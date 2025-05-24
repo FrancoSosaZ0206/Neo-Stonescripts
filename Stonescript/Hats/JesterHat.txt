@@ -1,0 +1,31 @@
+//—————————————————JesterHat————————————————————
+//Creator: Telos6857
+//Version: 1.1
+//Instrct: Copy and paste the text
+//         file into your mindstone...
+//         that's it
+//         You're free to remove all
+//         of the comment lines '//'
+//         after pasting since they're
+//         not needed
+
+?bighead
+ >h1,-2,#magenta,ascii
+,-.
+_(#
+asciiend
+ >h-3,-2,#green,ascii
+,-.
+#)_\
+asciiend
+ >h-4,-1,#yellow,ascii
+°#######°
+asciiend
+:
+ >h-2,0,#yellow,ascii
+###•
+•###•
+asciiend
+ >h0,0,#cyan,,
+ >h1,1,#red,¯
+ >h-1,1,#blue,`

@@ -1,0 +1,221 @@
+// Visual Status Effects
+// by: micahel.g.g.
+// v0.5
+
+// Visualizes and animates most of the debuffs and buffs on the characters.
+// Flames animate for Damage Over Time, ice forms around legs for Chilled, sick bubbles appear overhead for Poision effects and more. 
+// Will be shown on the stonehead and the enemy being targeted. 
+// In it's current state some of the visualized effects may be a little off from where they would be expected to be on some minor foes. This is going to be cleaned up in a later version.
+
+//set counter for animations
+var count
+var ice_y
+?loc.begin
+	count = 0 
+//set the 'y' position value of the frozen area on specific enemies
+?foe.name = "wasp_nest" | foe.name = "wasp" | foe.name = "Angry Shroom" | foe = tree_boss | foe = dysangelos_perfected 
+	ice_y = 4
+:?foe.name = "Morel" | foe.name = "Enoki" | foe = acronian_scout | foe = acronian_cultist
+	ice_y = 6
+:?foe.name = "poena" | foe.name = "pallas" | foe = yeti | foe = nagaraja
+	ice_y = 8
+:
+	ice_y = 2
+
+//Draw Debuffs for Enemies----------------------------------------------
+//'Frozen' Status
+?foe.debuffs.string = "debuff_chill:1" | foe.debuffs.string = "debuff_chill:2" | foe.debuffs.string = "debuff_chill:3"
+  >f0,@ice_y@,#888888,ascii
+###
+##/"\'/\`
+./|..|: \..
+asciiend
+
+//REALLY 'Frozen' Status
+?foe.debuffs.string = "debuff_chill:4" | foe.debuffs.string = "debuff_chill:5" | foe.debuffs.string = "debuff_chill:6"
+  >f0,@ice_y@,#888888,ascii
+###########/| 
+###/|.####/ |\
+##/ \/'.`|. ' \/',
+./|  |:  \..  |\ \.
+asciiend
+
+//Animation for 'Poisoned' Status
+?foe.debuffs.string = "debuff_damage"
+  ?count <= 3
+    >f0,-2,#888888,ascii
+Oo
+.
+asciiend
+  :?count <= 6
+    >f0,-2,#888888,ascii
+.O
+o
+asciiend
+  :?count <= 9
+    >f0,-2,#888888,ascii
+o.
+O
+asciiend
+
+//Animation for DOT 'On Fire' Status
+?foe.debuffs.string = "debuff_dot"
+  ?count <= 3
+    >f0,0,#888888,ascii
+#`,
+( `
+asciiend
+  :?count <= 6
+    >f0,0,#888888,ascii
+.'
+##)
+asciiend
+  :?count <= 9
+    >f0,0,#888888,ascii
+#'.
+( )
+asciiend
+
+//Animation for 'igniton' Status
+?foe.debuffs.string = "ignition"
+  ?count <= 3
+    >f0,4,#888888,ascii
+'`
+` 
+asciiend
+  :?count <= 6
+    >f0,4,#888888,ascii
+'
+:
+#
+asciiend
+  :?count <= 9
+    >f0,4,#888888,ascii
+.
+`
+#
+asciiend
+
+//draw status effects for the stonehead-------------------------------------
+//'Frozen' Status
+?debuffs.string = "debuff_chill" | debuffs.string = "debuff_yeti_chill"
+  >h-4,2,#888888,ascii
+###
+##/"\'/\`
+./|..|: \..
+asciiend
+
+//Animation for 'Poisoned' Status
+?debuffs.string = "debuff_damage"
+  ?count <= 3
+    >h0,-2,#888888,ascii
+Oo
+.
+asciiend
+  :?count <= 6
+    >h0,-2,#888888,ascii
+.O
+o
+asciiend
+  :?count <= 9
+    >h0,-2,#888888,ascii
+o.
+O
+asciiend
+
+//Animation for DOT 'On Fire' Status
+?debuffs.string = "debuff_dot"
+  ?count <= 3
+    >h-2,1,#888888,ascii
+#`,
+(#`
+asciiend
+  :?count <= 6
+    >h-2,1,#888888,ascii
+.'
+##)
+asciiend
+  :?count <= 9
+    >h-2,1,#888888,ascii
+#'.
+(#)
+asciiend
+
+//Animation for 'igniton' Status
+?debuffs.string = "ignition"
+  ?count <= 3
+    >h0,4,#888888,ascii
+'`
+` 
+asciiend
+  :?count <= 6
+    >h0,4,#888888,ascii
+'
+:
+#
+asciiend
+  :?count <= 9
+    >h0,4,#888888,ascii
+.
+`
+#
+asciiend
+
+//Draw Buffs for the Stonehead-------------------------------------------
+//Animation for 'Lucky' Status
+?buffs.string = "lucky_mult" | buffs.string = "lucky_crit"
+  ?count <= 4
+    >h-3,0,#white,ascii
+#♪
+asciiend
+  :?count <= 9
+    >h-3,0,#white,ascii
+♪
+asciiend
+
+//Animation for 'Strength' Status
+?buffs.string = "strength"
+  ?count <= 3
+    >h-3,0,#white,ascii
+P
+asciiend
+  ?count <= 6
+    >h-3,0,#white,ascii
+#O
+asciiend
+  :?count <= 9
+    >h-3,0,#white,ascii
+##W
+asciiend
+
+//Animation for 'Berserk' Status
+?buffs.string = "berserk"
+  ?count <= 4
+    >h-3,0,#white,ascii
+╬
+asciiend
+  :?count <= 9
+    >h-3,0,#white,ascii
+#╬
+asciiend
+
+//Animation for 'Vampire' Status
+?buffs.string = "vampiric"
+  ?count <= 4
+    >h-4,0,#white,ascii
+v,,v
+asciiend
+  :?count <= 9
+    >h-4,0,#white,ascii
+v^^v
+asciiend
+
+//Draw 'Smite' Status
+?buffs.string = "smite"
+  >h-3,3,#AA00DE,ascii
+#\#!#/
+asciiend
+
+count++
+?count > 9
+	count = 0

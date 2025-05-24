@@ -1,0 +1,118 @@
+﻿===== Changelog =====
+ v1.2 (2024-7-18) -Incoherent_Toast
+    Undo/Redo reworked (again), undo can now restore changes in layer counts.
+    It also now has the functionality to save unique undo functions for more complex
+    undo functions.
+    Fixed bug caused from pressing load with no saves avaliable
+    Raised "MaxUndos" to 100
+    Fixed bug that caused chisel to miss the queue to stop drawing.
+    Mobile versions no longer check hotkey commands
+    Chisel can now reload layers if a location loops
+ v1.1 (2024-7-14) -Incoherent_Toast
+    Added Eraser button to set left click to "#"
+    Minor optimisations
+ v1.0 (2024-04-12) -Incoherent_Toast
+    Added Layer Options
+    Reworked undo function to be compatable with layers
+    Added redo button
+    Reworked Save/Load functions to work with layers and still have backwards compatability
+    Now Requires importing external script, R.I.P. mobile users
+    Blank layers are now filled with "#" instead of white space to allow other layers to be visible.
+ v0.9 (2024-02-09) -Incoherent_Toast
+    Added ability to Copy, Cut and Paste
+    Updated the CanvasDrawCircle function, though I may adjust it further.
+ v0.8 (2024-02-03) -Incoherent_Toast
+    Added CanvasSingleEmplace
+    Updated CanvasLineEmplace, CanvasDrawGlyph, CanvasDrawRect, CanvasDrawDiamond
+ v0.7 (2024-02-02) -TeumessianSven
+    Shifted Style and buttons up 1 line to account for Screens 25 characters high
+    Added Toast to Authors and updated version
+ v0.6 (2024-02-02) -Incoherent_Toast
+    Added ability to save and load multiple canvas's
+    Added ability to Undo
+    Added buttons for Save, Load, Undo functions
+    Added keybind for undo with ctrl+z
+    Changed right click keybind from Z to A
+ v0.5 (2024-01-31) -Incoherent_Toast
+    Added ability to save and load the canvas
+    Changed drawing functions from setting glyphs to instead setting lists of strings 
+    Added keybinds for save/download with ctrl+s and ctrl+d
+ v0.4 (2024-01-28) -TeumessianSven
+    Rearranged Glyph Table
+    Made Layout maximize to adapt to screen size
+    Added Exit Button and removed Default Pause button
+    Disabled banner and stopped ambient sound
+    Added check to replace grappling hook with throwing stone
+    Changed logo to reflect a chiseling set
+ v0.3 (2023-11-05)
+    Added brush size option.
+    Added three brush style options, rectangle, circle, and diamond.
+    Extended palette selection region so it's possible to select the blank region at the bottom.
+ v0.2 (2023-11-05)
+    Added right mouse button drawing. (PC only)
+    Improved UI design.
+    Fixed layout issues for certain screen sizes.
+ v0.1 (2023-11-05)
+    Initial release. 
+
+
+This next segment is here to explain how I've designed things 
+incase anyone ever wants to try to understand what is going
+on behind the scenes in chisel.
+
+
+===== How are files saved/loaded? =====
+When I save files to memory I take each line and add it all to one string. 
+There are no new-line characters saved in this process because it was
+giving me issues. Instead the line-breaks are defined based on the user's
+screen width and the assumption that the width has not changed between saving
+and loading a document.
+This may need to be changed in future since it is possible to change screen
+sizes if you migrate a save, which would break your existing save images.
+Layers are seperated by this frowny face character: ☹ 
+This character isn't avaliable to the user and looks odd in game anyway so
+I figured it would serve as a useful marker to seperate layers. I may use
+this same trick in the future if I want to add additional detail to the 
+save file.
+
+
+===== How does the script store layer data? =====
+Each Layer is a seperate layer saved with this function:
+  new UI/ChiselFiles/SetLayer
+These new imports are saved in a list called: TextLayers
+Each entry of TextLayers has a ui text layer called "TextUI"
+and also an array for each row of text on a given array called: "TextList"
+
+So when you draw on a certain layer the script will first makes changes to:
+ TextLayers[Selected_Layer].TextList
+Then it will join that TextList and set the text ui of the current layer:
+ TextLayers[Selected_Layer].TextUI.text
+
+
+===== How does the undo function work? =====
+The undo list is structured as a 2d array in this format:
+[[ Data, Execution, Reversal], ... ]
+
+Data - Currently there is only 1 data format because there's only 1 undo function.
+       This is an array or strings. 1 string per layer with no line breaks. 
+Execution - This is a saved function. When the undo or redo function is called it will
+       pass the data to this function to enact changes.
+Reversal - This is the function that is called to save the reverse action. So when the
+       undo function is called it will call this function to save a redo entry. 
+       Conversly when the redo function is called it will use this to save an undo entry.
+
+
+===== Other features I may consider working on =====
+ - Colour. it's something I've been thinking I could add and I have some ideas
+   on how I can approach it so I may explore this idea in the future. If I do
+   though I likely won't do colour layers and will instead have a single colour
+   canvas that covers the whole image
+ - Importing. I may add the ability to paste images into a text document to be
+   later imported in-game to chisel. 
+ - Exporting. This one is a lot more complicated as I don't have the ability to
+   save data to the user's clipboard. The only way I've yet come up with is the
+   usage of QR codes to export data but this could be tricky to implement.
+ - Animations. I don't know that I'm likely to do add this feature but in theory
+   I'd like to add an option to make animations. This would include making 
+   individual frames, setting animation times, and the ability to save/
+   load said animations.

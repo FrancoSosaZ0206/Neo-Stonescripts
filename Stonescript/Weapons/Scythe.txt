@@ -1,0 +1,155 @@
+//scythe 1.0
+//By: Poly
+
+var SC
+
+?item.right = ＂+1 ＂
+ SC = #cyan
+?item.right = ＂+2 ＂
+ SC = #yellow
+?item.right = ＂+3 ＂
+ SC = #yellow
+?item.right = ＂+4 ＂
+ SC = #green
+?item.right = ＂+5 ＂
+ SC = #green
+?item.right = ＂+6 ＂
+ SC = #green
+?item.right = ＂+7 ＂
+ SC = #blue
+?item.right = ＂+8 ＂
+ SC = #blue
+?item.right = ＂+9 ＂
+ SC = #blue
+?item.right = ＂+10＂
+ SC = #blue
+?item.right = ＂+11＂
+ SC = #red
+?item.right = ＂+12＂
+ SC = #red
+?item.right = ＂+13＂
+ SC = #red
+?item.right = ＂+14＂
+ SC = #red
+?item.right = ＂+15＂
+ SC = #red
+?item.right = ＂+16＂
+ SC = #rainbow
+?item.right = ＂+17＂
+ SC = #rainbow
+?item.right = ＂+18＂
+ SC = #rainbow
+?item.right = ＂+19＂
+ SC = #rainbow
+?item.right = ＂+20＂
+ SC = #rainbow
+?item.right = ＂+21＂
+ SC = #rainbow
+
+?item.right= ＂bardiche＂
+ disable player
+?item.right! ＂bardiche＂
+ enable player
+
+?item.right= ＂bardiche＂ &
+^!ai.walking &
+^item.right.state = 1
+ >o-1,1,#white,ascii
+##O
+#/´
+/#\
+asciiend
+
+?item.right= ＂bardiche＂ &
+^ai.walking &
+^time % 15 <= 5 &
+^item.right.state=1
+ >o-1,1,#white,ascii
+##O
+#/´
+/#>
+asciiend
+
+?item.right= ＂bardiche＂ &
+^ai.walking &
+^time % 15 > 5 &
+^time % 15 <= 10 &
+^item.right.state=1
+ >o-1,1,#white,ascii
+##O
+#/´
+#>\
+asciiend
+
+?item.right= ＂bardiche＂ &
+^ai.walking &
+^time % 15 > 10 &
+^item.right.state=1
+ >o-1,1,#white,ascii
+##O
+#/´
+#X#
+asciiend
+
+?item.right= ＂bardiche＂ &
+^item.right.state=1
+ >o0,-2,@SC@,ascii
+#_╤__
+¯-╬-¯¯¯`
+##║
+##║
+##║
+##'
+asciiend
+
+?item.right= ＂bardiche＂ &
+^item.right.state= 2 |
+^item.right= ＂bardiche＂ &
+^item.right.state= 4
+ >o-1,1,#white,ascii
+O/
+`\
+/#\
+asciiend
+
+?item.right= ＂bardiche＂ &
+^item.right.state=2 |
+^item.right= ＂bardiche＂ &
+^item.right.state= 4
+ play blade_pallas_attack
+ >o-4,-4,@SC@,ascii
+###__
+#\//¯¯`
+#/X#
+'/#\
+####\
+#####\
+######`
+asciiend
+
+?item.right= ＂bardiche＂ &
+^item.right.state= 3
+ >o-1,1,#white,ascii
+##O
+#/\
+/#\
+asciiend
+
+?item.right= ＂bardiche＂ &
+^item.right.state=3
+ >o2,2,@SC@,ascii
+_____,|_
+¯¯¯¯¯T/
+asciiend
+
+?item.right= ＂bardiche＂ &
+^item.right.state=3 &
+^item.right.time = 1
+ play bronze_guardian_attack2
+
+?item.right= ＂bardiche＂ &
+^item.right.state= 3
+ >o5,3,#424242,ascii
+###_
+¯¯¯¯
+asciiend

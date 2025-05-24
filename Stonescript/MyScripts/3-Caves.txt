@@ -1,0 +1,378 @@
+﻿// *******************************************************
+//                      3-Caves.txt                       
+// *******************************************************
+
+// Script for Caves of Fear
+
+
+
+// IMPORTS
+
+var u = new MyScripts/Lib/Utilities
+var uimkr = new MyScripts/Lib/UI_Maker
+var p
+p = import MyScripts/Lib/Performance
+var a = new MyScripts/Lib/MyArsenal
+var i = new MyScripts/Lib/MyBetterInfo
+var c = new MyScripts/Lib/Combat
+c.Main()
+
+/***************************************************************/
+
+var som = new MyScripts/Lib/Speed_O_Meter
+var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
+var bosTmr
+bosTmr = import MyScripts/Borrowed/BossfightTimer2
+
+var somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+?som.Update(false)
+  somPanel.Recycle()
+  somPanel = null
+
+  somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+
+
+dpsm.ENABLED = true
+dpsm.refreshRate = 30
+
+var dpsPanel
+?dpsm.Update()
+  ?dpsPanel
+    dpsPanel.Recycle()
+    dpsPanel = null
+
+  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+
+/***************************************************************/
+
+
+
+// VARIABLES
+
+var runCount = 0
+var keepMask = true
+var smiteScr
+//var maskScr
+
+var canDebI
+var canDebP
+var canDebF
+
+var keepFTali = false
+
+?p.ll | p.ls <= 5
+  keepMask = false
+  keepFTali = false
+  ?p.tt = 1
+    runCount++
+
+?!smiteScr
+  ?p.ls <= 5
+    smiteScr = 1
+  :
+    smiteScr = 2
+:?p.ll & p.tt = 1 & p.ls > 5 &
+^smiteScr ! 4
+  smiteScr++
+
+/*?!maskScr
+  ?p.ls <= 5
+    maskScr = 3
+  :
+    maskScr = 6*/
+
+
+
+// FUNCTIONS:
+
+func fight1v1()
+  p.fds = foe.debuffs.string
+  p.bs = buffs.string
+
+  /* How to apply debuffs:
+  - apply all except the ones the foe is immune to.
+  Finish when:
+  - all possible debuffs have been applied. */
+  canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
+  canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
+  canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+
+  ?(p.bs = "berserk" | keepMask) & (canDebI | canDebP | canDebF)
+    ?keepMask
+      ?canDebI
+        equipL @a.dIsword@
+      :?canDebP
+        equipL @a.dPsword@
+      :?canDebF
+        equipL @a.dFsword@
+    :
+      //Left hand:
+      ?canDebP
+        equipL @a.dPsword@
+      :?canDebF
+        equipL @a.dFsword@
+      :?canDebI
+        equipL @a.dIwand1@
+
+      //Right hand:
+      ?canDebI
+        equipR @a.dIsword@
+  :
+    ?keepMask
+      equipL Bifrost
+    :
+      ?p.bs = "berserk"
+        c.doMoondial(Bifrost, a.isword, 2)
+      :
+        c.doMoondial(Bifrost, a.isword, 0)
+
+  return
+
+func ldtF(mode) // loadouts
+  ?mode = "default"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.cshield1@
+  :?mode = "armorRegen"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.cshield2@
+  :?mode = "engage"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.ishield@
+  :?mode = "escape"
+    equipL mind
+    ?!keepMask
+      equipR @a.ishield@
+  :?mode = "magnet"
+    equipL star
+    ?!keepMask
+      equipR triskelion
+
+  :?mode = "extend"
+    equipL triskelion
+    equipR mask
+
+  :?mode = "magic"
+    ?keepMask
+      ?canDebI
+        equipL @a.dIwand1@
+      :?canDebP
+        equipL @a.dPwand@
+      :?canDebF
+        equipL @a.dFwand@
+
+    :
+      p.bs = buffs.string
+      ?(p.tt % 2 = 0 & p.bs = "berserk")
+      ^| p.tt % 4 = 0
+        equipL triskelion
+        equipR hatchet
+
+      :?canDebI
+        equip @a.dIstaff@
+      :?canDebP
+        equip @a.dPstaff@
+      :?canDebF
+        equip @a.dFstaff@
+
+  :
+    >c-10,0,#red,
+    ^ERROR: ldtF() recieved incorrect mode: @mode@
+
+  return
+
+
+
+c.doAAC("sword 0*", a.cshield1)
+
+?(hp < maxhp) & runCount > 1
+  loc.Leave()
+
+?p.lb // AUTO BREWING
+  p.rs = res.stone
+  p.rw = res.wood
+  p.rb = res.bronze
+
+  ?p.rb >= 10
+    ?p.rs >= 10
+      ?p.ip ! "lucky"
+        brew stone + bronze
+
+    :?p.rw >= 10
+      ?p.ip ! "berserk"
+        brew wood + bronze
+    :
+      loc.Leave()
+  :
+    loc.Leave()
+
+?keepMask
+  ?p.ir ! "bardiche" &
+  ^p.ir ! "quarterstaff" &
+  ^p.ir ! "heavy hammer"
+    equipR mask
+
+?p.lb | p.ll
+  equipL triskelion
+  equipR @a.cshield1@
+
+:?c.canUseAETali() & !keepFTali
+  ?keepMask
+    c.useAETali("l")
+  :
+    equipL triskelion
+    c.useAETali("r")
+
+:?c.canUseFTali() & keepFTali
+  ?keepMask
+    c.useFTali("l")
+  :
+    equipL triskelion
+    c.useFTali("r")
+
+:?c.canUsePot() & (keepMask
+^| (p.ls <= 5 & p.tt < 60 & p.ip = "berserk"))
+  activate potion
+
+:?pickup.distance < 15
+  ldtF("magnet")
+:
+  p.fd = foe.distance
+  p.aiE = ai.enabled
+  p.si = screen.i
+
+  ?c.canUseBladeDS(smiteScr)
+    p.bs = buffs.string
+
+    ?p.fd <= 33 & i.getBuffInfo("smite",false,2) ! 30 & p.ls > 5
+      c.useBladeDS()
+
+  /*?c.canUseMaskDS(maskScr)
+    c.useMaskDS()*/
+
+  ?c.canUseQstaff() & p.aiE &
+  ^p.ir ! "heavy hammer" &
+  ^p.ir ! "bardiche" &
+  ^p.ir ! Kubikiribocho & (
+  ^(!c.canBash() & !c.canDash()) |
+  ^(p.fd < 11 | p.fd > 15))
+    c.useQstaff(a.myqstaff)
+
+  :?p.fd > 35
+    p.pa = armor
+    ?14 <= p.pa & p.pa <= 29
+      ldtF("default")
+    :?p.pa < 14
+      ldtF("armorRegen")
+    :
+      ldtF("extend")
+
+  :?p.fd > 15
+    ?!p.aiI & p.aiE
+      ldtF("engage")
+
+      var isAbtToDash
+      isAbtToDash = (p.fd <= 17)
+      ?keepMask & isAbtToDash
+        equipR @a.ishield@
+
+      canDebI = (p.fds ! "chill" &
+      ^f ! "immune_to_debuff_chill")
+      p.bs = buffs.string
+
+      ?!keepMask & canDebI & isAbtToDash &
+      ^i.getFoeTotalHP() > i.getBuffInfo("smite", false, 2) * a.smiteMult
+        equipR @a.aiShield@
+
+    :
+      ldtF("extend")
+
+  :
+    p.fs = foe.state
+    p.ft = foe.time
+
+    ?(p.f = "cool_bat" & p.fs = 33 & p.ft > 27) |
+    ^(p.f = "spider_boss_harder" & p.fs = 142 & p.ft > 57)
+      ?c.canUseMind()
+        ldtF("escape")
+      :
+        p.fds = foe.debuffs.string
+        canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
+        canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
+        canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+
+        ?canDebI | canDebP | canDebF
+          ldtF("magic")
+        :?keepMask
+          equipL @a.dIwand1@
+        :
+          equip @a.ibow@
+
+    :?c.canBash()
+      c.bash(a.isword)
+    :?c.canDash()
+      c.dash(a.isword, a.dshield)
+    :
+      ?p.f = "cool_bat"
+        fight1v1()
+
+        ?p.fs = 4
+          keepFTali = true
+
+      :?p.f ! "spider_boss_harder"
+        p.fc = foe.count
+
+        ?p.fc = 1 & p.fd < 7
+          p.bs = buffs.string
+          ?p.bs = "berserk"
+            c.doMoondial(Bifrost, a.isword, 2)
+          :
+            c.doMoondial(Bifrost, a.isword, 0)
+
+        :?p.fc >= 5 & c.canUseHamm()
+        ^& !c.canUseBlade() & p.ls > 5
+        ^& keepMask & p.fd < 11
+          c.useHamm(a.myHamm)
+        :?p.fd <= 10
+          p.fds = foe.debuffs.string
+          canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
+          canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
+          canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+
+          ?canDebI | canDebP | canDebF
+            ldtF("magic")
+
+          :?keepMask
+            equipL @a.dIwand1@
+          :
+            equipL @a.dIwand2@
+            equipR @a.dIwand1@
+
+
+      :?p.f = "spider_boss_harder"
+      ^& p.fs ! 4 // dying
+        ?c.canUseCind() & keepMask & dpsm.DPS ! "N/A"
+          ?p.fds = a.maxIgnitions_Default |
+          ^c.canKillCind(i.getFoeTotalHP(),
+          ^              i.getDebuffLvl("ignition", true),
+          ^              a.cindDmg_Default, dpsm.DPS)
+            c.useCind()
+
+        ?c.canUsePotDmg()
+          activate potion
+        :?c.canUseMask()
+          c.useMask()
+
+        :?p.fd < 11
+          ?c.canUseBard() & keepMask
+            c.useBard(Kubikiribocho)
+          :
+            fight1v1()
+
+
+
+// *******************************************************
+//                  END OF "3-Caves.txt"                  
+// *******************************************************

@@ -1,0 +1,1134 @@
+﻿//*******************************
+// SpringBloom
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v3.56.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Celebrate Spring by adding
+// colorful flowers and 
+// mushrooms to your world with
+// this combination of three 
+// Spring scripts for mobile:
+// -SpringFlowers
+// -SpringBanners
+// -SpringTree
+//
+// -SpringFlowers:
+// ---------------
+// Flowers will randomly bloom 
+// along the bottom of the 
+// screen and behind the player
+// as you travel through the 
+// world! 
+//
+// Be the gardener of your world! 
+// After tapping the flower 
+// button, Clicking or tapping 
+// anywhere on the screen will 
+// plant a flower at that location!
+// Tap the flower button again
+// when you're finished with your
+// garden!
+//
+// When flowers are planted, 
+// clicking the shovel button 
+// will dig up all flowers
+// allowing you to start fresh!
+// 
+// Sunflower
+//  .γ,
+// :>@<;
+//  ´(`
+//  `)´
+//
+// Dandelion
+//  .~.
+// :~*~;
+//  `{´
+//   }
+//
+// Tulip
+//   ,
+//  (_)
+//   (,
+//  `)
+//
+// Sage
+// ., ,
+// ,`γ,´
+//  `ι´
+//
+// Mushroom
+//  ,~.
+// (___)
+//  (_)
+//
+// -SpringBanners:
+// ---------------
+// Replaces the standard level
+// banners with spring banners 
+// decorated with flowers
+//
+// -SpringTree:
+// ------------
+// The tree at the Deadwood
+// Waterfall is in bloom to
+// celebrate Spring!
+//   ,:;*;,
+// ,:;*|'/*:,
+// *─\'|*|;─;
+// `,*\`;;─*
+//   `'｝｛´´
+//     ｛｝;´
+//     ｝｛
+//    /`\\
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that’s it!
+//
+// Advanced Instructions:
+// ----------------------
+// The following variables 
+// can be modified to tailor
+// what features you want 
+// running during gameplay.
+//
+// Colors: Selects whether colors
+//         are used or if flowers
+//         are in grayscale.
+// true:   Color
+// false:  Grayscale
+//
+// TaptoPlant: Selects whether
+//         the ability to plant
+//         flowers by clicking/
+//         tapping the screen is
+//         on or off.
+// true:   On
+// false:  Off
+//
+// FlowerTrail: Selects whether
+//         flowers bloom behind 
+//         the player or not
+// true:   On
+// false:  Off
+//
+// RandomFlowers: Selects whether
+//         flowers bloom randomly
+//         along the bottom of the 
+//         screen or not.
+// true:   On
+// false:  Off 
+//
+// ShowButton: Selects whether
+//         the shovel button is
+//         visible when there are
+//         flowers or not.
+// true:   Visible
+// false:  Hidden 
+//
+// MaxFlowers: Sets the max amount
+//         of flowers that can be 
+//         on the screen at once.
+//         Reduce this value if 
+//         the game starts to 
+//         lag when there are 
+//         lots of flowers on the
+//         screen.
+//
+// acolors[]: An array containing
+//         the colors flowers can
+//         bloom with. Change the
+//         colors in this array 
+//         to customize the
+//         colors of your flowers.
+//         This array can be 
+//         filled with as many
+//         colors as you want and
+//         will automatically 
+//         handle the array size.
+//
+// Banner: Sets whether the 
+//         Spring banners are 
+//         displayed or not.
+// true:   On
+// false:  Off
+//
+//
+// Enjoy!
+//
+//
+//*******************************
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+var Colors = true
+var TapToPlant = true
+var FlowerTrail = true
+var RandomFlowers = true
+var ShowButton = true
+var MaxFlowers = 1000
+var Banner = true
+
+var acolors = [
+#FF0000,#0000FF,
+#FFFF00,#FF00FF,#00FFFF,
+#FF7700,#7700FF,#0077FF]
+
+//*******************************
+// Global Variables
+//*******************************
+
+// Button Parameters
+var buttonanchor = top_right
+var buttondock = top_right
+
+// Flower Button Parameters
+var fbuttonx = -1
+var fbuttony = 6
+var fbutton
+var planting = false
+
+// Shovel Button Parameters
+var sbuttonx = -1
+?TapToPlant
+  var sbuttony = 11
+:
+  var sbuttony = 6
+var sbutton
+
+// Flower Control Arrays
+var apanel = []
+var aflowers = []
+var aflowersx = []
+var cleanup = []
+
+// Flower Trail Parameters
+var dist = 0
+var steps = 0
+var stepmin = 3
+var stepmax = 6
+var steprng = 0
+var init = screen.FromWorldX(0)
+var diff = 0
+diff = init - screen.FromWorldX(0)
+
+// Random Flower Parameters
+var delay = 1
+var dmin = 1
+var dmax = 30
+var rngx = 0
+var rngy = 0
+var xmin = 0
+var xmax = screen.w
+var ymin = screen.h - 4
+var ymax = screen.h - 2
+
+// Temp Parameters
+var FlowerTrailInit = FlowerTrail
+var RandomFlowersInit = RandomFlowers
+
+var flowerart = ascii
+#Ü
+´(`
+#░
+asciiend
+
+var shovelart = ascii
+┬
+│
+Ü
+asciiend
+
+var sun1 = ascii
+#
+#
+#
+##γ
+%%
+#
+#
+##γ
+##(
+%%
+#
+##γ
+#`(
+##)´
+%%
+##_
+#(_)
+#`(
+#`)´
+%%
+#.γ,
+:>@<;
+#´(`
+#`)´
+asciiend
+
+var sun2 = ascii
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+##_
+#(@)
+#
+#
+%%
+#.γ,
+:>@<;
+#´#`
+#
+asciiend
+
+var dandy1 = ascii
+#
+#
+#
+##γ
+%%
+#
+#
+##γ
+##{
+%%
+#
+##γ
+##{
+##}
+%%
+#
+#(@)
+##{
+##}
+%%
+#.~.
+:~*~;
+#`{´
+##}
+asciiend
+
+var dandy2 = ascii
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+#(@)
+#
+#
+%%
+#.~.
+:~*~;
+#`#´
+#
+asciiend
+
+var tulip1 = ascii
+#
+#
+#
+##γ
+%%
+#
+#
+##γ
+##(
+%%
+#
+##u
+##(,
+##)
+%%
+##,
+##Ü
+##(,
+##)
+%%
+##,
+#(_)
+##(,
+#`)
+asciiend
+
+var tulip2 = ascii
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+##u
+#
+#
+%%
+##,
+##Ü
+#
+#
+%%
+##,
+#(_)
+#
+#
+asciiend
+
+var sage1 = ascii
+#
+#
+#
+##γ
+%%
+#
+#
+##γ
+##ι
+%%
+#
+###,
+#`γ
+##ι´
+%%
+#
+###,
+#`γ,
+#`ι´
+%%
+#
+.,#,
+,`γ,´
+#`ι´
+asciiend
+
+var sage2 = ascii
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+###,
+#`
+###´
+%%
+#
+###,
+#`#,
+#`#´
+%%
+#
+.,#,
+,`#,´
+#`#´
+asciiend
+
+var shroom1 = ascii
+#
+#
+#
+##.
+%%
+#
+#
+#
+##õ
+%%
+#
+#
+##,
+#(_)
+%%
+#
+##,
+#(_)
+##0
+%%
+#
+#,~.
+(___)
+#(_)
+asciiend
+
+var shroom2 = ascii
+#
+#
+#
+##.
+%%
+#
+#
+#
+##õ
+%%
+#
+#
+##,
+#(_)
+%%
+#
+##,
+#(_)
+#
+%%
+#
+#,~.
+(___)
+#
+asciiend
+
+var treewood = ascii
+##,:;*;,
+,:;*|'/*:,
+*─\'|*|;─;
+`,*\`;;─*
+##`'##´´
+######´
+asciiend
+
+var treeleaves = ascii
+##,:;#;,
+,:;##'##:,
+###'###;#;
+`,##`;;
+##`'##´´
+######´
+asciiend
+
+var treeflowers = ascii
+#####*
+###*###*
+*####*
+##*#####*
+asciiend
+
+var custstyle = ui.AddStyle("
+^###
+^###
+^###")
+
+
+//*******************************
+// Functions
+//*******************************
+
+//*******************************
+// BuildRows()
+//
+// Creates panel rows to plants 
+// flowers in. There's a panel
+// for each y-value, spanning 
+// the entire screen, and the
+// panels are created top to 
+// bottom, meaning flowers 
+// planted in lower rows will 
+// overlap flowers planted in
+// higher rows, ensuring they 
+// maintain the illusion of the 
+// z-direction. 
+//
+//*******************************
+func BuildRows()
+  apanel.Clear()
+  var p
+  var t
+  for i = 0 .. screen.h
+    p = ui.AddPanel()
+    p.anchor = top_center
+    p.dock = top_center
+    p.visible = true
+    p.color = #888888
+    p.style = custstyle 
+    p.w = screen.w
+    p.h = 1
+    p.x = 0
+    p.y = i
+    apanel.Add(p)
+//
+
+
+//*******************************
+// Bloom()
+//
+// Creates a single flower at
+// location posx, posy. Randomly
+// chooses the type of flower
+// and the color of that flower.
+// Adds the flower to the panel 
+// correlated to it's y-position
+// so flowers grow in the correct
+// z-direction, and adds the
+// flower to the aflowers array
+// for future position control
+// and deletion. Returns the 
+// world position of the flower 
+// for reference as the player 
+// travels through the world
+//
+//*******************************
+func Bloom(posx,posy)
+  ?(aflowers.Count()+1) > MaxFlowers
+    return 0
+
+  ?posx < (screen.w + fbutton.x) & 
+   ^posx > (screen.w + fbutton.x - 8) &
+   ^posy > fbutton.y & posy < fbutton.y + 5
+    return 0 
+
+  var art1
+  var art2
+  var col1 = #AAAAAA
+  var col2 = #FFFFFF
+  var r = rng % (5)
+  
+  ?r = 0
+    art1 = sun1
+    art2 = sun2
+  :?r = 1
+    art1 = dandy1
+    art2 = dandy2   
+  :?r = 2
+    art1 = tulip1
+    art2 = tulip2    
+  :?r = 3
+    art1 = sage1
+    art2 = sage2    
+  :?r = 4
+    art1 = shroom1
+    art2 = shroom2    
+  :
+    art1 = sun1
+    art2 = sun2
+
+  ?Colors
+    ?r = 4
+      col1 = #white
+    :
+      col1 = #green
+
+    ?r = 1
+      col2 = #white
+    :
+      col2 = acolors[
+      ^(rng % acolors.Count())]  
+
+  var p = ui.AddPanel()
+  p.style = custstyle
+  p.anchor = top_left
+  p.dock = top_left
+  p.x = posx-2
+  p.y = -3
+  p.w = 5
+  p.h = 4
+
+  var a1 = ui.AddAnim(art1)
+  a1.duration = 20
+  a1.color = col1
+
+  var a2 = ui.AddAnim(art2)
+  a2.duration = 20
+  a2.color = col2
+
+  p.Add(a1)
+  p.Add(a2)
+
+  apanel[posy].Add(p)
+  aflowers.Add(p)
+  aflowersx.Add(screen.ToWorldX(
+                 ^posx-2) + diff)
+
+  a1.Play()
+  a2.Play()
+
+  return 1
+//
+
+//*******************************
+// Tend()
+//
+// Updates the position of 
+// flowers as the player travels
+// through the world. If the 
+// flowers are moved far off 
+// screen, they are deleted to 
+// save array size. If no flowers
+// exist, the shovel button is 
+// hidden, else it is visible
+//
+//*******************************
+func Tend()
+  cleanup.Clear()
+  ?aflowers.Count() >= 1
+    ?ShowButton = true
+      sbutton.visible = true
+    for i = 0 .. aflowers.Count() - 1
+      aflowers[i].x = screen.FromWorldX(
+                      ^aflowersx[i]-diff)
+      ?aflowers[i].x < -20
+        cleanup.Add(i)
+    ?cleanup.Count() >= 1
+      for i = cleanup.Count() - 1 .. 0
+        aflowers[(cleanup[i])].Clear()
+        aflowers.RemoveAt(cleanup[i])
+        aflowersx.RemoveAt(cleanup[i])
+  :
+    sbutton.visible = false
+//
+
+//*******************************
+// Prune()
+//
+// Clears all flowers and resets
+// the flower arrays when called
+//
+//*******************************
+func Prune()
+  ?aflowers.Count() >= 1
+    for i = 0 .. aflowers.Count() - 1
+      aflowers[i].Clear()
+    aflowers.Clear()
+    aflowersx.Clear()
+//
+
+//*******************************
+// DrawButton()
+//
+// Draws a Flower or Shovel button 
+// as a parent panel holding the 
+// ascii art and interactive 
+// button
+//
+//*******************************
+func DrawButton(type)
+  var vis
+  var buttonx
+  var buttony
+  var art
+  var text
+  var function
+
+  ?type = 1 //flower
+    vis = TapToPlant
+    buttonx = fbuttonx
+    buttony = fbuttony
+    art = flowerart
+    text = "[F]"
+    function = FBtnPressed
+    key.Bind("Up", "F")
+  :?type = 2 //shovel
+    vis = false
+    buttonx = sbuttonx
+    buttony = sbuttony
+    art = shovelart
+    text = "[S]"
+    function = SBtnPressed
+  :
+    return 0
+
+  var p = ui.AddPanel()
+  p.anchor = buttonanchor
+  p.dock = buttondock
+  p.visible = vis
+  p.color = #888888
+  p.style = 1
+  p.w = 7
+  p.h = 5
+  p.x = buttonx
+  p.y = buttony
+
+  var b = ui.AddButton()
+  b.anchor = center_center
+  b.dock = center_center
+  b.visible = inherit
+  b.style = 0
+  b.text = ""
+  b.w = 5
+  b.h = 3
+  b.SetPressed(function)
+  p.Add(b)
+
+  var a = ui.AddAnim(art)
+  a.anchor = center_center
+  a.dock = center_center
+  a.visible = inherit
+  a.color = #white
+  p.Add(a)
+
+  // Only displays text on PC
+  // to match other buttons
+  ?sys.isPC
+    var t = ui.AddText()
+    t.anchor = bottom_right
+    t.dock = bottom_right
+    t.visible = inherit
+    t.color = #888888
+    t.text = text
+    t.w = 3
+    t.h = 1
+    t.x = -1
+    p.Add(t)
+  //
+
+  return p
+//
+
+//*******************************
+// FBtnPressed()
+//
+// Intermediary function to
+// trigger planting flowers on
+// or off
+//*******************************
+func FBtnPressed()
+  ?!planting 
+    planting = true
+    fbutton.color = #FFFFFF
+  :
+    planting = false
+    fbutton.color = #888888
+//
+
+//*******************************
+// SBtnPressed()
+//
+// Intermediary function to
+// properly call Prune
+// function
+//*******************************
+func SBtnPressed()
+  Prune()
+//
+
+//*******************************
+// Sow()
+//
+// Randomly draws flowers behind
+// the player as he travels 
+// through the world. The amount 
+// of steps the player takes
+// before the next flower is 
+// planted is randomly generated
+// after each flower. Flowers 
+// aren't planted when traveling
+// to the boss because the player
+// technically stays still while
+// the world travels around them
+//
+//*******************************
+func Sow()
+  ?ai.walking & FlowerTrail
+    ?dist = 0
+      dist = screen.FromWorldX(pos.x) 
+      // Using FromWorld instead of just
+      // pos.x keeps flowers from spawning 
+      // during traveling to the boss
+      steps = 0
+      steprng = stepmin + rng % 
+                ^(stepmax - stepmin + 1)
+    :
+      steps = screen.FromWorldX(pos.x)-dist
+      // Using FromWorld instead of just
+      // pos.x keeps flowers from spawning 
+      // during traveling to the boss 
+      ?steps > steprng
+        Bloom(screen.FromWorldX(pos.x-5),
+             ^screen.FromWorldZ(pos.z))
+        dist = 0
+      :?steps < 0
+        dist = 0
+      //
+    //
+  //
+//
+
+//*******************************
+// PlantSeedbed()
+//
+// Sets the min and max row 
+// parameters the random flowers 
+// can sprout in. These rows are
+// kept near the bottom of the 
+// screen to add decoration
+// without interrupting gameplay.
+// For levels where random 
+// flowers sprouting or trailing
+// behind the player don't work
+// aesthetically, these features
+// are disabled. 
+//
+//*******************************
+func PlantSeedbed()
+  FlowerTrail = FlowerTrailInit 
+  RandomFlowers = RandomFlowersInit 
+  xmin = 0
+  xmax = screen.w
+  ymin = screen.h - 4
+  ymax = screen.h - 2
+  var lvl = loc.id
+
+  ?lvl = "rocky_plateau"
+    ymin = screen.h - 3
+
+  :?lvl = "deadwood_valley"
+    ymin = screen.h - 8
+    ymax = screen.h - 8
+
+  :?lvl = "caustic_caves"
+    ymin = screen.h - 2
+
+  :?lvl = "waterfall"
+    RandomFlowers = false
+
+  :?lvl = "fungus_forest"
+    ymin = screen.h - 4
+
+  :?lvl = "uulaa_shop"
+    ymin = screen.h - 1
+    ymax = screen.h - 1
+
+  :?lvl = "undead_crypt_intro"
+    RandomFlowers = false
+
+  :?lvl = "undead_crypt"
+    ymin = screen.h - 4
+
+  :?lvl = "cross_deadwood_river"
+    RandomFlowers = false
+    FlowerTrail = false
+
+  :?lvl = "bronze_mine"
+    ymin = screen.h - 5
+
+  :?lvl = "icy_ridge"
+    ymin = screen.h - 2
+
+  :?lvl = "cross_bridge"
+    RandomFlowers = false
+    FlowerTrail = false
+
+  :?lvl = "temple"
+    ymin = screen.h - 2
+//
+
+//*******************************
+// Sprout()
+//
+// Sprouts flowers within the
+// seedbed at a random location,
+// with random length delays
+// between each flower sprout.
+//
+//*******************************
+func Sprout()
+  ?RandomFlowers & time % delay=0
+    rngy = ymin+rng%(ymax-ymin+1)
+    rngx = xmin+rng%(xmax-xmin+1)
+    Bloom(rngx,rngy)
+    delay = dmin+rng%(dmax-dmin+1)
+//
+
+//*******************************
+// SpringBanner()
+//
+// Replaces the standard level
+// banners with spring banners 
+// decorated with flowers
+//
+//*******************************
+func SpringBanner()
+  ?Banner = false
+    return 0
+
+  var sp1 = ".v,   .·'·.    "
+  var sp2 = "´^`~*´ ´·` `~*~"
+  var sp3 = "    .·'·.   .v,"
+  var sp4 = "~*~´ ´·` `*~´^`"
+  var loc1 = ""
+  var loc2 = ""
+  var str1 = ""
+  var str2 = ""
+  var lvl = loc.id
+
+  ?lvl = "rocky_plateau"
+    loc1 = "Rocky Plateau"
+    loc2 = ".*~´`~*~´`~*."
+  :?lvl = "deadwood_valley"
+    loc1 = "Deadwood Valley"
+    loc2 = ".*~´`~*~*~´`~*."
+  :?lvl = "caustic_caves"
+    loc1 = "Caves of Fear"
+    loc2 = ".*~´`~*~´`~*."
+  :?lvl = "waterfall"
+    loc1 = "Deadwood Waterfall"
+    loc2 = ".*~´`~*~´`~*~´`~*."
+  :?lvl = "fungus_forest"
+    loc1 = "Mushroom Forest"
+    loc2 = ".*~´`~*~*~´`~*."
+  :?lvl = "undead_crypt_intro"
+    loc1 = "Haunted Gate"
+    loc2 = ".*~*~´`~*~*."
+  :?lvl = "undead_crypt"
+    loc1 = "Haunted Halls"
+    loc2 = ".*~´`~*~´`~*."
+  :?lvl = "cross_deadwood_river"
+    loc1 = "Cross Deadwood River"
+    loc2 = ".*~´`~.*~´`~*.~´`~*."
+  :?lvl = "bronze_mine"
+    loc1 = "Boiling Mine"
+    loc2 = ".*~*~´`~*~*."
+  :?lvl = "icy_ridge"
+    loc1 = "Icy Ridge"
+    loc2 = ".~´`*´`~."
+  :?lvl = "cross_bridge"
+    loc1 = "Cross the Bridge"
+    loc2 = ".~´`~*~´`~*~´`~."
+  :?lvl = "temple"
+    loc1 = "Temple"
+    loc2 = ".~´`~."
+
+  str1 = sp1 + loc1 + sp3
+  str2 = sp2 + loc2 + sp4
+  ui.ShowBanner(str1,str2)
+//
+
+//*******************************
+// BloomTree()
+//
+// Replaces the dead tree at the 
+// Deadwood Waterfall with a 
+// colorful tree full of leaves
+// and blooming with flowers. The
+// color of the flowers changes
+// randomly upon each visit
+//
+//*******************************
+func BloomTree()
+  ?loc.id ! "waterfall"
+    return 0
+  
+  var p = ui.AddPanel()
+  p.style = custstyle
+  p.anchor = bottom_center
+  p.dock = top_center
+  p.x = -14
+  p.y = -2
+  p.w = 10
+  p.h = 6
+
+  var a1 = ui.AddAnim(treewood)
+  a1.w = 10
+  a1.h = 6
+
+  var a2 = ui.AddAnim(treeleaves)
+  a2.w = 10
+  a2.h = 6
+
+  var a3 = ui.AddAnim(treeflowers)
+  a3.w = 10
+  a3.h = 6
+
+  ?Colors
+    a1.color = #888888
+    a2.color = #00FF00
+    a3.color = acolors[(rng % 
+                 ^acolors.Count())]
+  :
+    a1.color = #888888
+    a2.color = #CCCCCC
+    a3.color = #FFFFFF    
+
+  p.Add(a1)
+  p.Add(a2)
+  p.Add(a3)
+
+  ?screen.h > 25
+    apanel［9］.Add(p)//p.y=9
+  :
+    apanel［8］.Add(p)//p.y=8
+//
+
+
+//*******************************
+// Drawing Code 
+//*******************************
+
+?time <= 1 & totaltime <= 1
+  SpringBanner()
+  BuildRows()
+  BloomTree()
+  fbutton = DrawButton(1)
+  sbutton = DrawButton(2)
+  PlantSeedbed()
+:?time <= 1 
+  Prune()
+:?time > 5
+  Sow()
+  Sprout()
+  Tend()
+
+?planting & key = PrimaryBegin
+  Bloom(input.x,input.y)
+
+?key = DownBegin
+  SBtnPressed()
+
+?key = UpBegin
+  FBtnPressed()
+  
+//*******************************
+// End of File
+//*******************************

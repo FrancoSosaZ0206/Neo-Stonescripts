@@ -1,0 +1,1461 @@
+//Cave Party v1.0
+//By Mallathor
+//Makes the Cozy Cave more cozy by adding friends!!
+//Instructions:
+//1.put this file into the main stonescript directory, where CozyCave is
+//2.Put the BetterText file in the UI folder
+/*3.In the mind stone, type:
+?loc = waterfall
+ import Cosmetics/CaveParty
+4.Enjoy the extra cozyness!
+*/
+import CozyCave
+var Backflip = ascii
+#
+#
+#
+##o
+#/|\
+#/#\
+%%
+#
+#
+##o
+##|)
+#/#\
+%%
+#
+#
+###o
+#¯/_
+#((
+%%
+#
+#
+#>->o
+%%
+#
+#))
+#_\¯
+###o
+%%
+#
+##\)
+##|
+#/o\
+%%
+#
+#
+###)>
+#─/_
+#o
+%%
+#
+#
+#
+#o<-<
+%%
+#
+#
+#
+#o
+#(\;
+##<#\
+%%
+#
+#
+#
+#o
+/|\
+/#\
+%%
+#
+#
+#
+#o
+/|\
+/#\
+%%
+#
+#
+#
+#o
+/|\
+/#\
+%%
+#
+#
+#
+#o
+/|\
+/#\
+asciiend
+var stickyStickGuy = ascii
+#o_
+#|¯\
+#)\#\
+%%
+#o_
+#|¯\
+#)\#\
+%%
+#o_
+#|¯\
+#)\#\
+%%
+##o_
+#/,¯\
+/#\##\
+%%
+###o_
+##/#¯\
+#/)###\
+%%
+###o_
+##/#¯\
+#/)###\
+%%
+##o_
+#/,¯\
+/#\##\
+asciiend
+var ladder = ascii
+###/¯/
+##/¯/
+#/¯/
+/¯/
+asciiend
+var annoyingGuy = ascii
+#
+#
+#
+#
+#
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+###!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+###!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+##!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+##!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+###!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+###!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+##!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+##!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+###!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+###!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+##!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+##!
+##o
+#/|)
+#/#\
+%%
+#
+#
+#
+#
+#
+###o
+#
+#
+%%
+#
+#
+#
+#
+#
+####o
+#
+#
+%%
+#
+#
+#
+#
+#
+#####o
+#
+#
+%%
+#
+#
+#
+#
+#
+######o
+#
+#
+%%
+#
+#
+#
+#
+#
+#######o
+#
+#
+%%
+#
+#
+#
+#
+#
+########o
+###
+#
+#
+%%
+#
+#
+#
+#
+#
+#########o
+###
+#
+#
+%%
+#
+#
+#
+#
+##########o
+###
+#
+#
+%%
+#
+#
+#
+#
+###########o
+#
+###
+#
+#
+%%
+#
+#
+#
+#
+############o
+#
+###
+#
+#
+%%
+#
+#
+#
+#
+#############o
+#
+###
+#
+#
+%%
+#
+#
+#
+#
+##############o
+#
+###
+#
+#
+%%
+#
+#
+#
+###############o
+#
+#
+###
+#
+#
+%%
+###
+##
+#
+###############,.
+############-.~.|
+#######~-'..~.-;|
+############-.~´|
+###############`´#
+#
+###
+#
+#
+%%
+###
+##
+#
+###############,.
+############-.~.|
+#######~-'..~.-;|
+############-.~´|
+###############`´#
+#
+###
+#
+#
+%%
+###
+#
+#
+###############,.
+############-.~.|
+#######~-'..~.-;|
+############-.~´|
+###############`´#
+#
+###
+#
+#
+asciiend
+var lavaPool = ascii
+   ,´¯¯¯¯¯¯¯¯¯¯¯¯`. #
+ -/               /`-·
+ ,\              / `.
+  ,`------------´ \
+ ´ /  ' |  !   `\
+asciiend
+var lavaAnim = ascii
+#
+### ~ ~ ~ ~ ~ ~ ~
+###~ ~ ~ ~ ~ ~ ~
+%%
+#
+### ~ ~ ~ ~ ~ ~ ~
+### ~ ~ ~ ~ ~ ~ ~
+%%
+#
+###~ ~ ~ ~ ~ ~ ~ ~
+### ~ ~ ~ ~ ~ ~ ~
+%%
+#
+###~ ~ ~ ~ ~ ~ ~ ~
+###~ ~ ~ ~ ~ ~ ~
+asciiend
+var uulaaIdle = ascii
+##,-;"',-.
+#( (- -\  \
+##\,`ε.´`._\
+#__./  ,\__
+(,-(. / `-,)
+%%
+##,-;"',-.
+#( (- -\  \
+##\,`ε.´`._\
+#__./  ,¯¯,)
+(,-(. / ¯¯
+asciiend
+var fireChargeUp = ascii
+####.
+#####
+##☼##
+#####
+·####
+%%
+#####
+###·#
+##☼##
+#.###
+#####
+%%
+.####
+#####
+##ʘ##
+####·
+#####
+%%
+#####
+#·###
+##ʘ.#
+#####
+#####
+%%
+#####
+#####
+·#☼#·
+#####
+#####
+%%
+#####
+#####
+#·☼·#
+#####
+#####
+%%
+##·##
+#####
+##ʘ##
+#####
+##·##
+%%
+#####
+##·##
+##ʘ##
+##·##
+#####
+%%
+####.
+#####
+##☼##
+#####
+·####
+%%
+#####
+###·#
+##☼##
+#.###
+#####
+%%
+.####
+#####
+##ʘ##
+####·
+#####
+%%
+#####
+#·###
+##ʘ.#
+#####
+#####
+%%
+#####
+#####
+·#☼#·
+#####
+#####
+%%
+#####
+#####
+#·☼·#
+#####
+#####
+%%
+##·##
+#####
+##ʘ##
+#####
+##·##
+%%
+#####
+##·##
+##ʘ##
+##·##
+#####
+asciiend
+var fireBlast = ascii
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+☼###########
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+#☼##########
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+##☼#########
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+###☼#########
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+####☼######
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+#####☼######
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+######☼#####
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+#######☼######
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+#######☼######
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+########☼######
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+#########☼######
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###############
+#############
+############
+##########☼######
+############
+#############
+#############
+%%
+############
+############
+############
+############
+############
+############
+############
+############
+############
+###########_.----._
+#########.'        `.
+########:            :
+########|            |
+########!            !
+#########\          /
+######### `-.____.-'
+%%
+###########!
+###########.|
+###########||
+###########||
+###########||########/
+###########||######,/
+###########||#####//
+###########||####//
+###########|'---´/-.
+#########.´     .´
+########/      /##.-.
+#######|       | (   )
+#######|        `.`,/ ,
+#######|              '
+#######-\            /
+########/`._      _.´
+############`'--'´
+%%
+###########!
+###########.|
+###########||
+###########||
+###########||########/
+###########||######,/
+###########||#####//
+###########||####//
+###########|'---´/-.
+#########.´     .´
+########/      /##.-.
+#######|       | (   )
+#######|        `.`,/ ,
+#######|              '
+#######-\            /
+########/`._      _.´
+############`'--'´
+%%
+#
+asciiend
+var cake = ascii
+####10
+##|¯¯¯¯|
+#|¯¯¯¯¯¯|
+asciiend
+var sprinkles = ascii
+#
+#.######.
+asciiend
+var table = ascii
+╥──────╥
+║######║
+║######║
+asciiend
+var sorceress = ascii
+#σ
+/|\
+/#\
+asciiend
+var musicNotes = ascii
+#
+#
+#
+####♪
+%%
+#
+#
+##♪
+####♫
+%%
+#
+#♪
+##♫
+%%
+♪
+#♫
+#
+%%
+♫
+#
+#
+####♪
+%%
+#
+#
+##♪
+####♫
+%%
+#
+#♪
+##♫
+#
+%%
+♪
+#♫
+#
+####♪
+%%
+♫
+#
+##♪
+%%
+#
+#♪
+%%
+♪
+%%
+#
+#
+#
+####♪
+%%
+#
+#
+##♪
+####♫
+%%
+#
+#♪
+##♫
+%%
+♪
+#♫
+#
+%%
+♫
+#
+#
+####♪
+%%
+#
+#
+##♪
+####♫
+%%
+#
+#♪
+##♫
+#
+#
+###
+%%
+♪
+#♫
+#
+####♪
+%%
+♫
+#
+##♪
+#
+%%
+#
+#♪
+#
+#
+#
+#
+asciiend
+var magicStaff = ascii
+####·####
+######·##
+#·#######
+####{§/
+#####|
+#####|
+#####|
+%%
+#####·###
+#####·###
+##·######
+####{§|
+#####|
+#####|
+#####|
+%%
+######·##
+####·####
+###·#####
+####{§\
+#####|
+#####|
+#####|
+%%
+#######·#
+###·#####
+####·####
+####{§|
+#####|
+#####|
+#####|
+%%
+######·##
+##·######
+#####·###
+####{§/
+#####|
+#####|
+#####|
+asciiend
+var speaker = ascii
+#_
+|O|
+|o|
+asciiend
+var speechBox = ascii
+.────────────────.
+│                │
+│                │
+│                │
+'───────────. .──'
+#############\│
+asciiend
+var speechBoxShort = ascii
+.────────────────.
+│                │
+│                │
+'───────────. .──'
+#############\│
+asciiend
+var speechBoxTiny = ascii
+.────────────────.
+│                │
+'───────────. .──'
+#############\│
+asciiend
+var speechBoxFlipped = ascii
+.────────────────.
+│                │
+│                │
+│                │
+'──. .───────────'
+###|/
+asciiend
+var speechBoxShortFlipped = ascii
+.────────────────.
+│                │
+│                │
+'──. .───────────'
+###|/
+asciiend
+var speechBoxSide = ascii
+#.────────────────.
+#│                │
+#│                │
+_'                │
+#'────────────────'
+asciiend
+var clickAnywhere = "false"
+var charToPrint = "#"
+
+var dialogueState = 0
+var isBetweenDialogue = "false"
+var betweenTimer = 0
+var whoAmITalkingTo = "myself"
+var UIList = []
+var BoxList = []
+var NonTriggerList = []
+func MakeUIAnim(x,y,art,color,length,loop,playInstantly,visibleAtStart,listToAdd,draggable)
+  var animation
+  animation = ui.AddAnim(art)
+  animation.x = x
+  animation.y = y
+  animation.color = color
+  animation.loop = loop
+  animation.duration = length
+  ?playInstantly = true
+   animation.Play()
+  ?visibleAtStart = false
+   animation.visible = false
+  ?listToAdd = "triggers"
+   UIList.Add(animation)
+  :?listToAdd = "boxes"
+   BoxList.Add(animation)
+  :?listToAdd = "static"
+   NonTriggerList.Add(animation)
+  ?art = speaker
+   animation.dock = "top_left"
+  return animation
+//Dialogue Handler function-------------------------------------------
+func HandleDialogue()
+ ?whoAmITalkingTo = "John"
+  ?textTimer = 1
+   yapping.ShowText()
+   yapping.x = -6
+   yapping.y = 1
+   BoxList[0].x = -6
+   BoxList[0].y = 2
+   yapping.Reset()
+  ?dialogueState = 1 & textTimer < 42
+   BoxList[0].visible = true
+   yapping.FinishingText = "The name's Backflip. John Backflip."
+  ?dialogueState = 1 & totaltime % 2 = 0 & textTimer < 42
+   yapping.Update()
+  ?textTimer = 42
+   yapping.Reset()
+   yapping.HideText()
+   BoxList[0].visible = false
+
+  ?textTimer = 47
+   UIList[0].Play()
+   yapping.HideText()
+  ?textTimer = 60
+   dialogueState = 2
+   yapping.width = 16
+   yapping.y = 2
+   yapping.x = -7
+   yapping.FinishingText = "I am a master of the dark arts."
+   yapping.Reset()
+   yapping.ShowText()
+   BoxList[1].y = 2
+   BoxList[1].x = -7
+  ?dialogueState = 2 & totaltime % 2 = 0
+   yapping.Update()
+   BoxList[1].visible = true
+  ?textTimer > 90
+   dialogueState = 3
+   clickAnywhere = "true"
+ ?whoAmITalkingTo = "Sticky Stick"
+  ?dialogueState = 1
+   BoxList[1].x = 19
+   BoxList[1].y = -2
+   yapping.x = 19
+   yapping.y = -2
+  ?textTimer = 1
+   yapping.Reset()
+   yapping.ShowText()
+  ?dialogueState = 1 & textTimer < 45
+   BoxList[1].visible = true
+   yapping.FinishingText = "Yes! Yes! It's working!"
+  ?dialogueState = 1 & totaltime % 2 = 0 & textTimer < 42
+   yapping.Update()
+  ?textTimer = 46
+   yapping.Reset()
+   yapping.HideText()
+   BoxList[1].visible = false
+  ?textTimer = 50
+   dialogueState = 2
+   yapping.width = 16
+   yapping.x = 19
+   yapping.y = -3
+   BoxList[0].visible = true
+   BoxList[0].x = 19
+   BoxList[0].y = -2
+   yapping.FinishingText = "I will imbue my sticky stick with vast power!"
+   yapping.Reset()
+  ?dialogueState = 2 & totaltime % 2 = 0
+   yapping.ShowText()
+   yapping.Update()
+  ?textTimer = 100
+   dialogueState = 3
+   yapping.FinishingText = "And then, the world will fear my name!"
+   yapping.Reset()
+  ?dialogueState = 3 & totaltime % 2 = 0
+   yapping.Update()
+  ?textTimer > 165
+   clickAnywhere = true
+   dialogueState = 4
+  ?textTimer = 170
+   BoxList[0].visible = false
+   yapping.HideText()
+ ?whoAmITalkingTo = "sorceress"//---------------------------------------------sorceress dialogue
+  ?dialogueState = 1
+   BoxList[3].x = -2
+   BoxList[3].y = -11
+   yapping.x = -2
+   yapping.y = -11
+  ?textTimer = 1
+   yapping.Reset()
+   yapping.ShowText()
+  ?dialogueState = 1 & textTimer < 35
+   BoxList[3].visible = true
+   yapping.FinishingText = "Greetings, young one."
+  ?dialogueState = 1 & totaltime % 2 = 0 & textTimer < 52
+   yapping.Update()
+  ?textTimer = 44
+   yapping.Reset()
+   yapping.HideText()
+   BoxList[3].visible = false
+  ?textTimer = 46
+   dialogueState = 2
+   BoxList[4].x = 3
+   BoxList[4].y = -9
+   BoxList[4].visible = true
+   yapping.y = -9
+   yapping.x = 4
+   yapping.width = 16
+   yapping.FinishingText = "I sense great things in your future."
+   yapping.Reset()
+  ?dialogueState = 2 & totaltime % 2 = 0
+   yapping.ShowText()
+   yapping.Update()
+  ?textTimer = 100
+   dialogueState = 3
+   yapping.FinishingText = "May you be fortunate in your travels."
+   yapping.Reset()
+  ?dialogueState = 3 & totaltime % 2 = 0
+   yapping.Update()
+  ?textTimer > 150
+   clickAnywhere = true
+   dialogueState = 4
+ ?whoAmITalkingTo = "annoying"
+  ?dialogueState = 1
+   BoxList[2].x = 24
+   BoxList[2].y = -11
+   yapping.x = 24
+   yapping.y = -11
+   yapping.width = 17
+  ?textTimer = 1
+   yapping.Reset()
+   yapping.ShowText()
+  ?dialogueState = 1 & textTimer < 30
+   BoxList[2].visible = true
+   yapping.FinishingText = "Damn, she's hot"
+  ?dialogueState = 1 & totaltime % 2 = 0 & textTimer < 29
+   yapping.Update()
+  ?textTimer = 35
+   yapping.FinishingText = "Smash 100%"
+   yapping.Reset()
+   dialogueState = 2
+  ?dialogueState = 2 & totaltime % 2 = 0
+   yapping.ShowText()
+   yapping.Update()
+  ?textTimer = 70
+   dialogueState = 3
+   yapping.HideText()
+   yapping.Reset()
+   BoxList[2].visible = false
+   NonTriggerList[5].frame = 1
+   NonTriggerList[6].Play()
+   NonTriggerList[6].visible = true
+  ?textTimer = 100
+   NonTriggerList[7].visible = true
+   NonTriggerList[7].Play()
+   NonTriggerList[6].visible = false
+   UIList[3].Play()   
+  ?textTimer = 110
+   play bomb_cart_explosion
+  ?textTimer = 120
+   UIList[3].color = #bbbbbb
+   UIList[3].x = UIList[3].x + 1
+   NonTriggerList[5].frame = 0
+  ?textTimer = 122
+   UIList[3].x = UIList[3].x + 1
+  ?textTimer = 125
+   UIList[3].visible = false
+?loc = waterfall
+ ?totaltime = 1
+  //Function thing:art,color,duration,loop,play,visible,list,draggable
+  MakeUIAnim(0,5,Backflip,#a1f0fc,26,false,false,true,triggers,nah)
+  MakeUIAnim(-9,-7,sorceress,#white,1,false,false,true,triggers,nah)
+  MakeUIAnim(22,6,ladder,#bbbbbb,1,false,false,true,static,nah)
+  MakeUIAnim(26,2,stickyStickGuy,#white,90,true,true,true,triggers,nah)
+  MakeUIAnim(-12,-9,magicStaff,#magenta,20,true,true,true,static,nah)
+   
+  MakeUIAnim(51,20,speaker,#white,1,false,false,true,static,nah)
+  MakeUIAnim(13,-5,lavaPool,#aaaaaa,1,false,false,true,static,nah)
+  MakeUIAnim(11,-6,lavaAnim,#bababa,40,true,true,true,static,yeah)
+  MakeUIAnim(13,-9,uulaaIdle,#white,1,false,false,true,static,nah)
+  MakeUIAnim(17,-8,fireChargeUp,#FF7312,48,true,false,false,static,nah)
+  MakeUIAnim(37,-8,annoyingGuy,#white,32,false,false,true,triggers,nah)
+  MakeUIAnim(28,-12,fireBlast,#FF7312,24,false,false,false,static,nah)
+  MakeUIAnim(-10,1,cake,#FFFFBD,1,false,false,true,static,nah)
+  MakeUIAnim(-10,1,sprinkles,#cyan,1,false,false,true,static,nah)
+  MakeUIAnim(-9,4,table,#bbbbbb,1,false,false,true,static,nah)
+  MakeUIAnim(13,7,musicNotes,#white,168,true,true,true,static,nah)
+  MakeUIAnim(-6,2,speechBox,#aaaaaa,1,false,false,false,boxes,nah)
+  MakeUIAnim(-7,2,speechBoxShort,#aaaaaa,1,false,false,false,boxes,nah)
+  MakeUIAnim(24,-11,speechBoxTiny,#aaaaaa,1,false,false,false,boxes,nah)
+  MakeUIAnim(24,-11,speechBoxShortFlipped,#aaaaaa,1,false,false,false,boxes,nah)
+  MakeUIAnim(24,-11,speechBoxSide,#aaaaaa,1,false,false,false,boxes,nah)
+  NonTriggerList[11].flipX = true
+ ?totaltime > 2
+  CheckForDialogueTrigger()
+ var isDialogueActive = "false"
+ var textTimer = 0
+ ?totaltime % 2 = 0 & isDialogueActive = "true" & whoAmITalkingTo ! "myself" 
+  textTimer++
+func CheckForDialogueTrigger()
+ charToPrint = "#"
+ for i = 0..UIList.Count()-1
+   ?(input.x >= UIList[i].absoluteX & input.x <= UIList[i].w + UIList[i].absoluteX
+   ^&input.y >= UIList[i].absoluteY & input.y <= UIList[i].h + UIList[i].absoluteY)
+   ^|clickAnywhere = "true"
+    charToPrint = "…"
+    ?key = Begin
+      ?i = 0 //For John
+       ?whoAmITalkingTo = "myself"
+        whoAmITalkingTo = "John"
+	    isDialogueActive = "true"
+       ?dialogueState < 2
+        dialogueState = 1
+       ?dialogueState = 3
+        dialogueState = 0
+        whoAmITalkingTo = "myself"
+        yapping.HideText()
+        yapping.Reset()
+        BoxList[1].visible = false
+        clickAnywhere = "false"
+        textTimer = 0
+      ?i = 1 // for the sorceress
+       ?whoAmITalkingTo = "myself"
+        whoAmITalkingTo = "sorceress"
+        isDialogueActive = "true"
+       ?dialogueState < 2
+         dialogueState = 1
+       ?dialogueState = 4
+         dialogueState = 0
+         whoAmITalkingTo = myself
+         yapping.HideText()
+         yapping.Reset()
+         BoxList[4].visible = false
+         clickAnywhere = "false"
+         textTimer = 0 
+      ?i = 2 //for sticky stick guy
+       ?whoAmITalkingTo = "myself"
+        whoAmITalkingTo = "Sticky Stick"
+        isDialogueActive = "true"
+       ?dialogueState < 2
+         dialogueState = 1
+       ?dialogueState = 4
+         dialogueState = 0
+         whoAmITalkingTo = myself
+         yapping.HideText()
+         yapping.Reset()
+         BoxList[0].visible = false
+         clickAnywhere = "false"
+         textTimer = 0 
+      ?i = 3 //For the annoying person
+       ?whoAmITalkingTo = "myself"
+        whoAmITalkingTo = "annoying"
+	    isDialogueActive = "true"
+       ?dialogueState < 2
+        dialogueState = 1
+func HandleAutoCloseDialogue()
+ ?whoAmITalkingTo = "John"
+  ?dialogueState = 3
+   ?textTimer > 120
+    dialogueState = 0
+        whoAmITalkingTo = myself
+        yapping.HideText()
+        yapping.Reset()
+        BoxList[1].visible = false
+        clickAnywhere = "false"
+        textTimer = 0
+?loc = waterfall //declaring text at the bottom to avoid it getting hidden by text boxes
+ 
+ var yapping = new UI/BetterText
+ ?loc.begin
+  yapping.x = -6
+  yapping.y = 1
+ ?totaltime = 2
+  yapping.UpdateVariables()
+HandleDialogue()
+HandleAutoCloseDialogue()
+
+>`@input.x@,@input.y@,#000000,@charToPrint@
+
+/*
+⚿§†☤❄☼☆♂♀°☺ʘ◙◘⏹
+❤♦♣♠♪♫ ↑→↓←▲▶▼◀
+@$%&€£￥₩!¡?¿:;*
+,….·•'＂´`¯-_┊|
+≡=≠≈~÷+±≤≥<>«»^
+/\[]{}()░▒▓█▄▀
+ABCDEFGHIJKLM
+NOPQRSTUVWXYZ
+abcdefghijklm
+nopqrstuvwxyz 
+0123456789
+ãäâáàåÄÅÁÀëêéèÉ
+ïîíìõöôóòÖñüûúù
+ÜýçÇÑ Ææœ∞
+αβγ∆δεέζηΘιλ
+μξπρΣστΦφψΩω
+┌┬┐╔╦╗╒╤╕╓╥╖⌐ ¬ 
+├┼┤╠╬╣╞╪╡╟╫╢║ │ 
+└┴┘╚╩╝╘╧╛╙╨╜═ ─
+*/
+//---------Big A** Music Array---------\\
+var MusicList = [bronze_guardian_3,bronze_guardian_4,bronze_guardian_5,bronze_guardian_cyan,
+^bronze_mine_0,bronze_mine_1,bronze_mine_2,bronze_mine_3,bronze_mine_4,bronze_mine_5,
+^bronze_mine_cyan,slave_outro_climb,slave_outro_loop,caustic_caves,spider_boss,
+cross_deadwood_river,cross_deadwood_wind,deadwood_0,deadwood_1,deadwood_2,deadwood_3,
+deadwood_4,deadwood_5,deadwood_cyan,tree_boss,waterfall_descent,poena,skeleton_boss,
+undead_crypt_0,undead_crypt_1,undead_crypt_2,undead_crypt_3,undead_crypt_4,undead_crypt_5,
+undead_crypt_cyan,undead_crypt_intro,bridge_broken,bridge_crossing,icy_ridge_0,icy_ridge_1,
+icy_ridge_2,icy_ridge_3,icy_ridge_4,icy_ridge_5,icy_ridge_cyan,yeti,fire_loop,
+fungus_forest_0,fungus_forest_1,fungus_forest_2,fungus_forest_3,fungus_forest_4,
+fungus_forest_5,fungus_forest_cyan,mushroom_boss,mushroom_boss_cyan,shop,rocky_plateau_0,
+rocky_plateau_1,rocky_plateau_2,rocky_plateau_3,rocky_plateau_4,rocky_plateau_5,
+rocky_plateau_epilogue,rocky_plateau_fight,rocky_plateau_talk,nagaraja,temple_0,temple_1,
+temple_2,temple_3,temple_4,temple_5,temple_cyan,event_fall,event_hamartia,event_spring,
+event_stonejam,event_summer,event_winter,credits,main_menu,bone_factory,osteophone,uulaa]
+var musicDisplay = new UI/BetterText
+?totaltime = 1
+ musicDisplay.x = 15
+ musicDisplay.y = 13
+ musicDisplay.width = 35
+ musicDisplay.FinishingText = "currently playing:event_stonejam"
+ musicDisplay.color = #76d46a
+?totaltime = 2
+ musicDisplay.UpdateVariables()
+var playButtonDisplayX
+var playButtonDisplayY
+
+musicDisplay.Update()
+func RandomRange(min, max)
+  ?min >= max
+    return min
+  return min + rng % (max - min + 1)
+var chosenSong
+?loc.begin
+ music.Play(event_stonejam)
+?input.x >= 50 & input.x <= 53 & input.y >= 19 & input.y <= 22
+  playButtonDisplayX = input.x
+  playButtonDisplayY = input.y
+  ?key = "Begin"
+   chosenSong = RandomRange(0,84)
+   music.Stop()
+   musicDisplay.FinishingText = "currently playing:" + MusicList[chosenSong]
+   musicDisplay.Reset()
+   music.Play(MusicList[chosenSong])
+:
+  playButtonDisplayX = screen.w
+  playButtonDisplayY = screen.h
+>`@playButtonDisplayX@,@playButtonDisplayY@,#000000,▶

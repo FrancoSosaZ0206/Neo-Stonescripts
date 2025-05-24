@@ -1,0 +1,381 @@
+//AcronianGuardian 1.0
+//By: Poly
+
+disable player
+disable banner
+
+>`0,26,@atkcolor@,ascii
+ STATUSES:
+asciiend
+
+>`2,25,@atkcolor@,ascii
+Ö
+asciiend
+
+>`1,25,#white,ascii
+<#>
+asciiend
+
+>`6,25,#white,ascii
+@hp*127@/@maxhp*127@
+asciiend
+
+>`0,25,@wingcolor@,ascii
+^###^ 
+asciiend
+
+var EH
+var EyeX
+
+?time = 1
+ play bearer4_talk_evolving
+ EyeX = 0
+?time = 40
+ play bearer5_talk
+
+var wingcolor
+var atkcolor
+var bod
+
+wingcolor = #8f9101
+atkcolor = #yellow
+bod = #fffdd4
+?loc = icy |
+^buffs.string = chill
+ wingcolor = #0095a6
+ atkcolor = #cyan
+ bod = #d4fffe
+?foe = boss |
+^buffs.string = berserk
+ wingcolor = #ba0000
+ atkcolor = #red
+ bod = #ffd4d4
+
+?time % 40 < 10
+ EH = 0
+ >o@-15+EyeX@,-4,@wingcolor@,ascii
+##/‾‾‾‾‾`.
+#/  `     `.
+#\   _____` \
+##\`/#####`,/
+###\;
+asciiend
+
+?time % 40 > 9 &
+^time % 40 < 20
+ EH = 0
+ >o@-15+EyeX@,-5,@wingcolor@,ascii
+###/‾‾‾‾‾‾‾`.
+##/   `      \
+#/`_____     |
+#\/#####`. ` |
+##########`.,/
+asciiend
+
+?time % 40 > 19 &
+^time % 40 < 30
+ EH = -1
+ play bat_wing 125
+ >o@-15+EyeX@,-4,@wingcolor@,ascii
+#########____
+###/‾‾‾‾‾  ` \
+###\ `  ___.,/
+####\  /_/\
+#####\ ‾` /
+######‾‾‾‾
+asciiend
+
+?time % 40 > 29 &
+^time % 40 <= 40
+ EH = 0
+ >o@-15+EyeX@,-3,@wingcolor@,ascii
+##/‾‾‾‾‾`.
+#/  `     `.
+#\   _____` \
+##\`/#####`,/
+###\;
+asciiend
+
+?time % 40 < 10
+ >o@5+EyeX@,-4,@wingcolor@,ascii
+###.´‾‾‾‾‾\
+#.´     ´  \
+/ ´_____   /
+\.´#####\´/
+########;/
+asciiend
+
+?time % 40 > 9 &
+^time % 40 < 20
+ >o@4+EyeX@,-5,@wingcolor@,ascii
+#.´‾‾‾‾‾‾‾\
+/      ´   \
+|     _____´\
+| ´ .´#####\/
+\,.´
+asciiend
+
+?time % 40 > 19 &
+^time % 40 < 30
+ >o@4+EyeX@,-4,@wingcolor@,ascii
+#____
+/ ´  ‾‾‾‾‾\
+\,.___  ´ /
+###/\_\  /
+###\ ´‾ /
+####‾‾‾‾
+asciiend
+
+?time % 40 > 29 &
+^time % 40 <= 40
+ >o@5+EyeX@,-3,@wingcolor@,ascii
+###.´‾‾‾‾‾\
+#.´     ´  \
+/ ´_____   /
+\.´#####\´/
+########;/
+asciiend
+
+?time % 40 < 10
+ >o@-8+EyeX@,2,@wingcolor@,ascii
+/‾‾‾|
+| ´/
+\_(
+asciiend
+
+?time % 40 > 9 &
+^time % 40 < 20
+ >o@5+EyeX@,0,@wingcolor@,ascii
+#.´‾‾‾`.
+/    ´ |
+#`‾‾‾‾\/
+asciiend
+
+?time % 40 > 29 &
+^time % 40 <= 40
+ >o@5+EyeX@,1,@wingcolor@,ascii
+#.´‾‾‾`.
+/    ´ |
+#`‾‾‾‾\/
+asciiend
+
+?time % 40 < 10
+ play bat_wing_small 100
+ >o@6+EyeX@,2,@wingcolor@,ascii
+|‾‾‾\
+#\` |
+##)_/
+asciiend
+
+?time % 40 > 9 &
+^time % 40 < 20
+ >o@-10+EyeX@,0,@wingcolor@,ascii
+.´‾‾‾`.
+| `   \
+\/‾‾‾‾´
+asciiend
+
+?time % 40 > 29 &
+^time % 40 <= 40
+ >o@-10+EyeX@,1,@wingcolor@,ascii
+.´‾‾‾`.
+| `   \
+\/‾‾‾‾´
+asciiend
+
+?foe ! boss &
+^time % 70 < 65 &
+^buffs.string ! berserk &
+^time % 70 < 65
+ >o@-4+EyeX@,@-2+EH@,@bod@,ascii
+#\###|###/
+#.´‾‾‾‾‾`.
+/  /‾‾‾\  \
+\  \___/  /
+#`———————´
+asciiend
+
+?foe ! boss &
+^time % 70 < 65
+ >o@-1+EyeX@,@0+EH@,@atkcolor@,ascii
+/‾‾‾\
+\___/
+asciiend
+
+?foe ! boss &
+^time % 70 < 65 &
+^foe.distance < 30
+ >o@-1+EyeX@,@0+EH@,@atkcolor@,ascii
+ /‾‾‾\
+ \___/
+asciiend
+
+?foe = boss &
+^time % 70 < 65 &
+^foe.distance >= 30 |
+^buffs.string = berserk &
+^time % 70 < 65 &
+^foe.distance >= 30
+ >o@-4+EyeX@,@-2+EH@,@bod@,ascii
+#\#######/
+#.-.#|#.-.
+/  /\_/\  \
+\  \___/  /
+#`———————´
+asciiend
+
+?foe = boss &
+^time % 70 < 65 |
+^buffs.string = berserk &
+^time % 70 < 65
+ >o@-1+EyeX@,@0+EH@,@atkcolor@,ascii
+/###\
+\___/
+asciiend
+
+?foe = boss &
+^time % 70 < 65 &
+^foe.distance < 30 |
+^buffs.string = berserk &
+^time % 70 < 65 &
+^foe.distance < 30
+ >o@-4+EyeX@,@-2+EH@,@bod@,ascii
+#\########/
+#.-._#|#,.
+/  / \_/  \
+\  \___/  /
+#`———————´
+asciiend
+
+?foe = boss &
+^time % 70 < 65 &
+^foe.distance < 30 |
+^buffs.string = berserk &
+^time % 70 < 65 &
+^foe.distance < 30
+ >o@-1+EyeX@,@0+EH@,@atkcolor@,ascii
+ /###\
+ \___/
+asciiend
+
+?time % 70 > 64
+ >o@-4+EyeX@,@0+EH@,#white,ascii
+\`.——.——.´/
+#`/——|——\´
+asciiend
+
+?time < 110
+ >o-1,-6,#white,ascii
+#___
+'.,—'
+asciiend
+
+?time < 108
+ >o-3,-6,#white,ascii
+.———————.
+'——.,———'
+asciiend
+
+?time < 104
+ >o-7,-6,#white,ascii
+.———————————————.
+'——————.,———————'
+#######'
+asciiend
+
+?time < 99
+ >o-7,-7,#white,ascii
+.———————————————.
+| BE NOT AFRAID |
+'——————.,———————'
+#######|
+asciiend
+
+?item.right.state = 2 &
+^item.right.time <= 5
+ play bearer_attack 100
+ >f1,0,@atkcolor@,ascii
+•
+asciiend
+
+?time % 3 = 1 &
+^item.right.state = 2 &
+^item.right.time > 5
+ >f1,0,@atkcolor@,ascii
++
+asciiend
+
+?time % 3 = 1 &
+^item.right.state = 2 &
+^item.right.time > 10
+ >f1,0,@atkcolor@,ascii
+┼
+asciiend
+
+?item.right.state = 3 &
+^item.right.time = 1
+ play bomb_cart_explosion
+
+?item.right.state = 3 &
+^item.right.time <= 2
+ >f-1,-1,@atkcolor@,ascii
+#.—.
+(   )
+#`—´
+asciiend
+
+?item.right.state = 3 &
+^item.right.time <= 4 &
+^item.right.time > 2
+ >f0,-1,@atkcolor@,ascii
+#_
+(_)
+asciiend
+
+?item.right.state = 3 &
+^item.right.time <= 6 &
+^item.right.time > 4
+ >f1,0,@atkcolor@,ascii
+O
+asciiend
+
+?item.right.state = 3 &
+^item.right.time <= 8 &
+^item.right.time > 6 |
+^item.right.state = 4
+ >f1,0,@atkcolor@,ascii
+•
+asciiend
+
+?item.left.state <= 1
+ EyeX = 0
+
+?item.left.state = 2 &
+^item.left.time < 5
+ EyeX = -1
+ play bell_ringer_attack
+
+?item.left.state = 2 &
+^item.left.time < 10 &
+^item.left.time >= 5
+ EyeX = -2
+
+?item.left.state = 3 &
+^item.left.time <= 5
+ EyeX = 12
+ play bomb_cart_explosion
+
+?item.left.state = 3 &
+^item.left.time <= 7 &
+^item.left.time > 5
+ EyeX = 8
+
+?item.left.state = 3 &
+^item.left.time <= 10 &
+^item.left.time > 7
+ EyeX = 5
+
+?item.left.state = 3 &
+^item.left.time <= 13 &
+^item.left.time > 10
+ EyeX = 2

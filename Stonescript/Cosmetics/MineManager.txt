@@ -1,0 +1,190 @@
+//Mine_Manager 1.0
+//By: Poly
+
+var mount
+
+mount = 6
+
+?mount = 0
+ enable player
+:
+ disable player
+
+?mount = 6
+ >`0,25,#white,ascii
+#__
+)_#\#
+asciiend
+
+?mount = 6
+ >`2,26,#red,ascii
+O#:@hp@/@maxhp@
+asciiend
+
+?mount = 6
+ >`0,21,#red,ascii
+┌————┐
+│    │
+│    │
+└————┘
+asciiend
+
+?mount = 6 &
+^item.right.state < 2
+ >`1,22,#white,ascii
+#o
+#|‾T
+asciiend
+:?mount = 6
+ >`1,22,#white,ascii
+#o
+#|\_
+asciiend
+
+?mount = 6 &
+^item.left.state < 2
+ >`1,23,#white,ascii
+‾
+asciiend
+:?mount = 6
+ >`1,23,#white,ascii
+/
+asciiend
+
+?mount = 6 &
+^item.left.state = 1 |
+^mount = 6 &
+^item.left.state = -1
+ >o1,-1,#C8C7C5,ascii
+##//
+#//
+#\\
+#/|\
+#\v/
+asciiend
+
+?mount = 6 &
+^item.left.state = 1 &
+^item.left.time < 3
+ >o1,-1,#cyan,ascii
+##//
+#//
+#\\
+#/|\
+#\v/
+asciiend
+
+?mount = 6 &
+^item.left.state = 2
+ >o1,-2,#C8C7C5,ascii
+######/‾\
+##//#/—-•
+##\\//\_/
+###‾‾
+asciiend
+
+?mount = 6 &
+^item.left.state = 3
+ play mine_walker_attack_a 100
+ >o1,-2,#C8C7C5,ascii
+######___
+##//#/———:
+##\\//‾‾‾
+###‾‾
+asciiend
+
+?mount = 6 &
+^item.left.state = 4
+ play mine_walker_attack_b 100
+ >o1,-2,#cyan,ascii
+######___
+##//#/———:
+##\\//‾‾‾
+###‾‾
+asciiend
+
+?mount = 6
+ >o-6,-4,#white,ascii
+###_,—-.___
+##_\       \
+#| |)       \
+#|_/_________|
+asciiend
+
+?mount = 6
+ play wand_fire_cast 100
+ >o-4,0,#FF9C00,ascii
+VV
+asciiend
+
+?mount = 6 &
+^time % 10 < 5
+ >o-4,0,#FF9C00,ascii
+VV
+vv
+asciiend
+
+?mount = 6 &
+^time % 300 > 7
+ >o2,-3,#red,ascii
+#_
+(_)
+asciiend
+
+?mount = 6 &
+^time % 300 <= 7
+ >o2,-2,#red,ascii
+———
+asciiend
+
+?mount = 6 &
+^item.right.state = 1 |
+^mount = 6 &
+^item.right.state = -1
+ >o-3,-1,#white,ascii
+##//
+#//
+#\\
+#/|\
+#\v/
+asciiend
+
+?mount = 6 &
+^item.right.state = 1 &
+^item.right.time < 3
+ >o-3,-1,#cyan,ascii
+##//
+#//
+#\\
+#/|\
+#\v/
+asciiend
+
+?mount = 6 &
+^item.right.state = 2
+ >o-3,-2,#white,ascii
+######/‾\
+##//#/—-•
+##\\//\_/
+###‾‾
+asciiend
+
+?mount = 6 &
+^item.right.state = 3
+ play mine_walker_attack_a 100
+ >o-3,-2,#white,ascii
+######___
+##//#/———:
+##\\//‾‾‾
+###‾‾
+asciiend
+
+?mount = 6 &
+^item.right.state = 4
+ play mine_walker_attack_b 100
+ >o-3,-2,#cyan,ascii
+######___
+##//#/———:
+##\\//‾‾‾
+###‾‾
+asciiend

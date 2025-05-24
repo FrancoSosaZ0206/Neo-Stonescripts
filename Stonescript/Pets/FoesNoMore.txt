@@ -1,0 +1,1025 @@
+/*Foes No More
+ v1.0
+ Created By Malathor
+ Copy and paste this into your mind stone to summon friends
+ (If you're on PC, you can also import it, there's a guide to custom imports somewhere)
+ Adds a bunch of enemies as allies who follow you around!
+ Sadly, most of them are too far back to be much help in combat, but it's the thought that counts!
+ 
+ Click to summon wasps which fly towards your cursor!
+ They sometimes get really buggy (ba dum tss) for unknown reasons
+ I plan to fix this in a future patch
+*/
+//skully fits in with the rest of this, you can remove it if you want
+import Pets/Skully
+
+
+//Le snek:
+//————————— Declaring Variables —————————//
+var SnekHead
+var SnekBody
+var SnekWings
+var SnekHeadFrame = 0
+var SnekBodyFrame = 0
+var SnekWingFrame = 0
+
+
+//————————— Changable Vars —————————//
+var SnekForm = ＂flying＂//currently just "flying"
+var SnekX = 8
+var SnekY = -5
+
+var playWingSound = true //true or false 
+var SnekColor = #6BFF94
+//————————— Art —————————//
+?time % 3 = 0
+ SnekHeadFrame++
+?time % 2 = 0
+ SnekBodyFrame++
+ ?SnekHeadFrame < 20
+  SnekHead = ascii
+#.-.
+((`-'
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 20
+   SnekHead = ascii
+#.-.
+((`-'-
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 21
+   SnekHead = ascii
+#.-.
+((`-'--
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 22
+   SnekHead = ascii
+#.-.
+((`-'-<
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 23
+   SnekHead = ascii
+#.-.
+((`-'-,
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 24
+   SnekHead = ascii
+#.-.
+((`-',
+#\###´
+#_))
+asciiend
+ :?SnekHeadFrame = 25
+   SnekHead = ascii
+#.-.
+((`-'-,
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 26
+   SnekHead = ascii
+#.-.
+((`-'-´
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 27
+   SnekHead = ascii
+#.-.##,
+((`-'´
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 28
+   SnekHead = ascii
+#.-.
+((`-'-´
+#\\
+#_))
+asciiend
+ :?SnekHeadFrame = 29
+   SnekHead = ascii
+#.-.
+((`-',
+#\\
+#_))
+asciiend
+:?SnekHeadFrame = 30
+   SnekHead = ascii
+#.-.
+((`-'.
+#\\
+#_))
+asciiend
+?SnekHeadFrame > 30
+ SnekHeadFrame = 1
+?SnekForm = ＂flying＂
+ ?time % 3 = 0
+  SnekWingFrame++
+ ?SnekWingFrame = 1
+  SnekWings = ascii
+(\#|
+(#\|
+asciiend
+ :?SnekWingFrame = 2
+  SnekWings = ascii
+#
+`-._:´
+##
+asciiend
+ ?SnekWingFrame > 2
+  SnekWingFrame = 1
+?SnekForm = ＂flying＂ & SnekBodyFrame = 1
+ SnekBody = ascii
+######.´ `-.
+####.'´ ¯ `--´
+###(_
+asciiend
+?SnekForm = ＂flying＂ & SnekBodyFrame = 2
+ SnekBody = ascii
+######.´ `-.
+######/ ¯ `--´
+####-´
+asciiend
+:?SnekForm = ＂flying＂ & SnekBodyFrame = 3
+ SnekBody = ascii
+######.´ `-.
+######(,¯ `--´
+######-´
+asciiend
+:?SnekForm = ＂flying＂ & SnekBodyFrame = 4
+ SnekBody = ascii
+#####.-´_`-.
+#####`-., `--´
+########-'
+asciiend
+:?SnekForm = ＂flying＂ & SnekBodyFrame = 5
+ SnekBody = ascii
+#####.'¯_`-.
+####(´####`--´
+#####`-._
+asciiend
+:?SnekForm = ＂flying＂ & SnekBodyFrame = 6
+ SnekBody = ascii
+#####.'¯_`-.
+####/´####`--´
+####`._
+asciiend
+?SnekBodyFrame > 6
+ SnekBodyFrame = 1
+var SnekSound = 0
+SnekSound++
+?SnekSound % 30 = 0 & playWingSound
+ play flying_serpent_loop
+>o-@SnekX@,@SnekY@,@SnekColor@,@SnekHead@
+>o-@SnekX+11@,@SnekY+3@,@SnekColor@,@SnekBody@
+>o-@SnekX+6@,@SnekY+1@,@SnekColor@,@SnekWings@
+var antWalk = ascii
+-,#_,-.
+#O'|\-\`
+%%
+-,#_,-.
+#O/`/|-`
+%%
+-,#_,-.
+#O(`|-)`
+asciiend
+var cultistWalk = ascii
+,_
+{\\
+( `\
+/`o'._
+`¯¯'¯
+#####
+%%
+,_
+{\\
+( `\
+(`o'._
+#´¯¯¯ #
+###
+%%
+,_
+{\\
+( `\
+(`o`-._
+#¯¯¯¯¯
+###
+%%
+,_
+{\\
+( `\
+/`o`-._
+`¯¯¯¯¯
+###
+%%
+,_
+{\\
+( `\
+/`o'.__
+¯¯´¯¯ #
+###
+asciiend
+var iceElementalShoot = ascii
+% {repeat:5} Done!
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%% {repeat:2} Done!
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+%%
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+%%
+════════════════════════════════════════════════════════════
+%%
+────────────────────────────────────────────────────────────
+%%
+─-──--─-──--─-──--─-─-──--─-──--─-──--─-─-──--─-──--─-──--─-
+%%
+·-·#·#·-·#·-·#·#·-·#·-·#·#·-·#·-·#·#·-·#·-·#·#·-·#·-·#·#·-·
+%%
+##-####-###-#####-###-#####-###-#####-###-#####-###-#####-
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+asciiend
+var iceGuy = ascii
+##/|
+`/| \,
+#\o_/
+%%
+##/|
+`/| \,
+#\._/
+%%
+##/|
+`/| \,
+#\•_/
+%% {repeat:2} Done!
+##/|
+`/| \,
+#\O_/
+%%
+##/|
+`/| \,
+#\O_/
+%% {repeat:2}
+##/|
+`/| \,
+#\-_/
+%%
+##/|
+`/| \,
+#\-_/
+%% {repeat:3}
+##/|
+`/| \,
+#\o_/
+%%
+##/|
+`/| \,
+#\o_/
+%%
+##/|
+`/| \,
+#\o_/
+asciiend
+var skeletimmyWalk = ascii
+#_{)
+''¯)
+##/(
+%%
+#_{)
+''¯)
+##(V
+%%
+#_{)
+''¯)
+##<|
+asciiend
+var skeletimmyStand = ascii
+{)
+//\
+#/ \
+asciiend
+var scoutWalk = ascii
+######/
+###),_#____
+###`o/(  -´
+##,/_\#);
+##/##/\´
+#/#-´#_)_
+└####/##/
+####;##(
+###/####\
+%%
+######/
+###),_#____
+###`o/(  -´
+##,/_\#);
+##/##/\´
+#/#-´#_)_
+└####/#.´
+####(#(_
+#####\##'
+%%
+######/
+###),_#____
+###`o/(  -´
+##,/_\#);
+##/##/\´
+#/#-´#_)_
+└####/.-´
+#####¡
+#####'\
+%%
+######/
+###),_#____
+###`o/(  -´
+##,/_\#);
+##/##/\´
+#/#-´#_)_
+└####(.'´
+#####/\
+####´##\
+%%
+######/
+###),_#____
+###`o/(  -´
+##,/_\#);
+##/##/\´
+#/#-´#_)_
+└####(#.´
+######/-,
+#####/
+%%
+######/
+###),_#____
+###`o/(  -´
+##,/_\#);
+##/##/\´
+#/#-´#_)_
+└####/#.´
+#####`¡,
+######|
+%%
+######/
+###),_#____
+###`o/(  -´
+##,/_\#);
+##/##/\´
+#/#-´#_)_
+└####/#.´
+#####\(
+#####´#\
+asciiend
+var blast = ascii
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+#!
+%%
+#.
+<#>
+#`
+%%
+#,
+<#>
+#´
+%%
+#
+<#)
+#
+%%
+#
+#<#),
+%%
+#
+##<)
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+%%
+#
+asciiend
+var wasp = ascii
+#_
+#O('
+%%
+#_
+#O(),
+%%
+#/_#_)
+#O()/'
+%%
+#/_#/ #
+#O()/¯`
+#####¯
+%%
+\|##_)
+#O()/¯¯`
+#####¯¯
+%%
+\|##/ #
+#O()/¯¯\
+#####¯¯`'
+%%
+\|##_)
+#O()/¯\
+#####¯`\
+%%
+_\##/ #
+#O()/¯\
+#####¯`\
+%%
+_\##_)
+#O()/¯\
+#####\|
+######'
+%%
+_\##/ #
+#O()/\
+####\|
+#####'
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%%
+_\##_)
+#O()/\
+####)/
+###¯`
+%%
+_\##/ #
+#O()/\
+####)/
+####¯
+###
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+################_\##/ #
+#################O()/\
+####################)/
+###################¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###############_\##_)
+################O()/\
+###################)/
+##################¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+##############_\##/ #
+###############O()/\
+##################)/
+#################¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#############_\##_)
+##############O()/\
+#################)/
+################¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+############_\##/ #
+#############O()/\
+################)/
+###############¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+###########_\##_)
+############O()/\
+###############)/
+##############¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+##########_\##/ #
+###########O()/\
+##############)/
+#############¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#########_\##_)
+##########O()/\
+#############)/
+############¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+########_\##/ #
+#########O()/\
+############)/
+###########¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#######_\##_)
+########O()/\
+###########)/
+##########¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#
+######_\##/ #
+#######O()/\
+##########)/
+#########¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+#
+#####_\##_)
+######O()/\
+#########)/
+########¯`
+%%
+#
+#
+#
+#
+#
+#
+#
+####_\##/ #
+#####O()/\
+########)/
+#######¯`
+%%
+#
+#
+#
+#
+#
+#
+###_\##_)
+####O()/\
+#######)/
+######¯`
+%%
+#
+#
+#
+#
+##_\##/ #
+###O()/\
+######)/
+#####¯`
+%%
+#
+#
+#_\##_)
+##O()/\
+#####)/
+####¯`
+%%
+_\##/ #
+#O()/\
+####)/
+###¯`
+%% {repeat:13}
+#
+asciiend
+var testingThing = 0
+var hasWaspMoved = 0
+func pauseAnims()
+ armyList[0].Pause()
+ armyList[0].frame = 0
+ armyList[1].Pause()
+ armyList[1].frame = 0
+ armyList[4].frame = 2
+ armyList[4].Pause()
+ armyList[5].Pause()
+ armyList[5].visible = false
+ armyList[6].visible = true
+func playAnims()
+ armyList[0].Play()
+ armyList[1].Play()
+ armyList[4].Play()
+ armyList[5].visible = true
+ armyList[5].Play()
+ armyList[6].visible = false
+var armyList = []
+var blastList = []
+var waspList = []
+var animation
+var waspX = 0
+var waspY = 0
+func createAnim(art,posX,posY,color,duration,flip,loop)
+ animation = ui.AddAnim(art)
+ animation.dock = top_left
+ animation.x = posX
+ animation.y = posY
+ animation.color = color
+ animation.duration = duration
+ ?flip
+  animation.flipX = true
+ animation.Play()
+ ?loop = true
+  animation.loop = true
+ :
+  animation.loop = false
+ ?art = wasp
+  waspList.Add(animation)
+ :?art = blast
+  blastList.Add(animation)
+ :
+  armyList.Add(animation)
+?loc.loop
+ armyList.Clear()
+ waspList.Clear()
+ blastList.Clear()
+//—————————Creation—————————//
+?totaltime = 1
+ createAnim(scoutWalk,20,10,#yellow,42,true,true)
+ createAnim(antWalk,0,0,#FF7312,12,true,true)
+ createAnim(iceGuy,30,10,#cyan,40,true,true)
+ createAnim(iceElementalShoot,114,12,#cyan,40,true,true)
+ createAnim(cultistWalk,30,14,#red,15,true,true)
+ createAnim(skeletimmyWalk,30,14,#white,15,true,true)
+ createAnim(skeletimmyStand,30,14,#white,1,true,true)
+var button1
+var button2
+var walkToggle = true
+?!ai.walking & walkToggle
+ pauseAnims()
+ ?foe
+  armyList[3].Play()
+ walkToggle = false
+:?ai.walking & !walkToggle
+ playAnims()
+ armyList[3].frame = 0
+ armyList[3].Pause()
+ walkToggle = true
+
+func updateWasps()
+ for i = 0..waspList.Count()-1
+  //hasWaspMoved++
+  ?(waspList[i].frame = 29 | waspList[i].frame = 30) //& waspList[i].color ! #c8c8c8
+   ?waspList[i].color = #c8c8c8
+    waspList[i].x += 16
+    waspList[i].y += 14
+   waspList[i].x -= 16
+   waspList[i].y -= 14
+   waspList[i].color = #c8c8c8
+   testingThing++
+  ?waspList[i].frame = 50
+   waspList[i].visible = false
+  ?waspList[i].frame < 50
+   waspList[i].x -= 1
+
+
+//————————— Positioning for allies —————————///
+armyList[0].x = screen.FromWorldX(pos.x)-16
+armyList[0].y = screen.FromWorldZ(pos.z)-4
+armyList[1].x = screen.FromWorldX(pos.x)-2
+armyList[1].y = screen.FromWorldZ(pos.z)
+armyList[2].x = screen.FromWorldX(pos.x) - 13
+armyList[2].y = screen.FromWorldZ(pos.z)-1
+armyList[3].x = screen.FromWorldX(pos.x) + 71
+armyList[3].y = screen.FromWorldZ(pos.z) + 1
+armyList[4].x = screen.FromWorldX(pos.x)-28
+armyList[4].y = screen.FromWorldZ(pos.z)-1
+armyList[5].x = screen.FromWorldX(pos.x)-22
+armyList[5].y = screen.FromWorldZ(pos.z)+1
+armyList[6].x = screen.FromWorldX(pos.x)-22
+armyList[6].y = screen.FromWorldZ(pos.z)+1
+?key = PrimaryBegin
+ waspX = input.x + 34
+ waspY = input.y + 7
+ createAnim(wasp,waspX,waspY,#white,50,false,false)
+ createAnim(blast,waspX-33,waspY-7,#red,50,false,false)
+ 
+disable banner
+?waspList.Count() & totaltime % 1 = 0
+ updateWasps()
+/*Keeping this for future refrence:
+ Wasp changes to fly away anim on frame 31
+ Standing frames:
+ Scout: frame 0
+ Ant: also frame 0

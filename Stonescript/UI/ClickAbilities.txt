@@ -1,0 +1,815 @@
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+ ClickAbilities 
+  Version: 3.0
+  Author: Incoherent Toast
+
+This is a cooldown script which can also be used to activate certain items.
+You can use this into your script to allow more advanced item usages such as
+bardiche and hammer without having interruption issues. 
+To do this it needs to be properly incorperated into your script otherwise it
+will mostly function as a cooldown display
+
+This can add utility to scripting and so the display is an optional feature.
+To incorperate this into your script you need to use one of these functions:
+- Run()
+- RunNoDisplay()
+
+Here's an example usage:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+var CA = import UI/ClickAbilities
+?CA.Run()
+  ?foe.distance > 21
+    ?summon.count = 0
+      CA.SummonCinder()
+    :
+      equipL trisk
+    equipR Compound
+  :?item.GetCooldown("heavy_hammer")<=0 & item.CanActivate()
+    CA.Hamm("Heavy Hammer -shiny")
+  :?item.GetCooldown("bardiche")<=0 & foe.distance < 7 & item.CanActivate()
+    CA.Bard("Bardiche")
+  :
+    equipL Sword
+    equipR Hammer
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+Change Log -
+  v3.0
+  - Added Staff and wand ability buttons
+  - Tweaked function triggers
+  *Notes: There's now multiple items will variable cooldowns but I have
+  chosen not to check for this, so the percentage value of some items
+  will appear to never go down to 0% charge.
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+var BardicheDefault = "bardiche"
+var HammerDefault   = "heavy hammer"
+
+var LongDash = true
+/* This setting will mean that the dash/bash
+buttons may use qstaff to extend dash reach */
+
+func SysUpdateRate()
+  ?sys.isPC
+    return 4
+  :
+    return 8
+
+func SetDisplay(Boolean)
+  DisplayOn = Boolean
+  ?!CAinit
+    CA_BasePanel.Recycle()
+    CAinit = true
+
+var UpdateRate = SysUpdateRate()
+/* This changes how often the ability display updates. 
+Can be tweaked with "ClickAbilities.UpdateRate = x" */
+
+var SelectTab = ui.AddStyle("
+^╔═╛
+^║  
+^╚═╕")
+
+var DeselectTab = ui.AddStyle("
+^┌—#
+^│ #
+^└─#")
+
+var DisplayOn = true
+var CAinit = true
+var GetCD = item.GetCooldown
+
+var BashText
+var BashCanvas
+var BashButton
+
+var DashText
+var DashCanvas
+var DashButton
+
+var QstaffText
+var QstaffCanvas
+var QstaffButton
+
+var MindText
+var MindCanvas
+var MindButton
+
+var HammerText
+var HammerCanvas
+var HammerButton
+
+var BardText
+var BardCanvas
+var BardButton
+
+var BladeText
+var BladeCanvas
+var BladeButton
+
+var MaskText
+var MaskCanvas
+var MaskButton
+
+var WispText
+var WispCanvas
+var WispButton
+
+var CindSumButton
+var VoidSumButton
+
+var ScriptToggleText
+var ScriptToggleButton
+
+var CA_BasePanel
+
+var BladeDelay
+var WispInit = true
+
+var MinimiseButton
+var MinimiseToggle = false
+func CheckSys()
+  ?sys.isPC
+    return 0
+  return -10
+var MobileHotbarOffset = CheckSys()
+var ShiftX = screen.w - 1 + MobileHotbarOffset
+var ShiftY = 1
+var ActivationTime = -1
+
+var MainTabButton
+var WandTabButton
+var StaffTabButton
+var SelectedTab = 0
+var TabList
+
+
+var ResetText
+var ResetCanvas
+var ResetButton
+
+var PlagueText
+var PlagueCanvas
+var PlagueButton
+
+var CalamityText
+var CalamityCanvas
+var CalamityButton
+
+var ExploText
+var ExploCanvas
+var ExploButton
+
+var FrostText
+var FrostCanvas
+var FrostButton
+
+var GravityText
+var GravityCanvas
+var GravityButton
+
+var PreventText
+var PreventCanvas
+var PreventButton
+
+var BerserkText
+var BerserkCanvas
+var BerserkButton
+
+var GraspingText
+var GraspingCanvas
+var GraspingButton
+
+var InfernalText
+var InfernalCanvas
+var InfernalButton
+
+var EternityText
+var EternityCanvas
+var EternityButton
+
+var AcrobatText
+var AcrobatCanvas
+var AcrobatButton
+
+var StyleInvisible = ui.AddStyle("
+^###
+^###
+^###")
+
+func CheckInterruptProtocol()
+  return ActivationTime = -1
+
+func CheckItem(Item)
+  return GetCD(Item)<=0 & item.CanActivate()
+
+func Qstaff()
+  ?CheckItem("quarterstaff")
+    equip quarterstaff
+    activate R
+    ?item.left
+      equipL @item.left@
+    equip @item.right@
+
+func Mask()
+  ?CheckItem("mask") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR mask
+    activate R
+func Mind()
+  ?CheckItem("mind") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipL mind
+func Dash()
+  ?GetCD("dash")<=0 & CheckInterruptProtocol()
+    ?LongDash
+      ?CheckItem("quarterstaff") & foe.distance < 22 & foe.distance > 17
+        equip quarterstaff
+        activate R
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR dash
+func Bash()
+  ?GetCD("bash")<=0 & CheckInterruptProtocol()
+    ?LongDash
+      ?CheckItem("quarterstaff") & foe.distance < 22 & foe.distance > 17
+        equip quarterstaff
+        activate R
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR bash
+
+func Reset()
+  ?CheckItem("wand_vigor") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR reset wand
+    activate R
+func Plague()
+  ?CheckItem("wand_poison") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR plague wand
+    activate R
+func Calamity()
+  ?CheckItem("wand_aether") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR aether wand
+    activate R
+func Explode()
+  ?CheckItem("wand_fire") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR explosive wand
+    activate R
+func Frost()
+  ?CheckItem("wand_ice") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR frost wand
+    activate R
+func Gravity()
+  ?CheckItem("wand_stone") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equipR gravity wand
+    activate R
+func Prevention()
+  ?CheckItem("staff_vigor") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equip Prevention staff
+    activate R
+func Berserker()
+  ?CheckItem("staff_poison") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equip Berserker staff
+    activate R
+func Grasping()
+  ?CheckItem("staff_aether") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equip Grasping staff
+    activate R
+func Infernal()
+  ?CheckItem("staff_fire") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equip Infernal staff
+    activate R
+func Eternity()
+  ?CheckItem("staff_ice") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equip Eternity staff
+    activate R
+func Acrobatic()
+  ?CheckItem("staff_stone") & CheckInterruptProtocol()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 0
+    equip Acrobatic staff
+    activate R
+
+func Bard(input)
+  ?BardButton = input
+    ?CheckItem("bardiche") & CheckInterruptProtocol()
+      UseR(BardicheDefault)
+  :
+    UseR(input)
+func Hamm(input)
+  ?HammerButton = input
+    ?CheckItem("heavy_hammer") & CheckInterruptProtocol()
+      UseR(HammerDefault)
+  :
+    UseR(input)
+func Hammer(input)
+  UseR(input)
+func Bardiche(input)
+  UseR(input)
+
+func UseR(Weap)
+  SetReequips()
+  InterruptProtocol = SuperAttackRightProtocol
+  equip @Weap@
+  activate R
+  ActivationTime = 0
+
+func UseL(Weap)
+  SetReequips()
+  InterruptProtocol = SuperAttackLeftProtocol
+  equipL @Weap@
+  activate L
+  ActivationTime = 0
+
+func Blade()
+  ?CheckItem("blade") & CheckInterruptProtocol()
+    BladeDelay = 20
+    InterruptProtocol = BladeProtocol
+    ActivationTime = 0
+    screen.next()
+
+func SummonCinder()
+  ?CheckItem("fire_talisman") & CheckInterruptProtocol()
+    UseL("Fire Talisman")
+func SummonWeaver()
+  ?CheckItem("aether_talisman") & CheckInterruptProtocol()
+    UseL("Aether Talisman")
+
+func WispActivate()
+  ?summon.GetName() = "Cinderwisp"
+    activate Cinderwisp
+  :
+    activate Voidweaver
+
+var LeftReequip
+var RightReequip
+
+func SetReequips()
+  ?item.left
+    LeftReequip = item.left
+  :
+    LeftReequip = 0
+
+  ?item.right
+    RightReequip = item.right
+  :
+    RightReequip = 0
+
+func Reequip()
+  ?LeftReequip
+    equipL @LeftReequip@
+  ?RightReequip
+    equip @RightReequip@
+
+func MainTab()
+  SelectedTab = 0
+  WispInit = true
+  CA_BasePanel.Recycle()
+  CA_StartUp()
+
+func WandTab()
+  SelectedTab = 1
+  WispInit = true
+  CA_BasePanel.Recycle()
+  CA_StartUp()
+
+func StaffTab()
+  SelectedTab = 2
+  WispInit = true
+  CA_BasePanel.Recycle()
+  CA_StartUp()
+
+func ScriptToggle()
+  ?ToggleEnabled
+    InterruptProtocol = DisabledProtocol
+    ScriptToggleText.text = "Script: OFF"
+  :
+    InterruptProtocol = EnabledProtocol
+    ScriptToggleText.text = "Script: ON"
+  ToggleEnabled = !ToggleEnabled
+
+func MinimiseRight()
+  MinimiseToggle = !MinimiseToggle
+  ?MinimiseToggle
+    MinimiseButton.text = "[«"
+    ShiftX = screen.w + 14
+  :
+    MinimiseButton.text = "[»"
+    ShiftX = screen.w - 1 + MobileHotbarOffset
+func MinimiseUp()
+  MinimiseToggle = !MinimiseToggle
+  ?MinimiseToggle
+    MinimiseButton.text = "[▼]"
+    MinimiseButton.y = 11
+    ShiftY = -10
+  :
+    MinimiseButton.text = "[▲]"
+    MinimiseButton.y = 10
+    ShiftY = 1
+
+func UIButton(_UI,X,Y,_Func)
+  _UI.x = X
+  _UI.y = Y
+  _UI.w = 13
+  _UI.h = 1
+  _UI.text = ""
+  _UI.style = StyleInvisible
+  _UI.dock = top_left
+  _UI.anchor = top_left
+  _UI.SetPressed(_Func)
+  CA_BasePanel.Add(_UI)
+  return _UI
+
+func UIText(_UI,X,Y)
+  _UI.x = X
+  _UI.y = Y
+  _UI.w = 18
+  _UI.h = 1
+  _UI.dock = top_left
+  _UI.anchor = top_left
+  CA_BasePanel.Add(_UI)
+  return _UI
+
+func UICanvas(_UI,Y)
+  _UI.x = 1
+  _UI.y = Y
+  _UI.w = 13
+  _UI.h = 1
+  _UI.dock = top_left
+  _UI.anchor = top_left
+  _UI.blend = add
+  CA_BasePanel.Add(_UI)
+  return _UI
+
+func CA_StartUp()
+  CAinit = false
+  CA_BasePanel = ui.AddPanel()
+  CA_BasePanel.dock = top_left
+  CA_BasePanel.anchor = top_right
+  CA_BasePanel.x = ShiftX //screen.w - 1
+  CA_BasePanel.y = 1
+  CA_BasePanel.w = 15
+  CA_BasePanel.h = 10
+
+  ScriptToggleText   = UIText( ui.AddText("Script: ON"), 3,0)
+  ScriptToggleButton = UIButton( ui.AddButton(), 1,0,ScriptToggle)
+
+  ?SelectedTab = 0
+    BashText = UIText( ui.AddText(), 1,1)
+    BashButton = UIButton( ui.AddButton(), 1,1,Bash)
+    BashCanvas = UICanvas( ui.AddCanvas(), 1)
+
+    DashText = UIText( ui.AddText(), 1,2)
+    DashButton = UIButton( ui.AddButton(), 1,2,Dash)
+    DashCanvas = UICanvas( ui.AddCanvas(), 2)
+
+    QstaffText = UIText( ui.AddText(), 1,3)
+    QstaffButton = UIButton( ui.AddButton(), 1,3,Qstaff)
+    QstaffCanvas = UICanvas( ui.AddCanvas(), 3)
+
+    MindText = UIText( ui.AddText(), 1,4)
+    MindButton = UIButton( ui.AddButton(), 1,4,Mind)
+    MindCanvas = UICanvas( ui.AddCanvas(), 4)
+
+    HammerText = UIText( ui.AddText(), 1,5)
+    HammerButton = UIButton( ui.AddButton(), 1,5,Hamm)
+    HammerCanvas = UICanvas( ui.AddCanvas(), 5)
+
+    BardText = UIText( ui.AddText(), 1,6)
+    BardButton = UIButton( ui.AddButton(), 1,6,Bard)
+    BardCanvas = UICanvas( ui.AddCanvas(), 6)
+
+    BladeText = UIText( ui.AddText(), 1,7)
+    BladeButton = UIButton( ui.AddButton(), 1,7,Blade)
+    BladeCanvas = UICanvas( ui.AddCanvas(), 7)
+
+    MaskText = UIText( ui.AddText(), 1,8)
+    MaskButton = UIButton( ui.AddButton(), 1,8,Mask)
+    MaskCanvas = UICanvas( ui.AddCanvas(), 8)
+
+  :?SelectedTab = 1
+    ResetText = UIText( ui.AddText(), 0,1)
+    ResetCanvas = UICanvas( ui.AddCanvas(), 1)
+    ResetButton = UIButton( ui.AddButton(), 1,1,Reset)
+
+    PlagueText = UIText( ui.AddText(), 0,2)
+    PlagueCanvas = UICanvas( ui.AddCanvas(), 2)
+    PlagueButton = UIButton( ui.AddButton(), 1,2,Plague)
+
+    CalamityText = UIText( ui.AddText(), 0,3)
+    CalamityCanvas = UICanvas( ui.AddCanvas(), 3)
+    CalamityButton = UIButton( ui.AddButton(), 1,3,Calamity)
+
+    ExploText = UIText( ui.AddText(), 0,4)
+    ExploCanvas = UICanvas( ui.AddCanvas(), 4)
+    ExploButton = UIButton( ui.AddButton(), 1,4,Explode)
+
+    FrostText = UIText( ui.AddText(), 0,5)
+    FrostCanvas = UICanvas( ui.AddCanvas(), 5)
+    FrostButton = UIButton( ui.AddButton(), 1,5,Frost)
+
+    GravityText = UIText( ui.AddText(), 0,6)
+    GravityCanvas = UICanvas( ui.AddCanvas(), 6)
+    GravityButton = UIButton( ui.AddButton(), 1,6,Gravity)
+  :
+    PreventText = UIText( ui.AddText(), 0,1)
+    PreventCanvas = UICanvas( ui.AddCanvas(), 1)
+    PreventButton = UIButton( ui.AddButton(), 1,1,Prevention)
+
+    BerserkText = UIText( ui.AddText(), 0,2)
+    BerserkCanvas = UICanvas( ui.AddCanvas(), 2)
+    BerserkButton = UIButton( ui.AddButton(), 1,2,Berserker)
+
+    GraspingText = UIText( ui.AddText(), 0,3)
+    GraspingCanvas = UICanvas( ui.AddCanvas(), 3)
+    GraspingButton = UIButton( ui.AddButton(), 1,3,Grasping)
+
+    InfernalText = UIText( ui.AddText(), 0,4)
+    InfernalCanvas = UICanvas( ui.AddCanvas(), 4)
+    InfernalButton = UIButton( ui.AddButton(), 1,4,Infernal)
+
+    EternityText = UIText( ui.AddText(), 0,5)
+    EternityCanvas = UICanvas( ui.AddCanvas(), 5)
+    EternityButton = UIButton( ui.AddButton(), 1,5,Eternity)
+
+    AcrobatText = UIText( ui.AddText(), 0,6)
+    AcrobatCanvas = UICanvas( ui.AddCanvas(), 6)
+    AcrobatButton = UIButton( ui.AddButton(), 1,6,Acrobatic)
+
+  MainTabButton = UIButton( ui.AddButton() , -2 , 1,MainTab)
+  MainTabButton.w = 3
+  MainTabButton.h = 3
+  MainTabButton.style = DeselectTab
+
+  WandTabButton = UIButton( ui.AddButton() , -2 , 4,WandTab)
+  WandTabButton.w = 3
+  WandTabButton.h = 3
+  WandTabButton.text = "w"
+  WandTabButton.style = DeselectTab
+
+  StaffTabButton = UIButton( ui.AddButton() , -2 , 7,StaffTab)
+  StaffTabButton.w = 3
+  StaffTabButton.h = 3
+  StaffTabButton.text = "s"
+  StaffTabButton.style = DeselectTab
+
+  TabList = [MainTabButton, WandTabButton, StaffTabButton]
+  TabList[SelectedTab].bcolor = #FFFFFF
+  TabList[SelectedTab].style = SelectTab
+
+  CindSumButton = UIButton( ui.AddButton(), 1,9,SummonCinder)
+  CindSumButton.w = 3
+  CindSumButton.text = "φ"
+  CindSumButton.style = 1
+  VoidSumButton = UIButton( ui.AddButton(), 11,9,SummonWeaver)
+  VoidSumButton.w = 3
+  VoidSumButton.text = "*"
+  VoidSumButton.style = 1
+
+  ?sys.isPC & false
+    MinimiseButton = UIButton( ui.AddButton(), -1,4,MinimiseRight)
+    MinimiseButton.text = "[»"
+    MinimiseButton.w = 2
+    MinimiseButton.h = 3
+  :
+    MinimiseButton = UIButton( ui.AddButton(), 6,10,MinimiseUp)
+    MinimiseButton.text = "[▲]"
+    MinimiseButton.w = 3
+    MinimiseButton.h = 1
+
+func PercentCD(CD_Current,Max_CD)
+  return math.Min( (100* (Max_CD - CD_Current) ) / Max_CD,100)
+
+var QstaffMaxDuration = 0
+func CheckQstaffMaxDuration()
+  ?QstaffMaxDuration = 0
+    var QsCD = GetCD("quarterstaff")
+    ?QsCD > 0
+      QstaffMaxDuration = QsCD + 1
+func ReturnQstaffMaxDuration()
+  ?QstaffMaxDuration
+    return QstaffMaxDuration
+  return 195
+
+var MaskMaxDuration = 0
+func CheckMaskMaxDuration()
+  ?MaskMaxDuration = 0
+    var MaskCD = GetCD("mask")
+    ?MaskCD > 0
+      MaskMaxDuration = MaskCD + 1
+func ReturnMaskMaxDuration()
+  ?MaskMaxDuration
+    return MaskMaxDuration
+  return 2400
+
+
+func Update_CD_Bar(CA_Text, CA_Canvas, CD_Current, Max_CD, String)
+  var Percent = PercentCD(CD_Current, Max_CD)
+  ?Percent < 10
+    var Space = "   "
+  :?Percent < 100
+    var Space = "  "
+  :
+    var Space = " "
+
+  CA_Text.text = "#" + Percent + "%" + Space + String
+
+  var R = math.RoundToInt((100 - Percent) * 2.56)
+  var G = math.RoundToInt(Percent * 1.28)
+  CA_Canvas.SetBG(color.FromRGB(R,G,0))
+
+
+func WispSet()
+  WispText = UIText( ui.AddText(), 1,9)
+  WispCanvas = UICanvas( ui.AddCanvas(), 9)
+  WispButton = UIButton( ui.AddButton(), 1,9,WispActivate)
+  CA_BasePanel.h++
+  CindSumButton.y++
+  VoidSumButton.y++
+  WispInit = false
+
+func WispReset()
+  WispText.Recycle()
+  WispCanvas.Recycle()
+  WispButton.Recycle()
+  CA_BasePanel.h = 10
+  CindSumButton.y = 9
+  VoidSumButton.y = 9
+  WispInit = true
+
+func Updates()
+  ?SelectedTab = 0
+    Update_CD_Bar(BashText, BashCanvas, GetCD("bash"), 270, "Bash")
+    Update_CD_Bar(DashText, DashCanvas, GetCD("dash"), 45, "Dash")
+    Update_CD_Bar(QstaffText, QstaffCanvas, GetCD("quarterstaff"), ReturnQstaffMaxDuration(), "Qstaff")
+    Update_CD_Bar(MindText, MindCanvas, GetCD("mind"), 360, "Mind")
+    Update_CD_Bar(HammerText, HammerCanvas, GetCD("heavy_hammer"), 660, "Hammer")
+    Update_CD_Bar(BardText, BardCanvas, GetCD("bardiche"), 900, "Bard")
+    Update_CD_Bar(BladeText, BladeCanvas, GetCD("blade"), 2400, "Blade")
+    Update_CD_Bar(MaskText, MaskCanvas, GetCD("mask"), ReturnMaskMaxDuration(), "Mask")
+  :?SelectedTab = 1
+    Update_CD_Bar(ResetText, ResetCanvas, GetCD("wand_vigor"), 900, "❤ Reset")
+    Update_CD_Bar(PlagueText, PlagueCanvas, GetCD("wand_poison"), 900, "∞ Plague")
+    Update_CD_Bar(CalamityText, CalamityCanvas, GetCD("wand_aether"), 900, "* Calmty")
+    Update_CD_Bar(ExploText, ExploCanvas, GetCD("wand_fire"), 900, "φ Explod")
+    Update_CD_Bar(FrostText, FrostCanvas, GetCD("wand_ice"), 900, "❄ Frost")
+    Update_CD_Bar(GravityText, GravityCanvas, GetCD("wand_stone"), 900, "o Gravty")
+  :
+    Update_CD_Bar(PreventText, PreventCanvas, GetCD("staff_vigor"), 900, "❤ Prevnt") //variable cd
+    Update_CD_Bar(BerserkText, BerserkCanvas, GetCD("staff_poison"), 900, "∞ Bersrk")
+    Update_CD_Bar(GraspingText, GraspingCanvas, GetCD("staff_aether"), 900, "* Grasp")
+    Update_CD_Bar(InfernalText, InfernalCanvas, GetCD("staff_fire"), 900, "φ Infern")
+    Update_CD_Bar(EternityText, EternityCanvas, GetCD("staff_ice"), 900, "❄ Etrnty") //variable cd
+    Update_CD_Bar(AcrobatText, AcrobatCanvas, GetCD("staff_stone"), 900, "o Acrbat")  //variable cd
+
+
+  ?summon.GetName() = "Cinderwisp"
+    ?WispInit
+      WispSet()
+    Update_CD_Bar(WispText, WispCanvas, GetCD("cinderwisp"), 2700, "Cinder")
+  :?summon.GetName() = "Voidweaver"
+    ?WispInit
+      WispSet()
+    Update_CD_Bar(WispText, WispCanvas, GetCD("voidweaver"), 2700, "Void")
+  :?!WispInit
+    WispReset()
+
+
+var SummonTarget = ""
+var SavedTime = totaltime
+
+func ResetProtocol()
+  ?ToggleEnabled
+    InterruptProtocol = EnabledProtocol
+  :
+    InterruptProtocol = DisabledProtocol
+  ActivationTime = -1
+
+func SuperAttackRightProtocol()
+  ?item.right.state ! 2 & ActivationTime > 0
+    Reequip()
+    ResetProtocol()
+    return true
+  ActivationTime++
+  return false
+  
+func SuperAttackLeftProtocol()
+  ?item.left.state ! 2 & ActivationTime > 0
+    Reequip()
+    ResetProtocol()
+    return true
+  ActivationTime++
+  return false
+
+func OneTickProtocol()
+  ?ActivationTime > 0
+    Reequip()
+    ResetProtocol()
+    return true
+  ActivationTime++
+  return false
+
+func BladeProtocol()
+  BladeDelay --
+  ?BladeDelay = 0
+    equip blade
+    activate R
+    screen.ResetOffset()
+    SetReequips()
+    InterruptProtocol = OneTickProtocol
+    ActivationTime = 1
+
+func EnabledProtocol()
+  return true
+func DisabledProtocol()
+  return false
+
+var ToggleEnabled = true
+var InterruptProtocol = EnabledProtocol
+
+?loc.begin
+  InterruptProtocol = EnabledProtocol
+
+func CheckMinimised()
+  ?ShiftX ! CA_BasePanel.x
+    ?ShiftX < CA_BasePanel.x
+      CA_BasePanel.x --
+    :
+      CA_BasePanel.x ++
+  :?ShiftY ! CA_BasePanel.y
+    ?ShiftY < CA_BasePanel.y
+      CA_BasePanel.y --
+    :
+      CA_BasePanel.y ++
+
+func Display(InitTime)
+  ?DisplayOn
+    ?CAinit | totaltime=InitTime
+      CA_StartUp()
+    CheckMinimised()
+    CheckQstaffMaxDuration()
+    CheckMaskMaxDuration()
+    ?time % UpdateRate = 0 & !MinimiseToggle
+      Updates()
+
+func Run()
+  Display(1)
+  ?InterruptProtocol()
+    return true
+  return false
+
+func RunNoDisplay()
+  ?InterruptProtocol()
+    return true
+  return false
+
+
+
+////This segment will only get run if the player imports the script directly without assigning it a variable.
+
+?totaltime > 1
+  Display(2)
+  InterruptProtocol()

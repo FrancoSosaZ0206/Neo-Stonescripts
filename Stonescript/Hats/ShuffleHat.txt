@@ -1,0 +1,117 @@
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+       == Shuffle Hat ==
+      by Incoherent Toast
+           v 1.1
+
+import Hats/ShuffleHat
+
+Rerolls your hat to one of the many
+excellent hats previously added by
+the community.
+
+You can change the reroll method to 
+any of these functions:
+- FrameReroll()
+- LoopReroll()
+- ScreenReroll()
+To do that, use this method:
+var a
+a = import Hats/ShuffleHat
+a.RerollConditions = a.ScreenReroll
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+func DiscoVisor()
+  import Hats/DiscoVisor
+
+func CatHat()
+  import Hats/CatHat
+
+func ChefHat()
+  import Hats/ChefHat
+
+func Headphones()
+  import Hats/Headphones
+
+func Helmet()
+  import Hats/Helmet
+
+func MushroomHat()
+  import Hats/MushroomHat
+
+func PirateHat()
+  import Hats/PirateHat
+
+func SantaHat()
+  import Hats/SantaHat
+
+func Skully()
+  import Hats/Skully
+
+func ConfettiHead()
+  import Cosmetics/ConfettiHead
+
+func StarCloak()
+  import Hats/StarCloak
+
+func WavyScarf()
+  import Cosmetics/WavyScarf
+
+func SleepyStonehead()
+  import Cosmetics/SleepyStonehead
+
+func SillyGoose()
+  import Cosmetics/SillyGoose
+
+func Reroll()
+  var a
+  for i = 0..2
+    a = rng % FuncList.Count()
+    ?a ! Rand
+      break
+  Rand = a
+  enable player
+  CurrentImport = FuncList[Rand]
+
+var FuncList = [DiscoVisor,CatHat,ChefHat,Headphones,Helmet,MushroomHat,PirateHat,SantaHat,Skully,ConfettiHead,StarCloak,WavyScarf,SleepyStonehead,SillyGoose]
+
+var frames = 5
+var Rand
+var CurrentImport = null
+var LastScreeni
+var HeadPhoneImport = import Hats/Headphones
+
+func FrameReroll()
+  ?time % frames = 0
+    return true
+  return false
+
+func LoopReroll()
+  ?totaltime = 1
+    return true
+  return false
+
+func ScreenReroll()
+  ?LastScreeni ! screen.i
+    LastScreeni = screen.i
+    return true
+  LastScreeni = screen.i
+  return false
+
+var RerollConditions = FrameReroll
+
+func Run()
+  ?totaltime = 1
+    CatHat()
+  ?RerollConditions()
+    Reroll()
+  ?CurrentImport
+    CurrentImport()
+
+Run()
+
+
+
+
+
+

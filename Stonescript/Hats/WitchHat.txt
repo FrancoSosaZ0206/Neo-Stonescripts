@@ -1,0 +1,131 @@
+﻿//*******************************
+// WITCH HAT
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v4.1.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Gives your player a magical
+// witch hat! Cut down your foes
+// in style, knowing you're the
+// coolest witch around!
+//
+// Big Head:
+// 
+//  ,'`·_
+//   /_.──-.
+//  ,´ ,--. ;
+// :  ( '')'
+//  `·─`·´
+//     /|\
+//     / \
+//
+//
+// Small Head:
+//
+//      λ
+//     ¯Ö¯
+//     /|\
+//     / \
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that's it! 
+// If you want to customize
+// your colors, replace 
+// bigtopcolors & bigbotcolors 
+// below for the big head hat
+// and smlcolors for the small
+// head hat with your colors 
+// of choice. The colors slowly
+// cycle between the dark and 
+// light colors as magic courses
+// through the hat!
+//
+// Enjoy!
+//
+//
+//*******************************
+
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+var bigtopcolor1 = #301934 //Dark
+var bigtopcolor2 = #A865B5 //Light
+var bigbotcolor1 = #4B0082 //Dark
+var bigbotcolor2 = #A865B5 //Light
+var smlcolor1 = #008800 //Dark
+var smlcolor2 = #green  //Light
+
+//*******************************
+// Drawing Code 
+//*******************************
+
+var bighat1 = ascii
+##,'`·_
+##/_.──-.
+#,´ ,--. ;
+:  #####'
+#`·─
+asciiend
+
+var bighat2 = ascii
+###_.──-.
+#,´ ,--. ;
+:  #####'
+#`·─
+asciiend
+
+var smlhat1 = ascii
+#λ
+¯Ö¯
+asciiend
+
+var smlhat2 = ascii
+#Ö
+asciiend
+
+var tempcolor1
+var tempcolor2
+var t = 0
+
+?bighead
+  t = math.sin(time*0.05) / 2 + 0.5
+  tempcolor1 = color.Lerp(
+           ^bigtopcolor1,bigtopcolor2,t)
+  t = math.sin((time+20)*0.05) / 2 + 0.5
+  tempcolor2 = color.Lerp(
+           ^bigbotcolor1,bigbotcolor2,t)
+
+  >h-5,-3,@tempcolor1@,@bighat1@
+  >h-5,-2,@tempcolor2@,@bighat2@
+:
+  t = math.sin(time*0.05) / 2 + 0.5
+  tempcolor1 = color.Lerp(
+           ^smlcolor1,smlcolor2,t)
+  >h-1,0,@tempcolor1@,@smlhat1@
+  >h-1,1,@tempcolor1@,@smlhat2@
+//
+
+//*******************************
+// End of File
+//*******************************

@@ -1,0 +1,252 @@
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+FrogInvasion v1.5
+By: Incoherent Toast
+Gilbert's worst nightmare has come to fruition! Frogs are everywhere!
+
+To use this type this:
+----------------------------------------------
+import Cosmetics/FrogInvasion
+----------------------------------------------
+
+
+If you want to change the number of frogs do this:
+----------------------------------------------
+import Cosmetics/FrogInvasion
+.NumberOfFrogs = 20
+----------------------------------------------
+
+
+If you want to put chemicals in the water do this:
+----------------------------------------------
+import Cosmetics/FrogInvasion
+.TurnTheFrogsGay = true
+----------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+var NumberOfFrogs = 10
+var TurnTheFrogsGay = false
+
+
+var FrogJump = ascii
+#
+#
+#####,--
+###(! .-)
+###'·-((
+%%
+#
+#####,--
+####/ .-)
+##_(;-//
+###`
+%%
+#####.=-
+####/ .-)
+##_(/-)´`
+#-´‾
+%%
+#####.O-
+###,´ .-)
+#_(/--‾´‾
+-´‾
+%%
+#
+#####.Oo
+-´-`´ .-)
+####`-‾´‾
+%%
+#
+#
+##_##.Oo
+#/-`´ .-)
+###`--\´\
+%%
+#
+#
+#####,Oo
+##(\/ .-)
+##´ ·-\´\
+asciiend
+
+var Location
+var LocYSet = CheckLocYOffsets()
+var LocXSet = CheckLocXOffsets()
+
+var FrogXPosition
+var FrogYPosition
+var FrogXDestination
+var FrogYDestination
+var FrogXOrign = NormRNG(LocXSet[0], LocXSet[1])
+var FrogYOrign = NormRNG(LocYSet[0], LocYSet[1])
+var ResetPosition
+var Frog
+var FrogList = []
+var Init = true
+var InitTime = totaltime
+var SleepTime = 0
+
+var Colours = [
+^ "#FF7F7F","#FF3F3F","#FF0000","#BF0000","#7F0000"
+^,"#FEBE7F","#FD9E3F","#FD7E00","#BE5E00","#7E3F00"
+^,"#FED97F","#FEC63F","#FEB300","#BE8600","#7F5900"
+^,"#FEED7F","#FDE43F","#FDDB00","#BEA400","#7E6D00"
+^,"#FFFF7F","#FFFF3F","#FFFF00","#BFBF00","#7F7F00"
+^,"#EDFE7F","#E4FD3F","#DBFD00","#A4BE00","#6D7E00"
+^,"#D9FE7F","#C6FE3F","#B3FE00","#86BE00","#597F00"
+^,"#BEFE7F","#9EFD3F","#7EFD00","#5EBE00","#3F7E00"
+^,"#7FFF7F","#3FFF3F","#00FF00","#00BF00","#007F00"
+^,"#7FFEBE","#3FFD9E","#00FD7E","#00BE5E","#007E3F"
+^,"#7FFED9","#3FFEC6","#00FEB3","#00BE86","#007F59"
+^,"#7FFEED","#3FFDE4","#00FDDB","#00BEA4","#007E6D"
+^,"#7FFFFF","#3FFFFF","#00FFFF","#00BFBF","#007F7F"
+^,"#7FEDFE","#3FE4FD","#00DBFD","#00A4BE","#006D7E"
+^,"#7FD9FE","#3FC6FE","#00B3FE","#0086BE","#00597F"
+^,"#7FBEFE","#3F9EFD","#007EFD","#005EBE","#003F7E"
+^,"#7F7FFF","#3F3FFF","#0000FF","#0000BF","#00007F"
+^,"#BE7FFE","#9E3FFD","#7E00FD","#5E00BE","#3F007E"
+^,"#D97FFE","#C63FFE","#B300FE","#8600BE","#59007F"
+^,"#ED7FFE","#E43FFD","#DB00FD","#A400BE","#6D007E"
+^,"#FF7FFF","#FF3FFF","#FF00FF","#BF00BF","#7F007F"
+^,"#FE7FED","#FD3FE4","#FD00DB","#BE00A4","#7E006D"
+^,"#FE7FD9","#FE3FC6","#FE00B3","#BE0086","#7F0059"
+^,"#FE7FBE","#FD3F9E","#FD007E","#BE005E","#7E003F"]
+
+func StartUp()
+  Init = false
+  Frog = ui.AddAnim(FrogJump)
+  Frog.duration = 20
+  Frog.loop = false
+  Frog.gamePause = true
+  Frog.anchor = top_left
+  Frog.dock = top_left
+  FrogXPosition = FrogXOrign
+  FrogYPosition = FrogYOrign
+  Frog.y = FrogYPosition
+  ResetPosition = true
+  ?TurnTheFrogsGay
+    Frog.color = Colours[NormRNG(0, 119)]
+    //Frog.color = Colours2[NormRNG(0, 167)]
+
+func HeavyBiasRNG(HomePos, CurrentPos, Min, Max)
+  var Range = Max - Min
+  var Rand = (rngf * rngf * rngf)
+  ?CurrentPos > HomePos
+    return math.FloorToInt((1 - Rand )* Range) + Min
+  :
+    return math.FloorToInt(Rand * Range) + Min
+
+func BiasRNG(HomePos, CurrentPos, Min, Max)
+  var Range = Max - Min
+  var Rand = (rngf * rngf)
+  ?CurrentPos > HomePos
+    return math.FloorToInt((1 - Rand )* Range) + Min
+  :
+    return math.FloorToInt(Rand * Range) + Min
+
+func NormRNG(Min, Max)
+  var Range = Max - Min
+  return math.FloorToInt(Range * rngf) + Min
+
+func Run(that)
+  TurnTheFrogsGay = that.TurnTheFrogsGay
+  ?Init
+    StartUp()
+
+  ?FrogXPosition < pos.x - 70
+    FrogXPosition += NormRNG(150, 250)
+    FrogXOrign = FrogXPosition
+    FrogYOrign = NormRNG(LocYSet[0], LocYSet[1])
+
+  ?Frog.playing
+    SleepTime = 0
+    ?FrogYDestination ! 0
+      ?time % (20/FrogYDestination) = 0
+        ?FrogYDestination > 0 
+          FrogYPosition--
+        :
+          FrogYPosition++
+        Frog.y = FrogYPosition
+    ?FrogXDestination ! 0
+      ?time % (20/FrogXDestination) = 0
+        ?FrogXDestination > 0 
+          FrogXPosition--
+        :
+          FrogXPosition++
+  :?rng > 9525
+    FrogYDestination = HeavyBiasRNG(FrogYOrign,FrogYPosition,-4,4)
+
+    ?math.Abs(FrogXPosition - FrogXOrign) < 10
+      FrogXDestination = NormRNG(-8,8)
+    :?math.Abs(FrogXPosition - FrogXOrign) < 30
+      FrogXDestination = BiasRNG(FrogYOrign,FrogYPosition,-8,8)
+    :
+      FrogXDestination = HeavyBiasRNG(FrogYOrign,FrogYPosition,-8,8)
+
+    ?FrogXDestination > 0
+     ?Frog.flipX = false
+        FrogXPosition += 9
+      Frog.flipX = true
+    :?FrogXDestination < 0
+      ?Frog.flipX = true
+        FrogXPosition -= 9
+      Frog.flipX = false
+    Frog.Play()
+    ?FrogXPosition < pos.x + 70
+      play haunted_gate_point_lost 50
+  :
+    SleepTime++
+    ?SleepTime > 60
+      Frog.frame = 0
+  Frog.x = screen.FromWorldX(FrogXPosition)
+
+func CheckLocXOffsets()
+  ?Location = "uulaa_shop" 
+    return [0,40]
+  :?Location = "waterfall"
+    return [-40,-5]
+  :
+    return [0,20*NumberOfFrogs]
+
+func CheckLocYOffsets()
+  Location = loc
+  ?Location = "waterfall"
+    return [0,5]
+  :?Location = "uulaa_shop"
+    return [5, 15]
+  :?Location = "deadwood_valley"
+    return [8,12]
+  :?Location = "temple"
+    return [18,21]
+  :?Location = "undead_crypt"
+    return [14,21]
+  :?Location = "fungus_forest"
+    return [11,19]
+  :?Location = "caustic_caves"
+    return [13,17]
+  :?Location = "icy_ridge"
+    return [16,21]
+  :?Location = "bronze_mine"
+    return [7,11]
+  :?Location = "rocky_plateau"
+    return [11,16]
+  :
+    return [5, 15]
+
+
+func RunAll()
+  ?totaltime = 1
+    InitTime = 1
+    FrogList.Clear()
+  ?totaltime >= InitTime+1
+    ?FrogList.Count() < NumberOfFrogs
+      for a = FrogList.Count()..NumberOfFrogs - 1
+        var TempNew = new Cosmetics/FrogInvasion
+        FrogList.Add(TempNew)
+    :?FrogList.Count() > NumberOfFrogs
+      for a = FrogList.Count()..NumberOfFrogs + 1
+        FrogList[0].BasePanel.Recycle()
+        FrogList.RemoveAt(0)
+  for a : FrogList
+    a.Run(this)
+RunAll()
+

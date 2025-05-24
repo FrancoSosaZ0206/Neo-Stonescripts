@@ -1,0 +1,800 @@
+//Frog Bog Carnival Game
+//by michael.g.g.
+//ver 0.6
+
+//A minigame where you launch a frog in the air and time it to land on the rotating lily pads
+//Instructions: Import this script's file path in the Mindstone and go to the Deadwood Waterfall
+//You have three turns to launch a frog onto a lilypad. One will be on the seesaw platform with two more waiting on the right side.
+//Click the target on the left of the seesaw to smack you hammer down on it and lauch the frog to the right.
+//You'll have to time it right for the lily pad to move the the spot that the frog will land.
+//land all three frogs to win.
+
+
+//Set Variables
+var LilyFlower
+var LilyPad1
+var LilyPad2
+var LilyPad3
+var River
+var Target
+var Seesaw
+var Frog1
+var Frog2
+var Frog3
+var Frog1eyes
+var Frog2eyes
+var Frog3eyes
+var flightcount
+var count
+var dir
+var dircount
+var button
+var turn
+var landflag
+var landflag2
+var landflag3
+var frogjump1
+var frogjump2
+var message
+
+//define the funtion to when the target is clicked on as a button.
+//flightcount will determine the postion of the frog when airborn
+func OnPressed()
+   flightcount++
+
+//makes sure the script logic will only run at waterfall. 
+?loc = waterfall & !loc.isQuest   
+//changes music
+      ambient.Stop()
+      music.Play(shop)   
+//initialize variables at the first frame of the location
+  ?loc.begin
+      count = 0
+      dircount = 0
+      flightcount = 0
+      turn = 1
+      landflag = 0
+      landflag2 = 0
+      landflag3 = 0
+      message = 0
+//create location banner
+      ui.ShowBanner(te.xt("Frog Bog Game"))
+
+//draw objects
+  River = ui.AddAnim(ascii
+                                                                                                    
+====================================================================================================
+|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|__|
+ ~-  ~  -                     ~-  ~             -  ~       ~  -     ~  -       ~        ~  -~
+   ~  ~-              ~     ~-         ~-   ~         ~        ~           ~   -      ~       ~    - 
+-             - ~  --   -               - ~      ~  --   -        - ~      --     - ~  -            
+  -~-  ~                 --  ~         ~                       ~      ~            -                
+             -       -         -                   ~-     ~        -         -            ~         
+~ -   ~       -   ~   ~ -        -         ~        ~     -   ~       -   ~           ~        ~    
+                 ~  - ~                         -                        -                          
+    ~   -     ~   -     ~   -                ~   -     ~   -     ~     -     ~   -                   
+~  -              -                 -                   -          -     -                            
+   ~     -   ~     -   ~     -   ~     -         -   ~     -                 - -    -   ~     -      
+  ~     -                            -         -         -   ~     -   ~     -         -        -    
+ -    ~    -    ~    -      -                                 -         -    ~    -                  
+ -           ~ -        -      -             ~ -   -         ~                 -                     
+      -        ~    ~               ~  -                             ~  -     -        -             
+~  -  ~      -         -        -           -     ~  -        -      -         -     ~               
+   - ~                           --          --          - ~  -                                       
+  ~     -   ~     -   ~     -   ~     -   ~     -   -                 ~     -   ~     -             
+~ -                -                   -          -         -      ~   -             ~   -     ~   
+ -   ~        ~         ~ -   ~          ~         ~  - ~       ~           ~             -               
+   ~   -     ~   -        -     ~              -              -     ~   -     ~         ~   -  
+  -         -           -           -      -           -      -          -         -              -
+  ~     -          ~    ~     -                  -   ~     -        -              -                       
+ ~     -   ~     -   ~               -   ~         ~     -         -   ~     -   ~     -   ~     -  
+-    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    
+
+asciiend)
+        River.x = 0
+	River.y = 0
+	River.color = #888888
+
+  button = ui.AddButton()
+  button.y = 0
+  button.x = -40
+  button.text = " "
+  button.SetPressed(OnPressed)
+  button.sound = hammer_cast
+
+	Seesaw = ui.AddAnim(ascii
+##
+########--.__#####____
+########     '---/    \
+########   __.---\____/
+########--'_/_\_
+
+asciiend)
+	Seesaw.color = #A54A10 //#CCCCCC
+	Seesaw.x = -27
+	Seesaw.y = 0
+
+	Target = ui.AddAnim(ascii
+  _____ 
+ / ___ \ 
+/ /   \ \
+\ \___/ /
+ \_____/
+
+asciiend)
+	Target.color = #A54A10
+	Target.x = -35
+	Target.y = 0
+
+	LilyFlower = ui.AddAnim(ascii
+####
+#/\##/\##/\##
+/  \/  \/  \
+\\/\ /\ /\//
+#\/|.....Â/
+%%
+#
+asciiend)
+	LilyFlower.color = #white
+	LilyFlower.x = 20
+	LilyFlower.y = 0
+
+	LilyPad1 = ui.AddAnim(ascii
+####_
+#,Â´   `.
+/    1  \
+\       /
+#\/|..-Â´
+%%
+#
+asciiend)
+	LilyPad1.color = #618a3d
+
+
+	LilyPad2 = ui.AddAnim(ascii
+####_
+#,Â´   `.
+/    2  \
+\       /
+#\/|..-Â´
+%%
+#
+asciiend)
+	LilyPad2.color = #618a3d
+
+
+	LilyPad3 = ui.AddAnim(ascii
+####_
+#,Â´   `.
+/   3   \
+\       /
+#\/|..-Â´
+%%
+#
+asciiend)
+	LilyPad3.color = #618a3d
+
+
+//Lilypad rotation instructions. incriments x value a 2 per 1 y value. 
+//does the inverse when a half rotation is complete to do a full rotation. 
+//dir and dircount determine the when to inverse the values 
+  ?count > 0 & count <= 5
+    dir = (dircount % 2)
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x
+      LilyPad1.y = -7
+      LilyPad2.x = LilyFlower.x - 8
+      LilyPad2.y = 4
+      LilyPad3.x = LilyFlower.x + 8
+      LilyPad3.y = 4
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x
+      LilyPad1.y = 7
+      LilyPad2.x = LilyFlower.x + 8
+      LilyPad2.y = -4
+      LilyPad3.x = LilyFlower.x - 8
+      LilyPad3.y = -4
+
+  ?count > 5 & count <= 10
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +2
+      LilyPad1.y = -7
+      LilyPad2.x = LilyFlower.x - 10
+      LilyPad2.y = 3
+      LilyPad3.x = LilyFlower.x +6
+      LilyPad3.y = 5
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x -2
+      LilyPad1.y = 7
+      LilyPad2.x = LilyFlower.x +10
+      LilyPad2.y = -3
+      LilyPad3.x = LilyFlower.x - 6
+      LilyPad3.y = -5
+
+  ?count > 10 & count <= 15
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x + 4
+      LilyPad1.y = -6
+      LilyPad2.x = LilyFlower.x -12
+      LilyPad2.y = 2
+      LilyPad3.x = LilyFlower.x + 4
+      LilyPad3.y = 6
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 4
+      LilyPad1.y = 6
+      LilyPad2.x = LilyFlower.x + 12
+      LilyPad2.y = -2
+      LilyPad3.x = LilyFlower.x - 4
+      LilyPad3.y = -6
+
+  ?count > 15 & count <= 20
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x + 6
+      LilyPad1.y = -5
+      LilyPad2.x = LilyFlower.x - 13
+      LilyPad2.y = 1
+      LilyPad3.x = LilyFlower.x +2
+      LilyPad3.y = 7
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 6
+      LilyPad1.y = 5
+      LilyPad2.x = LilyFlower.x +13
+      LilyPad2.y = -1
+      LilyPad3.x = LilyFlower.x - 2
+      LilyPad3.y = -7
+
+  ?count > 20 & count <= 25
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x + 8
+      LilyPad1.y = -4
+      LilyPad2.x = LilyFlower.x - 14
+      LilyPad2.y = 0
+      LilyPad3.x = LilyFlower.x 
+      LilyPad3.y = 7
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 8
+      LilyPad1.y = 4
+      LilyPad2.x = LilyFlower.x + 14
+      LilyPad2.y = 0
+      LilyPad3.x = LilyFlower.x 
+      LilyPad3.y = -7
+
+  ?count > 25 & count <= 30
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +10
+      LilyPad1.y = -3
+      LilyPad2.x = LilyFlower.x - 13
+      LilyPad2.y = -1
+      //LilyPad3.x = LilyFlower.x +14
+      //LilyPad3.y = 0
+      LilyPad3.x = LilyFlower.x -2
+      LilyPad3.y = 7
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 10
+      LilyPad1.y = 3
+      LilyPad2.x = LilyFlower.x + 13
+      LilyPad2.y = 1
+      LilyPad3.x = LilyFlower.x + 2
+      LilyPad3.y = -7
+
+  ?count > 30 & count <= 35
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +12
+      LilyPad1.y = -2
+      LilyPad2.x = LilyFlower.x - 12
+      LilyPad2.y = -2
+      LilyPad3.x = LilyFlower.x - 4
+      LilyPad3.y = 6
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 12
+      LilyPad1.y = 2
+      LilyPad2.x = LilyFlower.x + 12
+      LilyPad2.y = 2
+      LilyPad3.x = LilyFlower.x + 4
+      LilyPad3.y = -6
+
+  ?count > 35 & count <= 40
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +13
+      LilyPad1.y = -1
+      LilyPad2.x = LilyFlower.x - 10
+      LilyPad2.y = -3
+      LilyPad3.x = LilyFlower.x - 6
+      LilyPad3.y = 5
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 13
+      LilyPad1.y = 1
+      LilyPad2.x = LilyFlower.x + 10
+      LilyPad2.y = 3
+      LilyPad3.x = LilyFlower.x + 6
+      LilyPad3.y = -5
+
+  ?count > 40 & count <= 45
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +14
+      LilyPad1.y = 0
+      LilyPad2.x = LilyFlower.x - 8
+      LilyPad2.y = -4
+      LilyPad3.x = LilyFlower.x - 8
+      LilyPad3.y = 4
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 14
+      LilyPad1.y = 0
+      LilyPad2.x = LilyFlower.x + 8
+      LilyPad2.y = 4
+      LilyPad3.x = LilyFlower.x + 8
+      LilyPad3.y = -4
+
+  ?count > 45 & count <= 50
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +13
+      LilyPad1.y = 1
+      LilyPad2.x = LilyFlower.x - 6
+      LilyPad2.y = -5
+      LilyPad3.x = LilyFlower.x - 10
+      LilyPad3.y = 3
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 13
+      LilyPad1.y = -1
+      LilyPad2.x = LilyFlower.x + 6
+      LilyPad2.y = 5
+      LilyPad3.x = LilyFlower.x + 10
+      LilyPad3.y = -3
+
+  ?count > 50 & count <= 55
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +12
+      LilyPad1.y = 2
+      LilyPad2.x = LilyFlower.x - 4
+      LilyPad2.y = -6
+      LilyPad3.x = LilyFlower.x - 12
+      LilyPad3.y = 2
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 12
+      LilyPad1.y = -2
+      LilyPad2.x = LilyFlower.x + 4
+      LilyPad2.y = 6
+      LilyPad3.x = LilyFlower.x + 12
+      LilyPad3.y = -2
+
+  ?count > 55 & count <= 60
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +10
+      LilyPad1.y = 3
+      LilyPad2.x = LilyFlower.x - 2
+      LilyPad2.y = -7
+      LilyPad3.x = LilyFlower.x - 13
+      LilyPad3.y = 1
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 10
+      LilyPad1.y = -3
+      LilyPad2.x = LilyFlower.x + 2
+      LilyPad2.y = 7
+      LilyPad3.x = LilyFlower.x + 13
+      LilyPad3.y = -1
+
+  ?count > 60 & count <= 65
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +8
+      LilyPad1.y = 4
+      LilyPad2.x = LilyFlower.x 
+      LilyPad2.y = -8
+      LilyPad3.x = LilyFlower.x - 13
+      LilyPad3.y = 0
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 8
+      LilyPad1.y = -4
+      LilyPad2.x = LilyFlower.x 
+      LilyPad2.y = 8
+      LilyPad3.x = LilyFlower.x + 13
+      LilyPad3.y = 0
+
+  ?count > 65 & count <= 70
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +6
+      LilyPad1.y = 5
+      LilyPad2.x = LilyFlower.x + 2
+      LilyPad2.y = -7
+      LilyPad3.x = LilyFlower.x - 13
+      LilyPad3.y = -1
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 6
+      LilyPad1.y = -5
+      LilyPad2.x = LilyFlower.x + -2
+      LilyPad2.y = 7
+      LilyPad3.x = LilyFlower.x + 13
+      LilyPad3.y = 1
+
+  ?count > 70 & count <= 75
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +4
+      LilyPad1.y = 6
+      LilyPad2.x = LilyFlower.x + 4
+      LilyPad2.y = -6
+      LilyPad3.x = LilyFlower.x - 12
+      LilyPad3.y = -2
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 4
+      LilyPad1.y = -6
+      LilyPad2.x = LilyFlower.x - 4
+      LilyPad2.y = 6
+      LilyPad3.x = LilyFlower.x + 12
+      LilyPad3.y = 2
+
+  ?count > 75 & count <= 80
+    ?dir = 0
+      LilyPad1.x = LilyFlower.x +2
+      LilyPad1.y = 7
+      LilyPad2.x = LilyFlower.x + 6
+      LilyPad2.y = -5
+      LilyPad3.x = LilyFlower.x - 10
+      LilyPad3.y = -3
+    ?dir = 1
+      LilyPad1.x = LilyFlower.x - 2
+      LilyPad1.y = -7
+      LilyPad2.x = LilyFlower.x - 6
+      LilyPad2.y = 5
+      LilyPad3.x = LilyFlower.x + 10
+      LilyPad3.y = 3
+    dircount++
+ 
+//draw frogs and logic on moving and determining if each frog lands on pad
+ Frog1 = ui.AddAnim(ascii
+#####,Oo
+##(\/ .-)
+##´ ·-\´\
+asciiend)
+
+	Frog1.color = #green
+	?turn = 1 & flightcount = 28 & Frog1.x >= (LilyPad1.x - 10) & Frog1.x <= (LilyPad1.x + 10) & Frog1.y >= (LilyPad1.y -1) & Frog1.y <= (LilyPad1.y +1)
+	  landflag = 1
+	  play pickup_success
+	  Frog1.x = LilyPad1.x
+	  Frog1.y = LilyPad1.y
+	  turn = 2
+	  flightcount = 0
+	:?turn = 1 & flightcount = 28 & Frog1.x >= (LilyPad2.x - 10) & Frog1.x <= (LilyPad2.x + 10) & Frog1.y >= (LilyPad2.y -1) & Frog1.y <= (LilyPad2.y +1)
+	  landflag = 2
+	  play pickup_success
+	  Frog1.x = LilyPad2.x
+	  Frog1.y = LilyPad2.y
+	  turn = 2
+	  flightcount = 0
+	:?turn = 1 & flightcount = 28 & Frog1.x >= (LilyPad3.x - 10) & Frog1.x <= (LilyPad3.x + 10) & Frog1.y >= (LilyPad3.y -1) & Frog1.y <= (LilyPad3.y +1)
+	  landflag = 3
+	  turn = 2
+	  play pickup_success
+	  Frog1.x = LilyPad3.x
+	  Frog1.y = LilyPad3.y
+	  flightcount = 0
+	:?turn = 1 & flightcount = 28
+	  Frog1.x = 100
+	  Frog1.y = 100
+	  play cross_deadwood_splash
+	  turn = 2
+	  flightcount = 0
+  	  >`45,13,ascii
+.\:.|.:/.#
+asciiend
+	:?turn = 1
+	  Frog1.x = -20 + flightcount
+	  Frog1.y = 0
+	:?turn > 1
+	  ?landflag = 1 
+	    Frog1.x = LilyPad1.x
+	    Frog1.y = LilyPad1.y
+	  :?landflag = 2 
+	    Frog1.x = LilyPad2.x
+	    Frog1.y = LilyPad2.y
+	  :?landflag = 3 
+	    Frog1.x = LilyPad3.x
+	    Frog1.y = LilyPad3.y
+	  :?landflag = 0
+	    Frog1.x = 100
+	    Frog1.y = 100
+
+ Frog1eyes = ui.AddAnim(ascii
+######^^
+######'=
+##
+asciiend)
+
+	Frog1eyes.color = #green
+	?landflag > 0
+	  Frog1eyes.x = Frog1.x
+	  Frog1eyes.y = Frog1.y
+	:
+	  Frog1eyes.x = 100
+	  Frog1eyes.y = 100
+
+	Frog2 = ui.AddAnim(ascii
+#####,Oo
+##(\/ .-)
+##´ ·-\´\
+asciiend)
+	Frog2.color = #green
+	?turn < 2
+	  Frog2.x = 25
+	  Frog2.y = 11
+
+	?turn = 2 & flightcount = 28 & Frog2.x >= (LilyPad1.x - 10) & Frog2.x <= (LilyPad1.x + 10) & Frog2.y >= (LilyPad1.y -1) & Frog2.y <= (LilyPad1.y +1) & landflag ! 1
+	  landflag2 = 1
+	  turn = 3
+	  play pickup_success
+	  Frog2.x = LilyPad1.x
+	  Frog2.y = LilyPad1.y
+	  flightcount = 0
+	:?turn = 2 & flightcount = 28 & Frog2.x >= (LilyPad2.x - 10) & Frog2.x <= (LilyPad2.x + 10) & Frog2.y >= (LilyPad2.y -1) & Frog2.y <= (LilyPad2.y +1) & landflag ! 2
+	  landflag2 = 2
+	  turn = 3
+	  play pickup_success
+	  Frog2.x = LilyPad2.x
+	  Frog2.y = LilyPad2.y
+	  flightcount = 0
+	:?turn = 2 & flightcount = 28 & Frog2.x >= (LilyPad3.x - 10) & Frog2.x <= (LilyPad3.x + 10) & Frog2.y >= (LilyPad3.y -1) & Frog2.y <= (LilyPad3.y +1) & landflag ! 3
+	  landflag2 = 3
+	  turn = 3
+	  play pickup_success
+	  Frog2.x = LilyPad3.x
+	  Frog2.y = LilyPad3.y
+	  flightcount = 0
+	:?turn = 2 & flightcount = 28
+	  Frog2.x = 100
+	  Frog2.y = 100
+	  play cross_deadwood_splash
+	  turn = 3 
+	  flightcount = 0
+  	  >`45,13,ascii
+.\:.|.:/.#
+asciiend
+	:?turn = 2 
+	  Frog2.x = -20 + flightcount
+	  Frog2.y = 0
+	:?turn > 2
+	  ?landflag2 = 1 
+	    Frog2.x = LilyPad1.x
+	    Frog2.y = LilyPad1.y
+	  :?landflag2 = 2 
+	    Frog2.x = LilyPad2.x
+	    Frog2.y = LilyPad2.y
+	  :?landflag2 = 3 
+	    Frog2.x = LilyPad3.x
+	    Frog2.y = LilyPad3.y
+	  :?landflag2 = 0
+	    Frog2.x = 100
+	    Frog2.y = 100
+
+ Frog2eyes = ui.AddAnim(ascii
+######^^
+######'=
+##
+asciiend)
+
+	Frog2eyes.color = #green
+	?landflag2 > 0
+	  Frog2eyes.x = Frog2.x
+	  Frog2eyes.y = Frog2.y
+	:
+	  Frog2eyes.x = 100
+	  Frog2eyes.y = 100
+
+	Frog3 = ui.AddAnim(ascii
+#####,Oo
+##(\/ .-)
+##´ ·-\´\
+asciiend)
+	Frog3.color = #green
+	?turn < 3
+	  Frog3.x = 33
+	  Frog3.y = 11
+
+	?turn = 3 & flightcount = 28 & Frog3.x >= (LilyPad1.x - 10) & Frog3.x <= (LilyPad1.x + 10) & Frog3.y >= (LilyPad1.y -1) & Frog3.y <= (LilyPad1.y +1) & landflag ! 1 & landflag2 ! 1
+	  landflag3 = 1
+	  turn = 4
+	  play pickup_success
+	  Frog3.x = LilyPad1.x
+	  Frog3.y = LilyPad1.y
+	:?turn = 3 & flightcount = 28 & Frog3.x >= (LilyPad2.x - 10) & Frog3.x <= (LilyPad2.x + 10) & Frog3.y >= (LilyPad2.y -1) & Frog3.y <= (LilyPad2.y +1) & landflag ! 2 & landflag2 ! 2
+	  landflag3 = 2
+	  turn = 4
+	  play pickup_success
+	  Frog3.x = LilyPad2.x
+	  Frog3.y = LilyPad2.y
+	:?turn = 3 & flightcount = 28 & Frog3.x >= (LilyPad3.x - 10) & Frog3.x <= (LilyPad3.x + 10) & Frog3.y >= (LilyPad3.y -1) & Frog3.y <= (LilyPad3.y +1) & landflag ! 3 & landflag2 ! 3
+	  landflag3 = 3
+	  turn = 4
+	  play pickup_success
+	  Frog3.x = LilyPad3.x
+	  Frog3.y = LilyPad3.y
+	:?turn = 3 & flightcount = 28
+	  Frog3.x = 100
+	  Frog3.y = 100
+	  play cross_deadwood_splash
+  	  >`45,13,ascii
+.\:.|.:/.#
+asciiend
+	  turn = 4
+
+
+	:?turn = 3
+	  Frog3.x = -20 + flightcount
+	  Frog3.y = 0
+	:?turn > 3
+	  ?landflag3 = 1 
+	    Frog3.x = LilyPad1.x
+	    Frog3.y = LilyPad1.y
+	  :?landflag3 = 2 
+	    Frog3.x = LilyPad2.x
+	    Frog3.y = LilyPad2.y
+	  :?landflag3 = 3 
+	    Frog3.x = LilyPad3.x
+	    Frog3.y = LilyPad3.y
+	  :?landflag3 = 0
+	    Frog3.x = 100
+	    Frog3.y = 100
+
+ Frog3eyes = ui.AddAnim(ascii
+######^^
+######'=
+##
+asciiend)
+
+	Frog3eyes.color = #green
+	?landflag3 > 0
+	  Frog3eyes.x = Frog3.x
+	  Frog3eyes.y = Frog3.y
+	:
+	  Frog3eyes.x = 100
+	  Frog3eyes.y = 100
+
+//Game over banner message determined on performance
+  ?turn = 4 & message = 0
+    ui.ShowBanner(te.xt("GAME OVER"))
+    ?landflag > 0 & landflag2 > 0 & landflag3 > 0
+      ui.ShowBanner(te.xt("PERFECT GAME!!"))
+    message = 1
+
+//airborne frog draws based on early period of flightcount variable
+  frogjump1 = ui.AddAnim(ascii
+###\\
+\\##\\ ##.(o)O
+#\\##'..'   ..`.
+###'-'     .===.)__  
+######`--\'.-_-'  
+##########\
+asciiend)
+	frogjump1.color = #green
+	?flightcount > 2 & flightcount < 18 & turn < 4
+	  frogjump1.x = flightcount - 20
+	  frogjump1.y = 0
+	:
+	  frogjump1.x = 100
+	  frogjump1.y = 0
+
+  frogjump2 = ui.AddAnim(ascii
+#
+#
+#####.Oo
+-´-`´ .-)
+####`-‾´‾
+#
+asciiend)
+	frogjump2.color = #green
+	?flightcount > 18 & flightcount < 28 & turn < 4
+	  frogjump2.x = flightcount - 20
+	  frogjump2.y = 0
+	:
+	  frogjump2.x = 100
+	  frogjump2.y = 0
+
+//Hammer Smack Animation relies on the first frames of flightcount
+	?flightcount >= 1 & flightcount < 3
+	  >`2,10,ascii
+####,----,
+###/    ' \`.
+##/ _      . \
+#/ (,'     |  \
+/          |   .
+\   /'    _/.  |
+#`.   _.-'  ': |.
+## `-.      _.`_ `-.
+#######` ' "####`._ `,
+################## `'
+asciiend
+
+	?flightcount >= 3 & flightcount < 5
+	  >`2,10,ascii
+####___
+###/   \`.
+##/ _   \ `.
+#/ (/    \  \
+/      . ':. \  
+\_.- '"     '/-.
+##`-.___.' `-.  `-.
+############## `-.  `-.
+################# `-.'_}
+asciiend
+
+
+	?flightcount >= 5 & flightcount < 8
+	  >`2,10,ascii
+####__
+###/ \`.
+##/_  \ `
+#/(/   \ \
+/   ,. '. | 
+\_.'     '/`-.
+##`-.__.'`-.  `-.
+############`-.  `-.
+###############`-.  `-.
+##################`-._)}
+asciiend
+
+	?flightcount = 5
+	   play level_up
+
+//ripples in water occur at specific periods in the counter
+	?count > 0 & count <= 20
+	  >`28,20,#888888,ascii
+####
+    ~
+asciiend 
+
+	?count > 25 & count <= 45
+	  >`30,7,#888888,ascii
+####
+    ~
+asciiend
+
+	?count > 15 & count <= 35
+	  >`76,6,#888888,ascii
+####
+    ~
+asciiend
+
+	?count > 30 & count <= 50
+	  >`9,3,#888888,ascii
+####
+    ~
+asciiend
+
+	?count > 20 & count <= 40
+	  >`74,20,#888888,ascii
+####
+    ~
+asciiend
+
+	?count > 10 & count <= 30
+	  >`0,20,#888888,ascii
+####
+    ~
+asciiend
+
+//keeps timing for lily postions and water animations
+  count++
+  ?count > 80
+    count = 1
+
+//play intermittent croaks for ambience
+  ?count = 20 | count = 40
+    play frog
+
+//keep flightcount incrementing until the frog reaches the lilypad
+  ?flightcount >= 1
+    flightcount++
+  ?flightcount > 28
+    flightcount = 0
+
+
+/*
+//Debug stuff that should have been removed before posting
+>`0,1,Counter @count@ 
+>`0,2,Padx @LilyPad1.x@ 
+>`0,3,Pady @LilyPad1.y@ 
+>`0,4,dir @dir@ 
+>`0,5,dirc @dircount@
+>`0,6,flight @flightcount@
+>`0,7,frog @Frog1.x@
+>`0,8,turn @turn@
+*/
+

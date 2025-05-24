@@ -1,0 +1,427 @@
+/*///////////////////////////
+Pet Dragon v1.4
+
+A Chinese dragon follower which will launch fireballs at your foes
+and where-ever you click.
+This requires the use of a seperate Explosion.txt script which should
+go into the Cosmetics folder.
+
+ - Incoherent Toast
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+var ChineseDragonHead = [ascii
+#####\`-`~.
+######{_ ` `~;
+########‾`/~´
+#####´‾‾`´
+asciiend,ascii
+#####\`-`~.
+######{_ ` `~;
+########‾`/~´
+#####´‾`-´
+asciiend,ascii
+#####\`-`~.
+######{_ ` `~;
+########‾`/~´
+#####´`--´
+asciiend,ascii
+#####\`-`~.
+######{_ ` `~;
+########‾`/~´
+#####`._,´
+asciiend,ascii
+#####\`-`~.
+######{_ ` `~;
+########‾`/~´
+#####-.-´´
+asciiend,ascii
+#####\`-`~.
+######{_ ` `~;
+########‾`/~´
+#####,´‾`´
+asciiend]
+
+var DragonAttack = [ascii
+#
+#
+########################\`-`~.
+####################_###,｛_ ` `~;
+######_..-.._####,´‾ ‾`´  ,‾`/~´
+###.´‾. --   ‾`-´  _._   ;
+##/´‾##))##`._  _,´###((´
+#'####,´######‾‾#######`´"
+#####"
+asciiend,ascii
+######################.# .
+#######################\`-`~.
+########################｛_ ` `~;
+#######################,  `/~-`
+######__...__####,´‾‾`´  ,
+###.´‾  __   ‾`-´  ,._   ;
+#.´´‾##))##`.._ _,´###((´
+######,´#######‾#######`.
+#####"###################"
+asciiend,ascii
+######################. .
+######################|`-`~.
+#######################｛_ ` `´;
+######################/  `._\‾
+#`.########__####,´‾‾´  ( 
+##``---´‾‾‾  ‾`-´    _  ;
+###`- `))-- .._  _.´‾#))
+######,´#######‾####".´
+#####"
+asciiend,ascii
+######################. .
+######################|`-`~.
+#######################｛_ ` `´;
+###.´##############__#/  `._\‾
+##(´-._####__###,´‾  ´  / 
+###`.  ‾‾‾‾  `-´     _  ;
+##### `))`--.._  _.´‾#))
+######,´#######‾####".´
+#####"
+asciiend,ascii
+#######################. .
+#######################|`-`~.
+#######################,｛_ ` `´;
+######################/  ,`._\‾
+#`.########__####,´‾‾´  ( 
+##``---´‾‾‾  ‾`-´    _  ;
+###`- `))-- .._  _.´‾#))
+######,´#######‾####".´
+#####"
+asciiend,ascii
+#
+#
+#######################\`-`~.
+#######################,｛_ ` `´;
+######__...__####,´‾‾`´  ,`._\‾
+###.´‾  __   ‾`-´  ,._   ;
+#.´´‾##))##`.._ _,´###((´
+######,´#######‾#######`.
+#####"###################"
+asciiend,ascii
+#
+#
+########################
+########################_\`-`~.
+######__...__####,´‾‾`´‾ ‾｛_ ` `´;
+###.´‾  __   ‾`-´  ,._   ;##`._\‾
+#.´´‾##))##`.._ _,´###((´
+######,´#######‾#######`.
+#####"###################"
+asciiend,ascii
+#
+#
+########################
+########################_\`-`~.
+######__...__####,´‾‾`´‾ ‾｛_ ` `´;
+###.´‾  __   ‾`-´  ,._   ;##`._\‾
+#.´´‾##))##`.._ _,´###((´
+######,´#######‾#######`.
+#####"###################"
+asciiend,ascii
+#
+#
+#######################\`-`~.
+#######################,｛_ ` `´;
+######__...__####,´‾‾`´  ,`/~-`
+###.´‾  __   ‾`-´  ,._   ;
+#.´´‾##))##`.._ _,´###((´
+######,´#######‾#######`.
+#####"###################"
+asciiend]
+
+var ChineseDragonBody = [ascii
+####################_###,
+######_..-.._####,´‾ ‾`´  ,
+###.´‾. --   ‾`-´  _._   ;
+##/´‾##))##`._  _,´###((´
+#'####,´######‾‾#######`´"
+#####"
+asciiend,ascii
+###################_####,
+######_.-.._####,´‾ ‾'-´  ,
+###.´‾  __   ‾`‾   _     ;
+##/´‾‾#))#`._   _,´#‾`((´
+#´####,´#####‾‾########`´"
+#####"
+asciiend,ascii
+##################_#####,
+#####_.-.._####,´‾ ‾'- ´  ,
+###.´  __  ‾‾`´   _      /
+#,´´‾‾#))`._   _,´#‾‾`((´
+######,´#####‾‾########`.
+#####"###################"
+asciiend,ascii
+#################_######,
+#####_.-._####,´‾ ‾'-.-´  ,
+###.´ _     ‾`´   _      /
+#-´ ´‾#))`._  _,´#‾` (/´
+######,´####‾‾########`.
+#####"#################"
+asciiend,ascii
+################_#######,
+#####_##_####,´‾ ‾'-._,'  ,
+#-.-´ ‾‾  ‾`´   _        /
+####‾` ))._  _,´#‾`._// ´
+######,´###‾‾########`,
+#####"###############"
+asciiend,ascii
+###############_########,
+########_###,´‾ ‾'-._#,'  ,
+#´`\`--´  ‾´   _         /
+####`-.))_  _,´#‾`-.-))´
+######.´##‾‾########,´
+######`"###########"
+asciiend,ascii
+##############_#########,
+#,.#####_##,´‾ ‾'-._##,'  ,
+###\`--´ ‾´   _     ‾‾   /
+####`-.//_ _,´#‾`-._.))´
+######`,##‾#########,´
+#######"###########"
+asciiend,ascii
+#############_##########,
+#`..######,´‾ ‾'-._##_.´  ,
+###\``-.-´   _      ‾   .´
+####`-.(( _,´#‾`-.__.))´
+########`´"#########,´
+###################"
+asciiend,ascii
+############_###########,
+#,`.#####,´‾ ‾'-._##_.-´  ,
+###\``--´   _      ‾    .´
+####`-.((_,´#‾`-.__ _,))
+########`´"########‾#,´
+####################"
+asciiend,ascii
+###########_############,
+#,`.####,´‾ ‾'-._##_.´`´  ,
+###\``-´   _      ‾     ,´
+####`-.((,´#‾`-.__  _.))
+########`.########‾‾#,´
+#########"##########"
+asciiend,ascii
+##########_#############,
+#``.###,´‾ ‾'-._##_#,´`´  ,
+###\`-´   _      ‾      ,´
+####`-´((‾#‾`-. _ _ _,|)
+########`.#########‾##`,
+#########"############"
+asciiend,ascii
+########################,
+#´`.###.´ ‾`-.#_#_.--´`´  ,
+###\ ‾´  _      ‾       ,´
+####`-´(/#‾`-._ __,-._(/
+########`,#####‾#######`.
+########"###############"
+asciiend,ascii
+########################,
+##'.#_,-´ ‾`-.._#.'´‾´`´  ,
+##`.`  __               ,´
+####`‾#//‾`-._  _-´`._((
+#######`,#####‾########`.
+#######"#################"
+asciiend,ascii
+########################,
+#####.-´ ‾`-..#_#.'´‾´`´  ,
+`..-´  _._               ;
+##``´´#))#‾`._   _-´`._((
+######,´######‾#########`.
+#####"####################"
+asciiend]
+
+var ScreenX
+var px
+var t
+var tt
+
+var x = pos.x-40
+var y = -5
+var Attackframe = -1
+var CancelAttack = false
+var MovementFrame = 0
+var ExplosionCoords = []
+var Boom = import Cosmetics/Explosion
+var customStyle = ui.AddStyle("
+^###
+^###
+^###")
+
+var MotherPanel
+var DragonBody
+var DragonHead
+var FirePanel
+var ResetPosition
+
+?key = UpBegin
+  y++
+  MotherPanel.y = y
+:?key = DownBegin
+  y--
+  MotherPanel.y = y
+
+
+ScreenX = screen.FromWorldX(x)
+px = pos.x
+t = time
+tt = totalTime
+
+?loc.begin | loc.loop
+  MotherPanel = ui.AddPanel()
+  DragonBody = ui.AddText()
+  DragonHead = ui.AddText()
+  FirePanel = ui.AddPanel()
+  FirePanel.style = customStyle
+  x = px-30
+  MotherPanel.style = customStyle
+  MotherPanel.Add(DragonBody)
+  MotherPanel.Add(DragonHead)
+  DragonBody.w = 99
+  DragonHead.w = 99
+  DragonHead.y = -1
+  DragonHead.x = 19
+  ResetPosition = true
+  MotherPanel.y = y
+
+?t%28 = 2
+  DragonHead.x = 37 - DragonHead.x
+MotherPanel.x = ScreenX
+
+func MoveFoward()
+  ?px - x > 15 & t%2=0
+    x++
+  :?px - x > 50 & t%4=1
+    x++
+  ?screen.FromWorldX(px) < 14
+    x = math.Max( x , px - 38 )
+
+func FlyingAnimation()
+  DragonBody.y = 0
+  ?tt%4 = 0
+    MovementFrame = (MovementFrame+1)
+    DragonBody.text = ChineseDragonBody[MovementFrame%ChineseDragonBody.Count()]
+    DragonHead.text = ChineseDragonHead[MovementFrame%ChineseDragonHead.Count()]
+
+?Attackframe > -1
+  ?MovementFrame = 0
+    DragonHead.text = ""
+    ?Attackframe%4 = 0
+      DragonBody.text = DragonAttack[Attackframe/4]
+      DragonBody.y = -3
+    Attackframe = (Attackframe+1)%(DragonAttack.Count()*4)
+    ?Attackframe = 0
+      Attackframe = -1
+    :?Attackframe = 22
+      ?foe.distance < 25
+        ExplosionCoords = [px+foe.distance+3,pos.z]
+      SetFireBall()
+    ?screen.FromWorldX(px) < 14
+      x = math.Max( x , px - 38 )
+  :
+    MoveFoward()
+    ?t%2
+      ?MovementFrame%14 < 6
+        MovementFrame--
+      :
+        MovementFrame = (MovementFrame + 1)%14
+    DragonBody.text = ChineseDragonBody[MovementFrame%ChineseDragonBody.Count()]
+    DragonHead.text = ChineseDragonHead[MovementFrame%ChineseDragonHead.Count()]
+:
+  MoveFoward()
+  FlyingAnimation()
+
+?Attackframe = -1
+  ?key = PrimaryBegin
+    ?ScreenX+27<input.x
+      ExplosionCoords = [screen.ToWorldX(input.x),input.y]
+      Attackframe = 0
+  ?foe.distance < 30 & ScreenX > -13
+    ExplosionCoords = [px+foe.distance+3,pos.z]
+    Attackframe = 0
+
+?t ! tt & ResetPosition
+  ?loc=harder
+    x = px-40
+    ResetPosition = false
+
+var FireColour = color.FromRGB(18,5,0)
+var FireBallX
+var FireBallStartX
+var FireBallVelocity = []
+var FireBallA
+var FireBallB
+var FireBallC
+var FireBallD
+var FireText
+var drawFireball = !sys.isMobile
+
+?FireBallVelocity.Count()>0
+  var PercentTraveled
+  PercentTraveled = (1.0*FireBallX-FireBallStartX)/(ExplosionCoords[0]-FireBallStartX)
+  FireBallX = FireBallX + FireBallVelocity[0]
+  FirePanel.x = screen.FromWorldX(FireBallX)-46
+  FirePanel.y = y + math.FloorToInt(PercentTraveled*FireBallVelocity[1])
+
+  ?PercentTraveled >= 1.0
+    FireBallVelocity.Clear()
+    FirePanel.Recycle()
+    ?drawFireball
+      Boom.Explosion(0,ExplosionCoords[1])
+    :
+      play bomb_cart_explosion 100
+
+func SetFireBall()
+  FirePanel.Recycle()
+  FirePanel = ui.AddPanel()
+  FirePanel.style = customStyle  
+
+  FireBallA = ui.AddCanvas() 
+  FireBallB = ui.AddCanvas() 
+  FireBallC = ui.AddCanvas() 
+  FireBallD = ui.AddCanvas() 
+  FireText = ui.AddText("φ")
+
+  FireBallX = x+28
+  FireBallStartX = x+28
+  FirePanel.x = screen.FromWorldX(FireBallX)
+  FirePanel.y = y
+  FireBallVelocity = [ math.RoundToInt(math.Sign(ExplosionCoords[0]-x-28)*3) ,ExplosionCoords[1]-screen.h/2-y]
+
+  FireBallA.w = 5
+  FireBallA.h = 3
+
+  FireBallB.w = 7
+  FireBallB.h = 1
+
+  FireBallC.w = 3
+  FireBallC.h = 3
+
+  FireBallD.w = 1
+  FireBallD.h = 5
+
+  FireText.align = center
+  FireText.y = 2
+  FireText.color = #yellow
+
+  FireBallA.blend = Add
+  FireBallB.blend = Add
+  FireBallC.blend = Add
+  FireBallD.blend = Add
+
+  FireBallA.SetBG(FireColour)
+  FireBallB.SetBG(FireColour)
+  FireBallC.SetBG(FireColour)
+  FireBallD.SetBG(FireColour)
+
+  FirePanel.Add(FireBallA)
+  FirePanel.Add(FireBallB)
+  FirePanel.Add(FireBallC)
+  FirePanel.Add(FireBallD)
+  FirePanel.Add(FireText)
+
+Boom.ExplosionStatus()
+?Boom.ExplosionCurrentDuration > -1
+  Boom.ExplosionX = screen.FromWorldX(ExplosionCoords[0])

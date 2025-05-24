@@ -1,0 +1,330 @@
+/*///////////////////////////////////
+FoeStateTracker v5.0
+
+This is a simple script that will list the last 5 previous enemy states and times.
+You can adjust the number of states that are retained with the settings button.
+
+```````````````````
+import UI/FoeStateTracker
+````````````````````
+
+This version will also track other events and display them with reference to foe state and time.
+Currently it tracks:
+  When damage is received
+  When healing is received
+  When the player is debuffed
+  When the foe is buffed
+
+ - Incoherent Toast
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+var MaxListLength = storage.Get("MaxListLength",5)
+var CheckingDamage  = storage.Get("CheckingDamage",true)
+var CheckingHealing = storage.Get("CheckingHealing",true)
+var CheckingDebuffs = storage.Get("CheckingDebuffs",true)
+var CheckingFoeBuffs= storage.Get("CheckingFoeBuffs",true)
+var StateList = []
+var StateListText
+var TimeListText
+var StateListBox
+var init = true
+var Mobile = sys.isMobile
+var Defense = 0
+var PHealth = hp
+var EventRecorder = []
+var EventDisplayText
+var DebuffCount = 0
+var FoeBuffCount = 0
+var DragButton
+var Label
+var DragCont = import UI/DragController
+var ToggleDragging = false
+var XSet = storage.Get("X",0)
+var YSet = storage.Get("Y",7)
+var SettingsButton
+var SettingsToggle = false
+var SettingsPanel
+var SettingsText
+var CloseSettings
+var ListIncreaseButton
+var ListDecreaseButton
+var DamageToggleButton
+var HealingToggleButton
+var DebuffsToggleButton
+var FoeBuffsToggleButton
+var StyleInvisible = ui.AddStyle("
+^###
+^###
+^###")
+
+func Create_UI_Element(_UI,X,Y,W)
+  _UI.x = X
+  _UI.y = Y
+  _UI.w = W
+  _UI.dock = top_left
+  _UI.anchor = top_left
+  return _UI
+
+var z
+?totaltime = 1 | init
+  ?totaltime = 1
+    SettingsToggle = false
+  init = false
+  EventRecorder.Clear()
+  StateList.Clear()
+  StateListBox = Create_UI_Element( ui.AddPanel(), XSet,YSet,9)
+  StateListBox.h = 2+MaxListLength
+
+  z = ""
+  for a = 1..MaxListLength
+    z += "\n│"
+  Label = Create_UI_Element( ui.AddText("S : T"+z),-5,0,20)
+  Label.align = center
+  Label.color = #808080
+
+  StateListText = Create_UI_Element( ui.AddText(),1,1,20)
+  StateListText.align = left
+
+  TimeListText =  Create_UI_Element( ui.AddText(),5,1,20)
+  TimeListText.align = left
+
+  EventDisplayText =  Create_UI_Element( ui.AddText(),0,2+MaxListLength,99)
+  EventDisplayText.align = left
+
+  DragButton = Create_UI_Element( ui.AddButton() ,-1,0,3)
+  DragButton.h = 1
+  DragButton.text = "ʘ"
+  DragButton.style = StyleInvisible
+  DragButton.SetDown(DragToggle)
+
+  SettingsButton = Create_UI_Element( ui.AddButton() ,7,0,3)
+  SettingsButton.h = 1
+  SettingsButton.text = "≡"
+  SettingsButton.style = StyleInvisible
+  SettingsButton.SetDown(OpenSettings)
+
+  StateListBox.Add(Label)
+  StateListBox.Add(StateListText)
+  StateListBox.Add(TimeListText)
+  StateListBox.Add(EventDisplayText)
+  StateListBox.Add(DragButton)
+  StateListBox.Add(SettingsButton)
+
+func ClearStorage()
+  storage.Delete("X")
+  storage.Delete("Y")
+  storage.Delete("MaxListLength")
+  storage.Delete("CheckingDamage")
+  storage.Delete("CheckingHealing")
+  storage.Delete("CheckingDebuffs")
+  storage.Delete("CheckingFoeBuffs")
+
+func DragToggle()
+  ToggleDragging = !ToggleDragging
+
+func ListDecrease()
+  ?MaxListLength > 1
+    MaxListLength--
+    storage.Set("MaxListLength", MaxListLength)
+func ListIncrease()
+  MaxListLength++
+  storage.Set("MaxListLength", MaxListLength)
+func CheckingDamageToggle()
+  CheckingDamage = !CheckingDamage
+  storage.Set("CheckingDamage", CheckingDamage)
+  SettingsText.text = GetSettingsText()
+func CheckingHealingToggle()
+  CheckingHealing = !CheckingHealing
+  storage.Set("CheckingHealing", CheckingHealing)
+  SettingsText.text = GetSettingsText()
+func CheckingDebuffsToggle()
+  CheckingDebuffs = !CheckingDebuffs
+  storage.Set("CheckingDebuffs", CheckingDebuffs)
+  SettingsText.text = GetSettingsText()
+func CheckingFoeBuffsToggle()
+  CheckingFoeBuffs = !CheckingFoeBuffs
+  storage.Set("CheckingFoeBuffs", CheckingFoeBuffs)
+  SettingsText.text = GetSettingsText()
+
+func OpenSettings()
+  SettingsToggle = !SettingsToggle
+  ?SettingsToggle
+    SettingsPanel = ui.AddPanel()
+    SettingsPanel.w = 23
+    SettingsPanel.h = 9
+    SettingsPanel.style = 1
+
+    SettingsText = Create_UI_Element( ui.AddText() ,0,0,23)
+    SettingsText.text = GetSettingsText()
+
+    ListDecreaseButton = Create_UI_Element( ui.AddButton() ,14,1,3)
+    ListDecreaseButton.h = 1
+    ListDecreaseButton.text = "-"
+    ListDecreaseButton.style = StyleInvisible
+    ListDecreaseButton.SetDown(ListDecrease)
+
+    ListIncreaseButton = Create_UI_Element( ui.AddButton() ,18,1,3)
+    ListIncreaseButton.h = 1
+    ListIncreaseButton.text = "+"
+    ListIncreaseButton.style = StyleInvisible
+    ListIncreaseButton.SetDown(ListIncrease)
+
+    DamageToggleButton = Create_UI_Element( ui.AddButton() ,17,4,5)
+    DamageToggleButton.h = 1
+    DamageToggleButton.text = ""
+    DamageToggleButton.style = StyleInvisible
+    DamageToggleButton.SetDown(CheckingDamageToggle)
+
+    DebuffsToggleButton = Create_UI_Element( ui.AddButton() ,17,5,5)
+    DebuffsToggleButton.h = 1
+    DebuffsToggleButton.text = ""
+    DebuffsToggleButton.style = StyleInvisible
+    DebuffsToggleButton.SetDown(CheckingDebuffsToggle)
+
+    FoeBuffsToggleButton = Create_UI_Element( ui.AddButton() ,17,6,5)
+    FoeBuffsToggleButton.h = 1
+    FoeBuffsToggleButton.text = ""
+    FoeBuffsToggleButton.style = StyleInvisible
+    FoeBuffsToggleButton.SetDown(CheckingFoeBuffsToggle)
+
+    HealingToggleButton = Create_UI_Element( ui.AddButton() ,17,7,5)
+    HealingToggleButton.h = 1
+    HealingToggleButton.text = ""
+    HealingToggleButton.style = StyleInvisible
+    HealingToggleButton.SetDown(CheckingHealingToggle)
+ 
+    CloseSettings = Create_UI_Element( ui.AddButton() ,21,0,3)
+    CloseSettings.h = 1
+    CloseSettings.text = "[x]"
+    CloseSettings.style = StyleInvisible
+    CloseSettings.SetDown(OpenSettings)
+
+    SettingsPanel.Add(CloseSettings)
+    SettingsPanel.Add(SettingsText)
+    SettingsPanel.Add(ListIncreaseButton)
+    SettingsPanel.Add(ListDecreaseButton)
+    SettingsPanel.Add(DamageToggleButton)
+    SettingsPanel.Add(HealingToggleButton)
+    SettingsPanel.Add(DebuffsToggleButton)
+    SettingsPanel.Add(FoeBuffsToggleButton)
+  :
+    SettingsPanel.Recycle()
+    SettingsPanel = null
+
+func OnOffText(Bool)
+  ?Bool
+    return "[color=#108010]ON[/color]"
+  return "[color=#A01010]OFF[/color]"
+
+func GetSettingsText()
+  var ReturnText = ascii
+#######Settings
+#List Length: [#] [#]
+#[color=#606060]─────────────────────[/color]
+#####Event Logger:
+#Damage received [{0}]
+#Player Debuffed [{1}]
+#Foe Buffed      [{2}]
+#Player Healed   [{3}]
+asciiend
+  return string.format(ReturnText, OnOffText(CheckingDamage),OnOffText(CheckingDebuffs),OnOffText(CheckingFoeBuffs),OnOffText(CheckingHealing))
+
+?ToggleDragging
+  XSet = math.Clamp(input.x, 0, screen.w)
+  YSet = math.Clamp(input.y, 1, screen.h-1)
+  StateListBox.x = XSet
+  StateListBox.y = YSet
+  ?key ! "primary"
+    ToggleDragging = false
+    storage.Set("X",XSet)
+    storage.Set("Y",YSet)
+
+var Math
+func CheckDamage()
+  Math = hp + armor + armor.f/10.0
+  ?Math + 0.5 < Defense
+    EventRecorder.Add(["Received "+math.RoundToInt(10*(Defense - Math))/10.0+" damage at: ",foe.state,foe.time,totaltime])
+    UpdateEventDisplay()
+  Defense = Math
+
+func CheckHealing()
+  ?hp > PHealth
+    EventRecorder.Add(["Healed " + (hp-PHealth) + " hp at: ",foe.state,foe.time,totaltime])
+    UpdateEventDisplay()
+  PHealth = hp
+
+func CheckDebuffs()
+  ?debuffs.count > DebuffCount
+    EventRecorder.Add(["Received debuff at: ",foe.state,foe.time,totaltime])
+    UpdateEventDisplay()
+  DebuffCount = debuffs.count
+
+func CheckFoeBuffs()
+  ?foe.buffs.count > FoeBuffCount
+    EventRecorder.Add(["Foe received buff at: ",foe.state,foe.time,totaltime])
+    UpdateEventDisplay()
+  :?foe.buffs.count < FoeBuffCount
+    EventRecorder.Add(["Foe lost buff at: ",foe.state,foe.time,totaltime])
+    UpdateEventDisplay()
+  FoeBuffCount = foe.buffs.count
+
+?CheckingDamage
+  CheckDamage()
+?CheckingHealing
+  CheckHealing()
+?CheckingDebuffs
+  CheckDebuffs()
+?CheckingFoeBuffs
+  CheckFoeBuffs()
+
+func UpdateTimeText()
+  var Times = ""
+  for i =0..StateList.Count()-1
+    Times += StateList[i][1] + "\n"
+  TimeListText.text = Times
+
+func UpdateStateText()
+  var States = ""
+  for i =0..StateList.Count()-1
+    States += StateList[i][0] + "\n"
+  StateListText.text = States
+
+func UpdateTimeListText()
+  TimeListText.text = foe.state + "," + foe.time
+
+func UpdateEventDisplay()
+  var TempText = ""
+  for a : EventRecorder
+    TempText = TempText + a[0] + a[1] + ":" + a[2] + "\n"
+  EventDisplayText.text = TempText
+
+func CheckEventTimers()
+  ?EventRecorder[0][3] + 50 < totaltime
+    EventRecorder.RemoveAt(0)
+    UpdateEventDisplay()
+
+func CheckListMax()
+  ?StateList.Count() > MaxListLength
+    for a = MaxListLength..StateList.Count()-1
+      StateList.RemoveAt(MaxListLength)
+
+?StateList.Count()
+  ?foe.state ! StateList[0][0]
+    StateList.Insert(0,[foe.state,foe.time])
+    CheckListMax()
+    UpdateStateText()
+    UpdateTimeText()
+  :?foe.time ! StateList[0][1]
+    StateList[0].Emplace(1,foe.time)
+    UpdateTimeText()
+:?foe.distance < 30
+  StateList.Add([foe.state,foe.time])
+  UpdateStateText()
+  UpdateTimeText()
+
+?StateListBox.h ! 2+MaxListLength
+  StateListBox.Recycle()
+  init = true
+
+?EventRecorder.Count()
+  CheckEventTimers()

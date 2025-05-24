@@ -1,0 +1,241 @@
+//turret 1.0
+//By: Poly
+
+var mount
+
+mount = 3
+
+?mount = 0
+ enable player
+:
+ disable player
+
+?mount = 3
+ >`0,26,#white,ascii
+╤═］>:
+asciiend
+
+?loc = temple & foe.distance > 30 &
+^foe ! boss
+ equipR cultist mask
+
+?loc = temple & foe.distance < 30 &
+^foe ! boss
+ loadout 1
+
+?foe.state = 115 &
+^foe.time >= 50 &
+^foe = perfected
+ equipR mind stone
+
+?mount = 3 &
+^ai.walking
+ play bomb_cart_move 100
+
+?mount = 3 &
+^ai.walking &
+^item.left = trisk |
+^mount = 3 &
+^ai.walking &
+^item.right = trisk
+ play bomb_cart_move 250
+
+?foe.damage > hp &
+^mount = 3
+ play bomb_cart_fuse
+
+?mount = 3 &
+^loc ! uulaa_shop
+ >`0,10,ascii
+######§
+######│
+######│
+(‾‾‾‾‾‾‾)
+#‾`———´‾
+asciiend
+
+?mount = 3 &
+^item.left.state <= 1 &
+^loc ! uulaa_shop
+ >`2,10,#white,ascii
+##O
+#/|
+#/#\
+asciiend
+
+?mount = 3 &
+^item.left.state > 1
+ >`2,10,#white,ascii
+##O/
+##|
+#/#\
+asciiend
+
+?mount = 3 &
+^item.right.state = 1 &
+^loc ! uulaa_shop
+ >`2,10,#white,ascii
+##O
+##|v
+#/#\
+asciiend
+
+?mount = 3 &
+^item.right.state > 1 &
+^item.left.state > 1
+ >`2,10,#white,ascii
+##O_
+##|‾
+#/#\
+asciiend
+
+?mount = 3 &
+^item.right.state > 1
+ >`2,10,#white,ascii
+##O#
+##|‾
+#/#\
+asciiend
+
+?mount = 3 &
+^buffs.string = berserk
+ >`2,10,#white,ascii
+##ò>
+# |‾
+#/#\
+asciiend
+
+?mount = 3 &
+^ai.walking &
+^time % 30 > 10 &
+^time % 30 < 17
+ >`3,12,#white,ascii
+ >
+asciiend
+
+?mount = 3 &
+^ai.walking &
+^time % 30 >= 17
+ >`3,12,#white,ascii
+ \
+asciiend
+
+?mount = 3 &
+^ai.walking &
+^time % 30 <= 5
+ >`3,12,#white,ascii
+/_
+asciiend
+
+?mount = 3
+ >o-1,1,#white,ascii
+.
+╧═╤═］>
+#/|\
+°#o#°
+asciiend
+
+?mount = 3 &
+^buffs.string = smite &
+^item.left.state ! 3
+ >o1,1,#white,ascii
+__
+╪
+asciiend
+
+?mount = 3 &
+^buffs.string = smite &
+^item.left.state = 3 &
+^item.left = socketed
+ play bearer_attack_hit 100
+ >o0,1,#white,ascii
+__
+#╪
+asciiend
+
+?mount = 3 &
+^item.right = trisk |
+^mount = 3 &
+^item.left = trisk
+ >o-1,4,#cyan,ascii
+°#o#°
+asciiend
+
+?mount = 3 &
+^item.left.state = 2 |
+^mount = 3 &
+^item.left.state = 4
+ >o4,2,#white,ascii
+—>
+asciiend
+
+?mount = 3 &
+^item.left.state = 3
+ play sword_hit 110
+ >o4,2,#white,ascii
+——>
+asciiend
+
+?mount = 3 &
+^buffs.string = vampiric
+ >o4,2,#red,ascii
+♥
+asciiend
+
+?mount = 3 &
+^item.left.state = 2 &
+^buffs.string = vampiric |
+^mount = 3 &
+^item.left.state = 4 &
+^buffs.string = vampiric
+ >o4,2,#red,ascii
+~♥
+asciiend
+
+?mount = 3 &
+^item.left.state = 3 &
+^buffs.string = vampiric
+ play life_gain 110
+ >o4,2,#red,ascii
+~~♥
+asciiend
+
+?mount = 3 &
+^item.right.state = 2
+ >o-1,1,#red,ascii
+.
+asciiend
+
+?mount = 3 &
+^item.right.state = 2 &
+^item.right.time < 7
+ >o-2,-1,#red,ascii
+#.
+`'´
+asciiend
+
+?mount = 3 &
+^item.right.state = 3
+ play bomb_cart_explosion 75
+ >f0,0,#red,ascii
+#.-.
+(   )
+#`-´
+asciiend
+
+?mount = 3 &
+^item.right.state = 4
+ >f1,0,#red,ascii
+#_
+(_)
+asciiend
+
+?mount = 3 &
+^item.left = fire talisman |
+^mount = 3 &
+^item.right = fire talisman
+ >o-2,2,#yellow,ascii
+i
+φ
+'
+asciiend

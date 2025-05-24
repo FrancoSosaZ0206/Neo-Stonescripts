@@ -1,0 +1,107 @@
+//-~-~-Information-~-~-\\
+/*By: CitrionDragon☆\
+Import using import Foes/FlowerFoes
+Switch between Colored and Uncolored using */
+var colored=true
+
+var snail
+var ant
+var anthill
+var bigsnail
+
+//Uncolored\\
+var Snail=ascii
+*.--*.
+/),(, *
+ (_*)/ )
+`-\\(_/
+asciiend
+
+var BigSnail=ascii
+######*
+#*'¯¯(`.
+/ )--.) \
+ (`*_/` .*
+\\\/_\_//
+#\/__´_/
+asciiend
+
+var Ant=ascii
+####*
+*
+asciiend
+
+
+var AntHill=ascii
+    *
+  /(,'*
+ /*') _)
+/(:/ ( `\
+':V._ \
+asciiend
+?colored=false
+  ?foe=＂huge snail＂
+    >f3,0,@Snail@
+  :?foe=＂big a** snail＂
+    >f2,0,@BigSnail@
+  :?foe=＂ant hill＂
+    >f-4,1,#a9a9a9,@AntHill@
+  :?foe=＂ant＂
+    >f0,1,@Ant@
+//Colored\\
+var snail1=ascii
+#
+#),(,
+#(_#)/
+###\(
+asciiend
+var snail2=ascii
+*###*
+######*
+###*
+asciiend
+
+var bigsnail1=ascii
+#
+#####(
+##)###)
+#(`#_/`#.
+##\/#\_/
+##/##´
+asciiend
+var bigsnail2=ascii
+######*
+#*
+#
+###*#####*
+asciiend
+
+var Ant=ascii
+####*
+*
+asciiend
+
+var anthill1=ascii
+#
+###(,
+####)#_)
+#(#/#(#`
+##V###\
+asciiend
+var anthill2=ascii
+####*
+######*
+##*
+asciiend
+?colored
+  ?foe=＂huge snail＂
+    >f3,0,#green,@snail1@
+    >f3,0,#magenta,@snail2@
+  :?foe=＂big a** snail＂
+    >f2,0,#green,@bigsnail1@
+    >f2,0,#magenta,@bigsnail2@
+  :?foe=＂ant hill＂
+    >f-4,1,#green,@anthill1@
+    >f-4,1,#magenta,@anthill2@
+  :?foe=＂ant＂
+    >f0,1,#magenta,@Ant@

@@ -1,0 +1,42 @@
+// Made by: Kash % ♦Kash♦
+// v1.1
+
+/*
+Adds a Helmet Cosmetic to your Stonehead and
+displays a custom banner at the start of the
+location. Only on ~Caves of Fear~.
+Helmet looks better with big head.
+*/
+
+// § Editable §
+var HelmetColor = #EE8113 //Color of the Helmet
+var ShowHelmet = True //Shows/Hides the Helmet
+var ShowBanner = True //Show/Hide Custom Banner
+
+// ₪ Main Code ₪
+/*
+?loc_ = ＂Caves of Fear＂
+  ?locbegin & ShowBanner = True
+    ui.ShowBanner(·•♦◀▶♦•·,Caving the Fear)
+  ?!bighead & ShowHelmet = True
+    >h-1,0,@HelmetColor@,ascii
+#_
+'#°
+asciiend
+  :?bighead & ShowHelmet = True
+    >h-2,-2,@HelmetColor@,ascii
+ .¬. 
+╧══◙╧
+asciiend
+*/
+
+?bighead
+    >h-2,-2,@HelmetColor@,ascii
+ .¬. 
+╧══◙╧
+asciiend
+:
+  >h-1,0,@HelmetColor@,ascii
+#_
+'#°
+asciiend

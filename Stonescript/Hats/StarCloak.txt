@@ -1,0 +1,48 @@
+// Star Cloak - by Raeborga
+// v1.5
+// Requires big head
+
+var bgc = CheckStars()
+var CloakColour = "#bf9f7f"
+
+func CheckStars()
+  ?loc.stars>30
+    return "rain"
+  :?loc.stars>25
+    return "red"
+  :?loc.stars>20
+    return "blue"
+  :?loc.stars>15
+    return "green"
+  :?loc.stars>10
+    return "yellow"
+  :?loc.stars>5
+    return "cyan"
+  :?loc.stars>1
+    return "white"
+  :
+    return "magenta"
+
+
+func Draw()
+  ?bighead
+    >h-3,-2,@CloakColour@,ascii
+##__##
+##, `#
+#( ##)
+##^.^##
+#//####
+´´###``
+asciiend
+  :
+    >h-3,-2,@CloakColour@,ascii
+##__##
+##, `#
+#( '')
+##^.^##
+#//####
+´´###``
+asciiend
+  >h-2,-1,#@bgc@,☆
+
+Draw()

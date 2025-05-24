@@ -1,0 +1,134 @@
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  FireFly
+  By: Toast 2.0
+
+import Cosmetics/FireFly
+
+  If you want more or less fireflies do this:
+
+import Cosmetics/FireFly
+.MaxFireFlies = 8
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+var MaxFireFlies = 6
+var DiscoMode = false
+
+
+var FireColour = "#060603"
+var FireColourA = "#252515"
+
+var DiscoModeColourSet =     ["#0A0000","#040A04","#000008","#030006","#000306","#070300","#060600","#000607","#0A000A",]
+var DiscoModeColourSetText = ["#A00000","#04A004","#000070","#300060","#003060","#603000","#606000","#006060","#A000A0",]
+
+var XBaseMove
+var XWobbleFactor
+var YWobbleFactor
+var YCurveFactor
+var YCurveAmplitude
+var YFixed = 2
+var BasePanel
+var customStyle = ui.AddStyle("#########")
+var Sin = math.Sin
+var Round = math.RoundToInt
+var Floor = math.FloorToInt
+var ScFWX = screen.FromWorldX
+var ScreenW = screen.w
+var ScreenDepth
+
+func RandRange(Min, Max)
+  var Range = Max - Min
+  return Floor(Range * rngf) + Min
+
+func GenerateRandoms()
+  XWobbleFactor = RandRange(0,5) 
+  YWobbleFactor = RandRange(0,5) 
+  YCurveFactor = RandRange(0,9) 
+  ScreenDepth = RandRange(20,65)
+  ?DiscoMode
+    var DiscoColour = RandRange(0,8)
+    for a : BasePanel.children
+      ?a.w < 9
+        a.SetBG(DiscoModeColourSet[DiscoColour])
+      :
+        a.color = DiscoModeColourSetText[DiscoColour]
+    YFixed = screen.h / 3
+    YCurveAmplitude = rngf * screen.h / 3.0 + 2.5
+  :
+    YCurveAmplitude = rngf * 1.5 + 2.5
+    YFixed = 2
+
+func SetCanvas(UI,W,H, Parent)
+  UI.w = W
+  UI.h = H
+  UI.blend = Add
+  UI.SetBG(FireColour)
+  UI.SetFG(FireColourA)
+  Parent.Add(UI)
+
+func MakeFireFly()
+  BasePanel = ui.AddPanel()
+  BasePanel.style = customStyle  
+
+  SetCanvas(ui.AddCanvas(), 7,1, BasePanel)
+  SetCanvas(ui.AddCanvas(), 5,3, BasePanel)
+  SetCanvas(ui.AddCanvas(), 3,3, BasePanel)
+  SetCanvas(ui.AddCanvas(), 1,5, BasePanel)
+
+  var FireText = ui.AddText("•")
+  FireText.w = 9
+
+  BasePanel.x = 20
+  BasePanel.y = 10
+  BasePanel.anchor = top_left
+  BasePanel.dock = top_left
+
+  FireText.align = center
+  FireText.y = 2
+  FireText.color = "#yellow"
+  BasePanel.Add(FireText)
+
+  XBaseMove = RandRange(screen.ToWorldX(0),screen.ToWorldX(ScreenW+30))
+  GenerateRandoms()
+
+func MoveFly(t,Px,Sx)
+  Sx =  (Sx * ScreenDepth)/ScreenW
+  var YBaseMove = Round(YCurveAmplitude*Sin(t/8.0 + YCurveFactor) + YFixed)
+  ?t%2
+    XBaseMove--
+  ?XBaseMove + Sx < Px - 70 
+    GenerateRandoms()
+    XBaseMove = Px +  ScreenW + RandRange(5, ScreenW/2) - (Sx * ScreenDepth)/ScreenW
+  :?XBaseMove + Sx > Px + 200
+    GenerateRandoms()
+    XBaseMove = RandRange(screen.ToWorldX(0),screen.ToWorldX(ScreenW+30))
+  BasePanel.y = YBaseMove + Round(1.5*Sin((t/5.0+ YWobbleFactor )%6.0))
+  BasePanel.x = ScFWX(XBaseMove + Round(2.5*Sin((t/3.5+ XWobbleFactor )%6.0))+ Sx)
+
+var InitTime = totaltime
+var FlyList = []
+var FlyListCount = 0
+
+func Run()
+  var t = totaltime
+  var Px = pos.x
+  var Sx = screen.x
+  ?t = 1
+    InitTime = 1
+    FlyList.Clear()
+    FlyListCount = 0
+  ?t >= InitTime+1
+    ?FlyListCount < MaxFireFlies
+      for a = FlyList.Count()..MaxFireFlies - 1
+        var b = new Cosmetics/FireFly
+        b.MakeFireFly()
+        FlyList.Add(b)
+      FlyListCount = FlyList.Count()
+    :?FlyListCount > MaxFireFlies
+      for a = FlyList.Count()..MaxFireFlies + 1
+        FlyList[0].BasePanel.Recycle()
+        FlyList.RemoveAt(0)
+      FlyListCount = FlyList.Count()
+  for a : FlyList
+    a.MoveFly(t,Px,Sx)
+
+Run()

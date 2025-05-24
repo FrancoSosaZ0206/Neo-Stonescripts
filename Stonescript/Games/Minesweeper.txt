@@ -1,0 +1,667 @@
+/*
+SSRPG Version: 3.68.2
+Version: 1.3
+author: xx, Mind Stone Thief
+
+v1.3
+	add color
+
+v1.2 edited by Mind Stone Thief
+	Support Mobile
+
+*/
+/*
+instruction:
+//	import Games/Minesweeper
+
+if you feel stuck while running, can use:
+//	var minesweeper = new Games/Minesweeper
+//	minesweeper.run(positive real number)
+to change update frequency per frame
+
+update frequency per frame is default to 20
+*/
+var showContent
+
+// [[FG, BG, art]]
+var artList = [
+	["#000000", "#000000", "#"], // 0
+	["#0000f7", "#c6c6c6", "1"], // 1
+	["#007700", "#c6c6c6", "2"], // 2
+	["#ec0000", "#c6c6c6", "3"], // 3
+	["#000080", "#c6c6c6", "4"], // 4
+	["#800000", "#c6c6c6", "5"], // 5
+	["#008080", "#c6c6c6", "6"], // 6
+	["#000000", "#c6c6c6", "7"], // 7
+	["#707070", "#c6c6c6", "8"], // 8
+	["#ff0000", "#cc3030", "@"], // mine
+	["#ffffff", "#000000", "o"], // close
+	["#ff0000", "#000000", "▶"] // flag
+]
+
+// [[mineCount, state: -1-flag, 0-close, 1-open]]
+var data = []
+var width = 9
+var height = 9
+
+// [[x, y]]
+var mine = []
+var mineCount = 0
+
+var flagCount = 0
+var targetCount = 0
+
+
+
+var mainBox
+var mainBoxText
+var mainBoxCanvas
+
+var targetBox
+var targetBoxText
+
+var timerBox
+var timerBoxText
+
+var titleText
+var guideText
+var difficultySelectionText
+
+var titleTextList = [[],
+["#rainFF", "M I N E S W E E P E R"],
+["#rainFF", "Y O U   W I N"],
+["#cc0000", "gameover"]
+]
+
+var guideTextList_pc = [["Z/R.->flag"],
+["#99ccff", "↑↓-SwchLv  X-Back  C-(Re)Start"],
+["#99ccff", "X-GoToTitle  C-RestartGame"]
+]
+
+var guideTextList_mobile = [["•->flag"],
+["#99ccff", "↑↓-SwchLv  ←-Back  •-(Re)Start"],
+["#99ccff", "←-GoToTitle  •-RestartGame"]
+]
+
+
+var buttonList = []
+
+/*
+0: initialize
+1: restart
+2: title
+3: setupTarget
+4: setupData
+5: playing
+6: processVicinityData
+7: win
+8: drawMines
+9: gameover
+*/
+var state = 0
+
+
+// [[width, height, mineCount]]
+var difficulty = [[8,8,10], [16,16,40], [30,16,99]]
+// [[color, text]]
+var difficultyText = [
+	["#0000ff","beginner"],
+	["#00ff00","intermediate"],
+	["#ff0000","expert"]
+]
+var difficultyTextLength = 14
+var difficultyIndex = difficulty.Count() - 1
+
+// timer variables
+var timer = 0
+var secTimer = 0
+
+// cache variables
+var cx = 0
+var cy = 0
+var cx2 = 0
+var cy2 = 0
+var cl = []
+var ct = 0
+var cc = 0
+
+// test variables
+var a = 0
+var b = 0
+
+func main(fre)
+	?loc.stars = 0 & loc ! waterfall
+		return
+
+	?loc.loop
+		createUI()
+		redraw()
+		return
+	
+	for i = 1..fre
+		?state = 5
+			?playing()
+				break
+		:?state = 6
+			?processVicinityData()
+				break
+		:?state = 2
+			?title()
+				break
+		:?state = 8
+			?drawMines()
+				break
+		:?state = 4
+			?setupData()
+				break
+		:?state = 3
+			?setupTarget()
+				break
+		:?state = 1
+			?restart()
+				break
+		:?state = 0
+			?initialize()
+				break
+		:
+			break
+
+	globalInput()
+
+	//showdata(fre)
+
+func globalInput()
+	?key = bumpRBegin
+		createMap()
+	:?key = backEnd
+		changeState(1)
+
+func initialize()
+	key.Bind(BumpL, Z, Mouse1)
+	createUI()
+	changeState(1)
+	return true
+
+func restart()
+	clearCanvas()
+	setupLevel(difficulty.Count() - 1)
+	setTimerBoxText(0)
+	setDifficultySelectionText()
+	difficultySelectionText.visible = inherit
+	changeState(2)
+	return true
+
+func setupScreen()
+	mainBox.w = width + 2
+	mainBox.h = height + 2
+	mainBox.y = 1
+
+	mainBoxCanvas.w = width
+	mainBoxCanvas.h = height
+
+	titleText.y = -mainBox.h / 4
+
+	targetBox.x = mainBox.x - mainBox.w / 2 + 2
+	targetBox.y = mainBox.y - mainBox.h / 2 - 2
+
+	timerBox.x = mainBox.x + mainBox.w / 2 - 3
+	timerBox.y = targetBox.y
+
+func initCache()
+	cx = 0
+	cy = 0
+	cx2 = 0
+	cy2 = 0
+	cl.Clear()
+	ct = 0
+	cc = 0
+
+func setupLevel(i)
+	width = difficulty[i][0]
+	height = difficulty[i][1]
+	mineCount = difficulty[i][2]
+
+	setTargetBoxText(0)
+
+	flagCount = 0
+	targetCount = width * height - mineCount
+	
+	setupScreen()
+
+func createMap()
+	mainBoxCanvas.visible = false
+	titleText.visible = false
+	guideText.visible = false
+	difficultySelectionText.text = "loading..."
+	difficultySelectionText.visible = inherit
+
+	setupLevel(difficultyIndex)
+
+	initTimer()
+
+	initCache()
+	clearCanvas()
+	data.Clear()
+	mine.Clear()
+	changeState(3)
+
+func title()
+	setTitleText(1) // "M I N E S W E E P E R"
+	setGuideText(1)
+
+	?key = up | key = down
+		?key = upEnd | key = downEnd
+			ct = 0 // delay timer reset
+		:
+			?!ct // delay timer check
+				?key = up
+					addDifficultyIndex(-1)
+				:?key = down
+					addDifficultyIndex(1)
+			ct = (ct + 1) % 5 // delay timer update (5 frames)
+
+	return true
+
+func setDifficultyIndex(i)
+	difficultyIndex = i
+	setDifficultySelectionText()
+
+func addDifficultyIndex(i)
+	setDifficultyIndex((difficultyIndex + difficulty.Count() + i) % difficulty.Count())
+
+func setDifficultySelectionText()
+	var t = ""
+	var d
+	?difficultyIndex - 1 >= 0
+		d = difficultyText[difficultyIndex - 1]
+		t += string.Format("▲\n[color={0}]{1}[/color]\n", d[0],  d[1])
+	:
+		t += "\n\n"
+	d = difficultyText[difficultyIndex]
+	t += string.Format("[[color={0}]{1}[/color]]", d[0], d[1])
+	?difficultyIndex + 1 < difficulty.Count()
+		d = difficultyText[difficultyIndex + 1]
+		t += string.Format("\n[color={0}]{1}[/color]\n▼", d[0],  d[1])
+	:
+		t += "\n\n"
+	difficultySelectionText.text = t
+
+func setTitleText(i)
+	var d = titleTextList[i]
+	titleText.color = d[0]
+	titleText.frame = i
+	titleText.visible = inherit
+
+func setGuideText(i)
+	?sys.isPC
+		var d = guideTextList_pc[i]
+	:?sys.isMobile
+		var d = guideTextList_mobile[i]
+	guideText.color = d[0]
+	guideText.text = d[1]
+	guideText.visible = inherit
+
+
+func win()
+	setTitleText(2) // "Y O U  W I N"
+	setGuideText(2) // "X-GoToTitle  C-RestartGame"
+
+func drawMines()
+	?mine.Count()
+		var z = mine[0]
+		cx = z[0]
+		cy = z[1]
+		drawCanvas(cx, cy, 9)
+		mine.RemoveAt(0)
+	:
+		gameover()
+		changeState(9)
+	return true
+
+func gameover()
+	setTitleText(3) // "gameover"
+	setGuideText(2) // "X-GoToTitle  C-RestartGame"
+
+func setupData()
+	?data.Count() < height * width
+		?ct ! data.Count()
+			cx = data.Count() % width
+			cy = math.FloorToInt(data.Count() / width)
+
+			?isTarget(cx, cy)
+				cc = -8
+			:
+				cx2 = cx - 1
+				cy2 = cy - 1
+				cc = 0
+
+			ct = data.Count()
+
+		// 如果目標位置是地雷, 為防止玩家根據時間差異作弊, 設定為與正常計算相同的執行次數
+		:?cc < 0
+			cc++
+			?cc = 0
+				addData(cx, cy, 9)
+
+		// 如果目標位置不是地雷, 計算附近8格內有幾個地雷
+		:?cy2 > cy + 1
+			?cc
+				addData(cx, cy, cc)
+			:
+				addData(cx, cy, 0)
+
+		:
+			?!(cx2 = cx & cy2 = cy) & isTarget(cx2, cy2)
+				cc++
+			cx2++
+			?cx2 > cx + 1
+				cx2 = cx - 1
+				cy2++
+	:
+		mainBoxCanvas.visible = inherit
+		difficultySelectionText.visible = false
+		changeState(5)
+		return true
+	return false
+
+func addData(x, y, s)
+	data.Add([s, 0])
+	drawCanvas(x, y, 10)
+	setTimerBoxText(width * height - data.Count())
+
+func setupTarget()
+	?mine.Count() < mineCount
+		var x = rng % width
+		var y = rng % height
+		?!isTarget(x, y)
+			mine.Add([x, y])
+			setTargetBoxText(mine.Count())
+	:
+		changeState(4)
+		return true
+	return false
+
+func isTarget(x, y)
+	?mine.Count() & inRange(x, y)
+		for i = 0..mine.Count() - 1
+			?x = mine[i][0] & y = mine[i][1]
+				return true
+	return false
+
+func playing()
+	?sys.isPC // 
+		>`@mainBox.absoluteX@,@mainBox.absoluteY+mainBox.h-1@,Z/R.->flag
+	
+	updateTimer()
+	?key = primaryBegin | key = bumpLBegin
+		var x = input.x - (mainBox.absoluteX + 1)
+		var y = input.y - (mainBox.absoluteY + 1)
+		?inRange(x, y)
+			?key = bumpLBegin
+				?flagTile(x, y)
+					return false
+			:?key = primaryBegin
+				?openTile(x, y)
+					return false
+	return true
+
+func initTimer()
+	timer = 0
+	secTimer = 0
+	setTimerBoxText(width * height)
+
+func updateTimer()
+	timer = (timer + 1) % 30
+	?!timer
+		secTimer++
+		setTimerBoxText(secTimer)
+
+func flagTile(x,y)
+	var z = data[getIndex(x, y)]
+	?z[1] = 0
+		z[1] = -1
+		drawCanvas(x, y, 11)
+		flagCount++
+		setTargetBoxText(mineCount - flagCount)
+	:?z[1] = -1
+		z[1] = 0
+		drawCanvas(x, y, 10)
+		flagCount--
+		setTargetBoxText(mineCount - flagCount)
+	return false
+
+func openTile(x, y)
+	var z = data[getIndex(x, y)]
+
+	?z[1] // flag(-1) or open(1)
+		return false
+
+	?z[0] = 9 // mine
+		drawCanvas(x, y, z[0])
+		startGameOver()
+		return true
+
+	// close
+	z[1] = 1
+	targetCount--
+
+	drawCanvas(x, y, z[0])
+
+	?z[0] = 0
+		startProcessVicinityData(x, y)
+		return true
+	:?!targetCount
+		win()
+		changeState(7)
+	return false
+
+func drawCanvas(x, y, n)
+	var art = artList[n]
+	mainBoxCanvas.Set(x, y, art[0], art[1], art[2])
+
+func startGameOver()
+	initCache()
+	changeState(8)
+
+func startProcessVicinityData(x, y)
+	?state ! 6
+		initCache()
+		changeState(6)
+	cl.Add([x, y])
+
+func processVicinityData()
+	?!cc
+		?ct < cl.Count()
+			var z = cl[ct]
+
+			cx = z[0]
+			cy = z[1]
+
+			cc = 8
+
+			ct++
+		:
+			changeState(5)
+			return true
+
+	:
+		cx2 = cx + getoffset(cc + 1) // cache x offset
+		cy2 = cy + getoffset(cc + 3) // cache y offset
+
+		?!(cx2 = cx & cy2 = cy) & inRange(cx2, cy2)
+			openTile(cx2, cy2)
+
+		cc--
+	return false
+
+func getoffset(n)
+	n = n % 8
+	?n % 4
+		?n < 4
+			return -1
+		:
+			return 1
+	return 0
+
+func inRange(x, y)
+	return x >= 0 & x < width & y >= 0 & y < height
+
+func showdata(fre)
+	>@fre@ @state@ @difficultyIndex@\n
+	^@ct@ @cc@ @cx@ @cy@ @cx2@ @cy2@\n
+	^@cl.Count()@ @input.x@ @input.y@\n
+	^@screen.w@ @screen.h@ @targetCount@\n
+	^@mainBox.absoluteX@ @mainBox.absoluteY@ @a@ @b@
+
+func setTimerBoxText(n)
+	timerBoxText.text = numberToString(n)
+
+func setTargetBoxText(n)
+	targetBoxText.text = numberToString(n)
+
+func changeState(i)
+	state = i
+
+func createUI()
+	mainBox = ui.AddPanel()
+	
+	//mainBoxText = ui.AddText()
+	//mainBoxText.visible = false
+	//mainBox.Add(mainBoxText)
+
+	mainBoxCanvas = ui.AddCanvas()
+	mainBoxCanvas.w = width
+	mainBoxCanvas.h = height
+	mainBoxCanvas.visible = false
+	mainBox.Add(mainBoxCanvas)
+
+	targetBox = ui.AddPanel()
+	targetBox.w = 5
+	targetBox.h = 3
+
+	targetBoxText = ui.AddText()
+	targetBoxText.text = "000"
+	targetBoxText.w = 3
+	targetBoxText.h = 1
+	targetBox.Add(targetBoxText)
+
+	timerBox = ui.AddPanel()
+	timerBox.w = 5
+	timerBox.h = 3
+
+	timerBoxText = ui.AddText()
+	timerBoxText.text = "000"
+	timerBoxText.w = 3
+	timerBoxText.h = 1
+	timerBox.Add(timerBoxText)
+
+	titleText = ui.AddAnim(ascii
+
+%%
+M I N E S W E E P E R
+%%
+####Y O U   W I N
+%%
+######gameover
+asciiend)
+	titleText.Stop()
+	mainBox.Add(titleText)
+
+	guideText = ui.AddText()
+	guideText.w = screen.w
+	guideText.h = 1
+	guideText.y = -1
+	guideText.align = center
+	guideText.anchor = bottom_center
+	guideText.dock = bottom_center
+	mainBox.Add(guideText)
+	
+
+	difficultySelectionText = ui.AddText()
+	difficultySelectionText.w = screen.w
+	difficultySelectionText.y = mainBox.y + mainBox.h * 2 / 3
+	difficultySelectionText.align = center
+	mainBox.Add(difficultySelectionText)
+
+	setupScreen()
+	
+	?sys.isMobile
+		BuildArrowButton(0, 0, •)
+		BuildArrowButton(0, -3, ↑)
+		BuildArrowButton(0, 3, ↓)
+		BuildArrowButton(5, 0, ←)
+
+func BuildArrowButton(x, y, t)
+	var button = ui.AddButton()
+	button.text = t
+	button.w = 5
+	button.h = 3
+	button.x = x
+	button.y = y
+	button.style = 1
+	button.anchor = center_left
+	button.dock = center_left
+	button.SetPressed(buttonAction)
+	buttonList.Add(button)
+
+func buttonAction(btn)
+	?buttonList[0] = btn
+		createMap()
+	:?buttonList[1] = btn
+		?state = 2
+			addDifficultyIndex(-1)
+	:?buttonList[2] = btn
+		?state = 2
+			addDifficultyIndex(1)
+	:?buttonList[3] = btn
+		changeState(1)
+
+func redraw()
+	redrawCanvas()
+	?state = 5 | state = 8 |
+	^state = 7 | state = 9
+		setTargetBoxText(mineCount - flagCount)
+		setTimerBoxText(secTimer)
+		?state = 7
+			win()
+		:?state = 9
+			gameover()
+	:?state = 2
+		restart()
+
+func redrawCanvas()
+	for y = 0..height - 1
+		for x = 0..width - 1
+			var i = getIndex(x, y)
+			?i >= data.Count()
+				return
+
+			var z = data[i]
+			?z[1] = -1
+				drawCanvas(x, y, 11)
+			:?z[1] = 0
+				drawCanvas(x, y, 10)
+			:
+				drawCanvas(x, y, z[0])
+	return
+
+func run(fre)
+	main(fre)
+
+main(20)
+
+
+func getIndex(x, y)
+	return width * y + x
+
+func numberToString(n)
+	?n <= 0
+		return "000"
+
+	n = "00" + n
+	return string.sub(n, string.size(n) - 3)
+
+func clearCanvas()
+	mainBoxCanvas.SetFG("#000000")
+	mainBoxCanvas.SetBG("#000000")
+	mainBoxCanvas.Set("#")

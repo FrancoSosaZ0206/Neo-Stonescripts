@@ -1,0 +1,272 @@
+//Rf : Hammer
+//By: Poly
+//Vr : 1.0
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+var HE
+var HEL
+?base.IRS=1
+ HE=＂=＂
+?base.ILS=1
+ HEL=V
+?base.IRS=1
+ HE=base.IRI
+?base.ILS=1
+ HEL=base.ILI
+?base.IRS=2|
+^base.ITS=3
+ HE=V
+?base.IRS=2|
+^base.ITS=3
+ HEL=V
+
+?base.IR=＂Hammer＂&base.IR!Heavy
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^foe.state>=32|
+^base.IR=＂Hammer＂&base.IR!Heavy&
+^foe.state=4
+ >o1,2,#white,ascii
+(
+asciiend
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^foe.state=33
+ >o1,2,#white,ascii
+V
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.T%20<=4
+ >o1,-1,@ICR@,ascii
+(¯\_/¯)
+##(@HE@)
+###¯
+asciiend
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.T%20>4&
+^base.T%20<=8
+ >o1,-2,@ICR@,ascii
+.—.###.—.
+###\_/
+###(@HE@)
+####¯
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.T%20>8&
+^base.T%20<=12
+ >o1,-2,@ICR@,ascii
+.#####.
+#\###/
+##\_/
+##(@HE@)
+###¯
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.T%20=13
+ play bat_wing
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.T%20>12&
+^base.T%20<=16
+ >o1,-2,@ICR@,ascii
+###_
+##/@HE@\
+#(#¯#)
+##`#´
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.T%20>16
+ >o1,-2,@ICR@,ascii
+###_
+.—´@HE@`—.
+`##¯##´
+asciiend
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=3&
+^base.IRT=3
+ >o@1+base.FD@,3,@ICR@,ascii
+##.^.
+.—´¯`—.
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^foe.state!33
+ >o-1,2,#white,ascii
+/
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^foe.state>=32&
+^foe.state!33|
+^base.IR=＂Hammer＂&base.IR!Heavy&
+^foe.state=4
+ >o-1,2,#white,ascii
+(
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^foe.state=33
+ >o0,2,#white,ascii
+V
+asciiend
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.T%20<=4
+ >o-8,-1,@ICL@,ascii
+(¯\_/¯)
+##(@HEL@)
+###¯
+asciiend
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.T%20>4&
+^base.T%20<=8
+ >o-8,-2,@ICL@,ascii
+.—.###.—.
+###\_/
+###(@HEL@)
+####¯
+asciiend
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.T%20>8&
+^base.T%20<=12
+ >o-8,-2,@ICL@,ascii
+.#####.
+#\###/
+##\_/
+##(@HEL@)
+###¯
+asciiend
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.T%20=13
+ play bat_wing
+
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.T%20>12&
+^base.T%20<=16
+ >o-8,-2,@ICL@,ascii
+###_
+##/@HEL@\
+#(#¯#)
+##`#´
+asciiend
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.T%20>16
+ >o-8,-2,@ICL@,ascii
+###_
+.—´@HEL@`—.
+`##¯##´
+asciiend
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=2&
+^base.ILT=1|
+^base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=3&
+^base.ILT=6
+ >o@4+base.FD@,3,@ICL@,ascii
+_
+asciiend
+
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=2&
+^base.ILT=2|
+^base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=3&
+^base.ILT=5
+ >o@3+base.FD@,3,@ICL@,ascii
+.—.
+asciiend
+
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=2&
+^base.ILT>3|
+^base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=3&
+^base.ILT=4
+ >o@1+base.FD@,3,@ICL@,ascii
+.—´¯`—.
+asciiend
+
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=3&
+^base.ILT=1
+ >o@1+base.FD@,-1,@ICL@,ascii
+##.^.
+##| |
+##| |
+##|||
+.—´¯`—.
+asciiend
+
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=3&
+^base.ILT=2
+ >o@1+base.FD@,0,@ICL@,ascii
+##.^.
+##| |
+##|||
+.—´¯`—.
+asciiend
+?base.IL=＂Hammer＂&base.IL!Heavy&
+^base.ILS=3&
+^base.ILT=3
+ >o@1+base.FD@,2,@ICL@,ascii
+##.^.
+.—´¯`—.
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=2&
+^base.IRT=1|
+^base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=3&
+^base.IRT=6
+ >o@4+base.FD@,4,@ICR@,ascii
+_
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=2&
+^base.IRT=2|
+^base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=3&
+^base.IRT=5
+ >o@3+base.FD@,4,@ICR@,ascii
+.—.
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=2&
+^base.IRT>3|
+^base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=3&
+^base.IRT=4
+ >o@1+base.FD@,4,@ICR@,ascii
+.—´¯`—.
+asciiend
+
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=3&
+^base.IRT=1
+ >o@1+base.FD@,0,@ICR@,ascii
+##.^.
+##| |
+##| |
+##|||
+.—´¯`—.
+asciiend
+?base.IR=＂Hammer＂&base.IR!Heavy&
+^base.IRS=3&
+^base.IRT=2
+ >o@1+base.FD@,1,@ICR@,ascii
+##.^.
+##| |
+##|||
+.—´¯`—.
+asciiend

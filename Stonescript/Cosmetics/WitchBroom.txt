@@ -1,0 +1,108 @@
+﻿//*******************************
+// WITCH BROOM
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v4.1.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Gives your player a magical
+// witch broom to soar through
+// Stone Story, complete with 
+// bubbles! (Combine with 
+// import WitchHat for full
+// witchy effect!)
+// 
+//         .-.
+//        ( '')
+//         `·´
+//         /|\
+// o ° . »──>>──
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that's it! 
+// If you want to customize
+// your colors, replace 
+// broomcolor, legcolor, and 
+// bubblecolors below with 
+// your colors of choice. Add
+// as many bubble colors as you
+// like, the bubbles will 
+// randomly cycle through them
+// as you soar! 
+//
+// Enjoy!
+//
+//
+//*******************************
+
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+var broomcolor = #964B00
+var legcolor   = #white
+var bubblecolors = [#cyan,
+                    #green,
+                    #blue]
+
+//*******************************
+// Drawing Code 
+//*******************************
+
+//Broom
+
+>h-3,3,@broomcolor@,»──>>──
+>h0,3,@legcolor@,>>
+
+//Bubbles
+
+var bubbles = ［＂＂,＂＂,＂＂,＂＂,＂＂］
+var colors = [null,null,null,null,null]
+
+var bubblearray = ［
+＂＂, ＂＂, ＂＂, ＂＂,＂ ＂, ＂＂,
+＂.＂,＂·＂,＂•＂,＂☺＂,＂O＂,＂°＂］
+
+?time%3 = 0
+  bubbles［4］ = bubbles［3］
+  bubbles［3］ = bubbles［2］
+  bubbles［2］ = bubbles［1］
+  bubbles［1］ = bubbles［0］
+  bubbles［0］ = bubblearray［rng % 12］
+
+  colors［4］ = colors［3］
+  colors［3］ = colors［2］
+  colors［2］ = colors［1］
+  colors［1］ = colors［0］
+  colors［0］ = bubblecolors［
+        ^rng % bubblecolors.Count()］
+  
+>h-9,3,@colors［4］@,@bubbles［4］@
+>h-8,3,@colors［3］@,@bubbles［3］@
+>h-7,3,@colors［2］@,@bubbles［2］@
+>h-6,3,@colors［1］@,@bubbles［1］@
+>h-5,3,@colors［0］@,@bubbles［0］@
+
+//*******************************
+// End of File
+//*******************************

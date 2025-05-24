@@ -1,0 +1,273 @@
+﻿//*******************************
+// PetSun
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v3.60.6
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Travel the world with
+// a pet sun in tow! 
+// Watch it fly down from
+// the sky to join you on 
+// your adventure,
+// strobing brightly along 
+// the way and reacting when 
+// things get scary!
+//
+//     .-.
+//    { ''}
+//     `-´
+//
+//   __.▲.__
+//   \·.-.·/
+//  ◀:{ ''}:▶
+//   /·`-´·\
+//   ¯¯'▼'¯¯
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that’s it!
+//
+// Advanced Instructions:
+// ----------------------
+// The following variables 
+// can be modified to tailor
+// your pet sun experience:
+//
+// suncolor:  Color of the sun
+//
+// sunstrobe: Speed of sun's 
+//            strobing effect
+//
+// sunalert:  Speed of sun's
+//            strobing effect
+//            when excited or
+//            scared
+//
+// sundistx:  Distance sun stays
+//            back from player
+//
+// sundisty:  Distance sun stays
+//            above player
+//
+// sunsizex:  Distance sun wanders
+//            in the x direction
+//
+// sunsizey:  Distance sun wanders
+//            in the y direction
+//
+//
+// Enjoy!
+//
+//
+//*******************************
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+var suncolor  = #FFDD00
+var sunstrobe = 40
+var sunalert  = 10
+var sundistx  = -16
+var sundisty  = -10
+var sunsizex  = 3
+var sunsizey  = 2
+
+//*******************************
+// Global Variables
+//*******************************
+
+var initialized = null
+var sunpnl = null
+var sunanim = null
+var suntext = null
+var x = 0
+var y = 0
+var currx = -50
+var sinx = 0
+var lastPlayerZ = -20
+var modx = 4
+var mody = 2
+
+
+//*******************************
+// ASCII Art
+//*******************************
+
+var sunpet = ascii
+
+###.-.
+##{ ''}
+###`-´
+
+%%
+####.
+##·.-.·
+#<{ ''}>
+##·`-´·
+####'
+%%
+#__#.#__
+#\·.-.·/
+#<{ ''}>
+#/·`-´·\
+#¯¯#'#¯¯
+%%
+#__.▲.__
+#\·.-.·/
+<:{ ''}:>
+#/·`-´·\
+#¯¯'▼'¯¯
+%%
+#__.▲.__
+#\·.-.·/
+◀:{ ''}:▶
+#/·`-´·\
+#¯¯'▼'¯¯
+%%
+###.▲.
+#'#.-.#'
+◀:{ ''}:▶
+#.#`-´#.
+###'▼'
+%%
+###.#.
+###.-.
+·#{ ''}#·
+###`-´
+###'#'
+asciiend
+
+var custstyle = ui.AddStyle("
+^###
+^###
+^###")
+
+//*******************************
+// Functions
+//*******************************
+
+//*******************************
+// DrawSun()
+//
+// Creates the panel and 
+// animation for the pet
+// sun art
+//
+//*******************************
+func DrawSun()
+  sunpnl = ui.AddPanel()
+  sunpnl.style = custstyle
+  sunpnl.anchor = top_left
+  sunpnl.dock = top_left
+  sunpnl.x = -20
+  sunpnl.y = -10
+  sunpnl.w = 9
+  sunpnl.h = 5
+  
+  sunanim = ui.AddAnim(sunpet)
+  sunanim.anchor = center_center
+  sunanim.dock = center_center
+  sunanim.loop = true
+  sunanim.duration = sunstrobe
+  sunanim.color = suncolor 
+  sunanim.Play()
+
+  suntext = ui.AddText()
+  suntext.anchor = center_center
+  suntext.dock = center_center
+  suntext.w = 3
+  suntext.h = 1
+  suntext.text = " ''"
+
+  sunpnl.Add(sunanim)
+  sunpnl.Add(suntext)
+//
+
+//*******************************
+// MoveSun()
+//
+// Updates the pet sun panel
+// with new x/y coordinates 
+// converting them from the 
+// world to screen positions for
+// use with the sun panel. Also,
+// updates sun's expression in 
+// response to player's facial
+// expression.
+//
+//*******************************
+func MoveSun()
+
+  y = math.RoundToInt(sunsizey*math.Cos(
+             ^math.ToRad(totaltime)*mody))
+  
+  ?lastPlayerZ+2 < pos.z
+    lastPlayerZ++
+  :?lastPlayerZ-2 > pos.z
+    lastPlayerZ--
+
+  sunpnl.y = y+screen.FromWorldZ(lastPlayerZ)
+             ^+ sundisty
+
+
+  ?currx + 1 < pos.x
+    currx++
+
+  ?!ai.walking
+    x = math.RoundToInt(sunsizex*math.Sin(
+             ^math.ToRad(totaltime)*modx))
+    ?sinx < x
+      sinx = sinx + 0.1
+    :?sinx > x
+      sinx = sinx - 0.1
+    
+  sunpnl.x = math.RoundToInt(sinx)+
+             ^screen.FromWorldX(currx)
+             ^+ sundistx
+    
+
+  ?face = "°°"
+    suntext.text = " °°"
+    sunanim.duration = sunalert
+  :?face = "^^"
+    suntext.text = " ^^"
+    sunanim.duration = sunalert
+  : 
+    suntext.text = " ''"
+    sunanim.duration = sunstrobe
+//
+
+
+//*******************************
+// Drawing Code 
+//*******************************
+
+?totaltime <= 1
+  DrawSun()
+  currx = -50
+:
+  MoveSun()
+
+//*******************************
+// End of File
+//*******************************

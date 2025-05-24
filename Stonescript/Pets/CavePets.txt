@@ -1,0 +1,330 @@
+//CavePets
+//By: Lazy 1.0
+var warmerAnim
+var peelerWalkAnim
+var peelerWaitAnim
+var lickerAnim
+var biterWalkAnim
+var biterWaitAnim
+var chopperWalkAnim
+var chopperWaitAnim
+
+?loc.begin
+  warmerAnim = ui.AddAnim(ascii
+###_##__
+##|(#/_(
+##\(#|\(
+###v)`/#
+###＂─'##
+%%
+#########
+#_#####__
+|(####/_(
+`.\V)/.'#
+##`＂─'###
+%%
+#######
+#######
+#######
+###v)_#
+##/＂─#\
+##|(#|(
+##\(#\)
+%%
+########
+########
+########
+##.v)─.#
+#/#＂─\.\
+#\(###)/
+asciiend)
+  warmerAnim.duration = 12
+  warmerAnim.loop = true
+  warmerAnim.Play()
+  warmerAnim.flipX = true
+  warmerAnim.dock = top_left
+warmerAnim.x = screen.FromWorldX(pos.x)-1
+warmerAnim.y = screen.FromWorldZ(pos.z)-8
+
+?loc.begin
+  lickerAnim = ui.AddAnim(ascii
+_####__
+`\,,/.'
+##＂─'##
+%%
+#######
+\_,,_/.
+#`＂─`'#
+%%
+######
+##,,##
+#,＂─\.
+#|,#|;
+%%
+######
+##,,##
+.'＂─`.
+\####/
+asciiend)
+  lickerAnim.duration = 7
+  lickerAnim.loop = true
+  lickerAnim.Play()
+  lickerAnim.flipX = true
+  lickerAnim.dock = top_left
+lickerAnim.x = screen.FromWorldX(pos.x)-10
+lickerAnim.y = screen.FromWorldZ(pos.z)-5
+
+?loc.begin
+  biterWalkAnim = ui.AddAnim(ascii
+##,-,
+<∞|/>
+%%
+##,-,
+/∞(|)
+%%
+##,-,
+|∞<(|
+%%
+##,-,
+(∞/<\
+asciiend)
+  biterWaitAnim = ui.AddAnim(ascii
+##,─,
+/∞|¯\
+%%
+##,─,
+/∞|¯\
+%%
+##,─,
+/∞|¯\
+%%
+##,─,
+/-|¯\
+asciiend)
+  biterWalkAnim.visible = false
+  biterWalkAnim.duration = 15
+  biterWalkAnim.loop = true
+  biterWalkAnim.Play()
+  biterWalkAnim.flipX = true
+  biterWalkAnim.dock = top_left
+
+  biterWaitAnim.visible = false
+  biterWaitAnim.duration = 50
+  biterWaitAnim.loop = true
+  biterWaitAnim.Play()
+  biterWaitAnim.flipX = true
+  biterWaitAnim.dock = top_left
+?ai.walking = true
+ biterWaitAnim.visible = false
+ biterWalkAnim.visible = true
+ biterWalkAnim.x = screen.FromWorldX(pos.x)-3
+ biterWalkAnim.y = screen.FromWorldZ(pos.z)+2
+:
+ biterWaitAnim.visible = true 
+ biterWalkAnim.visible = false
+ biterWaitAnim.x = screen.FromWorldX(pos.x)-3
+ biterWaitAnim.y = screen.FromWorldZ(pos.z)+2
+
+
+?loc.begin
+  peelerWalkAnim = ui.AddAnim(ascii
+#####_###
+####( )_#
+,´`∞<'|#)
+######'##
+%%
+#####_##
+###_( )#
+#/'∞`´\)
+´######`
+%%
+#####_##
+####( )#
+#|`(`^´|
+#'#####'
+%%
+#####_###
+####( )##
+#(`∞/<´\#
+##`´####`
+%%
+#####_####
+####( )###
+#<;∞|/#`.#
+####'####`
+%%
+#####_####
+#_##( )#_#
+'#`∞(|#`#'
+#####`####
+asciiend)
+  peelerWaitAnim = ui.AddAnim(ascii
+#####_###
+####( )##
+#/`∞|´\\#
+´###'##``
+%%
+#####_###
+####( )##
+#/`∞|´\\#
+´###'##``
+%%
+#####_###
+####( )##
+#/`∞|´\\#
+´###'##``
+%%
+#####_###
+####( )##
+#/`-|´\\#
+´###'##``
+asciiend)
+  peelerWalkAnim.visible = false
+  peelerWalkAnim.duration = 21
+  peelerWalkAnim.loop = true
+  peelerWalkAnim.Play()
+  peelerWalkAnim.flipX = true
+  peelerWalkAnim.dock = top_left
+
+  peelerWaitAnim.visible = false
+  peelerWaitAnim.duration = 60
+  peelerWaitAnim.loop = true
+  peelerWaitAnim.Play()
+  peelerWaitAnim.flipX = true
+  peelerWaitAnim.dock = top_left
+?ai.walking = true
+ peelerWaitAnim.visible = false
+ peelerWalkAnim.visible = true
+ peelerWalkAnim.x = screen.FromWorldX(pos.x)+1
+ peelerWalkAnim.y = screen.FromWorldZ(pos.z)-2
+:
+ peelerWaitAnim.visible = true 
+ peelerWalkAnim.visible = false
+ peelerWaitAnim.x = screen.FromWorldX(pos.x)+1
+ peelerWaitAnim.y = screen.FromWorldZ(pos.z)-2
+
+
+?loc.begin
+  chopperWalkAnim = ui.AddAnim(ascii
+########___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'-.<`(´|
+#_,-- /####'
+#¯¯¯´¯######
+%%
+########___##
+######()`-.\#
+#,--.#_`__(/#
+'´¯¯'-./<#´\#
+#_,-- /`####`
+#¯¯¯´¯#######
+%%
+########___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'∞.|/-´)
+#_,-- /'####
+#¯¯¯´¯######
+%%
+########___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'∞.,\|^#
+#_,-- /##＂##
+#¯¯¯´¯######
+%%
+########___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'∞.,^\(#
+#_,-- /###``
+#¯¯¯´¯######
+%%
+########___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'∞.<`(´|
+#_,-- /####'
+#¯¯¯´¯######
+%%
+########___##
+######()`-.\#
+#,--.#_`__(/#
+'´¯¯'∞./<#´\#
+#_,-- /`####`
+#¯¯¯´¯#######
+%%
+####### ___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'∞.|/-´)
+#_,-- /'####
+#¯¯¯´¯######
+%%
+########___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'∞.,\|^#
+#_,-- /##＂##
+#¯¯¯´¯######
+%%
+########___#
+######()`-.\
+#,--.#_`__(/
+'´¯¯'∞.,^\(#
+#_,-- /###``
+#¯¯¯´¯######
+asciiend)
+  chopperWaitAnim = ui.AddAnim(ascii
+########___##
+######()`-.\#
+#,--.#_`__(/#
+'´¯¯'∞.,)´)\#
+#_,-- /#`#`#`
+#¯¯¯´¯#######
+%%
+########___##
+######()`-.\#
+#,--.#_`__(/#
+'´¯¯'∞.,)´)\#
+#_,-- /#`#`#`
+#¯¯¯´¯#######
+%%
+########___##
+######()`-.\#
+#,--.#_`__(/#
+'´¯¯'∞.,)´)\#
+#_,-- /#`#`#`
+#¯¯¯´¯#######
+%%
+########___##
+######()`-.\#
+#,--.#_`__(/#
+'´¯¯'-.,)´)\#
+#_,-- /#`#`#`
+#¯¯¯´¯#######
+asciiend)
+  chopperWalkAnim.visible = false
+  chopperWalkAnim.duration = 30
+  chopperWalkAnim.loop = true
+  chopperWalkAnim.Play()
+  chopperWalkAnim.flipX = true
+  chopperWalkAnim.dock = top_left
+
+  chopperWaitAnim.visible = false
+  chopperWaitAnim.duration = 50
+  chopperWaitAnim.loop = true
+  chopperWaitAnim.Play()
+  chopperWaitAnim.flipX = true
+  chopperWaitAnim.dock = top_left
+?ai.walking = true
+ chopperWaitAnim.visible = false
+ chopperWalkAnim.visible = true
+ chopperWalkAnim.x = screen.FromWorldX(pos.x)-7
+ chopperWalkAnim.y = screen.FromWorldZ(pos.z)
+:
+ chopperWaitAnim.visible = true 
+ chopperWalkAnim.visible = false
+ chopperWaitAnim.x = screen.FromWorldX(pos.x)-7
+ chopperWaitAnim.y = screen.FromWorldZ(pos.z)

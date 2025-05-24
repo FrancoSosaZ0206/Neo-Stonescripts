@@ -1,0 +1,81 @@
+//*******************************
+// MUSHROOM HAT
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v3.56.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Gives your player a cute
+// mushroom hat! 
+//   .-._
+//  ;°_.-().
+// .O'_.——-.:
+// ;.' ,—-. :
+// :: ( '')'
+//  `•-`.´
+//     /|\
+//     / \
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that’s it! 
+// If you want to customize
+// your colors, replace 
+// topcolor and botcolor below
+// with your colors of choice.
+//
+// Enjoy!
+//
+//
+//*******************************
+
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+var topcolor = #red
+var botcolor = #white
+
+//*******************************
+// Drawing Code 
+//*******************************
+
+>h-5,-4,@topcolor@,ascii
+##.-._
+#;°_.-().
+.O'_.——-.:
+;.' ,—-. :
+:: #####'
+#`•-
+asciiend
+
+>h-5,-4,@botcolor@,ascii
+#
+##°###()
+#O#_.——-.
+#.' ,—-. :
+#: #####'
+#`•-
+asciiend
+
+//*******************************
+// End of File
+//*******************************

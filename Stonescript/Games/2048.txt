@@ -1,0 +1,549 @@
+/*
+2048
+written by ArtificialPotato
+v2.0
+Description:
+Stonescript implementation of 2048 by Gabriele Cirulli
+1.0-original mode
+2.0-undoable mode added
+Instructions: Type 'import Games/2048' (without the quotes) into your mindstone.
+*/
+
+var str_title=ascii
+██████╗░░█████╗░░░██╗██╗░█████╗░
+╚════██╗██╔══██╗░██╔╝██║██╔══██╗
+░░███╔═╝██║░░██║██╔╝░██║╚█████╔╝
+██╔══╝░░██║░░██║███████║██╔══██╗
+███████╗╚█████╔╝╚════██║╚█████╔╝
+╚══════╝░╚════╝░░░░░░╚═╝░╚════╝░
+asciiend
+
+var str_gameover=ascii
+ _____ _____ _____ _____    _____ _____ _____ _____ 
+|   __|  _  |     |   __|##|     |  |  |   __| __  |
+|  |  |     | | | |   __|##|  |  |  |  |   __|    -|
+|_____|__|__|_|_|_|_____|##|_____|\___/|_____|__|__|
+###########Press a button/Title(C) to return to menu
+asciiend
+
+var str_undo_pc="    Z: Undo"
+var str_tips_pc=ascii
+ ↑↓←→: Move
+    X: Restart
+    C: Back To Title
+SHIFT: Show/Hide BG
+asciiend
+
+
+var int__FUSEDCOUNT=10//animation param
+var int_boxW=6
+var int_boxH=3
+var str_gamestate="title"// title/game/game_undo
+var bool_showbg=true
+
+//show_hide
+var arrint2_tiles=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+var listarrint2_hist=[]
+var listint_scorehist=[]
+var int_score=0
+var str_highscorekey="ap2048best"
+var int_highscore=storage.Get(str_highscorekey, 0)
+var str_highscorekey_undo="ap2048bestundo"
+var int_highscore_undo=storage.Get(str_highscorekey_undo, 0)
+//system vars and funcs
+var int_screenW
+int_screenW=screen.w
+var int_screenH
+int_screenH=screen.h
+var int_FloorToInt=math.FloorToInt
+var int_CeilToInt=math.CeilToInt
+var draw_Bg=draw.Bg
+var draw_Box=draw.Box
+var draw_Clear=draw.Clear
+var int_string_Size=string.Size
+var bool_isMobile=sys.isMobile
+
+func int_rnd(bins)//generate 0-(bins-1) int
+    return int_FloorToInt(rngf*bins)
+func init_tiles()
+    arrint2_tiles=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+    var first_tile=int_rnd(16)
+    var second_tile=int_rnd(15)
+    var rand=rngf
+    ?second_tile>=first_tile
+        second_tile=second_tile+1
+    ?rand<0.81
+        arrint2_tiles[int_FloorToInt(first_tile/4)][first_tile%4]=2
+        arrint2_tiles[int_FloorToInt(second_tile/4)][second_tile%4]=2
+    :?rand<0.99
+        arrint2_tiles[int_FloorToInt(first_tile/4)][first_tile%4]=4
+        arrint2_tiles[int_FloorToInt(second_tile/4)][second_tile%4]=2
+    :
+        arrint2_tiles[int_FloorToInt(first_tile/4)][first_tile%4]=4
+        arrint2_tiles[int_FloorToInt(second_tile/4)][second_tile%4]=4
+
+var arrint_added=[-1,-1]
+var int_addedcount=-1
+func add_tile()
+    var num_zerotile=0//# of zero tile
+    for i = 0..15
+        ?arrint2_tiles[int_FloorToInt(i/4)][i%4]=0
+            num_zerotile=num_zerotile+1
+    var index_add=int_rnd(num_zerotile)
+    var zero_count=0
+    for i=0..15
+        ?arrint2_tiles[int_FloorToInt(i/4)][i%4]=0
+            ?index_add-zero_count=0
+                ?rngf<0.9
+                    arrint2_tiles[int_FloorToInt(i/4)][i%4]=2
+                :
+                    arrint2_tiles[int_FloorToInt(i/4)][i%4]=4
+                arrint_added[0]=int_FloorToInt(i/4)
+                arrint_added[1]=i%4
+                int_addedcount=int__FUSEDCOUNT
+            zero_count=zero_count+1
+
+func arrint2_clone(arrint2_arg)
+    var a=arrint2_arg
+    return [[a[0][0],a[0][1],a[0][2],a[0][3]],[a[1][0],a[1][1],a[1][2],a[1][3]],[a[2][0],a[2][1],a[2][2],a[2][3]],[a[3][0],a[3][1],a[3][2],a[3][3]]]
+
+
+func show_title()
+    var int_titleW=33
+    var int_titleH=6
+    var offsetX=int_CeilToInt((int_screenW-int_titleW)/2)
+    var offsetY=int_CeilToInt((int_screenH-int_titleH)/2-5)
+    >`@offsetX@,@offsetY@,#white,@str_title@
+    var start="Press a button to select mode"
+    offsetX=int_CeilToInt((int_screenW-38)/2)
+    offsetY=int_CeilToInt((int_screenH)/2+3)
+    >`@offsetX@,@offsetY@,#white,@start@
+
+func show_gameover()
+    var gameoverW=52
+    var gameoverH=4
+    var offsetX=int_CeilToInt((int_screenW-gameoverW)/2)
+    var offsetY=int_CeilToInt((int_screenH-gameoverH)/2)
+    >`@offsetX@,@offsetY@,#white,@str_gameover@
+func str_numcolor(number)
+    ?number=0
+        return "#000000"
+    :?number=2
+        return "#white"
+    :?number=4
+        return "#white"
+    :?number=8
+        return "#cyan"
+    :?number=16
+        return "#cyan"
+    :?number=32
+        return "#yellow"
+    :?number=64
+        return "#yellow"
+    :?number=128
+        return "#green"
+    :?number=256
+        return "#green"
+    :?number=512
+        return "#blue"
+    :?number=1024
+        return "#blue"
+    :?number=2048
+        return "#red"
+    :?number=4096
+        return "#red"
+    :
+        return "#rainFF"
+func str_bgcolor(number)
+    ?number=0
+        return "#000000"
+    :?number=2
+        return "#3D3D3D"
+    :?number=4
+        return "#4D4D4D"
+    :?number=8
+        return "#007B7B"
+    :?number=16
+        return "#008B8B"
+    :?number=32
+        return "#B8B800"
+    :?number=64
+        return "#C8C800"
+    :?number=128
+        return "#005400"
+    :?number=256
+        return "#006400"
+    :?number=512
+        return "#00007B"
+    :?number=1024
+        return "#00008B"
+    :?number=2048
+        return "#7B0000"
+    :?number=4096
+        return "#8B0000"
+    :
+        return "#9400D3"
+func show_tile(x,y,number)//xy:0-3int num:int
+    var offsetX=int_CeilToInt(int_screenW/2-int_boxW*2)+x*int_boxW
+    var offsetY=int_CeilToInt(int_screenH/2-int_boxH*2)+y*int_boxH
+    draw_Bg(offsetX,offsetY,str_bgcolor(number),int_boxW,int_boxH)
+    >`@offsetX@,@offsetY+1@,@str_numcolor(number)@,@number@
+
+var button_origstart
+var button_undostart
+func add_titlebuttons()
+    ui.Clear()
+    button_origstart = ui.AddButton()
+    button_origstart.y = 8
+    button_origstart.x = int_screenW/4
+    button_origstart.text = "Original"
+    button_origstart.SetPressed(start)
+    button_undostart = ui.AddButton()
+    button_undostart.y = 8
+    button_undostart.x = -int_screenW/4
+    button_undostart.text = "Undoable"
+    button_undostart.SetPressed(start)
+
+
+
+var bool_moved=false
+var arrint2_fused=[]
+var int_fusedcount=0
+func int_shake_to(dir)
+    bool_moved=false
+    arrint2_fused.Clear()
+    var score_tmp=0//score
+    ?dir="right"
+        for i=0..3
+            var first_pointer=0//next fuse index of i/j
+            var second_pointer=1//curr reading of i/j
+            for j=0..4//rev
+                ?second_pointer<4
+                    ?arrint2_tiles[i][3-second_pointer]!0
+                        ?arrint2_tiles[i][3-first_pointer]=arrint2_tiles[i][3-second_pointer]
+                            arrint2_tiles[i][3-first_pointer]=arrint2_tiles[i][3-first_pointer]*2
+                            score_tmp=score_tmp+arrint2_tiles[i][3-first_pointer]
+                            arrint2_tiles[i][3-second_pointer]=0
+                            arrint2_fused.Add([i,3-first_pointer])
+                            int_fusedcount=int__FUSEDCOUNT
+                            first_pointer=first_pointer+1
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :?arrint2_tiles[i][3-first_pointer]=0
+                            arrint2_tiles[i][3-first_pointer]=arrint2_tiles[i][3-second_pointer]
+                            arrint2_tiles[i][3-second_pointer]=0
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :
+                            ?second_pointer=first_pointer+1
+                                first_pointer=first_pointer+1
+                                second_pointer=second_pointer+1
+                            :
+                                first_pointer=first_pointer+1
+                    :
+                        second_pointer=second_pointer+1
+        return score_tmp
+    ?dir="left"
+        for i=0..3
+            var first_pointer=0//next fuse index of i/j
+            var second_pointer=1//curr reading of i/j
+            for j=0..4//rev
+                ?second_pointer<4
+                    ?arrint2_tiles[i][second_pointer]!0
+                        ?arrint2_tiles[i][first_pointer]=arrint2_tiles[i][second_pointer]
+                            arrint2_tiles[i][first_pointer]=arrint2_tiles[i][first_pointer]*2
+                            score_tmp=score_tmp+arrint2_tiles[i][first_pointer]
+                            arrint2_tiles[i][second_pointer]=0
+                            arrint2_fused.Add([i,first_pointer])
+                            int_fusedcount=int__FUSEDCOUNT
+                            first_pointer=first_pointer+1
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :?arrint2_tiles[i][first_pointer]=0
+                            arrint2_tiles[i][first_pointer]=arrint2_tiles[i][second_pointer]
+                            arrint2_tiles[i][second_pointer]=0
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :
+                            ?second_pointer=first_pointer+1
+                                first_pointer=first_pointer+1
+                                second_pointer=second_pointer+1
+                            :
+                                first_pointer=first_pointer+1
+                    :
+                        second_pointer=second_pointer+1
+                :
+                    break
+        return score_tmp
+    ?dir="up"
+        for i=0..3
+            var first_pointer=0//next fuse index of i/j
+            var second_pointer=1//curr reading of i/j
+            for j=0..4//rev
+                ?second_pointer<4
+                    ?arrint2_tiles[second_pointer][i]!0
+                        ?arrint2_tiles[first_pointer][i]=arrint2_tiles[second_pointer][i]
+                            arrint2_tiles[first_pointer][i]=arrint2_tiles[first_pointer][i]*2
+                            score_tmp=score_tmp+arrint2_tiles[first_pointer][i]
+                            arrint2_tiles[second_pointer][i]=0
+                            arrint2_fused.Add([first_pointer,i])
+                            int_fusedcount=int__FUSEDCOUNT
+                            first_pointer=first_pointer+1
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :?arrint2_tiles[first_pointer][i]=0
+                            arrint2_tiles[first_pointer][i]=arrint2_tiles[second_pointer][i]
+                            arrint2_tiles[second_pointer][i]=0
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :
+                            ?second_pointer=first_pointer+1
+                                first_pointer=first_pointer+1
+                                second_pointer=second_pointer+1
+                            :
+                                first_pointer=first_pointer+1
+                    :
+                        second_pointer=second_pointer+1
+        return score_tmp
+    ?dir="down"
+        for i=0..3
+            var first_pointer=0//next fuse index of i/j
+            var second_pointer=1//curr reading of i/j
+            for j=0..4//rev
+                ?second_pointer<4
+                    ?arrint2_tiles[3-second_pointer][i]!0
+                        ?arrint2_tiles[3-first_pointer][i]=arrint2_tiles[3-second_pointer][i]
+                            arrint2_tiles[3-first_pointer][i]=arrint2_tiles[3-first_pointer][i]*2
+                            score_tmp=score_tmp+arrint2_tiles[3-first_pointer][i]
+                            arrint2_tiles[3-second_pointer][i]=0
+                            arrint2_fused.Add([3-first_pointer,i])
+                            int_fusedcount=int__FUSEDCOUNT
+                            first_pointer=first_pointer+1
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :?arrint2_tiles[3-first_pointer][i]=0
+                            arrint2_tiles[3-first_pointer][i]=arrint2_tiles[3-second_pointer][i]
+                            arrint2_tiles[3-second_pointer][i]=0
+                            second_pointer=second_pointer+1
+                            bool_moved=true
+                        :
+                            ?second_pointer=first_pointer+1
+                                first_pointer=first_pointer+1
+                                second_pointer=second_pointer+1
+                            :
+                                first_pointer=first_pointer+1
+                    :
+                        second_pointer=second_pointer+1
+        return score_tmp
+
+func bool_movable()
+    
+    var movable=false
+    for i=0..3
+        var tmp_x=-1//check -
+        var tmp_y=-1//check |
+        for j=0..3
+            ?tmp_x=arrint2_tiles[i][j]|arrint2_tiles[i][j]=0
+                movable=true
+                break
+            :
+                tmp_x=arrint2_tiles[i][j]
+            
+            ?tmp_y=arrint2_tiles[j][i]|arrint2_tiles[j][i]=0
+                movable=true
+                break
+            :
+                tmp_y=arrint2_tiles[j][i]
+        ?movable
+            break
+    return movable
+
+
+func show_fused()
+    var num_fused=arrint2_fused.Count()
+    ?num_fused!0
+        for i=0..num_fused-1
+            var offsetX=int_CeilToInt(int_screenW/2-int_boxW*2)+arrint2_fused[i][1]*int_boxW
+            var offsetY=int_CeilToInt(int_screenH/2-int_boxH*2)+arrint2_fused[i][0]*int_boxH
+            draw_Box(offsetX, offsetY, int_boxW, int_boxH, str_numcolor(arrint2_tiles[arrint2_fused[i][0]][arrint2_fused[i][1]]), -3)
+func show_added()
+            var offsetX=int_CeilToInt(int_screenW/2-int_boxW*2)+arrint_added[1]*int_boxW
+            var offsetY=int_CeilToInt(int_screenH/2-int_boxH*2)+arrint_added[0]*int_boxH
+            draw_Box(offsetX, offsetY, int_boxW, int_boxH, "#8D8D8D", -1)
+func show_score()
+    var offsetX=int_CeilToInt(int_screenW/2+int_boxW*2)
+    var offsetY=int_CeilToInt(int_screenH/2-int_boxH*2)-1
+    var strscore="SCORE:"+int_score
+    ?str_gamestate="undo"
+        strscore=strscore+" BEST(Undo):"+int_highscore_undo
+    :
+        strscore=strscore+" BEST:"+int_highscore
+    >`@offsetX-int_string_Size(strscore)@,@offsetY@,@strscore@
+
+var bool_isgameover=false
+func reset_game()
+    int_score=0
+    init_tiles()
+    listarrint2_hist.Clear()
+    listint_scorehist.Clear()
+    ?str_gamestate="undo"
+        listarrint2_hist.Add(arrint2_clone(arrint2_tiles))
+        listint_scorehist.Add(int_score)
+    bool_isgameover=false
+func aftermove()
+    ?bool_moved
+            add_tile()
+            ?str_gamestate="undo"
+                listarrint2_hist.Add(arrint2_clone(arrint2_tiles))
+                listint_scorehist.Add(int_score)
+                ?listint_scorehist.Count()>100
+                    listint_scorehist.RemoveAt(0)
+                    listarrint2_hist.RemoveAt(0)
+            ?!bool_movable()
+                bool_isgameover=true
+var int_mobilekey=-1
+var bool_activatekey=false
+
+func update_game()
+    ?bool_isMobile&str_gamestate="game"
+        ?int_mobilekey!-1&!bool_activatekey
+            int_mobilekey=-1
+        :?bool_activatekey
+            bool_activatekey=false
+    :
+        ?str_gamestate="undo"
+            >`0,@int_screenH-7@,#FFFFFF,@str_undo_pc@
+        >`0,@int_screenH-6@,#FFFFFF,@str_tips_pc@
+    ?!bool_showbg
+        draw_Clear()
+    ?key=leftBegin|int_mobilekey=2
+        int_score+=int_shake_to("left")
+        aftermove()
+    :?key=rightBegin|int_mobilekey=0
+        int_score+=int_shake_to("right")
+        aftermove()
+    :?key=upBegin|int_mobilekey=1
+        int_score+=int_shake_to("up")
+        aftermove()
+    :?key=downBegin|int_mobilekey=3
+        int_score+=int_shake_to("down")
+        aftermove()
+    :?key=ability1Begin
+        bool_showbg=!bool_showbg
+    :?key = backBegin
+        reset_game()
+    :?key = bumpRBegin
+        str_gamestate="title"
+        add_titlebuttons()
+    :?key=bumpLBegin&str_gamestate="undo"
+        undo()
+    
+    ?int_fusedcount>0
+        show_fused()
+        int_fusedcount--
+    ?int_addedcount>0
+        show_added()
+        int_addedcount--
+    for i=0..3
+        for j=0..3
+            show_tile(j,i,arrint2_tiles[i][j])
+    show_score()
+    ?bool_isgameover
+        ?str_gamestate="undo"
+            ?int_score>int_highscore_undo
+                storage.Set(str_highscorekey_undo, int_score)
+                int_highscore_undo=int_score
+        :?int_score>int_highscore
+            storage.Set(str_highscorekey,int_score)
+            int_highscore=int_score
+        show_gameover()
+        ?bool_isMobile&int_mobilekey!-1&!bool_moved
+            reset_game()
+            int_mobilekey=-1
+            bool_activatekey=false
+            str_gamestate="title"
+            add_titlebuttons()
+
+
+func update_title()
+    show_title()
+    ?key = backBegin
+        reset_game()
+        str_gamestate="game"
+        ui.Clear()
+
+
+//main
+//button 18*5
+
+var button_undo
+var button_r
+var button_l
+var button_u
+var button_d
+func wasd(btn)
+    ?btn=button_r
+        int_mobilekey=0
+        bool_activatekey=true
+    :?btn=button_l
+        int_mobilekey=2
+        bool_activatekey=true
+    :?btn=button_d
+        int_mobilekey=3
+        bool_activatekey=true
+    :?btn=button_u
+        int_mobilekey=1
+        bool_activatekey=true
+
+func undo()
+    var int_histcount=listint_scorehist.Count()
+    ?str_gamestate="undo"&int_histcount>1
+        arrint2_tiles=arrint2_clone(listarrint2_hist[int_histcount-2])
+        listarrint2_hist.RemoveAt(int_histcount-1)
+        int_score=listint_scorehist[int_histcount-2]
+        listint_scorehist.RemoveAt(int_histcount-1)
+        bool_isgameover=false
+
+func add_buttons()
+    button_r = ui.AddButton()
+    button_r.x = int_screenW/2-10
+    button_r.text = "→"
+    button_r.SetDown(wasd)
+    button_l = ui.AddButton()
+    button_l.x = -int_screenW/2+10
+    button_l.text = "←"
+    button_l.SetDown(wasd)
+    button_u = ui.AddButton()
+    button_u.y = -int_screenH/2+3
+    button_u.text = "↑"
+    button_u.SetDown(wasd)
+    button_d = ui.AddButton()
+    button_d.y = int_screenH/2-3
+    button_d.text = "↓"
+    button_d.SetDown(wasd)
+    ?str_gamestate="undo"
+        button_undo=ui.AddButton()
+        button_undo.text="Undo"
+        button_undo.x = -int_screenW/2+10
+        button_undo.y = int_screenH/2-3
+        button_undo.SetDown(undo)
+
+func start(btn)
+    ?btn=button_undostart
+        str_gamestate="game_undo"
+    :
+        str_gamestate="game"
+    reset_game()
+    ui.Clear()
+    ?bool_isMobile
+        add_buttons()
+?loc.loop&bool_isMobile&str_gamestate="game"
+    add_buttons()
+:?loc.begin|loc.loop&str_gamestate="title"
+    add_titlebuttons()
+
+?str_gamestate="title"
+    update_title()
+:?str_gamestate="game"
+    update_game()
+

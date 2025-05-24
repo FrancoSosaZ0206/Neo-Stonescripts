@@ -1,0 +1,149 @@
+// *******************************************************
+//                     MyArsenal.txt                      
+// *******************************************************
+
+
+
+/* FILE INFO
+  Library with my current arsenal
+  Made by MetalEagle26 (Tom Crow)
+
+
+DESCRIPTION
+This library just has some variables
+  that minimalize the usage of my
+  current arsenal and provide some
+  info on their damage.
+
+HOW TO IMPORT
+  var a = new MyArsenal
+
+HOW TO USE
+  ?foe.debuffs.count = a.maxIgnitions // example
+
+- There are constant variables that are subject to changes
+depending on the level or state of your arsenal
+(i.e. bladeRDmg). It is recommended to check
+and change these values accordingly for the functions
+to work as intended. */
+
+
+
+// VARIABLES:
+
+/* Renamed:
+
+Mamba Negra = poison sword D *max
+Dothaneel = vigor sword D *max
+Void Slayer = aether sword D *max
+Vantum Phoenix = fire sword D *max
+Bifrost = ice sword D *max
+
+Speedy Hammer = stone hammer *max
+Kubikiribocho = bardiche *max (enchanted: crit)
+
+theVwand = vigor wand D golden
+
+Death's Kiss = poison sword dP shiny (enchanted: P) */
+
+
+//poison:
+var dPsword = "poison sword dP *max" // enchanted: speed
+var psword = "poison sword -dP *max"
+var pshield = "poison shield -ap *max"
+var apShield = "poison shield ap *max"
+var pBow = "poison bow -dP *max"
+var dPbow = "poison bow dP *max"
+var dPwand = "poison wand dP *max"
+var dPstaff = "poison staff dP *max"
+
+
+//vigor:
+var dLsword = "vigor sword dL *max"
+var vsword = "vigor sword -dL *max Spring24"
+var vshield = "vigor shield -ah *max"
+var ahShield = "vigor shield ah *max"
+var ahHammer = "vigor hammer ah *max"
+var vwand = "vigor wand D *max"
+
+//aether:
+var aesword = "aether sword -dU *max"
+var dUsword1 = "aether sword dU *max -big golden"
+var dUSWORD2 = "big aether sword dU *max golden"
+var aeshield = "aether shield -au *max"
+var auShield = "aether shield au *max"
+var aebow = "aether crossbow D *max"
+var dUstaff = "aether staff dU *max"
+var dUwand = "aether wand dU *max"
+
+//fire:
+var dFsword = "fire sword dF *max"
+var fsword = "fire sword -dF *max"
+var fshield = "fire shield A *max"
+var fbow = "fire crossbow dF *max"
+var dFwand = "fire wand dF *max"
+var dFstaff = "fire staff dF *max"
+
+//ice:
+var dIsword = "ice sword dI *max"
+var isword = "ice sword -dI *max"
+var ishield = "ice shield -ai *max"
+var aiShield = "ice shield ai *max"
+var dIwand1 = "ice wand dI *max +16"
+var dIwand2 = "ice wand dI *max +11"
+var ibow = "ice crossbow D *max"
+var dIstaff = "ice staff dI *max"
+
+//alternate:
+var altbow = "crossbow *max golden"
+
+//special weapons:
+var dshield = "dashing shield *max HoH24"
+var myqstaff = "quarterstaff golden"
+var fastBard = "bardiche *max" // enchanted: speed
+var myHamm = "heavy hammer *max"
+var rbow = "repeating crossbow *max golden"
+var sbow = "stone crossbow *max"
+var cshield1 = "compound shield *max shiny"
+var cshield2 = "compound shield *max -shiny"
+var tshield = "towering shield *max golden"
+
+
+
+// Weapons damage and stats
+
+var cMaxArmor = 35
+var boostedPdeb = 4 // [Death's Kiss]'s damage penalty (boosted)
+
+var bladeDmg = 310
+var bladeRDmg = 95
+var smiteMult = 8.8 // mult = multiplier
+
+var armDmg = 56
+var armRDmg = armDmg / 2
+var maxArmBuffs = 4
+
+// multiplied by the amount of Ignition buffs:
+var cindDmg_Default = 36
+var cindDmg_Boosted = 96
+var maxIgnitions_Default = "ignition:10"
+var maxIgnitions_Boosted = "ignition:17"
+
+var weavDmg = 1
+var weavUnmkChance = 0.14 // %
+var weavArmor = 1.35
+
+var hammDmg = 145
+
+/* WARNING: These stats are for
+[Kubikiribocho] only, not for the
+other bardiche! */
+var bardDmg = 52
+var bardCrit = 13.5
+var bardRDmg = (bardDmg + 17) * bardCrit
+
+
+
+// *******************************************************
+//                 END OF "MyArsenal.txt"                 
+// *******************************************************

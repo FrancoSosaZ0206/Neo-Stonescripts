@@ -1,0 +1,1170 @@
+var TITLE = "Chisel"
+var VERSION = "v1.2"
+var AUTHOR = "fruloo +\nSven & Toast"
+
+
+// Instructions
+// import UI/Chisel
+
+// Usage
+// 1) Enter Deadwood Waterfall.
+// 2) Select the desired glyph from the right panel.
+// 3) Use mouse or touchscreen to draw on the center panel.
+
+var LOGO = ascii
+,╦◘
+♦║▼
+║║║
+asciiend
+
+// UI Factory
+
+func MakePanel(parent, x, y, w, h, color, style)
+  var panel = ui.AddPanel()
+  panel.x = x
+  panel.y = y
+  panel.w = w
+  panel.h = h 
+  panel.anchor = top_left
+  panel.dock = top_left
+  ?color ! null
+    panel.color = color
+  ?style ! null
+    panel.style = style
+  ?parent ! null
+    parent.Add(panel)
+  return panel
+
+func MakeButton(x, y, w, h, text, style, onPressedFn)
+  var btn = ui.AddButton()
+  btn.x = x
+  btn.y = y
+  btn.w = w
+  btn.h = h
+  btn.anchor = top_left
+  btn.dock = top_left
+  ?text ! null
+    btn.text = text
+  :
+    btn.text = ""
+  ?style ! null
+    btn.style = style
+  ?onPressedFn ! null
+    btn.SetPressed(onPressedFn)
+  btn.visible = inherit
+  return btn
+
+func MakeSprite(x, y, w, h, color, spriteStr)
+  var sprite = ui.AddAnim(spriteStr)
+  sprite.x = x
+  sprite.y = y
+  sprite.w = w
+  sprite.h = h
+  sprite.anchor = top_left
+  sprite.dock = top_left
+  sprite.color = color
+  sprite.visible = inherit
+  return sprite
+
+func MakeText(x, y, w, h, align, content)
+  var text = ui.AddText()
+  text.x = x
+  text.y = y
+  text.w = w
+  text.h = h
+  text.anchor = top_left
+  text.dock = top_left
+  ?align ! null
+    text.align = align
+  ?content ! null
+    text.text = content
+  return text
+
+// Assets
+
+var StyleInvisible = ui.AddStyle("
+^###
+^###
+^###")
+
+var StyleBrackets = ui.AddStyle("
+^###
+^[#]
+^###")
+
+var AsciiPalette = ascii
+⚿§†☤❄☼☆♂♀°☺ʘ◙◘⏹
+❤♦♣♠♪♫ ↑→↓←▲▶▼◀
+@$%&€£￥₩!¡?¿:;*
+,….·•'＂´`¯-_┊|
+≡=≠≈~÷+±≤≥<>«»^
+/\[]{}()░▒▓█▄▀
+ABCDEFGHIJKLM
+NOPQRSTUVWXYZ
+abcdefghijklm
+nopqrstuvwxyz 
+0123456789
+ãäâáàåÄÅÁÀëêéèÉ
+ïîíìõöôóòÖñüûúù
+ÜýçÇÑ Ææœ∞
+αβγ∆δεέζηΘιλ
+μξπρΣστΦφψΩω
+┌┬┐╔╦╗╒╤╕╓╥╖⌐ ¬ 
+├┼┤╠╬╣╞╪╡╟╫╢║ │ 
+└┴┘╚╩╝╘╧╛╙╨╜═ ─
+asciiend
+
+// Main
+
+var initialized = false
+
+var basePanel = null
+
+var canvasPanel = null
+var canvasPanelTitle = null
+var canvasButton = null
+var canvas = null
+
+var palettePanel = null
+var palettePanelTitle = null
+var palleteTable = null
+var palleteButton = null
+
+var toolsPanel = null
+var toolsPanelTitle = null
+var toolsGlyphPanelL = null
+var toolsGlyphGlyphL = null
+var toolsGlyphPanelR = null
+var toolsGlyphGlyphR = null
+var toolsSwapGlyphLR = null
+var toolSwap = null
+
+var toolBrushSizeLabel = null
+var toolBrushSizeInc = null
+var toolBrushSizeDec = null
+var toolBrushSizeValue = null
+
+var toolBrushStyleLabel = null
+var toolBrushStyleRect = null
+var toolBrushStyleCircle = null
+var toolBrushStyleDiamond = null
+
+var toolSelectLeft
+var toolSelectRight
+var toolLoad
+var toolSave
+var toolUndo
+var toolRedo
+var toolClear = null
+var toolClose = null
+
+var dividerText = null
+var titleText = null
+var authorText = null
+var logoSprite = null
+
+var BrushType_Rect = "BrushType:Rect"
+var BrushType_Circle = "BrushType:Circle"
+var BrushType_Diamond = "BrushType:Diamond"
+
+var brushSizeMax = 20
+var brushSize = 1
+var brushStyle = BrushType_Rect
+
+var isDrawingL = false
+var lastDrawTimeL = null
+var currentGlyphL = "o"
+var isDrawingR = false
+var lastDrawTimeR = null
+var currentGlyphR = " "
+
+var CanvasBlankTextLine = "                                                                           "
+var String
+var Width =  screen.w - 38
+var Load
+var TextLayers = []
+var CornerToolPanel
+var SelectedTool = 0
+var toolSelectText
+
+var toolCopyButton
+var toolCutButton
+var toolPasteButton
+var toolSelectButton
+var toolSelectCanvas
+var toolSelectMotherPanel
+var tool_AddLayer_Button
+var tool_Layer_Buttons = []
+var Selected_Layer = 0
+var toolsTransparent
+var isPC = sys.isPC
+
+
+func Init()
+  disable hud
+  disable banner
+  disable pause  
+  disable abilities
+  disable loadout input
+  ambient.Stop()
+
+  basePanel = MakePanel(null, 0, 0, screen.w, screen.h, null, StyleInvisible)
+
+  // Canvas
+  canvasPanel = MakePanel(basePanel, 18, 0, basePanel.w - 36, basePanel.h, null, null)
+  canvasPanel.color = "#565656"
+  canvasPanelTitle = MakeText(2, 0, 12, 1, "left", "Canvas " + canvasPanel.w + "x" + canvasPanel.h)
+  canvasPanelTitle.color = "#565656"
+  canvasPanel.Add(canvasPanelTitle)
+
+  canvasButton = MakeButton(1, 1, canvasPanel.w - 2, canvasPanel.h - 2, null, StyleInvisible, null)
+  canvasButton.SetDown(StartDrawingL)
+  canvasButton.SetUp(EndDrawingL)
+  canvasButton.hcolor = "#000000"
+  canvasButton.sound = null
+  canvasPanel.Add(canvasButton)
+  canvas = ui.AddCanvas()
+  canvas.x = 1
+  canvas.y = 1
+  canvas.w = canvasPanel.w - 2
+  canvas.h = canvasPanel.h - 2
+  canvas.dock = top_left
+  canvas.anchor = top_left
+  canvas.SetFG("#ffffff")
+  canvas.SetBG("#000000")
+  canvasPanel.Add(canvas)
+
+  ?initialized
+    RecreateLayers()
+  :
+    NewLayer()
+
+
+  // Palette
+  palettePanel = MakePanel(basePanel, 0, 0, 18, basePanel.h, null, null)
+  palettePanel.color = "#565656"
+  palettePanelTitle = MakeText(5, 1, 12, 1, "left", "Palette")
+  palettePanelTitle.color = "#565656"
+  palettePanel.Add(palettePanelTitle)
+
+  palleteButton = MakeButton(1, 3, 16, 19, null, StyleInvisible, CheckPaletteSelectL)
+  palleteButton.hcolor = "#000000"
+  palettePanel.Add(palleteButton)
+  palleteTable = MakeSprite(1, 3, 16, 19, "#ffffff", AsciiPalette)
+  toolsTransparent = MakeButton(4, 22, 8, 3, "Eraser", null, SetEraser)
+  palettePanel.Add(toolsTransparent)
+  palettePanel.Add(palleteTable)
+
+
+  //CornerToolPanel = MakePanel(basePanel, 0, 20, 18, basePanel.h-20, "#565656", null)
+  toolSelectLeft = MakeButton(1, 0, 3, 3, "◀", StyleBrackets, ToolSelectLeft)
+  toolSelectRight = MakeButton(14,0, 3, 3, "▶", StyleBrackets, ToolSelectRight)
+  //toolSelectText = MakeText(2, 21, 16, 1, "center", "Drawing")
+  //CornerToolPanel.Add(toolSelectLeft)
+  //CornerToolPanel.Add(toolSelectRight)
+  CreateToolMasterPanel()
+
+  //func MakePanel(parent, x, y, w, h, color, style)
+
+  // Tools
+  toolsPanel = MakePanel(basePanel, basePanel.w - 18, 0, 18, basePanel.h, null, null)
+  toolsPanel.color = "#565656"
+  toolsPanelTitle = MakeText(2, 0, 12, 1, "left", "Tools")
+  toolsPanelTitle.color = "#565656"
+  toolsPanel.Add(toolsPanelTitle)
+  dividerText = MakeText(1, basePanel.h - 5, 16, 1, "center", "────────────────")
+  dividerText.color = "#565656"
+  toolsPanel.Add(dividerText)
+
+  toolsGlyphPanelL = MakePanel(toolsPanel, 1, 1, 5, 3, #888888, null)
+  toolsGlyphGlyphL = MakeText(0, 1, 5, 1, "center", currentGlyphL)
+  toolsGlyphPanelL.Add(toolsGlyphGlyphL)
+
+  toolsGlyphPanelR = MakePanel(toolsPanel, 6, 1, 5, 3, #888888, null)
+  toolsGlyphGlyphR = MakeText(0, 1, 5, 1, "center", currentGlyphR)
+  toolsGlyphPanelR.Add(toolsGlyphGlyphR)
+
+  toolSwap = MakeButton(11, 1, 6, 3, "Swap", null, SwapLR)
+  toolsPanel.Add(toolSwap)
+  toolUndo = MakeButton(1, 9, 8, 3, "Undo", null, Undo)
+  toolUndo.bcolor = #202020
+  toolsPanel.Add(toolUndo)
+  toolRedo = MakeButton(9, 9, 8, 3, "Redo", null, Redo)
+  toolRedo.bcolor = #202020
+  toolsPanel.Add(toolRedo)
+  toolSave = MakeButton(1, 12, 8, 3, "Save", null, OpenSaveScreen)
+  toolsPanel.Add(toolSave)
+  toolLoad = MakeButton(9, 12, 8, 3, "Load", null, OpenLoadScreen)
+  toolsPanel.Add(toolLoad)
+  toolClear = MakeButton(1, 15, 16, 3, "Clear Canvas", null, ClearCanvas)
+  toolsPanel.Add(toolClear)
+  toolClose = MakeButton(1, 18, 16, 3, "Close Chisel", null, CloseChisel)
+  toolsPanel.Add(toolClose)
+
+  toolBrushSizeLabel = MakeText(1, 5, 6, 1, "left", "Size")
+  toolsPanel.Add(toolBrushSizeLabel)
+  toolBrushSizeDec = MakeButton(7, 4, 3, 3, "-", StyleBrackets, DecBrushSize)
+  toolsPanel.Add(toolBrushSizeDec)
+  toolBrushSizeInc = MakeButton(14, 4, 3, 3, "+", StyleBrackets, IncBrushSize)
+  toolsPanel.Add(toolBrushSizeInc)
+  toolBrushSizeValue = MakeText(10, 5, 3, 1, "right", "" + brushSize)
+  toolsPanel.Add(toolBrushSizeValue)
+
+  toolBrushStyleLabel = MakeText(1, 7, 6, 1, "left", "Style")
+  toolsPanel.Add(toolBrushStyleLabel)
+  toolBrushStyleRect = MakeButton(7, 6, 3, 3, "▒", StyleBrackets, PickBrushTypeRect)
+  toolsPanel.Add(toolBrushStyleRect)
+  toolBrushStyleCircle = MakeButton(10, 6, 3, 3, "0", StyleInvisible, PickBrushTypeCircle)
+  toolsPanel.Add(toolBrushStyleCircle)
+  toolBrushStyleDiamond = MakeButton(13, 6, 3, 3, "♦", StyleInvisible, PickBrushTypeDiamond)
+  toolsPanel.Add(toolBrushStyleDiamond)
+
+  // About
+  titleText = MakeText(1, basePanel.h - 4, 16, 1, "left", TITLE + " " + VERSION)
+  toolsPanel.Add(titleText)
+  authorText = MakeText(1, basePanel.h - 3, 16, 1, "left", "By " + AUTHOR)
+  toolsPanel.Add(authorText)
+  logoSprite = MakeSprite(14, basePanel.h - 4, 4, 3, "#ffffff", LOGO)
+  toolsPanel.Add(logoSprite)
+
+  // Enable right mouse drawing on PC
+  ?isPC 
+    key.Bind("Left", "A", "Mouse1")
+
+  initialized = true
+  SelectedTool = 0
+
+// Util
+
+func PointInRect(px, py, rx, ry, rw, rh)
+  return px >= rx    &     px < (rx + rw)    &    py >= ry    &    py < (ry + rh)
+
+var UndoList = []
+var MaxUndos = 100
+func AddUndoList()
+  var SaveList = []
+  for a : TextLayers
+    SaveList.Add(string.Join("",a.TextList))
+  UndoList.Add([SaveList,SaveRecover,AddRedoList])
+  ?MaxUndos+1 < UndoList.Count()
+    UndoList.RemoveAt(0)
+  UpdateRedoButtonColour()
+  UpdateUndoButtonColour()
+
+var RedoList = []
+func AddRedoList()
+  var SaveList = []
+  for a : TextLayers
+    SaveList.Add(string.Join("",a.TextList))
+  RedoList.Add([SaveList,SaveRecover,AddUndoList])
+  UpdateRedoButtonColour()
+  UpdateUndoButtonColour()
+
+// Palette
+
+func CheckPaletteSelectL()
+  var dx = input.x - palleteTable.absoluteX
+  var dy = input.y - palleteTable.absoluteY
+
+  ?PointInRect(dx, dy, 0, 0, palleteTable.w, palleteTable.h)
+    currentGlyphL = draw.GetSymbol(input.x, input.y)
+    toolsGlyphGlyphL.text = currentGlyphL
+
+func CheckPaletteSelectR()
+  var dx = input.x - palleteTable.absoluteX
+  var dy = input.y - palleteTable.absoluteY
+
+  ?PointInRect(dx, dy, 0, 0, palleteTable.w, palleteTable.h)
+    currentGlyphR = draw.GetSymbol(input.x, input.y)
+    toolsGlyphGlyphR.text = currentGlyphR
+
+// Canvas
+
+func CanvasSaveText(Layer)
+  String = ""
+  for a : TextLayers[Layer].TextList
+    String += a
+  return String
+
+func CanvasLineAdder(Layer)
+  String = ""
+  for a : TextLayers[Layer].TextList
+    String += a+"\n"
+  return String
+
+func CanvasSingleEmplace(BaseString, x, glyph)
+  var StartofLine = string.Sub(BaseString,0,x)
+  var EndofLine = string.Sub(BaseString,x+1)
+  return StartofLine + glyph + EndofLine
+
+func CanvasLineEmplace(BaseString, x, w, glyphs)
+  var StartW = math.Max(x-w/2,0)
+  var EndW = math.Min(x+1+w/2,Width)
+  var CropW = math.Min(w/2+1+x-StartW,w/2-x+EndW)
+
+  var StartofLine = string.Sub(BaseString,0,StartW)
+  var EndofLine = string.Sub(BaseString,EndW)
+  var Middle = string.Sub(glyphs,0,CropW)
+  return StartofLine + Middle + EndofLine
+
+func PasteLineEmplace(BaseString, x, w, glyphs)
+  ?w%2
+    var CropStart = x-w/2
+    var StartW = math.Max(CropStart,0)
+    var EndW = math.Min(x+1+w/2,Width)
+  :
+    var CropStart = x-w/2+1
+    var StartW = math.Max(CropStart,0)
+    var EndW = math.Min(x+1+w/2,Width)
+  var CropW = math.Min(w/2+1+x-StartW,w/2-x+EndW)
+
+  var StartofLine = string.Sub(BaseString,0,StartW)
+  var EndofLine = string.Sub(BaseString,EndW)
+  ?CropStart < StartW
+    var Middle = string.Sub(glyphs,-(x-w/2+1),CropW)
+  :?EndW < x+1+w/2 & w%2=0
+    var Middle = string.Sub(glyphs,0,CropW-1)
+  :
+    var Middle = string.Sub(glyphs,0,CropW)
+  return StartofLine + Middle + EndofLine
+
+func CanvasDrawGlyph(x, y, glyph)
+  ?PointInRect(x, y, 0, 0, canvas.w, canvas.h)
+    TextLayers[Selected_Layer].TextList[y] = CanvasSingleEmplace(TextLayers[Selected_Layer].TextList[y], x, glyph)
+
+func CanvasDrawRect(dx, dy, r, glyph)
+  var MinRange = math.Max(dy+1-r,0)
+  var MaxRange = math.Min(dy+r-1,ScreenH-3)
+  var MaxGlyphs = ""
+  for a = 1..2*r-1
+    MaxGlyphs += glyph
+  for i = MinRange..MaxRange
+    TextLayers[Selected_Layer].TextList[i] = CanvasLineEmplace(TextLayers[Selected_Layer].TextList[i], dx, 2*r-1, MaxGlyphs)
+
+func CanvasDrawCircle(dx, dy, r, glyph)
+  var temp
+  var MinRange = math.Max(dy+1-r,0)
+  var MaxRange = math.Min(dy+r-1,ScreenH-3)
+  var MaxGlyphs = ""
+  for a = 1..2*r-1 + 20
+    MaxGlyphs += glyph
+  for i = MinRange..MaxRange
+    temp = math.RoundToInt(math.Sqrt(  r*r - math.Pow(((i-dy)*(1.1+r/20.0)),2) )*2)
+    ?temp > 0
+      TextLayers[Selected_Layer].TextList[i] = CanvasLineEmplace(TextLayers[Selected_Layer].TextList[i], dx, temp, MaxGlyphs)
+
+func CanvasDrawDiamond(dx, dy, r, glyph)
+  var MinRange = math.Max(dy+1-r,0)
+  var MaxRange = math.Min(dy+r-1,ScreenH-3)
+  var MaxGlyphs = ""
+  for a = 1..2*r-1
+    MaxGlyphs += glyph
+  for i = MinRange..MaxRange
+    TextLayers[Selected_Layer].TextList[i] = CanvasLineEmplace(TextLayers[Selected_Layer].TextList[i], dx, 2*r-1-math.Abs(2*(i-dy)), MaxGlyphs)
+
+var toolSelectOrigin = []
+var toolSelectIsSelecting = false
+func StartDrawingL()
+  var dx = input.x - canvas.absoluteX
+  var dy = input.y - canvas.absoluteY
+  ?PointInRect(dx, dy, 0, 0, canvas.w, canvas.h)
+    ?SelectedTool = 0
+      isDrawingL = true
+      AddUndoList()
+      RedoList.Clear()
+    :?PasteToggle
+      PasteSelection(dx,dy)
+    :?SelectionToggle
+      OpenCutCopyButtons()
+      ?toolSelectOrigin.Count()>0
+        toolSelectCanvas.Recycle()
+      toolSelectIsSelecting = true
+      toolSelectCanvas = ui.AddCanvas()
+      toolSelectCanvas.anchor = top_left
+      toolSelectCanvas.dock = top_left
+      toolSelectOrigin = [dx+1,dy+1]
+      toolSelectCanvas.blend = "Add"
+      toolSelectCanvas.w = 1
+      toolSelectCanvas.h = 1
+      toolSelectCanvas.x = dx
+      toolSelectCanvas.y = dy
+      toolSelectCanvas.visible = false
+      toolSelectCanvas.SetBG("#101010")
+      canvasPanel.Add(toolSelectCanvas)
+
+func EndDrawingL()
+  toolSelectIsSelecting = false
+  isDrawingL = false
+
+func CanvasDrawL()
+  var dx = input.x - canvas.absoluteX
+  var dy = input.y - canvas.absoluteY
+
+  ?PointInRect(dx, dy, 0, 0, canvas.w, canvas.h)
+    ?brushSize = 1
+      CanvasDrawGlyph(dx, dy, currentGlyphL)
+    :?brushStyle = BrushType_Rect
+      CanvasDrawRect(dx, dy, brushSize, currentGlyphL)
+    :?brushStyle = BrushType_Circle
+      CanvasDrawCircle(dx, dy, brushSize, currentGlyphL)
+    :?brushStyle = BrushType_Diamond
+      CanvasDrawDiamond(dx, dy, brushSize, currentGlyphL)
+    TextLayers[Selected_Layer].TextUI.text= CanvasLineAdder(Selected_Layer)
+  lastDrawTimeL = time.msbn
+
+func StartDrawingR()
+  var dx = input.x - canvas.absoluteX
+  var dy = input.y - canvas.absoluteY
+  ?PointInRect(dx, dy, 0, 0, canvas.w, canvas.h)
+    isDrawingR = true
+    AddUndoList()
+    RedoList.Clear()
+
+func EndDrawingR()
+  isDrawingR = false
+
+func CanvasDrawR()
+  var dx = input.x - canvas.absoluteX
+  var dy = input.y - canvas.absoluteY
+
+  ?PointInRect(dx, dy, 0, 0, canvas.w, canvas.h)
+    ?brushSize = 1
+      CanvasDrawGlyph(dx, dy, currentGlyphR)
+    :?brushStyle = BrushType_Rect
+      CanvasDrawRect(dx, dy, brushSize, currentGlyphR)
+    :?brushStyle = BrushType_Circle
+      CanvasDrawCircle(dx, dy, brushSize, currentGlyphR)
+    :?brushStyle = BrushType_Diamond
+      CanvasDrawDiamond(dx, dy, brushSize, currentGlyphR)
+    TextLayers[Selected_Layer].TextUI.text= CanvasLineAdder(Selected_Layer)
+  lastDrawTimeR = time.msbn
+
+// Tools
+
+func SwapLR()
+  var temp = currentGlyphL
+  currentGlyphL = currentGlyphR
+  currentGlyphR = temp
+  toolsGlyphGlyphL.text = currentGlyphL
+  toolsGlyphGlyphR.text = currentGlyphR
+
+func PickBrushTypeRect()
+  brushStyle = BrushType_Rect
+  toolBrushStyleRect.style = StyleBrackets
+  toolBrushStyleCircle.style = StyleInvisible
+  toolBrushStyleDiamond.style = StyleInvisible
+
+func PickBrushTypeCircle()
+  brushStyle = BrushType_Circle
+  toolBrushStyleRect.style = StyleInvisible
+  toolBrushStyleCircle.style = StyleBrackets
+  toolBrushStyleDiamond.style = StyleInvisible
+
+func PickBrushTypeDiamond()
+  brushStyle = BrushType_Diamond
+  toolBrushStyleRect.style = StyleInvisible
+  toolBrushStyleCircle.style = StyleInvisible
+  toolBrushStyleDiamond.style = StyleBrackets
+
+func IncBrushSize()
+  brushSize++
+  ?brushSize > brushSizeMax
+    brushSize = brushSizeMax
+  toolBrushSizeValue.text = "" + brushSize
+
+func DecBrushSize()
+  brushSize--
+  ?brushSize < 1
+    brushSize = 1
+  toolBrushSizeValue.text = "" + brushSize
+
+func ClearCanvas()
+  AddUndoList()
+  for Layer : TextLayers
+    Layer.TextUI.Recycle()
+  TextLayers.Clear()
+  NewLayer()
+  Selected_Layer = 0
+
+func CloseChisel()
+  loc.Leave()
+
+func Run()
+  ?!initialized | loc.loop
+    Init()
+
+  ?lastDrawTimeL ! null & (time.msbn).Sub(lastDrawTimeL).Ge(90)
+    isDrawingL = false
+
+  ?isDrawingL
+    CanvasDrawL()
+  :
+    lastDrawTimeL = null
+
+  ?toolSelectIsSelecting
+    DrawSelectionBox() 
+
+  ?key = "PrimaryEnd"
+    EndDrawingL()
+
+  ?isPC
+    ?key = "LeftBegin"
+      CheckPaletteSelectR()
+      StartDrawingR()
+    ?key = "LeftEnd"
+      EndDrawingR()
+
+    ?lastDrawTimeR ! null & (time.msbn).Sub(lastDrawTimeR).Ge(90)
+      isDrawingR = false
+
+    ?isDrawingR
+      CanvasDrawR()
+    :
+      lastDrawTimeR = null
+
+    ?key = "Ability2"
+      ?key = "DownBegin"
+        ?canvasPanel.visible
+          OpenSaveScreen()
+      :?key = "RightBegin"
+        OpenLoadScreen()
+      :?key = "bumpLBegin"
+        Undo()
+
+var Waterfall = string.Equals(loc.id, waterfall)
+?Waterfall
+  Run()
+
+?item.left = grappling hook
+  equip shovel
+
+func CanvasStartUp()
+  ?loc.loop
+    return CanvasLineAdder(Selected_Layer)
+  String = ""
+  TextLayers[Selected_Layer].TextList = []
+  for a = 1..screen.h - 2
+    TextLayers[Selected_Layer].TextList.Add(string.Sub(CanvasBlankTextLine,0,Width))
+  return CanvasLineAdder(Selected_Layer)
+
+
+//  ==============  Save Functions  ==============
+
+func Undo()
+  ?UndoList.Count() > 0
+    Load = UndoList[UndoList.Count()-1]
+    Load[2]()  //This is the saved Add Redo List function
+    Load[1]()  //This opens the saved undo load function
+    UndoList.RemoveAt(UndoList.Count()-1)
+  UpdateUndoButtonColour()
+
+func Redo()
+  ?RedoList.Count() > 0
+    Load = RedoList[RedoList.Count()-1]
+    Load[2]() //This is the saved Add Undo List function
+    Load[1]() //This opens the saved redo load function
+    RedoList.RemoveAt(RedoList.Count()-1)
+  UpdateRedoButtonColour()
+
+func UpdateRedoButtonColour()
+  ?RedoList.Count() = 0
+    toolRedo.bcolor = #202020
+  :
+    toolRedo.bcolor = #808080
+
+func UpdateUndoButtonColour()
+  ?UndoList.Count() = 0
+    toolUndo.bcolor = #202020
+  :
+    toolUndo.bcolor = #808080
+
+func SaveRecover()
+  var LoadLayerList = Load[0]
+  var LCount = LoadLayerList.Count() 
+  var TCount = TextLayers.Count()
+
+  ?LCount > TCount
+    for a=TCount..LCount-1
+      NewLayer()
+  :?LCount < TCount
+    for a=LCount..TCount-1
+      TextLayers[0].TextUI.Recycle()
+      TextLayers.RemoveAt(0)
+
+  var Ta = 0
+  for T : TextLayers
+    for L = 0..T.TextList.Count()-1
+      T.TextList[L] = string.Sub( LoadLayerList[Ta] , L*Width , Width)
+    T.TextUI.text = string.Join("\n",T.TextList)
+    Ta++
+
+  ?SelectedTool = 2
+    LayerToolScreen()
+
+func CloseSaveScreen()
+  BackgroundPanel.Recycle()
+  BackgroundFade.Recycle()
+  SaveText.Recycle()
+  CloseButton.Recycle()
+  canvasPanel.visible = true
+  for a : ButtonList
+    a.Recycle()
+
+var BackgroundPanel
+var BackgroundFade
+var SaveText
+var CloseButton
+var ScreenH = screen.h
+var ButtonList = []
+
+func OpenSaveScreen()
+  ?!canvasPanel.visible
+    return
+  canvasPanel.visible = false
+  BackgroundFade = ui.AddCanvas()
+  BackgroundFade.w = Screen.w
+  BackgroundFade.h = ScreenH
+  BackgroundFade.blend = Subtract
+  BackgroundFade.SetFG(#404040)
+
+  BackgroundPanel = ui.AddPanel()
+  BackgroundPanel.w = 61
+  BackgroundPanel.h = ScreenH
+
+  SaveText = ui.AddText("Select Save Slot")
+  SaveText.w = 50
+  SaveText.y = -ScreenH/2 + 3
+  SaveText.align = center
+
+  CloseButton = ui.AddButton()
+  CloseButton.style = StyleBrackets
+  CloseButton.x = 10
+  CloseButton.y = -ScreenH/2 + 1
+  CloseButton.w = 3
+  CloseButton.h = 3
+  CloseButton.SetDown(CloseSaveScreen)
+  CloseButton.text = "X"
+
+  var StorageList = storage.Keys()
+  var StorageCount = StorageList.Count() + 1
+  var ButtonsPerRow
+  ?StorageCount > 35
+    ButtonsPerRow = 10
+  :
+    ButtonsPerRow = 5
+  var RowCount = math.CeilToInt((1.0*StorageCount)/ButtonsPerRow)
+  var remainder = StorageCount % ButtonsPerRow
+  var ListReference
+
+  ButtonList.Clear()
+
+  for a=1..RowCount
+    ListReference = (a-1)*ButtonsPerRow
+    ?a = RowCount & remainder>0
+      for b=1..remainder
+        GenerateSaveLoadButtons(true,StorageList,a,b,remainder,ListReference+b)
+    :
+      for b=1..ButtonsPerRow
+        GenerateSaveLoadButtons(true,StorageList,a,b,ButtonsPerRow,ListReference+b)
+
+func OpenLoadScreen()
+  ?!canvasPanel.visible
+    return
+  canvasPanel.visible = false
+  BackgroundFade = ui.AddCanvas()
+  BackgroundFade.w = Screen.w
+  BackgroundFade.h = ScreenH
+  BackgroundFade.blend = Subtract
+  BackgroundFade.SetFG(#404040)
+
+  BackgroundPanel = ui.AddPanel()
+  BackgroundPanel.w = 61
+  BackgroundPanel.h = ScreenH
+
+  SaveText = ui.AddText("Select Load Slot")
+  SaveText.w = 50
+  SaveText.y = -ScreenH/2 + 3
+  SaveText.align = center
+
+  CloseButton = ui.AddButton()
+  CloseButton.style = StyleBrackets
+  CloseButton.x = 10
+  CloseButton.y = -ScreenH/2 + 1
+  CloseButton.w = 3
+  CloseButton.h = 3
+  CloseButton.SetDown(CloseSaveScreen)
+  CloseButton.text = "X"
+
+  var StorageList = storage.Keys()
+  var StorageCount = StorageList.Count()
+  var ButtonsPerRow
+  ?StorageCount = 0
+    SaveText.text = "No Loads Slots Found ☹"
+    CloseButton.x = 15
+    return
+  :?StorageCount > 35
+    ButtonsPerRow = 10
+  :
+    ButtonsPerRow = 5
+  var RowCount = math.CeilToInt((1.0*StorageCount)/ButtonsPerRow)
+  var remainder = StorageCount % ButtonsPerRow
+  var ListReference
+
+  ButtonList.Clear()
+
+  for a=1..RowCount
+    ListReference = (a-1)*ButtonsPerRow
+    ?a = RowCount & remainder>0
+      for b=1..remainder
+        GenerateSaveLoadButtons(false,StorageList,a,b,remainder,ListReference+b)
+    :
+      for b=1..ButtonsPerRow
+        GenerateSaveLoadButtons(false,StorageList,a,b,ButtonsPerRow,ListReference+b)
+
+func ButtonSave(btn)
+  var ButtonSelected
+  for a = 0..ButtonList.Count()-1
+    ?btn = ButtonList[a]
+      ButtonSelected = a+1
+  >Saved to Slot @ButtonSelected@!
+  var SaveFile = ""
+  for Layer = 0..TextLayers.Count()-1
+    SaveFile += CanvasSaveText(Layer) + "☹"
+  storage.Set("SaveSlot"+ButtonSelected,SaveFile)
+  CloseSaveScreen()
+
+func ButtonLoad(btn)
+  AddUndoList()
+
+  var ButtonSelected
+  for a = 0..ButtonList.Count()-1
+    ?btn = ButtonList[a]
+      ButtonSelected = a+1
+  >Loaded Slot @ButtonSelected@!
+  var LoadAllLayers = string.Split(storage.Get("SaveSlot"+ButtonSelected),"☹",true)
+  Load = [LoadAllLayers,SaveRecover,AddRedoList]
+  SaveRecover()
+  CloseSaveScreen()
+
+func GenerateSaveLoadButtons(Saving,StorageList,Row,Column,ColumnCount,ListReference)
+  var SLButton = ui.AddButton()
+  var MiddleNumber = math.CeilToInt((1.0*ColumnCount)/2)
+  var PositionOffset = Column - MiddleNumber
+  var BWidth = 5
+  var BHeight = 3
+
+  SLButton.h = BHeight
+  SLButton.w = BWidth
+  SLButton.y = -ScreenH/2 + BHeight * (Row-1) + 4
+  ?ListReference = StorageList.Count()+1
+    SLButton.text = "New"
+  :
+    SLButton.text = "" + ListReference
+  SLButton.x =  (BWidth+1) * PositionOffset - ((1+ColumnCount)%2)*(BWidth+1)/2
+  ?Saving
+    SLButton.SetDown(ButtonSave)
+  :
+    SLButton.SetDown(ButtonLoad)
+  ButtonList.Add(SLButton)
+
+// ============   Tool Select 
+
+func ToolSelectLeft()
+  SelectedTool--
+  ?SelectedTool < 0
+    SelectedTool = 2
+  UpdateToolSelectPanel()
+
+func ToolSelectRight()
+  SelectedTool = (SelectedTool+1)%3
+  UpdateToolSelectPanel()
+
+func CreateToolMasterPanel()
+  toolSelectMotherPanel = ui.AddPanel()
+  toolSelectMotherPanel.style = StyleInvisible
+  toolSelectMotherPanel.anchor = top_left
+  toolSelectMotherPanel.dock = top_left
+
+var tool_UpDownLayer_buttons = []
+var tool_SelectLayer_Buttons = []
+var TempA
+var tempB
+
+func UpdateToolSelectPanel()
+  SelectionToggle = false
+  PasteToggle = false
+  ?toolSelectOrigin.Count()>0
+    toolSelectCanvas.Recycle()
+    toolSelectOrigin.Clear()
+  ?SelectedTool = 0
+    palettePanelTitle.text = "Palette"
+    toolsTransparent.visible = true
+    palleteTable.visible = true
+    palleteButton.visible = true
+    toolSelectMotherPanel.Recycle()
+    CreateToolMasterPanel()
+
+  :?SelectedTool = 1
+    palettePanelTitle.text = "Selection"
+    toolsTransparent.visible = false
+    palleteTable.visible = false
+    palleteButton.visible = false
+    toolSelectMotherPanel.Recycle()
+    CreateToolMasterPanel()
+
+    toolSelectButton = MakeButton(1, 3, 16, 3, "Select", null, SelectionModeToggle)
+    toolSelectMotherPanel.Add(toolSelectButton)
+    ?CopyList.Count() > 0
+      OpenCutCopyButtons()
+      OpenPasteButton()
+
+  :?SelectedTool = 2
+    palettePanelTitle.text = "Layers"
+    toolsTransparent.visible = false
+    palleteTable.visible = false
+    palleteButton.visible = false
+    LayerToolScreen()
+
+    //func MakeText(x, y, w, h, align, content)
+
+var SelectionToggle = false
+var CutCopyEnabled = false
+var PasteEnabled = false
+var PasteToggle = false
+
+func OpenCutCopyButtons()
+  toolCutButton = MakeButton(1, 6, 8, 3, "Cut", null, CutSelection)
+  toolCopyButton = MakeButton(9, 6, 8, 3, "Copy", null, CopySelection)
+  toolSelectMotherPanel.Add(toolCutButton)
+  toolSelectMotherPanel.Add(toolCopyButton)
+
+func OpenPasteButton()
+  toolPasteButton = MakeButton(1, 9, 16, 3, "Paste Mode", null, PasteModeToggle)
+  toolSelectMotherPanel.Add(toolPasteButton)
+  toolSelectButton.bcolor = "#181818"
+  toolPasteButton.bcolor = "#FFFFFF"
+  SelectionToggle = false
+  PasteEnabled = true
+  PasteToggle = true
+
+func SelectionModeToggle()
+  ?SelectionToggle
+    SelectionToggle = false
+    toolSelectButton.bcolor = "#181818"
+  :
+    SelectionToggle = true
+    ?PasteEnabled
+      PasteToggle = false
+      toolPasteButton.bcolor = "#181818"
+    toolSelectButton.bcolor = "#FFFFFF"
+
+func CutSelection()
+  CopySelection()
+  AddUndoList()
+  var PasteHeight = CopyList.Count()
+  var PasteWidth = string.Size(CopyList[0])
+  var Cx = (toolSelectCanvas.x-1-(PasteWidth+1)%2) + PasteWidth/2
+  var Cy = (toolSelectCanvas.y-1) + PasteHeight/2
+  var MaxRange = math.Min(Cy+(PasteHeight-1)/2,ScreenH-3)
+  ?PasteHeight%2
+    var MinRange = math.Max(Cy-(PasteHeight-1)/2,0)
+  :
+    var MinRange = math.Max(Cy-(PasteHeight-1)/2-1,0)
+  for i = MinRange..MaxRange
+    TextLayers[Selected_Layer].TextList[i] = PasteLineEmplace(TextLayers[Selected_Layer].TextList[i], Cx, PasteWidth+1, CanvasBlankTextLine)
+  TextLayers[Selected_Layer].TextUI.text= CanvasLineAdder(Selected_Layer)
+
+var CopyList = []
+func CopySelection()
+  CopyList.Clear()
+  var CopyWidth = toolSelectCanvas.w
+  var CopyX = toolSelectCanvas.x-1
+  var CopyY = toolSelectCanvas.y-1
+  var CopyHeight = toolSelectCanvas.h-1
+  for a = CopyY..CopyY+CopyHeight
+    CopyList.Add( string.Sub(TextLayers[Selected_Layer].TextList[a],CopyX,CopyWidth))
+  OpenPasteButton()
+  >Selection copied!
+
+func PasteModeToggle()
+  ?PasteToggle
+    PasteToggle = false
+    toolPasteButton.bcolor = "#181818"
+  :
+    PasteToggle = true
+    SelectionToggle = false
+    toolSelectButton.bcolor = "#181818"
+    toolPasteButton.bcolor = "#FFFFFF"
+
+func PasteSelection(dx,dy)
+  AddUndoList()
+  var CopyListRef
+  var PasteHeight = CopyList.Count()
+  var PasteWidth = string.Size(CopyList[0])
+  var MaxRange = math.Min(dy+(PasteHeight-1)/2,ScreenH-3)
+  ?PasteHeight%2
+    var MinRange = math.Max(dy-(PasteHeight-1)/2,0)
+  :
+    var MinRange = math.Max(dy-(PasteHeight-1)/2-1,0)
+  for i = MinRange..MaxRange
+    CopyListRef = i-dy+PasteHeight/2
+    TextLayers[Selected_Layer].TextList[i] = PasteLineEmplace(TextLayers[Selected_Layer].TextList[i], dx, PasteWidth, CopyList[CopyListRef])
+  TextLayers[Selected_Layer].TextUI.text= CanvasLineAdder(Selected_Layer)
+
+func DrawSelectionBox()
+  var dx = input.x - canvas.absoluteX +1
+  var dy = input.y - canvas.absoluteY +1
+  toolSelectCanvas.w = math.Abs(dx - toolSelectOrigin[0])
+  toolSelectCanvas.h = math.Abs(dy - toolSelectOrigin[1])
+  ?dx < toolSelectOrigin[0]
+    toolSelectCanvas.x = dx
+  :
+    toolSelectCanvas.x = toolSelectOrigin[0]
+  ?dy < toolSelectOrigin[1]
+    toolSelectCanvas.y = dy
+  :
+    toolSelectCanvas.y = toolSelectOrigin[1]
+
+/////////////////////////Layers Section
+
+var Math
+func LayerToolScreen()
+
+  toolSelectMotherPanel.Recycle()
+  CreateToolMasterPanel()
+
+  tool_AddLayer_Button = MakeButton(1, 3, 16, 3, "Add Layer", null, AddLayerButton)
+  toolSelectMotherPanel.Add(tool_AddLayer_Button)
+
+  tool_Layer_Buttons.Clear()
+  tool_SelectLayer_Buttons.Clear()
+  for a=0..TextLayers.Count()-1
+    Math = TextLayers.Count()-1-a
+    tool_Layer_Buttons.Add(MakeButton(2, 6+Math*2, 12, 3, "Layer: "+a, null, LayerDetails))
+    ?a = Selected_Layer
+      tool_SelectLayer_Buttons.Add(MakeButton(14, 6+Math*2, 3, 3, "ʘ", null, SelectLayer))
+    :
+      tool_SelectLayer_Buttons.Add(MakeButton(14, 6+Math*2, 3, 3, "☺", null, SelectLayer))
+    toolSelectMotherPanel.Add(tool_Layer_Buttons[a])
+    toolSelectMotherPanel.Add(tool_SelectLayer_Buttons[a])
+
+func AddLayerButton()
+  AddUndoList()
+  NewLayer()
+  LayerToolScreen()
+
+func NewLayer()
+  var TempNew = new UI/ChiselFiles/SetLayer
+  TextLayers.Add(TempNew)
+  canvasPanel.Add(TextLayers[TextLayers.Count()-1].TextUI)
+
+func SelectLayer(btn)
+  for a = 0..tool_SelectLayer_Buttons.Count()-1
+    ?btn = tool_SelectLayer_Buttons[a]
+      tool_SelectLayer_Buttons[Selected_Layer].text = "☺"
+      tool_SelectLayer_Buttons[a].text = "ʘ"
+      Selected_Layer = a
+
+var Layer_Detail_Panel
+var ChosenButton = 9999
+var Layer_ShiftUp_Button
+var Layer_ShiftDown_Button
+var Layer_Delete_Button
+var Layer_Visible_Button
+
+func LayerDetails(btn)
+  ?ChosenButton < tool_Layer_Buttons.Count()
+    ?btn = tool_Layer_Buttons[ChosenButton] & Layer_Detail_Panel
+      Layer_Detail_Panel.Recycle()
+      ChosenButton = 9999
+      for a = 0..tool_Layer_Buttons.Count()-1
+        Math = tool_Layer_Buttons.Count()-1-a
+        tool_Layer_Buttons[a].y = 6+Math*2
+        tool_SelectLayer_Buttons[a].y = 6+Math*2
+      return
+  ChosenButton = 9999
+  for a = 0..tool_Layer_Buttons.Count()-1
+    Math = tool_Layer_Buttons.Count()-1-a
+    ?tool_Layer_Buttons[a] = btn
+      ChosenButton = a
+    ?a <= ChosenButton
+      tool_Layer_Buttons[a].y = 14+Math*2
+      tool_SelectLayer_Buttons[a].y = 14+Math*2
+    :
+      tool_Layer_Buttons[a].y = 6+Math*2
+      tool_SelectLayer_Buttons[a].y = 6+Math*2
+
+  Math = tool_Layer_Buttons.Count()-1-ChosenButton
+  ?Layer_Detail_Panel
+    Layer_Detail_Panel.Recycle()
+  Layer_Detail_Panel = MakePanel(toolSelectMotherPanel, 1, 6+Math*2, 17, 11, null, -5)
+  Layer_ShiftUp_Button = MakeButton(13, 1, 3, 3, "▲", null, LayerShiftUp)
+  Layer_ShiftDown_Button = MakeButton(13, 7, 3, 3, "▼", null, LayerShiftDown)
+  Layer_Delete_Button = MakeButton(1, 7, 12, 3, "Delete", null, LayerDelete)
+  ?TextLayers[ChosenButton].TextUI.visible
+    Layer_Visible_Button = MakeButton(1, 4, 12, 3, "Visible", null, LayerVisible)
+  :
+    Layer_Visible_Button = MakeButton(1, 4, 12, 3, "Invisible", null, LayerVisible)
+  tool_Layer_Buttons[ChosenButton].y = 7+Math*2
+  tool_SelectLayer_Buttons[ChosenButton].y = 10+Math*2
+
+  Layer_Detail_Panel.Add(Layer_ShiftUp_Button)
+  Layer_Detail_Panel.Add(Layer_ShiftDown_Button)
+  Layer_Detail_Panel.Add(Layer_Delete_Button)
+  Layer_Detail_Panel.Add(Layer_Visible_Button)
+
+var Intermediary_Variable
+
+func LayerShiftUp()
+  ?ChosenButton < TextLayers.Count()-1
+    Intermediary_Variable = TextLayers[ChosenButton+1].TextList
+    TextLayers[ChosenButton+1].TextList = TextLayers[ChosenButton].TextList
+    TextLayers[ChosenButton].TextList = Intermediary_Variable
+
+    Intermediary_Variable = TextLayers[ChosenButton+1].TextUI.text
+    TextLayers[ChosenButton+1].TextUI.text = TextLayers[ChosenButton].TextUI.text
+    TextLayers[ChosenButton].TextUI.text = Intermediary_Variable
+
+    LayerDetails(tool_Layer_Buttons[ChosenButton+1])
+
+func LayerShiftDown()
+  ?ChosenButton > 0
+    Intermediary_Variable = TextLayers[ChosenButton-1].TextList
+    TextLayers[ChosenButton-1].TextList = TextLayers[ChosenButton].TextList
+    TextLayers[ChosenButton].TextList = Intermediary_Variable
+
+    Intermediary_Variable = TextLayers[ChosenButton-1].TextUI.text
+    TextLayers[ChosenButton-1].TextUI.text = TextLayers[ChosenButton].TextUI.text
+    TextLayers[ChosenButton].TextUI.text = Intermediary_Variable
+
+    LayerDetails(tool_Layer_Buttons[ChosenButton-1])
+
+func LayerDelete()
+  AddUndoList()
+  ?TextLayers.Count()>1
+    ?ChosenButton < TextLayers.Count()
+      TextLayers[ChosenButton].TextUI.Recycle()
+      TextLayers.RemoveAt(ChosenButton)
+      ?Selected_Layer > 0
+        Selected_Layer--
+    ChosenButton = 9999
+    LayerToolScreen()
+
+func LayerVisible()
+  ?TextLayers[ChosenButton].TextUI.visible
+    Layer_Visible_Button.text = "Invisible"
+    TextLayers[ChosenButton].TextUI.visible = false
+  :
+    Layer_Visible_Button.text = "Visible"
+    TextLayers[ChosenButton].TextUI.visible = true
+
+func SetEraser()
+  currentGlyphL = "#"
+  toolsGlyphGlyphL.text = "Invis"
+
+func RecreateLayers()
+  for T : TextLayers
+    T.TextUI = ui.AddText(T.CanvasLineAdder())
+    T.TextUI.w = screen.w - 38
+    T.TextUI.y = -10
+    T.TextUI.align = center

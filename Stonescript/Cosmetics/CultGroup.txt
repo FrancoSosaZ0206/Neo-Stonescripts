@@ -1,0 +1,1149 @@
+/*Credits\\
+By Citriondragon
+1.1
+- Deleted shadows
+- Disabled player
+1.0
+- Initial release
+*/
+
+var playercolor=#rainFF
+
+var player
+var guardboi
+var heavygal
+var marksgal
+var adeptboi
+var sorceress
+
+var refX = 0
+var refZ = 0
+refX = screen.FromWorldX(pos.x)
+refZ = pos.z
+var lastrefX=0
+var playerX
+playerX=pos.x
+var lastplayerX=0
+var cultX=[gaurdboiX,heavygalX,marksgalX,adeptboiX,sorceressX]
+var pewpews=[]
+var delete=[]
+var remove
+
+var leader=ascii
+###_
+##{))
+### \
+##( !_
+###`¯
+%%
+###_
+##{))
+### \
+##( '._
+###¯´¯
+%%
+###_
+##{))
+### \
+##/ `-._
+##`¯¯¯¯
+%%
+###_
+##{))
+### \
+##/ '.__
+##¯¯¯¯
+asciiend
+
+var guard=ascii
+#
+###_
+#_{))
+(∞( \┼───
+#¯( !_
+###`¯
+%%
+#
+###_
+#_{))
+(∞( \┼───
+#¯( '._
+###¯´¯
+%%
+#
+###_
+#_{))
+(∞( \┼───
+#¯/ `-._
+##`¯¯¯¯
+%%
+#
+###_
+#_{))
+(∞( \┼───
+#¯/ '.__
+##¯¯¯¯
+asciiend
+
+var guardattack=ascii
+#
+####_
+##_{))
+#(∞( \┼───
+##¯/ '._
+####¯¯¯
+%%
+#
+####_
+#_ {))┼───
+#∞(` ¯
+#¯ ( '._
+####¯¯¯
+%%
+#
+####_#┼───
+#_ {)/
+#| ¯ ¡
+#¯ ( '._
+####¯¯¯
+%%
+#
+####_┼───
+#__{()
+#) ¯ ¡
+#¯ / '._
+###`¯`¯
+%%
+#
+####_┼───
+##_{()
+##)V ¡
+##¯/(`,
+###`#¯
+%%
+###_.---.
+#.´  .-- '
+/   ´)
+───┼/¡
+##¯/(`,
+###`#¯
+%%
+#
+####_
+##_{))
+───┼/¡
+##¯/ `,
+###¯`¯
+%%
+#
+####_
+##_{))
+#───┼)
+##¯/ `.
+####¯`¯
+%%
+#
+####_
+##_{))
+##)V ┼
+##¯/ `._
+####¯¯¯
+%%
+#
+####_
+#__{))
+#) ¯ |┼─
+#¯ / '._
+####¯¯¯
+%%
+#
+####_
+#_ {))
+#| ¯ \┼───
+#¯ / '._
+####¯¯¯
+%%
+#
+####_
+#_ {))
+#∞(` \┼───
+#¯ / '._
+####¯¯¯
+%% {repeat:18}
+#
+####_
+##_{))
+#(∞( \┼───
+##¯/ '._
+####¯¯¯
+asciiend
+
+var heavyhitter=ascii
+###########
+###########___
+##########[___]
+############║{))
+############║=´¡
+############║( (_
+############' `¯
+%%
+###########
+###########___
+##########[___]
+############║{))
+############║=´¡
+############║( '._
+############' ¯´¯
+%%
+###########
+###########___
+##########[___]
+############║{))
+############║=´¡
+############║/ `-._
+############'`¯¯¯¯
+%%
+###########
+###########___
+##########[___]
+############║{))
+############║=´¡
+############║/ '.__
+############'¯¯¯¯
+asciiend
+
+var heavyattack=ascii
+% {repeat:3}
+#
+###########___
+##########[___]
+############║{))
+############║=´¡
+############║/ '._
+############'¯¯¯¯
+%%
+###########___
+##########[___]
+############║#_
+############║{))
+############║¯´¡
+############'( '._
+##############¯¯¯
+%%
+#
+#################┌¯┐
+##########-══════╡ │
+############`{\)#└_┘
+#############(`¡
+##############)'._
+##############`¯¯
+%%
+#
+##################┌¯┐
+###########-══════╡ │
+#############{)/##└_┘
+#############(´¡
+##############\'._
+###############`¯
+%% {repeat:3}
+#
+###################┌¯┐
+############-══════╡ │
+##############{)/##└_┘
+##############|´¡
+##############( (_
+###############`¯
+%%
+###########_____
+#########.´  __ `'-.
+#######/   .´###`.  \
+######/   /#{))###`-´
+######|  /═══/═-
+######'--'##`\_'._
+############## ¯¯
+%%
+#
+#
+#############_
+######┌¯┐###{))
+####.\│!│/.══/═-
+#####\___/###`-.`-
+%%
+#
+#
+#############_
+####,#┌:┐#.#{))
+##`###│ ╞════/═-. #
+####`#' '#####`-:\
+######¯¯¯
+%%
+#
+#
+#######'#####_
+###-##┌¯┐##-{))
+#¯####│ ╞════/═-._
+###´##└_┘######`·`
+#######¯
+%%
+#
+#######.
+#############_
+##.###┌¯┐###{))
+.#####│ ╞════/═-_.
+##.###└_┘#####`.-´
+%%
+#
+#
+#############_
+######┌¯┐###{))
+######│ ╞════/═-_.
+######└_┘#####\,:´
+%%
+#
+#
+#############_
+#######┌¯┐##{))
+#######│ ╞════)═-_
+#######└_┘###`\  /
+###############¯´
+%%
+#
+#
+##############_
+########┌¯┐#_{))
+########│ ╞════)═-
+########└_┘#'. ¯)
+#############¯´
+%%
+#
+#
+###########.-._
+##########/ /{))
+#########'-´`\/¡
+#############/\`/
+#############`¯`
+%%
+#
+###########___
+##########[___]
+############║{))
+############║=´¡
+############║/ '·,
+############'¯¯¯¯
+%% {repeat:17}
+#
+###########___
+##########[___]
+############║{))
+############║=´¡
+############║/ '._
+############'¯¯¯¯
+asciiend
+
+var marksman=ascii
+##########_
+#########{))
+#######{══╤)
+#########( !_
+##########`¯
+%%
+##########_
+#########{))
+#######{══╤)
+#########( '._
+##########¯´¯
+%%
+##########_
+#########{))
+#######{══╤)
+#########/ `-._
+#########`¯¯¯¯
+%%
+##########_
+#########{))
+#######{══╤)
+#########/ '.__
+#########¯¯¯¯
+asciiend
+
+var markattack=ascii
+##########_
+#########{))
+#######{══╤)
+#########/ '._
+#########¯¯¯¯
+%%
+##########_
+#########{))
+######{══╤/¡
+#########/ '._
+#########¯¯¯¯
+%% {repeat:2}
+##########_
+#####{══╤{))
+#########¯´¡
+#########/ '._
+#########¯¯¯¯
+%%
+####.#####_
+####-{══╤{))
+####´####¯´¡
+#########/ '._
+#########¯¯¯¯
+%%
+###·######_
+###·##{══╤))
+###·#####`V¡
+#########/ '._
+#########¯¯¯¯
+%%
+##`#######_
+######{══╤))
+##.######`V¡
+#########/ '._
+#########¯¯¯¯
+%%
+#'########_
+#########{))
+#######{══╤)
+#´#######/ '._
+#########¯¯¯¯
+%%
+´#########_
+#########{))
+#######{══╤)
+.########/ '._
+#########¯¯¯¯
+%% {repeat:21}
+##########_
+#########{))
+#######{══╤)
+#########/ '._
+#########¯¯¯¯
+asciiend
+
+var pewpew=ascii
+───-·
+asciiend
+
+var adept=ascii
+#
+#
+######,
+###∞_/(_
+###|{\\
+###|-´ )
+###|/__\
+####`##´
+%%
+#
+#
+######,
+###∞_/(_
+###|{\\
+###|-,/
+###|/__\
+####`##´
+%%
+#
+#
+######,
+###∞_/(_
+###|{\\
+###|-, )
+###|( (
+#####`¯
+%%
+#
+#
+###∞##,
+###|_/(_
+###|{\\
+###|`, \
+####(_(
+######'
+%%
+#
+#
+###∞##,
+###|_/(_
+###|{\\
+###|`,/
+####/__\
+####`##´
+%%
+#
+#
+#####∞,
+####//(_
+###/{\\
+##/`¯, )
+####( (
+#####`¯
+%%
+#
+#
+######,
+####∞/(_
+###/{\\
+##/-´, \
+#/##(_(
+######'
+%%
+#
+#
+######,
+####∞/(_
+###/{\\
+##/-´,/
+#/##/__\
+####`##´
+%%
+#
+#
+######,
+##∞#_/(_
+##|#{\\
+##|-´, )
+##|#( (
+#####`¯
+%%
+#
+#
+######,
+##∞#_/(_
+##|#{\\
+##|-´, \
+##|#(_(
+######'
+asciiend
+
+var adeptattack=ascii
+#
+#
+###∞##,
+###|_/(_
+###|{\\
+###|`,/
+####/__\
+####`##´
+%%
+#
+#
+###∞##,
+###|_/(_
+###|{\\
+###|`/(
+####/__\
+####`##´
+%%
+#
+#
+###∞##,
+###|_/(_
+###|{\\
+###|-´(
+####/__\
+####`##´
+%%
+#
+###∞
+###|##,
+###|_/(_
+###|{\\
+####`¯(
+####/__\
+####`##´
+%%
+#
+######∞
+#####/,
+####//(_
+###/{\\
+####`¯(
+####/__\
+####`##´
+%%
+######'
+####- ∞ -
+#####/.
+####//(_
+###/{\\
+####`¯(
+####/__\
+####`##´
+%%
+######.
+#####-∞-
+#####/'
+####//(_
+###/{\\
+####`¯(
+####/__\
+####`##´
+%% {repeat:2}
+#
+######∞
+#####/,
+####//(_
+###/{\\
+####`¯(
+####/__\
+####`##´
+%%
+#
+#####:-
+∞#####,
+#\##_/(_
+##\#{\\
+###\-´(
+####/__\
+####`##´
+%%
+#
+###.#-
+∞###´#,
+#\##_/(_
+##\#{\\
+###\-´(
+####/__\
+####`##´
+%%
+#
+####·
+∞#´,##,
+#\##_/(_
+##\#{\\
+###\-´(
+####/__\
+####`##´
+%%
+#
+#
+######,
+#∞##_/(_
+##\#{\\
+###\_/(
+####\__\
+####`##´
+%%
+#
+#
+######,
+###∞_/(_
+###|{\\
+###|-,/
+###|/__\
+####`##´
+%% {repeat:26}
+#
+#
+######,
+###∞_/(_
+###|{\\
+###|-, )
+###|/__\
+####`  ´
+asciiend
+
+var splat=ascii
+% {repeat:4}
+#
+(`.
+##'
+%% {repeat:2}
+#
+(`·.
+%%
+#
+(`'.
+%%
+#
+(:·'
+%%
+#
+(,.´
+%% {repeat:2}
+#
+(.·´
+%% {repeat:5}
+##.
+(,'
+asciiend
+
+var sorcerer=ascii
+#
+###,_
+###{\\
+###( `\
+###/`o'._
+###`¯¯'¯
+%%
+#
+###,_
+###{\\
+###( `\
+###(`o'._
+####´¯¯¯
+%%
+#
+###,_
+###{\\
+###( `\
+###(`o`-._
+####¯¯¯¯¯
+%%
+#
+###,_
+###{\\
+###( `\
+###/`o`-._
+###`¯¯¯¯¯
+%%
+#
+###,_
+###{\\
+###( `\
+###/`o'.__
+###¯¯´¯¯
+asciiend
+
+var sorcererattack=ascii
+#
+###,_
+###{\\
+###/ `\
+###`o '._
+###`¯¯'¯
+%%
+##.o
+.'/,_
+| `{\\
+'  `,')
+#`.__,`,
+###` ¯¯
+%% {repeat:3}
+###o
+##/,_
+##\{\\
+###`,')
+###/( `,
+###` ¯¯
+%%
+#o
+#|#,_
+##\{\\
+###`,')
+###/( `,
+###` ¯¯
+%%
+#
+o##,_
+#\_{\\
+###`,')
+###/. `.
+###`¯`¯¯
+%%
+#
+###,_
+###{\\
+o──',`\
+###/  '._
+###`¯'¯¯
+%%
+#
+###,_
+###{\\
+###/,`\
+#o´/  '._
+###`¯¯'¯
+%%
+#
+###,_
+###{\\
+###/,`\
+##'o  '._
+###`¯¯'¯
+%% {repeat:19}
+#
+###,_
+###{\\
+###( `\
+###/`o'._
+###`¯¯'¯
+asciiend
+
+var boom=ascii
+#
+#|/
+##¯
+#
+%%
+#|#/
+#
+###¯
+%%
+#'#´
+#
+####¯
+%% {repeat:7}
+#
+asciiend
+
+var pewboom=ascii
+#
+c@
+%%
+#
+c.@
+asciiend
+
+var pray = ascii
+% {repeat:5}
+##_
+\((}/
+#) '
+,` )
+#¯¯
+%%
+###_
+#|´(}/
+#/ .´
+,` )
+#¯¯
+%%
+#
+####_
+#,-´/}_
+,' ,¯¯
+#¯¯
+%% {repeat:5}
+#
+#
+#####_
+,-'¯´_)
+#¯¯¯ ¯¯
+%%
+#
+####_
+#,-´/}_
+,' ,¯¯
+#¯¯
+%%
+###_
+#|´(}/
+#/ .´
+,` )
+#¯¯
+asciiend
+
+var prayer=false
+
+func CreateProjectile(type)
+  var proj
+  var ptime=0
+  var startX=adeptboi.x
+  var endX=cultX[3]*-1+foe.distance
+  ?type="mark"
+    proj=ui.AddAnim(pewpew)
+    proj.anchor=top_left
+    proj.dock=top_left
+    proj.x=marksgal.x-5
+    proj.y=marksgal.y+1
+  :?type="sorc"
+    proj=ui.AddAnim(pewboom)
+    proj.anchor=top_left
+    proj.dock=top_left
+    proj.x=sorceress.x-3
+    proj.y=sorceress.y+2
+    proj.Play()
+  :?type="adep"
+    proj=ui.AddAnim(splat)
+    proj.anchor=top_left
+    proj.dock=top_left
+    proj.x=adeptboi.x-6
+    proj.y=adeptboi.y+1
+    proj.Play()
+  return [type,proj,ptime,startX,endX]
+
+?totaltime=1
+  pewpews.Clear()
+  prayer=false
+  heavygal=ui.AddAnim(heavyhitter)
+  heavygal.anchor=top_left
+  heavygal.dock=top_left
+  heavygal.flipX=true
+  heavygal.loop=true
+  heavygal.Play()
+  heavygal.x=refX+6
+  heavygal.y=refZ-8
+  cultX[1]=6
+  adeptboi=ui.AddAnim(adept)
+  adeptboi.anchor=top_left
+  adeptboi.dock=top_left
+  adeptboi.flipX=true
+  adeptboi.loop=true
+  adeptboi.Play()
+  adeptboi.x=refX-11
+  adeptboi.y=refZ-7
+  cultX[3]=-11
+  player=ui.AddAnim(leader)
+  player.anchor=top_left
+  player.dock=top_left
+  player.flipX=true
+  player.color=playercolor
+  player.loop=true
+  player.frame=3
+  player.x=refX+3
+  player.y=refZ-3
+  player.visible=false
+  marksgal=ui.AddAnim(marksman)
+  marksgal.anchor=top_left
+  marksgal.dock=top_left
+  marksgal.flipX=true
+  marksgal.loop=true
+  marksgal.Play()
+  marksgal.x=refX-15
+  marksgal.y=refZ-3
+  cultX[2]=-15
+  sorceress=ui.AddAnim(sorcerer)
+  sorceress.anchor=top_left
+  sorceress.dock=top_left
+  sorceress.flipX=true
+  sorceress.loop=true
+  sorceress.Play()
+  sorceress.x=refX-11
+  sorceress.y=refZ-2
+  cultX[4]=-11
+  guardboi=ui.AddAnim(guard)
+  guardboi.anchor=top_left
+  guardboi.dock=top_left
+  guardboi.flipX=true
+  guardboi.loop=true
+  guardboi.Play()
+  guardboi.x=refX-4
+  guardboi.y=refZ
+  cultX[0]=-4
+  lastrefX=screen.FromWorldX(pos.x)
+  lastplayerX=pos.x
+
+for X = 0..cultX.Count()-1
+  cultX[X]=cultX[X]-(playerX - lastplayerX)
+
+player.x=refX+3
+player.y=refZ-3
+?ai.walking&player.playing=false
+  player.Play()
+:?!ai.walking&player.playing
+  player.Stop()
+  player.frame=3
+
+?foe="Naga"&foe.distance<=23
+  guardboi.Load(pray)
+  guardboi.flipX=false
+  guardboi.Play()
+  heavygal.Load(pray)
+  heavygal.flipX=false
+  heavygal.Play()
+  heavygal.y=refZ-5
+  ?!prayer
+    heavygal.x=refX-6
+    cultX[1]=-6
+    prayer=true
+  marksgal.Load(pray)
+  marksgal.flipX=false
+  marksgal.Play()
+  adeptboi.Load(pray)
+  adeptboi.flipX=false
+  adeptboi.Play()
+  adeptboi.y=refZ-4
+  sorceress.Load(pray)
+  sorceress.flipX=false
+  sorceress.Play()
+:
+  guardboi.flipX=true
+  heavygal.flipX=true
+  marksgal.flipX=true
+  adeptboi.flipX=true
+  sorceress.flipX=true
+  ?foe&loc!"Temple"
+    ?cultX[0]<foe.distance
+      ?time%3=0
+        guardboi.Load(guard)
+        cultX[0]=cultX[0]+1
+    :
+      guardboi.Load(guardattack)
+      guardboi.Play()
+    ?cultX[1]<foe.distance+5
+      ?time%3=0
+        heavygal.Load(heavyhitter)
+        cultX[1]=cultX[1]+1
+    :
+      heavygal.Load(heavyattack)
+      heavygal.Play()
+    ?cultX[2]<foe.distance-20
+      ?time%3=0
+        marksgal.Load(marksman)
+        cultX[2]=cultX[2]+1
+    :
+      marksgal.Load(markattack)
+      marksgal.Play()
+      ?marksgal.frame=3
+        pewpews.Add(CreateProjectile("mark"))
+    ?cultX[3]<foe.distance-18
+      ?time%3=0
+        adeptboi.Load(adept)
+        cultX[3]=cultX[3]+1
+    :
+      adeptboi.Load(adeptattack)
+      ?adeptboi.frame=8
+        pewpews.Add(CreateProjectile("adep"))
+      adeptboi.Play()
+    ?cultX[4]<foe.distance-18
+      ?time%3=0
+        sorceress.Load(sorcerer)
+        cultX[4]=cultX[4]+1
+    :
+      sorceress.Load(sorcererattack)
+      sorceress.Play()
+      ?sorceress.frame=1
+        pewpews.Add(CreateProjectile("sorc"))
+  :?time%3=0
+    guardboi.Load(guard)
+    heavygal.Load(heavyhitter)
+    marksgal.Load(marksman)
+    adeptboi.Load(adept)
+    sorceress.Load(sorcerer)
+    ?cultX[0]<-4
+      guardboi.Play()
+      cultX[0]=cultX[0]+1
+    :?cultX[0]>-4
+      guardboi.Play()
+      cultX[0]=cultX[0]-1
+    :?guardboi.playing
+      guardboi.Stop()
+      guardboi.frame=3
+    ?cultX[1]<6
+      heavygal.Play()
+      cultX[1]=cultX[1]+1
+    :?cultX[1]>6
+      heavygal.Play()
+      cultX[1]=cultX[1]-1
+    :?heavygal.playing
+      heavygal.Stop()
+      heavygal.frame=3
+    ?cultX[2]<-15
+      marksgal.Play()
+      cultX[2]=cultX[2]+1
+    :?cultX[2]>-15
+      marksgal.Play()
+      cultX[2]=cultX[2]-1
+    :?marksgal.playing
+      marksgal.Stop()
+      marksgal.frame=3
+    ?cultX[3]<-11
+      adeptboi.Play()
+      cultX[3]=cultX[3]+1
+    :?cultX[3]>-11
+      adeptboi.Play()
+      cultX[3]=cultX[3]-1
+    :?adeptboi.playing
+      adeptboi.Stop()
+      adeptboi.frame=0
+    ?cultX[4]<-12
+      sorceress.Play()
+      cultX[4]=cultX[4]+1
+    :?cultX[4]>-12
+      sorceress.Play()
+      cultX[4]=cultX[4]-1
+    :?sorceress.playing
+      sorceress.Stop()
+      sorceress.frame=2
+?foe!"Nage"
+  ?foe
+    ?guardboi.y>refZ-1
+      guardboi.y=guardboi.y-1
+    :?guardboi.y<refZ-1
+      guardboi.y=guardboi.y+1
+    ?heavygal.y>refZ-7
+      heavygal.y=heavygal.y-1
+    :?heavygal.y<refZ-7
+      heavygal.y=heavygal.y+1
+  :
+    ?guardboi.y>refZ
+      guardboi.y=guardboi.y-1
+    :?guardboi.y<refZ
+      guardboi.y=guardboi.y+1
+    ?heavygal.y>refZ-8
+      heavygal.y=heavygal.y-1
+    :?heavygal.y<refZ-8
+      heavygal.y=heavygal.y+1
+  ?marksgal.y>refZ-3
+    marksgal.y=marksgal.y-1
+  :?marksgal.y<refZ-3
+    marksgal.y=marksgal.y+1
+  ?adeptboi.y>refZ-7
+    adeptboi.y=adeptboi.y-1
+  :?adeptboi.y<refZ-7
+    adeptboi.y=adeptboi.y+1
+  ?sorceress.y>refZ-2
+    sorceress.y=sorceress.y-1
+  :?sorceress.y<refZ-2
+    sorceress.y=sorceress.y+1
+
+?cultX[0] < -60 | cultX[0] > 60
+  cultX[0] = -20
+?cultX[1] < -60 | cultX[1] > 60
+  cultX[1] = -20
+?cultX[2] < -60 | cultX[2] > 60
+  cultX[2] = -20
+?cultX[3] < -60 | cultX[3] > 60
+  cultX[3] = -20
+?cultX[4] < -60 | cultX[4] > 60
+  cultX[4] = -20
+
+?pewpews.Count()>0
+  for P = 0..pewpews.Count()-1
+    ?pewpews[P][0]="mark"
+      ?pewpews[P][1].x>=refX+foe.distance
+        delete.Add(P)
+        pewpews[P][1].Recycle()
+      :
+        pewpews[P][1].x=pewpews[P][1].x+1
+    :?pewpews[P][0]="sorc"
+      ?pewpews[P][1].x>=refX+foe.distance
+        pewpews[P][1].Load(boom)
+        ?pewpews[P][1].frame=3
+          delete.Add(P)
+          pewpews[P][1].Recycle()
+      :
+        pewpews[P][1].x=pewpews[P][1].x+1
+    :?pewpews[P][0]="adep"
+      ?pewpews[P][2]>=pewpews[P][4]+2
+        delete.Add(P)
+        pewpews[P][1].Recycle()
+      :
+        pewpews[P][2]=pewpews[P][2]+1
+        pewpews[P][1].x=pewpews[P][1].x+1
+        pewpews[P][1].y=math.FloorToInt(0.25*((pewpews[P][2]-pewpews[P][3])*(pewpews[P][2]+pewpews[P][4]))/10+adeptboi.y*2)
+        >`0,@pewpews[P][2]@,@pewpews[P][1].y@
+//      0.25*((x-4)*(x+4))
+  ?delete.Count()>0
+    for d : delete
+      pewpews.Emplace(d,0)
+    for d : delete
+      remove=pewpews.IndexOf(0)
+      pewpews.RemoveAt(remove)
+    delete.Clear()
+
+lastrefX=screen.FromWorldX(pos.x)
+lastplayerX=pos.x
+guardboi.x=refX+cultX[0]
+heavygal.x=refX+cultX[1]
+marksgal.x=refX+cultX[2]
+adeptboi.x=refX+cultX[3]
+sorceress.x=refX+cultX[4]
+/*
+for x = -7..7
+  >`60,@x+8@,@math.FloorToInt((0.25*((x-4)*(x+4))+10))@
+  >`@x+50@,@math.FloorToInt((0.25*((x-4)*(x+4))+10))@,#cyan,•*/

@@ -1,0 +1,217 @@
+/* SIMON GAME
+
+Author: ark.brr
+
+Play the classic simon game in stone story rpg!
+Instructions: Copy and paste everything
+your mindstone, then go to the waterfall
+and play it.
+
+Version 1.0 release
+
+*/
+
+var yellowB = Ui.AddButton()
+var greenB = Ui.AddButton()
+var blueB = Ui.AddButton()
+var redB = Ui.AddButton()
+
+var NoBorder = Ui.AddStyle(＂#########＂)
+
+?blink = true
+^& totaltime > 1
+  yellowB.visible = false
+  greenB.visible = false
+  redB.visible = false
+  blueB.visible = false
+:?blink = false
+  yellowB.visible = true
+  greenB.visible = true
+  redB.visible = true
+  blueB.visible = true
+
+yellowB.SetPressed(yellowF)
+yellowB.x = -9
+yellowB.y = 4
+yellowB.w = 13
+yellowB.style = NoBorder
+
+greenB.SetPressed(greenF)
+greenB.x = -9
+greenB.y = -4
+greenB.w = yellowB.w
+greenB.style = NoBorder
+
+blueB.SetPressed(blueF)
+blueB.x = 9
+blueB.y = 4
+blueB.w = yellowB.w
+blueB.style = NoBorder
+
+redB.SetPressed(redF)
+redB.x = 9
+redB.y = -4
+redB.w = yellowB.w
+redB.style = NoBorder
+
+yellowB.text = ＂yellow＂
+greenB.text = ＂green＂
+blueB.text = ＂blue＂
+redB.text = ＂red＂
+var trueAnswer = ［］
+var playerAnswer = ［］
+
+func yellowF()
+  playerAnswer.Add(＂3＂)
+func greenF()
+  playerAnswer.Add(＂1＂)
+func blueF()
+  playerAnswer.Add(＂4＂)
+func redF()
+  playerAnswer.Add(＂2＂)
+
+var actualAnswer
+actualAnswer = rng%4 + 1 + ＂＂
+
+var trueAnswerS
+var trueAnswerI
+var playerAnswerI
+var round = 0
+
+?trueAnswer.Count() > 0
+  trueAnswerS = string.Join(＂＂,trueAnswer)
+  ?string.Size(trueAnswerS) > 0
+    trueAnswerI = int.Parse(trueAnswerS)
+var playerAnswerS
+?playerAnswer.Count() > 0
+  playerAnswerS = string.Join(＂＂, playerAnswer)
+  ?string.Size(playerAnswerS) > 0
+    playerAnswerI = int.Parse(playerAnswerS)
+
+var isTrue
+?trueAnswerI = playerAnswerI
+  isTrue = ＂correct＂
+:?playerAnswer.Count()=trueAnswer.Count()
+  playerAnswer.Clear()
+  trueAnswer.Clear()
+  isTrue = ＂wrong＂
+  play smithy_hammer_fail
+  round=0
+
+
+?trueAnswer.Count() = playerAnswer.Count()
+^& round < 9
+  playerAnswer = ［］
+  trueAnswer.Add(actualAnswer)
+  round++
+  ?totaltime > 1
+    ind = 0
+:?round = 9
+  >c-3,-8,you won!
+  var prevtime_w = totaltime
+  ?totaltime-prevtime_w > 59
+    loc.Leave()
+>`31,7,#222226,
+^###▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒###\n
+^#▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒#\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^#▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒#\n
+^###▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒###\n
+
+>`44,12,#750396,
+^▒▒▒▒▒\n
+^▒▒▒▒▒\n
+^▒▒▒▒▒\n
+
+>`45,20,#750396,@round@
+>`31,15,#66660a,
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^#▒▒▒▒▒▒▒▒▒▒▒▒\n
+^###▒▒▒▒▒▒▒▒▒▒\n
+
+>`31,7,#0a660f,
+^###▒▒▒▒▒▒▒▒▒▒\n
+^#▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+
+>`49,15,#0a0a66,
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒#\n
+^▒▒▒▒▒▒▒▒▒▒###\n
+
+>`49,7,#660a0a,
+^▒▒▒▒▒▒▒▒▒▒###\n
+^▒▒▒▒▒▒▒▒▒▒▒▒#\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+
+var ind = 0
+var prevTime = 30
+var blink = true
+?ind = trueAnswer.Count()
+  blink = false
+:
+  blink = true
+
+?totaltime > 30 & blink = true
+^& playerAnswer.Count() = 0
+  ?prevTime + 15 > totaltime
+    ?ind ! -1
+      ?trueAnswer［ind］ = 1
+        >`31,7,#55ff59,
+^###▒▒▒▒▒▒▒▒▒▒\n
+^#▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+      :?trueAnswer［ind］ = 2
+        >`49,7,#ff5559,
+^▒▒▒▒▒▒▒▒▒▒###\n
+^▒▒▒▒▒▒▒▒▒▒▒▒#\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+      :?trueAnswer［ind］ = 3
+        >`31,15,#ffff59,
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^#▒▒▒▒▒▒▒▒▒▒▒▒\n
+^###▒▒▒▒▒▒▒▒▒▒\n
+      :?trueAnswer［ind］ = 4
+        >`49,15,#5955ff,
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒▒\n
+^▒▒▒▒▒▒▒▒▒▒▒▒#\n
+^▒▒▒▒▒▒▒▒▒▒###\n
+
+  :?prevTime+30 > totaltime
+
+    ?ind < trueAnswer.Count()
+    ^& prevTime+28=totaltime
+      ind++
+  :
+    prevTime = totaltime
+?totaltime > 15
+^!(trueAnswer［0］ = ＂4＂ |
+^trueAnswer［0］ = ＂1＂ |
+^trueAnswer［0］ = ＂2＂ |
+^trueAnswer［0］ = ＂3＂)
+  trueAnswer.Clear()
+  trueAnswer.Add(actualAnswer)

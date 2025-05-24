@@ -1,0 +1,1513 @@
+/*Name: KILLER RPG
+Type: Addon/Minigame
+Creator: GANG(discord:gagabriell)
+Version: 1.0
+KILLER RPG is an addon with a single purpose,
+kill foes, complete missions, earn points and 
+get the last rank! (All systems can be used in
+other Scripts with due credits given)
+*/
+
+
+//var -Lag
+var LB 
+LB = loc.begin
+var LL
+LL = loc.loop
+var TT
+TT = totaltime
+var Td
+Td = time.Day
+var Ti
+Ti = time
+var St
+St = storage.set
+var Sg
+Sg = storage.get
+var Si
+Si = storage.incr
+var f 
+f = foe
+var Mr
+Mr = Math.round
+
+//var most important
+var point = Sg(＂points＂ ,0)
+//Var with priority
+var PotionMI = 1
+var MutageMission = Sg(＂MutageM＂,0)
+var number = 0.09999
+number = Mr(number*10)/10
+var ColorReward = #yellow
+
+//Event var
+var XpEvent = 1
+var KillEvent = 1
+//Event system
+//Kill Event
+?Td > 20 & Td < 24
+ KillEvent = 2
+ ?Ti < 151
+  >`0,0,#red,DOUBLE KILL EVENT IS ACTIVE
+:?Td = 20
+ ?Ti < 151
+  >`0,0,#red,
+  ^Double kill Event available tomorrow
+//Xp Event
+?Td > 0 & Td < 3
+ XpEvent = 2
+ ColorReward = #rainbow
+ ?Ti < 151
+  >`0,0,#rainbow,DOUBLE XP EVENT IS ACTIVE
+:?Td = 31
+ ?Ti < 151
+  >`0,0,#00FFFF,
+  ^Double XP Event available tomorrow
+?Td > 13 & Td < 16
+ XpEvent = 2
+ ColorReward = #rainbow
+ ?Ti < 151
+  >`0,0,#rainbow,DOUBLE XP EVENT IS ACTIVE
+:?Td = 13
+ ?Ti < 151
+  >`0,0,#00FFFF,
+  ^Double XP Event available tomorrow
+
+//Mutagen Event
+?Td > 6 & Td < 10
+ >`0,0,#FF10F0,
+ ^DOUBLE MUTAGENS EVENT ACTIVATE
+ number = 0.19999
+ number = Mr(number*10)/10
+:?Td = 6
+ >`0,0,#00FF00,
+ ^Double Mutagens Event available tomorrow
+
+
+//ascii
+var Rt = ［ascii
+.__________________________.
+|—————————REWARDS——————————|
+|#####################     |
+|###################       |
+|#####################     |
+|######################### |
+|                          |
+|                          |
+|                          |
+|##########################|
+|__________________________|
+'##########################'
+asciiend,ascii
+.__________________________.
+|—————————REWARDS——————————|
+|#####################     |
+|###################       |
+|#####################     |
+|######################### |
+|__________________________|
+'##########################'
+asciiend］
+
+var help = ［ascii
+EVENT DATES:
+2x XP Event: Day 1 to Day 2 & Day 14 to Day 15
+2x Kill Event: Day 21 to Day 23
+2x Mutagens Event: Day 7 to Day 9
+
+One day before the event a warning will be given
+to remind you that the event is the next day, 
+and when active it will also open a warning
+(warnings are only shown during the first 150
+frames of the map)
+
+•REWARDS: Check the ＂REWARDS＂ button. There you 
+will find a list of all the rewards for the 
+respective missions.
+
+•MISSIONS: There are 3 types - items, bosses, and
+FOE.
+
+•Item: requires a specific item to complete the
+mission.
+
+•Boss: requires defeating a boss to complete the
+mission. Each boss defeat increases the counter 
+according to the star of the location you are in.
+
+•FOE: requires defeating an enemy to complete
+the mission
+
+•XP: necessary to level up. You can earn XP by 
+completing missions or fulfilling requirements
+within 2 maps for the XP points to be counted.
+
+•SKIP MISSIONS: After earning 20 XP, you will
+have 
+access to skip missions. Each skip costs 1 XP,so 
+it is recommended not to abuse it. Only 1 map is 
+needed to skip the mission.
+
+•REQUIREMENTS: Any way to earn XP that does not 
+involve completing missions.
+
+•KILL XP: Earn KILL XP by defeating an enemy. The
+amount of Kill XP earned varies according to the 
+star of the location divided by 2 (even for item 
+and enemy missions).
+
+•Market: Store where you can buy potions (that
+give some kind of buff)
+
+•Gems:Gems are remnants of power from a foe,
+left when killing an enemy,each enemy leaves the 
+gem respective to its element 
+
+•«» = Fire Gem, left by fire enemies 
+
+•<> = Ice Gem, left by ice enemies 
+
+•:∞: = Poison Gem, left by poison enemies 
+
+•\V/ = Vigor Gem, left by vigor enemies 
+
+•± = Aether Gem, left by Aether enemies 
+
+•©:Acropolis Coin,Few enemies have it,Rare to see
+2% chance of an enemy dropping it after its death 
+•Potions: Found in the Market,
+buff gem and © gain and accelerate your progress
+in the RPG
+
+•LABORATORY(LAB):In the Laboratory are Found
+to the MUTAGENS
+
+•MUTAGENS: These are permanent improvements 
+purchased with ©
+
+Mutagen Killer: Multiplies all Kill gains
+both in missions and in requirements
+
+Mutagen Gem: Multiply the gain of all Gems
+
+Mutage ©: Increases an enemy's chance of Dropping
+©
+
+Mutagenic Mission: Reduces the number of deaths
+Required to complete missions
+
+Search: Offline Search, when starting a Search
+will be taken off the map and when entering another map
+A new interface will be available in this
+interface There will be the option to receive you will have
+10 seconds to receive the search if it will not be
+kicked off the map
+asciiend,ascii
+DATAS DE EVENTOS:
+2x XP Event: Dia 1 á Dia 2 & Dia 14 á Dia 15
+2x Kill Event: Dia 21 á Dia 23
+2x Mutagens Event: Dia 7 á Dia 9
+
+Um dia antes do evento um aviso será mostrado
+para lhe lembrar que o evento é no próximo dia e 
+durante um evento tambem haverá um aviso sendo
+mostrado(os avisos são mostrados nos primeiros
+150 frames do mapa)
+
+•RECOMPENSAS: verifique o botão ＂RECOMPENSAS＂ Lá
+estarão listadas todas as recompensas para as 
+respectivas missões.
+
+•MISSÕES: Existem 3 tipos - itens, chefes e FOE
+
+•Item: requer um certo item para completar a missão
+•Chefe: requer derrotar um chefe para completar a
+missão. Cada derrota de chefe sobe  o contador 
+conforme a estrela da localização que você está.
+•FOE: requer derrotar um inimigo para completar a
+missão
+
+•XP: necessário para subir de nível. Você pode 
+ganhar XP completando missões ou cumprindo 
+requisitos
+
+•PULAR MISSÕES: Após ganhar 20 XP, você terá 
+acesso a pular missões. Cada pulo custa 1 XP, por
+isso é recomendado não abusar. É necessário
+apenas 1 mapa para pular a missão.
+•REQUISITOS: Qualquer forma de ganhar XP que não 
+envolve completar missões.
+
+•KILL XP: Ganhe KILL XP ao derrotar um inimigo. A
+quantidade de Kill XP  ganhado varia conforme a 
+estrela da localização  dividida por 2 (mesmo
+para missões de itens e inimigos).
+
+•Market: Loja aonde se compras poções
+(que dão algum tipo de buff)
+
+•Gems: Gemas são resquícios de poder de um foe,
+deixado ao matar um inimigo,
+cada inimigo deixa a gema respectiva a seu
+elemento
+
+•«» = Fire Gem,deixada por inimigos de fogo
+
+•<> = Ice Gem,deixada por inimigos de gelo
+
+•:∞: = Poison Gem,deixada por inimigos de veneno
+
+•\V/ = Vigor Gem,deixada por inimigos de vigor
+
+•± = Aether Gem,deixada por inimigos de Aether
+
+•©: Moeda Da Acrópole,Poucos inimigos á 
+possuem,Rara de se ver
+2% de chance de um inimigo dropar após sua morte
+chance pode ser aumentada no ＂LAB＂
+
+•Potions: Encontradas no Market,
+buffam ganho de Gems e © e aceleram seu progress
+no RPG
+
+•LABORATORY(LAB):No Laboratório são Encontradas
+as MUTAGENS
+
+•MUTAGENS:São melhorias permanentes compradas 
+com ©
+
+Mutagen Killer: Multiplica todo ganho de Kills
+tanto em missões tanto em requerimentos
+
+Mutagen Gem: Multiplica o ganho de todas as Gems
+
+Mutagem ©: Aumenta a chance de um inimigo Dropar
+©
+Mutagen Mission: Diminui a quantidade de Kills
+Necessárias para completar as missões
+
+Search: Busca Offline,ao iniciar uma Search 
+será tirado do mapa e ao entrar em outro mapa
+uma nova interface Estará Disponível,nessa
+interface Estará a opcão de receber você terá
+10 secundos para receber a busca se não será
+expulso do mapa
+asciiend］
+
+
+var MarketAscii = ［ascii
++-------------------------------------------+
+|    POTION 2XGEMS    |     POTION 2X       |
+| Effect: 2XALLGEMS   | Effect: 2X          |
+| Cost: 25            | Cost:1K ALL GEMS    |
+|         ###         |         ###         |
++---------------------+---------------------+
+|    POTION Missions  |     POTION 2X       |
+| Effect:Missions/2   | Effect: 2X          |
+| Cost:1K ALLGEMS& 50 | Cost: 100           |
+|         ###         |         ###         |
++-------------------------------------------+
+asciiend,ascii
+/////////////////##########\\\\\\\\\\\\\\\\\\
++=====================×=====================+
+|    KILLER MUTAGE    |     GEM MUTAGE      |
+|MUTAGEN:             |MUTAGEN:             |
+|Cost: 25             |Cost: 25             |
+|         ###         |         ###         |
++=====================×=====================+
+|  DROP CHANCE MUTAGE |   MISSION MUTAGE    |
+|MUTAGEN:             |MUTAGEN:             |
+|Cost: 50             |Cost: 25             |
+|         ###         |         ###         |
++=====================×=====================+
+\\\\\\\\\\\\\\\\\\\\\\|//////////////////////
+asciiend］
+
+
+
+//var Random Missions
+var val1 = Sg(＂val1＂,0)
+var SM = false
+var RV = false
+var RB = false
+var RL = false
+var MMComplete = false
+var MBComplete = false
+var MTComplete = false
+var MLComplete = false
+var it = Sg(＂it＂,0)
+var val2 = Sg(＂val2＂,0)
+var val3 = Sg(＂rv＂,0)
+var val4 = Sg(＂val4＂,0)
+var val5 = Sg(＂val5＂,0)
+var val6 = Sg(＂val6＂,0)
+var val7 = Sg(＂val7＂,0)
+var T = Sg(＂Map＂,0)
+//Missions
+var MM = Sg(＂mm＂,0)
+var MB = Sg(＂mb＂,0)
+var MT = Sg(＂mt＂,0)
+var ML = Sg(＂ml＂,0)
+var A
+
+var AB
+//Random system
+?LB | LL
+ RV = false
+ RB = false
+ SM = false
+ RL = false
+
+?RL = true
+ St(＂val6＂,rng%8)
+ St(＂val7＂,rng%4)
+ MLComplete = true
+ ML = 0
+ St(＂ml＂,ML)
+?RV = true
+ St(＂rv＂,rng%3)
+ MM = 0
+ St(＂mm＂,MM)
+ MMComplete = true
+ St(＂val1＂,rng%12)
+?RB = true
+ St(＂val2＂,rng%6)
+ St(＂val4＂,rng%5)
+ MB = 0
+ St(＂mb＂,MB)
+ MBComplete = true
+?SM = true
+ St(＂val5＂,rng%5)
+ MT = 0
+ St(＂mt＂,MT)
+ MTComplete = true
+ St(＂it＂,rng%25)
+
+//>@it@
+//var of requirements and identification of item
+//and foes
+var G
+var H
+var C
+var D
+var B
+var E
+var IRW 
+
+
+//identification
+var LocArray = ［
+Deadwood Canyon,
+Temple,
+Mushroom Florest,
+Rocky Plateau,
+Caves of Fear,
+Haunted Halls,
+Boiling Mine,
+Icy Ridge］
+G = LocArray［val6］
+
+var foeArray = ［
+Stone Scarab,
+Huge Mosquito,
+Skin Peeler,
+Minotaur,
+Ice Elemental,
+Booo,
+Ant,
+Groud Serpent,
+Wasp,
+Knee Chopper,
+Wound Licker,
+Nail Biter,
+Huge Snail］
+A = foeArray［val1］
+
+var bossArray = ［
+Dysangelos,
+Bolesh,
+Angry Shroom,
+Pallas,
+Hrímnir,
+Bronze Guardian,
+Nagaraja］
+AB = bossArray［val2］
+
+var N1 = ［
+100,
+200,
+300,
+400,
+500,
+600］
+D = N1［val3］
+D = (D/PotionMI) - MutageMission
+B = N1［val4］
+B = (B/PotionMI) - MutageMission
+
+var N3 = ［
+500,
+1000,
+2000,
+3000,
+4000,
+10000］
+C = N3［val5］
+C = (C/PotionMI) - MutageMission
+var N4 = ［
+2000,
+3000,
+4000,
+5000］
+H = N4［val7］ 
+H = (H/PotionMI)-MutageMission
+
+var IRWw = ［
+5,
+6,
+8,
+10,
+12,
+20］
+
+IRW = IRWw［val5］
+IRW = IRW*XpEvent
+
+var ARM = ［
+Cultist Mask,
+Bardiche,
+Skeleton Arm,
+Blade of the Fallen God,
+Repeating Crossbow,
+Heavy hammer,
+Ice Hammer,
+Fire Hammer,
+Vigor Hammer,
+Poison Hammer,
+Stone Hammer,
+Sword,
+Fire Sword,
+Ice Sword,
+Vigor Sword,
+Poison Sword,
+Stone Sword,
+Heavy Crossbow, 
+Quarterstaff,
+Crossbow,
+War Hammer,
+Vigor Wand,
+Fire Wand,
+Ice Wand,
+Poison Wand,
+Stone Wand］
+E = ARM［it］
+//Coins
+var PotionCR = 1
+var CF = Sg(＂CF＂,0)
+var CI = Sg(＂CI＂,0)
+var CVI = Sg(＂CVI＂,0)
+var CP = Sg(＂CP＂,0)
+var CAE = Sg(＂CAE＂,0)
+//Drop
+var chance = Sg(＂cd＂,2.0)
+
+
+//Kill count system
+var Dmgt = Sg(＂dmgt＂,0.0)
+var Dmg = Sg(＂DmgP＂,0)
+var Fkill = Sg(＂FK＂ ,0.0)
+var killP = Sg(＂Kpoints＂,0.0)
+var killed = Sg(＂Kcount＂,0)
+//Potions and Mutagens
+
+var PotionE = 1
+var PotionK = 1
+var PotionP = 1
+var PotionAE = 1
+var MutageKiller = Sg(＂MutageKL＂,1)
+var MutageGem = Sg(＂MutageGM＂,1)
+
+
+var Pi = 0
+var missionItemac = false
+var missionLocAC = false
+?item.right = E | item.left = E
+ missionItemac = true
+:
+ missionItemac = false
+?l = G
+ missionLocAC = true
+:
+ missionLocAC = false
+?Pi > foe.getcount(100000)
+  killed = killed + (Pi-foe.getcount(1000))
+  St(＂Kcount＂, killed)
+  ?point >= 20
+     Drop = rngf*100
+     Drop = Mr(Drop*10)/10
+   ?f = Fire
+    CF = CF +(Pi-foe.getcount(1000)) *2*
+    ^(MutageGem+PotionE)
+    CF = Mr(CF*10)/10
+    St(＂CF＂,CF)
+   :?f = Ice
+    CI = CI +(Pi-foe.getcount(1000))*2
+    ^*(MutageGem+PotionE)
+    CI = Mr(CI*10)/10
+    St(＂CI＂,CI)
+   :?f = Poison
+    CP = CP +(Pi-foe.getcount(1000))*2
+    ^*(MutageGem+PotionE)
+    CP = Mr(CP*10)/10
+    St(＂CP＂,CP)
+   :?f = Vigor
+    CVI = CVI +(Pi-foe.getcount(1000)) *2*
+    ^(MutageGem+PotionE)
+    CVI = Mr(CVI*10)/10
+    St(＂CVI＂,CVI)
+   :?f = Aether
+    CAE = CAE +(Pi-foe.getcount(1000)) *2
+    ^* (MutageGem+PotionE)
+    CAE = Mr(CAE*10)/10
+    St(＂CAE＂,CAE)
+  killP = (killP + (Pi-foe.getcount(1000))
+  ^+ loc.stars/2 * (MutageKiller+PotionK))
+  ^*KillEvent
+  killP = Mr(killP*10)/10
+  St(＂Kpoints＂, killP)
+  Dmg = Dmg + foe.maxhp
+  St(＂DmgP＂,Dmg)
+  Dmgt = Dmgt + foe.maxhp
+  St(＂dmgt＂,Dmgt)  
+  ?point >= 10
+   ?missionLocAC = true
+    ML = (ML + (Pi-foe.getcount(100000))
+    ^+loc.stars/2* (MutageKiller+PotionK))
+    ^*KillEvent
+    ML = Mr(ML*10)/10
+    St(＂ml＂,ML)
+   ?f = A 
+    MM = (MM + (Pi-foe.getcount(100000))
+    ^+ loc.stars/2* (MutageKiller+PotionK))
+    ^*KillEvent
+    MM = Mr(MM*10)/10
+    St(＂mm＂,MM)
+   ?f = AB & f = Phase2 = !Pallas
+    MB = (MB + (Pi-foe.getcount(100000))
+    ^+ loc.stars * (MutageKiller+PotionK)-1)
+    ^*KillEvent
+    MB = Mr(MB*10)/10
+    St(＂mb＂,MB)
+   ?missionItemac = true
+     MT = (MT + (Pi-foe.getcount(100000))
+     ^+ loc.stars/2*(MutageKiller+PotionK))
+     ^*KillEvent
+     MT = Mr(MT*10)/10
+     St(＂mt＂,MT)
+Pi = foe.getcount(100000)
+
+var Drop = 101
+
+
+var CR = Sg(＂CR＂,0)
+?Drop <= chance*PotionCR
+ CR = CR + 1
+ St(＂CR＂,CR)
+ Drop = 101
+ 
+//rewards
+var val = (val3 + 3)*XpEvent
+var valB = (val4 + 5)*XpEvent
+var valL = (val7 + 7)*XpEvent
+
+
+//System Map
+var seenTreasure = false
+var storedData = false
+
+?LB | LL
+  storedData = false
+  seenTreasure = false
+?pickup=treasure
+  seenTreasure = true
+?seenTreasure = true & !storedData
+  Fkill = Fkill + 1
+  St(＂FK＂,Fkill)
+  Si(＂Map＂,loc.stars)
+ storedData = true
+
+//system requeriments
+?Fkill >= 25
+   point = point + (3*XpEvent)
+   St(＂points＂,point)
+   Fkill = 0
+   St(＂FK＂,Fkill)
+?T >= 150
+   point = point + (6*XpEvent)
+   St(＂points＂,point)
+   T = 0
+   St(＂Map＂,T)
+?killP >= 2500
+   point = point + (4*XpEvent)
+   St(＂points＂,point)
+   killP = 0
+   St(＂Kpoints＂,killP)
+
+?Dmg >= 300000
+   point = point + (5*XpEvent)
+   St(＂points＂,point)
+   Dmg = 0
+   St(＂DmgP＂,Dmg)
+?MT >= C
+   point = point + IRW
+   St(＂points＂,point)
+   MT = 0
+   St(＂mt＂,MT)
+   SM = true
+
+?MM >= D
+   point = point + val
+   St(＂points＂,point)
+   MM = 0
+   St(＂mm＂,MM)
+   RV = true
+
+?MB >= B
+   
+   point = point + valB
+   MB = 0
+   St(＂mb＂,MB)
+   St(＂points＂,point)
+   RB = true
+?ML >= H
+ St(＂ml＂,ML)
+ point = point + valL
+ St(＂points＂,point)
+ ML = 0
+ RL = true
+
+//Patents
+var P =［
+^［＂3rd Class Soldier＂,10,#00FFFF］,
+^［＂2nd Class Soldier＂,20,#00FFFF］,
+^［＂1st Class Soldier＂,30,#00FFFF］,
+^［＂Cable＂,40,#00FFFF］,
+^［＂4th Sergeant＂,50,#00FFFF］,
+^［＂3rd Sergeant＂,75,#blue］,
+^［＂2nd Sergeant＂,100,#blue］,
+^［＂1st Sergeant＂,125,#blue］,
+^［＂Warrant Officer＂,150,#blue］,
+^［＂Aspiring Officer＂,175,#blue］,
+^［＂2nd Lieutenant＂,225,#red］,
+^［＂1st Lieutenant＂,275,#red］,
+^［＂Captain＂,325,#red］,
+^［＂Biggest＂,375,#red］,
+^［＂Lieutenant-Colonel＂,475,#red］,
+^［＂Colonel＂,575,#rainbow］,
+^［＂Brigadier General＂,675,#rainbow］,
+^［＂Division General＂,775,#rainbow］,
+^［＂General of the Army＂,875,#rainbow］,
+^［＂Marshal＂,1075,#rainbow］,
+^［＂Rambo＂,2075,#rainbow］,
+^［＂Prince Killer＂,3075,#808080］,
+^［＂King Killer＂,4075,#DAA520］,
+^［＂Demigod Killer＂,5000,#4B0082］,
+^］
+var Pcount = P.Count()
+
+var Rew = false
+//buttons
+var togglepoints = false
+var her = false
+func OnPressed() 
+  togglepoints = !togglepoints
+  her = !her
+func pre()
+ Rew = !Rew
+  
+?LB | LL
+  var button = ui.AddButton()
+  button.x = -43
+  button.h = 3
+  button.w = 7
+  button.y = -6
+  button.text = RPG
+  button.SetPressed(OnPressed)
+  var m = ui.AddButton()
+  m.x = -40
+  m.h = 3
+  m.w = 12
+  m.y = -3
+  m.text = Missions
+  m.SetPressed(OnPress)
+  m.visible = false
+  m.bcolor = #blue
+  var Reward = Ui.AddButton()
+  Reward.x = -29
+  Reward.h = 3
+  Reward.w = 11
+  Reward.y = -3
+  Reward.text = Rewards
+  Reward.SetPressed(pre)
+  Reward.visible = false
+  Reward.tcolor = #yellow
+  Reward.bcolor = #yellow
+button.visible = true
+
+?togglepoints = true
+ >c-13,12,Complete Maps = @T@/150
+ >`0,12,Total Kills = @killed@\n
+ ^Total Damage = @Dmgt@\n
+ ^Kill XP = @killP@/2.500\n
+ ^Damage XP = @Dmg@/300.000\n
+ ?point >= 20
+  >`25,1,#red,#«» 
+  >`28,1,@CF@
+  >`33,1,#00FFFF,#<>
+  >`36,1,@CI@
+  >`42,1,#00FF00,:∞:
+  >`45,1,@CP@
+  >`52,1,#FF00FF,\V/
+  >`55,1,@CVI@
+  >`61,1,#808080,±
+  >`62,1,@CAE@
+  >`68,1,#rainbow,©
+  >`69,1,@CR@
+ ?point > 5000
+  >`0,17,#8B0000,Patent = GOD KILLER
+  >`0,18,#8B0000,NVL = MAX
+  >`0,16,XP = @point@/∞
+  >`0,19,#green,Next Patent in future update
+ :
+  for i=0..Pcount-1
+   ?point<P［i］［1］
+    >`0,17,@P［i］［2］@,Patent = @P［i］［0］@
+    >`0,18,@P［i］［2］@,NVL = @i@/24
+    >`0,16,XP = @point@/@P［i］［1］@
+    >`0,19,#green,Next Patent in @P［i］［1］@XP
+    break
+ 
+ >`0,25,Boss kill = @Fkill@/25
+
+var S = false
+var Mission = false
+func OnPress() 
+  Mission = !Mission
+  S = !S
+  
+?point >= 20
+ ?LB | LL
+  var skf = Ui.AddButton()
+  skf.text = ＂SKIP＂
+  skf.x = -20
+  skf.y = -9
+  skf.h = 1
+  skf.w = 6
+  skf.tcolor = #red
+  skf.bcolor = #000000
+  skf.SetPressed(mfs)
+
+  var skb = Ui.AddButton()
+  skb.text = ＂SKIP＂
+  skb.x = -20
+  skb.y = -10
+  skb.h = 1
+  skb.w = 6
+  skb.tcolor = #red
+  skb.bcolor = #000000
+  skb.SetPressed(mbs)
+
+  var ski = Ui.AddButton()
+  ski.text = ＂SKIP＂
+  ski.x = -20
+  ski.y = -8
+  ski.h = 1
+  ski.w = 6
+  ski.tcolor = #red
+  ski.bcolor = #000000
+  ski.SetPressed(mis)
+
+  var skl = Ui.AddButton()
+  skl.text = ＂SKIP＂
+  skl.x = -20
+  skl.y = -7
+  skl.h = 1
+  skl.w = 6
+  skl.tcolor = #red
+  skl.bcolor = #000000
+  skl.SetPressed(mls)
+
+?Mission = true
+ ?point < 10
+  >`0,0,#red,Missions Unlocked in ＂XP = 10＂
+ :?point >= 10
+   >`29,3,Mission ####:
+   >`37,3,#red,Boss
+   >`29,4,Mission ####:
+   >`37,4,#00FFFF,Foes
+   >`29,5,Mission ####:
+   >`37,5,#00FF00,Item
+   >`29,6,Mission ###:
+   >`37,6,#yellow,LOC
+   ?MBComplete = true
+    >c-4,-10,#yellow,MISSION BOSS COMPLETE!
+   :?MB < B
+    >c-4,-10,Kill @AB@: @MB@/@B@
+
+   ?MTComplete = true
+    >c-4,-8,#yellow,MISSION ITEM COMPLETE!
+   :?MT < C
+    >c-4,-8,Kill @MT@/@C@ Using @E@
+
+   ?MMComplete = true
+    >c-4,-9,#yellow,MISSION FOE COMPLETE!
+   :?MM < D
+    >c-4,-9,Kill @A@: @MM@/@D@
+   ?MLComplete = true
+    >c-4,-7,#yellow,MISSION LOC COMPLETE!
+   :?ML < H
+    >c-4,-7,Kill @ML@/@H@ in @G@
+
+var SKIC = false
+var SKFC = false
+var SKBC = false
+var SKLC = false
+?SKIC = true
+  ski.tcolor = #00FF00
+?SKBC = true
+ skb.tcolor = #00FF00
+?SKFC = true
+ skf.tcolor = #00FF00
+?SKLC = true
+ skl.tcolor = #00FF00
+func mls()
+  RL = true
+  point = point - 1
+  St(＂points＂,point)
+  SKLC = true
+func mfs()
+
+ RV = true
+ point = point - 1
+ St(＂points＂,point)
+ St(＂mm＂,0)
+ SKFC = true
+func mbs()
+ RB = true
+ 
+ point = point - 1
+ St(＂points＂,point)
+ St(＂mb＂,0)
+ SKBC = true
+func mis()
+ St(＂mt＂,0)
+ SM = true
+ 
+ point = point - 1
+ St(＂points＂,point)
+ SKIC = true
+?point >= 20
+ ?S = true
+  skf.visible = true
+  skb.visible = true
+  ski.visible = true
+  skl.visible = true
+ ?S = false
+  skf.visible = false
+  skb.visible = false
+  ski.visible = false
+  skl.visible = false
+?Rew = true 
+ >c-15,-5,@ColorReward@,Boss Kill Reward: 3XP\n
+ ^Kill XP Reward: 4XP\n
+ ^Damage XP Reward: 5XP\n
+ ^Complete Maps Reward: 6XP
+ ?point < 10
+  >`30,6,@Rt［1］@
+ ?point >= 10
+  >`30,6,@Rt［0］@
+  >c-15,-1,@ColorReward@
+  ^,Mission Foes Reward: @val@XP\n
+  ^Mission Boss Reward: @valB@XP\n
+  ^Mission item Reward: @IRW@XP\n
+  ^Mission LOC Reward: @valL@XP
+
+var xH = 31
+var yH = 0
+var LimiteYH = 0
+func Down()
+ ?yH = LimiteYH
+  yH = LimiteYH
+ :
+  yH--
+
+
+func Up()
+ ?yH = 0
+  yH = 0
+ :
+  yH++
+
+var LabAscii
+
+var HT = false
+func HTH()
+ HT = !HT
+
+func LABB()
+ LabAscii = !LabAscii
+?LB | LL
+ var HB = Ui.AddButton()
+ HB.text = Help
+ HB.x = -36
+ HB.y = -6
+ HB.h = 3
+ HB.w = 6
+ HB.bcolor = #red
+ HB.SetPressed(HTH)
+ var HBR = Ui.AddButton()
+ HBR.text = BR
+ HBR.x = -29
+ HBR.y = -6
+ HBR.h = 3
+ HBR.w = 6
+ HBR.bcolor = #red
+ HBR.SetPressed(hbr)
+ var HE = Ui.AddButton()
+ HE.text = EN
+ HE.x = -29
+ HE.y = -9
+ HE.h = 3
+ HE.w = 6
+ HE.bcolor = #red
+ HE.SetPressed(he)
+ var HPDown = Ui.AddButton()
+ HPDown.h = 3
+ HPDown.w = 3
+ HPDown.text = ＂↓＂
+ HPDown.SetPressed(Down)
+ HPDown.dock = top_left
+ HPDown.x = 29
+ HPDown.y = 7
+ var HPUp = Ui.AddButton()
+ HPUp.dock = top_left
+ HPUp.x = 29
+ HPUp.y = 4
+ HPUp.h = 3
+ HPUp.w = 3
+ HPUp.text = ＂↑＂
+ HPUp.SetPressed(Up)
+
+ var Market = Ui.AddButton()
+ Market.x = -19
+ Market.h = 3
+ Market.y = -3
+ Market.w = 8
+ Market.text = ＂Market＂
+ Market.SetPressed(Markett)
+ var Lab = Ui.AddButton()
+ Lab.x = -12
+ Lab.y = -3
+ Lab.w = 7
+ Lab.h = 3
+ Lab.text = ＂LAB＂
+ Lab.bcolor = #00FF00
+ Lab.SetPressed(LABB)
+ var TonicMKL = Ui.AddButton()
+ TonicMKL.x = 3
+ TonicMKL.h = 1 
+ TonicMKL.y = -2
+ TonicMKL.w = 20
+ TonicMKL.text = BUY
+ TonicMKL.tcolor = #FF10F0
+ TonicMKL.SetPressed(MutageKLAC)
+ var TonicELc = Ui.AddButton()
+ TonicELc.x = -3
+ TonicELc.h = 1
+ TonicELc.y = -2
+ TonicELc.w = 20
+ TonicELc.text = BUY
+ TonicELc.SetPressed(POTIONEAC)
+ var TonicCRAc = Ui.AddButton()
+ TonicCRAc.x = 19
+ TonicCRAc.h = 1 
+ TonicCRAc.y = -2
+ TonicCRAc.w = 20 
+ TonicCRAc.text = BUY 
+ TonicCRAc.SetPressed(POTIONCRAC)
+ var TonicMIAC = Ui.AddButton()
+ TonicMIAC.x = -3
+ TonicMIAC.h = 1 
+ TonicMIAC.y = 3
+ TonicMIAC.w = 20 
+ TonicMIAC.text = BUY 
+ TonicMIAC.SetPressed(POTIONMIAC)
+ var TonicVAc = Ui.AddButton()
+ TonicVAc.x = 19
+ TonicVAc.h = 1 
+ TonicVAc.y = 3
+ TonicVAc.w = 20 
+ TonicVAc.text = BUY 
+ TonicVAc.SetPressed(POTIONKAC)
+ var TonicMG = Ui.AddButton()
+ TonicMG.w = 20
+ TonicMG.y = -2
+ TonicMG.h = 1
+ TonicMG.x = 25
+ TonicMG.tcolor = #FF10F0
+ TonicMG.text = BUY
+ TonicMG.SetPressed(MutageMGAC)
+ var TonicMCR = Ui.AddButton()
+ TonicMCR.w = 20
+ TonicMCR.y = 3
+ TonicMCR.h = 1
+ TonicMCR.x = 3
+ TonicMCR.tcolor = #FF10F0
+ TonicMCR.text = BUY
+ TonicMCR.SetPressed(MutageCRAC)
+ var TonicMM = Ui.AddButton()
+ TonicMM.w = 20
+ TonicMM.y = 3
+ TonicMM.x = 25
+ TonicMM.tcolor = #FF10F0
+ TonicMM.text = BUY
+ TonicMM.h = 1
+ TonicMM.SetPressed(MutageMissionsAC)
+TonicMM.visible = false
+TonicMCR.visible = false
+TonicMG.visible = false
+Lab.visible = false
+TonicMIAC.visible = false
+TonicELc.visible = false
+TonicCRAc.visible = false
+TonicVAc.visible = false
+TonicMKL.visible = false
+HPUp.visible = false
+HPDown.visible = false
+var HEt = false
+var HBRt = false
+func he()
+ HEt = !HEt
+func hbr()
+ HBRt = !HBRt
+
+?HBRt = true
+ >`@xH@,@yH@,@help［1］@
+ LimiteYH = -62
+ HPUp.visible = true
+ HPDown.visible = true
+?HT = true
+ HE.visible = true
+ HBR.visible = true
+?HT = false
+ HE.visible = false
+ HBR.visible = false
+?HEt = true
+ >`@xH@,@yH@,@help［0］@
+  LimiteYH = -65
+ HPUp.visible = true
+ HPDown.visible = true
+var MarketVisible = false
+func Markett()
+ MarketVisible = !MarketVisible
+
+
+var PotionEActivate = false
+var BuffDE = Sg(＂BuffDE＂,0)
+
+func POTIONEAC()
+ ?CR >= 25
+  CR = CR - 25
+  St(＂CR＂,CR)
+  BuffDE = BuffDE + 10
+  St(＂BuffDE＂,BuffDE)
+
+?BuffDE > 0
+ PotionEActivate = true
+:?BuffDE = 0
+ PotionEActivate = false
+ PotionE = 0
+?PotionEActivate = true
+ >`28,2,#yellow,«»@BuffDE@
+ >`36,2,#blue,<>@BuffDE@
+ >`43,2,#90FF00,:∞:@BuffDE@
+ >`51,2,#FF0000,\V/@BuffDE@
+ >`59,2,±@BuffDE@
+ PotionE = 2
+ ?LB | LL
+  BuffDE = BuffDE - 1
+  St(＂BuffDE＂,BuffDE)
+
+
+
+var PotionCRActivate = false 
+var BuffDCR = Sg(＂BuffDCR＂,0)
+var CRascii = 1
+func POTIONCRAC() 
+  ?CF >= 1000 & CI >= 1000 & CVI >= 1000
+  ^& CAE >= 1000 & CP >= 1000
+    CAE = CAE - 500
+    CVI = CVI - 1000
+    CI = CI - 1000
+    CP = CP - 1000
+    CF = CF - 1000
+    St(＂CAE＂,CAE)
+    St(＂CI＂,CI)
+    St(＂CF＂,CF)
+    St(＂CP＂,CP)
+    St(＂CVI＂,CVI)
+    BuffDCR = BuffDCR + 10
+    St(＂BuffDCR＂,BuffDCR)
+
+?BuffDCR > 0
+  PotionCRActivate = true 
+:?BuffDCR = 0
+  
+ PotionCRActivate = false
+?PotionCRActivate = true
+ //CRascii = 2
+ PotionCR = 2
+ 
+ >`65,2,#blue,©@BuffDCR@
+ ?LB |LL
+   BuffDCR = BuffDCR - 1 
+   St(＂BuffDCR＂,BuffDCR)
+
+var PotionMIActivate = false 
+var BuffDMI = Sg(＂BuffDMI＂,0)
+
+func POTIONMIAC()
+  ?CF >= 1000 & CI >= 1000 & CVI >= 1000
+  ^& CAE >= 1000 & CP >= 1000 & CR >= 50
+    CAE = CAE - 500
+    CVI = CVI - 1000
+    CI = CI - 1000
+    CP = CP - 1000
+    CF = CF - 1000
+    CR = CR - 50
+    St(＂CR＂,CR)
+    St(＂CAE＂,CAE)
+    St(＂CI＂,CI)
+    St(＂CF＂,CF)
+    St(＂CP＂,CP)
+    BuffDMI = BuffDMI + 10
+    St(＂BuffDMI＂,BuffDMI) 
+?BuffDMI > 0
+  PotionMIActivate = true 
+:?BuffDMI = 0
+   PotionMIActivate = false
+   PotionMI = 1 
+?PotionMIActivate = true
+  PotionMI = 2
+  >`0,24,#rainFF,Missions @BuffDMI@
+ ?LB | LL 
+   BuffDMI = BuffDMI - 1
+   St(＂BuffDMI＂,BuffDMI)
+
+
+var PotionKActivate = false 
+var BuffDK = Sg(＂BuffDK＂,0)
+
+func POTIONKAC() 
+  ?CR >= 100
+    CR = CR - 100
+    St(＂CR＂,CR)
+    BuffDK = BuffDK + 10
+    St(＂BuffDK＂,BuffDK) 
+?BuffDK > 0
+  PotionKActivate = true 
+:?BuffDK = 0
+   PotionKActivate = false
+   PotionK = 0 
+?PotionKActivate = true
+  PotionK = 2
+  >`0,23,#red,KILL2X @BuffDK@
+ ?LB | LL
+   BuffDK = BuffDK - 1 
+   St(＂BuffDK＂,BuffDK)
+
+
+
+
+func MutageKLAC() 
+  ?CR  >= 25
+    CR = CR - 25
+    St(＂CR＂,CR)
+    MutageKiller = MutageKiller + number
+    MutageKiller = Mr(MutageKiller*10)
+    ^/10
+    St(＂MutageKL＂,MutageKiller)
+func MutageMGAC()
+   ?CR  >= 25
+    CR = CR - 25
+    St(＂CR＂,CR)
+    MutageGem = MutageGem + number
+    MutageGem = Mr(MutageGem*10)
+    ^/10
+    St(＂MutageGM＂,MutageGem)
+
+func MutageCRAC()
+   ?CR >= 50
+    CR = CR - 50
+    St(＂CR＂,CR)
+    chance = chance + number
+    chance = Mr(chance*10)
+    ^/10
+    St(＂cd＂,chance)
+
+
+func MutageMissionsAC()
+  ?CR >= 25
+   CR = CR - 25
+   St(＂CR＂,CR)
+   MutageMission = MutageMission + 1.0
+   St(＂MutageM＂,MutageMission)
+   
+
+var MutageCRAscii
+
+MutageCRAscii = (chance/PotionCR)-2
+MutageCRAscii = Mr(MutageCRAscii*10)/10
+
+//Offline system
+var TimeSaved = 0
+var TimeSavedStorage = Sg(＂Timer＂,0)
+var TimerCompair = 0
+var TimerInt = Sg(＂TimerInt＂,0)
+var OfflineSearch = Sg(＂OffSearch＂,false)
+var OffQuit = 10
+//Drop Off
+var MutagenDrop = 0
+var TimerDrop = Sg(＂TimerDrop＂,0)
+var WarningDrop = 0
+var WarningDropNumber = Sg(＂WarningD＂,0)
+
+?WarningDrop>0
+ >`0,0,#yellow,You gained @WarningDropNumber@ 
+ ^on all mutages
+ WarningDrop--
+
+
+
+func Save()
+ TimeSaved = time.msbn
+ TimeSaved = 
+ ^Math.BigNumber(TimeSaved.ToString())
+ TimeSaved.Div(1000)
+ TimeSaved.Div(60)
+ TimeSavedStorage = TimeSaved.ToString()
+ St(＂Timer＂,TimeSavedStorage)
+ OfflineSearch = true
+ St(＂OffSearch＂,OfflineSearch)
+ loc.leave()
+
+?OfflineSearch = true
+ ?TT%2
+  TimerCompair = time.msbn
+  TimerCompair = 
+  ^Math.BigNumber(TimerCompair.ToString())
+  TimeSaved = Math.BigNumber
+  ^(TimeSavedStorage)
+  TimerCompair.Div(1000)
+  TimerCompair.Div(60)
+  TimerCompair.Sub(TimeSaved)
+  TimerInt = Int.Parse(TimerCompair.ToString())
+  //^*10000
+  St(＂TimerInt＂,TimerInt)
+  ?TimerDrop < TimerInt/60
+   TimerDrop = TimerDrop+1
+   St(＂TimerDrop＂,TimerDrop)
+   ?TT%2 & TimerDrop>0
+     MutagenDrop = rngf*100
+     ?MutagenDrop <= 10
+      MutageMission = MutageMission + 1
+
+      St(＂MutageM＂,MutageMission)
+      chance = chance + 0.1
+      chance = Mr(chance*10)/10
+      St(＂cd＂,chance)
+      MutageGem = MutageGem + 0.1
+      MutageGem = Mr(MutageGem*10)/10
+      St(＂MutageGM＂,MutageGem)
+      MutageKiller = MutageKiller+0.1
+      MutageKiller=
+      ^Mr(MutageKiller*10)/10
+      St(＂MutageKL＂,MutageKiller)
+      WarningDropNumber = 
+      ^WarningDropNumber+0.1
+      WarningDropNumber =
+      ^Mr(WarningDropNumber*10)/10
+      St(＂WarningD＂,WarningDropNumber)
+      WarningDrop = 60
+
+  
+ 
+
+
+
+func Claim()
+    MT = MT + 1*TimerInt
+    MM = MM + 1*TimerInt
+    MB = MB + 1*TimerInt
+    ML = ML + 1*TimerInt
+    CF = CF + 2*TimerInt
+    CI = CI + 2*TimerInt
+    CAE = CAE + 2*TimerInt
+    CVI = CVI + 2*TimerInt
+    CP = CP + 2*TimerInt
+    CR = CR + 0.1*TimerInt
+    CR = Mr(CR*10)/10
+     WarningDropNumber = 0
+    St(＂WarningD＂,WarningDropNumber)
+    St(＂mt＂,MT)
+    St(＂MM＂,MM)
+    St(＂mb＂,MB)
+    St(＂ml＂,ML)
+    St(＂CF＂,CF)
+    St(＂CI＂,CI)
+    St(＂CAE＂,CAE)
+    St(＂CVI＂,CVI)
+    St(＂CP＂,CP)
+    St(＂CR＂,CR)
+    TimeSavedStorage = 0
+    St(＂Timer＂,TimeSavedStorage)
+    OfflineSearch = false
+    St(＂OffSearch＂,OfflineSearch)
+    TimerDrop = 0
+    St(＂TimerDrop＂,TimerDrop)
+
+var SearchAscii = ［ascii
+        SEARCH OFFLINE
+Search Gains:
+120 Gems/per hour
+(2 per Minute)
+6 ©/per Hour
+(0.1 per Minute)
+60 Kills in Missions/per Hour
+(1 per Minute)
+10% chance to Drop Mutagens
+(Every hour)
+asciiend］
+
+var SearchHUDD = false
+func SearchHUD()
+ SearchHUDD = !SearchHUDD
+var AnimSearch = 0
+?LB | LL
+ var SearchB = Ui.AddButton()
+ SearchB.y = -6
+ SearchB.h = 3
+ SearchB.w = 8
+ SearchB.text = ＂Search＂
+ SearchB.x = -29
+ SearchB.SetPressed(SearchHUD)
+ var SearchP = Ui.AddPanel()
+ SearchP.h = 15
+ SearchP.color = #yellow
+ var StartOffButton = Ui.AddButton()
+ StartOffButton.w = 28
+ StartOffButton.h = 3
+ StartOffButton.y = 5
+?OfflineSearch = false
+ StartOffButton.SetPressed(Save)
+  StartOffButton.text = ＂Start Search＂
+ 
+SearchP.w = AnimSearch
+SearchP.visible = false
+SearchB.visible = false
+StartOffButton.visible = false
+?SearchHUDD = true
+ ?point>=40
+  SearchP.visible = true
+
+  ?AnimSearch >=31
+   StartOffButton.visible = true
+   >c-14,-6,@SearchAscii［0］@
+   AnimSearch = 31
+  :
+   AnimSearch = AnimSearch+2
+ :
+  >`0,0,#red,
+  ^Search Offline available after ＂XP = 40＂
+:
+ AnimSearch = 0
+?OfflineSearch = true 
+ button.visible = false
+ SearchP.visible = true
+ SearchP.w = 31
+ StartOffButton.bcolor = #yellow
+ StartOffButton.visible = true
+ StartOffButton.text = ＂Claim＂
+ StartOffButton.SetPressed(Claim)
+  ?TT%31 = 30
+   OffQuit--
+  ?OffQuit = 0
+   loc.leave()
+
+ StartOffButton.visible = true
+  >c-14,-6,      CLAIM OFFLINE SEARCH\n
+  ^Time Search:\n
+  ^Days:@(TimerInt/60)/24@|
+  ^Hours:@TimerInt/60@|Minutes:@TimerInt@\n
+  ^Search Gains:\n
+  ^Gems Gains:@2*TimerInt@\n
+  ^© Gains:@0.1*TimerInt@\n
+  ^Foe Killed:@TimerInt@\n
+  ^Mutage Gains:@WarningDropNumber@\n\n
+  ^Expulsion in:@OffQuit@
+
+  AnimSearch = 31
+
+
+?MarketVisible = true
+ ?point >= 20
+  >c-14,-6,@MarketAscii［0］@
+  >c23,-5,#rainbow,©
+  >c20,1,#red,ALLKILL
+  >c23,0,#red,KILL
+  >c20,-4,#rainbow,©
+  >c-7,-3,#rainbow,©
+  >c4,2,#rainbow,©
+  >c15,2,#rainbow,©
+  TonicELc.visible = true
+  TonicCRAc.visible = true
+  TonicMIAC.visible = true
+  TonicVAc.visible = true
+ :
+  >`0,0,#red,Market available after ＂XP = 20＂
+
+?LabAscii = true
+ ?point >= 30
+  >c-8,-7,#90FF00,@MarketAscii［1］@
+  >c9,-7,#FF10F0,LABORATORY
+  TonicMG.visible = true
+  TonicMKL.visible = true
+  TonicMCR.visible = true
+  TonicMM.visible = true
+  >c23,-4,#FF10F0,X@MutageGem@
+  >c1,-4,#FF10F0,X@MutageKiller@
+  >c1,1,#FF10F0,+@MutageCRAscii@
+  >c23,1,#FF10F0,-@MutageMission@
+  >c-2,-3,#rainFF,©
+  >c20,-3,#rainFF,©
+  >c-2,2,#rainFF,©
+  >c-6,0,#rainFF,©
+  >c-6,22,#rainFF,©
+ :
+  >`0,0,#red,Laboratory available after ＂XP = 30＂
+
+?her = false
+ m.visible = false
+ Reward.visible = false
+ HB.visible = false
+ Market.visible = false
+?her = true
+ m.visible = true
+ Reward.visible = true
+ HB.visible = true
+ Market.visible = true
+ Lab.visible = true
+ ?HT = true
+  SearchB.visible = false
+ :
+  SearchB.visible = true

@@ -1,0 +1,623 @@
+/*Credits\\
+By Citriondragon
+Version 1.2
+-Hole no longer dissapears randomly/after loops
+Version 1.1
+-Added XP bar
+1.0
+-initial release
+
+Instructions:
+Method 1:
+1. Copy/paste into Mindstone
+2. (optional) Change colors for black hole in Colors section.
+
+Method 2 (PC only):
+1. Put this file into Cosmetics folder
+2. Import into mindstone with import Pets/BlackHole
+3. (optional) Change colors within the file in Colors section
+*/
+//-~-~-Colors-~-~-\\
+var holeColor = #white
+var ringColor = #rainFF
+var eyeColor = #ff00ff
+var particleColor1 = #yellow
+var particleColor2 = #yellow
+
+var uiAA = ui.AddAnim
+var uiAB = ui.AddButton
+var refX = 0
+var refZ = 0
+refX = pos.x + (screen.w/2)-(screen.x) - 45
+refZ = pos.z - 16
+var bX
+var bY
+var blackHole
+var blackHole2
+var holeEyes
+var holeSize
+var prtcl
+var prtclBig
+var prtclSize
+var prtcls=[]
+var pCount=-1
+var spawnChance
+var prtclX
+var prtclZ
+var spawnXrng
+var spawnYrng
+var spawnSizerng
+var delete=[]
+var holeTime
+var kills
+var fC
+var oldfC=0
+var fCdifference
+//from darkness script\\
+var radius
+var ShadePercentage
+var BasePanel
+var FilterList = []
+var FilterList2 = []
+var Shade
+var ShadeHex
+var lvl1btn
+var lvl2btn
+var lvl3btn
+var lvl4btn
+var lvl5btn
+var lvlpnl
+var menubtn
+var menu=false
+var unlock
+var timer
+var timebar
+var killbar
+
+var holeAsci1=ascii
+#
+#
+#
+#
+#######Φ######
+#
+#
+#
+%%
+#
+#
+#
+#######_
+######( )
+#######¯
+#
+#
+%%
+#
+#
+#
+######.-.
+#####(   )####
+######`-´
+#
+#
+%%
+#
+#
+####.-¯¯-.
+###.      .
+###'      '###
+####`-__-´
+#
+#
+%%
+######__
+##.-¯¯  ¯¯-.
+#¡          ¡
+.            .
+'            '
+#!          !
+##'-__  __-'
+######¯¯
+asciiend
+
+var holeAsci2=ascii
+#
+%%
+#
+#
+#
+######.
+#######\
+########'
+#
+#
+%%
+#
+#
+#
+#####.
+######¯-_
+#########'
+#
+#
+%%
+#
+#
+###.
+####¯-_
+#######¯-_
+##########'
+#
+#
+%%
+#
+-_
+##-_
+####¯-_
+#######¯-_
+##########¯-
+############¯-
+#
+asciiend
+
+var holeAsci3=ascii
+|
+###|
+asciiend
+
+prtcl=ascii
+•
+asciiend
+
+prtclBig=ascii
+@
+asciiend
+
+func BlackHole()
+  bX=refX
+  bY=refZ
+  blackHole=uiAA(holeAsci1)
+  blackHole.x=bX
+  blackHole.y=bY
+  blackHole.color=holeColor
+  blackHole2=blackHole.AddLayer(holeAsci2)
+  blackHole2.color=ringColor
+  ?holeSize=1
+    blackHole.frame=0
+  :?holeSize=2
+    blackHole.frame=1
+  :?holeSize=3
+    blackHole.frame=2
+  :?holeSize=4
+    blackHole.frame=3
+  :?holeSize=5
+    blackHole.frame=4
+    holeEyes=uiAA(holeAsci3)
+    holeEyes.x=bX+2
+    holeEyes.y=bY-1
+    holeEyes.color=eyeColor
+
+func Darkness()
+  ?holeSize=4
+    radius=8
+    ShadePercentage=30
+    Shade = ShadePercentage * 256 / 100
+    ShadeHex = color.FromRGB(Shade,Shade,Shade)
+  ?holeSize=5
+    radius=12
+    ShadePercentage=40
+    Shade = ShadePercentage * 256 / 100
+    ShadeHex = color.FromRGB(Shade,Shade,Shade)
+  BasePanel = ui.AddPanel()
+  BasePanel.visible = false
+  FilterList.Clear()
+  FilterList2.Clear()
+  for a=0..radius
+    FilterList.Add(ui.AddCanvas())
+    FilterList[a].w = math.RoundToInt(radius*3 - math.Abs(0.4*math.Pow((radius/2)-a,2)))
+    FilterList[a].h = 1
+    FilterList[a].y = (radius/2)-a
+    FilterList[a].blend = subtract
+    FilterList[a].SetFG(ShadeHex)
+    BasePanel.Add(FilterList[a])
+
+  for a=0..radius/2
+    FilterList2.Add(ui.AddCanvas())
+    FilterList2[a].w = math.RoundToInt(radius*1.5 - math.Abs(0.4*math.Pow((radius/4)-a,2)))
+    FilterList2[a].h = 1
+    FilterList2[a].y = (radius/4)-a
+    FilterList2[a].blend = subtract
+    FilterList2[a].SetFG(ShadeHex)
+    BasePanel.Add(FilterList2[a])
+
+func MoveHole()
+  ?time%30
+    ?blackHole.x<bX
+      blackHole.x=blackHole.x+1
+    :?blackHole.x>bX
+      blackHole.x=blackHole.x-1
+    ?blackHole.y<bY
+      blackHole.y=blackHole.y+1
+    :?blackHole.y>bY
+      blackHole.y=blackHole.y-1
+    ?holeSize=5
+      holeEyes.x=blackHole.x+2
+      holeEyes.y=blackHole.y-1
+    ?holeSize=4|holeSize=5
+      BasePanel.x=blackHole.x
+      BasePanel.y=blackHole.y
+
+func SpawnParticle()
+  ?prtclSize=1
+    var prtcl=uiAA(prtcl)
+    prtcl.x=prtclX
+    prtcl.y=prtclZ
+    prtcl.color=particleColor1
+  :?prtclSize=2
+    var prtcl=uiAA(prtclBig)
+    prtcl.x=prtclX
+    prtcl.y=prtclZ
+    prtcl.color=particleColor2
+  return prtcl
+
+func Particles()
+  spawnChance=rng
+  ?holeSize=3&time%75=0
+    ?spawnChance>=0&spawnChance<=9999
+      spawnXrng=rng%11
+      spawnYrng=rng%7
+      prtclSize=1
+      //x
+      ?spawnXrng=0
+        prtclX=bX-5
+      :?spawnXrng=1
+        prtclX=bX-4
+      :?spawnXrng=2
+        prtclX=bX-3
+      :?spawnXrng=3
+        prtclX=bX-2
+      :?spawnXrng=4
+        prtclX=bX-1
+      :?spawnXrng=5
+        prtclX=bX
+      :?spawnXrng=6
+        prtclX=bX+1
+      :?spawnXrng=7
+        prtclX=bX+2
+      :?spawnXrng=8
+        prtclX=bX+3
+      :?spawnXrng=9
+        prtclX=bX+4
+      :
+        prtclX=bX+5
+      //y
+      ?spawnYrng=0
+        prtclZ=bY-3
+      :?spawnYrng=1
+        prtclZ=bY-2
+      :?spawnYrng=2
+        prtclZ=bY-1
+      :?spawnYrng=3
+        prtclZ=bY
+      :?spawnYrng=4
+        prtclZ=bY+1
+      :?spawnYrng=5
+        prtclZ=bY+2
+      :
+        prtclZ=bY+3
+    prtcls.Add(SpawnParticle())
+  :?holeSize=4&time%45=0|holeSize=5&time%15=0
+      spawnXrng=rng%17
+      spawnYrng=rng%9
+      spawnSizerng=rng%2
+      //x
+      ?spawnXrng=0
+        prtclX=bX-9
+      :?spawnXrng=1
+        prtclX=bX-8
+      :?spawnXrng=2
+        prtclX=bX-7
+      :?spawnXrng=3
+        prtclX=bX-6
+      :?spawnXrng=4
+        prtclX=bX-5
+      :?spawnXrng=5
+        prtclX=bX-4
+      :?spawnXrng=6
+        prtclX=bX-3
+      :?spawnXrng=7
+        prtclX=bX-2
+      :?spawnXrng=8
+        prtclX=bX-1
+      :?spawnXrng=9
+        prtclX=bX
+      :?spawnXrng=10
+        prtclX=bX+1
+      :?spawnXrng=11
+        prtclX=bX+2
+      :?spawnXrng=12
+        prtclX=bX+3
+      :?spawnXrng=13
+        prtclX=bX+4
+      :?spawnXrng=14
+        prtclX=bX+5
+      :?spawnXrng=15
+        prtclX=bX+6
+      :?spawnXrng=16
+        prtclX=bX+7
+      :
+        prtclX=bX+8
+      //y
+      ?spawnYrng=0
+        prtclZ=bY-5
+      :?spawnYrng=1
+        prtclZ=bY-4
+      :?spawnYrng=2
+        prtclZ=bY-3
+      :?spawnYrng=3
+        prtclZ=bY-2
+      :?spawnYrng=4
+        prtclZ=bY-1
+      :?spawnYrng=5
+        prtclZ=bY
+      :?spawnYrng=6
+        prtclZ=bY+1
+      :?spawnYrng=7
+        prtclZ=bY+2
+      :?spawnYrng=8
+        prtclZ=bY+3
+      :
+        prtclZ=bY+4
+      ?spawnSizerng=0
+        prtclSize=1
+      :
+        prtclSize=2
+    prtcls.Add(SpawnParticle())
+
+func ParticleMove(p)
+    ?p.x<bX
+      p.x=p.x+1
+    :?p.x>bX
+      p.x=p.x-1
+    ?time%20=0
+      ?p.y<bY
+        p.y=p.y+1
+      :?p.y>bY
+        p.y=p.y-1
+    ?p.x=bX&p.y=bY
+      return true
+    return false
+
+var remove
+var count=0
+
+func ParticleRun()
+  ?time%10=0 & prtcls.Count()>0
+    for p : prtcls
+      ?ParticleMove(p)
+        delete.Add(count)
+        p.Recycle()
+      count++
+    count=0
+    ?delete.Count()>0
+      for d : delete
+        prtcls.Emplace(d,0)
+      for d : delete
+        remove=prtcls.IndexOf(0)
+        prtcls.RemoveAt(remove)
+      delete.Clear()
+
+func HoleXP()
+  >`0,9,#565656,ascii
+╔═╗
+║#║
+║#║
+║#║
+║#║
+╟_╢
+╟¯╢
+║#║
+║#║
+║#║
+║#║
+╚═╝
+asciiend
+  >`0,21,Lvl@holeSize@
+  fC=foe.GetCount(150)
+  ?totaltime%300=0
+    holeTime++
+  ?fC<oldfC
+    fCdifference=oldfC-fC
+    ?foe="boss"
+      kills=kills+fCdifference-1+loc.stars
+    :
+      kills=kills+fCdifference
+  oldfC=fC
+  ?holeSize=1
+    timebar=((holeTime*100)/60)/20
+    killbar=((kills*100)/250)/20
+    ?holeTime>=60&kills>=250
+      LvlUp()
+  :?holeSize=2
+    timebar=((holeTime*100)/180)/20
+    killbar=((kills*100)/500)/20
+    ?holeTime>=180&kills>=500
+      LvlUp()
+  :?holeSize=3
+    timebar=((holeTime*100)/320)/20
+    killbar=((kills*100)/1500)/20
+    ?holeTime>=320&kills>=1500
+      LvlUp()
+  :?holeSize=4
+    timebar=((holeTime*100)/320)/20
+    killbar=((kills*100)/3000)/20
+    ?holeTime>=320&kills>=3000
+      BasePanel.Recycle()
+      LvlUp()
+      unlock=true
+  ?timebar>5
+    timebar=5
+  ?killbar>5
+    killbar=5
+  ?timebar>0
+    for i = 1..timebar
+      >`1,@20-i@,#ff00ff,█
+  ?killbar>0
+    for i = 1..killbar
+      >`1,@9+i@,#red,█
+
+func LvlUp()
+  holeTime=0
+  kills=0
+  holeSize++
+  blackHole.Recycle()
+  HoleStart()
+
+func Buttons()
+  menubtn=uiAB()
+  menubtn.dock=center_left
+  menubtn.anchor=center_left
+  menubtn.text="»"
+  menubtn.tcolor=#ff00ff
+  menubtn.h=3
+  menubtn.w=3
+  menubtn.y=-6
+  menubtn.SetPressed(Menu)
+  lvl1btn=uiAB()
+  lvl1btn.text="Mini"
+  lvl1btn.h=3
+  lvl1btn.w=9
+  lvl1btn.y=-6
+  lvl1btn.SetPressed(SetLvl)
+  lvl2btn=uiAB()
+  lvl2btn.text="Small"
+  lvl2btn.h=3
+  lvl2btn.w=9
+  lvl2btn.y=-3
+  lvl2btn.SetPressed(SetLvl)
+  lvl3btn=uiAB()
+  lvl3btn.text="Medium"
+  lvl3btn.h=3
+  lvl3btn.w=9
+  lvl3btn.y=0
+  lvl3btn.SetPressed(SetLvl)
+  lvl4btn=uiAB()
+  lvl4btn.text="Large"
+  lvl4btn.h=3
+  lvl4btn.w=9
+  lvl4btn.y=3
+  lvl4btn.SetPressed(SetLvl)
+  lvl5btn=uiAB()
+  lvl5btn.text="Giant"
+  lvl5btn.h=3
+  lvl5btn.w=9
+  lvl5btn.y=6
+  lvl5btn.SetPressed(SetLvl)
+  lvlpnl=ui.AddPanel()
+  lvlpnl.dock=center_left
+  lvlpnl.anchor=center_left
+  lvlpnl.y=3
+  lvlpnl.Add(lvl1btn)
+  lvlpnl.Add(lvl2btn)
+  lvlpnl.Add(lvl3btn)
+  lvlpnl.Add(lvl4btn)
+  lvlpnl.Add(lvl5btn)
+  lvlpnl.visible=false
+
+func Menu()
+  ?unlock
+    menu=!menu
+    ?menu
+      menubtn.text="«"
+      lvlpnl.visible=true
+    :
+      menubtn.text="»"
+      lvlpnl.visible=false
+  :
+      timer=0
+
+func Text()
+  ?timer!30
+    >`3,7,#red,Black Hole Level 5 Required
+    timer++
+
+func SetLvl(btn)
+  blackHole.Recycle()
+  ?holeSize=4|holeSize=5
+    BasePanel.Recycle()
+    ?holeSize=5
+      holeEyes.Recycle()
+  ?btn=lvl1btn
+    holeSize=1
+  :?btn=lvl2btn
+    holeSize=2
+  :?btn=lvl3btn
+    holeSize=3
+  :?btn=lvl4btn
+    holeSize=4
+  :?btn=lvl5btn
+    holeSize=5
+  HoleStart()
+
+func HoleStart()
+  ?holeSize=4|holeSize=5
+    Darkness()
+  BlackHole()
+
+?totaltime=1
+  holeSize=storage.Get("size",1)
+  holeTime=storage.Get("time",0)
+  kills=storage.Get("kills",0)
+  unlock=storage.Get("unlock",false)
+  timer=30
+  prtcls.Clear()
+  HoleStart()
+  Buttons()
+?pickup="treasure"
+  storage.Set("time",holeTime)
+  storage.Set("kills",kills)
+  storage.Set("size",holeSize)
+  storage.Set("unlock",unlock)
+?key=bumpRBegin
+  holeTime=0
+  kills=0
+?holeSize=1
+  bX=refX-5
+  bY=refZ
+:?holeSize=2
+  bX=refX-7
+  bY=refZ-1
+:?holeSize=3
+  bX=refX-10
+  bY=refZ-2
+:?holeSize=4
+  bX=refX-11
+  bY=refZ-3
+:?holeSize=5
+  bX=refX-16
+  bY=refZ-4
+?unlock=false
+  HoleXP()
+MoveHole()
+Particles()
+ParticleRun()
+Text()
+
+var holeGun=ascii
+──┬──
+#( )
+#╧Φ╧{
+%%
+──┬──
+╒(_)╕
+╧(│)╧{
+##¯
+%%
+───┬───
+╒/  |\╕
+╞\.┬./╡/
+╧( │ )╧│
+##`┴´##\
+asciiend
+

@@ -1,0 +1,157 @@
+//Rf : Repeater
+//By: Poly
+//Vr : 1.7
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+?base.IRS>1&
+^base.IR=Repeating&
+^Buffs.string=berserk|
+^base.IRS=1&
+^Buffs.string=berserk&
+^base.IRT=1&
+^base.IR=Repeating
+ play bearer_attack_hit 130
+ >o2,0,@base.ICR@,ascii
+#######################################__,-'¯\
+.,——-——-——-——-——-——-——-——-——-——-——-——-/—-——-`¡\
+'`——-——-——-——-——-——-——-——-——-——-——-——-\—-——-,!/
+#######################################¯¯`-._/
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=1&
+^base.IRT<3|
+^base.IR=Repeating&
+^Buffs.string=berseek
+ >o1,2,#white,ascii
+¯
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=1&
+^base.IRT>=3&
+^Buffs.string!berseek
+ >o1,2,#white,ascii
+\
+asciiend
+?base.IR=Repeating
+ >o-1,2,#white,ascii
+/
+asciiend
+?base.IR=Repeating&
+^base.IRS=3
+ >o-1,2,#white,ascii
+<
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=2|
+^base.IR=Repeating&
+^base.IRS=4
+ >o-1,2,#white,ascii
+(
+asciiend
+
+?base.IR=Repeating
+ >o-2,1,@base.ICR@,ascii
+#_
+［
+asciiend
+?base.IR=Repeating&
+^time%2=1
+ >o-2,3,@base.ICR@,ascii
+'
+asciiend
+
+?base.IR=Repeating&
+^time%3>1
+ >o-2,3,@base.ICR@,ascii
+＂
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=4&
+^Buffs.string!berseek
+ >o1,2,#white,ascii
+)
+asciiend
+?base.IR=Repeating&
+^base.IRS=2&
+^base.IRT<2&
+^Buffs.string!berseek
+ >o1,1,#white,ascii
+/
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=2&
+^base.IRT>=2&
+^Buffs.string!berseek
+ >o1,1,#white,ascii
+)
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=2&
+^base.IRT=1
+ >o0,0,@base.ICR@,ascii
+·
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=2&
+^base.IRT>1
+ >o0,0,@base.ICR@,ascii
+•
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=3&
+^Buffs.string!berseek
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=3&
+^base.IRT=1
+ >o2,2,@base.ICR@,ascii
+*
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=3&
+^base.IRT=2
+ >o2,2,@base.ICR@,ascii
+O
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=3&
+^base.IRT=3
+ >o2,2,@base.ICR@,ascii
+o
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=3&
+^base.IRT=4
+ >o2,2,@base.ICR@,ascii
++
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=3&
+^base.IRT=5
+ >o2,2,@base.ICR@,ascii
+x
+asciiend
+
+?base.IR=Repeating&
+^base.IRS=3&
+^base.IRT=6
+ >o2,2,@base.ICR@,ascii
+•
+asciiend

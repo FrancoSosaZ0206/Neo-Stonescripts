@@ -1,0 +1,187 @@
+//BossBar 3.99.1
+//By Lazy
+
+var screenW = screen.w
+var BarX = 0 
+var BarY = -11
+var foe_ = foe
+var loc_ = loc
+var lstar = loc.stars
+var fdamage = foe.damage
+
+//─────────────────────────────────────────────────────────────────\\
+
+var BossHP //Curr health
+var BossTHP //total health
+var BossAP //curr armor
+var BossTAP //total armor
+var BarText = ＂＂ //health and armor
+var CharCount = 0
+var Blocks = 43
+var ArmorBlocks = ＂▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀＂
+var ArmorFades = ＂▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀＂
+var HealthFade
+var BossHPLost
+var BossAPLost
+var HPBarLength
+var HPBarLength2
+var APBarLength = 0
+var APBarLength2 = 0
+
+func MorelAP()
+  ?lstar = 5
+    BossTAP = 50
+  :?lstar = 6
+    BossTAP = 100
+  :?lstar = 7
+    BossTAP = 150
+  :?lstar = 8
+    BossTAP = 200
+  :?lstar = 9
+    BossTAP = 250
+  :?lstar = 10
+    BossTAP = 300
+  :?lstar = 11
+    BossTAP = 200
+  :?lstar = 12
+    BossTAP = 250
+  :?lstar = 13
+    BossTAP = 300
+  :?lstar = 14
+    BossTAP = 350
+  :?lstar = 15
+    BossTAP = 400
+
+
+func DysanAP()
+  ?lstar = 5
+    BossTAP = 500
+  :?lstar = 6
+    BossTAP = 1850
+  :?lstar = 7
+    BossTAP = 2000
+  :?lstar = 8
+    BossTAP = 2170
+  :?lstar = 9
+    BossTAP = 2335
+  :?lstar = 10
+    BossTAP = 2500
+  :?lstar = 11
+    BossTAP = 3300
+  :?lstar = 12
+    BossTAP = 3725
+  :?lstar = 13
+    BossTAP = 4150
+  :?lstar = 14
+    BossTAP = 4575
+  :?lstar = 15
+    BossTAP = 5000
+
+func BossStats()
+  BossHP = foe.hp
+  BossAP = foe.armor
+  BossTHP = foe.maxhp
+  ?foe ! "Dysangelos" & foe ! "Morel"
+    BossTAP = foe.maxarmor
+  :?foe = "Dysangelos"
+    DysanAP()
+  :?foe = "Morel"
+    MorelAP()
+  BossHPLost = (BossTHP - BossHP) //health lost
+  ?BossHPLost >= BossTHP
+    BossHPLost = BossTHP
+  BossAPLost = (BossTAP - BossAP) //armor lost
+  ?BossAPLost >= BossTAP
+    BossAPLost = BossTAP
+
+  ?BossHP <= 0 & foe = ＂boss＂
+    BossHP = 0 //stops -hp
+  ?BossAP <= 0 & foe = ＂boss＂
+    BossAP = 0 //stops -ap
+  ?BossAP ! 0
+    BarText = BossAP+＂│＂+BossTAP
+    CharCount = string.Size(BarText + ＂＂)
+  :
+    BarText = BossHP+＂│＂+BossTHP
+    CharCount = string.Size(BarText + ＂＂)
+
+?foe = ＂boss＂
+  BossStats()
+
+
+//─────────────────────────────────────────────────────────────────\\
+
+var BossBarText
+var BossBar
+var BossAPFade
+var BossArmorBar
+var LastHPBarLength = 0
+var LastAPBarLength = 0
+?totaltime = 1
+  BossBar = ui.AddPanel() //Adds outline of bar
+  BossBar.w = 45 //length of bar
+  BossBar.h = 3 //height of bar
+  BossBar.x = BarX //X position of bar
+  BossBar.y = BarY //Y position of bar
+
+  BossAPFade = ui.AddText() //Fade of AP decreasing
+  BossBar.Add(BossAPFade)
+  BossAPFade.w = 43
+  BossAPFade.h = 0
+  BossAPFade.anchor = center_center
+  BossAPFade.text = ArmorFades
+  BossAPFade.color = #373535
+
+  BossArmorBar = ui.AddText() //Blocks for boss AP
+  BossBar.Add(BossArmorBar)
+  BossArmorBar.w = 43
+  BossArmorBar.h = 0
+  BossArmorBar.anchor = center_center
+  BossArmorBar.color = #5b5b5b //#ADD8E6
+
+  BossBarText = ui.AddText() //Writes boss HP & AP
+  BossBar.Add(BossBarText)
+  BossBarText.h = -4
+  BossBarText.anchor = center_center
+
+?foe = ＂boss＂
+  BossBar.visible = true
+  BossBarText.visible = true
+  BossArmorBar.visible = true
+  BossAPFade.visible = true
+:
+  BossBar.visible = false
+  BossBarText.visible = false
+  BossArmorBar.visible = false
+  BossAPFade.visible = false
+
+
+?foe = ＂boss＂
+  BossArmorBar.text = ArmorBlocks
+  BossBarText.text = BarText //Writes boss HP & AP
+  BossBarText.w = CharCount //Length of # or ABC
+
+
+  ?BossAP > 0
+    APBarLength = 43 - (43 * BossAPLost / BossTAP) //determines ap blocks
+    HPBarLength = 43 //max hp since	only attacking armor
+    ?APBarLength2 ! APBarLength
+      LastAPBarLength = APBarLength2
+    APBarLength2 = APBarLength
+  :
+    APBarLength = 0 //armor = 0
+    LastAPBarLength = 0 //armorfade = 0
+    HPBarLength = 43 - (43 * BossHPLost / BossTHP) //determines hp blocks
+    ?HPBarLength2 ! HPBarLength
+      LastHPBarLength = HPBarLength2
+    HPBarLength2 = HPBarLength
+
+  ?HPBarLength <= 42
+    draw.bg(22, 2, #330000, LastHPBarLength, 1) //makes hp fade according to dmg dealt
+	?HPBarLength <= 0
+      draw.bg(22, 2, #330000, 0, 1) //failsafe to make bar length 0
+
+  draw.bg(22, 2, #7f0000, HPBarLength, 1) //makes hp bar
+
+  BossArmorBar.text = string.Sub(ArmorBlocks, 0, APBarLength) //makes curr armor
+  BossAPFade.text = string.Sub(ArmorFades, 0, LastAPBarLength) //makes armor fade

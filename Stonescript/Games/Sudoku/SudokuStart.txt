@@ -1,0 +1,332 @@
+
+
+func main()
+  ?loc.begin & loc = Waterfall
+    ambient.Stop()
+    music.Play(musicList[rng % musicList.Count()])
+    disable banner
+		initUI()
+  ?totaltime = 2
+    sudoCore.initUI()
+    sudoCore.matInit(0,0)
+  ?totaltime > 2
+    sudoCore.core()
+    loopEvent()
+
+
+func initUI()
+  buttonList.Clear()
+
+  mainWindow = ui.AddPanel()
+  mainWindow.clip = true
+
+  mainWindow.x = 0
+  mainWindow.y = 0
+  mainWindow.anchor = center_center
+  mainWindow.dock = center_center
+	mainWindow.w = screen.w
+	mainWindow.h = screen.h
+  var customStyle = ui.AddStyle("╔═╗║ ║╚═╝")
+  mainWindow.style = customStyle
+
+  for i = 0..3
+    titleButtonInit(titleX + titleButtonPos[i][0],titleButtonPos[i][1],readText(titleButtonText[i]))
+  titleButtonList[0].SetUp(startPressed)
+  titleButtonList[1].SetDown(diffPressed)
+  diffPanelInit()
+  titleButtonList[2].SetDown(levelPressed)
+  adjustLevel(nowDiff,0)
+  titleButtonList[3].SetDown(recordPressed)
+  recordPanelInit()
+  recordUpdate(-1,-1)
+
+  var title = ui.AddText()
+  mainWindow.Add(title)
+  title.x = titleX
+  title.y = titleY
+  title.ay = center
+  title.dy = center
+  title.w = titleW
+  title.h = titleH
+  title.text = string.Format(titleText)
+  title.color = #999999
+
+  buttonInit(buttonX + buttonPos[0][0],buttonPos[0][1],readText(delText[0]))
+  buttonList[0].w = 15
+  for i = 1..9
+    buttonInit(buttonX + buttonPos[i][0],buttonPos[i][1],i)
+  buttonInit(buttonX + buttonPos[buttonPos.Count()-1][0],buttonPos[buttonPos.Count()-1][1],readText(delText[1]))
+  buttonList[buttonList.Count()-1].w = 15
+  //buttonList[buttonList.Count()-1].SetDown(startPressed)
+
+func loopEvent()
+  ?boardFlashTime > 0
+    boardFlashPlay()
+    ?dt(boardFlashTime) = boardFlashFrame * 9 & boardFlashDirection = 1
+      ?sudoCore.mainWindow.visible = false 
+        sudoCore.mainWindow.visible = true
+        mainWindow.visible = false
+      :
+        sudoCore.mainWindow.visible = false
+        mainWindow.visible = true
+  ?sudoCore.vectory = 1 
+    ?sudoCore.dt(sudoCore.vectoryTime) = 45
+      adjustLevel(nowDiff,nowLevel+1)
+      recordUpdate(nowDiff,dt(startTime))
+      boardFlashStart()
+
+
+
+func titleButtonInit(x_,y_,i_)
+  var button_ = ui.AddButton()
+  button_.style = 0
+  button_.x = x_
+  button_.y = y_
+  button_.w = 11
+  button_.h = 3
+  button_.text = string.Format(i_+"")
+  mainWindow.Add(button_)
+  titleButtonList.Add(button_)
+
+
+func buttonInit(x_,y_,i_)
+  var button_ = ui.AddButton()
+  button_.SetDown(numPressed)
+  button_.style = 4
+  button_.x = x_
+  button_.y = y_
+  button_.w = 5
+  button_.h = 3
+  button_.text = string.Format(i_+"")
+
+  mainWindow.Add(button_)
+  buttonList.Add(button_)
+
+func numPressed(btn)
+  var a
+
+func startPressed(btn)
+  adjustLevel(nowDiff,0)
+  boardFlashStart()
+  sudoCore.matInit(nowDiff,nowLevel)
+  startTime = totaltime - boardFlashFrame * 18 - 45
+
+func diffPanelInit()
+  diffPanel = ui.AddPanel()
+  mainWindow.Add(diffPanel)
+  diffPanel.w = 13
+	diffPanel.h = 5
+  diffPanel.x = titleX + titleButtonPos[1][0]
+  diffPanel.y = titleY + titleH/2 + diffPanel.h/2 + 1
+  diffPanel.style = ui.AddStyle("┼─┼│ │┼─┼")
+  diffPanel.visible = false
+
+  for i =0..2
+    var button_ = ui.AddButton()
+    diffPanel.Add(button_)
+    button_.w = 11
+	  button_.h = 1
+    button_.y = i-1
+    button_.style = 0
+    button_.text = readText(diffText[i])
+    button_.SetDown(diffChoicePressed)
+  
+  nowDiff = 1
+  titleButtonList[1].text = readText(titleButtonText[1]) + readText(diffText[1])
+
+func diffPressed(btn)
+  ?diffPanel.visible = false
+    diffPanel.visible = inherit
+  :
+    diffPanel.visible = false
+  
+
+func diffChoicePressed(btn)
+  for i = 0..2
+    ?string.Equals(btn.text,readText(diffText[i]))
+      nowDiff = i
+      titleButtonList[1].text = readText(titleButtonText[1]) + readText(diffText[i])
+  adjustLevel(nowDiff,0)
+
+func levelPressed(btn)
+ var a
+
+func adjustLevel(diff_,level_)
+  nowLevel = storageLevel(diff_,level_)
+  titleButtonList[2].text = readText(titleButtonText[2]) + string.Format(nowLevel+"")
+
+func storageLevel(diff_,level_)
+  var levelKey = storageLevelKey[diff_]
+  ?storage.Has(levelKey)
+    var highLevel_ = storage.Get(levelKey)
+    ?highLevel_ >= level_
+      return highLevel_
+    :
+      ?level_ > 99
+        level_ = 99
+      storage.Set(levelKey,level_)
+      return level_
+  :
+    storage.Set(levelKey,0)
+    return 0
+
+func recordPanelInit()
+  recordText.Clear()
+  recordPanel = ui.AddPanel()
+  mainWindow.Add(recordPanel)
+  recordPanel.w = 13
+	recordPanel.h = 5
+  recordPanel.x = titleX + titleButtonPos[3][0]
+  recordPanel.y = titleY + titleH/2 + recordPanel.h/2 + 1
+  recordPanel.style = ui.AddStyle("┼─┼│ │┼─┼")
+  recordPanel.visible = false
+
+  for i =0..2
+    var text_ = ui.AddText()
+    recordPanel.Add(text_)
+    text_.w = 11
+	  text_.h = 1
+    text_.y = i-1
+    recordText.Add(text_)
+
+func recordUpdate(diff_,time_)
+  var t
+  for i = 0..2
+    ?diff_ = i
+      t = storageTime(i,time_)
+    :
+      t = storageTime(i,-1)
+    ?t >= 0 
+      ?t > 299970
+        t = 299970
+      recordText[i].text = string.Format(readText(diffText[i]) +":"+ t/30+"s")
+    :
+      recordText[i].text = readText(diffText[i]) +":--s"
+
+func storageTime(diff_,time_)
+  var timeKey = storageTimeKey[diff_]
+  ?storage.Has(timeKey) & ((time >=0 & storage.Get(timeKey) <= time_) | time_ < 0)
+    return storage.Get(timeKey)
+  :
+    ?time_ >=0
+      storage.Set(timeKey,time_)
+    return time_
+
+func recordPressed(btn)
+  ?recordPanel.visible = false
+    recordPanel.visible = inherit
+  :
+    recordPanel.visible = false
+
+func boardFlashStart()
+  boardFlashCanvas = ui.AddCanvas()
+  boardFlashCanvas.w = screen.w
+  boardFlashCanvas.h = screen.h
+  boardFlashCanvas.blend = Add
+  boardFlashTime = totaltime + 3
+  boardFlashDirection = 1
+
+func boardFlashPlay()
+  var f = boardFlashFrame
+  var f1 = f*3
+  var f2 = f*9
+
+  ?boardFlashDirection = 1
+    ?dt(boardFlashTime) % f = 0
+      for x_ = 0..screen.w
+        ?(x_ % 3) = math.floor((dt(boardFlashTime) % f1) / f)
+          for y_ = 0..screen.h
+            ?(y_ % 3) = math.floor((dt(boardFlashTime) % f2) / f1)
+              boardFlashCanvas.SetBG(x_,y_, #FFFFFF)
+              play stone_throw_hit
+    ?dt(boardFlashTime) > f2
+      boardFlashTime = totaltime + 3
+      boardFlashDirection = -1
+
+  :?boardFlashDirection = -1
+    ?dt(boardFlashTime) % f = 0
+      for x_ = 0..screen.w
+        ?(x_ % 3) = math.floor((dt(boardFlashTime) % f1) / f)
+          for y_ = 0..screen.h
+            ?(y_ % 3) = math.floor((dt(boardFlashTime) % f2) / f1)
+              boardFlashCanvas.SetBG(x_,y_, #000000)
+              play stone_throw_hit
+    ?dt(boardFlashTime) > f2 + 10
+      boardFlashTime = 0
+      boardFlashDirection = 0
+      boardFlashCanvas.Recycle()
+
+func dt(time_)
+  return (totaltime - time_)
+
+
+func readText(textList)
+  ?te.language = "ZH-CN" | te.language = "ZH-TW"
+    return textList[1]
+  :
+    return textList[0]
+  
+
+
+var titleText = ascii
+╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗
+║  █████| █ ║  █| ████  ║ ██|█  |█  ║ █ |█  | █ ║
+╟─█─┼───┼─█─╫──█┼─█─┼─█─╫█──┼─█─┼█──╫█──┼█──┼─█─╢
+║█  |   | █ ║  █| █ |  █║█  | █ |█  █   |█  | █ ║
+╟▓█─┼───┼─█─╫──█┼─█─┼──█╫█──┼─█─┼███║───┼█──┼─█─╢
+║ ▓████ | █ ║  █| █ |  █║█  | █ |██ ║   |█  | █ ║
+╠═══╪═█▓╪═█═╬══▓╪═█═╪══▓╬█══╪═▓═╪█═█╬═══╪█══╪═▓═╣
+║   | █▓| █ ║  ▓| █ |  ▓║█  | ▓ |█  ▓   |█  | ▓ ║
+╟───┼─▓─┼─█─╫──▓┼─█─┼─▓─╫█──┼─▓─┼█──╫▓──┼█──┼─▓─╢
+║▓██▓▓  |  █║█▓ | ██▓▓  ║ ██|▓  |█  ║ ▓ | ██|▓  ║
+╟───┴───┴───╫───┴───┴───╫───┴───┴───╫───┴───┴───╢
+║###########║###########║###########║###########║
+╚═══════════╩═══════════╩═══════════╩═══════════╝
+asciiend
+
+var musicList = [rocky_plateau_0,rocky_plateau_1,rocky_plateau_2,rocky_plateau_3,rocky_plateau_4]
+var mainWindow
+var buttonList = []
+var buttonX = 25
+var buttonPos = [[0,3],[-5,-6],[0,-6],[5,-6],[-5,-3],[0,-3],[5,-3],[-5,0],[0,0],[5,0],[0,6]]
+
+var titleButtonList = []
+var titleButtonPos = [[-18,5],[-6,5],[6,5],[18,5]]
+var titleButtonText = [
+["Start!","开始！"],
+["Diff:","难度:"],
+["LV:","关卡:"],
+["Record","记录"]
+]
+
+var nowDiff = 0
+var nowLevel = 0
+var diffPanel
+var diffText = [
+["Easy","简单"],
+["Norm","普通"],
+["Hard","困难"]
+]
+var storageLevelKey=["SudokuHighLevel_0","SudokuHighLevel_1","SudokuHighLevel_2"]
+var storageTimeKey=["SudokuFastTime_0","SudokuFastTime_1","SudokuFastTime_2"]
+var recordPanel
+var recordText = []
+var startTime = 0
+
+var delText = [
+["Delete","删除"],
+["Verify","验证"]
+]
+
+var boardFlashCanvas
+var boardFlashTime = -1
+var boardFlashDirection = 0
+var boardFlashFrame = 5
+
+
+var titleX = -10
+var titleY = 0
+var titleW = 49
+var titleH = 13
+
+var sudoCore = import Games/Sudoku/SudokuCore

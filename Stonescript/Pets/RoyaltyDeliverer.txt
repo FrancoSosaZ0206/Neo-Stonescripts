@@ -1,0 +1,52 @@
+//RoyaltyDeliverer 1.0
+//By: ASCII
+
+var pusheranim = ascii
+##O_#.TTT.
+#/##|=«8»=|
+/#\#|_____|
+%%
+##O_#.TTT.
+#/##|=«8»=|
+/|##|_____|
+%%
+##O_#.TTT.
+#/##|=«8»=|
+V|##|_____|
+%%
+##O_#.TTT.
+#/##|=«8»=|
+#|>#|_____|
+asciiend
+
+var refx = 0
+var refz = 0
+refx = pos.x + (screen.w/2)-(screen.x)
+refz = pos.z - 3
+
+var pusher
+?totalTime = 1
+ pusher = ui.AddAnim(pusheranim)
+ pusher.duration = 20
+ pusher.loop = true
+ pusher.playOnStart = true
+ pusher.Play()
+ pusher.gamePause = true
+ pusher.anchor = top_left
+ pusher.dock = top_left
+ pusher.color = #FFFFFF
+pusher.x = refx - 15
+pusher.y = refz - 0
+
+?foe ! boss
+ >o-33,-2,#B1B1B1,ascii
+.————————————————————————————.
+|Delivery for the Stone-head!|
+'————————————————————,———————'
+asciiend
+:?foe = boss | foe.count >= 10
+ >o-33,-2,#B1B1B1,ascii
+.————————————————————————————.
+|Delivery for the… oh my god…|
+'————————————————————,———————'
+asciiend

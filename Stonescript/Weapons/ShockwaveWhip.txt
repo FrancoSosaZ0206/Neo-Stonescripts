@@ -1,0 +1,243 @@
+//Rf : Crossbow
+//By: Poly
+//Vr : 1.5
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+?base.IR="crossbow_"&
+^Buffs.string=berserk
+ base.ICR=#47312b
+?base.IL="crossbow_"&
+^Buffs.string=berserk
+ base.ICL=#47312b
+
+?base.IR="crossbow_"&
+^base.IRS=1
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=1
+ >o-3,3,@base.ICR@,ascii
+___.´
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=2&
+^base.IRT<3
+ >o1,2,#white,ascii
+)
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=2&
+^base.IRT<3
+ >o0,3,@base.ICR@,ascii
+_|
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=2&
+^base.IRT>=3
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=2&
+^base.IRT>=3
+ >o2,3,@base.ICR@,ascii
+`.___
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=3
+ >o1,1,#white,ascii
+/
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=3&
+^base.IRT=1&
+^foe.distance>=5
+ play controller_whip_attack
+
+?base.IR="crossbow_"&
+^base.IRS=3&
+^base.IRT=1&
+^foe.distance<5&
+^Buffs.string!berserk
+ play controller_whip_hit
+?base.IR="crossbow_"&
+^base.IRS=3&
+^base.IRT=1&
+^foe.distance<5&
+^Buffs.string=berserk
+ play bomb_cart_explosion
+
+?base.IR="crossbow_"&
+^base.IRS=3&
+^base.IRT=1
+ >o2,0,@base.ICR@,ascii
+,.
+##|
+##´
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=3&
+^base.IRT=2
+ >o2,0,@base.ICR@,ascii
+,´¯\
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=3&
+^base.IRT>3
+ >o2,-2,@base.ICR@,ascii
+###)
+##/
+.´
+asciiend
+?base.IR="crossbow_"&
+^base.IRS=4&
+^base.IRT<3
+ >o1,1,#white,ascii
+)
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=4&
+^base.IRT<3
+ >o-2,0,@base.ICR@,ascii
+.´`.
+|
+asciiend
+?base.IR="crossbow_"&
+^base.IRS=4&
+^base.IRT>=3
+ >o1,2,#white,ascii
+`
+asciiend
+
+?base.IR="crossbow_"&
+^base.IRS=4&
+^base.IRT>=3
+ >o-4,2,@base.ICR@,ascii
+.´¯¯
+|
+asciiend
+?base.IL="crossbow_"&
+^base.ILS=1
+ >o-1,2,#white,ascii
+/
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=1
+ >o-6,3,@base.ICL@,ascii
+___.´
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=2&
+^base.ILT<3
+ >o-1,2,#white,ascii
+)
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=2&
+^base.ILT<3
+ >o-3,3,@base.ICL@,ascii
+_|
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=2&
+^base.ILT>=3
+ >o-1,2,#white,ascii
+/
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=2&
+^base.ILT>=3
+ >o-1,3,@base.ICL@,ascii
+`.___
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=3
+ >o-1,1,#white,ascii
+/
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=3&
+^base.ILT=1&
+^foe.distance>=5
+ play controller_whip_attack
+
+?base.IL="crossbow_"&
+^base.ILS=3&
+^base.ILT=1&
+^foe.distance<5
+ play controller_whip_hit
+
+?base.IL="crossbow_"&
+^base.ILS=3&
+^base.ILT=1
+ >o-1,0,@base.ICL@,ascii
+,.
+##|
+##´
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=3&
+^base.ILT=2
+ >o-1,0,@base.ICL@,ascii
+,´¯\
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=3&
+^base.ILT>3
+ >o-1,-2,@base.ICL@,ascii
+###)
+##/
+.´
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=4&
+^base.ILT<3
+ >o-1,1,#white,ascii
+)
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=4&
+^base.ILT<3
+ >o-5,0,@base.ICL@,ascii
+.´`.
+|
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=4&
+^base.ILT>=3
+ >o-1,2,#white,ascii
+`
+asciiend
+
+?base.IL="crossbow_"&
+^base.ILS=4&
+^base.ILT>=3
+ >o-5,2,@base.ICL@,ascii
+.´¯¯
+|
+asciiend

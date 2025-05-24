@@ -1,0 +1,265 @@
+/* Mushroomhead
+by:Mallathor
+was made by modifying the PetFrog script,
+which was created by standardcombo.
+
+Turns the stonehead player character into
+a little mushoom */
+disable player
+
+
+
+var keepDistance = -17
+var maxX = -1
+
+var maxDistance
+maxDistance = -70
+
+var targetZ = -1
+
+var x = 0
+var y = 0
+var myX = 10
+var myZ = 0
+var lastPlayerX = 0
+var lastPlayerZ = 0
+
+var stateNone = 0
+var stateIdle = 1
+var stateJump = 2
+var currentState = stateNone
+var stateTime = 0
+
+var LeftEye = o
+var RightEye = o
+var EyeBrows = "###"
+var EyePosX = 0
+var EyePosZ = 0
+//changable color values
+ var EyeColor = #white
+ var MushColor = #rainff
+?(item.right.state ! 1 & item.right.state ! 4)|(item.left.state ! 1 & item.left.state ! 4 & item.left.state ! -1)
+  EyeBrows = "\ /"
+:
+  EyeBrows = "   "
+?item.left.state = -1
+ ?item.right = vigor
+  LeftEye = ❤
+  RightEye = ❤
+ :?item.right = poison
+  LeftEye = ∞
+  RightEye = ∞
+ :?item.right = ice
+  LeftEye = ❄
+  RightEye = ❄
+ :?item.right = fire
+  LeftEye = φ
+  RightEye = φ
+ :?item.right = aether
+  LeftEye = "*"
+  RightEye = "*"
+ :
+  LeftEye = o
+  RightEye = o
+:
+ ?item.right = vigor
+  RightEye = ❤
+ :?item.right = poison
+  RightEye = ∞
+ :?item.right = ice
+  RightEye = ❄
+ :?item.right = fire
+  RightEye = φ
+ :?item.right = aether
+  RightEye = "*"
+ :?item.right = quest
+  RightEye = "!"
+ :?item.right = star
+  RightEye = "☆"
+ :?item.right = ki
+  RightEye = "@"
+ :
+  RightEye = o
+ ?item.left = vigor
+  LeftEye = ❤
+ :?item.left = poison
+  LeftEye = ∞
+ :?item.left = ice
+  LeftEye = ❄
+ :?item.left = fire
+  LeftEye = φ
+ :?item.left = aether
+  LeftEye = "*"
+ :?item.left = quest
+  LeftEye = "!"
+ :?item.left = star
+  LeftEye = "☆"
+ :?item.left = ki
+  LeftEye = "@"
+ :
+  LeftEye = o
+func SetState(newState)
+
+  currentState = newState
+  stateTime = 0
+
+
+?currentState = stateNone | time = 1
+  lastPlayerX = pos.x
+  lastPlayerZ = pos.z
+  myX = keepDistance
+  myZ = targetZ
+
+  // Start further away if the frog is summoned while the location is already running
+  ?time > 1
+    myX = maxDistance
+
+  SetState(stateIdle)
+
+
+myX = myX - (pos.x - lastPlayerX)
+
+stateTime++
+
+?currentState = stateIdle
+  ?myX < maxDistance | myX > -maxDistance
+    myX = maxDistance
+  myZ = myZ - (pos.z - lastPlayerZ)
+
+  ?myX < keepDistance
+    SetState(stateJump)
+
+:?currentState = stateJump
+  ?myX < maxX
+    myX++
+
+  ?stateTime >= 6
+    ?myZ > targetZ
+      myZ--
+    :?myZ < targetZ
+      myZ++
+
+  ?stateTime >= 12
+    SetState(stateIdle)
+
+
+lastPlayerX = pos.x
+lastPlayerZ = pos.z
+
+// Draw
+/*
+☆☺ʘ❤♦♣♠•◘⏹◙♂♀♪♫☼
+⚿œ§≠¿↑↓→←▲▼▶◀_-¯
+«»™!＂#$%&'()*+,
+［］^`´.\/|0123456
+789:;<=>?@ABCDEF
+GHIJKLMNOPQRSTU
+VWZ abcdefghijkl
+mnopqrstuvwxyz
+ÇüéâäàåçêëèïîìÄÅ
+ÉæÆôöòûùýÖÜ€£￥₩ÀÁ
+áíóúñÑãõζηξλψέρι
+αβγπΣσμτΦΘΩδ∞φεω
+≡±≥≤÷≈°…·†☤∆❄┊
+╓ ╖╒ ╕╔ ╗┌ ┐╥ ╤
+║ ╟┤ ├╢ ╠╡ ╞╬ ╪ 
+╙ ╜╘ ╛╚ ╝└ ┘╨ ╧
+╦ ═ ┬ ║
+╫ ─ ┼ ╣ ⌐ ¬
+╩ ═ ┴ │ ░▒▓█▄▀
+*/
+?currentState = stateIdle
+  >o@myX+10@,@myZ-3@,@MushColor@,ascii
+#
+#
+#
+####.^.
+###/.'.\
+##(' " ')
+##`|# #|´
+###|_─_|
+#####¯
+asciiend
+  >o@myX+14@,@myZ+3@,@LeftEye@ @RightEye@
+  >o@myX+14@,@myZ+2@,#red,@EyeBrows@
+  x = myX + 5
+  y = myZ + 2
+
+  ?face = "°°"
+    ?time % 10 = 0 & myX > keepDistance
+      myX--
+
+    
+?currentState = stateJump
+  ?stateTime/2 = 0
+    >o@myX+10@,@myZ-3@,@MushColor@,ascii
+#
+#
+####.^.
+###/.'.\
+##(' " ')
+##`|# #|´
+###| ─ |
+###'───'
+asciiend
+    >o@myX+14@,@myZ+2@,@LeftEye@ @RightEye@
+    >o@myX+14@,@myZ+1@,#red,@EyeBrows@
+  :?stateTime/2 = 1
+    >o@myX+10@,@myZ-3@,@MushColor@,ascii
+#
+####.^.
+###/.'.\
+##(' " ')
+##`|# #|´
+###| ─ |
+###'───'
+asciiend
+   >o@myX+14@,@myZ+1@,@LeftEye@ @RightEye@
+   >o@myX+14@,@myZ@,#red,@EyeBrows@
+  :?stateTime/2 = 2
+    >o@myX+10@,@myZ-3@,@MushColor@,ascii
+####.^.
+###/.'.\
+##(' " ')
+##`|# #|´
+###| ─ |
+###'───'
+asciiend
+   >o@myX+14@,@myZ@,@LeftEye@ @RightEye@
+   >o@myX+14@,@myZ-1@,#red,@EyeBrows@
+  :?stateTime/2 = 3
+    >o@myX+10@,@myZ-3@,@MushColor@,ascii
+####.^.
+###/.'.\
+##(' " ')
+##`|# #|´
+###| ─ |
+###'¯¯¯'
+asciiend
+   >o@myX+14@,@myZ@,@LeftEye@ @RightEye@
+   >o@myX+14@,@myZ-1@,#red,@EyeBrows@
+  :?stateTime/2 = 4
+    >o@myX+10@,@myZ-3@,@MushColor@,ascii
+#
+####.^.
+###/.'.\
+##(' " ')
+##`|# #|´
+###|_─_|
+#####¯
+asciiend
+   >o@myX+14@,@myZ+1@,@LeftEye@ @RightEye@
+   >o@myX+14@,@myZ@,#red,@EyeBrows@
+  :?stateTime/2 = 5
+    >o@myX+10@,@myZ-3@,@MushColor@,ascii
+#
+#
+####.^.
+###/.'.\
+##(' " ')
+##`|# #|´
+###|_─_|
+#####¯
+asciiend
+   >o@myX+14@,@myZ+2@,@LeftEye@ @RightEye@
+   >o@myX+14@,@myZ+1@,#red,@EyeBrows@

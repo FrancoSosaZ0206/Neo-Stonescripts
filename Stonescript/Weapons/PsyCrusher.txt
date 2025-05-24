@@ -1,0 +1,125 @@
+//Rf : Heavy Hammer
+//By: Poly
+//Vr : 1.0
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+var HevHamX
+var HevHamY
+var HevHamSway
+var HevHamSc1
+var HevHamSc2
+
+?base.T%12<=3
+ HevHamSway=1
+?base.T%12<=6&
+^base.T%12>3|
+^base.T%12>9
+ HevHamSway=0
+?base.T%12<=9&
+^base.T%12>6
+ HevHamSway=-1
+
+?base.T%20<=5
+ HevHamSc1=＂［  | ］＂
+ HevHamSc2=＂│`   │＂
+?base.T%20<=10&
+^base.T%20>5
+ HevHamSc1=＂［ |  ］＂
+ HevHamSc2=＂│   `│＂
+?base.T%20<=15&
+^base.T%20>10
+ HevHamSc1=＂［|   ］＂
+ HevHamSc2=＂│  ` │＂
+?base.T%20>15
+ HevHamSc1=＂［   |］＂
+ HevHamSc2=＂│ `  │＂
+
+?base.FD<10
+ HevHamX=base.FD
+:?!ai.walking
+ HevHamX=10
+:
+ HevHamX=10+HevHamSway
+?base.IR=Heavy_Hammer&
+^base.IRS=1
+ HevHamY=-8
+ >o-1,1,#white,ascii
+(#/
+asciiend
+?base.IR=Heavy_Hammer&
+^base.IRS=2&
+^base.IRT<=3
+ HevHamY=-9
+?base.IR=Heavy_Hammer&
+^base.IRS=2&
+^base.IRT>3
+ HevHamY=-10
+?base.IR=Heavy_Hammer&
+^base.IRS=3&
+^base.IRT<=3
+ HevHamY=-2
+?base.IR=Heavy_Hammer&
+^base.IRS=3&
+^base.IRT>3&
+^base.IRT<=5
+ HevHamY=-4
+?base.IR=Heavy_Hammer&
+^base.IRS=3&
+^base.IRT>5
+ HevHamY=-6
+
+?base.IR=Heavy_Hammer&
+^base.IRS=2
+ >o-1,1,#white,ascii
+\#)
+asciiend
+
+?base.IR=Heavy_Hammer&
+^base.IRS=3
+ >o0,2,#white,ascii
+\\
+asciiend
+
+?base.IR=Heavy_Hammer&
+^base.IRS=4&
+^base.IRT<=3
+ >o-1,2,#white,ascii
+/#)
+asciiend
+
+?base.IR=Heavy_Hammer&
+^base.IRS=4&
+^base.IRT>3
+ >o-1,2,#white,ascii
+¯#¯
+asciiend
+
+?base.IR=Heavy_Hammer&
+^base.IRS!3|
+^base.IR=Heavy_Hammer&
+^base.IRS=3&
+^base.IRT>3
+ >o@HevHamX@,@HevHamY@,@base.ICR@,ascii
+______
+)    (
+│¯¯¯¯│
+@HevHamSc2@
+|____|
+@HevHamSc1@
+#¯¯¯¯
+asciiend
+
+?base.IR=Heavy_Hammer&
+^base.IRS=3&
+^base.IRT<=3
+ >o@HevHamX-3@,@HevHamY@,@base.ICR@,ascii
+###______
+###)    (
+###│¯¯¯¯│
+###@HevHamSc2@
+.##|____|##.
+#`.@HevHamSc1@.´
+####¯¯¯¯
+asciiend

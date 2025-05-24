@@ -1,0 +1,173 @@
+var ToolList = [
+[ice crossbow],
+[aether crossbow],
+[trisk, star],
+[Heavy Hammer],
+[quest,compound],
+[trisk,bashing],
+[trisk,dashing],
+[blade],
+]
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+ToolBelt
+version: 2.0
+by Incoherent Toast
+
+This is a script that can allow the user to add
+loadouts to a list so that they can have access
+to a much larger toolbelt selection
+
+to do this you can do this:
+var Tb = import UI/ToolBelt
+Tb.Run()
+?loc.begin
+  Tb.ToolList = [
+[ice crossbow],
+[aether crossbow],
+[trisk, star],
+[Heavy Hammer],
+[quest,compound],
+[trisk,bashing],
+[trisk,dashing],
+[blade],
+]
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
+
+
+var isPC = sys.isPC
+var MotherPanel
+var Invis = ui.AddStyle("#########")
+var ButtonToggle = false
+var ToolbeltButton
+var ToolbeltText
+var SavedX = input.x
+var SavedY = input.y
+var ScreenW = screen.w
+var ScreenH = screen.h
+var RndToInt = math.RoundToInt
+var Sin = math.sin
+var Cos = math.cos
+var Pi = math.pi
+var Atan = math.atan
+var v
+var toolascii = ascii
+#┬####<)
+#╪═[]═╪
+#U####'
+asciiend
+var ShieldIcon = ascii
+|`-´|
+|   |
+#`-´
+asciiend
+
+var ButtonList = []
+func GenerateButtons()
+  var RadialDistance = math.Max(ToolList.Count()/2+1,4)
+  ?RadialDistance > ScreenH/2 - 1
+    ?RadialDistance > (5 * ScreenH) / 6
+      var Stagger = 3
+    :?RadialDistance > (5 * ScreenH) / 9
+      var Stagger = 2
+    RadialDistance = ScreenH/2 - 1
+  var Stagger = 1
+  var n = ToolList.Count()
+  MotherPanel = ui.AddPanel()
+  MotherPanel.style = Invis 
+  for a = 0 .. n-1
+    var ay = RndToInt((RadialDistance - a%Stagger*3) * math.Cos(Pi-(a*2*Pi/n)))
+    var ax = 2*RndToInt((RadialDistance - a%Stagger*3) * math.Sin(Pi-(a*2*Pi/n)))
+    var Button = CreateUI(ui.AddButton(),ax,ay,5,3)
+    Button.style = Invis
+    Button.text = ""
+    Button.SetPressed(SelectTool)
+    ButtonList.Add(Button)
+    var Shield = CreateUI(ui.AddText(ShieldIcon),ax,ay,5,3)
+    Shield.color = #119911
+    var Num = CreateUI(ui.AddText(""+a),ax,ay+1,10,3)
+    Num.align = center
+    MotherPanel.Add( Button )
+    MotherPanel.Add( Shield )
+    MotherPanel.Add( Num )
+
+func ToggleButtons()
+  ButtonToggle = !ButtonToggle
+  ?ButtonToggle
+    ToolbeltButton.bcolor = #202020
+    ToolbeltText.color = #808080
+    GenerateButtons()
+    play equip
+  :
+    ButtonList.Clear()
+    ?MotherPanel
+      MotherPanel.Recycle()
+    ToolbeltButton.bcolor = #808080
+    ToolbeltText.color = #FFFFFF
+    play unequip
+
+func CreateUI(UI,X,Y,W,H)
+  UI.x = X
+  UI.y = Y
+  UI.w = W
+  UI.h = H
+  return UI
+
+
+func Startup()
+  Init = false
+  ToolbeltButton = CreateUI(ui.AddButton(),0,6,8,5)
+  ToolbeltButton.text = ""
+  ToolbeltButton.dock = top_left
+  ToolbeltButton.anchor = top_left
+  ToolbeltButton.SetPressed(ToggleButtons)
+
+  ToolbeltText = CreateUI(ui.AddText(),0,7,8,3)
+  ToolbeltText.text = toolascii
+  ToolbeltText.dock = top_left
+  ToolbeltText.anchor = top_left
+
+var Init = true
+var CursorAngle
+var SelectedSlot
+var Yset
+func Run()
+  ?totaltime = 1
+    Init = true
+    ButtonList.Clear()
+
+  ?Init
+    Startup()
+
+  ?isPC & ButtonToggle
+    ?SavedX ! input.x | SavedY ! input.y
+      ?input.y >= ScreenH/2
+        v=Pi
+      :
+        ?input.x<ScreenW/2
+          v=2*Pi
+        :
+          v=0
+      CursorAngle = v-math.Atan((1.0*((input.x-(ScreenW/2))/2))/(input.y-(ScreenH/2)))
+      SelectedSlot = RndToInt(CursorAngle/(2*Pi/ToolList.Count()))%ToolList.Count()
+    Yset = -1
+    for a : ToolList[SelectedSlot]
+      >c@-string.Size(a)/2@,@Yset@,@a@
+      Yset++
+    SavedX = input.x
+    SavedY = input.y
+
+func SelectTool(btn)
+  var ButtonNum = 0
+  for a : ButtonList
+    ?a = btn
+      break
+    :
+      ButtonNum++
+  ?ToolList[ButtonNum].Count() = 1
+    equip @ToolList[ButtonNum][0]@
+  :
+    equipL @ToolList[ButtonNum][0]@
+    equipR @ToolList[ButtonNum][1]@
+  ButtonToggle = false
+  MotherPanel.Recycle()
+  ButtonList.Clear()

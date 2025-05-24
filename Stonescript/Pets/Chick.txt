@@ -1,0 +1,843 @@
+﻿//*******************************
+// PetChick
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v3.56.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Travel the world with
+// a pet chick in tow! 
+// Watch it hatch and join
+// you in your adventure,
+// peeping excitedly along 
+// the way and chirping when 
+// things get scary!
+//
+//             Peep!
+//       __O< ´
+//     '{/_;,
+// :';´:'._.'
+//  `-´
+//                 Chirp!
+//   __O-   {\\O< ´
+// `{/ ;   ,( ¯;
+//   ^^      ^^
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that’s it!
+//
+// Advanced Instructions:
+// ----------------------
+// The following variables 
+// can be modified to tailor
+// your pet chick experience:
+//
+// hatchsound: Sound of the egg
+//             hatching
+//
+// chirpsound: Sound chick makes 
+//             when scared
+//              
+// peepsound:  Sound chick makes
+//             when happy
+//
+// wingsound:  Sound of chick's 
+//             wings flapping
+//
+// eggColor:   Color of chick egg
+//
+// chickColor: Color of chick pet
+//
+// chirpColor: Color of the chirp
+//
+// peepColor:  Color of the peep
+//
+// waitDistMin: Farthest distance 
+//             the chick will wait
+//             before flying to the
+//             player
+//
+// waitDistMax: Closest distance
+//             the chick will wait
+//             before flying to the
+//             player
+//
+// minDistance: Closest the chick
+//             will get to player
+//
+// targetZ:    The z-position the 
+//             chick will fly to
+//             in reference to the
+//             players position
+//
+//
+// Enjoy!
+//
+//
+//*******************************
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+var hatchsound = [pickup_stone,250]
+var chirpsound = [buy,300]
+var peepsound  = [confirm,300]
+var wingsound  = [bat_wing_small,300]
+
+var eggColor   = #FFFCEC
+var chickColor = #FFDD00
+var chirpColor = #FF0000
+var peepColor  = #00FFFF
+
+var waitDist    = -20
+var waitDistMin = -25
+var waitDistMax = -15
+var minDistance = -8
+var targetZ = 1
+
+//*******************************
+// Global Variables
+//*******************************
+
+var lvl
+var hatchdur = 50
+var noiseflag = 0
+var x = 0
+var y = 0
+var myX = 0
+var myZ = 0
+var lastPlayerX = 0
+var lastPlayerZ = 0
+var maxDistance = -70
+
+var stateNone = 0
+var stateIdle = 1
+var stateJump = 2
+var stateFly  = 3
+var stateLand = 4
+var currentState = stateNone
+var stateTime = 0
+var clicked = false
+var peeping = 0
+
+var epanel
+var eanim1
+var eanim2
+var canim
+var epeep
+
+var cpanel
+var cidle
+var chirp
+var calert
+var peep
+var cjump
+var cfly
+var cland
+var auth
+var butt
+
+//*******************************
+// ASCII Art
+//*******************************
+
+var hatch1 = ascii
+#
+######,-.
+#####:   :
+#####'._.'
+%%
+#
+######,-.
+#####: ; : 
+#####'._.'
+%%
+#
+######,-.
+#####:·; :
+#####'._.'
+%%
+#
+######,-.
+#####:·;,:
+#####'._.'
+%%
+######,-.
+#####:·;,:
+####`({_,O-
+#####'._.'
+%%
+#####,-,
+####:,`_O-
+####`{/_;,
+#####'._.'
+%%
+#
+######__O<
+####'{/_;,
+:';´:'._.'
+#`-´
+%%
+#
+######__O-
+####`{/_;,
+:';´:'._.'
+#`-´
+%%
+#
+######__O-
+####`{/_;,
+:';´:'._.'
+#`-´
+%%
+#
+######__O-
+####`{/ ;
+######^^
+#
+%%
+#
+######__O-
+####`{/_;,
+:';´:'._.'
+#`-´
+%%
+#
+######__O-
+####`{/ ;
+######^^
+#
+asciiend
+
+var hatch2 = ascii
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+%%
+#
+#
+####`({#,O-
+#
+%%
+#
+#######_O-
+####`{/#;
+#
+%%
+#
+######__O<
+####,{/#;
+#
+#
+%%
+#
+######__O-
+####`{/#;
+#
+#
+%%
+#
+######__O-
+####`{/#;
+#
+#
+%%
+#
+######__O-
+####`{/ ;
+######^^
+#
+%%
+#
+######__O-
+####`{/_;
+#
+#
+%%
+#
+######__O-
+####`{/ ;
+######^^
+#
+asciiend
+
+
+var chickidle = ascii
+##__O-
+`{/ ;
+##^^
+%%
+#{\\O<
+,( ¯;
+##^^
+%%
+##__O<
+`{/ ;
+##^^
+%%
+##__O-
+`{/ ;
+##^^
+asciiend
+
+var chickalert = ascii
+##__O-
+`{/ ;
+##^^
+%%
+#{\\O<
+,( ¯;
+##^^
+asciiend
+
+var chickjump = ascii
+#
+#
+##__O-
+`{/ ;
+##^^
+%%
+#
+#
+#{\\O-
+,( ¯;
+##^^
+%%
+#
+##__O-
+`{/ /
+#´´
+#
+%%
+#{\\O-
+`( ¯/
+#´´
+#
+#
+asciiend
+
+var chickfly = ascii
+#{\\O-
+,( ¯/
+#´´
+%%
+##__O-
+`{/ /
+#´´
+asciiend
+
+var chickland = ascii
+#{\\O-
+`( ¯/
+#´´
+#
+#
+%%
+#
+##__O-
+`{/ /
+##^^
+#
+%%
+#
+#
+#{\\O-
+,( ¯;
+##^^
+%%
+#
+#
+##__O-
+`{/ ;
+##^^
+asciiend
+
+var textchirp = ascii
+#Chirp!
+´
+asciiend
+
+var textpeep = ascii
+#Peep!
+´
+asciiend
+
+var textauth = ascii
+#♣Sven
+´
+asciiend
+
+var custstyle = ui.AddStyle("
+^###
+^###
+^###")
+
+
+//*******************************
+// Functions
+//*******************************
+
+//*******************************
+// DrawEgg()
+//
+// Creates the panel and 
+// animations for the egg 
+// hatching art
+//
+//*******************************
+func DrawEgg()
+  epanel = ui.AddPanel()
+  epanel.anchor = top_left
+  epanel.dock = top_left
+  epanel.w = 11
+  epanel.h = 5
+  epanel.style = custstyle 
+
+  eanim1 = ui.AddAnim(hatch1)
+  eanim1.duration = hatchdur
+  eanim1.color = #87867E
+
+  eanim2 = ui.AddAnim(hatch1)
+  eanim2.duration = hatchdur
+  eanim2.color = eggColor
+
+  canim = ui.AddAnim(hatch2)
+  canim.duration = hatchdur
+  canim.color = chickColor
+
+  epeep = ui.AddAnim(textpeep)
+  epeep.color = peepColor
+  epeep.x = 9
+  epeep.y = -1
+  epeep.visible = false
+
+  epanel.Add(eanim1)
+  epanel.Add(eanim2)
+  epanel.Add(canim)
+  epanel.Add(epeep)
+//
+
+//*******************************
+// DrawChick()
+//
+// Creates the panel and 
+// animations for the pet
+// chick art
+//
+//*******************************
+func DrawChick()
+  cpanel = ui.AddPanel()
+  cpanel.anchor = top_left
+  cpanel.dock = top_left
+  cpanel.w = 6
+  cpanel.h = 5
+  cpanel.style = custstyle 
+  cpanel.visible = false
+
+  cidle = ui.AddAnim(chickidle)
+  cidle.loop = false
+  cidle.duration = 25
+  cidle.color = chickColor
+  cidle.y = 1
+
+  calert = ui.AddAnim(chickalert)
+  calert.loop = false
+  calert.duration = 7
+  calert.color = chickColor
+  calert.y = 1
+
+  cjump = ui.AddAnim(chickjump)
+  cjump.loop = false
+  cjump.duration = 10
+  cjump.color = chickColor
+
+  cfly = ui.AddAnim(chickfly)
+  cfly.loop = true
+  cfly.duration = 7
+  cfly.color = chickColor
+  cfly.y = -2
+
+  cland = ui.AddAnim(chickland)
+  cland.loop = false
+  cland.duration = 10
+  cland.color = chickColor
+
+  chirp = ui.AddAnim(textchirp)
+  chirp.color = chirpColor
+  chirp.x = 7
+  chirp.visible = false
+
+  peep = ui.AddAnim(textpeep)
+  peep.color = peepColor
+  peep.x = 7
+  peep.visible = false
+
+  auth = ui.AddAnim(textauth)
+  auth.color = peepColor
+  auth.x = 7
+  auth.visible = false
+
+  butt = ui.AddButton()
+  butt.w = 1
+  butt.h = 1
+  butt.y = 1
+  butt.SetUp(ChickClick)
+  butt.text = ""
+  butt.style = custstyle
+  butt.hcolor = #000000
+  butt.visible = false
+  butt.sound = wand_air_hit
+  
+  cpanel.Add(cidle)
+  cpanel.Add(calert)
+  cpanel.Add(cjump)
+  cpanel.Add(cfly)
+  cpanel.Add(cland)
+  cpanel.Add(chirp)
+  cpanel.Add(peep)
+  cpanel.Add(butt)
+  cpanel.Add(auth)
+//
+
+func ChickClick()
+  ?clicked = false
+    clicked = true
+//
+
+//*******************************
+// SetState()
+//
+// Sets the next state and 
+// resets the stateTime timer
+//
+//*******************************
+func SetState(newState)
+  currentState = newState
+  stateTime = 0
+//
+
+//*******************************
+// ShowChick()
+//
+// Controls which animation is
+// visible depending on what 
+// state the chick is in
+//
+//*******************************
+func ShowChick(state)
+  cidle.visible = false
+  calert.visible = false
+  cjump.visible = false
+  cfly.visible  = false
+  cland.visible = false
+  butt.visible = false
+
+  ?state = 0 //Idle
+    butt.visible = true
+    cidle.visible = true
+  ?state = 1 //Jump
+    clicked = false
+    cjump.visible = true
+    cjump.Play()
+    chirp.visible = false
+    peep.visible  = false
+    auth.visible  = false
+  :?state = 2 //Fly
+    clicked = false
+    cfly.visible  = true
+    cfly.Play()
+  :?state = 3 //Land
+    clicked = false
+    cland.visible = true
+    cland.Play()
+  :?state = 5 //Alert
+    clicked = false
+    calert.visible = true
+//
+
+//*******************************
+// MoveChick()
+//
+// Updates the pet chick panel
+// with new x/y coordinates 
+// converting them from the 
+// world to screen positions for
+// use with the chick panel
+//
+//*******************************
+func MoveChick(x,y)
+  cpanel.x = x+screen.FromWorldX(pos.x) - 6
+  cpanel.y = y+screen.FromWorldZ(lastPlayerZ) 
+             ^- 4 + targetZ
+//
+
+//*******************************
+// MakeNoise()
+//
+// Controls which and when sounds
+// are played depending on the 
+// noise desired, the state of
+// the chick, and if a noise is
+// already playing
+//
+//*******************************
+func MakeNoise(noise)
+  ?noise = 0 //hatch
+    ?canim.frame < 5
+      play @hatchsound[0]@ @hatchsound[1]@
+    ?canim.frame = 6
+      chirp.visible = false
+      epeep.visible = true
+      ?noiseflag < 1
+        play @peepsound[0]@ @peepsound[1]@
+        noiseflag = 1
+    :?canim.frame = 7
+      epeep.visible = true
+    :
+      noiseflag = 0 
+      epeep.visible = false 
+
+  :?noise = 1 //peep
+    ?peeping = 0 & clicked = true
+      peeping = 2
+      clicked = false
+    :?peeping = 0 & (1 + rng % 30) = 1
+      peeping = 1
+    :?peeping > 0
+      ?!cidle.playing
+        cidle.Play()
+        noiseflag = 0
+      ?cidle.frame = 0
+        auth.visible = false
+        peep.visible = false
+      :?cidle.frame = 1
+        ?noiseflag < 1
+          chirp.visible = false
+          ?peeping = 1
+            peep.visible = true
+            auth.visible = false
+          :?peeping = 2
+            peep.visible = false
+            auth.visible = true
+          play @peepsound[0]@ @peepsound[1]@
+          noiseflag = 1
+      :?cidle.frame = 2
+        noiseflag = 0
+        ?peeping = 1
+          peep.visible = true
+          auth.visible = false
+        :?peeping = 2
+          peep.visible = false
+          auth.visible = true
+      :?cidle.frame = 3
+        auth.visible = false
+        peep.visible = false
+        peeping = 0
+      :
+        auth.visible = false
+        peep.visible = false
+
+  :?noise = 2 //Alert
+    ?!calert.playing
+      calert.Play()
+      noiseflag = 0
+    :?calert.frame = 1
+      ?noiseflag < 1
+        auth.visible = false
+        peep.visible = false
+        chirp.visible = true
+        play @chirpsound[0]@ @chirpsound[1]@
+        noiseflag = 1
+    :
+      noiseflag = 0
+      chirp.visible = false
+
+  :?noise = 3 //Success
+    ?!calert.playing
+      calert.Play()
+    :?calert.frame = 1
+      ?noiseflag < 1
+        auth.visible = false
+        chirp.visible = false
+        peep.visible = true
+        play @peepsound[0]@ @peepsound[1]@
+        noiseflag = 1
+    :
+      noiseflag = 0  
+      peep.visible = false
+
+  :?noise = 4 //fly
+    ?noiseflag < 1
+      play @wingsound[0]@ @wingsound[1]@
+      noiseflag = 1
+    :
+      noiseflag = 0
+//
+
+//*******************************
+// AnimateChick()
+//
+// The main function controlling
+// the pet chick, determing what
+// state it's in, what animation
+// to show, what noises to make,
+// and when to update movement
+//
+//*******************************
+func AnimateChick()
+  ?currentState = stateNone | time = 1
+    ?totaltime <= 1
+      DrawEgg()
+      DrawChick() 
+
+      lvl = loc.id
+      ?lvl = "waterfall"
+        targetZ = 0
+
+    lastPlayerX = pos.x
+    lastPlayerZ = pos.z
+    myX = waitDistMin
+    myZ = targetZ
+    epanel.x = myX+screen.FromWorldX(pos.x) - 10
+    epanel.y = myZ+screen.FromWorldZ(lastPlayerZ) 
+               ^- 3 + targetZ
+
+    ?pos.x > 0
+      epanel.visible = false
+      SetState(stateIdle)
+    :
+      SetState(stateHatch)
+    
+  :?currentState = stateHatch
+    ?!eanim1.playing
+      eanim1.Play()
+    :?eanim1.playing
+      eanim2.Play()
+      canim.Play()
+    
+    MakeNoise(0)
+ 
+    ?canim.frame = 11 
+      ShowChick(0)
+      epanel.visible = false
+      SetState(stateIdle)
+
+  :?currentState = stateIdle
+    ShowChick(0)
+ 
+    ?face = "°°"
+      ShowChick(5)
+      MakeNoise(2)
+    :?face = "^^"
+      ShowChick(5)
+      MakeNoise(3)
+    : 
+     ShowChick(0)
+     MakeNoise(1)
+
+    ?myX < maxDistance | myX > -maxDistance
+      myX = maxDistance
+
+    ?myX < waitDist
+      SetState(stateJump)
+  
+  :?currentState = stateJump
+    ShowChick(1)
+    ?!cjump.playing
+      cjump.Play()
+    :
+      ?cjump.frame > 2
+        MakeNoise(4)
+        ?myX < minDistance
+          myX++
+      ?cjump.frame = 3
+        currentState = stateFly
+
+  :?currentState = stateFly
+    ShowChick(2)
+    MakeNoise(4)
+    ?!cfly.playing
+      cfly.Play()
+    :
+      ?stateTime/4 >= 5
+        currentState = stateLand
+
+    ?myX < minDistance
+      myX++
+
+    ?lastPlayerZ < pos.z
+      lastPlayerZ++
+    :?lastPlayerZ > pos.z
+      lastPlayerZ--
+
+  :?currentState = stateLand
+    ShowChick(3)
+    ?!cland.playing
+      cland.Play()
+    :
+      ?cland.frame < 3
+        MakeNoise(4)
+        ?myX < minDistance
+          myX++
+      ?cland.frame = 3
+        currentState = stateIdle
+
+    waitDist = waitDistMin + rng %
+     ^(waitDistMax - waitDistMin + 1)   
+
+  myX = myX - (pos.x - lastPlayerX)
+  stateTime++
+  lastPlayerX = pos.x
+  MoveChick(myX,myZ)
+//
+
+
+//*******************************
+// Drawing Code 
+//*******************************
+
+//?loc.begin | loc.loop
+//  DrawEgg()
+//  DrawChick()
+
+AnimateChick()
+
+//*******************************
+// End of File
+//*******************************

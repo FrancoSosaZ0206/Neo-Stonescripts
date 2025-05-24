@@ -1,0 +1,1159 @@
+//-~-~-Information-~-~-\\
+/*By: CitrionDragon☆\
+Version 1.0
+  Full release
+
+Put this file into the Games folder, and import it using
+import Games/Arena
+
+Survive as long as you can in the Arena!
+
+\☆Go to waterfall to play!*/
+
+//-~-~-Variables-~-~-\\
+//aliases\\
+var uiAA = ui.AddAnim
+var uiAB = ui.AddButton
+var uiAP = ui.AddPanel
+var uiAT = ui.AddText
+var invis = ui.AddStyle("#########")
+var corners = ui.AddStyle("╔#╗###╚#╝")
+
+var back
+var health
+var maxhealth
+var level
+var xp
+var maxxp
+var xpperc
+var xpbar
+var xpcolor=#rainff
+var floor
+var room
+var inventory = []
+var weapon1=sword
+var weapon2=bow
+var weapon3=magic_book
+var actions=0
+var maxactions=1
+var turn=false
+var turns=0
+var foes = []
+var playerC=7
+var playerR=3
+var upbtn
+var downbtn
+var leftbtn
+var rightbtn
+var uiborders
+
+var score=0
+var difficulty=1
+var foecount=0
+
+//var RoomData=import Games/Rooms
+
+var attackbtns=[]
+var meleeattack
+var rangedattack
+var magicattack
+
+var damage=0
+var bufftimer=0
+
+var inv
+var invbtn
+var invpnl
+var invscreen
+var invopen=false
+var invarray=[[Sword,GreatSword],[Bow,Crossbow],[Staff,Book]] //Melee 0, Ranged 1, Magic 2
+var melee="sword"
+var ranged="longbow"
+var magic="staff"
+var meleeasci
+var rangedasci
+var magicasci
+var meleetxt
+var rangedtxt
+var magictxt
+var meleetab
+var rangedtab
+var magictab
+var invpage=1
+var invbtnsword
+var invbtngreatsword
+var invbtnlongbow
+var invbtncrossbow
+var invbtnstaff
+var invbtnbook
+
+var undiscovered=ascii
+ .-.
+  .'
+  •
+asciiend
+
+var sword=ascii
+
+  ─╣≡≡══──
+asciiend
+
+var greatsword=ascii
+   |________
+ ─<╣       /
+   |¯¯¯¯¯¯¯
+asciiend
+
+var longbow=ascii
+          
+   .-´¯`-.
+   ¯¯¯¯¯¯¯
+asciiend
+
+var crossbow=ascii
+
+    ╤══}
+asciiend
+
+var staff=ascii
+
+  -═══════O
+asciiend
+
+var book=ascii
+    _____
+   ´\ .: \
+   '´\ :' \
+asciiend
+
+var arena=ascii
+WLWLWLWLWLWLWLWLWLWLWLWLWLWLWLWLWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMMFEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMPLEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMMFEMEMEMEMEMEMEMWL
+WLEMEMEMEMEMEMEMEMEMEMEMEMEMEMEMWL
+WLWLWLWLWLWLWLWLWLWLWLWLWLWLWLWLWL
+asciiend
+
+var loaded=false
+
+func InventoryScreen()
+  invscreen=uiAP()
+  invscreen.anchor=top_right
+  invscreen.dock=top_right
+  invscreen.w=55
+  invscreen.h=21
+  invscreen.x=-2
+  invscreen.y=1
+  invpnl=uiAP()
+  invpnl.w=55
+  invpnl.h=19
+  invpnl.y=1
+  CreateTabs()
+  invscreen.Add(invpnl)
+  ShowInventory()
+
+func OpenInventory()
+  ?invopen=false
+    invopen=true
+    InventoryScreen()
+  :
+    invopen=false
+    invpage=1
+    invscreen.Recycle()
+
+func CreateTabs()
+  meleetab=uiAB()
+  meleetab.anchor=top_left
+  meleetab.dock=top_left
+  meleetab.w=18
+  meleetab.h=3
+  meleetab.x=0
+  meleetab.bcolor=#ffffff
+  meleetab.text=te.xt("Melee")
+  meleetab.SetPressed(Tabs)
+  rangedtab=uiAB()
+  rangedtab.anchor=top_left
+  rangedtab.dock=top_left
+  rangedtab.w=19
+  rangedtab.h=3
+  rangedtab.x=18
+  rangedtab.text=te.xt("Ranged")
+  rangedtab.SetPressed(Tabs)
+  magictab=uiAB()
+  magictab.anchor=top_left
+  magictab.dock=top_left
+  magictab.w=18
+  magictab.h=3
+  magictab.x=37
+  magictab.text=te.xt("Magic")
+  magictab.SetPressed(Tabs)
+  //statstab=uiAB()
+  //statstab.anchor=top_left
+  //statstab.dock=top_left
+  //statstab.w=17
+  //statstab.h=3
+  //statstab.x=51
+  //statstab.text=te.xt("Stats")
+  //statstab.SetPressed(Tabs)
+  invscreen.Add(meleetab)
+  invscreen.Add(rangedtab)
+  invscreen.Add(magictab)
+  //invpnl.Add(statstab)
+
+func Tabs(btn)
+  ?btn=meleetab
+    invpage=1
+    meleetab.bcolor=#ffffff
+    rangedtab.bcolor=#808080
+    magictab.bcolor=#808080
+    //statstab.bcolor=#808080
+  :?btn=rangedtab
+    invpage=2
+    meleetab.bcolor=#808080
+    rangedtab.bcolor=#ffffff
+    magictab.bcolor=#808080
+    //statstab.bcolor=#808080
+  :?btn=magictab
+    invpage=3
+    meleetab.bcolor=#808080
+    rangedtab.bcolor=#808080
+    magictab.bcolor=#ffffff
+    //statstab.bcolor=#808080
+  //:?btn=statstab
+  //  upgradepage=0
+  //  weapontab.bcolor=#808080
+  //  towertab.bcolor=#808080
+  //  utiltab.bcolor=#808080
+  //  statstab.bcolor=#ffffff
+  ShowInventory()
+
+func Select(btn)
+  ?btn.text="Great Sword"
+    melee="greatsword"
+    meleetxt.text="Great Sword"
+    meleeasci.Load(greatsword)
+  :?btn.text="Sword"
+    melee="sword"
+    meleetxt.text="Sword"
+    meleeasci.Load(sword)
+  :?btn.text="Long Bow"
+    ranged="longbow"
+    rangedtxt.text="Long Bow"
+    rangedasci.Load(longbow)
+  :?btn.text="Crossbow"
+    ranged="crossbow"
+    rangedtxt.text="Crossbow"
+    rangedasci.Load(crossbow)
+  :?btn.text="Staff"
+    magic="staff"
+    magictxt.text="Staff"
+    magicasci.Load(staff)
+  :?btn.text="Book"
+    magic="book"
+    magictxt.text="Book"
+    magicasci.Load(book)
+
+func CreateInventoryBtn(x,y,text,anim)
+  var panel=uiAP()
+  panel.anchor=top_left
+  panel.dock=top_left
+  panel.x=x
+  panel.y=y
+  panel.h=6
+  panel.w=17
+  var button=uiAB()
+  button.anchor=top_left
+  button.dock=top_left
+  button.h=6
+  button.w=17
+  button.text=text
+  button.tcolor=#010101
+  button.SetPressed(Select)
+  var txt=uiAT()
+  txt.anchor=top_left
+  txt.dock=top_left
+  txt.x=1
+  txt.y=1
+  txt.h=2
+  txt.w=15
+  txt.align=center
+  txt.text=te.xt(text)
+  //var temp=text+asci
+  //temp=string.Split(temp,true)
+  //temp=string.Join("",temp)
+  //temp=string.ToLower(temp)
+  var asci=uiAA(anim)
+  asci.anchor=top_left
+  asci.dock=top_left
+  asci.x=2
+  asci.y=2
+  panel.Add(button)
+  panel.Add(asci)
+  panel.Add(txt)
+  return [panel,button,txt,asci]
+
+func ShowInventory()
+  invpnl.Clear()
+  //?upgradepage=0  //Stats
+  //  stattxt1=uiAT()
+  //  stattxt1.anchor=top_left
+  //  stattxt1.dock=top_left
+  //  stattxt1.w=24
+  //  stattxt1.h=19
+  //  stattxt1.y=1
+  //  stattxt1.x=1
+  //  upgradepnl.Add(stattxt1)
+  //  stattxt2=uiAT()
+  //  stattxt2.anchor=top_left
+  //  stattxt2.dock=top_left
+  //  stattxt2.w=24
+  //  stattxt2.h=19
+  //  stattxt2.y=1
+  //  stattxt2.x=26
+  //  upgradepnl.Add(stattxt2)
+  //  Stats()
+  ?invpage=1  //Melee Weapons
+    invbtnsword=CreateInventoryBtn(1,1,"Sword",sword)
+    invpnl.Add(invbtnsword[0])
+    invbtngreatsword=CreateInventoryBtn(18,1,"Great Sword",greatsword)
+    invpnl.Add(invbtngreatsword[0])
+    //invbtnlongbow=CreateInventoryBtn(35,1,"Long Bow",longbow)
+    //invpnl.Add(invbtnlongbow[0])
+  :?invpage=2  //Ranged Weapons
+    invbtnlongbow=CreateInventoryBtn(1,1,"Long Bow",longbow)
+    invpnl.Add(invbtnlongbow[0])
+    invbtncrossbow=CreateInventoryBtn(18,1,"Crossbow",crossbow)
+    invpnl.Add(invbtncrossbow[0])
+  :?invpage=3  //Magic Weapons
+    invbtnstaff=CreateInventoryBtn(1,1,"Staff",staff)
+    invpnl.Add(invbtnstaff[0])
+    invbtnbook=CreateInventoryBtn(18,1,"Book",book)
+    invpnl.Add(invbtnbook[0])
+  :?invpage=4
+    >effects
+
+var uiback=ascii
+                             ╔═══════════════════════════════════════════════════════╗ 
+┌───────────┬───────────────┐║#######################################################║ 
+                             ║#######################################################║ 
+                             ║#######################################################║ 
+            ├───────────────┤║#######################################################║ 
+                             ║#######################################################║ 
+╞═══════════╪═══════════════╡║#######################################################║ 
+                             ║#######################################################║ 
+                             ║#######################################################║ 
+            ├───────────────┤║#######################################################║ 
+                             ║#######################################################║ 
+╞═══════════╪═══════════════╡║#######################################################║ 
+                             ║#######################################################║ 
+                             ║#######################################################║ 
+            ├───────────────┤║#######################################################║ 
+                             ║#######################################################║ 
+└───────────┴───────────────┘║#######################################################║ 
+┌──────┬──────┬──────┬──────┐║#######################################################║ 
+│      │      │      │      │║#######################################################║ 
+│      │      │      │      │║#######################################################║ 
+│      │      │      │      │║#######################################################║ 
+└──────┴──────┴──────┴──────┘║#######################################################║ 
+┌─────────────┬─────────────┐╚═══════════════════════════════════════════════════════╝ 
+│             │             │                                                          
+└─────────────┴─────────────┘                                                          
+                                                                                       
+asciiend
+
+/*
+┌───────────┬───────────────┐
+ Bone GreatS  EarthSplitter 
+   |_______       Ready     
+ -<       .´├───────────────┤
+   |´`´`´`     Weapon Info
+╞═══════════╪═══════════════╡
+     Bow         Ability    
+               Unavailable  
+   .-´¯`-.  ├───────────────┤
+   ¯¯¯¯¯¯¯     Weapon Info
+╞═══════════╪═══════════════╡
+    Staff         Spell     
+              Cooldown: 3/5 
+  -═══════O ├───────────────┤
+               Weapon Info
+└───────────┴───────────────┘
+*/
+
+var empty=ascii
+╔   ╗
+     
+╚   ╝
+asciiend
+
+var player_=ascii
+#.-.
+(   )
+#`-´
+asciiend
+
+var foe_=ascii
+#.-.#
+(   )
+#`-´#
+asciiend
+
+var wood=ascii
+###.
+._/-
+#/
+asciiend
+
+var heal=ascii
+  █
+█████
+  █  
+asciiend
+
+var strength=ascii
+  _
+( | )
+  ¯
+asciiend
+
+var speed=ascii
+  ──O
+──</V
+──/>
+asciiend
+
+var Test=ascii
+Yeet
+asciiend
+
+var wall=ascii
+█████
+█████
+█████
+asciiend
+
+func AttackMelee(btn)
+  var C=(btn.x/5)
+  var R=(btn.y/3)
+  ?meleetxt.text="Great Sword"
+    ?roomarray[C][R][0].Count()>0
+      ?roomarray[C][R][0][0]="foe"
+        roomarray[C][R][0][3]=roomarray[C][R][0][3]-(level+damage)*1.25
+    ?roomarray[C-1][R][0].Count()>0 //Right
+      ?roomarray[C-1][R][0][0]="player"
+        ?roomarray[C][R+1][0].Count()>0
+          ?roomarray[C][R+1][0][0]="foe"
+            roomarray[C][R+1][0][3]=roomarray[C][R+1][0][3]-(level+damage)*1.25
+        ?roomarray[C][R-1][0].Count()>0
+          ?roomarray[C][R-1][0][0]="foe"
+            roomarray[C][R-1][0][3]=roomarray[C][R-1][0][3]-(level+damage)*1.25
+    ?roomarray[C+1][R][0].Count()>0 //Left
+      ?roomarray[C+1][R][0][0]="player"
+        ?roomarray[C][R+1][0].Count()>0
+          ?roomarray[C][R+1][0][0]="foe"
+            roomarray[C][R+1][0][3]=roomarray[C][R+1][0][3]-(level+damage)*1.25
+        ?roomarray[C][R-1][0].Count()>0
+          ?roomarray[C][R-1][0][0]="foe"
+            roomarray[C][R-1][0][3]=roomarray[C][R-1][0][3]-(level+damage)*1.25
+    ?roomarray[C][R-1][0].Count()>0 //Down
+      ?roomarray[C][R-1][0][0]="player"
+        ?roomarray[C+1][R][0].Count()>0
+          ?roomarray[C+1][R][0][0]="foe"
+            roomarray[C+1][R][0][3]=roomarray[C+1][R][0][3]-(level+damage)*1.25
+        ?roomarray[C-1][R][0].Count()>0
+          ?roomarray[C-1][R][0][0]="foe"
+            roomarray[C-1][R][0][3]=roomarray[C-1][R][0][3]-(level+damage)*1.25
+    ?roomarray[C][R+1][0].Count()>0 //Up
+      ?roomarray[C][R+1][0][0]="player"
+        ?roomarray[C+1][R][0].Count()>0
+          ?roomarray[C+1][R][0][0]="foe"
+            roomarray[C+1][R][0][3]=roomarray[C+1][R][0][3]-(level+damage)*1.25
+        ?roomarray[C-1][R][0].Count()>0
+          ?roomarray[C-1][R][0][0]="foe"
+            roomarray[C-1][R][0][3]=roomarray[C-1][R][0][3]-(level+damage)*1.25
+  :?meleetxt.text="Sword"
+    ?roomarray[C][R][0].Count()>0
+      ?roomarray[C][R][0][0]="foe"
+        roomarray[C][R][0][3]=roomarray[C][R][0][3]-(level+damage)*1.5
+  for A : attackbtns
+    A.Recycle()
+  attackbtns.Clear()
+  actions++
+
+func AttackRanged(btn)
+  var C=(btn.x/5)
+  var R=(btn.y/3)
+  var pierce=0
+  var maxpierce=1
+  var mult=1.25
+  ?rangedtxt.text="Crossbow"
+    maxpierce=2
+    mult=1
+  ?roomarray[C-1][R][0].Count()>0 //Right
+    ?roomarray[C-1][R][0][0]="player"
+      for A = C..16
+        ?roomarray[A][R][0].Count()>0
+          ?roomarray[A][R][0][0]="foe"
+            roomarray[A][R][0][3]=roomarray[A][R][0][3]-(level+damage)*mult
+            pierce++
+            ?pierce=maxpierce
+              break
+  ?roomarray[C+1][R][0].Count()>0 //Left
+    ?roomarray[C+1][R][0][0]="player"
+      for A = C..0
+        ?roomarray[A][R][0].Count()>0
+          ?roomarray[A][R][0][0]="foe"
+            roomarray[A][R][0][3]=roomarray[A][R][0][3]-(level+damage)*mult
+            pierce++
+            ?pierce=maxpierce
+              break
+  ?roomarray[C][R-1][0].Count()>0 //Down
+    ?roomarray[C][R-1][0][0]="player"
+      for A = R..16
+        ?roomarray[C][A][0].Count()>0
+          ?roomarray[C][A][0][0]="foe"
+            roomarray[C][A][0][3]=roomarray[C][A][0][3]-(level+damage)*mult
+            pierce++
+            ?pierce=maxpierce
+              break
+  ?roomarray[C][R+1][0].Count()>0 //Up
+    ?roomarray[C][R+1][0][0]="player"
+      for A = R..0
+        ?roomarray[C][A][0].Count()>0
+          ?roomarray[C][A][0][0]="foe"
+            roomarray[C][A][0][3]=roomarray[C][A][0][3]-(level+damage)*mult
+            pierce++
+            ?pierce=maxpierce
+              break
+  for A : attackbtns
+    A.Recycle()
+  attackbtns.Clear()
+  actions++
+
+func AttackMagic(btn)
+  var C=(btn.x/5)
+  var R=(btn.y/3)
+  ?magictxt.text="Staff"
+    ?roomarray[C][R][0].Count()>0
+      ?roomarray[C][R][0][0]="foe"
+        roomarray[C][R][0][3]=roomarray[C][R][0][3]-(level+damage)
+  ?magictxt.text="Book"
+    ?roomarray[C][R][0].Count()>0
+      ?roomarray[C][R][0][0]="foe"
+        roomarray[C][R][0][3]=roomarray[C][R][0][3]-(level+damage)*0.75
+    ?roomarray[C-1][R][0].Count()>0
+      ?roomarray[C-1][R][0][0]="foe"
+        roomarray[C-1][R][0][3]=roomarray[C-1][R][0][3]-(level+damage)*0.75
+    ?roomarray[C+1][R][0].Count()>0
+      ?roomarray[C+1][R][0][0]="foe"
+        roomarray[C+1][R][0][3]=roomarray[C+1][R][0][3]-(level+damage)*0.75
+    ?roomarray[C][R-1][0].Count()>0
+      ?roomarray[C][R-1][0][0]="foe"
+        roomarray[C][R-1][0][3]=roomarray[C][R-1][0][3]-(level+damage)*0.75
+    ?roomarray[C][R+1][0].Count()>0
+      ?roomarray[C][R+1][0][0]="foe"
+        roomarray[C][R+1][0][3]=roomarray[C][R+1][0][3]-(level+damage)*0.75
+  for A : attackbtns
+    A.Recycle()
+  attackbtns.Clear()
+  actions++
+
+func AttackCell(cellc,cellr,attacktype)
+  var btn=uiAB()
+  btn.dock=top_left
+  btn.anchor=top_left
+  btn.h=3
+  btn.w=5
+  btn.x=5*cellc
+  btn.y=3*cellr
+  btn.text=""
+  btn.style=corners
+  btn.SetPressed(attacktype)
+  roompnl.Add(btn)
+  return btn
+  
+func AttackMeleeStart()
+  attackbtns.Add(AttackCell(playerC+1,playerR,AttackMelee))
+  attackbtns.Add(AttackCell(playerC-1,playerR,AttackMelee))
+  attackbtns.Add(AttackCell(playerC,playerR+1,AttackMelee))
+  attackbtns.Add(AttackCell(playerC,playerR-1,AttackMelee))
+
+func AttackRangedStart()
+  attackbtns.Add(AttackCell(playerC+1,playerR,AttackRanged))
+  attackbtns.Add(AttackCell(playerC-1,playerR,AttackRanged))
+  attackbtns.Add(AttackCell(playerC,playerR+1,AttackRanged))
+  attackbtns.Add(AttackCell(playerC,playerR-1,AttackRanged))
+
+func AttackMagicStart()
+  for c = 0..roomarray.Count()-1
+    for r = 0..roomarray[c].Count()-1
+      ?roomarray[c][r][0].Count()>0
+        ?roomarray[c][r][0][0]="foe"
+          attackbtns.Add(AttackCell(c,r,AttackMagic))
+
+//func CreateFoe(type)
+//  return "foe",false
+func FoeTurn()
+  room=2
+func PlayerTurn()
+  room=3
+func Save()
+  storage.Set("level",level)
+  storage.Set("xp",xp)
+
+var roomarray=[]
+var showarray=[]
+var floorarray=[]
+var roompnl
+
+func FoeActions()
+  for c = 0..roomarray.Count()-1
+    for r = 0..roomarray[c].Count()-1
+      ?roomarray[c][r][0].Count()>0
+        ?roomarray[c][r][0][0]="foe"&roomarray[c][r][0][1]=false
+          roomarray[c][r][0][1]=true
+          ?roomarray[c][r][0][3]<=0
+            roomarray[c][r][0].Clear()
+            xp++
+            continue
+          ?roomarray[c-1][r][0].Count()>0
+            ?roomarray[c-1][r][0][0]="player"
+              health--
+              continue
+          ?roomarray[c][r-1][0].Count()>0
+            ?roomarray[c][r-1][0][0]="player"
+              health--
+              continue
+          ?roomarray[c+1][r][0].Count()>0
+            ?roomarray[c+1][r][0][0]="player"
+              health--
+              continue
+          ?roomarray[c][r+1][0].Count()>0
+            ?roomarray[c][r+1][0][0]="player"
+              health--
+              continue
+          var foedata=[]
+          for d = 0..roomarray[c][r][0].Count()-1
+            foedata.Add(roomarray[c][r][0][d])
+          roomarray[c][r][0].Clear()
+          ?c>playerC&roomarray[c-1][r][0].Count()=0
+            for d = 0..foedata.Count()-1
+              roomarray[c-1][r][0].Add(foedata[d])
+          :?c<playerC&roomarray[c+1][r][0].Count()=0
+            for d = 0..foedata.Count()-1
+              roomarray[c+1][r][0].Add(foedata[d])
+          :?r>playerR&roomarray[c][r-1][0].Count()=0
+            for d = 0..foedata.Count()-1
+              roomarray[c][r-1][0].Add(foedata[d])
+          :?r<playerR&roomarray[c][r+1][0].Count()=0
+            for d = 0..foedata.Count()-1
+              roomarray[c][r+1][0].Add(foedata[d])
+          :
+            for d = 0..foedata.Count()-1
+              roomarray[c][r][0].Add(foedata[d])
+           
+  for c = 0..roomarray.Count()-1
+    for r = 0..roomarray[c].Count()-1
+      ?roomarray[c][r][0].Count()>0
+        ?roomarray[c][r][0][0]="foe"
+          roomarray[c][r][0][1]=false
+
+func AddFoe()
+  var c=rng%17
+  var r=rng%17
+  ?roomarray[c][r][0].Count()=0
+    roomarray[c][r][0].Add("foe",false,"melee",5*difficulty)
+    foecount--
+
+func AddBuff()
+  var c=rng%17
+  var r=rng%17
+  var random=rng%3
+  ?roomarray[c][r][1].Count()=0
+    ?random=0
+      roomarray[c][r][1].Add("heal")
+    :?random=1
+      roomarray[c][r][1].Add("strength")
+    :
+      roomarray[c][r][1].Add("speed")
+
+//
+//func AddHarvest(c,r)
+//  roomarray[c][r][1].Add("wood")
+//
+//func AddPickup(c,r)
+//  roomarray[c][r][2].Add("test")
+//
+//func AddWall(c,r)
+//  roomarray[c][r][0].Add("wall")
+
+func BtnMovePlayer(btn)
+  ?!invopen
+    roomarray[playerC][playerR][0].Clear()
+    ?btn=leftbtn&playerC>0
+      ?roomarray[playerC-1][playerR][0].Count()=0
+        playerC--
+        ?playerC>4&playerC<11
+          roompnl.x=roompnl.x+5
+    ?btn=upbtn&playerR>0
+      ?roomarray[playerC][playerR-1][0].Count()=0
+        playerR--
+        ?playerR>2&playerR<13
+          roompnl.y=roompnl.y+3
+    ?btn=rightbtn&playerC<16
+      ?roomarray[playerC+1][playerR][0].Count()=0
+        playerC++
+        ?playerC<12&playerC>5
+          roompnl.x=roompnl.x-5
+    ?btn=downbtn&playerR<16
+      ?roomarray[playerC][playerR+1][0].Count()=0
+        playerR++
+        ?playerR<14&playerR>3
+          roompnl.y=roompnl.y-3
+    roomarray[playerC][playerR][0].Add("player")
+    Grab()
+    DisplayRoom()
+    actions++
+
+func MovePlayer()
+  ?key=leftBegin&playerC>0
+    ?roomarray[playerC-1][playerR][0].Count()=0
+      roomarray[playerC][playerR][0].Clear()
+      playerC--
+      roomarray[playerC][playerR][0].Add("player")
+      ?playerC>4&playerC<11
+        roompnl.x=roompnl.x+5
+    Grab()
+    DisplayRoom()
+    actions++
+  ?key=upBegin&playerR>0
+    ?roomarray[playerC][playerR-1][0].Count()=0
+      roomarray[playerC][playerR][0].Clear()
+      playerR--
+      roomarray[playerC][playerR][0].Add("player")
+      ?playerR>2&playerR<13
+        roompnl.y=roompnl.y+3
+    Grab()
+    DisplayRoom()
+    actions++
+  ?key=rightBegin&playerC<16
+    ?roomarray[playerC+1][playerR][0].Count()=0
+      roomarray[playerC][playerR][0].Clear()
+      playerC++
+      roomarray[playerC][playerR][0].Add("player")
+      ?playerC<12&playerC>5
+        roompnl.x=roompnl.x-5
+    Grab()
+    DisplayRoom()
+    actions++
+  ?key=downBegin&playerR<16
+    ?roomarray[playerC][playerR+1][0].Count()=0
+      roomarray[playerC][playerR][0].Clear()
+      playerR++
+      roomarray[playerC][playerR][0].Add("player")
+      ?playerR<14&playerR>3
+        roompnl.y=roompnl.y-3
+    Grab()
+    DisplayRoom()
+    actions++
+
+/*func InitilizeFloor()
+  for c = 0..16
+    roomarray.Add([]) //Add Columns
+    for r = 0..16
+      roomarray[c].Add([]) //Add Rowa
+  floorarray[0][0].Add(RoomData.emptyroom)
+  floorarray[1][0].Add(RoomData.emptyroom)
+*/
+func MoveRooms()
+  >yeet
+
+func CreateCell(c,r,type)
+  var cell=uiAA(type)
+  cell.anchor=top_left
+  cell.dock=top_left
+  cell.x=c*5
+  cell.y=r*3
+  ?type=player_
+    cell.color=#cyan
+  :?type=foe_
+    cell.color=#red
+  :?type=heal
+    cell.color=#green
+  :?type=strength
+    cell.color=#magenta
+  :?type=speed
+    cell.color=#yellow
+  roompnl.Add(cell)
+  return cell
+
+func InitilizeRoom()
+  for c = 0..16
+    roomarray.Add([]) //Add columns
+    for r = 0..16
+      roomarray[c].Add([[],[],[]]) //Add Rows and foe/player, harvest/exit, and pickup slots
+  var ccount=0
+  var rcount=0
+  var datapos=0
+  for cellcount = 0..(17*17)-1
+    var celldata
+    celldata=string.Sub(arena, datapos, 2)
+    ?celldata="EM"
+      //showarray.Add(CreateCell(ccount,rcount,empty))
+      roomarray[ccount][rcount][1].Add("")
+    :?celldata="PL"
+      playerC=ccount
+      playerR=rcount
+      roomarray[playerC][playerR][0].Add("player")
+      showarray.Add(CreateCell(playerC,playerR,player_))
+    :?celldata="MF"
+      roomarray[ccount][rcount][0].Add("foe",false,"melee",5*difficulty)
+      showarray.Add(CreateCell(ccount,rcount,foe_))
+    :?celldata="WH"
+      roomarray[ccount][rcount][1].Add("wood")
+    :?celldata="WL"
+      roomarray[ccount][rcount][0].Add("wall")
+      showarray.Add(CreateCell(ccount,rcount,wall))
+    :?celldata="EX"
+      roomarray[ccount][rcount][2].Add("exit")
+    datapos=datapos+2
+    ccount++
+    ?ccount>16
+      ccount=0
+      rcount++
+      datapos=datapos+2
+
+func DisplayRoom()
+  ?showarray.Count()>0
+    roompnl.Clear()
+    showarray.Clear()
+  ?roomarray.Count()>0
+    for c = 0..roomarray.Count()-1
+      for r = 0..roomarray[c].Count()-1
+        ?roomarray[c][r][0].Count()>0
+          ?roomarray[c][r][0][0]="player"
+            showarray.Add(CreateCell(playerC,playerR,player_))
+          :?roomarray[c][r][0][0]="foe"
+            showarray.Add(CreateCell(c,r,foe_))
+          :?roomarray[c][r][0][0]="wall"
+            showarray.Add(CreateCell(c,r,wall))
+        :?roomarray[c][r][1].Count()>0
+          ?roomarray[c][r][1][0]="heal"
+            showarray.Add(CreateCell(c,r,heal))
+          :?roomarray[c][r][1][0]="strength"
+            showarray.Add(CreateCell(c,r,strength))
+          :?roomarray[c][r][1][0]="speed"
+            showarray.Add(CreateCell(c,r,speed))
+        :?roomarray[c][r][2].Count()>0
+          ?roomarray[c][r][2][0]="test"
+            >`@30+5*c@,@1+3*r@,#green,@test@
+          :?roomarray[c][r][2][0]="exit"
+            >`@30+5*c@,@1+3*r@,#yellow,@empty@
+        //:
+          //showarray.Add(CreateCell(c,r,empty))
+
+func Grab()
+  ?roomarray[playerC][playerR][1].Count()>0
+    ?roomarray[playerC][playerR][1][0]="heal"
+      health=health+5
+    :?roomarray[playerC][playerR][1][0]="strength"
+      damage++
+    :?roomarray[playerC][playerR][1][0]="speed"
+      maxactions=2
+      bufftimer=5
+    roomarray[playerC][playerR][1].Clear()
+
+var deathtxt
+var stattxt
+var deathpnl
+var retrybtn
+
+func Restart()
+  level=1
+  xp=0
+  damage=0
+  health=maxhealth
+  roompnl.x=30-3*5
+  roompnl.y=1-5*3
+  roompnl.Clear()
+  roomarray.Clear()
+  showarray.Clear()
+  floorarray.Clear()
+  InitilizeRoom()
+  deathpnl.Recycle()
+
+func DeathScreen()
+  deathpnl=uiAP()
+  deathpnl.anchor=top_right
+  deathpnl.dock=top_right
+  deathpnl.w=55
+  deathpnl.h=21
+  deathpnl.x=-2
+  deathpnl.y=1
+  deathtxt=uiAT("You have been defeated!")
+  deathtxt.w=53
+  deathtxt.h=3
+  deathtxt.y=-2
+  deathtxt.align=center
+  deathpnl.Add(deathtxt)
+  stattxt=uiAT("Score:"+score+"   Turns Survived:"+turns)
+  stattxt.w=53
+  stattxt.h=3
+  stattxt.x=0
+  stattxt.y=0
+  stattxt.align=center
+  deathpnl.Add(stattxt)
+  retrybtn=uiAB()
+  retrybtn.y=2
+  retrybtn.text="Retry?"
+  retrybtn.SetPressed(Restart)
+  deathpnl.Add(retrybtn)
+
+func CreateUI()
+  //Room
+  roompnl=uiAP()
+  roompnl.anchor=top_left
+  roompnl.dock=top_left
+  roompnl.x=30-3*5
+  roompnl.y=1-5*3
+  roompnl.style=invis
+  //UI
+  uiborders=uiAA(uiback)
+  uiborders.anchor=top_left
+  uiborders.dock=top_left
+  uiborders.color=#808080
+  //Inventory Button
+  invbtn=uiAB()
+  invbtn.style=invis
+  invbtn.anchor=bottom_left
+  invbtn.dock=bottom_left
+  invbtn.x=1
+  invbtn.y=-2
+  invbtn.w=13
+  invbtn.h=3
+  invbtn.text=te.xt("Inventory")
+  invbtn.SetPressed(OpenInventory)
+  //Move Buttons
+  leftbtn=uiAB()
+  leftbtn.anchor=top_left
+  leftbtn.dock=top_left
+  leftbtn.x=1
+  leftbtn.y=18
+  leftbtn.w=6
+  leftbtn.h=3
+  leftbtn.text=""
+  leftbtn.style=invis
+  leftbtn.SetPressed(BtnMovePlayer)
+  upbtn=uiAB()
+  upbtn.anchor=top_left
+  upbtn.dock=top_left
+  upbtn.x=8
+  upbtn.y=18
+  upbtn.w=6
+  upbtn.h=3
+  upbtn.text=""
+  upbtn.style=invis
+  upbtn.SetPressed(BtnMovePlayer)
+  downbtn=uiAB()
+  downbtn.anchor=top_left
+  downbtn.dock=top_left
+  downbtn.x=15
+  downbtn.y=18
+  downbtn.w=6
+  downbtn.h=3
+  downbtn.text=""
+  downbtn.style=invis
+  downbtn.SetPressed(BtnMovePlayer)
+  rightbtn=uiAB()
+  rightbtn.anchor=top_left
+  rightbtn.dock=top_left
+  rightbtn.x=22
+  rightbtn.y=18
+  rightbtn.w=6
+  rightbtn.h=3
+  rightbtn.text=""
+  rightbtn.style=invis
+  rightbtn.SetPressed(BtnMovePlayer)
+  //Weapon Buttons
+  meleetxt=uiAT("Sword")
+  meleetxt.anchor=top_left
+  meleetxt.dock=top_left
+  meleetxt.w=11
+  meleetxt.h=4
+  meleetxt.x=1
+  meleetxt.y=2
+  meleetxt.align=center
+  meleeasci=uiAA(sword)
+  meleeasci.anchor=top_left
+  meleeasci.dock=top_left
+  meleeasci.x=0
+  meleeasci.y=3
+  meleeattack=uiAB()
+  meleeattack.anchor=top_left
+  meleeattack.dock=top_left
+  meleeattack.w=11
+  meleeattack.h=4
+  meleeattack.x=1
+  meleeattack.y=2
+  meleeattack.text=""
+  meleeattack.style=invis
+  meleeattack.SetPressed(AttackMeleeStart)
+  rangedtxt=uiAT("Long Bow")
+  rangedtxt.anchor=top_left
+  rangedtxt.dock=top_left
+  rangedtxt.w=11
+  rangedtxt.h=4
+  rangedtxt.x=1
+  rangedtxt.y=7
+  rangedtxt.align=center
+  rangedasci=uiAA(longbow)
+  rangedasci.anchor=top_left
+  rangedasci.dock=top_left
+  rangedasci.x=0
+  rangedasci.y=8
+  rangedattack=uiAB()
+  rangedattack.anchor=top_left
+  rangedattack.dock=top_left
+  rangedattack.w=11
+  rangedattack.h=4
+  rangedattack.x=1
+  rangedattack.y=7
+  rangedattack.text=""
+  rangedattack.style=invis
+  rangedattack.SetPressed(AttackRangedStart)
+  magictxt=uiAT("Staff")
+  magictxt.anchor=top_left
+  magictxt.dock=top_left
+  magictxt.w=11
+  magictxt.h=4
+  magictxt.x=1
+  magictxt.y=12
+  magictxt.align=center
+  magicasci=uiAA(staff)
+  magicasci.anchor=top_left
+  magicasci.dock=top_left
+  magicasci.x=0
+  magicasci.y=13
+  magicattack=uiAB()
+  magicattack.anchor=top_left
+  magicattack.dock=top_left
+  magicattack.w=11
+  magicattack.h=4
+  magicattack.x=1
+  magicattack.y=12
+  magicattack.text=""
+  magicattack.style=invis
+  magicattack.SetPressed(AttackMagicStart)
+
+?loc="waterfall"
+  ?!loaded
+    level=storage.Get("level",1)
+    xp=storage.Get("xp",0)
+    maxhealth=15+level*5
+    maxxp=level*2
+    xpperc=(xp*100)/maxxp
+    back=ui.AddCanvas()
+    back.w=screen.w
+    back.h=screen.h
+    back.Set(" ")
+    health=maxhealth
+    //AddPickup(3,4)
+    CreateUI()
+    InitilizeRoom()
+    loaded=true
+    
+  ?!invopen
+    //DisplayRoom()
+    MovePlayer()
+  ?actions>=maxactions
+    turn=true
+  ?turn
+    FoeActions()
+    ?xp>=maxxp
+      level++
+      xp=xp-maxxp
+      health=health+5
+    DisplayRoom()
+    turns++
+    ?turns%50=0
+      difficulty++
+    ?turns%5=0
+      foecount=1+math.FloorToInt(difficulty/5)
+    ?rng%2=0
+      AddBuff()
+    ?bufftimer>0
+      bufftimer--
+      ?bufftimer=0
+        maxactions=1
+    ?health<=0
+      DeathScreen()
+    score=score+50
+    actions=0
+    turn=false
+  ?foecount>0
+    AddFoe()
+  maxhealth=15+level*5
+  maxxp=level*2
+  xpperc=((xp*screen.w)/maxxp)
+  
+  for i = 1..screen.w
+    >`@-1+i@,26,#565656,-
+  
+  >`0,25,@health@/@maxhealth@
+  >`10,25,Level:@level@
+  ?xpperc>0
+    for i = 1..xpperc
+      >`@-1+i@,26,@xpcolor@,█
+  
+  ?key=backBegin
+    xp=xp+10
+  >c0,12,@xp@
+  
+  >`80,23,ascii
+ .•.
+•(•)•
+ '•'
+asciiend
+  >`0,18,ascii
+# _.-' #  ▲   # \¯¯¯/# '-._ 
+#◀   | # / \  #  \ / # |   ▶
+# ¯'-. #/___\ #   ▼  # .-'¯ 
+asciiend
+  ?meleetxt.text="Great Sword"
+    >`15,2,@(level+damage)*1.25@
+  :
+    >`15,2,@(level+damage)*1.5@
+  ?rangedtxt.text="Crossbow"
+    >`15,7,@(level+damage)@
+  :
+    >`15,7,@(level+damage)*1.25@
+  ?magictxt.text="Book"
+    >`15,12,@(level+damage)*0.75@
+  :
+    >`15,12,@(level+damage)@
+  >`30,23,Speed:@bufftimer@
+
+/*
+Sight Stone- Can see where you are, Shows enemy descriptions
+Star Stone- Unlocks difficulty, Picks up all resources in a room
+Ki Stone- Gain Ki, 2x Ki
+Xp Stone- Unlocks Levels, 2x Xp
+Ouroborous- Unlocks "looping" (going deeper?), heals 1 hp per pi sec
+Quest Stone- Unlock Missions, +armor when held
+Fissure Stone- Unlock breaking weapons for resources, fires a beam that deals x damage
+Tri- Unlock enchant fusing, +move range
+Mind- , dashes x spaces
+Moon- , -ability cds
+*/

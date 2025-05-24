@@ -1,0 +1,277 @@
+var MaxListLength = 4
+
+/*///////////////////////////////////
+PlayerStateTracker v2
+
+This is a script that will list the last 4 previous player states and times.
+You can adjust the number of states that are retained with the variable "MaxListLength"
+
+For example
+import UI/PlayerStateTracker
+.MaxListLength = 10
+
+ - Incoherent Toast
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+var LStateList = []
+var RStateList = []
+var LStateListText
+var RStateListText
+var StateListBox
+var DragButton
+var ToggleDragging = false
+var XSet = storage.Get("X",58)
+var YSet = storage.Get("Y",1)
+var StyleInvisible = ui.AddStyle("#########")
+var init = true
+var Mobile = sys.isMobile
+var Label
+var WeaponsLegend
+
+var RLastAttackTime = 0
+var RLastAttackState = 0
+var ColourList = [
+^"[color=#FF0000]", 
+^"[color=#00FF00]", 
+^"[color=#0000FF]", 
+^"[color=#FFFF00]", 
+^"[color=#FF8000]", 
+^"[color=#00FFFF]", 
+^"[color=#FF0080]", 
+^"[color=#800080]",
+^"[color=#8000FF]",
+^"[color=#FF80B8]",
+^"[color=#802000]",
+^"[color=#808000]",
+^"[color=#008080]"] //13 colours
+
+var WeaponsList = [""]
+var UsedWeaps = []
+var WeaponsLegendClipPanel
+
+?totaltime = 1 | init
+  init = false
+
+  StateListBox = ui.AddPanel()
+  StateListBox.anchor = top_left
+  StateListBox.dock = top_left
+  StateListBox.w = 16
+  StateListBox.y = YSet
+  StateListBox.h = 2+MaxListLength
+  StateListBox.x = XSet
+
+  Label = ui.AddText("Player State Tracker\n[color=#808080][L]######[R][/color]")
+  Label.w = 20
+  Label.x = -10
+  Label.anchor = top_left
+  Label.align = center
+  Label.y = -2 - MaxListLength/2
+
+  WeaponsLegendClipPanel = ui.AddPanel()
+  WeaponsLegendClipPanel.clip = true
+  WeaponsLegendClipPanel.w = 14
+  WeaponsLegendClipPanel.h = MaxListLength + 2
+  WeaponsLegendClipPanel.style = StyleInvisible
+  WeaponsLegendClipPanel.x = -14
+  WeaponsLegendClipPanel.anchor = top_left
+  WeaponsLegendClipPanel.dock = top_left
+  WeaponsLegendClipPanel.y = 1
+
+  WeaponsLegend = ui.AddText()
+  WeaponsLegend.w = 99
+  WeaponsLegend.x = 0
+  WeaponsLegend.anchor = top_left
+  WeaponsLegend.dock = top_left
+  WeaponsLegend.align = left
+  WeaponsLegend.y = 0
+  WeaponsLegendClipPanel.Add(WeaponsLegend)
+
+  LStateListText = ui.AddText()
+  LStateListText.w = 99
+  LStateListText.x = -7
+  LStateListText.anchor = top_left
+  LStateListText.align = left
+  LStateListText.y =  - MaxListLength/2
+
+  RStateListText = ui.AddText()
+  RStateListText.w = 99
+  RStateListText.x = 2
+  RStateListText.anchor = top_left
+  RStateListText.align = left
+  RStateListText.y =  - MaxListLength/2
+
+  DragButton = ui.AddButton()
+  DragButton.x = -1
+  DragButton.w = 3
+  DragButton.h = 1
+  DragButton.anchor = top_left
+  DragButton.dock = top_left
+  DragButton.text = "ʘ"
+  DragButton.style = StyleInvisible
+  DragButton.SetDown(DragToggle)
+
+  StateListBox.Add(LStateListText)
+  StateListBox.Add(RStateListText)
+  StateListBox.Add(Label)
+  //StateListBox.Add(PauseButton)
+  StateListBox.Add(WeaponsLegendClipPanel)
+  StateListBox.Add(DragButton)
+
+func ClearStorage()
+  storage.Delete("X")
+  storage.Delete("Y")
+
+func DragToggle()
+  ToggleDragging = !ToggleDragging
+
+?ToggleDragging
+  XSet = math.Clamp(input.x, 0, screen.w)
+  YSet = math.Clamp(input.y, 1, screen.h-1)
+  StateListBox.x = XSet
+  StateListBox.y = YSet
+  ?key ! "primary"
+    ToggleDragging = false
+    storage.Set("X",XSet)
+    storage.Set("Y",YSet)
+
+
+
+var TempText
+func UpdateText(TextUI, List)
+  TempText = ""
+  for i : List
+    ?i[2] = 0
+      TempText = TempText + i[4] + i[0] + ":" +i[1] + "[/color]\n"
+    :
+      TempText = TempText + i[4] + i[0] + ":" +i[1] + "(" + (i[1]+i[2]) + ")" +"[/color]\n"
+  TextUI.text = TempText
+
+var LastState
+func EvaluateLastRightTime()
+  RLastAttackTime = 0
+  LastState = RStateList[1][0]
+  for a = 1..RStateList.Count()-1
+    ?RStateList[a][0] > LastState
+      return
+    :
+      RLastAttackTime += math.Max(RStateList[a][1],1)
+      LastState = RStateList[a][0]
+
+func EvaluateLastLeftTime()
+  LLastAttackTime = 0
+  LastState = LStateList[1][0]
+  for a = 1..LStateList.Count()-1
+    ?LStateList[a][0] > LastState
+      return
+    :
+      LLastAttackTime += math.Max(LStateList[a][1],1)
+      LastState = LStateList[a][0]
+
+
+func CheckListMax(List)
+  ?List.Count() > MaxListLength
+    var Last = List.Count()-1
+    for a = Last-1..0
+      ?string.Equals(List[Last][3] , List[a][3])
+        List.RemoveAt(Last)
+        return
+    var Index = WeaponsList.IndexOf(List[Last][3])
+    ?Index > -1
+      WeaponsList[Index] = ""
+      UpdateWeaponLegend()
+    List.RemoveAt(Last)
+
+
+func UpdateWeaponLegend()
+  var EmptyString = ""
+  var Array
+  for a = 0..math.Min( WeaponsList.Count()-1, MaxListLength)
+    ?!string.Equals(WeaponsList[a], "")
+      Array = string.Split(WeaponsList[a])
+      EmptyString += ColourList[a%13] + "ʘ " + Array[0] + " " + Array[1] + "[/color]\n"
+  WeaponsLegend.text = EmptyString
+
+func ListInsert(StateList, IS, IT, Offset_Time, Itm )
+  var Index = WeaponsList.IndexOf(Itm)
+  ?Index > -1
+    StateList.Insert(0,[IS ,IT , Offset_Time , Itm , ColourList[Index%13]])
+  :
+    Index = WeaponsList.IndexOf("")
+    ?Index = -1
+      Index = WeaponsList.Count()
+      WeaponsList.Add(Itm)
+    :
+      WeaponsList[Index] = Itm
+    UpdateWeaponLegend()
+    StateList.Insert(0,[IS ,IT , Offset_Time , Itm , ColourList[Index%13]])
+
+func FirstListItem(List,Itm,IS,IT)
+  var Index = WeaponsList.IndexOf(Itm)
+  ?Index > -1
+    List.Add([ IS ,IT , 0 , Itm , ColourList[Index%13]])
+  :
+    Index = WeaponsList.IndexOf("")
+    ?Index = -1
+      Index = WeaponsList.Count()
+      WeaponsList.Add(Itm)
+    :
+      WeaponsList[Index] = Itm
+    UpdateWeaponLegend()
+    List.Add([ IS , IT , 0 , Itm, ColourList[Index%13]])
+
+
+// [ State , time , offset_time , item , Index_Colour]
+// [   0   ,   1  ,       2     ,   3  ,      4      ]
+
+func CheckStates()
+  ?LStateList.Count()
+    ?item.left ! LStateList[0][3]
+      ListInsert(LStateList, item.left.state, item.left.time, 0, item.left )
+      CheckListMax(LStateList)
+      UpdateText(LStateListText , LStateList)
+    :?item.left.state ! LStateList[0][0]
+      ?item.left.time ! 0
+        ListInsert(LStateList, item.left.state, item.left.time, -item.left.time, item.left )
+      :
+        ListInsert(LStateList, item.left.state, item.left.time, 0, item.left )
+      CheckListMax(LStateList)
+      UpdateText(LStateListText , LStateList)
+    :?item.left.time ! LStateList[0][1]
+      ?item.left.time < LStateList[0][1]
+        LStateList[0].Emplace(2,LStateList[0][1] - LStateList[0][2])
+      LStateList[0].Emplace(1,item.left.time)
+      CheckListMax(LStateList)
+      UpdateText(LStateListText , LStateList)
+  :
+    FirstListItem(LStateList,item.left,item.left.state,item.left.time)
+    UpdateText(LStateListText , LStateList)
+
+  ?RStateList.Count()
+    ?item.right ! RStateList[0][3]
+      ListInsert(RStateList, item.right.state, item.right.time, 0, item.right )
+      CheckListMax(RStateList)
+      UpdateText(RStateListText , RStateList)
+    :?item.right.state ! RStateList[0][0]
+      ?item.right.time ! 0
+        ListInsert(RStateList, item.right.state, item.right.time, -item.right.time, item.right )
+
+      :
+        ListInsert(RStateList, item.right.state, item.right.time, 0, item.right )
+      CheckListMax(RStateList)
+      UpdateText(RStateListText , RStateList)
+    :?item.right.time ! RStateList[0][1]
+      RStateList[0].Emplace(1,item.right.time)
+      CheckListMax(RStateList)
+      UpdateText(RStateListText , RStateList)
+    ?false //item.right.state < RLastAttackState
+      EvaluateLastRightTime()
+      RLastAttackState = item.right.state
+  :
+    FirstListItem(RStateList, item.right, item.right.state, item.right.time)
+    UpdateText(RStateListText , RStateList)
+
+?StateListBox.h ! 2+MaxListLength
+  StateListBox.Recycle()
+  init = true
+
+CheckStates()

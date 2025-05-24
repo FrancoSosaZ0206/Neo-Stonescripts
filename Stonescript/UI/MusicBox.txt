@@ -1,0 +1,554 @@
+//MusicBox\\
+/*By: CitrionDragon☆\
+version 2.1
+ Bug fix- Now keep its position during loops
+Version 2.0
+ Added Ambience tracks, accessable by changing the box with a button
+Version 1.5
+ Made compatable with mobile
+ Can now be dragged with the help of DragController (by:Ket)
+ Keeps its position between locs as well
+Version 1.1
+ Arriving at a boss now does not override music (may restart track tho)
+Version 1.0
+
+Listen to any music track in the game!
+Saves the track you're on even after leaving location!
+Can loop and shuffle tracks!
+
+To import:
+1.Put this file into the UI folder in Stonescript files
+2.Put import UI/MusicBox into mindstone
+3.Enter any loc and listen to whatever you want!
+
+\☆Change display color here!*/
+var color=#4169e1  //for music display
+var color2=#green  //for ambience display
+//-~-~-MainCode-~-~-\\
+var uiAB=ui.AddButton
+var track
+var atrack
+var number
+var anumber
+var avolume=1
+var tracksMobile=[
+cross_deadwood_river,rocky_plateau_4,
+^rocky_plateau_talk,rocky_plateau_fight,
+^rocky_plateau_epilogue,deadwood_3,tree_boss,
+^caustic_caves,spider_boss,fungus_forest_3,
+^mushroom_boss,shop,uulaa,undead_crypt_intro,
+^undead_crypt_3,skeleton_boss,bronze_mine_3,
+^bronze_guardian_3,icy_ridge_3,yeti,temple_3,
+^nagaraja,osteophone,bone_factory,slave_outro_climb,
+^slave_outro_loop,bridge_broken,bridge_crossing
+]
+var tracksPC=[
+cross_deadwood_river,cross_deadwood_wind,deadwood_0,
+^deadwood_1,deadwood_2,deadwood_3,deadwood_4,
+^deadwood_5,deadwood_cyan,tree_boss,waterfall_descent,
+^poena,caustic_caves,spider_boss,fungus_forest_0,
+^fungus_forest_1,fungus_forest_2,fungus_forest_3,
+^fungus_forest_4,fungus_forest_5,fungus_forest_cyan,
+^mushroom_boss,mushroom_boss_cyan,shop,skeleton_boss,
+^undead_crypt_0,undead_crypt_1,undead_crypt_2,
+^undead_crypt_3,undead_crypt_4,undead_crypt_5,
+^undead_crypt_cyan,undead_crypt_intro,bronze_guardian_3,
+^bronze_guardian_4,bronze_guardian_5,bronze_guardian_cyan,
+^bronze_mine_0,bronze_mine_1,bronze_mine_2,
+^bronze_mine_3,bronze_mine_4,bronze_mine_5,
+^bronze_mine_cyan,slave_outro_climb,slave_outro_loop,
+^bridge_broken,bridge_crossing,icy_ridge_0,
+^icy_ridge_1,icy_ridge_2,icy_ridge_3,icy_ridge_4,
+^icy_ridge_5,icy_ridge_cyan,yeti,nagaraja,
+^temple_0,temple_1,temple_2,temple_3,temple_4,
+^temple_5,temple_cyan,rocky_plateau_0,rocky_plateau_1,
+^rocky_plateau_2,rocky_plateau_3,rocky_plateau_4,
+^rocky_plateau_5,rocky_plateau_epilogue,rocky_plateau_fight,
+^rocky_plateau_talk,event_fall,event_hamartia,event_spring,
+^event_stonejam,event_summer,event_winter,credits,
+^main_menu,bone_factory,osteophone,uulaa
+]
+var tracksAmbience=[
+ambient_mines,ambient_caves,ambient_bronze_gate,
+^ambient_deadwood,ambient_mushroom,ambient_bridge,ambient_icy,
+^ambient_cave,ambient_rocky,ambient_temple,ambient_crypt,
+^ambient_haunted_gate,ambient_pallas,waterfall_a,waterfall_b,
+^waterfall_c
+]
+//4 slots for ambience audio
+var invis = ui.AddStyle("#########")
+var musictime=0
+var playbtn
+var aplaybtn
+var forward
+var aforward
+var backward
+var abackward
+var loopbtn
+var loop=false
+var shufflebtn
+var shuffle=false
+var upbtn
+var downbtn
+var paused=false
+var apaused=false
+var swapbtn
+var stype="music"
+var btnpanel
+var stereo
+var display
+var adisplay
+var text
+var temp=0
+var onpc=sys.isPC
+
+func PlayMusic(btn)
+  ?btn=playbtn
+    paused=!paused
+  :?btn=aplaybtn
+    apaused=!apaused
+
+func MoveTrack(btn)
+  ?btn=loopbtn
+    loop=!loop
+    shuffle=false
+  :?btn=shufflebtn
+    shuffle=!shuffle
+    loop=false
+  :?btn=forward
+    number++
+    ?onpc
+      ?number>tracksPC.Count()-1
+        number=0
+    :
+      ?number>tracksMobile.Count()-1
+        number=0
+  :?btn=backward
+    number--
+    ?onpc
+      ?number<0
+        number=tracksPC.Count()-1
+    :
+      ?number<0
+        number=tracksMobile.Count()-1
+  ?loop
+    loopbtn.tcolor=#green
+  :
+    loopbtn.tcolor=#white
+  ?shuffle
+    shufflebtn.tcolor=#green
+  :
+    shufflebtn.tcolor=#white
+  ?onpc
+    track=tracksPC[number]
+  :
+    track=tracksMobile[number]
+  ?!paused
+    music.Play(track)
+  storage.Set("number",number)
+  temp=0
+
+func AMoveTrack(btn)
+  ?btn=upbtn&avolume<3
+    avolume++
+  :?btn=downbtn&avolume>0
+    avolume--
+  :?btn=aforward
+    anumber++
+    ?anumber>tracksAmbience.Count()-1
+      anumber=0
+  :?btn=backward
+    anumber--
+    ?anumber<0
+      anumber=tracksAmbience.Count()-1
+  atrack=tracksAmbience[anumber]
+  ambient.Stop()
+  for t = 0..avolume
+    ambient.Add(atrack)
+  storage.Set("anumber",anumber)
+  temp=0
+
+func Display()
+  ?stype="music"
+    ?string.Size(track)<=13
+      display.text=track
+    :?totaltime%30=0
+      ?temp=string.Size(track)+1
+        temp=0
+      text=string.Join(" ",[track,track])
+      text=string.Sub(text,temp,13)
+      temp++
+      display.text=text
+  :?stype="ambience"
+    ?string.Size(atrack)<=13
+      adisplay.text=atrack
+    :?totaltime%30=0
+      ?temp=string.Size(atrack)+1
+        temp=0
+      text=string.Join(" ",[atrack,atrack])
+      text=string.Sub(text,temp,13)
+      temp++
+      adisplay.text=text
+
+func Loop()
+  ?musictime>=3200&loop=true
+    number++
+    ?onpc
+      ?number>tracksPC.Count()-1
+        number=0
+      track=tracksPC[number]
+    :
+      ?number>tracksMobile.Count()-1
+        number=0
+      track=tracksMobile[number]
+    ?!paused
+      music.Play(track)
+    storage.Set("number",number)
+    temp=0
+    musictime=0
+
+func Shuffle()
+  ?musictime>=3200&shuffle=true
+    ?onpc
+      number=0+rng%((tracksPC.Count()-1)-0+1)
+      track=tracksPC[number]
+    :
+      number=0+rng%((tracksMobile.Count()-1)-0+1)
+      track=tracksMobile[number]
+    ?!paused
+      music.Play(track)
+    storage.Set("number",number)
+    temp=0
+    musictime=0
+
+func Swap()
+  ?stype="music"
+    stype="ambience"
+    btnpanel.Clear()
+    ABtns()
+    swapbtn.text="M"
+  :?stype="ambience"
+    stype="music"
+    btnpanel.Clear()
+    Btns()
+    swapbtn.text="A"
+
+func Btns()
+  playbtn=uiAB()
+  playbtn.y=1
+  playbtn.h=3
+  playbtn.w=3
+  playbtn.text="║"
+  playbtn.SetPressed(PlayMusic)
+  shufflebtn=uiAB()
+  shufflebtn.y=1
+  shufflebtn.x=6
+  shufflebtn.h=3
+  shufflebtn.w=3
+  shufflebtn.text="☤"
+  shufflebtn.SetPressed(MoveTrack)
+  forward=uiAB()
+  forward.y=1
+  forward.x=3
+  forward.h=3
+  forward.w=3
+  forward.text="»"
+  forward.SetPressed(MoveTrack)
+  backward=uiAB()
+  backward.y=1
+  backward.x=-3
+  backward.h=3
+  backward.w=3
+  backward.text="«"
+  backward.SetPressed(MoveTrack)
+  loopbtn=uiAB()
+  loopbtn.y=1
+  loopbtn.x=-6
+  loopbtn.h=3
+  loopbtn.w=3
+  loopbtn.text="∞"
+  loopbtn.SetPressed(MoveTrack)
+  display=ui.AddText()
+  display.y=1
+  display.w=13
+  display.color=color
+  btnpanel=ui.AddPanel()
+  btnpanel.x=0
+  btnpanel.y=0
+  btnpanel.h=5
+  btnpanel.w=17
+  btnpanel.style=invis
+  btnpanel.Add(display)
+  btnpanel.Add(loopbtn)
+  btnpanel.Add(backward)
+  btnpanel.Add(playbtn)
+  btnpanel.Add(forward)
+  btnpanel.Add(shufflebtn)
+  stereo.Add(btnpanel)
+
+func ABtns()
+  aplaybtn=uiAB()
+  aplaybtn.y=1
+  aplaybtn.h=3
+  aplaybtn.w=3
+  aplaybtn.text="║"
+  aplaybtn.SetPressed(PlayMusic)
+  upbtn=uiAB()
+  upbtn.y=1
+  upbtn.x=6
+  upbtn.h=3
+  upbtn.w=3
+  upbtn.text="↑"
+  upbtn.SetPressed(AMoveTrack)
+  aforward=uiAB()
+  aforward.y=1
+  aforward.x=3
+  aforward.h=3
+  aforward.w=3
+  aforward.text="»"
+  aforward.SetPressed(AMoveTrack)
+  abackward=uiAB()
+  abackward.y=1
+  abackward.x=-3
+  abackward.h=3
+  abackward.w=3
+  abackward.text="«"
+  abackward.SetPressed(AMoveTrack)
+  downbtn=uiAB()
+  downbtn.y=1
+  downbtn.x=-6
+  downbtn.h=3
+  downbtn.w=3
+  downbtn.text="↓"
+  downbtn.SetPressed(AMoveTrack)
+  adisplay=ui.AddText()
+  adisplay.y=1
+  adisplay.w=13
+  adisplay.color=color2
+  btnpanel=ui.AddPanel()
+  btnpanel.x=0
+  btnpanel.y=0
+  btnpanel.h=5
+  btnpanel.w=17
+  btnpanel.style=invis
+  btnpanel.Add(adisplay)
+  btnpanel.Add(upbtn)
+  btnpanel.Add(abackward)
+  btnpanel.Add(aplaybtn)
+  btnpanel.Add(aforward)
+  btnpanel.Add(downbtn)
+  stereo.Add(btnpanel)
+
+?totaltime=1
+  stereo=ui.AddPanel()
+  stereo.x=25
+  stereo.y=-11
+  stereo.h=5
+  stereo.w=17
+  stereo.color=#808080
+  swapbtn=uiAB()
+  swapbtn.x=9
+  swapbtn.y=0
+  swapbtn.h=5
+  swapbtn.w=3
+  swapbtn.text="A"
+  swapbtn.SetPressed(Swap)
+  stereo.Add(swapbtn)
+  Btns()
+  number=storage.Get("number",0)
+  anumber=storage.Get("anumber",0)
+  ?onpc
+    track=tracksPC[number]
+  :
+    track=tracksMobile[number]
+  atrack=tracksAmbience[anumber]
+  music.Play(track)
+musictime++
+Loop()
+Shuffle()
+Display()
+?paused
+  music.Stop()
+  ?stype="music"
+    playbtn.text="▶"
+:
+  music.Play(track)
+  ?stype="music"
+    playbtn.text="║"
+?apaused
+  ambient.Stop()
+  ?stype="ambience"
+    aplaybtn.text="▶"
+:?ambient!atrack
+  ambient.Stop()
+  for t = 0..avolume
+    ambient.Add(atrack)
+  ?stype="ambience"
+    aplaybtn.text="║"
+//>`0,0,@paused@, this works
+//DragController
+//v1.0 by Ket
+//--User Configureable variables
+var keepPos = true
+
+//--Internal variables, may change on updates
+var draggables = []
+var draggablesX = []
+var draggablesY = []
+var draggablesCanDrag = []
+var ix
+var iy
+var oldix
+var oldiy
+var curIndex
+var touched = false
+var screenw = screen.w
+var screenh = screen.h
+var hasCleared = false
+
+
+//--Public Functions
+//Adds component to the array of tracked draggables.
+func Add(comp)
+  ?!hasCleared & loc.loop
+    draggables.Clear()
+    hasCleared=true
+  ?draggables.Contains(comp)
+    return
+    
+  draggables.Add(comp)
+  var index = draggables.Count()-1
+  ?draggablesX.Count() >= draggables.Count()
+    ?keepPos
+      comp.x = draggablesX[index]
+      comp.y = draggablesY[index]
+  :
+    draggablesCanDrag.Add(true)
+    draggablesX.Add(comp.x)
+    draggablesY.Add(comp.y)
+  
+//Removes component from array of draggables, it will no longer be tracked
+func Remove(comp)
+  var index = draggables.IndexOf(comp)
+  ?index ! -1
+    draggables.RemoveAt(index)
+    draggablesX.RemoveAt(index)
+    draggablesY.RemoveAt(index)
+    draggablesCanDrag.RemoveAt(index)
+
+//Clears all draggables, for use if you want a full reset mid-run
+func Clear()
+  draggables.Clear()
+  draggablesX.Clear()
+  draggablesY.Clear()
+  draggablesCanDrag.Clear()
+  
+//Changes in which order the components will be dragged if they overlap,
+//as if you had called Add(comp) in a different order.
+//Highest index is the priority when picking a component to move.
+//Components added later will be on top.
+//Note: can mix up position after loop.
+func SetIndex(comp,index)
+  var oldindex = draggables.IndexOf(comp)
+  ?oldindex ! -1
+    var tCanDrg = draggablesCanDrag[oldindex]
+    Remove(comp)
+    ?index < 0
+      draggables.Insert(0,comp)
+      draggablesCanDrag.Insert(0,tCanDrg)
+      draggablesX.Insert(0,comp.x)
+      draggablesY.Insert(0,comp.y)
+    :?index < draggables.Count()
+      draggables.Insert(index,comp)
+      draggablesCanDrag.Insert(index,tCanDrg)
+      draggablesX.Insert(index,comp.x)
+      draggablesY.Insert(index,comp.y)
+    :
+      draggables.Add(comp)
+      draggablesCanDrag.Add(tCanDrg)
+      draggablesX.Add(comp.x)
+      draggablesY.Add(comp.y)
+      
+//Get index of component, for use with SetIndex
+func GetIndex(comp)
+  return draggables.IndexOf(comp)
+  
+//Enables/Disables dragging for a single component.
+//true to enable drag, false to disable.
+func CanDrag(comp,bool)
+  var index = draggables.IndexOf(comp)
+  ?index ! -1
+    ?bool
+      draggablesCanDrag[index] = true
+    :
+      draggablesCanDrag[index] = false
+
+//Checks for drag and updates component position
+func Update()
+  var key_ = key
+  ?hasCleared
+    hasCleared = false
+  ?key_ = primary
+    ix = clamp(input.x,0,screenw-1)
+    iy = clamp(input.y,0,screenh-1)
+    ?key_ = primaryBegin
+      touched = false
+      ?draggables.Count() ! 0
+        for i = (draggables.Count()-1)..0
+          ?draggables[i].parent = null
+            Remove(draggables[i])
+          :?touching(draggables[i],ix,iy) &
+          ^draggablesCanDrag[i]
+            curIndex = i
+            touched = true
+            break
+      ?touched
+        oldix = ix
+        oldiy = iy
+    ?touched & (key_ = primaryEnd |
+    ^draggablesCanDrag[curIndex] = false)
+      draggablesX[curIndex] =
+      ^draggables[curIndex].x
+      draggablesY[curIndex] =
+      ^draggables[curIndex].y
+      touched = false
+    :?touched
+      draggables[curIndex].x += ix-oldix
+      draggables[curIndex].y += iy-oldiy
+      oldix = ix
+      oldiy = iy
+    storage.Set("dragx",draggablesX[0])
+    storage.Set("dragy",draggablesY[0])
+
+//--Internal Functions
+//Checks if X and Y are touching the component
+//Relative to top left of the screen
+func touching(comp,x,y)
+  ?x = null
+    x = clamp(input.x,0,screenw-1)
+  ?y = null
+    y = clamp(input.y,0,screenh-1)
+  var compx = comp.absoluteX
+  var compy = comp.absoluteY
+  var w = comp.w
+  var h = comp.h
+  ?x >= compx &
+  ^x < (compx + w) &
+  ^y >= compy &
+  ^y < (compy + h)
+    return true
+  :
+    return false
+//Stonescript math.clamp for better performance.
+func clamp(num,min,max)
+  ?num < min
+    return min
+  ?num > max
+    return max
+  return num
+
+?totaltime=1
+  Add(stereo)
+  draggables[0].x=storage.get("dragx",draggablesX[0])
+  draggables[0].y=storage.get("dragy",draggablesY[0])
+Update()

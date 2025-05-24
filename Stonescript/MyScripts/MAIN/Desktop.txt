@@ -1,0 +1,65 @@
+// *******************************************************
+//                     START OF "MAIN"                    
+// *******************************************************
+
+
+
+/* MAIN SCRIPT - FILE INFO
+  Made by MetalEagle26 (Tom Crow)
+  Platform: Desktop
+
+HOW TO USE
+
+  import MyScripts/MAIN/PC
+
+Enjoy your multi-location script package :3 */
+
+
+
+/* ************************************* */
+
+// VARIABLES
+
+// We don't need to import the whole
+// Performance lib to get this:
+var l = loc
+
+
+
+// PROCEDURE
+
+import MyScripts/MAIN/MyPlayerCosmetics
+
+?!loc.isQuest & (
+^l = "Waterfall" |
+^l = "cross_deadwood_river" |
+^l = "cross_bridge")
+  loc.Leave()
+
+:?l = "undead_crypt_intro" // Haunted Gate
+  import MyScripts/Gate
+
+:?l = "Rocky"
+  import MyScripts/1-Rocky
+:?l = "Deadwood"
+  import MyScripts/2-Deadwood
+:?l = "Caves"
+  import MyScripts/3-Caves
+:?l = "Mushroom"
+  import MyScripts/4-Mushroom
+:?l = "Halls"
+  import MyScripts/5-Halls
+:?l = "Mine"
+  import MyScripts/6-Mine
+:?l = "Ridge"
+  import MyScripts/7-Ridge
+:?l = "Temple"
+  import MyScripts/8-Temple
+
+/* ************************************* */
+
+
+
+// *******************************************************
+//                      END OF "Main"                     
+// *******************************************************

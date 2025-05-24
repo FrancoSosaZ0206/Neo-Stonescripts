@@ -1,0 +1,109 @@
+//dragonworm
+//By:Sterella 1.0
+var dragonworm1
+var dragonworm2
+var dragonworm3
+var dragonworm4
+var dragonworm5
+var dragonwormstand
+dragonworm1 = ascii
+################
+##,←________####
+,ó~_________`<«←
+asciiend
+dragonworm2 = ascii
+################
+###,←-—————•####
+#,ó~_•————•_`<«←
+asciiend
+dragonworm3 = ascii
+################
+####,←¯¯¯¯¯\####
+##,ó~_/¯¯¯\_`<«←
+asciiend
+dragonworm4 = ascii
+######•————•####
+#####,←•——• \###
+###,ó~•'##'•_<«←
+asciiend
+dragonworm5 = ascii
+######•´¯¯¯`•###
+######,←|¯| (###
+####,ó~•'#'•_<«←
+asciiend
+dragonwormstand = ascii
+##,←####
+,ó~_¯`•#
+##__) |#
+•´   •'#
+| (¯¯###
+'•_<«←##
+asciiend
+
+var dragonwormpos
+var dragonwormstart = screen.w + 20
+var dragonwormworldpos
+var dragonwormposy
+var dragonwormanim = 1
+var dragonwormmode = 0
+var disabledragonworm = 0
+
+?loc = temple
+  ?pos.x < 10
+    dragonwormworldpos =
+    ^screen.ToWorldX(dragonwormstart)
+  dragonwormposy = screen.h - 4
+  ?foe = phase1 |
+  ^foe.distance > 300 & pos.x > 150
+    disabledragonworm = 1
+  :?loc.loop
+    disabledragonworm = 0
+  ?disabledragonworm = 1
+    ?time = 1
+      dragonwormpos = -20
+  ?time % 3 = 0
+    ?dragonwormmode = 0
+      dragonwormanim++
+      dragonwormworldpos--
+      ?dragonwormanim = 5
+        dragonwormmode = 1
+    :
+      dragonwormanim--
+      ?dragonwormanim = 1
+        dragonwormmode = 0
+
+  dragonwormpos = 
+  ^screen.FromWorldX(dragonwormworldpos)
+
+  ?dragonwormpos < -20 & disabledragonworm = 0
+    dragonwormworldpos = 
+    ^screen.ToWorldX(dragonwormstart)
+
+  ?dragonwormpos >= -20 | disabledragonworm = 0
+    ?dragonwormanim = 1
+      >`@dragonwormpos@,@dragonwormposy@,
+      ^#rain77,@dragonworm1@
+    :?dragonwormanim = 2
+      >`@dragonwormpos@,@dragonwormposy@,
+      ^#rain77,@dragonworm2@
+    :?dragonwormanim = 3
+      >`@dragonwormpos@,@dragonwormposy@,
+      ^#rain77,@dragonworm3@
+    :?dragonwormanim = 4
+      >`@dragonwormpos@,@dragonwormposy@,
+      ^#rain77,@dragonworm4@
+    :
+      >`@dragonwormpos@,@dragonwormposy@,
+      ^#rain77,@dragonworm5@
+:?loc = waterfall
+  >c0,-8,#rain77,@dragonwormstand@
+:?loc = bridge
+  ?pos.x < 10
+    dragonwormposy = pos.z - 10
+  dragonwormworldpos = 330
+  dragonwormpos = 
+  ^screen.FromWorldX(dragonwormworldpos)
+  >`@dragonwormpos@,@dragonwormposy@,
+  ^#rain77,@dragonwormstand@
+  >`@dragonwormpos+7@,@dragonwormposy+11@,
+  ^#rain77,@dragonwormstand@

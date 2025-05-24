@@ -1,0 +1,251 @@
+//-~-~-Information-~-~-\\
+/*By: CitrionDragon☆\
+Version 1.0
+  Full release
+*/
+
+var refX = 0
+var refZ = 0
+refX = screen.FromWorldX(pos.x)
+refZ = pos.z
+var lastrefX=0
+var playerX
+playerX=pos.x
+var lastplayerX=0
+var draculaX=0
+var dracula
+var bat=false
+var pooftime=0
+
+//0 is idle
+var draculanim=ascii
+#
+#
+#
+#
+###\(}_
+##,' ¯/
+#'-_.'
+%%
+#
+#
+#
+#
+###\(}_
+.-´  ,'
+#¯-´ \
+%%
+#
+#
+#
+#
+###\(}_
+.-´  ,'
+#¯-´>\
+%%
+#
+#
+#
+#
+###\(}_
+.-´  ,'
+#¯-´|\
+%%
+#
+#
+#
+#
+###\(}_
+.-´  ,'
+#¯-´|>
+asciiend
+
+var batanim=ascii
+__##_###
+)_\#)|##
+)/|#)/##
+#\´(v###
+##'─"###
+#
+#
+%%
+#########
+__#####_#
+)_\####)|
+#'.\(v/.´
+###'─"´##
+#
+#
+%%
+#######
+#######
+#######
+#_(v###
+/#─"\##
+)|#)|##
+(/#)/##
+%%
+########
+########
+########
+#.-(v.##
+/./-" \#
+\(###)/#
+#
+asciiend
+
+var poofanim1=ascii
+#
+#
+#
+#
+###\(}_
+##,' ¯/
+##\( )/
+%%
+#
+#
+#
+#
+###.-.
+#`((  )/
+##(_)_.'
+%%
+#
+#
+####_
+###(_)
+#( ) `_)'
+##, ' )
+##`___
+%%
+#
+#
+__##`#._
+._`###`),
+#'.\(v/.
+#`#'─"´
+###___
+%%
+#
+#
+__#####_
+)'\####'|
+#'.\(v/.´
+'##'─"´
+####_
+asciiend
+
+var poofanim2=ascii
+#
+#
+__#####_#
+)_\####)|
+#'.\(v/.´
+###'─"´##
+##\( )/
+%%
+#
+#
+#
+__####_
+)_\.-.)|
+#`((  )/
+##(_)_.'
+%%
+####_
+###(_)
+#( ) `_)'
+##, ' )
+##`___
+%%
+#
+#
+####`#.#
+.#`###`#,
+####\(}.
+#`#,' ¯/
+##'-_.'
+%%
+#
+#
+#######
+#'#####'
+####\(}_´
+'##,' ¯/
+##'-_.'
+asciiend
+
+?totaltime=1
+  dracula=UI.AddAnim(draculanim)
+  dracula.anchor=top_left
+  dracula.dock=top_left
+  dracula.x=refX-15
+  dracula.y=refZ-8
+  dracula.loop=false
+  draculaX=-15
+  lastrefX=screen.FromWorldX(pos.x)
+  lastplayerX=pos.x
+
+draculaX = draculaX - (playerX - lastplayerX)
+
+?draculaX<-12
+  ?draculaX<-17&bat=false
+    ?pooftime=0
+      dracula.Load(poofanim1)
+      dracula.frame=0
+      pooftime=5
+    :?time%2=0
+      dracula.frame++
+      pooftime--
+      ?pooftime=0
+        dracula.Load(batanim)
+        dracula.frame=1
+        bat=true
+  ?pooftime!0
+    ?bat
+      ?time%2=0
+        dracula.frame++
+        pooftime--
+        ?pooftime=0
+          dracula.Load(draculanim)
+          dracula.frame=0
+          bat=false
+  :?bat
+    ?time%2=0
+      dracula.frame++
+      draculaX++
+    :?draculaX<-23
+      dracula.frame++
+      draculaX++
+  :?time%3=0
+    dracula.frame++
+    ?dracula.frame=0
+      dracula.frame=1
+    draculaX++
+:?bat
+  ?pooftime=0
+    dracula.Load(poofanim2)
+    dracula.frame=0
+    pooftime=5
+  :?time%2=0
+    dracula.frame++
+    pooftime--
+    ?pooftime=0
+      dracula.Load(draculanim)
+      dracula.frame=0
+      bat=false
+:?pooftime=0
+  dracula.frame=0
+
+?draculaX < -70 | draculaX > 70
+  draculaX = -30
+
+?dracula.y>refZ-8
+  dracula.y=dracula.y-1
+:?dracula.y<refZ-8
+  dracula.y=dracula.y+1
+
+lastrefX=screen.FromWorldX(pos.x)
+lastplayerX=pos.x
+dracula.x=refX+draculaX

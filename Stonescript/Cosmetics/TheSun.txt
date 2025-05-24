@@ -1,0 +1,86 @@
+/*Info
+By:Insult
+Version 1.0
+*/
+
+var mid = screen.w/2
+var ropedown = -20
+var altropedown = -20
+var bounce = false
+var done = false
+var fight = false
+
+var stars = loc.stars
+var col
+
+?stars <= 5
+ col = #bbbb00
+:?stars > 5 & stars <= 10
+ col = #00bbbb
+:?stars > 10 & stars <= 15
+ col = #bb8800
+
+?totaltime%3=0&done=false
+ ropedown += 1
+ ?ropedown = 2
+  done=true
+
+?(totaltime-1)%6=0&done=false
+ altropedown += 2
+
+
+?done=true&bounce=false
+ ropedown -= 1
+ altropedown += 1
+ ?ropedown = 1
+  bounce = true
+
+?loc = icy | loc = rocky | loc = cross
+ >`@mid+5@,@ropedown-4@,#777777,ascii
+  ┊ 
+  ┊ 
+  ┊ 
+  ┊ 
+  ┊ 
+asciiend
+ >`@mid+5@,@altropedown-5@,#777777,ascii
+##########┊
+##########┊
+##########┊
+##########┊
+##########┊
+asciiend
+ >`@mid+5@,@altropedown-1@,@col@,ascii
+#########(¯)
+##########¯
+asciiend
+ >`@mid+2@,@ropedown@,@col@,ascii
+################
+## .─¯─.
+#,´     `.
+#| ▼-▼   |
+#'       '
+##`._ _.´
+#### ¯
+asciiend
+ >`@mid+1@,@ropedown@,@col@,ascii
+######|
+##\#######/
+###########
+─###########─
+###########
+##/#######\
+######|    
+asciiend
+
+?bighead
+ >( ▼-▼
+
+?foe = boss & foe.distance < 20
+ ropedown -= 1
+ altropedown -= 1
+?totaltime=1
+ ropedown = -20
+ altropedown = -17
+ bounce = false
+ done = false

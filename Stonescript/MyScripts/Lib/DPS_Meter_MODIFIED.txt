@@ -1,0 +1,267 @@
+﻿// *******************************************************
+//              START OF "DPS_Meter_MODIFIED"             
+// *******************************************************
+
+
+/* ************* FILE INFO ************* *
+  Made by: Pikarizard Charikachu xD
+  Modified by: MetalEagle26 (Tom Crow)
+  
+  Current version: v2.0.0
+
+··········································
+
+DESCRIPTION
+
+Displays various stats to help you in 
+min-maxing your damage output. Only 
+works on bosses. Also coded so that it 
+only records stats the moment you 
+damage bosses. Neat right?
+
+··········································
+
+INSTRUCTIONS
+
+On PC:
+  var dpsMeter = new DPS_Meter
+
+On mobile:
+  Copy-paste this script into your mindstone.
+  
+To execute it:
+  dpsMeter.mkUI(x, y, colorStr, mode)
+
+··········································
+
+CHANGELOG
+
+v1.1:
+  - Removed unnecessary information
+    from the print command.
+  - Changed variable names for
+    major clarity.
+  - Added commentary explaining some
+    of the process.
+v1.2:
+  - Changed display mode to functional.
+    Now, to print the data, you need
+    to call a function.
+v1.3:
+  - Changed file name:
+    DPS Checker >>> DPS Meter.
+v1.4:
+  - Added UI and toString style functions.
+v1.5:
+  - Added "DPSMeterEnabled" global variable:
+    Now, to enable the functions and procedure,
+    this variable has to be set to [true].
+v1.6:
+  - changed dpsMeterUpdate() to public.
+  - uiDPSMeter() and dpsMeterUpdate() have
+    a new "mode" parameter, allowing to display
+    less information in a slim design if desired.
+v1.7:
+  - minor bug fixes and improvements.
+v1.8:
+  - Renamed all functions and variables:
+    "DPSmeter" -> "dpsm".
+  - Added new variable: dpsmRefresh, which
+    is used to control the refresh rate of
+    the meter's UI panel.
+  - uiDPSMeter() -> mkDpsmUI().
+  - removed "dps_" from some variable names.
+  - dpsmUpdate(): now it doesn't depend on changes
+    of "_old" variables, though it still updates them.
+  - Added imports: Utilities, Performance for performance
+    and centralization of dependencies.
+  - Other minor changes.
+v1.9:
+  - Renamed functions and variables: removed "dpsm"
+    from them to make them more concise and cohesive with
+    object-oriented programming and the "new" keyword.
+  - Renamed variables:
+    - Enabled -> ENABLED
+    - Refresh -> refreshRate
+  - "_old" variables deprecated. Now the original
+    ones are used.
+  - Update() - mode parameter and "_old" vars deprecated.
+v2.0.0:
+  - Removed function dpsUpdate().
+  - All variable updates and calculations are now
+    done in function Update().
+
+******************************************
+
+Have fun! */
+
+
+// IMPORTS
+
+var p
+p = import MyScripts/Lib/Performance
+
+
+
+// GLOBAL VARIABLES
+
+var ENABLED = false
+var refreshRate = 1 // meter's refresh rate (in frames) (1 = always refresh)
+
+
+
+// PRIVATE VARIABLES
+
+var sec = 30      // No need to import the whole Utilities script just for this variable.
+var currhp = 0    // foe's current hitpoints (with armor)
+var nethp = 0     // foe's net maximum hitpoints (with armor)
+
+var hits      = 0 // hit counter
+var dmg       = 0 // current damage dealt
+var totalDmg  = 0 // total damage dealt
+var startTime = 0 // timestamp for the beginning of the fight
+var auxhp     = 0 // auxiliar variable to compare with currhp
+
+var FRM = "N/A" // frames elapsed from first hit
+var FPH = "N/A" // frames per hit >>> hit frequency | frames elapsed from each hit to the next
+var HPS = "N/A" // hits per second
+var DPF = "N/A" // damage per frame
+var DPS = "N/A" // damage per second
+
+
+
+// PROCEDURE
+
+
+// PUBLIC FUNCTIONS
+
+func Update()
+  // Calculate only when desired:
+  ?ENABLED & p.f = "boss" // only works when there's a boss
+
+    currhp  = p.fhp + p.fa
+    nethp   = foe.maxhp + foe.maxarmor
+
+    ?0 < currhp & currhp < nethp // boss lost hp/armor, but isn't dead
+
+      ?auxhp > currhp // if current hp updates
+        hits += 1 // we count a hit
+        dmg       = auxhp - currhp // we get the damage dealt from the difference
+        totalDmg  = totalDmg + dmg // and we accumulate it in this variable
+
+    : // else, reset temporal variables
+      startTime = p.tt
+      hits      = 0
+      dmg       = 0
+      totalDmg  = 0
+
+
+    FRM = p.tt - startTime // total time minus the time the first hit was dealt
+    ?hits > 1
+      FPH = FRM      / (hits /*- 1*/) // -1 is there to avoid stat flicking
+    :
+      FPH = "N/A"
+
+    ?FPH ! "N/A"
+      HPS = sec      / FPH
+    :
+      HPS = "N/A"
+      
+    ?FRM > 0
+      DPF = totalDmg / FRM // damage accumulated - no. frames elapsed
+    :
+      DPF = "N/A"
+
+    ?DPF ! "N/A"
+      DPS = DPF  * sec
+    :
+      DPS = "N/A"
+
+    auxhp = currhp
+
+
+    return p.tt % refreshRate = 0
+  :
+    return false
+
+/* Returns ui panel containing the DPS Meter.
+mode:
+  1 = returns the full version of the Meter.
+
+  2 = returns a smaller version of it,
+      containing less information. */
+func mkUI(x, y, colorStr, mode)
+  var panel
+  var txt
+  
+  ?ENABLED & (mode = 1 | mode = 2)
+
+    panel = ui.AddPanel()
+
+    var dpsStr
+    ?mode = 1
+      dpsStr = "###DPS#METER###"   + "\n" +
+      ^        "···············"   + "\n" +
+      ^        "#hits#####" + hits + "\n" +
+      ^        "#hits/s###" + HPS  + "\n" +
+      ^        "#dmg#/hit#" + dmg  + "\n" +
+      ^        "#dmg#/f###" + DPF  + "\n" +
+      ^        "#dmg#/s###" + DPS  + "\n" +
+      ^        "···············"
+
+    :?mode = 2
+      dpsStr = "DPS#|#" + DPS
+
+    txt = ui.AddText(dpsStr)
+    panel.Add(txt)
+    
+    ?mode = 1
+      panel.anchor = top_left
+      panel.dock = top_left
+      txt.anchor = top_left
+      txt.dock = top_left
+
+      panel.style = -3
+
+    :?mode = 2
+      panel.anchor = top_center
+      panel.dock = top_center
+      txt.anchor = top_left
+      txt.dock = top_left
+
+      panel.style = -1
+      
+    
+    panel.color = colorStr
+    txt.color = colorStr
+
+
+    panel.x = x
+    panel.y = y
+    
+    txt.x = 1
+    txt.y = 1
+    
+    ?mode = 1
+      txt.w = 15
+      txt.h = 8
+
+    :?mode = 2
+      txt.w = string.Size(dpsStr)
+      txt.h = 1
+
+
+    panel.w = txt.w + 2
+    panel.h = txt.h + 2
+
+
+  ?mode ! 1 & mode ! 2
+    >c0,0,#red,func mkUI() - incorrect mode: @mode@
+
+  return panel
+
+
+
+// *******************************************************
+//               END OF "DPS_Meter_MODIFIED"              
+// *******************************************************

@@ -1,0 +1,327 @@
+//made by insult2 (insult#2146)
+//v2.0
+
+//DESCRIPTION
+//shows how good you are at The Game.
+
+/*
+INSTRUCTIONS
+enter each location at the highest star you
+have unlocked to input your times.
+enter deadwood waterfall to activate the
+script. 
+
+click the next/back buttons for
+more details.
+*/
+
+var bigstr = 0
+var a = 50
+var b = 0
+var c = 0
+var cstr = ＂＂
+var bar = ［］
+var cstr2 = ＂＂
+var d = 0
+var donttry = false
+var num
+
+var mmin = math.Min
+var igco = item.getCount
+var sjoi = string.Join
+var sget = storage.Get
+
+var remark=［
+＂Didnt even try＂,＂Could be better＂,
+＂Below average＂,＂Somewhat okay＂,
+＂Average＂,＂Cool, I guess＂,
+＂Good enough＂,＂I would stop by now＂,
+＂Straight A＂,＂Unbelievably good＂,
+＂Perfection＂
+］
+
+var colors =［
+#999999,#EEEEEE,#cyan,#yellow,#green,#blue,
+#red,#magenta,#FFAA00,#AA00FF,#rainFF
+］
+
+var text = string.Break(＂Remarks:＂,1)
+var gcc = igco(＂enchant＂)
+var uion = false
+
+func timecalc(x)
+ ?x<=0
+  return 1
+ :
+  return 0.1
+
+//locationtimestars
+
+var rockys = sget(rocky_plateau_star,4)
+var rockyt = sget(rocky_plateau_time,0)
+var canyons = sget(deadwood_valley_star,2)
+var canyont = sget(deadwood_valley_time,0)
+var cavess = sget(caustic_caves_star,2)
+var cavest = sget(caustic_caves_time,0)
+var mushs = sget(fungus_forest_star,2)
+var musht = sget(fungus_forest_time,0)
+var hallss = sget(undead_crypt_star,2)
+var hallst = sget(undead_crypt_time,0)
+var mines = sget(bronze_mine_star,2)
+var minet = sget(bronze_mine_time,0)
+var icys = sget(icy_ridge_star,2)
+var icyt = sget(icy_ridge_time,0)
+var temples = sget(temple_star,2)
+var templet = sget(temple_time,0)
+
+var rockyfin = (rockys-4.0)/11.0*
+^timecalc(rockyt-3600)
+var canyonfin = (canyons-2.0)/13.0*
+^timecalc(canyont-1510)
+var cavesfin = (cavess-2.0)/13.0*
+^timecalc(cavest-1976)
+var mushfin = (mushs-2.0)/13.0*
+^timecalc(musht-2006)
+var hallsfin = (hallss-2.0)/13.0*
+^timecalc(hallst-2598)
+var minefin = (mines-2.0)/13.0*
+^timecalc(minet-3124)
+var icyfin = (icys-2.0)/13.0*
+^timecalc(icyt-2889)
+var templefin = (temples-2.0)/13.0*
+^timecalc(templet-4166)
+
+var locfinal = (rockyfin*1.0
+^+canyonfin*1.0+cavesfin*1.0
+^+mushfin+hallsfin+minefin+icyfin
+^+templefin)*12.5
+
+//first check
+var year = utc.year
+var month = utc.month
+var day = utc.day
+var hour = utc.hour
+var minute = utc.minute
+var second = utc.second
+
+var datestring = ＂｛0｝/｛1｝/｛2｝ on ｛3｝:｛4｝:｛5｝＂
+?storage.Get(＂FIRSTTIMEPLAY＂,0)=0
+  datestring = string.Format(
+  ^datestring,month,day,year,hour,minute,second)
+  storage.Set(＂FIRSTTIMEPLAY＂,datestring)
+
+datestring = storage.Get(＂FIRSTTIMEPLAY＂)
+ 
+var coderan = sys.os
+  
+var hcalc =(item.GetTreasureLimit() - 100)/5
+//save grade calc
+var kic = mmin(res.ki,2000000) / 2000000.0
+var mhc = mmin((hcalc),60) / 60.0
+var gpc = mmin(totalgp,3000) / 3000.0
+var osc = mmin(igco(＂moon_stone＂)+igco(
+^＂grappling_hook_lv2＂),2)
+
+//lost item count
+var lic = mmin(192,
+^igco(＂blade＂) + igco(＂mask＂)
+^+ igco(＂fire_talisman＂)  +
+^igco(＂bash＂) + igco(＂skeleton_arm＂)+
+^igco(＂aether_talisman＂))
+var licperc = lic/192.0
+var oscperc = osc/2.0
+
+var gr = -1.0
+var h
+
+func gradecalc(x)
+ h = (-x * x + (2 + 3) * x)/(1 + 3)
+ return h
+
+var kicc = mmin(res.crystals,50) / 50.0
+
+var gru = mmin(0.075 * kic + 0.125 * mhc
+^ + 0.1 * gpc
+^ + 0.25 * (locfinal/100.0)
+^ + 0.25 * licperc + 0.1 * oscperc + 0.1 * kicc
+^,1)
+
+?gr = -1.0
+ gr = gradecalc(gru)
+
+var grk = gr * 20
+var grkr = gr * 100
+var grck = math.FloorToInt(gr * 10)
+
+var acgr = gr * 10000 / 100.00000
+var acgru = gru * 10000 / 100.00000
+
+var ccolor = colors［grck］
+var cremark = remark［grck］
+
+var formstr =
+^＂Name:# ｛0｝ \n
+^Level:# ｛1｝ \n
+^Lost Items:# ｛2｝ \n
+^Key Items:# ｛3｝ \n
+^Ki:# ｛4｝ \n
+^Crystals:# ｛8｝ \n \n
+^Power:# ｛5｝ \n
+^Grade:# ｛6｝% \n
+^U-Grade:# ｛7｝% ##＂
+
+//registertime
+?totaltime<30
+ var loci = loc.id
+ var locs = string.join(＂＂,［loci,_star］)
+ var loct = string.join(＂＂,［loci,_time］)
+ ?sget(locs,0)<=loc.stars
+ ^&loc.besttime!-1
+  ?sget(locs,0)=loc.stars&sget(loct,0)=loc.
+^besttime
+   >`1,23,#00d000,Same Best Time!
+  :
+   >`1,23,#00ff00,New Best Time!
+^\n@loc.stars@* @loc.besttime@f
+  ?totaltime=1
+   storage.set(locs,loc.stars)
+   storage.set(loct,loc.besttime)
+
+var formstrloc =
+^＂Rocky:#    ｛0｝\n
+^Canyon:#   ｛1｝\n
+^Caves:#    ｛2｝\n
+^Mushroom:# ｛3｝\n
+^Halls:#    ｛4｝\n
+^Mines:#    ｛5｝\n
+^Ridge:   # ｛6｝\n
+^Temple:#   ｛7｝\n\n
+^Total:#    ｛8｝%＂
+
+var formlocstr =
+^＂｛0｝* ｛1｝f＂
+
+func formloc(x,y)
+ ?x<1
+  return ＂No Info＂
+ :
+  return string.Format(formlocstr,x,y)
+
+var formstrlocdone = string.Format(
+^formstrloc,
+^formloc(rockys,rockyt),
+^formloc(canyons,canyont),
+^formloc(cavess,cavest),
+^formloc(mushs,musht),
+^formloc(hallss,hallst),
+^formloc(mines,minet),
+^formloc(icys,icyt),
+^formloc(temples,templet),
+^locfinal)
+
+
+var formstrd = string.Format(
+^formstr,player.name,hcalc,lic,osc,res.ki,
+^totalgp,acgr,acgru,res.crystals)
+var largestr=string.Split(formstrd)
+
+//scaler
+var y = 0
+?bar = ＂＂
+ for i = 1..20
+  ?grk >= i & gr <= 1
+   bar.Add(＂█＂)
+  :
+   bar.Add(＂▒＂)
+
+var largstr
+var mode = 0
+var flipflop = false
+func swap(butt)
+ ?butt=but
+  mode += 1
+  mode=mode%3
+ :
+  mode -= 1
+  ?mode<0
+   mode=2
+
+var shortwait=0
+//easter eggs
+?gr > 1
+ ambient.Stop()
+ ccolor = #990000
+ cremark = ＂You know what you did.＂
+ acgr = 0
+ gr = 0
+ grkr = 0
+
+var shortwait
+
+?loc = waterfall & totalTime > 30 & donttry
+^ = false
+ >c@a@,-7,Braggability Meter 2.0
+ ?a ! 7
+  a -= 1
+ :?mode = 0
+  ?cstr = ＂＂
+   >c7,-5,@ccolor@,Save:\n@cstr@
+  ?b ! 21
+   play xp_tick
+   cstr = sjoi(＂＂,bar,0,b)
+   b += 1
+  :
+   >c7,-3,@ccolor@,@c@%
+   ?c ! Math.roundToInt(grkr)
+    c += 1
+   :
+    ?cstr2 = ＂R＂
+     >c7,-1,@cstr2@
+    ?d ! 8
+     d += 1
+     cstr2 = sjoi(＂＂,text,0,d)
+    :
+     ?uion = false
+      play error
+     >c7,0,@ccolor@,@cremark@
+     ?shortwait = 8
+      >c7,2,You checked on:
+      >c7,3,@ccolor@,@datestring@!    
+      >c7,4,OS: @coderan@
+     :
+      shortwait += 1
+     ?shortwait = 7
+      play error
+     uion = true
+ :?mode=1
+  >c7,-5,@ccolor@,@sjoi(＂＂,largestr)@
+ :?mode=2  
+  >c7,-5,@ccolor@,@formstrlocdone@
+  >c7,-5,Rocky:\nCanyon:\nCaves:\nMushroom:
+^\nHalls:\nMines:\nRidge:\nTemple:\n\nTotal:
+?uion = true
+ >c17,6,#888888,@mode+1@/3
+ var but = ui.AddButton()
+ but.text = ＂next>＂
+ but.x = 23
+ but.y = 6
+ but.h = 1
+ but.w = 5
+ but.hcolor = #AAAAAA
+ but.tcolor = #888888
+ but.SetPressed(swap)
+ var but2 = ui.AddButton()
+ but2.text = ＂<back＂
+ but2.x = 13
+ but2.y = 6
+ but2.h = 1
+ but2.w = 5
+ but2.hcolor = #AAAAAA
+ but2.tcolor = #888888
+ but2.SetPressed(swap)
+
+?item.left = grap
+ donttry = true
+ a = 0
+ uion = false
+ ui.Clear()

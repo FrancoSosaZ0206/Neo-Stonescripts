@@ -1,0 +1,357 @@
+//Mushroom Pet V3
+//The Mushroom Pet is a nice and simple company
+//for you and your travels. This script is not
+//quite optimized, but thank you for trying it!
+//You can change the vars for the X and Y pos.
+//You can also set the var ＂MushReactiveColor＂
+//to 1 for a fun experience, or set the var
+//＂MushItemCol＂ to 1 for something else, even
+//more interesting.
+
+//IMPORTANT! Do not set 1 to both vars.
+
+//This pet was made by: Pyro
+
+//Special thanks to: Olivia, for making the
+//reactive enchantment color script.
+
+var MushReactiveColor = 0
+var MushItemCol = 1
+
+var Mushroom
+var Mushscared
+var MushroomY = -2
+var MushroomX = 14
+var MushroomFrame = 0
+var MushscaredFrame = 0
+var MushwinFrame = 0
+var thing = 0
+var thingz = 0
+var MC
+var MC2
+
+?time % 3 = 0
+ MushroomFrame++
+
+?time % 3 = 0
+ ?MushroomFrame < 4
+  ?foe = boss
+   MushscaredFrame++
+
+?ai.walking = false
+ ?MushroomFrame < 4
+  MushroomFrame = 1
+
+?foe = boss & foe.hp < 1
+ thingz = 1
+
+?time % 3 = 0
+ ?thingz = 1
+  MushwinFrame++
+   thing++
+
+?MushwinFrame > 8
+ MushwinFrame = 0
+  thingz = 0
+
+?MushReactiveColor = 1
+ var lasthp = hp
+  ?hp < lasthp
+   MC = #red
+    lasthp = hp
+
+?MushReactiveColor = 1
+ ?hp > lasthp
+  MC = #green
+   lasthp = hp
+?MushReactiveColor = 1
+ ?buffs.string = lucky_crit | buffs.string =
+^ berserk | buffs.string = strength
+  MC = #rainbow
+?MushReactiveColor = 1
+ ?buffs.string = invisibility
+  MC = #777777
+?MushReactiveColor = 1
+ ?debuffs.string = debuff_attack_speed
+  MC = #aaaaff
+
+var FindWer
+var FindEnc
+var FindWerL
+var FindEncL
+var Enc1
+var Enc2
+
+?string.Equals(item.left,＂＂) = false
+ FindWerL = string.IndexOf(item.left,＂+＂)
+ FindEncL = string.Sub(item.left,FindWerL+1,2)
+ Enc2 = int.Parse(FindEncL)
+:
+ Enc2 = Enc1
+
+?string.Equals(item.right,＂＂) = false
+ FindWer = string.IndexOf(item.right,＂+＂)
+ FindEnc = string.Sub(item.right,FindWer+1,2)
+ Enc1 = int.Parse(FindEnc)
+
+var EnchCol
+var EnchCol2
+var Element = ＂O＂
+
+?Enc1>=16
+ EnchCol = #rainff
+:?Enc1>=11
+ EnchCol = #red
+:?Enc1 >= 7
+ EnchCol = #blue
+:?Enc1 >= 4
+ EnchCol = #green
+:?Enc1 >= 2
+ EnchCol = #yellow
+:?Enc1 = 1
+ EnchCol = #cyan
+:
+ EnchCol = #white
+
+ Mushroom = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#| •w•|
+#'____'
+asciiend
+
+?MushroomFrame = 2
+ Mushroom = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#| •w•|
+'------'
+asciiend
+
+?MushroomFrame = 3
+ Mushroom = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#| >w<|
+´------`                                       
+asciiend
+
+?MushroomFrame = 4
+ Mushroom = ascii
+#
+#
+###.--.
+#.'  '_'.
+##|¯>w<|
+##|    |
+##,____,
+#
+asciiend
+
+?MushroomFrame = 5
+ Mushroom = ascii
+#
+####.--.
+##.'  '_'.
+###|¯>w<|
+###|    |
+###.    .
+####'--'
+#
+asciiend
+
+?MushroomFrame = 6
+ Mushroom = ascii
+#####.--.
+###.'  '_'.
+####|¯>w<|
+####|    |
+####.    .
+#####'--'
+#
+#
+asciiend
+
+?MushroomFrame = 7
+ Mushroom = ascii
+#####.--.
+###.'  '_'.
+####|¯¯¯¯|
+####| >w<|
+####.    .
+#####¯¯¯¯
+#
+#
+asciiend
+
+?MushroomFrame = 8
+ Mushroom = ascii
+#
+####.--.
+##.'  '_'.
+###|¯¯¯¯|
+###|    |
+###. •w•.
+####¯¯¯¯
+#
+asciiend
+
+?MushroomFrame = 9
+ Mushroom = ascii
+#
+#
+####.--.
+##.'  '_'.
+###|¯¯¯¯|
+###|    |
+###. •w•.
+####¯¯¯¯
+asciiend
+
+?MushroomFrame = 10
+ Mushroom = ascii
+#
+#
+#
+###.--.
+#.'  '_'.
+##|¯¯¯¯|
+##| •w•|
+##'____'
+asciiend
+
+?MushroomFrame = 11
+ Mushroom = ascii
+#
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#| •w•|
+##¯¯¯¯
+asciiend
+
+?MushroomFrame = 12
+ Mushroom = ascii
+#
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#| •w•|
+#'----'
+asciiend
+
+?MushscaredFrame = 1
+ Mushscared = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#| -w-|
+#'----'
+asciiend
+
+?MushscaredFrame = 2
+ Mushscared = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#|'OwO|
+#'----'
+asciiend
+
+?MushscaredFrame = 3
+ Mushscared = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#|＂-w-|
+#'----'
+asciiend
+
+?MushscaredFrame = 3
+ Mushscared = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#|＂OwO|
+#'----'
+asciiend
+
+?MushscaredFrame = 7
+ Mushscared = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#|'•w•|
+#'----'
+asciiend
+
+?MushroomFrame > 12
+  MushroomFrame = 1
+
+?MushscaredFrame > 0
+ Mushroom = ascii
+#
+asciiend
+
+?MushscaredFrame > 7
+ ?foe.distance > 20
+  MushscaredFrame = -1
+
+?MushscaredFrame = -1
+ Mushscared = ascii
+#
+asciiend
+
+?MushwinFrame > 0
+ Mushroom = ascii
+#
+#
+#
+##.--.
+.'  '_'.
+#|¯¯¯¯|
+#| ^w^|
+#'----'
+asciiend
+
+?MushwinFrame > 9
+ MushwinFrame = -1
+?MushItemCol = 1
+ MC = EnchCol
+>o-@MushroomX@,@MushroomY@,@MC@,@Mushroom@
+>o-@MushroomX@,@MushroomY@,@MC@,@Mushscared@
+?time % 14 = 0
+ MC = #white

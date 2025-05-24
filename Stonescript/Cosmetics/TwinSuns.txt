@@ -1,0 +1,55 @@
+//-~-~-Information-~-~-\\
+/*By:CitrionDragon☆\
+Version 1.0
+Change glasses value to add/remove glasses
+Even works in Temple!
+*/
+
+var pos
+var glasses=true
+?loc=＂icy＂
+  pos=22
+:?loc=＂rocky＂
+  ?foe=＂phase＂
+    pos=22
+  :
+    pos=26
+?loc=＂icy＂|loc=＂rocky＂
+  ?glasses
+    >`@pos@,1,ascii
+        .   
+  `.   _!_   .´ _ 
+    ,´¯   ¯`.  ｛＂｝
+   /-._______\  ¯
+-- |  |__||__| --
+   \         /
+    `._   _.´
+  .´   ¯¡¯   `.
+        '
+asciiend
+  : 
+    >`@pos@,1,ascii
+        .   
+  `.   _!_   .´ _ 
+    ,´¯   ¯`.  ｛ ｝
+   /         \  ¯
+-- |         | --
+   \         /
+    `._   _.´
+  .´   ¯¡¯   `.
+        '
+asciiend
+?loc=temple&(screen.i%4=1)&loc!＂nagaraja＂
+  ?glasses
+    >`35,1,ascii
+_
+＂｝
+¯
+asciiend
+
+  :
+    >`35,1,ascii
+_
+ ｝
+¯
+asciiend

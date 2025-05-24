@@ -1,0 +1,30 @@
+﻿// *******************************************************
+//                     START OF "Gate"                    
+// *******************************************************
+
+
+
+// IMPORTS
+
+import Cosmetics/PetStonehead
+var a = new MyScripts/Lib/MyArsenal
+var c = new MyScripts/Lib/Combat
+
+var set = new MyScripts/Borrowed/scottyEyeTracker
+
+
+
+// PROCEDURE:
+
+?c.canUseQstaff_OG() & ai.walking
+  c.useQstaff(a.myqstaff)
+:
+  equipL triskelion
+
+set.scottyEyeTracker("#red")
+
+
+
+// *******************************************************
+//                       END OF "Gate"                    
+// *******************************************************

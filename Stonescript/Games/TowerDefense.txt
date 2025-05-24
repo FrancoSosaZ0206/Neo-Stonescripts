@@ -1,0 +1,2750 @@
+//-~-~-Information-~-~-\\
+/*By: CitrionDragon☆\
+Version 3.0
+  Added translations
+Version 2.9
+  Changes some texts
+  Found all text that needs translations
+Version 2.7
+  Added Armor and its upgrades
+  Revised how stats page works
+  Fixed Regen
+Version 2.5
+  Revised upgrade and stats menu
+  Added pierce max funcionality
+Version 2.2
+  Reorganized and Cleaned up code
+  Disabled Save function for now
+Version 2.1
+  Bleed indicator fixed
+  Combined the 3 CheckDebuff functions into one
+  Added Pause Screen
+Version 2.0
+  Added new location
+  Added new foe type (ranged)
+  Added Main Menu button
+  Updated Restart button
+  Added sound when a projectile hits
+  Added version number to title screen
+  Foes now keep spawning while a boss is alive, at a reduced rate
+Version 1.9
+  Added code for switching Locations
+  Made concepts for new location's foes
+Version 1.8
+  Added shooting animation
+  Fixed bug where 1 damage was added when hitting tower
+  Added title to start screen
+  Added Location switch button
+Version 1.7
+  Buttons on Tower (Up, Down, Shop) now align correctly on any screen.h
+  Added bleed indicator
+  Added crit indicator
+  Replaced sword enemy with hornet
+  Added background, background changes depending on hp %
+Version 1.6
+  Fixed where costs location didnt scale
+  Crit, Pierce, and Bleed now start at lvl 0
+  Changed stats so chances in stats are rounded up
+  Added starting money
+  Fixed bug where multiplier wasnt at current difficulty at start
+Version 1.5
+  Fixed more bugs in upgrade menu
+  Added difficulties
+  Moved around ui components (coins, score, etc)
+  Fixed bug where start screen buttons work during retry screen
+Version 1.1
+  Added Queen Bee animations
+  Small change to multiplier, now goes up by x2 instead of x1.5
+  Added score system
+Version 1.0
+  Fixed bugs in upgrade menu
+  Revised how shop screen works, foes will no longer go on top of it
+  Added music
+  Added slow debuff
+  Added bleed
+Version 0.91
+  Added sounds
+  Added Stat menu next to upgrade menu
+  Added faster foe spawning in later waves
+  Fixed Stonehead's head size
+  Added label to Upgrade button
+Version 0.9
+  Most features added
+  Need to make debuffs (honey and bleed), animations, stat menu
+  Need to revise upgrade menu so enemies/arrows dont print over it
+  Need to add sounds and music
+  Test multiplier scaling to see if it needs changings
+
+//--Credits--\\
+//Foes\\
+  Ascii- Bee
+  Sven- Small Snake
+//Optimization and Troubleshooting\\
+  p3lb0x
+  Inconherent_Toast
+\☆Have fun! More will be added in the future!*/
+
+//-~-~-Aliases-~-~-\\
+var uiAB = ui.AddButton
+var uiAA = ui.AddAnim
+var uiAT = ui.AddText
+var uiAP = ui.AddPanel
+var uiAC = ui.AddCanvas
+var sw = screen.w
+
+//-~-~-Variables-~-~-\\
+//-~-UI-~-\\
+var upbtn
+var downbtn
+var shopbtn
+var level
+var gameovertxt
+var gameoverpnl
+var startoverbtn
+var gamerun
+var startbtn
+var startpnl
+var gamestart
+var gametime
+var x2speed
+var speedbtn
+var pausebtn
+var startscreenbtn
+var pausepnl
+var pausetxt
+var version=te.xt("Version")+" 3.0"
+var versiontxt
+var difficulty=1
+var diffup
+var diffdown
+var locations=["Forest","Volcano"]
+var location=1
+var locleft
+var locright
+var loctxt
+var title
+var titleasci=ascii
+##._._._.##########################____#######____
+#/_  __/___#_######_____##_____###/    \___##/ __/__##____##________
+##/ /#/ __ \ |#/|#/ / _ \/ ___/##/ __\ / _ \/ /_/ _ \/ __ \/ ___/ _ \
+#/ /#/ /_/ / |/ |/ /  __/ /#####/   .´/  __/ __/  __/ /#/ (__  )  __/
+/_/##\____/|__/|__/\___/_/#####/_____/\___/_/##\___/_/#/_/____/\___/
+asciiend
+//-~-Upgrades-~-\\
+var ubtnspeed
+var ubtndamage
+var ubtncritunlock
+var ubtncritdamage
+var ubtncritchance
+var ubtnpierceunlock
+var ubtnpiercechance
+var ubtnpiercemax
+var ubtnbleedunlock
+var ubtnbleeddamage
+var ubtnbleedchance
+var ubtnhealth
+var ubtnregen
+var ubtnarmorunlock
+var ubtnarmormax
+var ubtnarmorregen
+var upgradepage=2
+var basiclvl=0
+var heavylvl=0
+var quicklvl=0
+var speedlvl=1
+var damagelvl=1
+var healthlvl=1
+var regenlvl=1
+var regen=1.5
+var armormaxlvl=0
+var armorregenlvl=0
+var piercemaxlvl=0
+var piercechancelvl=0
+var pierceChance=0
+var pierceRng
+var critdamagelvl=0
+var critchancelvl=0
+var critChance=0
+var critRng
+var critDamage=1.5
+var bleeddamagelvl=0
+var bleedchancelvl=0
+var bleedChance=0
+var bleedRng
+var bleedDmg=0.5
+var bleedDuration=150
+var upgradepnl
+var infopnl
+var infotitle
+var infodesc
+var infoupgrade
+var infocost
+var infolevel
+var selected
+var stattxt1
+var stattxt2
+var upgradeinfo=[]
+//-~-Score-~-\\
+var score
+var highscore
+//-~-Shop-~-\\
+var coins
+var coinchancerng
+var coincountrng
+var shop
+var shoppnl
+var shopopen
+var weapontab
+var towertab
+var utiltab
+var statstab
+var shoptxt
+var shopasci = ascii
+#_______
+|       |
+#¯¯¯¯¯¯¯
+#-┌───┌
+##_)_(_
+asciiend
+//-~-Tower-~-\\
+var twrhptxt
+var towerhp
+var towermaxhp=15+healthlvl*5
+var towerperc
+var tower
+var towerback
+var crystal
+var backpanel
+var backcanvas
+var background
+var forestasci=ascii
+                                                                                                         
+.                         .                                      .                                       
+             .                                .                                            .             
+      .            .                                                              .                      
+                             .        _,._      _    .                                                   
+                                    ,´ ,´ `    ((                     .                                  
+                                   /  /         ¯                                                        
+                     .             |  '                                                  .               
+                   |           .   \   `.__,/                 .                                          
+                   |                `._  _,´                                     .                       
+                   |     .             ¯¯    .                               .                           
+                   |                        / \       .                     / \                          
+                   |                      .´ ' `.               .         .´ ' `.                        
+                   |    .         .        /   \         .                 /   \       .         .       
+                   |   / \               .´     `.      / \              .´     `.              / \      
+                   |  ´ ' `   .      .  ´  '   '  `    ´ ' `      .     ´  '   '  `      .     ´ ' `     
+      100% HP      |  /   \  / \    / \ ./       \.    /   \     / \    ./       \.     / \    /   \     
+                   |.´ ' ' `. ' `  ´ '.´ '   '   ' `..´ ' ' `.  ´ ' ` .´ '   '   ' `.  ´ ' ` .´ ' ' `.   
+                   | /     \/   \  /   /           \  /     \   /   \  /           \   /   \  /     \    
+                   |´ '   ' `. ' `. '.´             .´ '   ' `.´ ' ' `.             `.´ ' ' .´ '   ' `.  
+                   |         \   \  ´  '     '     '/         \/     \ '     '     '  `     /         \  
+                   |'   '   ' `.' `.   ' `.|   |  .´ '   '   ' `.   ' `.   |   |    .´ '  .´ '   '   ' `.
+                   |  |   |        \      \|   |       |   | /         \   |   |    /        \ |   |     
+                   |  |   |   '   ' `.   ' |   |       |   |´ '   '   ' `. |   |  .´ '   '  ' `|   |     
+                   |  |   | |   |  |   |   |   |       |   |     |  |      |   |       |   |   |   |     
+%%
+                                                                                                         
+.                         .                                      .                                       
+             .                                .                                            .             
+      .            .                                            (¯)      ('¯)     _(¯¯¯¯'¯'  .           
+                             .        _,._      _    .         (_( )    (_)_))   ( (     ) ('¯  _(¯¯¯¯'¯'
+                                    ,´ ,´ `    ((                     .        (( (  ))   )_)_ ( (     ) 
+                                   /  /         ¯                ('¯)         _(¯¯¯¯'¯'     '_( (  ))   )
+                     .             |  '                         (_)_))    (¯ ( (     )   _(¯¯¯ '__))¯¯¯¯ 
+                   |           .   \   `.__,/                 .          (_(( (  ))   ) ( (     )  )   (_
+                   |                `._  _,´                                 '__))¯¯¯¯ ( (  ))   )     . 
+                   |     .             ¯¯    .                      (¯)      .          '__))¯¯¯¯ (¯)    
+                   |                        / \       .            (_( )    / \       (_( )              
+                   |                      .´ ' `.               .         .´ ' `.                        
+                   |    .         .        /   \         .                 /   \       .         .       
+                   |   / \               .´     `.      / \              .´     `.              / \      
+    75% HP         |  ´ ' `   .      .  ´  '   '  `    ´ ' `      .     ´  '   '  `      .     ´ ' `     
+                   |  /   \  / \    / \ ./       \.    /   \     / \    ./       \.     / \    /   \     
+                   |.´ ' ' `. ' `  ´ '.´ '   '   ' `..´ ' ' `.  ´ ' ` .´ '   '   ' `.  ´ ' ` .´ ' ' `.   
+                   | /     \/   \  /   /           \  /     \   /   \  /           \   /   \  /     \    
+                   |´ '   ' `. ' `. '.´             .´ '   ' `.´ ' ' `.             `.´ ' ' .´ '   ' `.  
+                   |         \   \  ´  '     '     '/         \/     \ '     '     '  `     /         \  
+                   |'   '   ' `.' `.   ' `.|   |  .´ '   '   ' `.   ' `.   |   |    .´ '  .´ '   '   ' `.
+                   |  |   |        \      \|   |       |   | /         \   |   |    /        \ |   |     
+                   |  |   |   '   ' `.   ' |   |       |   |´ '   '   ' `. |   |  .´ '   '  ' `|   |     
+                   |  |   | |   |  |   |   |   |       |   |     |  |      |   |       |   |   |   |     
+%%
+                                                                                                         
+.                         .                                      .                                       
+             .                                .     ('¯)                 _(¯¯¯¯'¯'                    .  
+      .            .                               (_)_))     _(¯¯¯¯'¯' ( (     )  _(¯¯¯¯'¯ (¯¯¯¯'¯''    
+                             .        _,._      _    .       ( (   ' ) ( (  ))    ( (      '    )  )   (_
+                                    ,´ ,´ `    ((           _(¯¯¯¯'¯'  (   )   ) '__))¯¯¯¯( (  ))    (  )
+                                   /  /         ('¯)       ( (   ' ) ))¯¯  _(¯¯ ¯'¯'¯ ('¯)  '_)¯¯¯¯ '__))
+                     .             |  '        (_)_))     ( (  ))    _ ( (     ) )¯ ( (     )   _(¯¯¯ '__
+                   |           .   \   `.__,/              '__))¯¯¯'¯'¯  '  .     ( (  )( (  )   ) ( (   
+                   |                `._  _,´                        ( (     )   '__)(¯¯'¯'¯¯¯¯    '__))¯¯
+                   |     .             ¯¯    .           ('¯)      ( (  ))   ) (¯)  ( (     )  '__))¯¯¯¯ 
+                   |                        / \       . (_)_))      '__))¯¯¯¯ (_( )  ( (  ))   )         
+                   |                      .´ ' `.               .         .´ ' `.     '__))¯¯¯¯                     
+                   |    .         .        /   \         .                 /   \       .         .       
+                   |   / \               .´     `.      / \              .´     `.              / \      
+     50% HP        |  ´ ' `   .      .  ´  '   '  `    ´ ' `      .     ´  '   '  `      .     ´ ' `     
+                   |  /   \  / \    / \ ./       \.    /   \     / \    ./       \.     / \    /   \     
+                   |.´ ' ' `. ' `  ´ '.´ '   '   ' `..´ ' ' `.  ´ ' ` .´ '   '   ' `.  ´ ' ` .´ ' ' `.   
+                   | /     \/   \  /   /           \  /     \   /   \  /           \   /   \  /     \    
+                   |´ '   ' `. ' `. '.´             .´ '   ' `.´ ' ' `.             `.´ ' ' .´ '   ' `.  
+                   |         \   \  ´  '     '     '/         \/     \ '     '     '  `     /         \  
+                   |'   '   ' `.' `.   ' `.|   |  .´ '   '   ' `.   ' `.   |   |    .´ '  .´ '   '   ' `.
+                   |  |   |        \      \|   |       |   | /         \   |   |    /        \ |   |     
+                   |  |   |   '   ' `.   ' |   |       |   |´ '   '   ' `. |   |  .´ '   '  ' `|   |     
+                   |  |   | |   |  |   |   |   |       |   |     |  |      |   |       |   |   |   |     
+%%
+                                                                                                         
+.                         .                                      .                                       
+             .                                .     ('¯)                 _(¯¯¯¯'¯'                    .  
+      .            .       ('¯)                    _(¯¯¯¯'¯' _(¯¯¯¯'¯' ( (     )  _(¯¯¯¯'¯ (¯¯¯¯'¯''     
+                          (_)_))      _,._(¯¯¯¯'¯ ( (     ) '    .       ( (   ' ) ( (  ))    ( (      ' 
+                                    ,´  ( (     )( (  ))   )         .  _(¯¯¯¯'¯'  (   )   ) '__))¯¯¯¯( (
+                        ('¯)       /  /( (  ))    '__))¯¯¯¯ )'¯)   '   ( (   ' ) ))¯¯  _(¯¯ ¯'¯'¯ ('¯)  '
+                     . (_)_))      | _(¯¯¯¯'¯'' '__))¯(¯¯'¯'¯¯ '  .    (_))     ( (  ))    _ ( (     ) )¯
+                   |           .   \( (     ) _(¯' ¯'   `.__,/  (    )     _(¯¯¯¯'¯'  '__))¯¯¯'¯'¯  '  . 
+                   |               ( (  ))  (     ) `._(¯¯¯¯'¯'  _,´   ( (  ))   ( (     )  )            
+                   |     .          '__))¯¯¯¯ (  ))   )(       _(¯¯¯¯'¯'  '__))¯¯¯( (  ))   )¯   ('¯)    
+                   |          (¯)           / \ '__))¯   )    ( (     ) __))¯¯¯¯ (_)_))      '__))¯¯¯¯ (_
+                   |         (_( )        .´ ' `.      '__))¯( (  ))   )  .´ ' `.     '__))¯¯¯¯          
+                   |    .         .        /   \         .    '__))¯¯¯¯    /   \       .         .       
+                   |   / \               .´     `.      / \              .´     `.              / \      
+     25% HP        |  ´ ' `   .      .  ´  '   '  `    ´ ' `      .     ´  '   '  `      .     ´ ' `     
+                   |  /   \  / \    / \ ./       \.    /   \     / \    ./       \.     / \    /   \     
+                   |.´ ' ' `. ' `  ´ '.´ '   '   ' `..´ ' ' `.  ´ ' ` .´ '   '   ' `.  ´ ' ` .´ ' ' `.   
+                   | /     \/   \  /   /           \  /     \   /   \  /           \   /   \  /     \    
+                   |´ '   ' `. ' `. '.´             .´ '   ' `.´ ' ' `.             `.´ ' ' .´ '   ' `.  
+                   |         \   \  ´  '     '     '/         \/     \ '     '     '  `     /         \  
+                   |'   '   ' `.' `.   ' `.|   |  .´ '   '   ' `.   ' `.   |   |    .´ '  .´ '   '   ' `.
+                   |  |   |        \      \|   |       |   | /         \   |   |    /        \ |   |     
+                   |  |   |   '   ' `.   ' |   |       |   |´ '   '   ' `. |   |  .´ '   '  ' `|   |     
+                   |  |   | |   |  |   |   |   |       |   |     |  |      |   |       |   |   |   |     
+asciiend
+var volcanoasci=ascii
+                                                                                                         |
+.                        .             .            .                     .                              |
+             .             _,._      _                                                      .            |
+      .            .     ,´ ,´ `    ((                        .                                          |
+                        /  /         ¯       .                                      .                    |
+                        |  '                    .-----¯¯¯¯------.        .                         .     |
+                        \   `.__,/            .´-.---______--.-.-`.              ___------___            |
+                         `._  _,´           .´  /   /   |    |  \  `.          .:::;::       `.          |
+                   |   .    ¯¯          .  /  .´  _/     \    \  `   \        /:;:::'          \      .  |
+                   |              .       /     ./ |      |   |       `.    .::::::'            \        |
+                   |                    ./     /   |      '    `.__     \  /::;::'               `.      |
+                   |__----__  .       .´      ´   / \__          \  `    \´:;:::'                  \     |
+                   |:::;    `.       /           |     `          \       \':::'                    \    |
+                   |:;:'      \     /:.         /                 /`.      `.:'                      \   |
+                   |:'         `. .::::        /                 ´   |       \                        `. |
+    100% HP        |'            /::;:'        |                      \       \                         \|
+                   |            /;::::         |                       \       \.                        |
+                   |          ./:::;:'       .´                         `.       `.                      |
+                   |        .:::;::::       /                                       `.                   |
+                   |      .:;::::::'        |                                         \                  |
+                   |     /:::::::;:        /                                           \                 |
+                   |    /::::;:::'       .¯                                             `.               |
+                   |  .::;:::::::                                                         \              |
+                   | /:::::;::::'                                                          `.            |
+                   |´::;::::::::                                                             `.          |
+%%
+                                                                                                         |
+.                        .             .            .   ('¯)           (¯)           .                   |
+             .             _,._      _       ('¯)      (_)_))         (_( )                      .       |
+      .            .     ,´ ,´ `    ((      (_)_))               ('¯)     .                              |
+                        /  /         ¯       .                  (_)_))              .                    |
+                        |  '          (¯)       .-----¯¯¯¯------.        .                         .     |
+                        \   `.__,/   (_( )    .´-.---______--.-.-`.              ___------___            |
+                         `._  _,´           .´  /   /   |  (¯)  \  `.          .:::;::       `.          |
+                   |   .    ¯¯          .  /  .´  _/     \(_( )  `   \        /:;:::'          \      .  |
+                   |              .       /     ./ |      |   |       `.    .::::::'            \        |
+                   |                    ./     /   |      '    `.__     \  /::;::'               `.      |
+                   |__----__  .       .´      ´   / \__          \  `    \´:;:::'                  \     |
+                   |:::;    `.       /           |     `          \       \':::'                    \    |
+                   |:;:'      \     /:.         /                 /`.      `.:'                      \   |
+                   |:'         `. .::::        /                 ´   |       \                        `. |
+     75% HP        |'            /::;:'        |                      \       \                         \|
+                   |            /;::::         |                       \       \.                        |
+                   |          ./:::;:'       .´                         `.       `.                      |
+                   |        .:::;::::       /                                       `.                   |
+                   |      .:;::::::'        |                                         \                  |
+                   |     /:::::::;:        /                                           \                 |
+                   |    /::::;:::'       .¯                                             `.               |
+                   |  .::;:::::::                                                         \              |
+                   | /:::::;::::'                                                          `.            |
+                   |´::;::::::::                                                             `.          |
+%%
+                                                                                                         |
+.                        .             .          _(¯¯¯¯'¯')              .  ('¯)                        |
+             .             _,._      _ ('¯)      ( (     ) )   .            (_)_))          .            |
+      .            .     ,´ ,´ `    (((_)_))    ( (  ))   ))    _(¯¯¯¯'¯')                               |
+                        /  /         ¯       .   '__))¯¯¯¯     ( (     ) ))         .                    |
+                        |  '           _(¯¯¯¯'¯') ----¯¯¯¯----( (  ))   ))         (¯)             .     |
+                        \   `. ('¯)   ( (     ) ))---______--. '__))¯¯¯¯         _(_( )---___            |
+                         `._  (_)_)) ( (  ))   ))   /   |    |  \  `.     ('¯) .:::;::       `.          |
+                   |   .    ¯¯        '__))¯¯¯¯   _/ ('¯)\    \  `   \   (_)_)):;:::'          \      .  |
+                   |              .       /     ./ |(_)_))|   |   (¯) `.    .::::::'            \        |
+                   |                   (¯)     /   |      '    `.(_( )  \  /::;::'               `.      |
+                   |__----__  .       (_( )   ´   / \__          \  `    \´:;:::'                  \     |
+                   |:::;    `.       /           |     `          \       \':::'                    \    |
+                   |:;:'      \     /:.         /                 /`.      `.:'                      \   |
+                   |:'         `. .::::        /                 ´   |       \                        `. |
+     50% HP        |'            /::;:'        |                      \       \                         \|
+                   |            /;::::         |                       \       \.                        |
+                   |          ./:::;:'       .´                         `.       `.                      |
+                   |        .:::;::::       /                                       `.                   |
+                   |      .:;::::::'        |                                         \                  |
+                   |     /:::::::;:        /                                           \                 |
+                   |    /::::;:::'       .¯                                             `.               |
+                   |  .::;:::::::                                                         \              |
+                   | /:::::;::::'                                                          `.            |
+                   |´::;::::::::                                                             `.          |
+%%
+                                                                                                         
+.                        .              _(¯¯¯¯'¯'  _(¯¯¯¯'¯')) .            .                     .      |
+             .             _,. ('¯)  _ ( (     )  ( (     )   ))_(¯¯¯¯¯¯¯'¯')                            |
+      .            .    (¯) ,´(_)_))((( (  ))   )( (  ))      ( (     ) )    _(¯¯¯¯'¯')                  |
+                       (_( )         ¯ '__)  _(¯¯ '__))¯¯¯  _(( (  ))    _(¯ ( (     ) )¯¯¯'¯') ))       |
+                        |  '          _(¯¯¯¯'¯'(       ) '__))¯¯¯¯      ( ( ( (     ))   ))   ('¯)) .    |
+                        \    ('¯)    ( (     )  (     )  _(¯¯¯¯'¯') ( (   '__)  )¯¯¯¯  ))   )(_)_)))     |
+                         `._(_)_))  ( (  ))   )'__))¯ ( (     )¯¯¯  ' '__))¯¯¯¯  __))¯¯¯¯     )          |
+                   |   .  (¯)        '__))¯¯¯¯      .( (  )  )   ))  _(¯¯¯¯'¯')  /     _(¯¯¯¯'¯')        |
+                   |     (_( )    .       /     ./ |  '__))¯¯¯¯   ( (     ) )  |  ( (     ) ) ('¯)       |
+                   |                    ('¯)   /   |      '    `.( (  ))   ))_( (  ))  ('¯)  (_)_))      |
+                   |__----__  .       .(_)_)) ´   / \__           '__))¯¯¯¯ `__))¯¯¯¯ (_)_))       \     |
+                   |:::;    `.       /           |     `          \       \':::'                    \    |
+                   |:;:'      \     /:.         /                 /`.      `.:'                      \   |
+                   |:'         `. .::::        /                 ´   |       \                        `. |
+     25% HP        |'            /::;:'        |                      \       \                         \|
+                   |            /;::::         |                       \       \.                        |
+                   |          ./:::;:'       .´                         `.       `.                      |
+                   |        .:::;::::       /                                       `.                   |
+                   |      .:;::::::'        |                                         \                  |
+                   |     /:::::::;:        /                                           \                 |
+                   |    /::::;:::'       .¯                                             `.               |
+                   |  .::;:::::::                                                         \              |
+                   | /:::::;::::'                                                          `.            |
+                   |´::;::::::::                                                             `.          |
+asciiend
+var locasci=[forestasci,volcanoasci]
+var towerasci=ascii
+¯|###|¯|###|¯|###|¯|
+¯#¯#¯#¯#¯|¯#¯#¯#¯#¯|
+
+
+
+
+#################|¯|
+¯#¯#¯#¯#¯|¯#¯#¯#¯#¯|
+
+
+
+
+#################|¯|
+¯#¯#¯#¯#¯|¯#¯#¯#¯#¯|
+
+
+
+
+#################|¯|
+¯#¯#¯#¯#¯|¯#¯#¯#¯|¯|
+asciiend
+var towerbackasci=ascii
+  |¯|   |¯|   |¯|  
+ ─ ┬ ─ ┬ | ┬ ─ ┬ ─ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ ┬ |
+ ┴ ┬ ┴ ┬ | ┬ ┴ ┬ ┴ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ ┬ |
+ ┴ ┬ ┴ ┬ | ┬ ┴ ┬ ┴ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ |¯|
+ ─ ┬ ─ ┬ | ┬ ─ ┬ ─ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ ┬ |
+ ┴ ┬ ┴ ┬ | ┬ ┴ ┬ ┴ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ ┬ | 
+ ┴ ┬ ┴ ┬ | ┬ ┴ ┬ ┴ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ |¯|
+ ─ ┬ ─ ┬ | ┬ ─ ┬ ─ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ ┬ | 
+ ┴ ┬ ┴ ┬ | ┬ ┴ ┬ ┴ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ ┬ | 
+ ┴ ┬ ┴ ┬ | ┬ ┴ ┬ ┴ |
+ ┬ ┴ ┬ ┴ | ┴ ┬ ┴ |¯|
+ ─ ┬ ─ ┬ | ┬ ─ ┬ |¯|
+asciiend
+var crystalasci=ascii
+#___________
+/ \/ \ / \/ \
+`.¯¯\¯¯¯/¯¯.´
+##`. \ / .´
+####`._.´
+asciiend
+//-~-Player-~-\\
+var equipped
+var bow
+var bowasci
+var reloadtime
+var reloadtimer
+var reloaded
+var player
+var currentarmor
+var armormax
+var forcefield
+var armortxt
+var armorperc
+var armorpnl
+var playerasci=ascii
+#O
+(╤═}
+/#\
+%%
+#O
+#\╤═}
+/#\
+%%
+#O_╤═}
+#`´
+/#\
+%%
+#O╤═}
+#V`
+/#\
+%%
+#O
+(╤══}
+/#\
+%%
+#O
+(╤═}≡
+/#\
+%%
+#O|¯|
+/|)•(
+/#|_|
+asciiend
+var field=ascii
+.
+#.
+#|
+#|
+#'
+'
+asciiend
+//-~-Arrows-~-\\
+var arrowy
+var arrows = [[],[],[]]
+var arrow=ascii
+─→
+asciiend
+//-~-Foes-~-\\
+var foes = [[],[],[]]
+var projectiles = [[],[],[]]
+var pickups = []
+var remove
+var leadArrow
+//-Bosses-\\
+var perc=0
+var bossBar=""
+var temp=0
+var bosslvl=3
+var moverng=0
+var bossAI
+var attack="idle"
+var spawncount=0
+var animtime=0
+var variable=false
+var bosslayer
+var bosses = []
+var bosshptxt
+//-Ascii-\\
+var snake=ascii
+<\##;≈~
+#(_·-·_,_
+%%
+<\#;≈~
+#(,-·_,-
+asciiend
+//Forest\\
+var bee=ascii
+#/)
+O__)>
+%%
+#.-´
+O__)>
+asciiend
+var wasp=ascii
+_|##|
+ O()/\
+####)/
+###¯`
+%%
+_\##/
+ O()/\
+####)/
+###¯`
+%%
+__##_
+ O()/\
+####)/
+###¯`
+%%
+_\##/
+ O()/\
+####)/
+###¯`
+asciiend
+var hornet=ascii
+\#(\_/)_
+.O(__)/ .\
+###\##)´ /
+#####¯` ´
+%%
+\###_.-´
+.O(__)/ .\
+###\##)´ /
+#####¯` ´
+asciiend
+//0-3 Idle,4-5 Spit, 6-7 Sting, 8-11 Call
+var queenbee=ascii
+##._≤≥
+##_.()--.───
+#####/'-_|─'
+#####_/-_'
+###-'-.-'
+%%
+##._≤≥####.
+##_.()--./ |
+#####/'-_|/
+#####_/-_'
+###-'-.-'
+%%
+##._≤≥###|.
+##_.()--.||
+#####/'-_|'
+#####_/-_'
+###-'-.-'
+%%
+##._≤≥####.
+##_.()--./ |
+#####/'-_|/
+#####_/-_'
+###-'-.-'
+%%
+##._≤≥
+##_.()--.───
+#####/'-_|─'
+######_)-_'
+####-'-.-'
+%%
+#._≤≥####.
+##-()--./ |
+##¯#_'--'./
+######_)--'
+####-'-.-'
+%%
+###._≤≥##|.
+###_.()--||
+#####/'-_|'
+#####_/-_'
+###-'-.-'
+%%
+###._≤≥####.
+###_.()--./ |
+######─'-_|/
+#####_.'-_'
+####'-.-'
+%%
+##•
+###\≤≥####.
+##_.()--./ |
+#####/'-_|/
+#####_/-_'
+###-'-.-'
+%%
+#(•) 
+###\≤≥###|.
+##_.()--.||
+#####/'-_|'
+#####_/-_'
+###-'-.-'
+%%
+((•))
+###\≤≥    .
+##_.()--./ |
+#####/'-_|/
+#####_/-_'
+###-'-.-'
+%%
+#(•) 
+###\≤≥
+##_.()--.───
+#####/'-_|─'
+#####_/-_'
+###-'-.-'
+asciiend
+var stinger=ascii
+<-
+asciiend
+var spit=ascii
+(≈~
+asciiend
+//Volcano\\
+var missle=ascii
+##____/
+< / / |:.
+##¯¯¯¯\
+%%
+##____/
+< / / |:'
+##¯¯¯¯\
+%%
+##____/
+< / / |::'
+##¯¯¯¯\
+%%
+##____/
+< / / |::.
+##¯¯¯¯\
+asciiend
+var mineflyer=ascii
+###└O┘
+┐_./|\.___
+╞\'¯¯¯'/¯/::.
+┘#`---´¯¯ '
+%%
+###└O┘
+┐_./|\.___
+╞\'¯¯¯'/¯/:::.
+┘#`---´¯¯ ''
+%%
+###└O┘
+┐_./|\.___
+╞\'¯¯¯'/¯/::.
+┘#`---´¯¯ ''
+asciiend
+var rocket=ascii
+###└O┘
+#__/|___/¯¯/
+/  //\ //¯|::.
+\ //  // _|::'
+#¯¯¯¯¯¯¯\__\
+%%
+###└O┘
+#__/|___/¯¯/
+/  //\ //¯|::.
+\ //  // _|:::'
+#¯¯¯¯¯¯¯\__\
+%%
+###└O┘
+#__/|___/¯¯/
+/  //\ //¯|:::.
+\ //  // _|:::'
+#¯¯¯¯¯¯¯\__\
+%%
+###└O┘
+#__/|___/¯¯/
+/  //\ //¯|:::.
+\ //  // _|::'
+#¯¯¯¯¯¯¯\__\
+asciiend
+var heli=ascii
+##___.___
+####_|_
+###´└O┘`
+#_/./|\,\
+|_\'¯¯¯'/
+#¯¯`---´
+%%
+###__.__
+####_|_
+###´└O┘`
+#_/./|\,\
+|_\'¯¯¯'/
+#¯¯`---´
+%%
+####_._
+####_|_
+###´└O┘`
+#_/./|\,\
+|_\'¯¯¯'/
+#¯¯`---´
+%%
+###__.__
+####_|_
+###´└O┘`
+#_/./|\,\
+|_\'¯¯¯'/
+#¯¯`---´
+asciiend
+//0-3 idle1, 4-7 idle 2
+var copter=ascii
+_______._______#######__.__
+##.----'----.________.--'--.
+#/[    ] \   [\ _____\   [ ]\
+[_________]  []|______|______]
+#\¯¯¯¯¯¯¯    [/      /  ¯¯¯¯/
+##`----------'------'------´
+%%
+#______.______#######___.___
+##.----'----.________.--'--.
+#/[    ] \   [\ _____\   [ ]\
+[_________]  []|______|______]
+#\¯¯¯¯¯¯¯    [/      /  ¯¯¯¯/
+##`----------'------'------´
+%%
+##_____._____#######____.____
+##.----'----.________.--'--.
+#/[    ] \   [\ _____\   [ ]\
+[_________]  []|______|______]
+#\¯¯¯¯¯¯¯    [/      /  ¯¯¯¯/
+##`----------'------'------´
+%%
+###____.____#######_____._____
+##.----'----.________.--'--.
+#/[    ] \   [\ _____\   [ ]\
+[_________]  []|______|______]
+#\¯¯¯¯¯¯¯    [/      /  ¯¯¯¯/
+##`----------'------'------´
+%%
+_______._______#######__.__
+##.----'----._ ___ __.--'--.
+##) └O┘  ζ   ζ'   '  !  └O┘ \
+#/  /|    >   >      ζ  /|\  ]
+#\¯¯^¯¯'¯    ζ_______.´^¯'¯¯/
+##`----------'--'---'------´
+%%
+#______.______#######___.___
+##.----'----._ ___ __.--'--.
+##) └O┘  ζ   ζ'   '  !  └O┘ \
+#/  /|    >   >      ζ  /|\  ]
+#\¯¯^¯¯'¯    ζ_______.´^¯'¯¯/
+##`----------'--'---'------´
+%%
+##_____._____#######____.____
+##.----'----._ ___ __.--'--.
+##) └O┘  ζ   ζ'   '  !  └O┘ \
+#/  /|    >   >      ζ  /|\  ]
+#\¯¯^¯¯'¯    ζ_______.´^¯'¯¯/
+##`----------'--'---'------´
+%%
+###____.____#######_____._____
+##.----'----._ ___ __.--'--.
+##) └O┘  ζ   ζ'   '  !  └O┘ \
+#/  /|    >   >      ζ  /|\  ]
+#\¯¯^¯¯'¯    ζ_______.´^¯'¯¯/
+##`----------'--'---'------´
+asciiend
+var controller=ascii
+###└O┘
+##{═╤)
+###/#\
+%%
+###└O┘
+#{═╤/
+###/#\
+%%
+{═╤_O┘
+###`´
+###/#\
+%%
+#{═╤O┘
+###´V
+###/#\
+asciiend
+var farrow=ascii
+←─
+asciiend
+var crate=ascii
+.---.
+`. .´
+ _._
+|\_/|
+|/ \|
+ ¯¯¯
+asciiend
+var cannonball=ascii
+#_
+(')
+#¯
+asciiend
+//-~-WaveController-~-\\
+var foelevel
+var foelevelrng
+var foey
+var foeyrng
+var foetype
+var foetyperng
+var spawnrate
+var frng
+var wave
+var foecount
+var maxfoe
+var threat
+var multiplier
+var bossalive
+//-~-Effects-~-\\
+var effects = []
+var stack
+var duration
+//-Debuffs-\\
+var debuffsP = [[],[],[]]
+var debuff
+var debuffeffect=[0]
+var bleedeffect=ascii
+._
+  '
+asciiend
+//-~-Other-~-\\
+var count=0
+var count2=0
+var DeleteList = []
+var DeleteList2 = []
+var invis = ui.AddStyle("#########")
+
+//-~-~-Functions-~-~-\\
+//-~-UI-~-\\
+func VarStart()
+  towerhp=towermaxhp
+  currentarmor=0
+  armormax=0
+  spawnrate=90
+  foelevel=1
+  foelevelrng=0
+  foey=0
+  foeyrng=0
+  foetype="sfoe"
+  foetyperng=0
+  frng=""
+  reloaded=true
+  reloadtimer=0
+  level=1
+  gametime=0
+  shopopen=false
+  wave=0
+  threat=0
+  foecount=0
+  multiplier=1*difficulty
+  speedlvl=1
+  damagelvl=1
+  healthlvl=1
+  critdamagelvl=0
+  critchancelvl=0
+  piercemaxlvl=0
+  piercechancelvl=0
+  bleeddamagelvl=0
+  bleedchancelvl=0
+  armormaxlvl=0
+  armorregenlvl=0
+  coins=0
+  score=0
+  x2speed=false
+
+func SetUp()
+  Background()
+  Shop()
+  BossHPtxt()
+  PauseBtn()						
+  PlayerStart()
+  equipped="basic"
+  Buttons()
+  VarStart()
+  TowerHP()
+  Forcefield()
+//-Start-\\
+func Start()
+  multiplier=1*difficulty
+  coins=5*difficulty
+  gamerun=true
+  gamestart=true
+  startpnl.visible=false
+  wave=1
+
+func Difficulty(btn)
+  ?btn=diffup&difficulty<5
+    difficulty++
+  :?btn=diffdown&difficulty>1
+    difficulty--
+
+func LocChange(btn)
+  ?btn=locright
+    location++
+    ?location>locations.Count()
+      location=1
+  :?btn=locleft
+    location--
+    ?location<1
+      location=locations.Count()
+  loctxt.text=te.xt(locations[location-1])
+  background.Load(locasci[location-1])
+
+func ShowDiff()
+  ?gamestart=false
+    >c-4,8,#565656,☆ ☆ ☆ ☆ ☆
+    for i = 0..difficulty-1
+      >c@-5+i*2@,8,#white, ☆
+  :
+    >c-5,-12,#565656,☆ ☆ ☆ ☆ ☆
+    for i = 0..difficulty-1
+      >c@-5+i*2@,-12,#white,☆ 
+
+func StartScreen()
+  title=uiAA(titleasci)
+  title.y=-8
+  startbtn=uiAB()
+  startbtn.w=9
+  startbtn.h=3
+  startbtn.y=2
+  startbtn.text=te.xt("Play")
+  startbtn.SetPressed(Start)
+  locright=uiAB()
+  locright.y=5
+  locright.x=7
+  locright.h=3
+  locright.w=3
+  locright.text="▶"
+  locright.SetPressed(LocChange)
+  locleft=uiAB()
+  locleft.y=5
+  locleft.x=-7
+  locleft.h=3
+  locleft.w=3
+  locleft.text="◀"
+  locleft.SetPressed(LocChange)
+  loctxt=uiAT(te.xt(locations[location-1]))
+  loctxt.y=7
+  loctxt.align="center"
+  //scoretxt=uiAT()
+  //scoretxt.y=12
+  //scoretxt.text=""
+  //scoretxt.align="center"
+  diffup=uiAB()
+  diffup.y=8
+  diffup.x=7
+  diffup.h=3
+  diffup.w=3
+  diffup.text="▶"
+  diffup.SetPressed(Difficulty)
+  diffdown=uiAB()
+  diffdown.y=8
+  diffdown.x=-7
+  diffdown.h=3
+  diffdown.w=3
+  diffdown.text="◀"
+  diffdown.SetPressed(Difficulty)
+  versiontxt=uiAT(version)
+  versiontxt.w=15
+  versiontxt.y=-3
+  versiontxt.x=32
+  startpnl=uiAP()
+  startpnl.Add(title)
+  startpnl.Add(startbtn)
+  startpnl.Add(locright)
+  startpnl.Add(locleft)
+  startpnl.Add(loctxt)
+  startpnl.Add(diffup)
+  startpnl.Add(diffdown)
+  startpnl.Add(versiontxt)
+  startpnl.style=invis
+//-Pause-\\
+func PauseBtn()
+  pausebtn=uiAB()
+  pausebtn.anchor=bottom_left
+  pausebtn.dock=bottom_left
+  pausebtn.text="||"
+  pausebtn.x=0
+  pausebtn.y=0
+  pausebtn.w=4
+  pausebtn.h=3
+  pausebtn.SetPressed(Speed)
+  speedbtn=uiAB()
+  speedbtn.anchor=bottom_left
+  speedbtn.dock=bottom_left
+  speedbtn.text=">>"
+  speedbtn.x=4
+  speedbtn.y=0
+  speedbtn.w=4
+  speedbtn.h=3
+  speedbtn.SetPressed(Speed)
+
+func PauseScreen()
+  pausetxt=uiAT(te.xt("Game Paused"))
+  pausetxt.w=24
+  pausetxt.h=8
+  pausetxt.y=1
+  pausetxt.align=center
+  //pausetxt.text=te.xt("Taking a break, are ye?")
+  startscreenbtn=uiAB()
+  startscreenbtn.w=14
+  startscreenbtn.h=5
+  startscreenbtn.y=1
+  startscreenbtn.x=0
+  startscreenbtn.text=te.xt("Menu")
+  startscreenbtn.SetPressed(StartOver)
+  pausepnl=uiAP()
+  pausepnl.w=30
+  pausepnl.h=10
+  pausepnl.Add(pausetxt)
+  pausepnl.Add(startscreenbtn)
+
+func Speed(btn)
+  ?btn=pausebtn
+    ?gamestart=true
+      gamerun=!gamerun
+      ?gamerun
+        pausepnl.Recycle()
+      :
+        PauseScreen()
+  :?btn=speedbtn
+    x2speed=!x2speed
+    ?x2speed
+      speedbtn.tcolor=#green
+    :
+      speedbtn.tcolor=#white
+//-GameOver-\\
+func GameOverScreen()
+  gameovertxt=uiAT()
+  startoverbtn=uiAB()
+  gameoverpnl=uiAP()
+  startscreenbtn=uiAB()
+  gameovertxt.w=24
+  gameovertxt.h=8
+  gameovertxt.align=center
+  gameovertxt.text=te.xt("The Crystal has fallen")
+  startoverbtn.w=14
+  startoverbtn.h=5
+  startoverbtn.y=1
+  startoverbtn.x=-7
+  startoverbtn.text=te.xt("Retry")
+  startoverbtn.SetPressed(StartOver)
+  startscreenbtn.w=14
+  startscreenbtn.h=5
+  startscreenbtn.y=1
+  startscreenbtn.x=7
+  startscreenbtn.text=te.xt("Menu")
+  startscreenbtn.SetPressed(StartOver)
+  gameoverpnl.w=32
+  gameoverpnl.h=10
+  gameoverpnl.Add(gameovertxt)
+  gameoverpnl.Add(startoverbtn)
+
+func GameOver()
+  gamerun=false
+  GameOverScreen()
+  ?score>highscore
+    highscore=score
+    storage.Set("highscore",highscore)
+
+func StartOver(btn)
+  ?btn=startoverbtn
+    ui.Clear()
+    arrows = [[],[],[]]
+    foes = [[],[],[]]
+    projectiles = [[],[],[]]
+    bosses = []
+    debuffsP = [[],[],[]]
+    bossalive=false
+    foecount=0
+    threat=0
+    multiplier=1
+    SetUp()
+    background.Load(locasci[location-1])
+    wave=1
+    gamestart=true
+    gamerun=true
+  :?btn=startscreenbtn
+    ui.Clear()
+    gamestart=false
+    gamerun=false
+    arrows = [[],[],[]]
+    foes = [[],[],[]]
+    projectiles = [[],[],[]]
+    debuffsP = [[],[],[]]
+    bosses = []
+    wave=1
+    foecount=0
+    threat=0
+    multiplier=1
+    SetUp()
+    StartScreen()
+//-Move-\\
+func Move(btn)
+  ?gamerun=true
+    ?btn=upbtn
+      level++
+    :?btn=downbtn
+      level--
+
+func Buttons()
+  //Up
+  upbtn=uiAB()
+  upbtn.anchor=bottom_left
+  upbtn.dock=bottom_left
+  upbtn.w=9
+  upbtn.h=3
+  upbtn.text="▲"
+  upbtn.y=-10
+  upbtn.SetPressed(Move)
+  //Down
+  downbtn=uiAB()
+  downbtn.anchor=bottom_left
+  downbtn.dock=bottom_left
+  downbtn.w=9
+  downbtn.h=3
+  downbtn.text="▼"
+  downbtn.y=-7
+  downbtn.SetPressed(Move)
+//-Shop-\\
+func Shop()
+  shop=uiAA(shopasci)
+  shop.anchor=bottom_left
+  shop.dock=bottom_left
+  shop.x=0
+  shop.y=-13
+  shopbtn=uiAB()
+  shopbtn.style=invis
+  shopbtn.anchor=bottom_left
+  shopbtn.dock=bottom_left
+  shopbtn.x=0
+  shopbtn.y=-13
+  shopbtn.w=9
+  shopbtn.h=6
+  shopbtn.text=""
+  shopbtn.SetPressed(OpenShop)
+  shoptxt=uiAT(te.xt("Upgrade"))
+  shoptxt.anchor=bottom_left
+  shoptxt.dock=bottom_left
+  shoptxt.x=1
+  shoptxt.y=-12
+  shoptxt.w=7
+  shoptxt.align="center"
+
+func CreateTabs()
+  weapontab=uiAB()
+  weapontab.anchor=top_left
+  weapontab.dock=top_left
+  weapontab.w=17
+  weapontab.h=3
+  weapontab.x=0
+  weapontab.bcolor=#ffffff
+  weapontab.text=te.xt("Offense")
+  weapontab.SetPressed(Tabs)
+  towertab=uiAB()
+  towertab.anchor=top_left
+  towertab.dock=top_left
+  towertab.w=17
+  towertab.h=3
+  towertab.x=17
+  towertab.text=te.xt("Defense")
+  towertab.SetPressed(Tabs)
+  utiltab=uiAB()
+  utiltab.anchor=top_left
+  utiltab.dock=top_left
+  utiltab.w=17
+  utiltab.h=3
+  utiltab.x=34
+  utiltab.text=te.xt("Utility")
+  utiltab.SetPressed(Tabs)
+  statstab=uiAB()
+  statstab.anchor=top_left
+  statstab.dock=top_left
+  statstab.w=17
+  statstab.h=3
+  statstab.x=51
+  statstab.text=te.xt("Stats")
+  statstab.SetPressed(Tabs)
+  shoppnl.Add(weapontab)
+  shoppnl.Add(towertab)
+  shoppnl.Add(utiltab)
+  shoppnl.Add(statstab)
+
+func ShopScreen()
+  shoppnl=uiAP()
+  shoppnl.w=68
+  shoppnl.h=23
+  shoppnl.y=0
+  upgradepnl=uiAP()
+  upgradepnl.w=68
+  upgradepnl.h=21
+  upgradepnl.y=1
+  infopnl=uiAP()
+  infopnl.w=17
+  infopnl.h=21
+  infopnl.y=1
+  infopnl.x=25
+  infotitle=uiAT()
+  infotitle.anchor=top_left
+  infotitle.dock=top_left
+  infotitle.w=15
+  infotitle.y=1
+  infotitle.x=1
+  infotitle.align=center
+  infodesc=uiAT()
+  infodesc.anchor=top_left
+  infodesc.dock=top_left
+  infodesc.w=15
+  infodesc.h=7
+  infodesc.y=3
+  infodesc.x=1
+  infodesc.align=center
+  infolevel=uiAT()
+  infolevel.anchor=top_left
+  infolevel.dock=top_left
+  infolevel.w=15
+  infolevel.h=1
+  infolevel.y=13
+  infolevel.x=1
+  infolevel.align=center
+  infocost=uiAT()
+  infocost.anchor=top_left
+  infocost.dock=top_left
+  infocost.w=15
+  infocost.h=1
+  infocost.y=15
+  infocost.x=1
+  infocost.align=center
+  infoupgrade=uiAB()
+  infoupgrade.anchor=top_left
+  infoupgrade.dock=top_left
+  infoupgrade.w=9
+  infoupgrade.h=3
+  infoupgrade.y=11
+  infoupgrade.x=4
+  infoupgrade.text=te.xt("Upgrade")
+  infoupgrade.visible=false
+  infoupgrade.SetPressed(Upgrade)
+  infopnl.Add(infotitle)
+  infopnl.Add(infodesc)
+  infopnl.Add(infocost)
+  infopnl.Add(infoupgrade)
+  infopnl.Add(infolevel)
+  CreateTabs()
+  shoppnl.Add(upgradepnl)
+  shoppnl.Add(infopnl)
+  ShowUpgrades()
+
+func OpenShop()
+  ?shopopen=false
+    gamerun=false
+    shopopen=true
+    ShopScreen()
+    ?pausepnl
+      pausepnl.Recycle()
+  :
+    ?gamestart
+      gamerun=true
+    shopopen=false
+    upgradepage=2
+    shoppnl.Recycle()
+//-~-Music-~-\\
+func Musictrack()
+  ?gamestart=false
+    music.play(rocky_plateau_5)
+  :?location=1 //Forest
+    ?bossalive
+      music.play(poena)
+    :?wave<10
+      music.play(deadwood_0)
+    :?wave>=10&wave<20
+      music.play(deadwood_1)
+    :?wave>=20&wave<30
+      music.play(deadwood_2)
+    :?wave>=30&wave<40
+      music.play(deadwood_3)
+    :?wave>=40&wave<50
+      music.play(deadwood_4)
+    :?wave>=50&wave<60
+      music.play(deadwood_5)
+    :?wave>=60
+      music.play(deadwood_cyan)
+  :?location=2 //Volcano
+    ?bossalive
+      music.play(bronze_guardian_3)
+    :?wave<10
+      music.play(bronze_mine_0)
+    :?wave>=10&wave<20
+      music.play(bronze_mine_1)
+    :?wave>=20&wave<30
+      music.play(bronze_mine_2)
+    :?wave>=30&wave<40
+      music.play(bronze_mine_3)
+    :?wave>=40&wave<50
+      music.play(bronze_mine_4)
+    :?wave>=50&wave<60
+      music.play(bronze_mine_5)
+    :?wave>=60
+      music.play(bronze_mine_cyan)
+//-~-Upgrades-~-\\
+func Upgrade()
+  ?selected="Speed"&speedlvl<10&coins>=(speedlvl*15)
+    coins=coins-(speedlvl*15)
+    speedlvl++
+  :?selected="Unlock Crit"&critdamagelvl=0&coins>=20
+    coins=coins-20
+    critdamagelvl++
+    critchancelvl++
+    critChance=999*critchancelvl
+    critDamage=1.5*critdamagelvl
+  :?selected="Crit Damage"&critdamagelvl<10&coins>=(critdamagelvl*10)
+    coins=coins-(critdamagelvl*10)
+    critdamagelvl++
+    critDamage=1.5*critdamagelvl
+  :?selected="Crit Chance"&critchancelvl<10&coins>=(critchancelvl*10)
+    coins=coins-(critchancelvl*10)
+    critchancelvl++
+    critChance=999*critchancelvl
+  :?selected="Unlock Pierce"&piercemaxlvl=0&coins>=20
+    coins=coins-20
+    piercemaxlvl++
+    piercechancelvl++
+    pierceChance=999*piercechancelvl
+  :?selected="Max Pierce"&piercemaxlvl<5&coins>=(piercemaxlvl*20)
+    coins=coins-(piercemaxlvl*20)
+    piercemaxlvl++
+  :?selected="Pierce Chance"&piercechancelvl<10&coins>=(piercechancelvl*10)
+    coins=coins-(piercechancelvl*10)
+    piercechancelvl++
+    pierceChance=999*piercechancelvl
+  :?selected="Unlock Bleed"&bleeddamagelvl=0&coins>=20
+    coins=coins-20
+    bleeddamagelvl++
+    bleedchancelvl++
+    bleedChance=999*bleedchancelvl
+    bleedDmg=bleeddamagelvl/2.0
+    bleedDuration=120+30*bleeddamagelvl
+  :?selected="Bleed Damage"&bleeddamagelvl<10&coins>=(bleeddamagelvl*10)
+    coins=coins-(bleeddamagelvl*10)
+    bleeddamagelvl++
+    bleedDmg=bleeddamagelvl/2.0
+    bleedDuration=120+30*bleeddamagelvl
+  :?selected="Bleed Chance"&bleedchancelvl<10&coins>=(bleedchancelvl*10)
+    coins=coins-(bleedchancelvl*10)
+    bleedchancelvl++
+    bleedChance=999*bleedchancelvl
+  :?selected="Damage"&damagelvl<100&coins>=(damagelvl*10)
+    coins=coins-(damagelvl*10)
+    damagelvl++
+  :?selected="Health"&healthlvl<100&coins>=(healthlvl*10)
+    coins=coins-(healthlvl*10)
+    healthlvl++
+    towermaxhp=10+healthlvl*10
+    towerhp=towerhp+10
+    TowerHpUpdate()
+  :?selected="Unlock Armor"&armormaxlvl=0&coins>=20
+    coins=coins-20
+    armorregenlvl++
+    armormaxlvl++
+    currentarmor=currentarmor+5
+    armormax=armormaxlvl*5
+    FieldUpdate()
+  :?selected="Max Armor"&armormaxlvl<5&coins>=(armormaxlvl*15)
+    coins=coins-(armormaxlvl*15)
+    armormaxlvl++
+    currentarmor=currentarmor+5
+    armormax=armormaxlvl*5
+    FieldUpdate()
+  :?selected="Armor Regen"&armorregenlvl<25&coins>=(armorregenlvl*20)
+    coins=coins-(armorregenlvl*20)
+    armorregenlvl++
+  :?selected="Regen"&regenlvl<25&coins>=(regenlvl*15)
+    coins=coins-(regenlvl*15)
+    regenlvl++
+  ?upgradepage=0
+    Stats()
+  InfoPanel()
+  ShowUpgrades()
+func Stats()
+  stattxt1.text=te.xt("Attack Speed")+":"+(30-speedlvl)+"f\n\n"+te.xt("Damage")+":"+damagelvl+"\n\n"
+^+te.xt("Crit Chance")+":"+critchancelvl+"/10\n\n"+te.xt("Crit Damage")+":"+critDamage+"x\n\n"
+^+te.xt("Pierce Chance")+":"+piercechancelvl+"/10\n\n"+te.xt("Max Pierce")+":"+piercemaxlvl+"\n\n"
+^+te.xt("Bleed Chance")+":"+bleedchancelvl+"/10\n\n"+te.xt("Bleed Damage")+":"+bleedDmg+"per15f\n\n"
+  stattxt2.text=te.xt("Tower Health")+":"+towerhp+"/"+towermaxhp+"\n\n"+te.xt("Health Regen")+":"+regenlvl+"per"+(1000-regenlvl*50)+"f\n\n"
+^+te.xt("Armor")+":"+currentarmor+"/"+armormax+"\n\n"+te.xt("Armor Regen")+":1per"+(1000-armorregenlvl*50)+"f\n\n"
+
+func CreateUpgradeBtn(x,y,text)
+  var button=uiAB()
+  button.anchor=top_left
+  button.dock=top_left
+  button.x=x
+  button.y=y
+  button.h=4
+  button.w=15
+  button.text=text
+  button.tcolor=#010101
+  button.SetPressed(Select)
+  var txt=uiAT()
+  txt.anchor=top_left
+  txt.dock=top_left
+  txt.x=x+1
+  txt.y=y+1
+  txt.h=2
+  txt.w=13
+  txt.align=center
+  txt.text=te.xt(text)
+  return [button,txt]
+
+//func CreateUpgradeTxt(x,y,text)
+
+func ShowUpgrades()
+  upgradepnl.Clear()
+  ?upgradepage=0  //Stats
+    stattxt1=uiAT()
+    stattxt1.anchor=top_left
+    stattxt1.dock=top_left
+    stattxt1.w=24
+    stattxt1.h=19
+    stattxt1.y=1
+    stattxt1.x=1
+    upgradepnl.Add(stattxt1)
+    stattxt2=uiAT()
+    stattxt2.anchor=top_left
+    stattxt2.dock=top_left
+    stattxt2.w=24
+    stattxt2.h=19
+    stattxt2.y=1
+    stattxt2.x=26
+    upgradepnl.Add(stattxt2)
+    Stats()
+  :?upgradepage=1  //Tower
+    ubtnhealth=CreateUpgradeBtn(1,1,"Health")
+    upgradepnl.Add(ubtnhealth[0])
+    upgradepnl.Add(ubtnhealth[1])
+    ubtnregen=CreateUpgradeBtn(16,1,"Regen")
+    upgradepnl.Add(ubtnregen[0])
+    upgradepnl.Add(ubtnregen[1])
+    ?armormaxlvl>0
+      ubtnarmormax=CreateUpgradeBtn(1,5,"Max Armor")
+      upgradepnl.Add(ubtnarmormax[0])
+      upgradepnl.Add(ubtnarmormax[1])
+      ubtnarmorregen=CreateUpgradeBtn(1,9,"Armor Regen")
+      upgradepnl.Add(ubtnarmorregen[0])
+      upgradepnl.Add(ubtnarmorregen[1])
+    :
+      ubtnarmorunlock=CreateUpgradeBtn(1,5,"Unlock Armor")
+      upgradepnl.Add(ubtnarmorunlock[0])
+      upgradepnl.Add(ubtnarmorunlock[1])
+  :?upgradepage=2  //Crossbows
+    ubtnspeed=CreateUpgradeBtn(1,1,"Speed")
+    upgradepnl.Add(ubtnspeed[0])
+    upgradepnl.Add(ubtnspeed[1])
+    ubtndamage=CreateUpgradeBtn(16,1,"Damage")
+    upgradepnl.Add(ubtndamage[0])
+    upgradepnl.Add(ubtndamage[1])
+    ?critdamagelvl>0
+      ubtncritdamage=CreateUpgradeBtn(1,5,"Crit Damage")
+      upgradepnl.Add(ubtncritdamage[0])
+      upgradepnl.Add(ubtncritdamage[1])
+      ubtncritchance=CreateUpgradeBtn(1,9,"Crit Chance")
+      upgradepnl.Add(ubtncritchance[0])
+      upgradepnl.Add(ubtncritchance[1])
+    :
+      ubtncritunlock=CreateUpgradeBtn(1,5,"Unlock Crit")
+      upgradepnl.Add(ubtncritunlock[0])
+      upgradepnl.Add(ubtncritunlock[1])
+    ?piercemaxlvl>0
+      ubtnpiercemax=CreateUpgradeBtn(16,5,"Max Pierce")
+      upgradepnl.Add(ubtnpiercemax[0])
+      upgradepnl.Add(ubtnpiercemax[1])
+      ubtnpiercechance=CreateUpgradeBtn(16,9,"Pierce Chance")
+      upgradepnl.Add(ubtnpiercechance[0])
+      upgradepnl.Add(ubtnpiercechance[1])
+    :
+      ubtnpierceunlock=CreateUpgradeBtn(16,5,"Unlock Pierce")
+      upgradepnl.Add(ubtnpierceunlock[0])
+      upgradepnl.Add(ubtnpierceunlock[1])
+    ?bleeddamagelvl>0
+      ubtnbleeddamage=CreateUpgradeBtn(31,5,"Bleed Damage")
+      upgradepnl.Add(ubtnbleeddamage[0])
+      upgradepnl.Add(ubtnbleeddamage[1])
+      ubtnbleedchance=CreateUpgradeBtn(31,9,"Bleed Chance")
+      upgradepnl.Add(ubtnbleedchance[0])
+      upgradepnl.Add(ubtnbleedchance[1])
+    :
+      ubtnbleedunlock=CreateUpgradeBtn(31,5,"Unlock Bleed")
+      upgradepnl.Add(ubtnbleedunlock[0])
+      upgradepnl.Add(ubtnbleedunlock[1])
+  :?upgradepage=3  //Utility
+    > 
+  :?upgradepage=4  //Effects?
+    >effects
+
+func Tabs(btn)
+  ?btn=weapontab
+    upgradepage=2
+    weapontab.bcolor=#ffffff
+    towertab.bcolor=#808080
+    utiltab.bcolor=#808080
+    statstab.bcolor=#808080
+  :?btn=towertab
+    upgradepage=1
+    weapontab.bcolor=#808080
+    towertab.bcolor=#ffffff
+    utiltab.bcolor=#808080
+    statstab.bcolor=#808080
+  :?btn=utiltab
+    upgradepage=3
+    weapontab.bcolor=#808080
+    towertab.bcolor=#808080
+    utiltab.bcolor=#ffffff
+    statstab.bcolor=#808080
+  :?btn=statstab
+    upgradepage=0
+    weapontab.bcolor=#808080
+    towertab.bcolor=#808080
+    utiltab.bcolor=#808080
+    statstab.bcolor=#ffffff
+  ShowUpgrades()
+
+func Select(btn)
+  selected=te.ToEnglish(btn.text)
+  InfoPanel()
+
+func InfoPanel()
+  ?selected="Speed"
+    infodesc.text=te.xt("Increases fire rate")
+    infocost.text="©"+speedlvl*15
+    infolevel.text=speedlvl+"/10"
+  :?selected="Unlock Crit"
+    infodesc.text=te.xt("Unlock Crits, which multiplies the amount of damage dealt")
+    infocost.text="©"+20
+    infolevel.text=critdamagelvl+"/1"
+  :?selected="Crit Damage"
+    infodesc.text=te.xt("Increases the damage multiplier of Crits")
+    infocost.text="©"+critdamagelvl*10
+    infolevel.text=critdamagelvl+"/10"
+  :?selected="Crit Chance"
+    infodesc.text=te.xt("Increases the chance to Crit")
+    infocost.text="©"+critchancelvl*10
+    infolevel.text=critchancelvl+"/10"
+  :?selected="Unlock Pierce"
+    infodesc.text=te.xt("Unlock Pierce, which allows arrows to pass through killed foes")
+    infocost.text="©"+20
+    infolevel.text=piercemaxlvl+"/1"
+  :?selected="Max Pierce"
+    infodesc.text=te.xt("Increases the amount of times an arrow can Pierce")
+    infocost.text="©"+piercemaxlvl*20
+    infolevel.text=piercemaxlvl+"/5"
+  :?selected="Pierce Chance"
+    infodesc.text=te.xt("Increases the chance to Pierce")
+    infocost.text="©"+piercechancelvl*10
+    infolevel.text=piercechancelvl+"/10"
+  :?selected="Unlock Bleed"
+    infodesc.text=te.xt("Unlock Bleed, which makes foes take damage over time")
+    infocost.text="©"+20
+    infolevel.text=bleeddamagelvl+"/1"
+  :?selected="Bleed Damage"
+    infodesc.text=te.xt("Increases the damage of each Bleed tick")
+    infocost.text="©"+bleeddamagelvl*10
+    infolevel.text=bleeddamagelvl+"/10"
+  :?selected="Bleed Chance"
+    infodesc.text=te.xt("Increases the chance to Bleed")
+    infocost.text="©"+bleedchancelvl*10
+    infolevel.text=bleedchancelvl+"/10"
+  :?selected="Damage"
+    infodesc.text=te.xt("Increases damage")
+    infocost.text="©"+damagelvl*10
+    infolevel.text=damagelvl+"/100"
+  :?selected="Health"
+    infodesc.text=te.xt("Increases the amount of damage the Crystal can take")
+    infocost.text="©"+healthlvl*10
+    infolevel.text=healthlvl+"/100"
+  :?selected="Unlock Armor"
+    infodesc.text=te.xt("Unlock Armor, which blocks projectiles")
+    infocost.text="©"+20
+    infolevel.text=armormaxlvl+"/1"
+  :?selected="Max Armor"
+    infodesc.text=te.xt("Increases amount of hits Armor can take")
+    infocost.text="©"+15
+    infolevel.text=armormaxlvl+"/10"
+  :?selected="Armor Regen"
+    infodesc.text=te.xt("Armor regenerates faster")
+    infocost.text="©"+20
+    infolevel.text=armorregenlvl+"/25"
+  :?selected="Regen"
+    infodesc.text=te.xt("Heals the Crystal at a slow rate")
+    infocost.text="©"+regenlvl*15
+    infolevel.text=regenlvl+"/25"
+  infotitle.text=te.xt(selected)
+  infoupgrade.visible=true
+//-~-Coins/Score-~-\\
+func Coins()
+  coinchancerng=rng
+  ?coinchancerng>=0&coinchancerng<=2999
+    coincountrng=rng
+    ?coincountrng>=0&coincountrng<=1999
+      coins=coins+(1*multiplier)
+      score=score+1*multiplier
+    :?coincountrng>=2000&coincountrng<=3999
+      coins=coins+(2*multiplier)
+      score=score+2*multiplier
+    :?coincountrng>=4000&coincountrng<=5999
+      coins=coins+(3*multiplier)
+      score=score+3*multiplier
+    :?coincountrng>=6000&coincountrng<=7999
+      coins=coins+(4*multiplier)
+      score=score+4*multiplier
+    :
+      coins=coins+(5*multiplier)
+      score=score+5*multiplier
+//-~-Tower-~-\\
+func TowerHP()
+  twrhptxt=uiAT()
+  twrhptxt.anchor=top_left
+  twrhptxt.dock=top_left
+  twrhptxt.w=13
+  twrhptxt.x=3
+  twrhptxt.y=2
+  twrhptxt.color=#FF00FF
+  twrhptxt.text=towerhp+＂/＂+towermaxhp
+  twrhptxt.align="center"
+
+func Back()
+  backcanvas=uiAC()
+  backcanvas.anchor=bottom_left
+  backcanvas.dock=bottom_left
+  backcanvas.w=screen.w
+  backcanvas.h=screen.h
+  backcanvas.Set(＂ ＂)
+  background=uiAA(locasci[location-1])
+  background.anchor=bottom_left
+  background.dock=bottom_left
+  background.color=#565656   //565656 Normal/75%, 845656 50%, c55656 25%
+  background.frame=0
+
+func Tower()
+  towerback=uiAA(towerbackasci)
+  towerback.anchor=bottom_left
+  towerback.dock=bottom_left
+  towerback.color=#565656
+  tower=uiAA(towerasci)
+  tower.anchor=bottom_left
+  tower.dock=bottom_left
+
+func Crystal()
+  crystal=uiAA(crystalasci)
+  crystal.anchor=bottom_left
+  crystal.dock=bottom_left
+  crystal.color=#ff00ff
+  crystal.x=3
+  crystal.y=-19
+
+func Background()
+  Back()
+  Tower()
+  Crystal()
+  backpanel=uiAP()
+  backpanel.anchor=bottom_left
+  backpanel.dock=bottom_left
+  backpanel.Add(background,1)
+  backpanel.Add(towerback,2)
+  backpanel.Add(crystal,3)
+  backpanel.Add(tower,4)
+
+func TowerHpUpdate()
+  twrhptxt.text=towerhp+＂/＂+towermaxhp
+  towerperc=(towerhp*100)/towermaxhp
+  ?towerperc<=25
+    background.color=#c55656
+    background.frame=3
+  :?towerperc<=50
+    background.color=#845656
+    background.frame=2
+  :?towerperc<=75
+    background.color=#565656
+    background.frame=1
+  :
+    background.color=#565656
+    background.frame=0
+//-~-Player-~-\\
+func PlayerStart()
+  player=uiAA(playerasci)
+  player.anchor=bottom_left
+  player.dock=bottom_left
+  player.x=10
+  player.y=-1
+
+func Reload()
+  ?reloaded=true
+    ArrowLevel()
+    reloaded=false
+  ?equipped="basic"
+    reloadtime=30-speedlvl  //10 levels, -1 frame per
+    ?reloadtime-reloadtimer<=5
+      player.frame=2
+    :?reloadtime-reloadtimer<=10
+      player.frame=1
+    :?reloadtime-reloadtimer>=25-speedlvl
+      player.frame=3
+    :
+      player.frame=0
+  :?equipped="heavy"
+    reloadtime=45
+    player.frame=1
+  :?equipped="repeater"
+    reloadtime=15
+    player.frame=2
+  ?CheckDebuff("player",level,"slow")
+    reloadtime=reloadtime+10
+  ?reloaded=false
+    reloadtimer++
+    ?x2speed
+      reloadtimer++
+  ?reloadtimer>=reloadtime
+    reloaded=true
+    reloadtimer=0
+
+func LevelMove()
+  ?level=1
+    player.y=-1
+    arrowy=-3
+    //player.color=#cyan
+  :?level=2
+    player.y=-7
+    arrowy=-9
+    //player.color=#white
+  :?level=3
+    player.y=-13
+    arrowy=-15
+    //player.color=#white
+  armorpnl.y=player.y
+
+func Forcefield()
+  forcefield=uiAA(field)
+  forcefield.anchor=top_left
+  forcefield.dock=top_left
+  forcefield.x=0
+  forcefield.y=0
+  forcefield.color=#FF00FF
+  armortxt=uiAT()
+  armortxt.anchor=top_left
+  armortxt.dock=top_left
+  armortxt.w=9
+  armortxt.x=0
+  armortxt.y=2
+  armortxt.color=#808080
+  armortxt.text=currentarmor+"/"+armormax
+  armortxt.align="center"
+  armorpnl=uiAP()
+  armorpnl.anchor=bottom_left
+  armorpnl.dock=bottom_left
+  armorpnl.h=6
+  armorpnl.x=20
+  armorpnl.y=player.y
+  armorpnl.style=invis
+  armorpnl.Add(forcefield)
+  armorpnl.Add(armortxt)
+  armorpnl.visible=false
+
+func FieldUpdate()
+  armortxt.text=currentarmor+"/"+armormax
+  armorperc=(currentarmor*100)/armormax
+  armorpnl.visible=true
+  ?armorperc=0
+    armorpnl.visible=false
+  :?armorperc<=25
+    forcefield.color=#3a003a
+  :?armorperc<=50
+    forcefield.color=#7b007b
+  :?armorperc<=75
+    forcefield.color=#c500c5
+  :
+    forcefield.color=#ff00ff
+//-~-Arrows-~-\\
+func CreateArrow()
+  var arrow = uiAA(arrow)
+  arrow.anchor = bottom_left
+  arrow.dock = bottom_left
+  arrow.x = 14
+  arrow.y = arrowy
+  arrow.Play()
+  arrow.duration = 5
+  arrow.loop = true
+  var damage = 0+damagelvl
+  var pierce=0
+  return [arrow,damage,pierce]
+
+func ArrowLevel()
+  arrows[level-1].Add(CreateArrow())
+  play crossbow_cast
+
+func MoveArrow(arrow)
+  arrow[0].x=arrow[0].x+1
+  ?arrow[0].x>=sw
+    return true
+  return false
+
+func RunArrows()
+  ?(gametime%2=0|x2speed&gametime%2=1) & arrows.Count()>0
+    for RowList = 0..arrows.Count()-1
+      ?arrows[RowList].Count() > 0
+        for Arrow : arrows[RowList]
+          ?MoveArrow(Arrow)
+            DeleteList.Add(RowList)
+            Arrow[0].Recycle()
+          //?RowList=0
+          //  Arrow[0].color=#yellow
+    ?DeleteList.Count()>0 
+      for Row : DeleteList
+        arrows[Row].RemoveAt(0)
+      DeleteList.Clear()
+//-~-Foes-~-\\
+func CreateFoe(foetype,foehp,speed,duration,x,y,ftype)
+  var gfoe = uiAA(foetype)
+  gfoe.anchor = bottom_left
+  gfoe.dock = bottom_left
+  gfoe.x = x
+  gfoe.y = y
+  gfoe.Play()
+  gfoe.duration = duration
+  gfoe.loop = true
+  var fhp = foehp*multiplier
+  return [gfoe,fhp,speed,[],[],ftype] //[3] is debuffs, [4] is buffs
+
+func MoveFoe(foe,RowList)
+  ?foe[5]="melee"
+    ?gametime%foe[2]=0|x2speed&gametime%foe[2]=1
+      foe[0].x=foe[0].x-1
+    ?foe[0].x<=20
+      towerhp=towerhp-(multiplier/difficulty)
+      TowerHpUpdate()
+      play grappling_hit
+      return true
+  :?foe[5]="ranged"
+    ?gametime%foe[2]=0|x2speed&gametime%foe[2]=1
+      ?foe[0].x>50
+        foe[0].x=foe[0].x-1
+    ?gametime%(foe[2]*10)=0|x2speed&gametime%(foe[2]*10)=1
+      projectiles[RowList].Add(CreateProjectile(cannonball,RowList+1,"damage:1",5,1,foe[0].x,foe[0].y))
+  return false
+
+func FoeCollision(foe,leadArrow,RowList)
+  ?leadArrow[0].x > foe[0].x
+    critRng=rng
+    bleedRng=rng
+    ?critRng>=0&critRng<=critChance
+      foe[1]=foe[1]-(leadArrow[1]*critDamage)
+      effects.Add(Crit(leadArrow[1]*critDamage,foe[0].x,foe[0].y))
+    :
+      foe[1]=foe[1]-leadArrow[1]
+    ?foe[1]<=0
+      pierceRng=rng
+      ?pierceRng>=0&pierceRng<=pierceChance&leadArrow[2]<piercemaxlvl
+        Coins()
+        score=score+5*multiplier
+        leadArrow[2]=leadArrow[2]+1
+      :
+        leadArrow[0].Recycle()
+        arrows[RowList].RemoveAt(0)
+        Coins()
+        score=score+5*multiplier
+      return true
+    :
+      ?bleedRng>=0&bleedRng<=bleedChance
+        ?CheckDebuff("foe",foe,"bleed")
+          //foe[3][count2][1]=foe[3][count2][1]+1
+          foe[3][count2][2]=foe[3][count2][2]+bleedDuration/3
+          count2=0
+        :
+          foe[3].Add(["bleed",1,bleedDuration])
+      leadArrow[0].Recycle()
+      arrows[RowList].RemoveAt(0)
+      return false
+  :
+    return false
+
+func RunFoes()
+  ?foes.Count()>0
+    for RowList = 0..foes.Count()-1
+      ?foes[RowList].Count() > 0
+        for Foe : foes[RowList]
+          //?RowList=0
+          //  Foe[0].color=#red
+          ?MoveFoe(Foe,RowList)
+            DeleteList.Add([RowList,count])
+            Foe[0].Recycle()
+          :?arrows[RowList].Count()>0
+            leadArrow=arrows[RowList][0]
+            ?FoeCollision(Foe,leadArrow,RowList)
+              DeleteList.Add([RowList,count])
+              Foe[0].Recycle()
+              play mosquito_death
+          DebuffsF(Foe)
+          ?CheckDebuff("foe",Foe,"bleed")&Foe[1]>0
+            ?Foe[5]="small"
+              >`@Foe[0].x+1@,@Foe[0].y-2+screen.h@,#red,@bleedeffect@
+            :?Foe[5]="med"
+              >`@Foe[0].x+3@,@Foe[0].y-3+screen.h@,#red,@bleedeffect@
+            :?Foe[5]="large"
+              >`@Foe[0].x+3@,@Foe[0].y-3+screen.h@,#red,@bleedeffect@
+            ?gametime%15=0|x2speed&gametime%15=1
+              Foe[1]=Foe[1]-Foe[3][count2][1]*bleedDmg
+            ?Foe[1]<=0
+              DeleteList.Add([RowList,count])
+              Foe[0].Recycle()
+              play mosquito_death
+            count2=0
+          count++
+        count=0
+    ?DeleteList.Count()>0
+      for Row : DeleteList
+        foes[Row[0]].Emplace(Row[1],0)
+      for Row : DeleteList
+        remove=foes[Row[0]].IndexOf(0)
+        foes[Row[0]].RemoveAt(remove)
+      DeleteList.Clear()
+//-Projectiles-\\
+func CreateProjectile(projectiletype,lvl,debuff,speed,duration,x,y)
+  var projectile = uiAA(projectiletype)
+  projectile.anchor = bottom_left
+  projectile.dock = bottom_left
+  projectile.x = x
+  projectile.y = y
+  projectile.Play()
+  projectile.duration = duration
+  projectile.loop = true
+  var debuff = debuff
+  var fspeed = speed
+  var level = lvl
+  return [projectile,debuff,speed,level]
+
+func MoveProjectile(P)
+  ?gametime%P[2]=0|x2speed&gametime%P[2]=1
+    P[0].x=P[0].x-1
+  ?P[0].x<=20
+    ?currentarmor>0&P[3]=level
+      currentarmor--
+      FieldUpdate()
+    :?P[1]="damage"
+      debuffeffect=string.Split(P[1],"damage:",true)
+      stack=int.Parse(debuffeffect[0])
+      towerhp=towerhp-(stack*multiplier/difficulty)
+      TowerHpUpdate()
+      play grappling_hit
+    :?P[1]="slow"
+      debuffeffect=string.Split(P[1],"slow",":",true)
+      stack=int.Parse(debuffeffect[0])
+      duration=int.Parse(debuffeffect[1])
+      ?CheckDebuff("player",P[3],"slow")
+        //debuffsP[P[3]-1][count][1]=debuffsP[P[3]-1][count][1]+stack
+        debuffsP[P[3]-1][count][2]=debuffsP[P[3]-1][count][2]+duration/3
+        count=0
+      :
+        debuffsP[P[3]-1].Add(["slow",stack,duration])
+      play spider_eggs_spawn
+    return true
+  return false
+
+func RunProjectiles()
+  ?projectiles.Count()>0
+    for RowList = 0..projectiles.Count()-1
+      ?projectiles[RowList].Count() > 0
+        for P : projectiles[RowList]
+          ?MoveProjectile(P)
+            DeleteList.Add([RowList,count])
+            P[0].Recycle()
+          count++
+        count=0
+    ?DeleteList.Count()>0
+      for Row : DeleteList
+        projectiles[Row[0]].Emplace(Row[1],0)
+      for Row : DeleteList
+        remove=projectiles[Row[0]].IndexOf(0)
+        projectiles[Row[0]].RemoveAt(remove)
+      DeleteList.Clear()
+//-Pickups-\\
+func CreatePickup(pickuptype,speed,duration,x,y)
+  var gpickup = uiAA(pickuptype)
+  gpickup.anchor = bottom_left
+  gpickup.dock = bottom_left
+  gpickup.x = x
+  gpickup.y = y
+  gpickup.Play()
+  gpickup.duration = duration
+  gpickup.loop = true
+  return [gpickup,speed]
+
+func MovePickup(P)
+  ?gametime%P[1]=0|x2speed&gametime%P[1]=1
+    P[0].y=P[0].y+1
+  ?P[0].y=0
+    return true
+  for RowList = 0..foes.Count()-1
+    ?foes[RowList].Count() > 0
+      for Foe : foes[RowList]
+        ?Foe[0].y<=P[0].y&Foe[0].y>=P[0].y-3
+          ?Foe[0].x>=P[0].x&Foe[0].x<=P[0].x+4
+            Foe[2]=Foe[2]-2
+            ?Foe[2]<=10
+              Foe[2]=10
+            return true
+  return false
+
+func RunPickups()
+  ?pickups.Count()>0
+    for P : pickups
+      ?MovePickup(P)
+        DeleteList.Add(count)
+        P[0].Recycle()
+      count++
+    count=0
+    ?DeleteList.Count()>0
+      for D : DeleteList
+        pickups.Emplace(D,0)
+      for D : DeleteList
+        remove=pickups.IndexOf(0)
+        pickups.RemoveAt(remove)
+      DeleteList.Clear()
+//-Bosses-\\
+func BossHPtxt()
+  bosshptxt=uiAT()
+  bosshptxt.anchor=top_right
+  bosshptxt.dock=top_right
+  bosshptxt.x=0
+  bosshptxt.y=3
+  bosshptxt.w=25
+  bosshptxt.align="right"
+  bosshptxt.color=#FF0000
+  bosshptxt.text=""
+
+func BossHealth()
+  perc=(bosses[0][1]*100)/bosses[0][2]
+  temp=math.FloortoInt(perc*25/100)
+  bossBar=""
+  for i = 0..temp-1
+    ?temp ! 0
+      bossBar="█"+bossBar
+/*
+  ?perc>=4
+    temp=math.FloortoInt(temp)
+    for i = 0..temp-2
+      bossBar="█"+bossBar
+*/
+  ?perc%4=3
+    bossBar="▓"+bossBar
+  :?perc%4=2
+    bossBar="▒"+bossBar
+  :?perc%4=1
+    bossBar="░"+bossBar
+  bosshptxt.text=bosses[0][1]+"/"+bosses[0][2]+" "+te.xt(bossAI)+"\n"+bossBar
+
+func CreateBoss(bosstype,size)
+  var boss = uiAA(bosstype)
+  boss.anchor = bottom_left
+  boss.dock = bottom_left
+  boss.x = sw
+  boss.y = -12
+  var bosshp = 50*multiplier
+  var bossmaxhp = 50*multiplier
+  var size = size
+  var debuff = []
+  return [boss,bosshp,bossmaxhp,size,debuff]
+
+func SpawnBoss()
+  ?location=1 //Forest
+    bosses.Add(CreateBoss(queenbee,single))
+    bossAI="QueenBee"
+  :?location=2 //Volcano
+    bosses.Add(CreateBoss(copter,single))
+    bossAI="ControllerCopter"
+
+func CheckBossCollisions(size)
+  for a = 0..2
+    ?arrows[a].Count() > 0
+      ?size="all"
+        ?arrows[a][0][0].x >= bosses[0][0].x
+          critRng=rng
+          ?critRng>=0&critRng<=critChance
+            bosses[0][1]=bosses[0][1]-(arrows[a][0][1]*critDamage)
+            effects.Add(Crit(arrows[a][0][1]*critDamage,bosses[0][0].x,bosses[0][0].y))
+          :
+            bosses[0][1]=bosses[0][1]-arrows[a][0][1]
+          arrows[a][0][0].Recycle()
+          arrows[a].RemoveAt(0)
+      :?size="single"
+        ?arrows[a][0][0].x > bosses[0][0].x & a=bosslvl-1
+          critRng=rng
+          ?critRng>=0&critRng<=critChance
+            bosses[0][1]=bosses[0][1]-(arrows[a][0][1]*critDamage)
+            effects.Add(Crit(arrows[a][0][1]*critDamage,bosses[0][0].x,bosses[0][0].y))
+          :
+            bosses[0][1]=bosses[0][1]-arrows[a][0][1]
+          ?bleedRng>=0&bleedRng<=bleedChance
+            ?CheckDebuff("boss",bosses,"bleed")
+              bosses[0][4][count][1]=bosses[0][4][count][1]+1
+              bosses[0][4][count][2]=bosses[0][4][count][2]+bleedDuration/3
+              count2=0
+            :
+              bosses[0][4].Add(["bleed",1,bleedDuration])
+          ?bosses[0][1]<=0
+            pierceRng=rng
+            ?pierceRng>=0&pierceRng<=pierceChance
+              Coins()
+            :
+              arrows[a][0][0].Recycle()
+              arrows[a].RemoveAt(0)
+              Coins()
+          :
+            arrows[a][0][0].Recycle()
+            arrows[a].RemoveAt(0)
+  ?bosses[0][1]>0
+    DebuffsB(bosses)
+    ?CheckDebuff("boss",bosses,"bleed")
+      //?bossAI="QueenBee"
+      >`@bosses[0][0].x+6@,@bosses[0][0].y-4+screen.h@,#red,@bleedeffect@
+      ?gametime%15=0|x2speed&gametime%15=1
+        bosses[0][1]=bosses[0][1]-bosses[0][4][count][1]*bleedDmg
+      count2=0
+  BossHealth()
+  ?bosses[0][1]<=0
+    bosslvl=3
+    bosses[0][0].Recycle()
+    bosses.RemoveAt(0)
+    coins=coins+25
+    bosshptxt.text=""
+    score=score+25*multiplier
+    play scorpion_death
+    ?bosslayer
+      bosslayer.Recycle()
+  :?bosses[0][0].x<=20
+    bosslvl=3
+    towerhp=towerhp-perc*(multiplier/difficulty)
+    TowerHpUpdate()
+    bosses[0][0].Recycle()
+    bosses.RemoveAt(0)
+    coins=coins+25
+    bosshptxt.text=""
+    play bomb_cart_explosion
+    ?bosslayer
+      bosslayer.Recycle()
+
+func RunBoss()
+  ?bossAI="QueenBee"
+    QueenBee()
+  :?bossAI="ControllerCopter"
+    ControllerCopter()
+//QueenBee\\
+func QueenBee()
+  ?bosses[0][0].x>55&(gametime%15=0|x2speed&gametime%15=1)
+    bosses[0][0].x=bosses[0][0].x-1
+  ?gametime%90=0|x2speed&gametime%90=1
+    moverng=rng
+    ?moverng%5=0
+      ?moverng>=4999&bosslvl<3
+        bosslvl++
+      :?moverng<4999&bosslvl>1
+        bosslvl--
+      ?bosslvl=1
+        bosses[0][0].y=0
+      :?bosslvl=2
+        bosses[0][0].y=-6
+      :?bosslvl=3
+        bosses[0][0].y=-12
+    :?moverng%5=1
+      attack="spit"
+    :?moverng%5=2
+      attack="sting"
+    :?moverng%5=3
+      spawncount=0
+      attack="spawn"
+  QueenAttack()
+  ?spawncount<5&(gametime%15=0|x2speed&gametime%15=1)
+    foeyrng=rng
+    ?bosslvl=1
+      ?foeyrng>=0&foeyrng<=2499
+        foey=-2
+      :?foeyrng>=2500&foeyrng<=4999
+        foey=-3
+      :?foeyrng>=5000&foeyrng<=7499
+        foey=-4
+      :
+        foey=-5
+    :?bosslvl=2
+      ?foeyrng>=0&foeyrng<=2499
+        foey=-8
+      :?foeyrng>=2500&foeyrng<=4999
+        foey=-9
+      :?foeyrng>=5000&foeyrng<=7499
+        foey=-10
+      :
+        foey=-11
+    :?bosslvl=3
+      ?foeyrng>=0&foeyrng<=2499
+        foey=-14
+      :?foeyrng>=2500&foeyrng<=4999
+        foey=-15
+      :?foeyrng>=5000&foeyrng<=7499
+        foey=-16
+      :
+        foey=-17
+    foes[bosslvl-1].Add(CreateFoe(bee,1,5,5,sw,foey,"melee"))
+    spawncount++
+
+func QueenAttack()
+  ?attack="idle"
+    ?gametime%8=0|gametime%8=1
+      bosses[0][0].frame=0
+    :?gametime%8=2|gametime%8=3
+      bosses[0][0].frame=1
+    :?gametime%8=4|gametime%8=5
+      bosses[0][0].frame=2
+    :?gametime%8=6|gametime%8=7
+      bosses[0][0].frame=3
+  :?attack="spit"
+    ?animtime=0
+      animtime=3
+    :?gametime%10=0|x2speed&gametime%10=1
+      animtime--
+      ?animtime=3|animtime=1
+        bosses[0][0].frame=4
+      :?animtime=2
+        bosses[0][0].frame=5
+        projectiles[bosslvl-1].Add(CreateProjectile(spit,bosslvl,"slow:1:150",5,1,bosses[0][0].x,bosses[0][0].y-5))
+      :?animtime=0
+        attack="idle"
+  :?attack="sting"
+    ?animtime=0
+      animtime=3
+    :?gametime%10=0|x2speed&gametime%10=1
+      animtime--
+      ?animtime=3|animtime=1
+        bosses[0][0].frame=6
+      :?animtime=2
+        bosses[0][0].frame=7
+        projectiles[bosslvl-1].Add(CreateProjectile(stinger,bosslvl,"damage:1",5,1,bosses[0][0].x,bosses[0][0].y-1))
+      :?animtime=0
+        attack="idle"
+  :?attack="spawn"
+    ?animtime=0
+      animtime=5
+    :?gametime%10=0|x2speed&gametime%10=1
+      animtime--
+      ?animtime=5|animtime=1
+        bosses[0][0].frame=8
+      :?animtime=4
+        bosses[0][0].frame=9
+      :?animtime=3
+        bosses[0][0].frame=10
+      :?animtime=2
+        bosses[0][0].frame=11
+      :?animtime=0
+        attack="idle"
+//ControllerCopter\\
+func ControllerCopter()
+  ?bosses[0][0].x>55&(gametime%15=0|x2speed&gametime%15=1)
+    bosses[0][0].x=bosses[0][0].x-1
+  ?gametime%90=0|x2speed&gametime%90=1
+    moverng=rng
+    ?moverng%5=0
+      ?moverng>=4999&bosslvl<3
+        bosslvl++
+      :?moverng<4999&bosslvl>1
+        bosslvl--
+      ?bosslvl=1
+        bosses[0][0].y=0
+      :?bosslvl=2
+        bosses[0][0].y=-6
+      :?bosslvl=3
+        bosses[0][0].y=-12
+    :?moverng%5=1
+      ?perc>50
+        spawncount=0
+        //attack="missles"
+    :?moverng%5=2
+      ?perc<=50
+        attack="crossbow"
+    :?moverng%5=3
+      pickups.Add(CreatePickup(crate,30,1,bosses[0][0].x+15,bosses[0][0].y+2))
+      //attack="drop"
+  ?perc<=25&(gametime%30=0|x2speed&gametime%30=1)
+    bosses[0][0].x=bosses[0][0].x-1
+  ?perc<=50
+    ?variable=false
+      bosslayer=uiAA(controller)
+      bosslayer.anchor = bottom_left
+      bosslayer.dock = bottom_left
+      bosslayer.x = bosses[0][0].x+13
+      bosslayer.y = bosses[0][0].y-1
+      variable=true
+    :
+      bosslayer.x = bosses[0][0].x+13
+      bosslayer.y = bosses[0][0].y-1
+  CopterAttack()
+  ?spawncount<3&(gametime%15=0|x2speed&gametime%15=1)
+    foeyrng=rng
+    ?bosslvl=1
+      ?foeyrng%2=0
+        foey=0
+      :?foeyrng%2=1
+        foey=-1
+    :?bosslvl=2
+      ?foeyrng%2=0
+        foey=-6
+      :?foeyrng%2=1
+        foey=-7
+    :?bosslvl=3
+      ?foeyrng%2=0
+        foey=-12
+      :?foeyrng%2=1
+        foey=-13
+    foes[bosslvl-1].Add(CreateFoe(missle,1,5,10,bosses[0][0].x+6,foey,"melee"))
+    spawncount++
+
+func CopterAttack()
+  ?perc>50
+    ?gametime%12>=0&gametime%12<=2
+      bosses[0][0].frame=0
+    :?gametime%12>=3&gametime%12<=5
+      bosses[0][0].frame=1
+    :?gametime%12>=6&gametime%12<=8
+      bosses[0][0].frame=2
+    :?gametime%12>=9&gametime%12<=11
+      bosses[0][0].frame=3
+  :
+    ?gametime%12>=0&gametime%12<=2
+      bosses[0][0].frame=4
+    :?gametime%12>=3&gametime%12<=5
+      bosses[0][0].frame=5
+    :?gametime%12>=6&gametime%12<=8
+      bosses[0][0].frame=6
+    :?gametime%12>=9&gametime%12<=11
+      bosses[0][0].frame=7
+  ?attack="crossbow"
+    ?animtime=0
+      animtime=4
+    :?gametime%10=0|x2speed&gametime%10=1
+      animtime--
+      ?animtime=3
+        bosslayer.frame=1
+      :?animtime=2
+        bosslayer.frame=2
+      :?animtime=1
+        bosslayer.frame=3
+        projectiles[bosslvl-1].Add(CreateProjectile(farrow,bosslvl,"damage:1",5,1,bosses[0][0].x+13,bosses[0][0].y-3))
+      :?animtime=0
+        bosslayer.frame=0
+        attack="idle"
+//-~-WaveController-~-\\
+func Reroll()
+  ?frng="flevel"
+    foelevelrng=rng
+    FoeLevel()
+  :?frng="fy"
+    foeyrng=rng
+    FoeY()
+  :?frng="ftype"
+    foetyperng=rng
+    FoeType()
+
+func FoeLevel()
+  ?foelevelrng>=0&foelevelrng<=2999
+    foelevel=1
+  :?foelevelrng>=3000&foelevelrng<=5999
+    foelevel=2
+  :?foelevelrng>=6000&foelevelrng<=8999
+    foelevel=3
+  :
+    frng="flevel"
+    Reroll()
+
+func FoeY()
+  ?foelevel=1
+    ?foeyrng>=0&foeyrng<=2499
+      foey=-2
+    :?foeyrng>=2500&foeyrng<=4999
+      foey=-3
+    :?foeyrng>=5000&foeyrng<=7499
+      foey=-4
+    :
+      foey=-5
+  :?foelevel=2
+    ?foeyrng>=0&foeyrng<=2499
+      foey=-8
+    :?foeyrng>=2500&foeyrng<=4999
+      foey=-9
+    :?foeyrng>=5000&foeyrng<=7499
+      foey=-10
+    :
+      foey=-11
+  :?foelevel=3
+    ?foeyrng>=0&foeyrng<=2499
+      foey=-14
+    :?foeyrng>=2500&foeyrng<=4999
+      foey=-15
+    :?foeyrng>=5000&foeyrng<=7499
+      foey=-16
+    :
+      foey=-17
+
+func FoeType()
+  ?foetyperng%7=0|foetyperng%7=1
+    foetype="mfoe"
+  :?foetyperng%7=2|foetyperng%7=3
+    foetype="sfoe"
+  :?foetyperng%7=4|foetyperng%7=5
+    foetype="lfoe"
+  :?location=2 //Volcano
+    foetype="rfoe"  //Ranged foe
+  :
+    frng="ftype"
+    Reroll()
+		
+func FoeRNG()
+  foelevelrng=rng
+  foeyrng=rng
+  foetyperng=rng
+
+func SpawnRate()
+  ?spawnrate>90
+    spawnrate=spawnrate-15
+  :?spawnrate>30&spawnrate<=90
+    spawnrate=spawnrate-5
+  :?spawnrate>5&spawnrate<=30
+    spawnrate=spawnrate-1
+	  
+func SpawnFoe()
+  ?location=1 //Forest
+    ?foetype="sfoe"
+      foes[foelevel-1].Add(CreateFoe(bee,1,5,5,sw,foey,"melee small"))
+    :?foetype="mfoe"
+      foes[foelevel-1].Add(CreateFoe(wasp,2,10,5,sw,foey,"melee med"))
+    :?foetype="lfoe"
+      foes[foelevel-1].Add(CreateFoe(hornet,4,15,5,sw,foey,"melee large"))
+  :?location=2 //Volcano
+    ?foetype="sfoe"
+      foes[foelevel-1].Add(CreateFoe(missle,1,5,10,sw,foey,"melee small"))
+    :?foetype="mfoe"
+      foes[foelevel-1].Add(CreateFoe(mineflyer,2,10,10,sw,foey,"melee med"))
+    :?foetype="lfoe"
+      foes[foelevel-1].Add(CreateFoe(rocket,4,15,10,sw,foey,"melee large"))
+    :?foetype="rfoe"
+      foes[foelevel-1].Add(CreateFoe(heli,2,15,10,sw,foey,"ranged med"))
+
+func WaveController()
+  maxfoe=5+(wave%10)+(threat*difficulty)
+  ?wave%10=0&bossalive!true
+    SpawnBoss()
+    bossalive=true
+  ?foecount<maxfoe|bosses.Count()>0
+    ?bossalive
+      ?gametime%(spawnrate*2)=0|x2speed&gametime%(spawnrate*2)=1
+        FoeRNG()
+        FoeType()
+        FoeLevel()
+        FoeY()
+        SpawnFoe()
+        foecount++
+    :?gametime%spawnrate=0|x2speed&gametime%spawnrate=1
+      FoeRNG()
+      FoeType()
+      FoeLevel()
+      FoeY()
+      SpawnFoe()
+      foecount++
+  :?foes[0].Count()=0&foes[1].Count()=0&foes[2].Count()=0&bosses.Count()=0
+    foecount=0
+    bossalive=false
+    score=score+wave*5
+    ?wave%10=0
+      threat++
+      multiplier=multiplier*2*difficulty
+      SpawnRate()
+    wave++
+//-~-Effects-~-\\
+func Effects()
+  ?effects.Count()>0
+    for E : effects
+      E[1]=E[1]-1
+      ?E[1]<=0
+        E[0].Recycle()
+        DeleteList.Add([count])
+      count++
+    count=0
+    ?DeleteList.Count()>0
+      for Row : DeleteList
+        effects.Emplace(Row[0],0)
+      for Row : DeleteList
+        remove=effects.IndexOf(0)
+        effects.RemoveAt(remove)
+      DeleteList.Clear()
+
+func Crit(damage,x,y)
+  var crit=uiAT()
+  crit.anchor = bottom_left
+  crit.dock = bottom_left
+  crit.color=#red
+  crit.text=""+damage
+  crit.x=x+1
+  crit.y=y
+  return [crit,15]
+//-Debuffs-\\
+func CheckDebuff(source,victim,debuff)
+  ?source="boss"
+    ?victim[0][4].Count()>0
+      for D : victim[0][4]
+        ?D.Contains(debuff)
+          return true
+        :
+          count2++
+      count2=0
+  :?source="foe"
+    ?victim[3].Count()>0
+      for D : victim[3]
+        ?D.Contains(debuff)
+          return true
+        :
+          count2++
+      count2=0
+  :?source="player"
+    ?debuffsP[victim-1].Count()>0
+      for D : debuffsP[victim-1]
+        ?D.Contains(debuff)
+          return true
+        :
+          count++
+      count=0
+  return false
+
+func DebuffsF(foe)
+  ?foe[3].Count()>0
+     for debuff : foe[3]
+       debuff[2]=debuff[2]-1
+       ?debuff[2]<=0
+         DeleteList2.Add([count2])
+       count2++
+     count2=0
+  ?DeleteList2.Count()>0
+    for Row : DeleteList2
+      foe[3].Emplace(Row[0],0)
+    for Row : DeleteList2
+      remove=foe[3].IndexOf(0)
+      foe[3].RemoveAt(remove)
+    DeleteList2.Clear()
+
+func DebuffsB(bosses)
+  ?bosses[0][4].Count()>0
+     for debuff : bosses[0][4]
+       debuff[2]=debuff[2]-1
+       ?debuff[2]<=0
+         DeleteList2.Add([count2])
+       count2++
+     count2=0
+  ?DeleteList2.Count()>0
+    for Row : DeleteList2
+      bosses[0][4].Emplace(Row[0],0)
+    for Row : DeleteList2
+      remove=bosses[0][4].IndexOf(0)
+      bosses[0][4].RemoveAt(remove)
+    DeleteList2.Clear()
+
+func Debuffs()
+  ?debuffsP.Count()>0
+    for L = 0..2
+      ?debuffsP[L].Count()>0
+        for debuff : debuffsP[L]
+          debuff[2]=debuff[2]-1
+          ?debuff[2]<=0
+            DeleteList.Add([L,count])
+          count++
+          >`21,@(screen.h-2)-L*6@,#yellow,@te.xt(debuff[0])@,@debuff[1]@,@debuff[2]@
+        count=0
+    ?DeleteList.Count()>0
+      for Row : DeleteList
+        debuffsP[Row[0]].Emplace(Row[1],0)
+      for Row : DeleteList
+        remove=debuffsP[Row[0]].IndexOf(0)
+        debuffsP[Row[0]].RemoveAt(remove)
+      DeleteList.Clear()
+//-~-Storage-~-\\
+func Save()
+  storage.Set("coins",coins)
+  storage.Set("basic",basiclvl)
+  storage.Set("heavy",heavylvl)
+  storage.Set("quick",quicklvl)
+  //storage.Set("crit",critlvl)
+  //storage.Set("pierce",piercelvl)
+
+//-~-~-RunGame-~-~-\\
+//-Main-\\
+?loc=waterfall
+  ?loc.begin
+    gamestart=false
+    gamerun=false
+    highscore=storage.Get("highscore",0)
+/*
+    coins=storage.Get("coins",0)
+    basiclvl=storage.Get("basic",1)
+    heavylvl=storage.Get("heavy",0)
+    quicklvl=storage.Get("quick",0)
+    critlvl=storage.Get("crit",0)
+    piercelvl=storage.Get("pierce",0)
+*/
+    SetUp()
+    StartScreen()
+  Musictrack()
+  ShowDiff()
+  ?gamestart=false
+    ?shopopen=true
+      startpnl.visible=false
+    :
+      startpnl.visible=true
+  ?key=backBegin
+    Save()
+  ?gamerun=true
+    gametime++
+    ?x2speed
+      gametime++
+/*
+    ?key=bumpLBegin
+      ?equipped="basic"
+        equipped="heavy"
+      :?equipped="heavy"
+        equipped="repeater"
+      :?equipped="repeater"
+        equipped="basic"
+*/
+    ?key=upBegin
+      level++
+    ?key=downBegin
+      level--
+    ?level<1
+      level=1
+    ?level>3
+      level=3
+    ?towerhp<=0
+      GameOver()
+    ?(gametime%(1000-regenlvl*50)=0|x2speed&gametime%(1000-regenlvl*50)=1)&towerhp<towermaxhp
+      towerhp=towerhp+regenlvl
+      ?towerhp>towermaxhp
+        towerhp=towermaxhp
+      TowerHpUpdate()
+    ?armorregenlvl>0
+      ?(gametime%(1000-armorregenlvl*50)=0|x2speed&gametime%(1000-armorregenlvl*50)=1)&currentarmor<armormax
+        currentarmor++
+        ?currentarmor>armormax
+          currentarmor=armormax
+        FieldUpdate()
+    WaveController()
+    Effects()
+    RunArrows()
+    RunFoes()
+    RunProjectiles()
+    RunPickups()
+    Debuffs()
+    ?bosses.Count()>0
+      RunBoss()
+      CheckBossCollisions(bosses[0][3])
+    LevelMove()
+    Reload()
+//-Stats-\\
+  >c-31,-12,©@coins@
+  >c8,-12,@te.xt(Score)@:@score@
+  >c22,-12,@te.xt(Highscore)@:@highscore@
+  >c-20,-12,@te.xt(Wave)@:@wave@
+
+//-Debug controls-\\
+var debug=true
+  ?gamerun=true
+    ?debug
+      ?key=bumpRBegin
+        wave++
+      ?key=bumpLBegin
+        coins=coins+100

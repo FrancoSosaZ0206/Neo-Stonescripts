@@ -1,0 +1,24 @@
+//Treeman 1.0
+//made by Radak
+>h-4,-4,#white,ascii
+####@
+###.＂.
+#.´  o`.
+#.´° _`.
+#‾.´_`.‾
+##‾└─┘‾
+asciiend
+>h-4,-4,#green,ascii
+
+###.#.
+#.´###`.
+#.´##_`.
+#‾.´_`.‾
+##‾###‾
+asciiend
+>h-4,-4,#rainFF,ascii
+####@
+####＂
+#####o
+###°
+asciiend

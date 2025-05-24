@@ -1,0 +1,378 @@
+//CoolDownTime
+//Version:v5.1
+//Author: JianShang36
+//Show potion and cooldown time of equipments, please put the file in the UI folder and read the example below
+//显示药水信息以及武器冷却、武器技能buff信息，请把该文件放在UI文件夹中，并阅读以下例子
+//function names of English and Chinese windows are different  中英文窗口的函数名是不同的
+
+/*
+Example：
+var CDTimeUI = new UI/CDTime
+CDTimeUI.CDTimeShow(1,1,True,True,True,True)
+
+If you want to set position of the window or not display the cd time of Lost Item, refer to the following information to adjust the arguments/parameters:
+CDTimeUI.CDTimeShow(posX,posY,ifBF,ifSKA,ifMask,ifSum)
+
+posX,posY:    Window's position relative to the upper-left corner of the screen.if posX,posY < 0, position will be relative to the lower-right corner of the screen.
+ifBF,ifSKA,ifMask,ifSum:   True/False  Whether show the cooldown time of Blade of the Fallen God, Skeleton Arm, Cult Mask or Summon.
+
+如果想用中文窗口，请使用：
+var CDTimeUI = new UI/CDTime
+CDTimeUI.CDTimeShowCHS(1,1,True,True,True,True)
+
+如果你想设置窗口所在的位置，或者调整是否显示遗物的冷却时间，请参考以下信息以调整你的函数参量：
+CDTimeUI.CDTimeShowCHS(posX,posY,ifBF,ifSKA,ifMask,ifSum)
+
+posX,posY:    窗口相对于屏幕左上角的位置；当输入的posX,posY小于 0 时，即为相对于屏幕右下角的位置
+ifBF,ifSKA,ifMask,ifSum:   填写True或者False  是否开启堕神之剑、骷髅手、那伽面具、召唤物冷却的显示
+
+Using this UI will automatically disable the potion button and active skill button.
+If you need to enable it, please add "enable hud a" after calling the UI's function.
+使用该UI会自动禁用药水按钮以及主动技能按钮，如果需要重新开启，请在意念石的对该UI的函数调用后加入"enable hud a"
+
+This UI will be initialized at loc.begin or loc.loop. If the code is modified midway, please reload it.
+该UI会在loc.begin或loc.loop 的时候初始化，如果中途修改代码，请重新加载。
+
+Provide other functions, maybe you can use them in your other battle scripts
+BFbuffCount() / SKAbuffCount() :return the count of smite or pick_pocket
+HAdebuffTime()  :return the duration of heavy hammer "armor_fatigue"
+提供一些其他的函数，也许你可以用于你的其他战斗类脚本的编写
+BFbuffCount() / SKAbuffCount() 返回重击或扒手的层数
+HAdebuffTime() 返回重锤“护甲疲劳”的持续时间
+
+For updated information, please refer to the end of the reference document.
+想了解更新信息，请看参考文档的末端。
+*/
+
+
+func CDTimeShow(posX, posY,ifBF,ifSKA,ifMask,ifSum)
+  disable hud a
+  ?(loc ! uulaa & loc ! undead_crypt_intro & loc ! cross deadwood river & loc ! cross bridge & loc ! Waterfall & loc ! head_heels_factory)
+    ?loc.begin | loc.loop
+      initUI(posX, posY,ifBF,ifSKA,ifMask,ifSum,false)
+    loopUI(false)
+
+
+func CDTimeShowCHS(posX, posY,ifBF,ifSKA,ifMask,ifSum)
+  disable hud a
+  ?(loc ! uulaa & loc ! undead_crypt_intro & loc ! cross deadwood river & loc ! cross bridge & loc ! Waterfall & loc ! head_heels_factory)
+    ?loc.begin | loc.loop
+      initUI(posX, posY,ifBF,ifSKA,ifMask,ifSum,true)
+    loopUI(true)
+	
+
+func initUI(posX, posY,ifBF,ifSKA,ifMask,ifSum,ifCHS)
+  calculateIfShow(ifBF,ifSKA,ifMask,ifSum)
+  iCHS = 0
+  ?posX < 0
+    posX = posX + screen.w
+  ?posY < 0
+    posY = posY + screen.h
+
+  mainTextList.Clear()
+  timeTextList.Clear()
+  buffTextList.Clear()
+
+  mainWindow = ui.AddPanel()
+  mainWindow.clip = true
+
+  mainWindow.x = posX
+  mainWindow.y = posY
+  mainWindow.anchor = top_left
+  mainWindow.dock = top_left
+	mainWindow.w = width
+	mainWindow.h = height
+  var customStyle = ui.AddStyle("╔#╗║#║╚═╝")
+  mainWindow.style = customStyle
+
+  mainTextInit(0,0,CDWindow)
+  potionInfo = getPotionInfo()
+  mainTextInit(x0,1,potionInfo[iCHS])
+  mainTextList[1].color = potionInfo[2]
+  mainTextList[1].align = left
+
+  for i = 0..ifShowList.Count()-1
+    mainTextInit(0,y1+i,mainTextWindowList[ifShowList[i]])
+    timeTextInit(x0+6,y1+i)
+    buffTextList.Add(timeTextList[0])
+    timeTextList.RemoveAt(0)
+  
+  ?ifSum
+    summonsList.IndexOf(summon.GetId())
+    mainTextInit(1,y1+ifShowList.Count()-1,"")
+    mainTextList[mainTextList.Count()-1].align = left
+  
+  for i = 0..weaponList.Count()-1
+    timeTextInit(timeTextPosList[i][0],timeTextPosList[i][1])
+  
+  ?ifCHS
+    mainTextList[0].text = string.Format(CDWindowCHS)
+    for i = 0..ifShowList.Count()-1
+      mainTextList[i+2].text = string.Format(mainTextWindowCHSList[ifShowList[i]])
+    iCHS = 1
+
+func loopUI(ifCHS)
+  ?item.potion ! Empty
+    potionInfo = getPotionInfo()
+    mainTextList[1].text = string.Format(potionInfo[iCHS])
+    mainTextList[1].color = potionInfo[2]
+  :?item.potion = Empty 
+    mainTextList[1].color = #7f7f7f
+  
+  ?ifShowList[ifShowList.Count()-1] = 4
+    summonText()
+  timeTextList[weaponList.Count()-1].text = ""
+  for i = 0..weaponList.Count()-1
+    timeText(i)
+  for i = 0..ifShowList.Count()-1
+    buffText(ifShowList[i])
+
+func mainTextInit(x_,y_,t_)
+  var mainText_ = ui.AddText()
+  mainText_.x = x_
+  mainText_.y = y_
+	mainText_.w = width
+	mainText_.h = 0
+	mainText_.align = center
+  mainText_.dock = top_center
+	mainWindow.Add(mainText_)
+  mainText_.text = string.Format(t_)
+  mainTextList.Add(mainText_)
+
+func timeTextInit(x_,y_)
+  var timeText_ = ui.AddText()
+  timeText_.x = x_
+  timeText_.y = y_
+	timeText_.w = width
+	timeText_.h = 0
+	timeText_.align = left
+  timeText_.dock = top_center
+	mainWindow.Add(timeText_)
+  timeTextList.Add(timeText_)
+
+func timeText(i)
+  equipment = weaponList[i]
+  ?item.GetCooldown(equipment) > 0
+    timeTextList[i].text = string.Format("[color=#FF0000]"+item.GetCooldown(equipment)+frame_[iCHS]+"[/color]")
+  :?item.GetCooldown(equipment) = 0 & item.CanActivate() = True & item.CanActivate(equipment) = False
+    timeTextList[i].text = string.Format("[color=#00FF00]"+RDY_[iCHS]+"[/color]")
+  :?item.GetCooldown(equipment) = 0 & item.CanActivate(equipment) = True
+    timeTextList[i].text = string.Format("[color=#FFFF00]"+RDY_[iCHS]+"[/color]")
+  :?item.GetCooldown(equipment) = 0 & item.CanActivate() = False
+    timeTextList[i].text = string.Format("[color=#F08080]"+WAIT_[iCHS]+"[/color]")
+
+func buffText(i)
+  ?i = 0
+    buffTextList[i].text = string.Format("[color=#d68910]×"+HAdebuffTime()+frame_[iCHS]+"[/color]")
+  :?i = 1
+    buffTextList[i].text = string.Format("[color=#FF00FF]·"+BFbuffCount()+"[/color]")
+  :?i = 2
+    buffTextList[i].text = string.Format("[color=#0000FF]≡"+SKAbuffCount()+"[/color]")
+  
+func summonText()
+  var sumID = summonsList.IndexOf(summon.GetId())
+  ?sumID >= 0
+    mainTextList[mainTextList.Count()-1].text = summonsText_[sumID][iCHS]
+    weaponList[weaponList.Count()-1] = summonsList[sumID]
+  :
+    mainTextList[mainTextList.Count()-1].text = ""
+    weaponList[weaponList.Count()-1] = ""
+
+func calculateIfShow(ifBF,ifSKA,ifMask,ifSum)
+  ifShowList = [0]
+  ?ifBF
+    ifShowList.Add(1)
+  ?ifSKA
+    ifShowList.Add(2)
+  ?ifMask
+    ifShowList.Add(3)
+  ?ifSum
+    ifShowList.Add(4)
+  height = y1 + 1 + ifShowList.Count()
+  weaponList = ["bardiche","hatchet","dash","bash","mind","quarterstaff"]
+  timeTextPosList = [[x0,y0],[x1,y0],[x0,y0+1],[x1,y0+1],[x0,y0+2],[x1,y0+2]]
+  for i = 0..ifShowList.Count()-1
+    weaponList.Add(weaponImpList[ifShowList[i]])
+    timeTextPosList.Add([x0,y1+i])
+
+func BFbuffCount()
+  var smiteCount = 0
+  ?buffs.count > 0
+    ?string.IndexOf(buffs.string,"smite") > 0
+      smiteCount = string.Sub(buffs.string, string.IndexOf(buffs.string,"smite") + 6, 3)
+      smiteCount = string.Sub(smiteCount, 0, string.IndexOf(smiteCount,":"))
+      smiteCount = int.parse(smiteCount)
+  return smiteCount
+  
+func SKAbuffCount()
+  var pickCount = 0
+  ?buffs.count > 0
+    ?string.IndexOf(buffs.string,"pick_pocket") > 0
+      pickCount = string.Sub(buffs.string, string.IndexOf(buffs.string,"pick_pocket") + 12, 3)
+      pickCount = string.Sub(pickCount, 0, string.IndexOf(pickCount,":"))
+      pickCount = int.parse(pickCount)
+  return pickCount
+
+func HAdebuffTime()
+  var armorFatTime = 0
+  var startIndex = -1
+  var endIndex = -1
+  ?foe.debuffs.count > 0
+    startIndex = string.IndexOf(foe.debuffs.string,"debuff_armor_fatigue")
+    ?startIndex > 0
+      endIndex = string.IndexOf(foe.debuffs.string,",",startIndex)
+      ?endIndex < 0
+        armorFatTime = string.Sub(foe.debuffs.string, startIndex + 23,(string.Size(foe.debuffs.string) - startIndex - 23))
+      :
+        armorFatTime = string.Sub(foe.debuffs.string, startIndex + 23, (endIndex - startIndex - 23))
+      armorFatTime = int.parse(armorFatTime)
+  return armorFatTime
+
+func getPotionInfo()
+  ?item.potion = Strength
+    return ["Strength oo","怪力oo#击晕与破甲",#d68910]
+  :?item.potion = Experience
+    return ["Experience/`","经验/`#增加经验和气",#85c1e9]
+  :?item.potion = Healing
+    return ["Healing ~≈","恢复~≈#100%回血",#2ecc71]
+  :?item.potion = Lightning
+    return ["Lightning .:","闪电.:#150地图炮",#a569bd]
+  :?item.potion = Vampiric
+    return ["Vampiric ~:","吸血~:#20%吸血",#c0392b]
+  :?item.potion = Cleansing
+    return ["Cleansing ~/","净化~/#回血与状态清除",#fcff27]
+  :?item.potion = Berserk
+    return ["Berserk /:","狂暴/:#攻速+15",#red]
+  :?item.potion = Lucky
+    return ["Lucky o:","幸运o:#100%暴击",#e8b233]
+  :?item.potion = Invisibility
+    return ["Invisible o/","隐形o/#完全闪避",#a3e4d7]
+  :?item.potion = Defensive
+    return ["Defensive ~o","防御~o#回血与回盾",#ba4a00]
+  :?item.potion = Empty
+    return ["Empty","空空如也的药瓶###",#7f7f7f]
+
+//CDTime Window
+var CDWindow = ascii
+╔═══#CD#Time#═══╗
+║PT#############║
+║BD######HC#####║
+║DS######BS#####║
+║MS######QS#####║
+asciiend
+
+var CDWindowCHS = ascii
+╔═══#冷却时间#药水#═══╗
+║药水#############║
+║巴迪什#####斧头#####║
+║冲锋盾#####冲撞盾####║
+║意念石#####铁头杖####║
+asciiend
+
+var HAWindow = ascii
+║HA#############║
+asciiend
+
+var HAWindowCHS = ascii
+║重锤#############║
+asciiend
+
+var BFWindow = ascii
+║BF#############║
+asciiend
+
+var BFWindowCHS = ascii
+║堕神剑############║
+asciiend
+
+var SKAWindow = ascii
+║SKA############║
+asciiend
+
+var SKAWindowCHS = ascii
+║骷髅手############║
+asciiend
+
+var MaskWindow = ascii
+║CMK############║
+asciiend
+
+var MaskWindowCHS = ascii
+║蛇面具############║
+asciiend
+
+var SumWindow = ascii
+║###############║
+asciiend
+
+var mainWindow
+var weaponImpList = ["hammer","blade","skeleton_arm","mask",""]
+var summonsList = ["cinderwisp","voidweaver"]
+var weaponList = ["bardiche","hatchet","dash","bash","mind","quarterstaff"]
+var ifShowList = [0]
+var mainTextList = []
+var timeTextList = []
+var buffTextList = []
+var potionInfo = []
+var equipment
+var width = 17
+var height = 7
+var x0 = 4    //左列x
+var x1 = 12   //右列x
+var y0 = 2    //普通区y
+var y1 = 5    //buff区y
+var iCHS = 0
+var RDY_ = ["RDY","就绪"]
+var WAIT_ = ["WAIT","等待"]
+var frame_ = ["f","帧"]
+var summonsText_ = [["CDW","煤灰"],["VW","织虚者"]]
+var mainTextWindowList = [HAWindow,BFWindow,SKAWindow,MaskWindow,SumWindow]
+var mainTextWindowCHSList = [HAWindowCHS,BFWindowCHS,SKAWindowCHS,MaskWindowCHS,SumWindow]
+var timeTextPosList = [[x0,y0],[x1,y0],[x0,y0+1],[x1,y0+1],[x0,y0+2],[x1,y0+2]]
+
+
+/*
+Update information
+v1.0  func of cooldown time
+v1.1  add potion infomation(Thanks for item.potion)
+v1.2  add Chinese Window
+v1.3  add information of Skeleton Arm 
+v2.1  now can choose whether show the cooldown time of Blade of the Fallen God and Skeleton Arm (not everyone use those).
+v2.2  now can use BFbuffCount() and SKAbuffCount() to return the count of "smite" or "pick_pocket" for other battle scripts
+v2.3  support showing more cooldown time of skills in the future
+v2.4  now cooldown time window disabled at Hunted Gate(undead_crypt_intro) and Hotspring Shop(uulaa_shop)
+v2.5  reconstruct the display function of the Lost Items' cooldown time
+v2.6  rewrite the document of example and update information
+v3.0  add the cooldown time of Cult Mask and also choose whether show
+v3.1  The return value of the functions BFbuffCount() and SKAbuffCount() are adjusted from string to int, and it will return 0 instead of null if there is no buff
+v3.2  Fixed the bug of missing single digits when the return value of BFbuffCount() is greater than 10
+V3.3  Fixed the bug of causing an error at the end time point of the smite buff
+v4.0  add the cooldown time of Heavy Hammer and can use HAdebuffTime() to return the duration of heavy hammer "armor_fatigue" for other scripts
+v4.1  adjust the UI to a hollow out style
+v4.2  fixed a bug where there was no recommendation code input location
+v5.0  refactored the script, replacing advanced print with UI namespace
+v5.1  add cooling information about summons' ability
+
+
+更新信息
+v1.0  显示冷却时间的功能
+v1.1  添加了药水信息（得益于item.potion函数的上线）
+v1.2  添加中文窗口
+v1.3  添加了关于骷髅手臂的冷却信息
+v2.1  现在能够选择是否显示堕神剑和骷髅手的冷却时间了（因为有些人不常用）
+v2.2  现在能够使用BFbuffCount() 和 SKAbuffCount() 来为其他脚本提供“重击”或者“偷窃”的层数
+v2.3  支持在未来进行更多的扩充
+v2.4  现在冷却时间窗口在闹鬼大门和温泉商店不会显示（会挡住买东西）
+v2.5  重构了遗物的冷却时间显示函数
+v2.6  重写了说明文档和更新信息
+v3.0  加入了那伽面具的冷却时间以及可选择其是否显示
+v3.1  BFbuffCount() 和 SKAbuffCount() 的返回值由string调整为int，且没有buff时会返回0，而不再是null
+v3.2  修正了BFbuffCount()返回值大于等于10时丢失个位数的问题
+v3.3  修正了重击buff在结束的时候报错的问题
+v4.0  加入了重锤的冷却信息并可以使用 HAdebuffTime() 来为其他脚本提供重锤“护甲疲劳”的持续时间
+v4.1  将UI调整为镂空风格
+v4.2  修复了没有推荐码输入位置的bug
+v5.0  重构了脚本，由上层打印更换为UI构架
+v5.1  添加了关于召唤物技能的冷却时间
+
+*/

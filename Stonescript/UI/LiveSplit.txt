@@ -1,0 +1,1519 @@
+//LiveSplit v1.0.2
+//Based on the speedrun timer with the same name
+//(https://livesplit.org/)
+//Made by Qrupafjzvm
+//Just like the actual LiveSplit, this script allows you to time your runs!
+//Instructions:
+// import UI/LiveSplit
+
+//===============Splits===============
+//==========Constants==========
+//Version
+var version = "Version 1.0.2"
+//Size of a block of text
+var sizeBlock = 11
+//Number of splits displayed
+var noSDed = 5
+//Half of number of splits displayed
+var halfnoSDed = (noSDed - 1) / 2
+//Number of columns
+var noCol = 5
+//Size of a column
+var sizeCol = noSDed + 4
+//Size of a row
+var sizeText = sizeBlock * noCol
+
+//==========Variables==========
+//===System variables===
+var locName = loc.name
+var locStars = loc.stars
+var screenW = screen.w
+var screenH = screen.h
+
+var foeString = foe
+foeString = foe
+var foeHP = foe.hp
+foeHP = foe.hp
+var foeDist = foe.distance
+foeDist = foe.distance
+
+//===Storage===
+//Array containing all current times
+var currentArray = []
+//Array containing all best times
+var bestArray = []
+//Array containing all reset counts
+var resetsArray = []
+//Number of total resets
+var totalResets = 0
+//Number of runs ending at the same time 
+var samePace = 0
+
+//Array containing all current segment times
+var currentSegmentArray = []
+//Array containing all best segment times
+var bestSegmentArray = []
+//Array containing all resets on the same pace as best segment
+var resetsSegmentArray = []
+//Array containing sum of best segments from last (for projected time)
+var sumSegmentArray = []
+//Sum of best
+var sumBest = 0
+//Projected finish time
+var projectedTime = 0
+
+//===Splits===
+//Time of last frame
+var lastTime = 0
+//If all splits are recorded in splitsArray
+var splitsExist = false
+//Size of splits array
+var splitsSize = 0
+//Current split index
+var currentSplitID = 0
+//Current split in STRING
+var currentSplitString = "CURRENT"
+//Current split's best time
+var lUBestTime = 0
+//Current segment's best time
+var lUBestSegment = 0
+//Array containing all splits
+var splitsArray = []
+//Contains all rooms that were empty since the first one
+//to add back in when CURRENT split ends or turns to PRE-BOSS
+var padding = []
+
+//===Triggers===
+//Switch for CURRENT split
+var swCurr = 0
+//Switch for MINIBOSS split
+var swMBoss = 0
+//Switch for BOSS split
+var swPBoss = 0
+//Switch for timing BOSS split
+var startBoss = 0
+//Current boss phase
+var phaseBoss = 0
+//Raises signal to update current split
+var updateSignal = 1
+//Records last screen to check for screen change
+var lastScreen = screen.i
+
+//===View mode===
+//Activates View mode
+var swArrow = 0
+//Start and end point of current view
+var startptr = 0
+var endptr = 0
+
+//===Column text===
+var SplitsText = "\n"
+var CurrentText = "CURRENT\n"
+var BestText = "BEST\n"
+var DifferenceText = "DIFFERENCE\n"
+var ResetsText = "RESETS\n"
+
+//===Settings===
+//Switches between formatting and not formatting time
+var swTimeFormat
+//Switches between split time and segment time
+var swTimingType
+//Switches between Hall of Fames and runs 
+var swType = 0 
+//Checks if UI is shown or hidden
+var checkUI = 1
+
+//===UI===
+//Contains the entire UI + buttons
+var FullUI 
+//Textboxes that displays the full UI
+var SplitsUI
+var SplitsColumn
+var CurrentColumn
+var BestColumn
+var DifferenceColumn
+var ResetsColumn
+//Textbox that displays the current split, overwrites other boxes on current split
+var CurrentBox
+var DifferenceBox
+//Buttons for UI visibility
+var hideUIButton
+//Buttons for View mode
+var upArrowButton
+var downArrowButton
+var resetViewButton
+
+//==========Functions==========
+//=====Storage=====
+func storageID(name, star, type, split)
+ //Returns ID value at "name" split's value type
+ //EX: "BEST" type of split "PHASE1"
+ return "LST"+type+name+star+split
+
+func getStorage(name, star, type, split, safety)
+ //Get storage value at "name" split's value type
+ return storage.Get(storageID(name, star, type, split), safety)
+
+func setStorage(name, star, type, split, value)
+ //Set storage value at "name" split's value type
+ storage.Set(storageID(name, star, type, split), value)
+
+func hasStorage(name, star, type, split)
+ //Check if storage value at "name" split's value type exists
+ return storage.Has(storageID(name, star, type, split))
+
+func deleteStorage(name, star, type, split)
+ //Delete storage value at "name" split's value type
+ storage.Delete(storageID(name, star, type, split))
+
+func incrStorage(name, star, type, split)
+ //Increase storage value at "name" split's value type
+ //If value doesn't exist, set it to 1
+ ?hasStorage(name, star, type, split)
+  storage.Incr(storageID(name, star, type, split))
+ :
+  setStorage(name, star, type, split, 1)
+
+func deleteSplit(name, star, split)
+ //Delete all information relating to "name" split
+ deleteStorage(name, star, "BEST-SEGMENT", split) 
+ deleteStorage(name, star, "BEST", split)
+ deleteStorage(name, star, "RESETS-SEGMENT", split)
+ deleteStorage(name, star, "RESETS", split)
+
+func resetStorage(name, star, splitsArr)
+ //Reset the entirety of a loc star
+ for i = 0..splitsArr.Count() - 1
+  deleteSplit(name, star, splitsArr[i])
+ deleteStorage(name, star, "BEST", "RESETS")
+ deleteStorage(name, star, "BEST", "COUNT")
+ deleteStorage(name, star, "SPLITS", "STRING")
+
+//=====Global UI=====
+func newPanel(x, y, w, h, anchor, dock, visible, style)
+ //Create a panel object with the parameters
+ var tempPanel = ui.AddPanel()
+ tempPanel.x = x
+ tempPanel.y = y
+ tempPanel.w = w
+ tempPanel.h = h
+ tempPanel.anchor = anchor
+ tempPanel.dock = dock
+ tempPanel.visible = visible
+ tempPanel.style = style
+ return tempPanel
+
+func newText(x, y, w, h, anchor, dock, visible, align, text)
+ //Create a text object with the parameters
+ var tempText = ui.AddText()
+ tempText.x = x
+ tempText.y = y
+ tempText.w = w
+ tempText.h = h
+ tempText.anchor = anchor
+ tempText.dock = dock
+ tempText.visible = visible
+ tempText.align = align
+ tempText.text = text
+ return tempText
+
+func newButton(x, y, w, h, anchor, dock, visible, style, text, OnPressed)
+ //Create a button object with the parameter
+ var tempButton = ui.AddButton()
+ tempButton.x = x
+ tempButton.y = y
+ tempButton.w = w
+ tempButton.h = h
+ tempButton.anchor = anchor
+ tempButton.dock = dock
+ tempButton.visible = visible
+ tempButton.style = style
+ tempButton.text = text
+ tempButton.SetPressed(OnPressed)
+ return tempButton
+
+//=====Saving=====
+func setSegment(t)
+ ?splitsExist
+  //If splits array exists
+  //Update current segment
+  var ttemp
+  ?currentSplitID ! 0
+   ttemp = t - currentArray[currentSplitID - 1]
+  :
+   ttemp = t
+  currentSegmentArray[currentSplitID] = ttemp
+  
+  //Update best segment and same pace resets
+  ?ttemp < bestSegmentArray[currentSplitID]
+   //If current segment is better than best segment
+   sumBest = sumBest - bestSegmentArray[currentSplitID] + ttemp
+   bestSegmentArray[currentSplitID] = ttemp
+   setStorage(locName, locStars, "BEST-SEGMENT", currentSplitString, ttemp)
+   resetsSegmentArray[currentSplitID] = 0
+  :?ttemp = bestSegmentArray[currentSplitID]
+   //If same pace
+   resetsSegmentArray[currentSplitID] = resetsSegmentArray[currentSplitID] + 1
+  setStorage(locName, locStars, "RESETS-SEGMENT", currentSplitString, resetsSegmentArray[currentSplitID])
+ :
+  //If splits array doesn't exist
+  //Update current segment
+  var ttemp
+  ?splitsSize ! 0
+   ttemp = t - currentArray[splitsSize - 1]
+  :
+   ttemp = t
+  currentSegmentArray.Add(ttemp)
+  
+  //Update best segment and same pace resets
+  bestSegmentArray.Add(getStorage(locName, locStars, "BEST-SEGMENT", currentSplitString, 99999))
+  ?ttemp < bestSegmentArray[splitsSize]
+   bestSegmentArray[splitsSize] = ttemp
+   setStorage(locName, locStars, "BEST-SEGMENT", currentSplitString, ttemp)
+   setStorage(locName, locStars, "RESETS-SEGMENT", currentSplitString, 0)
+  :?ttemp = bestSegmentArray[splitsSize]
+   incrStorage(locName, locStars, "RESETS-SEGMENT", currentSplitString)
+  resetsSegmentArray.Add(getStorage(locName, locStars, "RESETS-SEGMENT", currentSplitString, 0))
+
+func setSplit(split, newSplit, t, swUpdate)
+ //Saves a split to currentArray and switch to the next split
+ ?splitsExist
+  //If split array exists, use ID
+  currentArray[currentSplitID] = t
+  resetsArray[currentSplitID] = resetsArray[currentSplitID] + 1
+  incrStorage(locName, locStars, "RESETS", splitsArray[currentSplitID])
+  currentSplitID++
+  currentSplitString = splitsArray[currentSplitID]
+  projectedTime = currentArray[currentSplitID-1] + sumSegmentArray[currentSplitID]
+  //Check conditions
+  ?currentSplitString = "ROOM" | currentSplitString = "MINIBOSS"
+   swCurr = 1
+   swPBoss = 0
+   phaseBoss = 0
+  :?currentSplitString = "PRE-BOSS"
+   swPBoss = 1
+   swCurr = 0
+   phaseBoss = 0
+  :?currentSplitString = "PHASE"
+   phaseBoss++
+   swPBoss = 0
+   swCurr = 0
+  :
+   swCurr = 0
+   swPBoss = 0
+   phaseBoss = 0
+  updateSignal = 1
+  updateSplits()
+ :
+  //If split array doesn't exist, use string
+  currentArray.Add(t)
+  splitsArray.Add(split)
+  incrStorage(locName, locStars, "RESETS", split)
+  resetsArray.Add(getStorage(locName, locStars, "RESETS", split, 0))
+  splitsSize++
+  currentSplitString = newSplit
+  ?swUpdate
+   updateSignal = 1
+   updateSplits()
+
+func switchSplit(newSplit)
+ //Switch a split without saving it to currentArray
+ currentSplitString = newSplit
+ updateSignal = 1
+ updateSplits()
+
+//=====UI=====
+func printTime(frame)
+ //Print out @frame@ depending on format type
+ ?swTimeFormat
+  var fr = (frame % 30) * 100 / 30
+  var sec = frame / 30
+  var min = sec / 60
+  sec = sec - min * 60
+  ?sec < 10
+   sec = "0" + sec
+  ?fr < 10
+   fr = "0" + fr
+  return min + ":" + sec + "." + fr
+ :
+  return frame + ""
+
+func updateCurrentTime()
+ //Update current time and difference every frame
+ ?swTimingType 
+  //Splits
+  CurrentBox.text = printTime(lastTime)
+  ?lastTime <= lUBestTime
+   //If current time is better than best time
+   DifferenceBox.text = "-" + printTime(lUBestTime - lastTime)
+  :
+   DifferenceBox.text = "+" + printTime(lastTime - lUBestTime)
+ :
+  //Segments
+  var tempcurTime
+  ?currentSplitID ! 0 
+   tempcurTime = lastTime - currentArray[currentSplitID-1]
+  :
+   tempcurTime = lastTime
+  CurrentBox.text = printTime(tempcurTime)
+  ?tempcurTime <= lUBestSegment 
+   DifferenceBox.text = "-" + printTime(lUBestSegment - tempcurTime)
+  :
+   DifferenceBox.text = "+" + printTime(tempcurTime - lUBestSegment)
+
+func updateCurrent()
+ //Function to update all current events
+ ?!checkUI 
+  //If UI is hidden
+  return
+ :?swArrow 
+  //If in view mode
+  ?splitsExist
+   ?updateSignal
+    //Only mass update locations and stuff when signaled
+    ?currentSplitID < startptr
+     //If current split is below view
+     CurrentBox.y = 2
+     DifferenceBox.y = 2
+    :?currentSplitID > endptr
+     //If current split is above view
+     CurrentBox.y = noSDed + 1
+     DifferenceBox.y = noSDed + 1
+    :
+     //If current split is in view
+     CurrentBox.y = 2 + (currentSplitID - startptr)
+     DifferenceBox.y = 2 + (currentSplitID - startptr)
+    //Update best time and end signal
+    lUBestTime = bestArray[currentSplitID]
+    lUBestSegment = bestSegmentArray[currentSplitID]
+    updateSignal = 0
+   updateCurrentTime()
+  :
+   >ERROR: Arrows accessed without splits array, ping Qrupafjzvm with this message
+ :
+  //If not in view mode
+  ?splitsExist
+   //If splits array exists
+   ?updateSignal 
+    //Only mass update locations and stuff when signaled
+    ?currentSplitID < halfnoSDed
+     //If current split is below middle line
+     CurrentBox.y = 2 + currentSplitID
+     DifferenceBox.y = 2 + currentSplitID 
+    :?currentSplitID > splitsSize - 1 - halfnoSDed
+     //If current split is above middle line
+     CurrentBox.y = noSDed + 1 - (splitsSize - 1 - currentSplitID)
+     DifferenceBox.y = noSDed + 1 - (splitsSize - 1 - currentSplitID)
+    :
+     //If current split is in middle line
+     CurrentBox.y = 2 + halfnoSDed
+     DifferenceBox.y = 2 + halfnoSDed
+    //Update best time and end signal
+    lUBestTime = bestArray[currentSplitID]
+    lUBestSegment = bestSegmentArray[currentSplitID]
+    updateSignal = 0
+   updateCurrentTime()
+  :
+   //If splits array doesn't exist
+   ?updateSignal
+    //Only mass update locations and stuff when signaled
+    ?splitsSize + 1 < noSDed 
+     //If there aren't enough splits to fill the board
+     CurrentBox.y = splitsSize + 2
+    :
+     //If there are enough splits to fill the board
+     CurrentBox.y = noSDed + 1
+    //End signal
+    updateSignal = 0
+   //Updates current time every frame 
+   ?swTimingType
+    CurrentBox.text = printTime(lastTime)
+   :
+    ?splitsSize ! 0 
+     CurrentBox.text = printTime(lastTime - currentArray[splitsSize-1])
+    :
+     CurrentBox.text = printTime(lastTime)
+        
+func addTextColumns(splits, current, best, difference, resets)
+ //Add text to template columns
+ SplitsText = SplitsText + splits + "\n"
+ CurrentText = CurrentText + current + "\n"
+ BestText = BestText + best + "\n"
+ DifferenceText = DifferenceText + difference + "\n"
+ ResetsText = ResetsText + resets + "\n"
+
+func addMultipleSplits(startloop, endloop)
+ //Add multiple splits to columns
+ for i = startloop..endloop
+  ?currentArray[i] ! -1
+   //If data exists
+   var tempcurTime = currentArray[i]
+   var tempbestTime = bestArray[i]
+   //Check for difference between current and best time
+   var differencetemp
+   ?tempcurTime <= tempbestTime
+    //If current time is better than best time
+    differencetemp = "-" + printTime(tempbestTime - tempcurTime)   
+   :
+    //If current time is worse than best time
+    differencetemp = "+" + printTime(tempcurTime - tempbestTime)
+   //Assigning to columns
+   addTextColumns(splitsArray[i], printTime(tempcurTime), 
+               ^printTime(tempbestTime), differencetemp, resetsArray[i])
+  :
+   //If data doesn't exist
+   addTextColumns(splitsArray[i], "-", printTime(bestArray[i]), "-", resetsArray[i])
+
+func addMultipleSegments(startloop, endloop)
+ for i = startloop..endloop
+  ?currentSegmentArray[i] ! -1
+   var tempcurTime = currentSegmentArray[i]
+   var tempbestTime = bestSegmentArray[i]
+   var differencetemp
+   ?tempcurTime <= tempbestTime
+    //If current time is better than best time
+    differencetemp = "-" + printTime(tempbestTime - tempcurTime)   
+   :
+    //If current time is worse than best time
+    differencetemp = "+" + printTime(tempcurTime - tempbestTime)
+   addTextColumns(splitsArray[i], printTime(tempcurTime), 
+                 ^printTime(tempbestTime), differencetemp, resetsSegmentArray[i])
+  :
+   addTextColumns(splitsArray[i], "-", printTime(bestSegmentArray[i]), 
+                 ^"-", resetsSegmentArray[i])
+
+func updateSplits()
+ //Add splits to columns
+ ?!checkUI
+  //If UI is hidden
+  return 
+ :
+  ?swTimingType
+   //Splits
+   //Declare starting text for each column
+   SplitsText = "\n"
+   CurrentText = "CURRENT\n"
+   BestText = "BEST\n"
+   DifferenceText = "DIFFERENCE\n"
+   ResetsText = "RESETS\n"                                       
+   ?swArrow
+    //If in view mode
+    ?splitsExist
+     //If splits array exists
+     ?currentSplitID < startptr
+      //If current split is before view    
+      //Current split
+      addTextColumns(currentSplitString, "-", printTime(bestArray[currentSplitID]), 
+                    ^"-", resetsArray[currentSplitID])
+      //4 of the rest in view
+      addMultipleSplits(startptr+1, endptr)
+     :?currentSplitID > endptr
+      //If current split is after view
+      //4 of the start in view
+      addMultipleSplits(startptr, endptr-1)
+      //Current split
+      addTextColumns(currentSplitString, "-", printTime(bestArray[currentSplitID]), 
+                    ^"-", resetsArray[currentSplitID])
+     :
+      //If current split is in view
+      addMultipleSplits(startptr, endptr)
+    :
+     >ERROR: Arrows accessed without splits array, ping Qrupafjzvm with this message
+   :
+    //If not in view mode
+    ?splitsExist
+    //If splits array exists  
+     ?currentSplitID < halfnoSDed
+      //If current split is below middle line
+      addMultipleSplits(0, noSDed - 1)
+     :?currentSplitID > splitsSize - 1 - halfnoSDed
+      //If current split is above middle line
+      addMultipleSplits(splitsSize - noSDed, splitsSize - 1)
+     :
+      //If it's in the middle
+      addMultipleSplits(currentSplitID - halfnoSDed, currentSplitID + halfnoSDed)
+    :
+     //If splits array doesn't exist
+     ?splitsSize + 1 < noSDed
+      //If there aren't enough splits to fill the splits board
+      ?splitsSize > 0
+       for i = 0..splitsSize - 1
+        //Go through every split before current split
+        addTextColumns(splitsArray[i], printTime(currentArray[i]), "-", "-", resetsArray[i])
+      //Current split
+      addTextColumns(currentSplitString, "-", "-", "-", 
+                    ^getStorage(locName, locStars, "RESETS", currentSplitString, 0))
+     :
+      //If there are enough splits to fill the splits board
+      for i = splitsSize-noSDed+1..splitsSize-1
+       //All splits before current split
+       addTextColumns(splitsArray[i], printTime(currentArray[i]), "-", "-", resetsArray[i])
+      //Current split
+      addTextColumns(currentSplitString, "-", "-", "-", 
+                    ^getStorage(locName, locStars, "RESETS", currentSplitString, 0))
+   //Number of resets + runs on best pace
+   addTextColumns("RESETS", totalResets, "", "SAME PACE", samePace)
+  :
+   //Segments 
+   //Declare starting text for each column
+   SplitsText = "\n"
+   CurrentText = "CURRENT\n"
+   BestText = "BEST\n"
+   DifferenceText = "DIFFERENCE\n"
+   ResetsText = "SAME PACE\n"                                       
+   ?swArrow
+    //If in view mode
+    ?splitsExist
+     //If splits array exists
+     ?currentSplitID < startptr
+      //If current split is before view    
+      //Current split
+      addTextColumns(currentSplitString, "-", printTime(bestSegmentArray[currentSplitID]), 
+                    ^"-", resetsSegmentArray[currentSplitID])
+      //4 of the rest in view
+      addMultipleSegments(startptr+1, endptr)
+     :?currentSplitID > endptr
+      //If current split is after view
+      //4 of the start in view
+      addMultipleSegments(startptr, endptr-1)
+      //Current split
+      addTextColumns(currentSplitString, "-", printTime(bestSegmentArray[currentSplitID]), 
+                    ^"-", resetsSegmentArray[currentSplitID])
+     :
+      //If current split is in view
+      addMultipleSegments(startptr, endptr)
+     //Sum of best + projected finish time
+     
+     addTextColumns("SUM OF BEST", printTime(sumBest), "", "PROJECTED", printTime(projectedTime))
+    :
+     >ERROR: Arrows accessed without splits array, ping Qrupafjzvm with this message
+   :
+    //If not in view mode
+    ?splitsExist
+    //If splits array exists  
+     ?currentSplitID < halfnoSDed
+      //If current split is below middle line
+      addMultipleSegments(0, noSDed - 1)
+     :?currentSplitID > splitsSize - 1 - halfnoSDed
+      //If current split is above middle line
+      addMultipleSegments(splitsSize - noSDed, splitsSize - 1)
+     :
+      //If it's in the middle
+      addMultipleSegments(currentSplitID - halfnoSDed, currentSplitID + halfnoSDed)
+     //Sum of best + projected finish time
+     addTextColumns("SUM OF BEST", printTime(sumBest), "", "PROJECTED", printTime(projectedTime))
+    :
+     //If splits array doesn't exist
+     ?splitsSize + 1 < noSDed
+      //If there aren't enough splits to fill the splits board
+      ?splitsSize > 0
+       for i = 0..splitsSize - 1
+        //Go through every split before current split
+        addTextColumns(splitsArray[i], printTime(currentSegmentArray[i]), 
+                      ^printTime(bestSegmentArray[i]), "-", resetsSegmentArray[i])
+      //Current split
+      addTextColumns(currentSplitString, "-", "-", "-", 
+                    ^getStorage(locName, locStars, "RESETS-SEGMENT", currentSplitString, 0))
+     :
+      //If there are enough splits to fill the splits board
+      for i = splitsSize-noSDed+1..splitsSize-1
+       //All splits before current split
+       addTextColumns(splitsArray[i], printTime(currentSegmentArray[i]), 
+                     ^printTime(bestSegmentArray[i]), "-", resetsSegmentArray[i])
+      //Current split
+      addTextColumns(currentSplitString, "-", "-", "-", 
+                    ^getStorage(locName, locStars, "RESETS-SEGMENT", currentSplitString, 0))
+     //Sum of best + projected finish time
+     addTextColumns("SUM OF BEST", "-", "", "PROJECTED", "-")
+  
+  //Update all columns
+  SplitsColumn.text = SplitsText
+  CurrentColumn.text = CurrentText
+  BestColumn.text = BestText
+  DifferenceColumn.text = DifferenceText
+  ResetsColumn.text = ResetsText
+
+func upArrow()
+ //Up arrow for SplitsUI
+ ?!swArrow
+  //If not in view mode
+  swArrow = 1
+  ?currentSplitID - 1 < halfnoSDed
+   //If below split is below middle line
+   startptr = 0
+   endptr = noSDed - 1
+  :?currentSplitID - 1 > splitsSize - 1 - halfnoSDed
+   //If below split is above middle line
+   startptr = splitsSize-noSDed
+   endptr = splitsSize-1
+  :
+   //If below split is in middle line
+   startptr = currentSplitID - 1 - halfnoSDed
+   endptr = currentSplitID - 1 + halfnoSDed
+  updateSignal = 1
+  updateSplits()
+ :
+  //If already in view mode
+  ?startptr - 1 >= 0
+   startptr--
+   endptr--
+   updateSignal = 1
+   updateSplits()
+
+func downArrow()
+ //Down arrow for SplitsUI
+ ?!swArrow
+  //If not in view mode
+  swArrow = 1
+  ?currentSplitID + 1 < halfnoSDed
+   //If above split is below middle line
+   startptr = 0
+   endptr = noSDed - 1
+  :?currentSplitID + 1 > splitsSize - 1 - halfnoSDed
+   //If above split is above middle line
+   startptr = splitsSize-noSDed
+   endptr = splitsSize-1
+  :
+   //If above split is in middle line
+   startptr = currentSplitID + 1 - halfnoSDed
+   endptr = currentSplitID + 1 + halfnoSDed
+  updateSignal = 1
+  updateSplits()
+ :
+  //If already in view mode
+  ?endptr + 1 <= splitsSize - 1
+   startptr++
+   endptr++
+   updateSignal = 1
+   updateSplits()
+
+func resetView()
+ //Reset arrow changes
+ ?swArrow 
+  swArrow = 0
+  startptr = 0
+  endptr = 0
+  updateSignal = 1
+  updateSplits()
+
+func hideUI()
+ //Hides UI
+ checkUI = 0
+ SplitsUI.visible = false
+ upArrowButton.visible = false
+ downArrowButton.visible = false
+ resetViewButton.visible = false
+ hideUIButton.y = 0
+ hideUIButton.text = "SHOW"
+ hideUIButton.SetPressed(showUI)
+ 
+func showUI()
+ //Shows UI
+ checkUI = 1
+ SplitsUI.visible = true
+ upArrowButton.visible = splitsExist
+ downArrowButton.visible = splitsExist
+ resetViewButton.visible = splitsExist
+ hideUIButton.y = noSDed + 4
+ hideUIButton.text = "HIDE"
+ hideUIButton.SetPressed(hideUI)
+ updateSignal = 1
+ updateSplits()
+
+func createUI(showArrow, showProjected)
+ //Creates all UI elements
+ //Main panel
+ FullUI = newPanel(0, 0, sizeText + 4, sizeCol + 2, "top_center", "top_center", inherit, 0)
+ FullUI.style = ui.AddStyle("#########")
+
+ //The board
+ SplitsUI = newPanel(0, 1, sizeText + 2, sizeCol, "top_center", "top_center", inherit, -2)
+ FullUI.Add(SplitsUI)
+
+ SplitsColumn = newText(1, 1, sizeBlock, noSDed + 2, "top_left", "top_left", inherit, "left", "")
+ SplitsUI.Add(SplitsColumn)
+ 
+ CurrentColumn = newText(1 + sizeBlock, 1, sizeBlock, noSDed + 2, "top_left", "top_left", inherit, "center", "")
+ SplitsUI.Add(CurrentColumn)
+
+ BestColumn = newText(1 + sizeBlock * 2, 1, sizeBlock, noSDed + 2, "top_left", "top_left", inherit, "center", "")
+ SplitsUI.Add(BestColumn)
+
+ DifferenceColumn = newText(1 + sizeBlock * 3, 1, sizeBlock, noSDed + 2, "top_left", "top_left", inherit, "center", "")
+ SplitsUI.Add(DifferenceColumn)
+
+ ResetsColumn = newText(1 + sizeBlock * 4, 1, sizeBlock, noSDed + 2, "top_left", "top_left", inherit, "center", "")
+ SplitsUI.Add(ResetsColumn)
+ 
+ CurrentBox = newText(1 + sizeBlock, 2, sizeBlock, 1, "top_left", "top_left", inherit, "center", "-")
+ SplitsUI.Add(CurrentBox)
+
+ DifferenceBox = newText(1 + 3 * sizeBlock, 2, sizeBlock, 1, "top_left", "top_left", inherit, "center", "-")
+ SplitsUI.Add(DifferenceBox)
+
+
+ //The buttons
+ hideUIButton = newButton(1 + 2 * sizeBlock, noSDed + 4, sizeBlock, 3, "top_left", "top_left", true, -1, "HIDE", hideUI)
+ SplitsUI.Add(hideUIButton)
+
+ upArrowButton = newButton(1, noSDed + 4, sizeBlock, 3, "top_left", "top_left", showArrow, -1, "↑", upArrow)
+ SplitsUI.Add(upArrowButton)
+
+ downArrowButton = newButton(1 + sizeBlock, noSDed + 4, sizeBlock, 3, "top_left", "top_left", showArrow, -1, "↓", downArrow)
+ SplitsUI.Add(downArrowButton)
+
+ resetViewButton = newButton(1 + 4 * sizeBlock, noSDed + 4, sizeBlock, 3, "top_left", "top_left", showArrow, -1, "BACK", resetView)
+ SplitsUI.Add(resetViewButton)
+ 
+ ?!checkUI
+  //If UI is hidden before transition, hide it now
+  hideUI()
+
+//Other 
+func resetLoop()
+ //Resets everything on loop
+ swCurr = 1
+ swMBoss = 0
+ swPBoss = 0
+ phaseBoss = 0
+ startBoss = 0
+ updateSignal = 1
+ lastScreen = screen.i
+ padding = []
+
+//===============Hall of Fame===============
+//==========Constants==========
+//All loc names
+var locArray = [["Rocky Plateau", 5, 15], ["Deadwood Canyon", 3, 15], 
+               ^["Caves of Fear", 3, 15], ["Mushroom Forest", 3, 15], 
+               ^["Haunted Halls", 3, 15], ["Boiling Mines", 3, 15], 
+               ^["Icy Ridge", 3, 15], ["Temple", 3, 15]]
+
+var locNameArt = [
+^ascii
+  _                _                  
+ /_/ _  _  /_     /_/ / _ _/_ _  _    
+/ \ /_//_ /\ /_/ /   / /_|/  /_'/_|/_/
+             _/                       
+asciiend,
+^ascii
+  _                            _                
+ / | _  _   _/     _  _   _/  / ` _  _     _  _ 
+/_.'/_'/_|/_/ |/|//_//_//_/  /_, /_|/ //_//_// /
+                                       _/       
+asciiend,
+^ascii
+  _                      _         
+ / ` _    _   _  _ _/|  /_` _  _  _
+/_, /_||//_'_\  /_//   /   /_'/_|/ 
+                                   
+asciiend,
+^ascii
+                              _               
+ /|,/     _ /_ _ _  _  _ _   /_` _  _ _   __/_
+/  / /_/_\ / // /_//_// / / /   /_// /_'_\ /  
+                                              
+asciiend,
+^ascii
+                                      
+ /_/ _     _ _/_ _   _/  /_/ _  / /  _
+/ / /_|/_// //  /_'/_/  / / /_|/ / _\ 
+                                      
+asciiend,
+^ascii
+  _                              
+ /_) _  . / . _  _   /|,/ . _  _ 
+/_) /_// / / / //_/ /  / / / //_'
+                _/               
+asciiend,
+^ascii
+           _             
+ / _      /_/ .  _/ _  _ 
+/ /_ /_/ / \ / /_/ /_//_'
+     _/            _/    
+asciiend,
+^ascii
+ __                 
+ /  _  _ _   _  / _ 
+/  /_'/ / / /_// /_'
+           /        
+asciiend]
+//All colors
+var colorArr = [["#white", "#312C31"], 
+               ^["#cyan", "#002831"], 
+               ^["#yellow", "#312C10"], 
+               ^["#green", ""], 
+               ^["#blue", ""], 
+               ^["#red", ""], 
+               ^["#rainbow", ""]]
+//Number of locs 
+var noLocs = locArray.Count()
+//Current loc index shown
+var locIndex = 0
+//Current star shown
+var curStar = 5
+//Size of button
+var buttonSize = 3
+//Height of title
+var textHeight = 5
+//Number of splits displayed in Halls
+var noSDHalls = screenH - 9 - textHeight
+//Number of columns 
+var noColHalls = 3
+//Size of a Halls column
+var sizeHallsCol = noSDHalls + 5
+//Size of a Halls row
+var sizeHallsRow = sizeBlock * noColHalls
+//Number of clicks until deleting data
+var cntClick = 5
+
+//==========Variables==========
+//Start and end of the splits view
+var startHalls
+var endHalls 
+
+//==========UI==========
+//Entire Halls panel
+var HallsPanel 
+//Loc name display
+var HallsLoc
+var LocText
+//Buttons to change loc
+var locLeftButton
+var locRightButton
+//Stars display
+var locStarsPanel
+var locStarsText
+//Buttons to change stars
+var starsLeftButton
+var starsRightButton
+//Hall screen
+var hallSplitsPanel
+var hallSplitsColumn
+var hallBestColumn
+var hallResetsColumn
+var hallUpButton
+var hallDownButton
+//Utility buttons
+var switchFormatButton
+var switchFormatText
+var switchTimingButton
+var switchTimingText
+var resetStarButton
+var resetStarText
+var resetAllButton
+var resetAllText
+var versionText
+var exitButton
+
+//==========Functions==========
+func addTextHallsColumns(splits, best, resets)
+ SplitsText = SplitsText + splits + "\n"
+ BestText = BestText + best + "\n"
+ ResetsText = ResetsText + resets + "\n"
+
+func textHallSplits(name, star)
+ ?swTimingType
+  //Splits
+  //Declare starting text for each column
+  SplitsText = "\n"
+  BestText = "BEST\n"
+  ResetsText = "RESETS\n"
+  //Add all in view
+  for i = startHalls..endHalls
+   addTextHallsColumns(splitsArray[i], printTime(bestArray[i]), resetsArray[i])
+  //Number of resets + runs on best pace
+  addTextHallsColumns("RESETS", "", totalResets)
+  addTextHallsColumns("SAME PACE", "", samePace)
+  //Update UI
+  hallSplitsColumn.text = SplitsText
+  hallBestColumn.text = BestText
+  hallResetsColumn.text = ResetsText
+ :
+  //Segments 
+  SplitsText = "\n"
+  BestText = "BEST\n"
+  ResetsText = "RESETS\n"
+  //Add all in view
+  for i = startHalls..endHalls
+   addTextHallsColumns(splitsArray[i], printTime(bestSegmentArray[i]), resetsSegmentArray[i])
+  //Number of resets + runs on best pace
+  addTextHallsColumns("RESETS", "", totalResets)
+  addTextHallsColumns("SUM OF BEST", "", printTime(sumBest))
+  //Update UI
+  hallSplitsColumn.text = SplitsText
+  hallBestColumn.text = BestText
+  hallResetsColumn.text = ResetsText
+
+func updateHallSplits(name, star)
+ ?hasStorage(name, star, "SPLITS", "STRING")
+  //If splits string exist
+  //Extract data
+  splitsArray = string.Split(getStorage(name, star, "SPLITS", "STRING", ""), "$")
+  splitsSize = splitsArray.Count()
+  splitsExist = true
+  bestArray = []
+  bestSegmentArray = []
+  resetsArray = []
+  resetsSegmentArray = []
+  sumBest = 0
+  for i = 0..splitsSize - 1
+   bestArray.Add(getStorage(name, star, "BEST", splitsArray[i], 99999))
+   resetsArray.Add(getStorage(name, star, "RESETS", splitsArray[i], 0))
+   bestSegmentArray.Add(getStorage(name, star, "BEST-SEGMENT", splitsArray[i], 99999))
+   sumBest = sumBest + bestSegmentArray[i]
+   resetsSegmentArray.Add(getStorage(name, star, "RESETS-SEGMENT", splitsArray[i], 0))
+  totalResets = getStorage(name, star, "BEST", "RESETS", 1)
+  samePace = getStorage(name, star, "BEST", "COUNT", 1)
+  //Resize view
+  startHalls = 0
+  ?splitsSize > noSDHalls
+   hallUpButton.visible = true
+   hallDownButton.visible = true
+   endHalls = noSDHalls - 1
+  :
+   hallUpButton.visible = false
+   hallDownButton.visible = false
+   endHalls = splitsSize - 1
+  textHallSplits(name, star)
+ :
+  //If splits string doesn't exist
+  splitsArray.Clear()
+  splitsSize = 0
+  splitsExist = false
+  hallSplitsColumn.text = ""
+  hallBestColumn.text = "NO DATA"
+  hallResetsColumn.text = ""
+  hallUpButton.visible = false
+  hallDownButton.visible = false
+
+func padColor(text, color)
+  return "[color=" + color + "]" + text + "[/color]"
+
+func updateStars(fullupdate)
+ //Check if star count is valid
+ ?curStar < locArray[locIndex][1] 
+  curStar = locArray[locIndex][1]
+ :?curStar > locArray[locIndex][2] 
+  curStar = locArray[locIndex][2]
+ :
+  fullupdate = 1
+ //Print star line
+ var colorsToUse = colorArr[(curStar-1)/5]
+ var bright = colorsToUse[0]
+ var faded = colorsToUse[1]
+ var numBright = (curStar - 1) % 5 + 1
+ var numFaded = 5 - numBright
+ var starText = padColor(string.Sub("☆ ☆ ☆ ☆ ☆", 0, numBright*2 - 1), bright) 
+             ^+ padColor(string.Sub(" ☆ ☆ ☆ ☆", 0, numFaded*2), faded) 
+ locStarsText.text = starText
+ //Do a full update if needed
+ ?fullupdate 
+  updateHallSplits(locArray[locIndex][0], curStar)
+
+func rightLoc() 
+ //Move to the next loc to the right
+ cntClick = 5
+ locIndex = (locIndex + 1) % noLocs
+ LocText.text = locNameArt[locIndex]
+ updateStars(1)
+
+func leftLoc()
+ //Move to the next loc to the left
+ cntClick = 5
+ locIndex = (locIndex + noLocs - 1) % noLocs
+ LocText.text = locNameArt[locIndex]
+ updateStars(1)
+
+func rightStars()
+ //Move up 1 star
+ cntClick = 5
+ curStar++
+ updateStars(0)
+ 
+func leftStars()
+ //Move down 1 star
+ cntClick = 5
+ curStar--
+ updateStars(0)
+
+func upArrowHalls()
+ //Move view up
+ cntClick = 5
+ ?startHalls - 1 >= 0
+  startHalls--
+  endHalls--
+  textHallSplits(locArray[locIndex][0], curStar)
+
+func downArrowHalls()
+ //Move view down
+ cntClick = 5
+ ?endHalls + 1 <= splitsSize - 1
+  startHalls++
+  endHalls++
+  textHallSplits(locArray[locIndex][0], curStar)
+
+func switchFormat()
+ //Switch between frame and DigitalFormat
+ cntClick = 5
+ swTimeFormat = 1 - swTimeFormat
+ ?swTimeFormat = 0
+  >Switched to using frame count
+ :
+  >Switched to using DigitalFormat
+ setStorage("GLOBAL", "SETTINGS", "TIME", "FORMAT", swTimeFormat)
+ ?splitsExist
+  textHallSplits(locArray[locIndex][0], curStar)
+
+func switchTiming()
+ //Switch between split timing and segment timing
+ cntClick = 5
+ swTimingType = 1 - swTimingType
+ ?swTimingType = 0 
+  >Switched to using segment timing
+ :
+  >Switched to using split timing
+ setStorage("GLOBAL", "SETTINGS", "TIMING", "TYPE", swTimingType)
+ ?splitsExist
+  textHallSplits(locArray[locIndex][0], curStar)
+
+func resetStar()
+ //Reset all info of a star
+ ?splitsExist
+  ?cntClick > 1
+   cntClick--
+   >@cntClick@ more presses to delete this star's data.
+  :
+   resetStorage(locArray[locIndex][0], curStar, splitsArray)
+   splitsArray.Clear()
+   splitsSize = 0
+   splitsExist = false
+   hallSplitsColumn.text = ""
+   hallBestColumn.text = "NO DATA"
+   hallResetsColumn.text = ""
+   hallUpButton.visible = false
+   hallDownButton.visible = false
+   >Data removed.
+ :
+  >No data detected.
+
+func resetAll()
+ //Reset all info of all stars of all locs
+ ?cntClick > 1
+  cntClick--
+  >@cntClick@ more presses to delete all stars' data.
+ :
+  >Deleting all stars' data. This might take a while.
+  for i = 0..locArray.Count()-1
+   for j = locArray[i][1]..locArray[i][2]
+    ?hasStorage(locArray[i][0], j, "SPLITS", "STRING")
+     splitsArray = string.Split(getStorage(locArray[i][0], j, "SPLITS", "STRING", ""), "$")
+     resetStorage(locArray[i][0], j, splitsArray)
+  splitsArray.Clear()
+  splitsSize = 0
+  splitsExist = false
+  hallSplitsColumn.text = ""
+  hallBestColumn.text = "NO DATA"
+  hallResetsColumn.text = ""
+  hallUpButton.visible = false
+  hallDownButton.visible = false
+  >All stars' data has been deleted.
+
+func exitHalls()
+ loc.Leave()
+
+func createHall()
+ disable pause
+ disable banner
+
+ //Full panel for Hall
+ HallsPanel = newPanel(0, 0, screenW, screenH, "top_center", "top_center", inherit, 1)
+
+ //Loc panel
+ HallsLoc = newPanel(0, 1, screenW - (buttonSize + 2) * 2, textHeight + 2, "top_center", "top_center", inherit, 1) 
+ HallsPanel.Add(HallsLoc)
+ 
+ LocText = newText(0, 1, screenW - (buttonSize + 1) * 2, textHeight, "top_center", "top_center", inherit, "center", locNameArt[locIndex])
+ HallsLoc.Add(LocText)
+
+ locLeftButton = newButton(-(screenW / 2) + 3, 1 + textHeight / 2, 3, 3, "top_center", "top_center", inherit, 1, "<", leftLoc) 
+ HallsPanel.Add(locLeftButton)
+
+ locRightButton = newButton((screenW / 2) - 4, 1 + textHeight / 2, 3, 3, "top_center", "top_center", inherit, 1, ">", rightLoc) 
+ HallsPanel.Add(locRightButton)
+
+ //Stars panel
+ locStarsPanel = newPanel(-screenW / 4, 3 + textHeight, 11, 3, "top_center", "top_center", inherit, 1) 
+ HallsPanel.Add(locStarsPanel)
+
+ locStarsText = newText(0, 1, 9, 3, "top_center", "top_center", inherit, "center", "[color=#white]☆ ☆ ☆ ☆ ☆[/color]")
+ locStarsPanel.Add(locStarsText)
+
+ starsLeftButton = newButton(-8 - screenW / 4, 3 + textHeight, 3, 3, "top_center", "top_center", inherit, 1, "<", leftStars) 
+ HallsPanel.Add(starsLeftButton)
+
+ starsRightButton = newButton(8 - screenW / 4, 3 + textHeight, 3, 3, "top_center", "top_center", inherit, 1, ">", rightStars) 
+ HallsPanel.Add(locLeftButton)
+
+ //Splits panel
+ hallSplitsPanel = newPanel(screenW / 4 - 5, 3 + textHeight, sizeHallsRow + 2, sizeHallsCol, "top_center", "top_center", inherit, 2) 
+ HallsPanel.Add(hallSplitsPanel)
+ 
+ hallSplitsColumn = newText(1, 1, sizeBlock, noSDHalls + 2, "top_left", "top_left", inherit, "left", "")
+ hallSplitsPanel.Add(hallSplitsColumn)
+ 
+ hallBestColumn = newText(1 + sizeBlock, 1, sizeBlock, noSDHalls + 2, "top_left", "top_left", inherit, "center", "")
+ hallSplitsPanel.Add(hallBestColumn)
+ 
+ hallResetsColumn = newText(1 + sizeBlock * 2, 1, sizeBlock, noSDHalls + 2, "top_left", "top_left", inherit, "center", "")
+ hallSplitsPanel.Add(hallResetsColumn)
+ 
+ hallUpButton = newButton(-5, 1, 3, 3, "top_left", "top_left", inherit, 1, "↑", upArrowHalls)
+ hallSplitsPanel.Add(hallUpButton)
+
+ hallDownButton = newButton(-5, sizeHallsCol - 4, 3, 3, "top_left", "top_left", inherit, 1, "↓", downArrowHalls)
+ hallSplitsPanel.Add(hallDownButton)
+ 
+ //Utility buttons
+ switchFormatButton = newButton(-8 - screenW / 4, 4 + textHeight + sizeHallsCol / 3, 8, 4, "center_center", "top_center", inherit, 1, "", switchFormat)
+ HallsPanel.Add(switchFormatButton)
+ 
+ switchFormatText = newText(-8 - screenW / 4, 5 + textHeight + sizeHallsCol / 3, 8, 4, "center_center", "top_center", inherit, center, "SWITCH\nFORMAT")
+ HallsPanel.Add(switchFormatText)
+
+ switchTimingButton = newButton(8 - screenW / 4, 4 + textHeight + sizeHallsCol / 3, 8, 4, "center_center", "top_center", inherit, 1, "", switchTiming)
+ HallsPanel.Add(switchTimingButton)
+ 
+ switchTimingText = newText(8 - screenW / 4, 5 + textHeight + sizeHallsCol / 3, 8, 4, "center_center", "top_center", inherit, center, "SWITCH\nTIMING")
+ HallsPanel.Add(switchTimingText)
+
+ resetStarButton = newButton(-8 - screenW / 4, screenH - sizeHallsCol / 3, 8, 4, "center_center", "top_center", inherit, 1, "", resetStar)
+ HallsPanel.Add(resetStarButton)
+ 
+ resetStarText = newText(-8 - screenW / 4, screenH - sizeHallsCol / 3 + 1, 8, 4, "center_center", "top_center", inherit, center, "RESET\nSTAR")
+ HallsPanel.Add(resetStarText)
+
+ resetAllButton = newButton(8 - screenW / 4, screenH - sizeHallsCol / 3, 8, 4, "center_center", "top_center", inherit, 1, "", resetAll)
+ HallsPanel.Add(resetStarButton)
+ 
+ resetAllText = newText(8 - screenW / 4, screenH - sizeHallsCol / 3 + 1, 8, 4, "center_center", "top_center", inherit, center, "RESET\nALL")
+ HallsPanel.Add(resetStarText)
+
+ versionText = newText(- screenW / 2 + 1, screenH - 1, 15, 1, "bottom_left", "top_left", true, "left", version)
+ HallsPanel.Add(versionText)
+
+ exitButton = newButton(screenW / 2 - 1, screenH - 1, 6, 3, "bottom_right", "top_center", true, 1, "EXIT", exitHalls)
+ HallsPanel.Add(exitButton)
+
+ //Update the splits
+ updateHallSplits(locArray[locIndex][0], curStar)
+
+//Main
+?swType = 0
+ //Check if Halls or Splits (or none)
+ swTimeFormat = getStorage("GLOBAL", "SETTINGS", "TIME", "FORMAT", 1)
+ swTimingType = getStorage("GLOBAL", "SETTINGS", "TIMING", "TYPE", 1)
+ ?locName = "deadwood waterfall"
+  swType = 1
+ :?locStars > 0 & !loc.isQuest
+  swType = 2
+ :
+  swType = 3
+?swType = 1
+ //Hall of fame stuff
+ ?loc.begin
+  createHall()
+:?swType = 2
+ //Save system
+ ?loc.begin
+  //Initialize system
+  //Reset vars
+  resetLoop()
+
+  //Increase reset count cus yes
+  incrStorage(locName, locStars, "BEST", "RESETS")
+  totalResets = getStorage(locName, locStars, "BEST", "RESETS", 0)
+
+  //Check for splits string
+  ?hasStorage(locName, locStars, "SPLITS", "STRING")
+   //If exists
+   //Get splits array
+   splitsArray = string.Split(getStorage(locName, locStars, "SPLITS", "STRING", ""), "$")
+   splitsSize = splitsArray.Count()
+   splitsExist = true
+   currentSplitID = 0
+   currentSplitString = splitsArray[currentSplitID]
+
+   //Get all other storage values
+   sumBest = 0
+   for i = 0..splitsSize-1
+    currentArray.Add(-1)
+    bestArray.Add(getStorage(locName, locStars, "BEST", splitsArray[i], 99999))
+    resetsArray.Add(getStorage(locName, locStars, "RESETS", splitsArray[i], 0))
+
+    currentSegmentArray.Add(-1)
+    bestSegmentArray.Add(getStorage(locName, locStars, "BEST-SEGMENT", splitsArray[i], 99999))
+    sumBest = sumBest + bestSegmentArray[i]
+    resetsSegmentArray.Add(getStorage(locName, locStars, "RESETS-SEGMENT", splitsArray[i], 0))
+   
+   var tempSum
+   tempSum = sumBest
+   for i = 0..splitsSize-1
+    sumSegmentArray.Add(tempSum)
+    tempSum -= bestSegmentArray[i]
+   sumSegmentArray.Add(tempSum)
+   projectedTime = sumSegmentArray[0]
+
+  :
+   //If not exists
+   splitsArray = []
+   splitsSize = 0
+   splitsExist = false
+   currentSplitString = "CURRENT"
+   swCurr = 1
+
+  //These 2 should always exist
+  totalResets = getStorage(locName, locStars, "BEST", "RESETS", 1)
+  samePace = getStorage(locName, locStars, "BEST", "COUNT", 1)
+  
+
+  //Create UI
+  createUI((splitsSize>noSDed),(splitsExist & !swTimingType))
+  updateSplits()
+
+ ?loc.loop
+  //Reset on loop
+  //Deal with splits
+  ?splitsExist
+   //End "END" split
+   currentArray[currentSplitID] = lastTime
+   resetsArray[currentSplitID] = resetsArray[currentSplitID]+1
+   incrStorage(locName, locStars, "RESETS", splitsArray[currentSplitID])
+   
+   //Update segments
+   setSegment(lastTime)
+
+   //Save splits
+   var currentEnd
+   var bestEnd
+   currentEnd = currentArray[currentSplitID]
+   bestEnd = bestArray[currentSplitID]
+   ?currentEnd < bestEnd
+    totalResets = 1
+    samePace = 1
+    setStorage(locName, locStars, "BEST", "RESETS", 1)
+    setStorage(locName, locStars, "BEST", "COUNT", 1)
+    for i = 0..splitsSize-1 
+     bestArray[i] = currentArray[i]
+     setStorage(locName, locStars, "BEST", splitsArray[i], currentArray[i])
+     currentArray[i] = -1
+     currentSegmentArray[i] = -1
+   :
+    totalResets++
+    setStorage(locName, locStars, "BEST", "RESETS", totalResets)
+    ?currentEnd = bestEnd
+     samePace++
+     setStorage(locName, locStars, "BEST", "COUNT", samePace)
+    for i = 0..splitsSize-1
+     currentArray[i] = -1
+     currentSegmentArray[i] = -1
+   
+   //Edit sum array
+   var tempSum
+   tempSum = sumBest
+   for i = 0..splitsSize-1
+    sumSegmentArray[i] = tempSum
+    tempSum -= bestSegmentArray[i]
+  :
+   //End "END" split
+   setSegment(lastTime)
+   setSplit(currentSplitString, "", lastTime, 0)
+   
+   //Set splits array
+   setStorage(locName, locStars, "SPLITS", "STRING", string.Join("$", splitsArray))
+   splitsSize = splitsArray.Count()
+   splitsExist = true
+  
+   //Save splits
+   for i = 0..splitsSize-1
+    sumBest = sumBest + bestSegmentArray[i]
+    bestArray.Add(currentArray[i])
+    setStorage(locName, locStars, "BEST", splitsArray[i], currentArray[i])
+    currentArray[i] = -1
+    currentSegmentArray[i] = -1
+   
+   //Create sum array
+   var tempSum
+   tempSum = sumBest
+   for i = 0..splitsSize-1
+    sumSegmentArray.Add(tempSum)
+    tempSum -= bestSegmentArray[i]
+   sumSegmentArray.Add(tempSum)
+
+  projectedTime = sumSegmentArray[0]
+
+  //Reset vars
+  resetLoop()
+  currentSplitID = 0
+  currentSplitString = splitsArray[currentSplitID]
+
+  //Recreate UI
+  createUI((splitsSize>noSDed),(!swTimingType))
+  updateSplits()
+ 
+ //Splits system
+ //Room splits: ROOMi
+ //Miniboss splits: MINIBOSS
+ //Boss splits: BOSS
+ 
+ ?splitsExist
+  //If splits array has been saved
+  ?swCurr
+   //ROOM/MINIBOSS split
+   ?lastScreen ! screen.i
+    setSegment(lastTime)
+    setSplit("", "", lastTime, 1)
+    lastScreen = screen.i
+  :?swPBoss
+   //PRE-BOSS split
+   ?foeString = "phase" & foe.state > 0
+    setSegment(lastTime)
+    setSplit("", "", lastTime, 1)
+    lastScreen = screen.i
+  :?phaseBoss > 0
+   //PHASE split
+   ?startBoss 
+    ?foeHP <= 0 & foeString = phase & foeString ! "Morel, "
+     setSegment(lastTime)
+     setSplit("", "", lastTime, 1)
+     startBoss = 0
+     lastScreen = screen.i
+   :?foeHP > 0 & foeString = phase
+    startBoss = 1   
+ :
+  //If not, activate auto-detection
+  ?swCurr
+   //CURRENT split
+   ?lastScreen ! screen.i
+    //If new screen, add split to padding
+    padding.Add(["ROOM"+lastScreen, lastTime])
+    lastScreen = screen.i
+   ?foeDist <= 35 + screen.x - pos.x
+    //If meet enemy, end CURRENT split
+    ?foeString = "phase"
+     //If enemy is boss
+     ?foe.state > 0
+      //Boss fight started
+      setSegment(lastTime)
+      setSplit("PRE-BOSS", "PHASE1", lastTime, 1)
+      phaseBoss = 1
+     :
+      //Boss fight not started yet
+      switchSplit("PRE-BOSS")
+      swPBoss = 1
+     swCurr = 0
+     padding.Clear()
+    :
+     //If enemy is normal, resolve all padding
+     var lastPad 
+     lastPad = padding.Count() - 1
+     ?lastPad >= 0
+      for i = 0..lastPad
+       currentSplitString = padding[i][0]
+       setSegment(padding[i][1])
+       setSplit(padding[i][0], "", padding[i][1], 0)
+     ?foeString = boss | foeString = "wasp nest"
+      //Start Miniboss
+      switchSplit("MINIBOSS")
+      swMBoss = 1
+     :
+      //Start new room 
+      switchSplit("ROOM" + screen.i)
+     swCurr = 0
+     padding.Clear()
+   :?locName ! loc.name
+    //Start pre-boss
+    switchSplit("PRE-BOSS")
+    swCurr = 0
+    swPBoss = 1
+
+  :?swPBoss 
+   //"PRE-BOSS" split
+   ?foeString = phase & foe.state > 0
+    //If boss has switched out of state 0 -> battle start
+    setSegment(lastTime)
+    setSplit(currentSplitString, "PHASE1", lastTime, 1)
+    swPBoss = 0
+    phaseBoss = 1
+ 
+  :?phaseBoss > 0 
+   //"BOSS" split
+   ?pickup
+    //If found pickup, switch to "END"
+    switchSplit("END")
+    phaseBoss = 0
+    lastScreen = screen.i
+   :?startBoss 
+    ?foeHP <= 0 & foeString = phase & foeString ! "Morel, "
+     //switches between each phase
+     phaseBoss++
+     setSegment(lastTime)
+     setSplit(currentSplitString, "PHASE" + phaseBoss, lastTime, 1)
+     startBoss = 0
+   :?foeHP > 0 & foeString = phase
+    startBoss = 1
+  
+  :?screen.i ! lastScreen
+   //screen/loc change
+   ?swMBoss
+    //after miniboss is always pre-boss
+    ?foeDist <= screenW + screen.x - pos.x & foeString = phase & foe.state > 0
+     setSegment(lastTime)
+     setSplit(currentSplitString, "PHASE1", lastTime, 1)
+     phaseBoss = 1
+    :
+     setSegment(lastTime)
+     setSplit(currentSplitString, "PRE-BOSS", lastTime, 1)
+     padding.Clear()
+     swPBoss = 1
+     swMBoss = 0
+ 
+   :?locName ! loc.name 
+    //if loc name has changed -> entered subloc
+    setSegment(lastTime)
+    setSplit(currentSplitString, "PRE-BOSS", lastTime, 1)
+    swPBoss = 1
+    padding.Clear()
+
+   :?foeDist <= screenW + screen.x - pos.x
+    ?foeString = "phase"
+     ?foe.state > 0
+      //Save pre-boss, start boss
+      setSegment(lastTime)
+      setSplit("PRE-BOSS", "PHASE1", lastTime, 1)
+      phaseBoss = 1
+     :
+      //Start pre-boss
+      switchSplit("PRE-BOSS")
+      swPBoss = 1
+    :
+     //Not pre-boss, end split
+     ?foeString = boss | foeString = "wasp nest"
+      //Start Miniboss
+      setSegment(lastTime)
+      setSplit(currentSplitString, "MINIBOSS", lastTime, 1)
+      swMBoss = 1
+     :
+      //Start new room 
+      setSegment(lastTime)
+      setSplit(currentSplitString, "ROOM" + screen.i, lastTime, 1)
+   :?!swCurr
+    //Activate CURRENT split
+    setSegment(lastTime)
+    setSplit(currentSplitString, "CURRENT", lastTime, 1)
+    swCurr = 1
+   lastScreen = screen.i
+ lastTime = totaltime
+ //Printing
+ //Constantly update current split
+ updateCurrent()

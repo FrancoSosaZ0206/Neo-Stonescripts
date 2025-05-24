@@ -1,0 +1,189 @@
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+Aurora Borealis!
+version: 1.5
+by Incoherent Toast
+
+No fancy tricks needed for this! Just import it
+and then visit either 
+Icy ridge, Rocky Plateau, or the bridge!
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+
+
+var ColourLoop = 48
+var BarLoop = 95
+var BarHeight = 10
+
+var pi = math.pi
+var SetColours = []
+var RGB
+var R
+var G
+var B
+var YOffset = [1,2,3,4,4,5,5,6,6,6,7,7,7,7,7,7,6,6,6,5,5,4,4,3,2,1,0,-1,-2,-3,-4,-4,-5,-5,-6,-6,-6,-7,-7,-7,-7,-7,-7,-6,-6,-6,-5,-5,-4,-4,-3,-2,-1,0]
+var YMod = YOffset.Count()
+var RGB_Fade
+var MotherXOffset = 0
+var dx = 4
+
+func SinWave(Offset,Yset)
+  return 128 * math.sin((2 * pi * Yset) / ColourLoop + Offset) + 128
+
+var CanvasListA = []
+var CanvasListB = []
+var Wave_MotherPanel
+var StyleInvisible = ui.AddStyle("#########")
+
+func MakeCanvas(UI,X)
+  UI.blend = divide
+  UI.w = 3
+  UI.h = BarHeight
+  UI.x = X
+  UI.y = 99
+  UI.dock = top_left
+  Wave_MotherPanel.Add(UI)
+  return UI
+var c
+func WaveBase()
+  SetColours.Clear()
+  CanvasListA.Clear()
+  CanvasListB.Clear()
+  MotherXOffset = 0
+  Wave_MotherPanel = ui.AddPanel()
+  Wave_MotherPanel.style = StyleInvisible
+  Wave_MotherPanel.dock = top_left
+  Wave_MotherPanel.y = screen.h / 2 + 3
+  Wave_MotherPanel.x =  MotherXOffset + 3
+
+func ColourRound(Percent)
+ return color.FromRGB(math.RoundToInt(R*Percent),math.RoundToInt(G*Percent),math.RoundToInt(B*Percent))
+
+var ScreenW = screen.w
+func Canvas(UI,X,Y,BG)
+  UI.x = X
+  UI.y = Y
+  UI.w = ScreenW
+  UI.h = 1
+  UI.blend = add
+  UI.dock = top_left
+  UI.anchor = top_left
+  UI.SetFG(#000000)
+  UI.SetBG(BG)
+  return UI
+
+var Bar_MotherPanel
+var RockyBGSlopeOffsets = [46, 44, 43, 39, 37, 34, 31, 27, 23, 18, 13]
+var ValidLoc = false
+var LocOffset = CheckLoc()
+func CheckLoc()
+  ?loc = "icy"
+    ValidLoc = true
+    return 3
+  ?loc = "rocky"
+    ValidLoc = true
+    return -3
+  ?loc = "bridge"
+    ValidLoc = true
+    return 1
+
+func Bars()
+  var Max = screen.h/2+LocOffset
+  for a = 0..Max
+    var Fade = math.Max(0,2*(5+a-Max))
+    R = SinWave(0, a+20) / (30+Fade)
+    G = SinWave(2 * pi / 2, a+20) / (15+Fade)
+    B = SinWave(-0.5 * pi / 2, a+20) / (15+Fade)
+    RGB = ColourRound(1)
+    var Z = Canvas(ui.AddCanvas(),0,a,RGB)
+
+  Bar_MotherPanel = ui.AddPanel()
+  Bar_MotherPanel.style = StyleInvisible
+  Bar_MotherPanel.anchor = top_left
+  Bar_MotherPanel.dock = top_left
+  Bar_MotherPanel.y = 0
+
+  ?loc = "rocky"
+    ?loc.stars > 15
+      RockyXSet = 136 + (loc.stars - 15)*69
+    :?loc.stars < 11
+      RockyXSet = 136
+    :
+      RockyXSet = 274
+    var YPos = screen.h/2-2
+    for a : RockyBGSlopeOffsets
+      var Fade = math.Max(0,2*(5+YPos-Max))
+      R = SinWave(0, YPos+20) / (30+Fade)
+      G = SinWave(2 * pi / 2, YPos+20) / (15+Fade)
+      B = SinWave(-0.5 * pi / 2, YPos+20) / (15+Fade)
+      RGB = ColourRound(1)
+      var Z = Canvas(ui.AddCanvas(),50-a,YPos,RGB)
+      Bar_MotherPanel.Add(Z)
+      YPos++
+
+  ?loc = "bridge"
+    for a = screen.h/2+LocOffset+8..screen.h
+      var Fade = math.Max(0,2*(5+a-Max))
+      R = SinWave(0, a+20) / (30+Fade)
+      G = SinWave(2 * pi / 2, a+20) / (15+Fade)
+      B = SinWave(-0.5 * pi / 2, a+20) / (15+Fade)
+      RGB = ColourRound(1)
+      var Z = Canvas(ui.AddCanvas(),0,a,RGB)
+
+func RngRange(Min, Max)
+  var Range = Max - Min + 1
+  return rng%Range + Min
+
+var MotherYOffset = 0
+var YShiftA = [0,0,5]
+var YShiftB = [0,0,12]
+var RockyXSet = 0
+
+func Wave(List,YShift)
+  ?List.Count() < BarLoop
+    List.Add(MakeCanvas(ui.AddCanvas(),List.Count()))
+    List[List.Count()-1].SetBG(#B4B4B4)
+
+    for a = 0..3
+      var Z = 240-a*10
+      RGB = color.FromRGB(Z,Z,Z)
+      List[List.Count()-1].SetBG(0,a,RGB)
+      List[List.Count()-1].SetBG(0,BarHeight-a-1,RGB)
+  :
+    ?YShift[1] = 0
+      YShift[1] = RngRange(-10, 20)
+    :?YShift[1] > 0
+      YShift[1] = YShift[1] - 1
+      YShift[0] = YShift[0]+1
+    :
+      YShift[1] = YShift[1]+1
+      YShift[0] = math.Max(0,YShift[0]-1)
+    ?time % 2 = 0
+      List[0].x = BarLoop - Wave_MotherPanel.x + 4
+      List[0].y = YShift[2] - YOffset[YShift[0]/dx%YMod] + BarLoop/4 - Wave_MotherPanel.y
+    List.Add(List[0])
+    List.RemoveAt(0)
+
+var Init = true
+func Run()
+  ?totaltime = 1
+    Init = true
+  ?Init
+    Bars()
+    WaveBase()
+    Init = false
+  Wave(CanvasListA,YShiftA)
+  Wave(CanvasListB,YShiftB)
+
+  Wave_MotherPanel.x =  MotherXOffset + 3
+  Wave_MotherPanel.y =  MotherYOffset + 3
+  ?time % 4 = 0
+    MotherYOffset--
+  ?time % 2 = 0
+    MotherXOffset--
+  ?Bar_MotherPanel
+    Bar_MotherPanel.x = screen.FromWorldX(RockyXSet)
+
+?LocOffset ! null
+  Run()

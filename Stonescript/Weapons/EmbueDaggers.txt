@@ -1,0 +1,239 @@
+//Rf : Sword
+//By: Poly
+//Vr : 1.3
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+?base.IR=Sword&
+^Buffs.string=berserk
+ base.ICR=#ff3c00
+?base.IL=Sword&
+^Buffs.string=berserk
+ base.ICL=#ff3c00
+
+?base.IR=Sword&
+^base.IRS=1
+ >o1,2,#white,ascii
+‾
+asciiend
+
+?base.IR=Sword&
+^base.IRS=1
+ >o2,0,@base.ICR@,ascii
+|\
+@base.IRI@´
+'
+asciiend
+
+?base.IR=Sword&
+^base.IRS=2&
+^base.IRT<=7
+ >o1,2,#white,ascii
+v
+asciiend
+
+?base.IR=Sword&
+^base.IRS=2&
+^base.IRT<=7
+ >o2,0,@base.ICR@,ascii
+|\
+@base.IRI@´
+'
+asciiend
+
+?base.IR=Sword&
+^base.IRS=2&
+^base.IRT<=12&
+^base.IRT>7
+ >o1,1,#white,ascii
+/
+asciiend
+
+?base.IR=Sword&
+^base.IRS=2&
+^base.IRT<=12&
+^base.IRT>7
+ >o2,-1,@base.ICR@,ascii
+|\
+@base.IRI@´
+'
+asciiend
+
+?base.IR=Sword&
+^base.IRS=3&
+^base.IRT<=3
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR=Sword&
+^base.IRS=3&
+^base.IRT<=3
+ >o2,1,@base.ICR@,ascii
+,
+@base.IRI@.
+|/
+'
+asciiend
+?base.IR=Sword&
+^base.IRS=3&
+^base.IRT<=6&
+^base.IRT>3
+ >o1,2,#white,ascii
+)
+asciiend
+?base.IR=Sword&
+^base.IRS=3&
+^base.IRT<=6&
+^base.IRT>3
+ >o2,2,@base.ICR@,ascii
+,
+@base.IRI@.
+|/
+'
+asciiend
+
+?base.IR=Sword&
+^base.IRS=3&
+^base.IRT<=9&
+^base.IRT>6
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR=Sword&
+^base.IRS=3&
+^base.IRT<=9&
+^base.IRT>6
+ >o2,1,@base.ICR@,ascii
+,
+@base.IRI@.
+|/
+'
+asciiend
+?base.IR=Sword&
+^base.IRS=4
+ >o1,2,#white,ascii
+v
+asciiend
+
+?base.IR=Sword&
+^base.IRS=4
+ >o2,2,@base.ICR@,ascii
+@base.IRI@—
+asciiend
+
+?base.IL=Sword&
+^base.ILS=1
+ >o-1,2,#white,ascii
+‾
+asciiend
+?base.IL=Sword&
+^base.ILS=1
+ >o-2,0,@base.ICL@,ascii
+|\
+@base.ILI@´
+'
+asciiend
+
+?base.IL=Sword&
+^base.ILS=2&
+^base.ILT<=7
+ >o-1,2,#white,ascii
+v
+asciiend
+
+?base.IL=Sword&
+^base.ILS=2&
+^base.ILT<=7
+ >o-2,0,@base.ICL@,ascii
+|\
+@base.ILI@´
+'
+asciiend
+
+?base.IL=Sword&
+^base.ILS=2&
+^base.ILT<=12&
+^base.ILT>7
+ >o-1,1,#white,ascii
+\
+asciiend
+
+?base.IL=Sword&
+^base.ILS=2&
+^base.ILT<=12&
+^base.ILT>7
+ >o-2:-1,@base.ICL@,ascii
+|\
+@base.ILI@´
+'
+asciiend
+
+?base.IL=Sword&
+^base.ILS=3&
+^base.ILT<=3
+ >o-1,2,#white,ascii
+/
+asciiend
+
+?base.IL=Sword&
+^base.ILS=3&
+^base.ILT<=3
+ >o-2,1,@base.ICL@,ascii
+,
+@base.ILI@.
+|/
+'
+asciiend
+
+?base.IL=Sword&
+^base.ILS=3&
+^base.ILT<=6&
+^base.ILT>3
+ >o-1,2,#white,ascii
+(
+asciiend
+
+?base.IL=Sword&
+^base.ILS=3&
+^base.ILT<=6&
+^base.ILT>3
+ >o-2:2,@base.ICL@,ascii
+,
+@base.ILI@.
+|/
+'
+asciiend
+
+?base.IL=Sword&
+^base.ILS=3&
+^base.ILT<=9&
+^base.ILT>6
+ >o-1,-1,#white,ascii
+/
+asciiend
+
+?base.IL=Sword&
+^base.ILS=3&
+^base.ILT<=9&
+^base.ILT>6
+ >o-2,1,@base.ICL@,ascii
+,
+@base.ILI@.
+|/
+'
+asciiend
+
+?base.IL=Sword&
+^base.ILS=4
+ >o-1,2,#white,ascii
+v
+asciiend
+
+?base.IL=Sword&
+^base.ILS=4
+ >o-2,2,@base.ICL@,ascii
+@base.ILI@—
+asciiend

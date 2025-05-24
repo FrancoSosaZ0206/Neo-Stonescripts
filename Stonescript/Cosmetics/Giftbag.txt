@@ -1,0 +1,20 @@
+//Gift bag 1.0
+//by ditsaid
+>o-12,-1,#green,ascii
+###_//\
+#,'\/-/_/-._
+| `'＂＂＂`  ._\
+( `-.. - /##))
+`._____.'
+asciiend
+>o-12,-1,#blue,ascii
+###_
+###\/&
+asciiend
+>o-12,-1,#yellow,ascii
+####//\8
+asciiend
+>o-12,-1,#red,ascii
+#######
+######/+
+asciiend

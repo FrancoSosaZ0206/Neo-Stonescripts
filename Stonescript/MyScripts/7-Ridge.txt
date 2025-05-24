@@ -1,0 +1,368 @@
+// *******************************************************
+//                       7-Ridge.txt                      
+// *******************************************************
+
+// Script for Icy Ridge
+
+
+
+// IMPORTS
+
+var u = new MyScripts/Lib/Utilities
+var uimkr = new MyScripts/Lib/UI_Maker
+var p
+p = import MyScripts/Lib/Performance
+var a = new MyScripts/Lib/MyArsenal
+var i = new MyScripts/Lib/MyBetterInfo
+var c = new MyScripts/Lib/Combat
+c.Main()
+
+/***************************************************************/
+
+var som = new MyScripts/Lib/Speed_O_Meter
+var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
+var bosTmr
+bosTmr = import MyScripts/Borrowed/BossfightTimer2
+
+var somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+?som.Update(false)
+  somPanel.Recycle()
+  somPanel = null
+
+  somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+
+
+dpsm.ENABLED = false
+dpsm.refreshRate = 10
+
+var dpsPanel
+?dpsm.Update()
+  ?dpsPanel
+    dpsPanel.Recycle()
+    dpsPanel = null
+
+  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+
+/***************************************************************/
+
+
+
+// VARIABLES
+
+var blowing
+
+var keepMask = true
+
+var maskScr = 4
+var smiteScr = 1
+var weavScr = 3
+
+var canDebI
+var canDebP
+var canDebF
+
+var keepFTali = false
+
+?p.f = "boss"
+  keepFTali = true
+
+?p.ll
+  keepFTali = false
+  keepMask = false
+
+  ?smiteScr = 1 & p.ls > 10
+    smiteScr = 2
+
+
+
+// FUNCTIONS
+
+func ldtF(mode)
+
+  ?mode = "default"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.cshield1@
+  :?mode = "armorRegen"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.cshield2@
+  :?mode = "engage"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.fshield@
+  :?mode = "escape"
+    equipL mind
+    ?!keepMask
+      equipR @a.fshield@
+  :?mode = "magnet"
+    equipL star
+    ?!keepMask
+      equipR triskelion
+
+  :?mode = "extend"
+    equipL triskelion
+    equipR mask
+
+  :?mode = "magic"
+    ?keepMask
+      ?canDebI
+        equipL @a.dIwand1@
+      :?canDebP
+        equipL @a.dPwand@
+      :?canDebF
+        equipL @a.dFwand@
+
+    :
+      ?p.tt % 2 = 0
+        equipL triskelion
+        equipR hatchet
+
+      :?canDebI
+        equip @a.dIstaff@
+      :?canDebP
+        equip @a.dPstaff@
+      :?canDebF
+        equip @a.dFstaff@
+
+  :?mode = "meleeDmg"
+    equipL Vantum Phoenix
+    ?!keepMask
+      ?p.fd <= 5
+        equipR moon
+      :
+        equipR @a.auShield@
+
+  :?mode = "unmkDmg"
+    ?p.tt % 2 = 0 & p.fd > 4
+      equipL triskelion
+      equipR hatchet
+    :
+      equip @a.dUstaff@
+
+  :
+    >c-10,0,#red,
+    ^ERROR: ldtF() recieved incorrect mode: @mode@
+
+  return
+
+func fight1v1()
+  p.fds = foe.debuffs.string
+
+  /* How to apply debuffs:
+  - apply all except the ones the foe is immune to.
+  Finish when:
+  - all possible debuffs have been applied. */
+  canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
+  canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
+  canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+
+  ?canDebI | canDebP | canDebF
+    ?keepMask
+      ?canDebI
+        equipL @a.dIsword@
+      :?canDebP
+        equipL @a.dPsword@
+      :?canDebF
+        equipL @a.dFsword@
+    :
+      //Left hand:
+      ?canDebP
+        equipL @a.dPsword@
+      :?canDebF
+        equipL @a.dFsword@
+      :?canDebI
+        equipL @a.dIwand1@
+
+      //Right hand:
+      ?canDebI
+        equipR @a.dIsword@
+
+  :?keepMask
+    equipL Vantum Phoenix
+  :
+    p.bs = buffs.string
+    ?p.bs = "berserk"
+      c.doMoondial(Vantum Phoenix, a.fsword, 2)
+    :
+      c.doMoondial(Vantum Phoenix, a.fsword, 0)
+
+  return
+
+
+
+// PROCEDURE:
+
+c.doAAC("sword 0*", a.cshield1)
+
+?hp < maxhp
+  loc.Leave()
+
+?p.lb // AUTO BREWING
+  p.rs = res.stone
+  p.rw = res.wood
+  p.rb = res.bronze
+
+  ?p.rb >= 10
+    ?p.rw >= 10
+      ?p.ip ! "berserk"
+        brew wood + bronze
+
+    :?p.rs >= 10
+      ?p.ip ! "lucky"
+        brew stone + bronze
+    :
+      loc.Leave()
+  :
+    loc.Leave()
+
+?keepMask
+  ?p.ir ! "bardiche" &
+  ^p.ir ! "quarterstaff" &
+  ^p.ir ! "heavy hammer"
+    equipR mask
+
+?p.lb | p.ll
+  equipL triskelion
+  equipR @a.cshield1@
+
+:?c.canUseAETali() & !keepFTali
+  ?keepMask
+    c.useAETali("l")
+  :
+    equipL triskelion
+    c.useAETali("r")
+
+:?c.canUseFTali() & keepFTali
+  ?keepMask
+    c.useFTali("l")
+  :
+    equipL triskelion
+    c.useFTali("r")
+
+:?c.canUsePotDmg() & keepMask
+  activate potion
+
+:?pickup.distance ! 9999
+  ?c.canUseQstaff()
+    c.useQstaff(a.myqstaff)
+  :
+    ldtF("magnet")
+:
+  p.fd = foe.distance
+  p.fs = foe.state
+
+  ?p.f ! "yeti"
+    p.si = screen.i
+    p.bs = buffs.string
+    p.fn = foe.name
+
+    ?c.canUseBladeDS(smiteScr)
+      ?i.getBuffInfo("smite", false, 2) < 25
+        c.useBladeDS()
+
+    ?c.canUseMaskDS(maskScr)
+      ?i.getBuffInfo("smite", false, 2) >= 25
+        c.useMaskDS()
+      :
+        screen.ResetOffset()
+
+    ?c.canUseQstaff() &
+    ^p.ir ! "bardiche" &
+    ^p.ir ! "heavy hammer" & (
+    ^((c.canBash() | c.canDash()) & p.fd > 15)
+    ^| !(c.canBash() | c.canDash()))
+      c.useQstaff(a.myqstaff)
+
+    :?p.fd > 35
+      p.pa = armor
+      ?14 <= p.pa & p.pa <= 29
+        ldtF("default")
+      :?p.pa < 14
+        ldtF("armorRegen")
+      :
+        equipL triskelion
+        equipR mask
+
+    :?p.fd > 15
+      ldtF("engage")
+
+      var isAbtToDash
+      isAbtToDash = (p.fd <= 17)
+      ?keepMask & isAbtToDash
+        equipR @a.fshield@
+
+      p.fds = foe.debuffs.string
+      canDebI = (p.fds ! "chill" &
+      ^f ! "immune_to_debuff_chill")
+
+      ?!keepMask & canDebI & isAbtToDash &
+      ^i.getFoeTotalHP() > i.getBuffInfo("smite", false, 2) * a.smiteMult
+        equipR @a.aiShield@
+
+    :?c.canBash() & p.fn ! "Giant Ice Elemental"
+      c.bash(a.dIsword)
+    :?c.canDash()
+      c.dash(a.dIsword, a.dshield)
+
+    :
+      p.fc = foe.count
+
+      ?p.f = "spawner" | p.fn = "Ice Wall"
+        /******************
+        ?c.canUseWeav()
+          ?p.si = weavScr & p.fd < 7
+            c.useWeav()
+        // ****************/
+
+        ldtF("unmkDmg")
+
+      :
+        ?p.fn = "Giant Ice Elemental" // the miniboss
+          p.bs = buffs.string
+
+          ?c.canUseMask()
+            c.useMask()
+          :
+            fight1v1()
+
+        :?p.fc = 1
+          fight1v1()
+
+        :
+          p.fds = foe.debuffs.string
+          canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
+          canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
+          canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+
+          ?canDebI | canDebP | canDebF
+            ldtF("magic")
+          :
+            ldtF("unmkDmg")
+
+
+  :?p.f = "yeti" & p.fs ! 4
+    p.ft = foe.time
+
+    ?c.canUseQstaff() &
+    ^p.fd > 15 & p.fs ! 1
+      c.useQstaff(a.myqstaff)
+
+    ?p.fs = 1 & p.ft = 1
+      ui.OpenInv()
+
+    :?c.canBash()
+      c.bash(Vantum Phoenix)
+    :?c.canDash()
+      c.dash(Vantum Phoenix, a.dshield)
+
+    :?p.fa > 0 & c.canUsePotDmg()
+      activate potion
+    :
+      fight1v1()
+
+
+
+// *******************************************************
+//                  END OF "7-Ridge.txt"                  
+// *******************************************************

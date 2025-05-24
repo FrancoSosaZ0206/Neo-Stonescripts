@@ -1,0 +1,155 @@
+/*/*****           *****|*|
+   In-line Text Scroller 
+      Prod by Daikaji
+          v1.1.1
+\*\*****           *****|*|
+                    
+Purpose: Display large strings in
+smaller spaces by scrolling through
+the text! Customizable and multiple
+instances allowed. Won’t scroll if
+there is space for the full text.
+
+Parameters:
+input = The string you want to 
+scroll through. This can be a raw
+string or a variable.
+
+len = Length of the scrolling area.
+
+step = Time (in frames) the text 
+will delay before taking the next
+step in the scroll animation. I
+recommend 2.
+
+wait = Time (in frames) the text
+will stop so you can read it. I
+recommend somewhere between 30-60.
+If you set wait and step to the
+same number, you get continuous
+motion.
+
+Usage: For PC players - take the
+file and drag to your usual script
+folder. Use import, and then follow
+instructions below.
+
+For Mobile players(like me) - copy
+everything below the double line
+and paste at the top of your code.
+Careful not to override anything!
+Follow the rest of the usage
+instructions. If you want to copy 
+in these instructions as well, 
+that’s okay too.
+
+Call this function any time
+you would use the original string.
+Place it in a print command, or
+load a variable with it!
+Ex:
+>`0,9,Foe:@ScrollText(foe,20,2,45)@
+var L = ScrollText(loc,10,5,5)
+>`0,11,Loc:@L@
+
+Enjoy! (Copy below this line)
+=================================*/
+//ScrollText global vars 
+var keyST = []      // These arrays
+var waitCountST = []//act as a faux
+var indexST = []    //dictionary w/
+var targetST = []   //3 values.
+
+//helper function
+func SetNewTarget(SS,instance,
+^          input,inputSize,len)
+  var current = targetST[instance]
+  var next = current + len 
+  ?next >= inputSize
+    return 0
+
+  ?SS = false
+    return next
+
+  var temp
+  var tempArr = []
+  var result=string.IndexOf(input,
+  ^                       “ “,next)
+  ?result = -1
+    return 0
+  ?result <= next + 2
+    temp = string.Sub(input,result)
+    tempArr = string.Split(temp,
+    ^                       true)
+    ?tempArr.Count() = 0
+      return 0
+    :
+      return string.IndexOf(input,
+      ^            tempArr[0],next)
+  //else//
+  var goal
+  for i = 1..len/2+1
+    goal = next-i
+    ?string.IndexOf(input,” “,goal)
+    ^= goal
+      return goal+1
+
+  return next // Out of smartScroll
+              //range
+  
+//END SetNewTarget
+
+func ScrollText(input,len,step,wait)
+  var extraSpace = “  ”
+  var smartScroll = true
+
+  ?input = null
+    input = “”
+  :?Type(input) ! “string”
+    input = “Error: Input is wrong type.”
+
+  var inputSize
+  input = input + extraSpace
+  inputSize = string.size(input)
+  ?len>=inputSize
+    return input
+
+  var instance
+  ?keyST.IndexOf(input) = -1
+    keyST.Add(input)
+    waitCountST.Add(0)
+    indexST.Add(-1)
+    targetST.Add(0)
+  instance = keyST.IndexOf(input)
+
+  ?waitCountST[instance] = 0
+    indexST[instance] =
+    ^ indexST[instance] + 1
+    ?indexST[instance]>=inputSize
+      indexST[instance] = 0
+
+    ?indexST[instance] = 
+    ^targetST[instance]
+      waitCountST[instance] = wait
+      targetST[instance] =
+      ^SetNewTarget(smartScroll,
+      ^           instance,input,
+      ^             inputSize,len)
+    :
+      waitCountST[instance] = step
+
+  var output
+  var temp
+  ?indexST[instance]+len >inputSize
+    temp = indexST[instance] +
+    ^len-inputSize
+    output = string.Sub(input,
+    ^indexST[instance],len-temp)+
+    ^string.Sub(input,0,temp)
+  :
+    output = string.Sub(input,
+    ^    indexST[instance],len)
+  waitCountST[instance]=waitCountST[instance]-1
+  return output
+//====END OF ScrollText====
+

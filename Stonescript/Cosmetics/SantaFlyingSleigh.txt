@@ -1,0 +1,53 @@
+/*
+Santa's Flying Sleigh
+by michael.g.g.
+ver 1.1
+
+This script will draw Santa Claus flying with his reindeer in the distance across the sky.
+This will only happen in stages where there is an open sky. (Rocky Plateau, Icy Ridge and Stream of the Silent) 
+Should start at the beginning of the stage
+Rudolf's nose is red and the reindeers' legs are slightly animated
+
+Happy Holidays!
+  .	 .	.      .      `._o´*_.  Ho Ho Hoooo
+`',=.' `',=.' `',=.' `',=.'~~~  _-_-_
+*/
+
+
+//limit this script to only to stages with an open sky
+?loc = rocky | loc = ridge
+
+//Initialize the variables early in the stage
+  ?pos.x < 10
+    var deerFrame = 0
+    var deerX = 70
+
+//draw the sleigh for each frame of animation
+  ?deerFrame >= 0 & deerFrame < 5 & deerX > -50
+      >`@deerX@,6,@#888888@,ascii
+##.######.######.######.#####`._o´*_.
+`',=.'#`',=.'#`',=.'#`',=.'~~~~_-_-_#
+asciiend
+      >`@deerX@,6,@#AA0000@,ascii
+#
+`
+asciiend
+    deerFrame++
+
+  ?deerFrame >= 5 & deerFrame < 10 & deerX > -50
+      >`@deerX@,6,@#888888@,ascii
+##.######.######.######.#####`._o´*_.
+`'.=,'#`'.=,'#`'.=,'#`'.=,'~~~~_-_-_#
+asciiend
+      >`@deerX@,6,@#AA0000@,ascii
+#
+`
+asciiend
+    deerFrame++
+
+//decrease the sleigh's x position for each script iteration to have it move right to left
+  deerX--
+
+//reset the animation frames if frame counter is over 9
+  ?deerFrame >= 10
+    deerFrame = 0

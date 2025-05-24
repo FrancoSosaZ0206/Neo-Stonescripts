@@ -1,0 +1,113 @@
+/*Pet Stonehead
+By Mallathor, wooden construct
+Makes the Roof Overhead students always follow you around.
+Simply copy/paste into your mindstone, or you can import it if you're on PC.
+*/
+//Changeable Values——————————//
+var StoneheadPetX = 12
+var StoneheadPetY = -1
+//Main Code———————————————//
+var DisableStonehead = false
+var StoneheadPet
+var StoneheadPetFrame = 1
+var StoneheadRunAway = false
+?loc.begin | loc.loop 
+  StoneheadRunAway = false
+  StoneheadPetX = 12
+  StoneheadPetFrame = 1
+  DisableStonehead = false
+?time % 3 = 0
+  StoneheadPetFrame++
+?StoneheadPetFrame > 4
+  StoneheadPetFrame = 1
+//Art and  Drawing—————————//
+?DisableStonehead = true
+  StoneheadPet = ascii
+#
+asciiend 
+?(StoneheadPetFrame = 1 | !ai.walking)
+ ^& !StoneheadRunAway = true & DisableStonehead
+ ^=false 
+   StoneheadPet = ascii
+#####,
+####/-
+#o_/##
+#|‾###
+/#\###
+asciiend
+:?StoneheadPetFrame = 2 & !StoneheadRunAway
+^ = true & DisableStonehead =false
+ StoneheadPet = ascii
+#####,
+####/-
+#o_/##
+#|‾###
+#>\###
+asciiend
+:?StoneheadPetFrame = 3 & !StoneheadRunAway 
+^=true & DisableStonehead =false
+ StoneheadPet = ascii
+#####,
+####/-
+#o_/##
+#|‾###
+#|>###
+asciiend 
+:?StoneheadPetFrame = 4 & !StoneheadRunAway
+^=true 
+ StoneheadPet = ascii
+#####,
+####/-
+#o_/##
+#|‾###
+#|\###
+asciiend 
+?foe = phase & foe.distance < 25 & ai.enabled
+ ?time % 2 = 0 & StoneheadPetX < 101
+ 
+  StoneheadPetX++
+  StoneheadRunAway = true
+  ?StoneheadPetFrame = 1 & StoneheadRunAway 
+  ^=true & DisableStonehead =false
+   StoneheadPet = ascii
+############
+#AAAAAHHHHHH
+####\o/#####
+#####|######
+####/#\#####
+asciiend
+ :?StoneheadPetFrame = 2 & StoneheadRunAway 
+  ^=true & DisableStonehead =false
+
+   StoneheadPet = ascii
+############
+#AAAAAHHHHHH
+####\o/#####
+#####|######
+####/<######
+asciiend
+ :?StoneheadPetFrame = 3 & StoneheadRunAway 
+  ^=true & DisableStonehead =false
+
+  StoneheadPet = ascii
+############
+#AAAAAHHHHHH
+####\o/#####
+#####|######
+####<|######
+asciiend
+ :?StoneheadPetFrame = 4 & StoneheadRunAway 
+  ^=true & DisableStonehead =false 
+
+   StoneheadPet = ascii
+############
+#AAAAAHHHHHH
+####\o/#####
+#####|######
+####/|######
+asciiend
+?StoneheadPetX > 100
+  DisableStonehead = true
+
+>o-@StoneheadPetX@,@StoneheadPetY@,@StoneheadPet@
+//—————END—————//

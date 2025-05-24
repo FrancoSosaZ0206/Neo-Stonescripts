@@ -1,0 +1,42 @@
+//Pirate Hats
+//by: michael.g.g.
+//ver 1.0
+
+//This script is set to use a more detailed tricorn pirate hat when in big head mode and a bicorn hat with regular head. 
+//Colors for both hats and accessories can be modified by changing their variables below.
+//You can use names of colors such as #blue and #red but specific colors and shades will need to use a hex format.
+
+//This cosmetic was also designed to be compatible with the Skully hat. 
+//Import this *after* the Skully hat to get a skeleton pirate look.
+
+var bicornColor
+var tricornColor
+var eyePatchColor
+var jollyRogerColor
+
+//modify the values here to change colors-----
+bicornColor = #999999
+tricornColor = #b29670
+jollyRogerColor = #white
+eyePatchColor = #777777
+//---------------------------------------------
+
+?bighead
+  >h-5,-2,@tricornColor@,ascii
+###,.=.._
+##/.-x-.\\
+asciiend
+  >h-6,0,@eyePatchColor@,ascii
+#####.Ü#####
+asciiend
+:
+  >h-4,-1,@bicornColor@,ascii
+###___
+#,/___'.
+asciiend
+  >h-4,1,#white,ascii
+####U
+asciiend
+  >h-1,0,@jollyRogerColor@,ascii
+:o:
+asciiend

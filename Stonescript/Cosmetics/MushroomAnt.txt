@@ -1,0 +1,79 @@
+//Mushroom Ant
+//by michael.g.g.
+//version 1.3
+
+//This scirpt will place a non-hostile ant with a mushroom growing on its head panicking about halfway through the mushroom forest.
+//Higher star levels will show different mushrooms.
+
+//Initialize the variables early in the stage
+?pos.x < 50
+  var antFrame = 0
+  var antX = 70
+//When you reach a certain postion draw mushroom ant
+?loc = forest & (pos.x > 175 & pos.x < 227) & totaltime < 800
+//  >`1,7,ant = @antFrame@
+  play ant_walk
+
+  ?antFrame >= 0 & antFrame < 3
+    ?loc.stars > 10 
+      >`@antX@,16,@#888888@,ascii
+####_##
+#_#(_)#
+(_)(###
+-,\),-.
+>@/#/|-`
+asciiend
+    ?loc.stars <= 10
+      >`@antX@,16,@#888888@,ascii
+##__### 
+#(__)##
+###)###
+-,( ,-.
+>@/#/|-`
+asciiend
+    antFrame++
+    antX = 69
+
+  ?antFrame >= 3 & antFrame < 6
+    ?loc.stars > 10 
+      >`@antX@,16,@#888888@,ascii
+####_##
+#_#(_)#
+(_)(###
+-,\),-.
+-@(#|-)`
+asciiend
+    ?loc.stars <= 10
+      >`@antX@,16,@#888888@,ascii
+##__### 
+#(__)##
+###)###
+-,( ,-.
+-@(#|-)`
+asciiend
+    antFrame++
+    antX = 70
+
+  ?antFrame >= 6 & antFrame < 9
+    ?loc.stars > 10 
+      >`@antX@,16,@#888888@,ascii
+####_##
+#_#(_)#
+(_)(###
+-,\),-.
+>@'|\-\`
+asciiend
+    ?loc.stars <= 10
+      >`@antX@,16,@#888888@,ascii
+##__### 
+#(__)##
+###)###
+-,( ,-.
+>@'|\-\`
+asciiend
+    antFrame++
+    antX = 71
+
+?antFrame >= 9
+  antFrame = 0
+

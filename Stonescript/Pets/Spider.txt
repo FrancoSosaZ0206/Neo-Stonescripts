@@ -1,0 +1,119 @@
+//*******************************
+// PetSpider
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v3.58.6
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Travel the world with
+// a pet spider companion! 
+// As you explore, it'll
+// drop down randomly to 
+// say hi!
+// ___
+//  ┊
+//  ┊
+//  ┊
+//  楽
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that's it!
+//
+//
+// Enjoy!
+//
+//
+//*******************************
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+var text = ascii
+
+%%
+楽
+%%
+┊
+楽
+%%
+┊
+┊
+楽
+%%
+┊
+┊
+┊
+楽
+%%
+┊
+┊
+┊
+┊
+楽
+%%
+┊
+┊
+┊
+楽
+%%
+┊
+┊
+楽
+%%
+┊
+楽
+%%
+楽
+%%
+
+asciiend
+
+var wait = 0
+var a
+var waittime = 90
+var waitcounter = 0
+
+?totaltime <= 1
+  a = ui.AddAnim(text)
+  a.anchor = top_left
+  a.dock = top_left
+  a.x = 1 + rng % (screen.w-1)
+//
+
+?time % waittime = 0 & !a.paused
+  a.Play()
+  wait = 0
+//
+
+?wait = 1
+  ?waitcounter < 90
+    waitcounter++
+  :
+    a.Play()
+    wait = 1
+//
+    
+?a.frame = 5 & wait = 0
+  a.Pause()
+  wait = 1
+:?a.frame = 10
+  a.x = 1 + rng % (screen.w-1)
+  waittime = 30 + rng % (171)
+  waitcounter = 0
+//

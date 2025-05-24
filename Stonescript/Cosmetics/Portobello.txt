@@ -1,0 +1,88 @@
+//Portobello
+//By:Sterella
+var portobellohead = ［ascii
+###################
+##•´¯¯¯¯¯¯¯¯¯¯¯`•##
+#(_______________)#
+######|     |######
+######|  o o|######
+######\_###_/######
+asciiend,ascii
+#########___……_####
+# _…——´¯¯      `•##
+,´      ____……——'##
+L…——T¯¯¯   \#######
+#####\   ò ó|######
+######\_###_|######
+asciiend,ascii
+##############-…_##
+##•´¯¯¯¯¯¯¯¯¯¯¯¯`•#
+#(´      _________)
+#L…———/¯¯    |##.´#
+######|  > < /#####
+######\_###_/######
+asciiend,ascii
+###################
+##•´¯¯¯¯¯¯¯¯¯¯¯`•##
+#(_______________)#
+######|     |######
+######|  > <|######
+######\_###_/######
+asciiend］
+var portobellofeet = ［ascii
+ __
+U#U
+asciiend,ascii
+_ _
+#ö#
+asciiend,ascii
+__ 
+U#U
+asciiend,ascii
+_ _
+#U#
+asciiend］
+
+var feetcycle = 0
+var feetcycletime = 0
+var feetdelay
+var headstate = 0
+var righthold = 0
+var righttimer = 0
+
+?ai.walking
+  ?item.right = towering & item.left ! triskel
+    feetdelay = 12
+  :?item.right = triskel | item.left = triskel
+  ^& item.right ! towering
+    feetdelay = 6
+  :
+    feetdelay = 9
+  feetcycletime++
+  ?feetcycletime > feetdelay
+    ?player.direction = 1
+      feetcycle++
+      ?feetcycle = 4
+        feetcycle = 0
+    :
+      feetcycle--
+      ?feetcycle = -1
+        feetcycle = 3
+    feetcycletime = 0
+
+?righthold = item.right.state
+  righttimer++
+:
+  righttimer = 0
+
+?item.left.state > item.right.state |
+^righttimer > 5 & item.left.state >= 1
+  headstate = item.left.state
+:
+  headstate = item.right.state
+  righthold = item.right.state
+
+disable player
+
+>o-10,-3,@portobellohead［headstate-1］@
+>o-2,2,@portobellofeet［feetcycle］@

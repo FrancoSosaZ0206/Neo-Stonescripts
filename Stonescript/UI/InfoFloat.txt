@@ -1,0 +1,70 @@
+/* INFO FLOAT 1.0 by Gagabriell
+How to use: The FLOAT UI is a mobile UI, when you
+hold it for one second it can move around the
+screen, when you release it it will stay in the
+exact spot*/
+
+
+
+var xi = storage.get(＂x＂,0)
+var yi = storage.get(＂y＂,0)
+var Kill = storage.get(＂Kill＂,0)
+var f
+f = foe
+
+var BKill = storage.get(＂Bkill＂,0)
+var FC = 0
+?FC>foe.getcount(100000)
+ Kill = Kill + (FC-foe.getcount(100000))
+ storage.set(＂Kill＂,Kill)
+ ?foe = boss & foe = Phase2 = !Pallas
+  BKill = BKill + (FC-foe.getcount(100000))
+  storage.set(＂Bkill＂,BKill)
+FC = foe.getcount(100000)
+
+
+
+var color = #ffffff
+var delay = 30
+?input.x >= xi-2 & input.x <= xi+36
+ ?input.y >= yi & input.y <= yi+11
+  delay--
+
+?delay < 0
+  xi = input.x
+  yi = input.y
+  color = #00FF00
+  storage.set(＂y＂,yi)
+  storage.set(＂x＂,xi)
+?key = Primary = false
+ delay = 30
+ storage.set(＂y＂,yi)
+ storage.set(＂x＂,xi)
+ color = #ffffff
+
+var Borde = ［ascii
++-----------------------------------+
+|###################################|
+|#################                  |
+|##################                 |
+|##############                     |
+|##############                     |
+|###########                        |
+|###################################|
+|###################                |
+|#################                  |
++-----------------------------------+
+asciiend］
+>`@xi@,@yi@,Player Name: @player.name@\n
+^Treasure: @item.GetTreasureCount()@/
+^@item.GetTreasureLimit()@\n
+^Foe Damage: @foe.damage@\n
+^Foe Dist: @foe.distance@ \n
+^Foe State: @foe.state@ \n
+^Time: @time@\n
+^Best Time:@loc.besttime@ | Average Time:@loc
+^.averagetime@\n
+^Total Kills: @Kill@\n
+^Boss Kill: @BKill@\n
+
+>`@xi-1@,@yi-1@,@color@,@Borde［0］@

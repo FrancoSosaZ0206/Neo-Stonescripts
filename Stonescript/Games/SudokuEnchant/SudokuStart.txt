@@ -1,0 +1,365 @@
+func main()
+  ?loc.begin & loc = Waterfall
+    ambient.Stop()
+    music.Play(musicList[rng % musicList.Count()])
+    banner(0)    
+    highLevel = storageLevel(0)
+		initUI()
+    adjustUI()
+  ?totaltime = 2
+    sudoCore.initUI()
+    ballFlashInit()
+  ?totaltime > 2
+    sudoCore.core()
+    loopEvent()
+
+
+func initUI()
+  mainWindow = ui.AddPanel()
+  mainWindow.clip = true
+
+  mainWindow.x = 0
+  mainWindow.y = 0
+  mainWindow.anchor = center_center
+  mainWindow.dock = center_center
+	mainWindow.w = screen.w
+	mainWindow.h = screen.h
+  var customStyle = ui.AddStyle("╔═╗║ ║╚═╝")
+  mainWindow.style = customStyle
+
+  title = ui.AddText()
+  mainWindow.Add(title)
+  title.x = 0
+  title.y = 0
+  title.ay = center
+  title.dy = center
+  title.w = sudoW
+  title.h = sudoH
+  title.text = string.Format(sudoAnimVar.titleText)
+  title.color = #999999
+
+  buttonList.Clear()
+  enTitleAnim.Clear()
+  enTitleLayer.Clear()
+
+  for i = 0..5
+    buttonInit(enchantAnimPos[i][0],enchantAnimPos[i][1],i)
+    sudoEnchantAnimInit(mainWindow,enTitleAnim,enTitleLayer,enchantAnimPos[i][0],enchantAnimPos[i][1],i)
+    enTitleAnim[i].dock = center_center
+
+  startNote = ui.AddText()
+  mainWindow.Add(startNote)
+  startNote.color = #FFFFFF
+  startNote.align = center
+  startNote.dock = bottom_center
+  startNote.w = mainWindow.w - 16
+  startNote.h = 2
+  startNote.y = -2
+  ?te.language = "ZH-CN"
+    startNote.text = startNoteText[0]
+  :?te.language = "ZH-TW"
+    startNote.text = startNoteText[1]
+  :
+    startNote.text = startNoteText[2]
+
+  resetButton = ui.AddButton()
+  mainWindow.Add(resetButton)
+  resetButton.SetDown(resetButtonDown)
+  resetButton.style = 2
+  resetButton.dock = top_right
+  resetButton.anchor = top_right
+  resetButton.x = -1
+  resetButton.y = 1
+  resetButton.w = 5
+  resetButton.h = 3
+  resetButton.text = string.Format("R")
+  
+func loopEvent()
+  ?ballFlashTime > 0
+    ?dt(ballFlashTime) = 36
+      ballFlashAnim.Pause()
+      ?sudoCore.mainWindow.visible = false 
+        sudoCore.mainWindow.visible = true
+        mainWindow.visible = false
+      :
+        sudoCore.mainWindow.visible = false
+        mainWindow.visible = true
+      ballFlashAnim.visible = true
+    :?dt(ballFlashTime) = 50
+      ballFlashAnim.Play()
+    :?dt(ballFlashTime) > 180
+      ballFlashAnim.visible = false
+      ballFlashTime = -1
+
+  ?sudoCore.vectory = 1 
+    ?sudoCore.dt(sudoCore.vectoryTime) = 45
+      highLevel = storageLevel(nowLevel+1)
+      ballFlashStart(colorEnAnim[nowLevel],0,0)
+      adjustUI()
+      nowLevel = -1
+  
+  ?totaltime > 25
+    ?highLevel >= 6 
+      jamInit()
+    ?sudoJamWindow.flyDirection > -2
+      sudoJamWindow.shinyAnimPlay()
+      ?sudoJamWindow.flyDirection ! 0
+        sudoJamWindow.fly()
+        ?sudoJamWindow.flyDirection = -1
+            for i = 0..5
+              buttonList[i].visible = inherit
+            jamButton.visible = inherit
+            resetButton.visible = inherit
+
+func ballFlashStart(color_,x_,y_)
+  ballFlashAnim.color = color_
+  ballFlashAnim.x = x_ 
+  ballFlashAnim.y = y_ 
+  ballFlashAnim.visible = true
+  ballFlashAnim.Play()
+  play soul_stone
+  ballFlashTime = totaltime
+
+func ballFlashInit()
+  ballFlashAnim = ui.AddAnim(sudoAnimVar.ballFlash)
+  ballFlashAnim.visible = false
+  ballFlashAnim.duration = 60
+  ballFlashAnim.pivotY = -2
+  ballFlashAnim.loop = false
+  ballFlashAnim.dock = center_center
+
+func jamInit()
+  ?jamTime = -1
+    jamButton = ui.AddButton()
+    mainWindow.Add(jamButton)
+    jamButton.SetDown(jamShow)
+    jamButton.style = 0
+    jamButton.visible = false
+    jamButton.x = -1
+    jamButton.w = 3
+    jamButton.h = 3
+    jamButton.text = ""
+
+    jamTime = totaltime
+    jamAnim = ui.AddAnim(sudoAnimVar.yellowJam)
+    mainWindow.Add(jamAnim)
+    jamAnim.duration = 70
+    jamAnim.color = #EAD142
+    jamAnim.loop = true
+    jamAnim.pivotX = 0
+    jamAnim.pivotY = 0
+    jamAnim.Play()
+
+    boxAnim = ui.AddAnim(sudoAnimVar.jamBox)
+    mainWindow.Add(boxAnim)
+    boxAnim.duration = 90
+    boxAnim.pivotY = 0
+    boxAnim.pivotX = 1
+    boxAnim.color = #999999
+    boxAnim.loop = false
+  :?dt(jamTime) > 40 & dt(jamTime) <= 130
+    var t = dt(jamTime)
+    var t_c = math.sin(t*math.pi*0.05) / 2 + 0.5
+    ?t_c = 1
+      play haunted_gate_key_bounce_1
+    boxAnim.color = color.Lerp("#333333", "#ffffff", t_c)
+  :?dt(jamTime) = 131
+    boxAnim.Play()
+  :?dt(jamTime) = 220
+    jamButton.visible = inherit
+
+func jamShow()
+  for i = 0..5
+    buttonList[i].visible = false
+  jamButton.visible = false
+  resetButton.visible = false
+  sudoJamWindow.initUI()
+  sudoJamWindow.flyIn()
+
+func adjustUI()
+  for i = 0..5
+    ?i < highLevel
+      enTitleAnim[i].visible = inherit
+      enTitleLayer[i].color = #FFFFFF
+      buttonList[i].visible = inherit
+    :?i = highLevel
+      enTitleAnim[i].visible = inherit
+      enTitleLayer[i].color = #888888
+      buttonList[i].visible = inherit
+    :?i > highLevel
+      enTitleAnim[i].visible = false
+      buttonList[i].visible = false
+  ?highLevel = 0
+    startNote.visible = inherit
+  :
+    startNote.visible = false
+
+func sudoEnchantAnimInit(window,enAnim_,enLayer_,x_,y_,n_)
+  var enchantAnim_ = ui.AddAnim(sudoAnimVar.enchantAnimText)
+  var edgeLayer_ = enchantAnim_.AddLayer(sudoAnimVar.enchantText)
+
+  edgeLayer_.pivotX = 1
+  edgeLayer_.pivotY = 1
+  window.Add(enchantAnim_)
+  enchantAnim_.duration = 138
+  enchantAnim_.loop = true
+
+  enchantAnim_.dock = center_center
+  enchantAnim_.w = 3
+  enchantAnim_.h = 1
+  enchantAnim_.x = x_
+  enchantAnim_.y = y_
+
+  edgeLayer_.color = #888888
+  enchantAnim_.color = colorEnAnim[n_]
+  enchantAnim_.Play()
+
+  enAnim_.Add(enchantAnim_)
+  enLayer_.Add(edgeLayer_)
+
+func buttonInit(x_,y_,i_)
+  var button_ = ui.AddButton()
+  button_.SetDown(startButtonPressed)
+  button_.style = 0
+  button_.x = x_
+  button_.y = y_
+  button_.w = 5
+  button_.h = 3
+  button_.text = string.Format(i_+"")
+
+  mainWindow.Add(button_)
+  buttonList.Add(button_)
+
+func startButtonPressed(btn)
+  nowLevel = int.Parse(btn.text)
+  sudoCore.matInit(nowLevel)
+  ballFlashStart(colorEnAnim[nowLevel],0,0)
+
+func resetButtonDown()
+  mainWindow.visible = false
+
+  resetWindow = ui.AddPanel()
+  resetWindow.w = screen.w
+  resetWindow.h = screen.h
+  mainWindow.style = ui.AddStyle("╔═╗║ ║╚═╝")
+  
+  var resetNote = ui.AddText()
+  resetWindow.Add(resetNote)
+  resetNote.color = #FFFFFF
+  resetNote.align = center
+  resetNote.w = resetWindow.w - 24
+  resetNote.h = 2
+  resetNote.y = -5
+  ?te.language = "ZH-CN"
+    resetNote.text = resetNoteText[0]
+  :?te.language = "ZH-TW"
+    resetNote.text = resetNoteText[1]
+  :
+    resetNote.text = resetNoteText[2]
+
+  var resetTrueButton = ui.AddButton()
+  resetWindow.Add(resetTrueButton)
+  resetTrueButton.SetUp(resetTrueButtonUp)
+  resetTrueButton.style = 4
+  resetTrueButton.x = -5
+  resetTrueButton.h = 3
+  resetTrueButton.w = 7
+  resetTrueButton.tcolor = #red
+  resetTrueButton.text = "Yes"
+
+  var resetFalseButton = ui.AddButton()
+  resetWindow.Add(resetFalseButton)
+  resetFalseButton.SetUp(resetFalseButtonUp)
+  resetFalseButton.style = 4
+  resetFalseButton.x = 5
+  resetFalseButton.h = 3
+  resetFalseButton.w = 7
+  resetFalseButton.tcolor = #green
+  resetFalseButton.text = "No"
+
+func resetTrueButtonUp()
+  storage.Set("SudokuEnchantHighLevel", 0)
+  loc.Leave()
+
+func resetFalseButtonUp()
+  resetWindow.Clear()
+  resetWindow.Recycle()
+  mainWindow.visible = inherit
+
+
+func dt(time_)
+  return (totaltime - time_)
+
+func storageLevel(level_)
+  ?storage.Has("SudokuEnchantHighLevel")
+    var highLevel_ = storage.Get("SudokuEnchantHighLevel")
+    ?highLevel_ >= level_
+      return highLevel_
+    :
+      storage.Set("SudokuEnchantHighLevel",level_)
+      return level_
+  :
+    storage.Set("SudokuEnchantHighLevel",0)
+    return 0
+
+func banner(No_)
+  ?te.language = "ZH-CN"
+    ui.ShowBanner(banners[No_][0][0],banners[No_][0][1])
+  :?te.language = "ZH-TW"
+    ui.ShowBanner(banners[No_][1][0],banners[No_][1][1])
+  :
+    ui.ShowBanner(banners[No_][2][0],banners[No_][2][1])
+
+var musicList = [rocky_plateau_0,rocky_plateau_1,rocky_plateau_2,rocky_plateau_3,rocky_plateau_4]
+var mainWindow
+var highLevel = 0
+var nowLevel = -1
+var title
+var startNote
+var resetButton
+var resetWindow
+
+var boxAnim
+var jamAnim
+var jamButton
+var jamTime = -1
+
+var buttonList = []
+
+var enchantAnimPos = [[-1,-7],[9,-3],[9,3],[-1,6],[-11,3],[-11,-3]]
+var enTitleAnim = []
+var enTitleLayer = []
+var colorEnAnim = [#cyan,#yellow,#green,#blue,#red,#rainFF]
+
+var ballFlashAnim
+var ballFlashTime = -1
+
+var sudoX = 0
+var sudoY = 0
+var sudoW = 34
+var sudoH = 19
+
+var banners = [
+  [
+    ["宝庫","奇特的六边锁"],
+    ["寶庫","奇特的六边鎖"],
+    ["The Grand Treasury","The Unique Hexagonal Lock"]
+  ]
+]
+
+var startNoteText = [
+"\"附魔？好像雕刻在一个按键上，或许我能够试着按一下...\" ",
+"\"附魔？好像雕刻在一個按鍵上，或許我能夠試著按一下...\" ",
+"\"Enchantment? It seems carved on a button, perhaps I should try pressing it...\""
+]
+
+var resetNoteText = [
+"这个操作会[color=#red]重置游戏进度[/color]并离开，你确定吗？\n如果想要[color=#green]保存游戏[/color]，正常离开关卡即可。",
+"這個操作會[color=#red]重置遊戲進度[/color]並離開，你確定嗎？\n如果想要[color=#green]保存遊戲[/color]，正常離開關卡即可 。",
+"\"Enchantment? It seems carved on a button, perhaps I should try pressing it...\""
+]
+
+
+var sudoCore = import Games/SudokuEnchant/SudokuCoreEn
+var sudoAnimVar = import Games/SudokuEnchant/SudokuEnchantAnim
+var sudoJamWindow = import Games/SudokuEnchant/SudokuJamWindow

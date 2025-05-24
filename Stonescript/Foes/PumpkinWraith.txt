@@ -1,0 +1,50 @@
+// Pumpkin Wraith Foe Cosmetic
+// by: michael.g.g.
+// v1.0
+
+//Puts a big pumpkin head on the acronian cultist in the temple to make it look like a pumpkin headed foe.
+
+var lightColor
+var stemColor
+
+lightColor = #yellow //eyes, mouth
+stemColor = #706020 //little stem on top - brown by default
+
+var stateNone = 0
+var stateIdle = 1
+var currentState = stateNone
+var stateTime = 0
+
+func SetState(newState)
+  currentState = newState
+  stateTime = 0
+  SetState(stateIdle)
+
+stateTime++
+
+//set flickering for eyes and mouth based on stateTime
+?stateTime % 2 = 0
+	lightColor = #yellow
+:
+	lightColor = #white
+
+//draw pumpkin-----------------------------
+?foe = acronian_cultist
+  >o@foe.distance - 1@,@-5@,@#CC9020@,ascii
+   ,^..   
+ ,´^,,^`. 
+(( `vvv'))
+ ` `^^^'´
+asciiend
+  >o@foe.distance - 1@,@-5@,@lightColor@,ascii
+#
+###^..^
+###`vvv´
+###'^^^'
+asciiend
+  >o@foe.distance - 1@,@-5@,@stemColor@,ascii
+###,^.  
+#
+#
+#
+asciiend

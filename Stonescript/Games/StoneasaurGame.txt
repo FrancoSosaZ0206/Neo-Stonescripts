@@ -1,0 +1,1338 @@
+/*
+SSRPG Version: 3.68.2
+Version: 0.9.1
+Author: xx
+Assistance: JianShang36, Okamiroy, Citriondragon
+
+Reference to Chrome Dino and Ascension(Legend quest)
+*/
+/* 
+Instruction:
+
+Enter the following code in deadwood waterfall
+//	import Games/StoneasaurGame
+
+Steam: Press the C key to operate
+Phone: Click on the screen to operate
+*/
+/*
+Introduction:
+
+The game takes place after "Ascension",
+with Pusher ascends to the periphery of Acropolis...
+
+You need to control pusher to jump over obstacles and reach Acropolis
+
+NOTE: In-game text is not yet complete
+
+(Simplified Chinese)
+游戏发生在"化蝶飞升"后, 黑工登上了卫城... 的外围
+你需要操作角色跳过障碍, 到达卫城
+
+注意: 游戏内的文字尚未完成
+
+(Traditional Chinese)
+遊戲發生在"升天之旅"之後, 大力推手登上了衛城... 的外圍
+你需要控制角色跳過障礙, 到達衛城
+
+注意: 遊戲內的文本尚未完成
+*/
+
+
+
+disable banner
+
+var messageList = []
+
+var char
+var moveAnim = ascii
+#O
+/|\
+/#\
+%%
+#O
+/|\
+#>\
+%%
+#O
+/|\
+#|\
+%%
+#O
+/|\
+#|>
+asciiend
+
+var jumpDuration = 30
+var jumpDurationTimer = 0
+
+var delta
+
+var speed = 1
+var gameTime = 0
+var gameTimer = 0
+var gameDelay = 2
+
+var mainWindow
+
+var backgroundList = []
+var backgroundArt
+
+var groundList = []
+var groundHeight
+
+var obstacleList = []
+var baseDistance = 100
+// [[width, height, art]]
+var obstacleArtList = [
+[5, 3, ascii
+#___
+├─•─┤
+└───┘
+%%
+#___
+├─o─┤
+└───┘
+%%
+┌-─-┐
+╞╤8╤╡
+└┴─┴┘
+%%
+#___
+┼┬Ω┬┼
+└┴─┴┘
+asciiend],
+[7, 5, ascii
+#│¯¯¯|\
+#│(╬)|│
+#│ ║ |│
+#│   |│
+´¯¯¯¯'`
+asciiend]
+]
+
+var scoreWindow
+var scoreText
+var scoreValueText
+var highscoreText
+var highscoreValueText
+
+var fadeWindow
+var fadeTimer = 0
+var palette = ["#FFFFFF","#EEEEEE","#DDDDDD","#CCCCCC","#BBBBBB","#AAAAAA","#999999","#888888","#777777","#666666","#555555","#444444","#333333","#222222","#111111","#000000"]
+
+var messageWindow
+var maxMessageWidth
+var maxMessageHeight
+
+var messageText
+var messageIndex = 0
+
+var jamText
+var jamNode
+
+/*
+0: initialize
+1: title
+2: playing
+3: gameover
+*/
+var state = 0
+
+var score = 0
+var highscore = 0
+
+
+
+//////////     MAIN     //////////
+
+func main()
+	?loc ! fall
+		return
+
+	checkInput() // 預防輸入滯留
+
+	?state = 2 // playing
+		score = score + 1
+		?score > highscore
+			highscore = score
+		updateScoreText()
+		updateSpeed()
+
+		//gameTimer = (gameTimer + 1) % gameDelay
+		//?!gameTimer
+		gameTime++
+
+		updateGround()
+		updateObstacle()
+		?delta.x > -5
+			delta.x = delta.x - speed
+
+		updateCharJump()
+
+	:?state = 1 // title
+
+		?updateFade()
+			return
+		?checkKey()
+			?!getWatch(3)
+				state = -3
+				return
+		?gameTime // restart delay
+			gameTime--
+			return
+
+		updateCharJump()
+		?char.playing
+			state = 2
+			return
+
+		showHint()
+
+	:?state = 3 // gameover
+		>`@screen.w/2-5@,@screen.h/2-2@,GAME  OVER
+		?gameTime // restart delay
+			gameTime--
+			return
+		?checkInput()
+			goto()
+			gameTime = 15
+
+		showHint()
+
+	:?state = 0 // initialize
+		init()
+
+		?storage.Get("watch", 0)
+			fadeIn()
+			reset()
+		:
+			state = -1
+
+	:?state < 0
+		state = -watch(-state)
+		?state >= 0
+			gameTime = 15
+
+	//showdata()
+
+
+
+//////////     CREATE SCREEN     //////////
+
+func createUI()
+	mainWindow = ui.AddPanel()
+	mainWindow.w = screen.w
+	mainWindow.h = screen.h
+	mainWindow.clip = true
+	mainWindow.style = 0
+
+	backgroundList.Clear()
+	createBackground()
+	createBackground()
+	createBackgroundArt()
+
+	groundList.Clear()
+	createGround()
+	createGround()
+
+	createCharcter()
+	createDelta()
+
+	obstacleList.Clear()
+	for i = 0..obstacleArtList.Count() - 1
+		createObstacle(obstacleArtList[i])
+	resetObstaclePos()
+
+	createScoreWindow()
+
+	fadeWindow = ui.AddCanvas()
+	fadeWindow.w = mainWindow.w
+	fadeWindow.h = mainWindow.h
+	fadeWindow.blend = multiply
+	fadeWindow.SetFG("#000000")
+	mainWindow.Add(fadeWindow)
+
+	createMessageWindow()
+
+func createBackground()
+	var background = ui.AddAnim(ascii
+                        .                                                                 .     .    
+.        .              .           .                           . .                                  
+                                 .                                                           .     . 
+           .                      .                      .                                           
+                                                                          .                          
+                                                      .             .  .         .                   
+                  .                               .    .                                 .           
+     .                    .                                      .                                   
+.           .      .                                      .        .                                 
+                                    .    .                 .                            .            
+                                         .          .         .                                .     
+          .                                                                                       .  
+                                                                                                     
+                                                                              ..                     
+                                                                                                     
+                  .                                          .                                       
+      .                              .                                                               
+                  .                           .        ..                      .  .                  
+          .  .                              .                       .  .  .         .            .   
+                     .  .                        .           .                           ..          
+             .                .                                .                                     
+           .      .                                    .     ..       . . .            .       .     
+               .                                                  .    .                         .   
+      .                                                    .             .                     .     
+          .                            .       .                         .                           
+                 .       .                                                                  .        
+  .      .   .  .                                                 .            .                     
+   ..     .                            ..                            .     .   .         .    .      
+                      .    . .                                                      .                
+                               .      .     .                                              .         
+asciiend)
+	background.anchor = center_left
+	background.dock = center_left
+	mainWindow.Add(background)
+	backgroundList.Add(background)
+
+func createBackgroundArt()
+	backgroundArt = ui.AddAnim(ascii
+
+%%
+white tree
+%%
+Thundering Fortress
+%%
+Grand Treasury
+asciiend)
+	backgroundArt.x = screen.w
+	backgroundArt.anchor = center_left
+	backgroundArt.dock = center_left
+	backgroundArt.frame = 0
+	mainWindow.Add(backgroundArt)
+
+func createGround()
+	var ground = ui.AddAnim(ascii
+-^-------^-^^---^---^-^------^--------^----------------^^---------------^--^----^--^----^-----^-----^---
+ ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐  
+ │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │  
+┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   
+│   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   
+   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌
+   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
+  ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐   ┌   ┐ 
+  │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │ 
+asciiend)
+	ground.anchor = bottom_left
+	ground.dock = bottom_left
+	ground.color = "#808080"
+	mainWindow.Add(ground)
+	groundList.Add(ground)
+
+	groundHeight = 8
+
+func createCharcter()
+	char = ui.AddAnim(moveAnim)
+	char.x = screen.w / 5
+	char.y = -groundHeight
+	char.anchor = bottom_left
+	char.dock = bottom_left
+	char.duration = 20
+	char.loop = true
+	char.Stop()
+	mainWindow.Add(char)
+
+func createDelta()
+	delta = ui.AddAnim(ascii
+#
+#
+╒─,─╕
+└───┘
+%%
+#
+,───,
+╞─,─╡
+└───┘
+%%
+#___
+│```│
+╞─,─╡
+└───┘
+%%
+#___
+╞─∆─╡
+╞─,─╡
+└───┘
+%%
+#
+#___
+╞─∆─╡
+└───┘
+asciiend)
+	delta.x = char.x - 8
+	delta.y = -groundHeight
+	delta.anchor = bottom_left
+	delta.dock = bottom_left
+	delta.color = "#rainbow"
+	?storage.Get("watch", 0) < 8
+		delta.visible = false
+	mainWindow.Add(delta)
+
+func createObstacle(art)
+	var width = art[0]
+	var height = art[1]
+	var anim = art[2]
+	var obstacle = ui.AddAnim(anim)
+	obstacle.w = width
+	obstacle.h = height
+	obstacle.y = -groundHeight
+	obstacle.anchor = bottom_left
+	obstacle.dock = bottom_left
+	mainWindow.Add(obstacle)
+	obstacleList.Add(obstacle)
+
+func createScoreWindow()
+	var text
+
+	scoreWindow = ui.AddPanel()
+	scoreWindow.x = -3
+	scoreWindow.y = 1
+	scoreWindow.w = 15
+	scoreWindow.h = 2
+	scoreWindow.anchor = top_right
+	scoreWindow.dock = top_right
+	scoreWindow.style = 0
+	mainWindow.Add(scoreWindow)
+
+	text = messageList[0][0] + ": "
+	scoreText = ui.AddText(text)
+	scoreText.x = 1
+	scoreText.w = string.Size(text)
+	scoreText.h = 1
+	scoreText.anchor = top_left
+	scoreText.dock = top_left
+	scoreWindow.Add(scoreText)
+
+	text = string.Format("{0}", score)
+	scoreValueText = ui.AddText(text)
+	scoreValueText.w = string.Size(text)
+	scoreValueText.h = 1
+	scoreValueText.anchor = top_right
+	scoreValueText.dock = top_right
+	scoreWindow.Add(scoreValueText)
+
+	text = messageList[0][1] + ": "
+	highscoreText = ui.AddText(text)
+	highscoreText.w = string.Size(text)
+	highscoreText.h = 1
+	highscoreText.anchor = bottom_left
+	highscoreText.dock = bottom_left
+	scoreWindow.Add(highscoreText)
+
+	text = string.Format("{0}", highscore)
+	highscoreValueText = ui.AddText(text)
+	highscoreValueText.w = string.Size(text)
+	highscoreValueText.h = 1
+	highscoreValueText.anchor = bottom_right
+	highscoreValueText.dock = bottom_right
+	scoreWindow.Add(highscoreValueText)
+
+func createMessageWindow()
+	maxMessageWidth = mainWindow.w * 2 / 3
+	maxMessageHeight = mainWindow.h * 2 / 3
+
+	messageWindow = ui.AddPanel()
+	messageWindow.w = 0
+	messageWindow.h = 0
+	messageWindow.clip = true
+	messageWindow.style = 2
+	messageWindow.visible = false
+	mainWindow.Add(messageWindow)
+
+	messageText = ui.AddText("")
+	messageText.x = 2
+	messageText.y = 1
+	messageText.w = maxMessageWidth - 4
+	messageText.h = maxMessageHeight - 2
+	messageText.anchor = top_left
+	messageText.dock = top_left
+	messageWindow.Add(messageText)
+
+func createJam()
+	?!jamText
+		jamText = ui.AddText()
+		jamText.text = greenJamText
+		jamText.y = 2
+		jamText.w = 21
+		jamText.h = 9
+		jamText.align = center
+		jamText.anchor = top_center
+		jamText.dock = top_center
+		jamText.color = "#00b300"
+		jamText.visible = false
+		messageWindow.Add(jamText)
+
+	?!jamNode
+		jamNode = ui.AddText()
+		jamNode.text = messageList[0][3]
+		jamNode.y = -1
+		jamNode.w = maxMessageWidth - 4
+		jamNode.h = 3
+		jamNode.align = center
+		jamNode.anchor = bottom_center
+		jamNode.dock = bottom_center
+		jamNode.visible = false
+		messageWindow.Add(jamNode)
+
+	?!jamShinyList.Count()
+		//jamShinyList.Clear()
+		for i = 0..1
+			createJamShiny()
+
+func createJamShiny()
+	var anim = ui.AddAnim(jamShiny)
+	anim.w = 5
+	anim.h = 6
+	anim.duration = 30 - rng % 5
+	anim.color = "#00E600"
+	anim.loop = false
+	mainWindow.Add(anim)
+	jamShinyList.Add(anim)
+
+
+
+//////////////////////////////
+
+func fadeIn()
+	fadeTimer = 15
+	updateFade()
+
+func fadeOut()
+	fadeTimer = -15
+	updateFade()
+
+func updateFade()
+	?fadeTimer
+		var d = 3
+		?fadeTimer > 0
+			fadeWindow.SetFG(getPaletteColor(fadeTimer))
+			?!(totaltime % d)
+				fadeTimer--
+		:?fadeTimer < 0
+			fadeWindow.SetFG(getPaletteColor(fadeTimer + palette.Count()))
+			?!(totaltime % d)
+				fadeTimer++
+	return fadeTimer
+
+func getPaletteColor(n)
+	return palette[math.Clamp(n, 0, palette.Count() - 1)]
+
+func setupMessage(message)
+	messageWindow.visible = true
+	messageText.text = message
+
+func setupJam()
+	jamText.visible = true
+	jamNode.visible = true
+	setupMessage(" ")
+
+func clearJam()
+	?jamText
+		jamText.visible = false
+	?jamNode
+		jamNode.visible = false
+
+func updateMessage()
+	var d = 10
+	?messageWindow.visible
+		?messageText.text
+			?messageWindow.w = maxMessageWidth & messageWindow.h = maxMessageHeight
+				?checkInput()
+					messageText.text = ""
+					clearJam()
+			:
+				?messageWindow.w < maxMessageWidth
+					messageWindow.w = messageWindow.w + maxMessageWidth / d + 1
+				?messageWindow.w > maxMessageWidth
+					messageWindow.w = maxMessageWidth
+
+				?messageWindow.h < maxMessageHeight
+					messageWindow.h = messageWindow.h + maxMessageHeight / d + 1
+				?messageWindow.h > maxMessageHeight
+					messageWindow.h = maxMessageHeight
+
+				messageText.w = messageWindow.w - 4
+				messageText.h = messageWindow.h - 2
+		:
+			?messageWindow.w = 0 & messageWindow.h = 0
+				messageWindow.visible = false
+			:
+				?messageWindow.w > 0
+					messageWindow.w = messageWindow.w - maxMessageWidth / d - 1
+				?messageWindow.w < 0
+					messageWindow.w = 0
+
+				?messageWindow.h > 0
+					messageWindow.h = messageWindow.h - maxMessageHeight / d - 1
+				?messageWindow.h < 0
+					messageWindow.h = 0
+				
+	return messageWindow.visible
+
+func updateMessageList(messageListIndex)
+	?messageWindow.visible
+		updateMessage()
+	:
+		var targetList = messageList[messageListIndex]
+		?messageIndex < targetList.Count()
+			setupMessage(targetList[messageIndex])
+			messageIndex++
+		:
+			messageIndex = 0
+	return messageIndex
+
+func updateJamShiny()
+	?gameTime
+		gameTime--
+	:
+		var shiny
+		for i = 0..jamShinyList.Count() - 1
+			shiny = jamShinyList[i]
+			?!shiny.playing
+				shiny.x = rng % maxMessageWidth - maxMessageWidth / 2
+				shiny.y = rng % maxMessageHeight - maxMessageHeight / 2
+				shiny.flipX = rng % 2 = 0
+				shiny.Play()
+				gameTime = 30 / jamShinyList.Count()
+				return i
+	return -1
+
+//////////     INIT     //////////
+
+func init()
+	highscore = storage.Get("highscore", 0)
+	getLanguage()
+	createUI()
+
+func reset()
+	state = 1
+	score = 0
+
+	gameTime = 0
+	gameTimer = 0
+	gameDelay = 2
+	speed = 1
+
+	char.x = screen.w / 5
+	char.pivotY = 0
+	char.frame = 0
+	jumpDurationTimer = 0
+
+	updateGround()
+	resetObstaclePos()
+	delta.x = char.x - 8
+
+func resetObstaclePos()
+	for i = 0..obstacleList.Count() - 1
+		var obstacle = obstacleList[i]
+		obstacle.x = baseDistance + rng % baseDistance
+		obstacle.frame = 0
+
+
+
+//////////     UPDATE     //////////
+
+func updateScoreText()
+	var text = string.Format("{0}", score)
+	scoreValueText.text = text
+	scoreValueText.w = string.size(text)
+	
+
+func updateSpeed()
+	?score % 500 = 0
+		?score = math.Pow(speed + 1, 2) * 500
+			speed = speed + 1
+			char.x--
+		//:?score = 1000
+		//	gameDelay = 1
+
+//var acceleration = -0.0375
+//var velocity = 1.125
+func updateCharJump()
+	?jumpDurationTimer
+		jumpDurationTimer--
+		char.pivotY = math.CeilToInt(math.Sin((jumpDuration - jumpDurationTimer) * math.pi / jumpDuration) * 8)
+		//var x = jumpDuration - jumpDurationTimer
+		//char.pivotY = math.FloorToInt(velocity * x + acceleration * x * x)
+		/*
+		?jumpDurationTimer >= jumpDuration - 12
+			char.pivotY = (jumpDuration - jumpDurationTimer) / 2
+		:?jumpDurationTimer <= 12
+			char.pivotY = jumpDurationTimer / 2
+		*/
+		?!jumpDurationTimer
+			char.Play()
+	?checkInput() & !jumpDurationTimer
+		char.Stop()
+		char.frame = 0
+		jumpDurationTimer = jumpDuration
+
+func checkInput()
+	return key = primary | key = bumpR
+
+func updateGround()
+	/*
+	?backgroundArt.x > -backgroundArt.w
+		backgroundArt.x = backgroundArt.x - gameTime / 9
+	:?score % 1000 = 0
+		backgroundArt.frame = math.FloorToInt(score / 1000) % 4
+		backgroundArt.x = screen.w
+	*/
+	var offset = gameTime * speed
+	for i = 0..1
+		backgroundList[i].x = screen.w * i - (offset / 81) % screen.w
+		groundList[i].x = screen.w * i - (offset) % screen.w
+
+func updateObstacle()
+	for i = 0..obstacleList.Count() - 1
+		var obstacle = obstacleList[i]
+		obstacle.x = obstacle.x - speed
+
+		?isCollision(char, obstacle)
+			gameover()
+
+		?obstacle.x < -obstacle.w
+			obstacle.x = baseDistance + baseDistance / (2 - i) + rng % (baseDistance / (2 - i))
+			obstacle.frame = rng % 4
+
+func isCollisionX(a, b)
+	return a.x + a.w > b.x & a.x < b.x + b.w
+func isCollisionY(a, b)
+	return a.y - a.pivotY < b.y - b.pivotY + b.h & a.y - a.pivotY + a.h > b.y - b.pivotY
+func isCollision(a, b)
+	//return false
+	return isCollisionX(a, b) & isCollisionY(a, b)
+
+
+
+//////////     GAMEOVER     //////////
+
+func gameover()
+	saveHighscore()
+	char.Stop()
+	gameTime = 15
+	state = 3
+
+func saveHighscore()
+	storage.Set("highscore", highscore)
+	
+	var text = string.Format("{0}", highscore)
+	highscoreValueText.text = text
+	highscoreValueText.w = string.size(text)
+
+func goto()
+	?speed >= 2
+		?getWatch(3)
+			?!getWatch(4)
+				state = -4
+				return
+		:?getWatch(1)
+			?!getWatch(2)
+				state = -2
+				return
+	reset()
+
+
+////////////////////////////////////////
+
+func checkKey()
+	?key = leftEnd
+		?gameTimer = 0
+			gameTimer = 1
+			return false
+		?gameTimer = 1
+			gameTimer = 2
+			return false
+		gameTimer = 0
+	:?key = rightEnd
+		?gameTimer = 2
+			gameTimer = 3
+			return false
+		?gameTimer = 3
+			gameTimer = 0
+			return true
+		gameTimer = 0
+	:?key = upEnd
+		gameTimer = 0
+	:?key = downEnd
+		gameTimer = 0
+
+func watch(i)
+	var s = i % 100
+	var t = math.FloorToInt(i / 100)
+
+	?s = 1
+		t = watch_badStart(t)
+	:?s = 2
+		t = watch_badEnd(t)
+	:?s = 3
+		t = watch_goodStart(t)
+	:?s = 4
+		t = watch_goodEnd(t)
+
+	?t < 0
+		return -1
+	:
+		return t * 100 + s
+
+func setCharState(anim, pivotX, pivotY, duration, loop)
+	char.Load(anim)
+	char.pivotX = pivotX
+	char.pivotY = pivotY
+	char.duration = duration
+	char.loop = loop
+	char.frame = 0
+
+func resetCharState()
+	setCharState(moveAnim, 0, 0, 20, true)
+
+
+var badAnim = ascii
+
+
+>──>O
+%%
+
+
+#>─/O>
+%%
+
+###_
+#`┘<O\
+%%
+
+##__
+#|\/O
+%%
+
+##_\O
+#|\#\
+%%
+###O
+##(\
+#/#\
+%%
+##O
+#/|\
+#/#\
+asciiend
+func watch_badStart(i)
+	?i = 0
+		fadeIn()
+		setCharState(badAnim, 1, 0, 30, false)
+		return i + 1
+	:?i = 1
+		?!updateFade()
+			return i + 1
+	:?i = 2
+		char.Play()
+		return i + 1
+	:?i = 3
+		?!char.playing
+			return i + 1
+	:?i = 4
+		?!updateMessageList(1)
+			return i + 1
+	:?i = 5
+		resetCharState()
+		setWatch(1)
+		return -1
+	return i
+
+func watch_badEnd(i)
+	?i = 0
+		fadeOut()
+		createJam()
+		return i + 1
+	:?i = 1
+		?!updateFade()
+			return i + 1
+	:?i = 2
+		?!updateMessageList(2)
+			return i + 1
+	:?i = 3
+		setupJam()
+		return i + 1
+	:?i = 4
+		?!updateMessage()
+			return i + 1
+	:?i = 5
+		fadeIn()
+		reset()
+		setWatch(2)
+		return -1
+	return i
+
+var goodAnim = ascii
+
+
+
+
+%%
+
+#\O/
+
+
+%%
+
+#_O_
+
+
+%%
+###O
+#,((
+
+
+%%
+###O
+##'))`
+
+
+%%
+###O
+###))V
+
+
+%%
+####O
+###//\
+#####/V
+
+%%
+
+####_O
+#####´)
+#####¯\
+%%
+
+#####_O
+######|\
+#####´(
+%%
+
+######O
+#####/|\
+#####´(
+%%
+
+######O
+#####/|\
+#####/<
+%%
+
+#######O
+######/|\
+######<|
+%%
+
+########O
+#######/|\
+########|\
+%%
+
+#########O
+########/|\
+########/#\
+asciiend
+func watch_goodStart(i)
+	?i = 0
+		fadeIn()
+		delta.frame = 4
+		delta.visible = true
+		setCharState(goodAnim, 8, 1, 45, false)
+		return i + 1
+	:?i = 1
+		?!updateFade()
+			return i + 1
+	:?i = 2
+		?gameTime
+			gameTime--
+		:
+			?delta.frame
+				delta.frame--
+			:
+				return i + 1
+			gameTime = 5
+	:?i = 3
+		char.Play()
+		return i + 1
+	:?i = 4
+		?!char.playing
+			return i + 1
+	:?i = 5
+		?!updateMessageList(3)
+			return i + 1
+	:?i = 6
+		resetCharState()
+		setWatch(3)
+		return -1
+	return i
+
+func watch_goodEnd(i)
+	?i = 0
+		fadeOut()
+		createJam()
+		return i + 1
+	:?i = 1
+		?!updateFade()
+			return i + 1
+	:?i = 2
+		?!updateMessageList(4)
+			return i + 1
+	:?i = 3
+		setupJam()
+		return i + 1
+	:?i = 4
+		updateJamShiny()
+		?!updateMessage()
+			return i + 1
+	:?i = 5
+		fadeIn()
+		reset()
+		setWatch(4)
+		return -1
+	return i
+
+func setWatch(i)
+	?!getWatch(i)
+		storage.Incr("watch", math.Pow(2, i))
+
+func getWatch(i)
+	var w = storage.Get("watch", 0)
+	?w
+		var t = math.Pow(2, i)
+		return w % (t * 2) - w % t = t
+	return false
+
+func getLanguage()
+	?te.language = "EN"
+		getLanguage_EN()
+	:?te.language = "PT-BR"
+		getLanguage_PTBR()
+	:?te.language = "ZH-CN"
+		getLanguage_ZHCN()
+	:?te.language = "ZH-TW"
+		getLanguage_ZHTW()
+	:?te.language = "FR"
+		getLanguage_FR()
+	:?te.language = "DE"
+		getLanguage_DE()
+	:?te.language = "RU"
+		getLanguage_RU()
+	:?te.language = "ES-LA"
+		getLanguage_ESLA()
+	:?te.language = "ES-EU"
+		getLanguage_ESEU()
+	:?te.language = "JP"
+		getLanguage_JP()
+	:?te.language = "KR"
+		getLanguage_KR()
+	:?te.language = "TK"
+		getLanguage_TK()
+
+func getLanguage_EN()
+	messageList.Clear()
+	// basic info
+	messageList.Add([
+		"score",
+		"Hscore",
+		"click",
+		"A green gem, gentle yet hard,\nwith rare attraction.\n(input ↑←↓→ at the Stone Dungeon's title to use)"
+	])
+
+	for i = 0..3
+		messageList.Add([])
+	return
+
+	// bad start
+	messageList.Add([])
+	// bad end
+	messageList.Add([])
+	// good start
+	messageList.Add([])
+	// good end
+	messageList.Add([])
+
+func getLanguage_PTBR()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_ZHCN()
+	messageList.Clear()
+	// basic info
+	messageList.Add([
+		"分数",
+		"最高分",
+		"点击",
+		"一块绿宝石，温柔而坚硬，具有罕见的吸引力。\n(在Stone Dungeon标题输入↑←↓→后开始游戏即可使用)"
+	])
+
+	for i = 0..3
+		messageList.Add([])
+	return
+
+	// bad start
+	messageList.Add([
+		"\"好痛...\"\n冷风钻进你的伤口内，刺痛的感觉让你精神一振。",
+		"你站起来环顾四周，以往遥不可及的卫城正在你的眼前。\n看来你坚定的信念的确打动了琉刻。\n只是... 你似乎与卫城的大门还有一段距离。",
+		"遍地都是宝箱和纪念无名尸体的墓碑，也许同样是从[color=#00ff00]静溪[/color]运送上来的?\n但己经没空思考这种事情了，你不知道自己受伤的身体能不能支撑到进入卫城。",
+		"但即使如此，你依然一步步的往前，向着美好的人生迈进。"
+	])
+	// bad end
+	messageList.Add([
+	])
+	// good start
+	messageList.Add([
+	])
+	// good end
+	messageList.Add([
+	])
+
+func getLanguage_ZHTW()
+	messageList.Clear()
+	// basic info
+	messageList.Add([
+		"分數",
+		"最高分",
+		"點擊",
+		"一顆綠寶石，溫柔而堅硬，具有罕見的吸引力。\n(在Stone Dungeon標題輸入↑←↓→後開始遊戲即可使用)"])
+
+	for i = 0..3
+		messageList.Add([])
+	return
+
+	// bad start
+	messageList.Add([
+		"\"好痛...\"\n冷風鑽進你的傷口內，刺痛的感覺讓你精神一振。",
+		"你站起來環顧四周，以往遙不可及的衛城正在你的眼前。\n看來你堅定的信念的確打動了琉刻。\n只是... 你似乎與衛城的大門還有一段距離。",
+		"遍地都是寶箱和紀念無名屍體的墓碑，也許同樣是從[color=#00ff00]靜默溪流[/color]運送上來的?\n但己經沒空思考這種事情了，你不知道自己受傷的身軀能不能支撐到進入衛城。",
+		"但即使如此，你仍然一步步的往前，向着美好的人生邁進。"
+	])
+	// bad end
+	messageList.Add([
+		"只要能夠進去...\n我就是高貴的衛... 城......",
+		"經過漫長的道路，全身已經疲憊無力的你終於站立在高聳的大門前。\n。",
+		"",
+		""
+	])
+	// good start
+	messageList.Add([
+	])
+	// good end
+	messageList.Add([
+	])
+
+func getLanguage_FR()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_DE()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_RU()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_ESLA()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_ESEU()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_JP()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_KR()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+func getLanguage_TK()
+	getLanguage_EN()
+	return
+
+	messageList.Clear()
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+	messageList.Add([])
+
+var greenJamText = ascii
+#########,/\`-._
+#######,´/##\###`-.
+######/#/###/`-·._#`.
+####,´#/###/######;‾:
+###/##/#_./######;##;
+#,´##.·´##‾`-.##;##|
+/.·´###`·._###‾`\##;
+#‾‾‾`───.##`·._##\:
+#########‾‾‾`──:-.|
+asciiend
+
+var jamShinyList = []
+var jamShiny = ascii
+
+%%
+
+
+##.
+##'
+
+
+%%
+
+##.
+###\
+#\
+##'
+
+%%
+##.
+###\
+/#.
+##'#/
+#\
+##'
+%%
+###
+##.
+#/
+###/
+##'
+
+%%
+##.
+#/
+##.#\
+\#'
+###/
+##'
+%%
+
+##.
+###\
+#\
+##'
+
+%%
+
+
+##.
+##'
+
+
+%%
+
+asciiend
+
+func showHint()
+	?totaltime % 60 < 30
+		return
+	?sys.isPC
+		>`@screen.w/2-6@,@screen.h/2+2@,Press  C key
+	:?sys.isMobile
+		>`@screen.w/2-6@,@screen.h/2+2@,Click Screen
+
+func showdata()
+	>`0,0,@state@ @score@ @highscore@ @gameDelay@ @speed@ @fadeTimer@ @storage.Get("watch", 0)@
+
+	?char
+		>`0,1,@char.x@ @char.y@ @char.pivotY@ @char.w@ @char.h@
+
+	?obstacleList.Count()
+		>`0,2,@obstacleList[0].x@ @obstacleList[0].y@ @obstacleList[0].pivotY@ @obstacleList[0].w@ @obstacleList[0].h@ 
+		^@isCollisionX(char, obstacleList[0])@ @isCollisionY(char, obstacleList[0])@ @isCollision(char, obstacleList[0])@
+
+		>`0,3,@obstacleList[1].x@ @obstacleList[1].y@ @obstacleList[1].pivotY@ @obstacleList[1].w@ @obstacleList[1].h@ 
+		^@isCollisionX(char, obstacleList[1])@ @isCollisionY(char, obstacleList[1])@ @isCollision(char, obstacleList[1])@
+
+	?scoreText
+		>`0,4,@scoreText.text@ @string.Size(scoreText.text)@ @scoreText.w@ @scoreText.h@ 
+	?highscoreText
+		>`0,5,@highscoreText.text@ @string.Size(highscoreText.text)@ @highscoreText.w@ @highscoreText.h@
+
+
+
+main()
+
+func removeHighScore()
+	highscore = 0
+	storage.Delete("highscore")
+
+func removeWatch()
+	storage.Delete("watch")
+
+func removeAll()
+	removeHighScore()
+	removeWatch()
+	loc.Leave()
+
+//removeAll()

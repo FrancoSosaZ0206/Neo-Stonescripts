@@ -1,0 +1,345 @@
+﻿// *******************************************************
+//                     4-Mushroom.txt                     
+// *******************************************************
+
+// Script for Mushroom Forest:
+
+
+
+// IMPORTS
+
+var u = new MyScripts/Lib/Utilities
+var uimkr = new MyScripts/Lib/UI_Maker
+var p
+p = import MyScripts/Lib/Performance
+var a = new MyScripts/Lib/MyArsenal
+var i = new MyScripts/Lib/MyBetterInfo
+var c = new MyScripts/Lib/Combat
+c.Main()
+
+/***************************************************************/
+
+var som = new MyScripts/Lib/Speed_O_Meter
+var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
+var bosTmr
+bosTmr = import MyScripts/Borrowed/Boss_Timer
+
+var somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+?som.Update(false)
+  somPanel.Recycle()
+  somPanel = null
+
+  somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+
+
+dpsm.ENABLED = true
+dpsm.refreshRate = 30
+
+var dpsPanel
+?dpsm.Update()
+  ?dpsPanel
+    dpsPanel.Recycle()
+    dpsPanel = null
+
+  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+
+/***************************************************************/
+
+
+
+// VARIABLES
+
+var keepMask = true
+var smiteScr = 1
+
+var canDebI
+var canDebP
+var canDebF
+
+?p.ll
+  keepMask = false
+
+  ?p.tt = 1 & p.ls > 5 &
+  ^smiteScr ! 3
+    smiteScr++
+
+
+
+// FUNCTIONS:
+
+func fight1v1()
+  p.fds = foe.debuffs.string
+
+  /* How to apply debuffs:
+  - apply all except the ones the foe is immune to.
+  Finish when:
+  - all possible debuffs have been applied. */
+  canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
+  canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
+  canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+  
+  ?canDebI | canDebP | canDebF
+    ?keepMask
+      ?canDebI
+        equipL @a.dIsword@
+      :?canDebP
+        equipL @a.dPsword@
+      :?canDebF
+        equipL @a.dFsword@
+    :
+      //Left hand:
+      ?canDebP
+        equipL @a.dPsword@
+      :?canDebF
+        equipL @a.dFsword@
+      :?canDebI
+        equipL @a.dIwand1@
+
+      //Right hand:
+      ?canDebI
+        equipR @a.dIsword@
+  :
+    p.php = hp
+    p.pmhp = maxhp
+
+    ?keepMask
+      equipL Mamba Negra
+
+      ?p.php ! p.pmhp
+        equipL @a.dLsword@
+    :
+      p.bs = buffs.string
+      ?p.bs = "berserk"
+        c.doMoondial(Mamba Negra, a.psword, 2)
+      :
+        c.doMoondial(Mamba Negra, a.psword, 0)
+
+      ?p.php ! p.pmhp
+        equipR @a.dLsword@
+
+  return
+
+func ldtF(mode)
+
+  ?mode = "default"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.cshield1@
+  :?mode = "armorRegen"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.cshield2@
+  :?mode = "engage"
+    equipL triskelion
+    ?!keepMask
+      equipR @a.pshield@
+  :?mode = "escape"
+    equipL mind
+    ?!keepMask
+      equipR @a.pshield@
+  :?mode = "magnet"
+    equipL star
+    ?!keepMask
+      equipR triskelion
+
+  :?mode = "meleeDmg"
+    equipL Mamba Negra
+    ?!keepMask
+      equipR @a.psword@
+
+  :?mode = "rangedDmg"
+    equip @a.pBow@
+
+  :?mode = "magic"
+    ?keepMask
+      ?canDebI
+        equipL @a.dIwand1@
+      :?canDebP
+        equipL @a.dPwand@
+      :?canDebF
+        equipL @a.dFwand@
+
+    :
+      ?p.tt % 2 = 0
+        equipL triskelion
+        equipR hatchet
+
+      :?canDebI
+        equip @a.dIstaff@
+      :?canDebP
+        equip @a.dPstaff@
+      :?canDebF
+        equip @a.dFstaff@
+
+  :
+    >c-10,0,#red,
+    ^ERROR: ldtF() recieved incorrect mode: @mode@
+
+  return
+
+
+
+// PROCEDURE:
+
+?totaltime - bosTmr.endbos = 1 & loc = "harder Angry"
+  activate voidweaver
+
+
+c.doAAC("sword 0*", a.cshield1)
+
+?hp < maxhp & !keepMask
+  loc.Leave()
+
+?p.lb
+  p.rs = res.stone
+  p.rw = res.wood
+  p.rb = res.bronze
+
+  ?p.rb >= 10
+    ?p.rw >= 10
+      ?p.ip ! "berserk"
+        brew wood + bronze
+    :?p.rs >= 10
+      ?p.ip ! "lucky"
+        brew stone + bronze
+    :
+      loc.Leave()
+  :
+    loc.Leave()
+
+?keepMask
+  ?p.ir ! "bardiche" &
+  ^p.ir ! "quarterstaff" &
+  ^p.ir ! "heavy hammer"
+    equipR mask
+
+?p.lb | p.ll
+  equipL triskelion
+  equipR @a.cshield1@
+
+:?c.canUseAETali()
+  ?keepMask
+    c.useAETali("l")
+  :
+    equipL triskelion
+    c.useAETali("r")
+
+:?c.canUsePotDmg() & keepMask
+  activate potion
+
+:?pickup.distance ! 9999
+  ldtF("magnet")
+:
+  p.fds = foe.debuffs.string
+  p.fd = foe.distance
+  p.fc = foe.count
+
+  ?p.f = "mushroom_boss" & p.f ! "phase2"
+
+    ?c.canUsePotDmg()
+      activate potion
+
+    :?p.fa = foe.maxarmor & p.fd > 10
+      ?c.canBash()
+        c.bash(Mamba Negra)
+      :?c.canDash()
+        c.dash(Mamba Negra, a.dshield)
+
+    :
+      ?p.fs = 32 & p.ft >= 80 // boss's punch attack
+        ?c.canUseMask() & p.fd <= 10
+          ldtF("escape")
+        :
+          ?keepMask
+            equipL @a.dPwand@
+          :
+            ldtF("rangedDmg")
+
+      :
+        fight1v1()
+
+
+
+  : // normal foes and boss's phase2
+    p.fs = foe.state
+    ?c.canUseBladeDS(smiteScr)
+      c.useBladeDS()
+
+    ?c.canUseQstaff()
+      p.aiE = ai.enabled
+
+      ?p.aiE & p.ir ! "heavy hammer"
+      ^& p.ir ! "bardiche"
+      ^& p.ir ! Kubikiribocho
+      ^& (!(c.canBash() | c.canDash())
+      ^| (p.fd < 11 | p.fd > 15))
+        c.useQstaff(a.myqstaff)
+
+    ?p.fd > 35
+      p.pa = armor
+      ?14 <= p.pa & p.pa <= 29
+        ldtF("default")
+      :?p.pa < 14
+        ldtF("armorRegen")
+      :
+        equipL triskelion
+        equipR mask
+
+    :?p.fd > 15
+      ldtF("engage")
+
+      var isAbtToDash
+      isAbtToDash = (p.fd <= 17)
+      ?keepMask & isAbtToDash
+        equipR @a.pshield@
+      
+      canDebI = (p.fds ! "chill" & f ! "immune_to_debuff_chill")
+      p.bs = buffs.string
+
+      ?!keepMask & canDebI & isAbtToDash &
+      ^i.getFoeTotalHP() > i.getBuffInfo("smite", false, 2) * a.smiteMult
+        equipR @a.aiShield@
+
+    :?c.canBash()
+      c.bash(Mamba Negra)
+    :?c.canDash()
+      c.dash(Mamba Negra, a.dshield)
+
+    :?p.f ! "phase2"
+      ?c.canUseHamm() & p.fc >= 5 &
+      ^!c.canUseBlade() & keepMask
+        c.useHamm(a.myHamm)
+
+      :?p.fc = 1
+        fight1v1()
+      :
+        canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
+        canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
+        canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+        
+        ?canDebI | canDebP | canDebF
+          ldtF("magic")
+        :?keepMask
+          equipL @a.dPwand@
+        :
+          ldtF("rangedDmg")
+
+
+    :?p.fs ! 1 // boss appearing animation
+    ^&p.fs ! 4 // dying
+      // foe = "phase2" (Enoki & Morel)
+
+      p.ft = foe.time
+      p.bs = buffs.string
+
+      ?c.canUseMind()
+        ldtF("escape")
+      :?c.canUseMask()
+        c.useMask()
+      :
+        fight1v1()
+
+
+// *******************************************************
+//                 END OF "4-Mushroom.txt"                
+// *******************************************************

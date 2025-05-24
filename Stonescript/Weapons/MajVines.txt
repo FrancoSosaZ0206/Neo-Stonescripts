@@ -1,0 +1,135 @@
+//Rf : Wand
+//By: Poly
+//Vr : 1.3
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+?base.IR=Wand&
+^Buffs.string=berserk
+ base.ICR=#00ffa2
+?base.IL=Wand&
+^Buffs.string=berserk
+ base.ICL=#00ffa2
+
+?base.IR=Wand&
+^base.IRS=1|
+^base.IR=Wand&
+^base.IRS>2
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR=Wand&
+^base.IRS=1&
+^time%20<=10
+ >o2,0,@base.ICR@,ascii
+@base.IRI@
+#)
+(
+#`
+asciiend
+?base.IR=Wand&
+^base.IRS=1&
+^time%20>10
+ >o2,0,@base.ICR@,ascii
+@base.IRI@
+#)
+(
+´
+asciiend
+?base.IR=Wand&
+^base.IRS=2
+ >o1,1,#white,ascii
+/
+asciiend
+?base.IR=Wand&
+^base.IRS=2&
+^base.IRT<3
+ >o1,-1,@base.ICR@,ascii
+#@base.IRI@
+(
+#\
+##'
+asciiend
+
+?base.IR=Wand&
+^base.IRS=2&
+^base.IRT>3
+ >o0,-1,@base.ICR@,ascii
+@base.IRI@
+#\
+##\
+###`
+asciiend
+
+?base.IR=Wand&
+^base.IRS=3&
+^base.IRT<=1
+ >o1,0,@base.ICR@,ascii
+#@base.IRI@
+##)
+#/
+asciiend
+
+?base.IR=Wand&
+^base.IRS>2&
+^base.IRT>1
+ >o2,2,@base.ICR@,ascii
+.___,@base.IRI@
+asciiend
+
+?base.IL=Wand&
+^base.ILS=1|
+^base.IL=Wand&
+^base.ILS>2
+ >o-1,2,#white,ascii
+/
+asciiend
+?base.IL=Wand&
+^base.ILS=1
+ >o-3,0,@base.ICL@,ascii
+#@base.ILI@
+(
+#)
+´
+asciiend
+?base.IL=Wand&
+^base.ILS=2
+ >o-1,1,#white,ascii
+\
+asciiend
+?base.IL=Wand&
+^base.ILS=2&
+^base.ILT<3
+ >o-4,-1,@base.ICL@,ascii
+#@base.ILI@
+(
+#\
+##'
+asciiend
+
+?base.IL=Wand&
+^base.ILS=2&
+^base.ILT>3
+ >o-4,-1,@base.ICL@,ascii
+@base.ILI@
+#\
+##\
+asciiend
+
+?base.IL=Wand&
+^base.ILS=3&
+^base.ILT<=1
+ >o-1,0,@base.ICL@,ascii
+#@base.ILI@
+##)
+#/
+asciiend
+?base.IL=Wand&
+^base.ILS>2&
+^base.ILT>1
+ >o-2,1,@base.ICL@,ascii
+#####@base.ILI@
+.__.´
+asciiend

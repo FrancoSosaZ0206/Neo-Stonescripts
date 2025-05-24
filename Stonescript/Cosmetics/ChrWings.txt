@@ -1,0 +1,52 @@
+/* 
+Name: Aethrax / BoulderBrain
+
+Version: v3.68.1
+
+Description: ＂Who knows whats in store for the
+stone head in Acropolis, do we bring forth
+the wrath of the under World- or find comune 
+in the world above.＂
+
+Use: Press the button to switch cosmetic wings,
+feel free to steal or incorporate ascii into own
+characters.
+*/
+
+
+var P = 0
+func OnPress()
+  ?P = 0
+    P = 1
+    >Off
+  :?P = 1
+    P = 0
+    >On
+
+var button = ui.AddButton()
+button.x=5
+button.y=7
+button.w=8
+button.h=3
+button.text=＂SWITCH＂
+button.dock=top_left
+button.SetPressed(OnPress)
+
+?P = 0
+  >h-6,+0,#red,@DW@
+:
+  >h-7,-1,#yellow,@AW@
+
+
+var DW = ascii
+###人#####人
+##)`\└#┘/´(
+##v^´###`^v
+asciiend
+
+var AW = ascii
+###(\#####/)
+##(##(#_#)##)
+###(#´###`#)
+####＂～###～＂
+asciiend

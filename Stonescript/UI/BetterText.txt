@@ -1,0 +1,41 @@
+//Info\\
+//By:Mallathor v1.0
+
+var talkBox
+var FinishingText = "You forgot to change the text, that sounds like a skill issue"
+var CurrentText = ""
+var width = 14
+var height = 3
+var x = 0
+var y = 0
+var i = 1
+var color = #white
+var drag = import UI/DragController
+?totaltime = 1
+  talkBox = ui.AddText(CurrentText)
+  talkBox.w = width
+  talkBox.h = height
+  talkBox.x = x
+  talkBox.y = y
+  talkBox.color = color
+  drag.Add(talkBox)
+func UpdateVariables()
+ talkBox.x = x
+ talkBox.y = y
+ talkBox.w = width
+ talkBox.h = height
+ talkBox.color = color
+drag.Update()
+func Update()
+  CurrentText = string.Sub(FinishingText, 0, i)
+  talkBox.text = CurrentText
+  ?i < string.Size(FinishingText)
+   i++
+func ShowText()
+  talkBox.visible = true
+func HideText()
+  talkBox.visible = false
+func Reset()
+ UpdateVariables()
+ CurrentText = ""
+ i = 1

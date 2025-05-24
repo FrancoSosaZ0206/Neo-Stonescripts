@@ -1,0 +1,842 @@
+//-~-~-Information-~-~-\\
+/*By: CitrionDragon☆\
+Version 1.0
+  Full release
+
+Put this file into the Games folder, and import it using
+import Games/SpearThrowing
+
+This requires the A2S_v2 file to be put into the UI folder to function
+
+\☆Go to waterfall to play, and try to beat my highscore!*/
+
+var uiAA = ui.AddAnim
+var uiAB = ui.AddButton
+var uiAP = ui.AddPanel
+var uiAT = ui.AddText
+var corners = ui.AddStyle("╔─╗│#│╚─╝")
+var A2S = import UI/A2S
+
+var start=false
+var stopbtn
+var uipnl
+var uipnl2
+var powerbar
+var powerbar2
+var powerbar3
+var powerlvl=0
+var powerarrow=1
+var parrowdirection=1
+var accuracybar
+var accuracybar2
+var accuracybar3
+var accuracylvl=0
+var accuracyarrow=1
+var aarrowdirection=1
+var luck
+var luckrng
+var outcome
+var attempts=0
+var target
+var targetpos=3
+var score=0
+var minscore
+var maxscore
+var totalscore=0
+var highscore
+var highscores=[[1000,"Scout"],[3268.3,"Dragon"]]
+var back
+var background=ascii
+______________________|____________|_____________|_____________|___________/
+#####################/############/#############/#############/###########/ 
+####################/############/#############/#############/###########/ /
+###################/############/#############/#############/###########/ /
+##################/############/#############/#############/###########/ /
+#################/############/#############/#############/###########/ /
+################/############/#############/#############/###########| /
+##############|/###########|/############|/############|/###########/|/
+______________|____________|_____________|_____________|___________/_|
+#############/############/#############/#############/###########/ /
+############/############/#############/#############/###########/ /
+###########/############/#############/#############/###########/ /
+##########/############/#############/#############/###########/ /
+#########/############/#############/#############/###########/ /
+########/############/#############/#############/###########| /
+######|/###########|/############|/############|/############|/
+######|############|#############|#############|#############|
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+
+
+
+
+
+
+asciiend
+var back2
+var background2=ascii
+______________________|____________|_____________|_____________|___________/
+                 ^   /            /     ^       /             / _         / 
+        ^           /        ^   /             / _           /      ^    / /
+            _      /  ^         /  ^          /         ^   /           / /
+                  /       _    /      X      /      X      /   ^  X    / /
+      ^          /            /         _   /        _    /           / /
+          _     /   _        /             /    ^        /       _   | /
+              |/           |/  ^         |/            |/   ^       /|/
+______________|____________|_____________|_____________|___________/_|
+       ^     /            /    _        /         ^   /       _   / /
+            /         _  /             /  _          /           / /
+        _  /    ^       /             /             / ^         / /
+          /            /       X ^   /      ^X     /       X   / /
+     ^   /       _    /    ^        /             /       ^   / /
+        /            /             /         ^   /    ^      | /
+      |/   ^       |/       _    |/      _     |/            |/
+      |            |             |             |    _        |
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+
+
+
+
+
+
+asciiend
+
+var side
+var scorebar=ascii
+┌──Score───┐│
+│          ││
+├──Total───┤│
+│          ││
+└──────────┘│
+ HighScores │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+            │
+asciiend
+
+var rack
+var spearrack=ascii
+. ∆  ∆  ∆ .
+│─│──│──│─│
+│ │  │  │ │
+│─│──│──│─│
+│ '  '  ' │
+%%
+. ∆  ∆    .
+│─│──│────│
+│ │  │    │
+│─│──│────│
+│ '  '    │
+%%
+. ∆       .
+│─│───────│
+│ │       │
+│─│───────│
+│ '       │
+%%
+.         .
+│─────────│
+│         │
+│─────────│
+│         │
+asciiend
+
+var stonehead
+var idle=ascii
+#
+####O
+-──´───>
+###/#\
+%%
+####O
+###/|\
+###/#\
+asciiend
+var powerup=ascii
+#
+####O
+-──´───>
+###/#\
+%%
+#
+-──.───>
+###`|\
+###/#\
+%%
+-──────>
+###\O
+####|\
+###/#\
+asciiend
+
+var throw1=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+#######-──────>
+####O/
+####|
+###/#\
+%%
+###########-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__########-──────>
+####|
+###/#\
+%%
+##########
+####O##############-──────>
+####|\
+###/#\
+%%
+##########
+####O##################-──────>
+###/|\
+###/#\
+asciiend
+
+var throw2=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+#######-──────>
+####O/
+####|
+###/#\
+%%
+###########-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__########-──────>
+####|
+###/#\
+%%
+##########
+####O##############-──────>
+####|\
+###/#\
+%%
+##########
+####O#
+###/|\#################-──────>
+###/#\
+asciiend
+
+var throw3=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+#######-──────>
+####O/
+####|
+###/#\
+%%
+###########-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__########-──────>
+####|
+###/#\
+%%
+##########
+####O#
+####|\#############-──────>
+###/#\
+%%
+##########
+####O#
+###/|\
+###/#\#################-──────>
+asciiend
+
+var throw4=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+#########-──────>
+####O/
+####|
+###/#\
+%%
+#################-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__##################-──────>
+####|
+###/#\
+%%
+##########
+####O##########################-──────>
+####|\
+###/#\
+%%
+##########
+####O###############################-──────>
+###/|\
+###/#\
+asciiend
+
+var throw5=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+#########-──────>
+####O/
+####|
+###/#\
+%%
+#################-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__##################-──────>
+####|
+###/#\
+%%
+##########
+####O##########################-──────>
+####|\
+###/#\
+%%
+##########
+####O#
+###/|\##############################-──────>
+###/#\
+asciiend
+
+var throw6=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+#########-──────>
+####O/
+####|
+###/#\
+%%
+#################-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__##################-──────>
+####|
+###/#\
+%%
+##########
+####O#
+####|\#########################-──────>
+###/#\
+%%
+##########
+####O#
+###/|\
+###/#\##############################-──────>
+asciiend
+
+var throw7=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+###########-──────>
+####O/
+####|
+###/#\
+%%
+######################-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__########################-──────>
+####|
+###/#\
+%%
+##########
+####O#####################################-──────>
+####|\
+###/#\
+%%
+##########
+####O#############################################-──────>
+###/|\
+###/#\
+asciiend
+
+var throw8=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+###########-──────>
+####O/
+####|
+###/#\
+%%
+######################-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__########################-──────>
+####|
+###/#\
+%%
+##########
+####O#####################################-──────>
+####|\
+###/#\
+%%
+##########
+####O#
+###/|\############################################-──────>
+###/#\
+asciiend
+
+var throw9=ascii
+-──────>
+###\O
+####|\
+###/#\
+%%
+##-──────>
+####|
+####|\
+###/#\
+%%
+###########-──────>
+####O/
+####|
+###/#\
+%%
+######################-──────>
+####O.´
+####|
+###/#\
+%%
+##########
+####O__########################-──────>
+####|
+###/#\
+%%
+##########
+####O#
+####|\####################################-──────>
+###/#\
+%%
+##########
+####O#
+###/|\
+###/#\############################################-──────>
+asciiend
+
+func CreateUI()
+  uipnl=uiAP()
+  uipnl.w=screen.w
+  uipnl.h=screen.h
+  back=uiAA(background2)
+  back.dock=bottom_right
+  back.anchor=bottom_right
+  back.x=-1
+  back.y=-8
+  back.color=#808080
+  back2 = back.AddLayer(background)
+  side=uiAA(scorebar)
+  side.dock=top_left
+  side.anchor=top_left
+  side.x=1
+  side.y=1
+  uipnl2=uiAP()
+  uipnl2.w=screen.w
+  uipnl2.h=screen.h
+  uipnl2.style=corners
+  stonehead=uiAA(idle)
+  stonehead.dock=bottom_right
+  stonehead.anchor=bottom_right
+  stonehead.x=-65
+  stonehead.y=-13
+  stonehead.frame=1
+  stonehead.duration=15
+  stonehead.loop=false
+  target=uiAA(ascii
+#O
+´ʘ`
+#T
+asciiend)
+  target.dock=bottom_right
+  target.anchor=bottom_right
+  target.x=-44
+  target.y=-13
+  rack=uiAA(spearrack)
+  rack.dock=bottom_right
+  rack.anchor=bottom_right
+  rack.x=-61
+  rack.y=-2
+  stopbtn=uiAB()
+  stopbtn.dock=bottom_right
+  stopbtn.anchor=bottom_right
+  stopbtn.x=-43
+  stopbtn.y=-2
+  stopbtn.w=17
+  stopbtn.text="Play"
+  stopbtn.style=corners
+  stopbtn.SetPressed(StopBar)
+  powerbar=uiAA(ascii
+╔═══════════════════════════════╗
+║████████████████████████████████║
+╚═══════════════════════════════╝
+asciiend)
+  powerbar.dock=bottom_right
+  powerbar.anchor=bottom_right
+  powerbar.x=-8
+  powerbar.y=-3
+  powerbar.color=#red
+  powerbar2=powerbar.AddLayer(ascii
+###############══════════════════╗
+###############██████████████████║
+###############══════════════════╝
+asciiend)
+  powerbar2.color=#yellow
+  powerbar3=powerbar.AddLayer(ascii
+###########################══════╗
+###########################██████║
+###########################══════╝
+asciiend)
+  powerbar3.color=#green
+  accuracybar=uiAA(ascii
+╔═╗
+║█║
+║█║
+║█║
+║█║
+#
+#
+#
+#
+#
+#
+#
+#
+║█║
+║█║
+║█║
+║█║
+╚═╝
+asciiend)
+  accuracybar.dock=bottom_right
+  accuracybar.anchor=bottom_right
+  accuracybar.x=-3
+  accuracybar.y=-7
+  accuracybar.color=#red
+  accuracybar2=accuracybar.AddLayer(ascii
+#
+#
+#
+#
+#
+║█║
+║█║
+║█║
+#
+#
+║█║
+║█║
+║█║
+asciiend)
+  accuracybar2.color=#yellow
+  accuracybar3=accuracybar.AddLayer(ascii
+#
+#
+#
+#
+#
+#
+#
+#
+║█║
+║█║
+asciiend)
+  accuracybar3.color=#green
+
+func Arrows()
+  ?powerlvl<1
+    ?parrowdirection=1
+      powerarrow++
+      ?powerarrow=15
+        parrowdirection=0
+    :
+      powerarrow--
+      ?powerarrow=0
+        parrowdirection=1
+  ?accuracylvl<1
+    ?aarrowdirection=1
+      accuracyarrow++
+      ?accuracyarrow=15
+        aarrowdirection=0
+    :
+      accuracyarrow--
+      ?accuracyarrow=0
+        aarrowdirection=1
+  ?targetpos=1
+    target.x=-44
+  :?targetpos=2
+    target.x=-30
+  :
+    target.x=-16
+  >`@screen.w-41+2*powerarrow@,@screen.h-6@,ascii
+\/
+##
+/\
+asciiend
+  >`@screen.w-6@,@screen.h-9-accuracyarrow@,>#<
+
+func StopBar()
+  ?start=false
+    start=true
+    rack.frame=1
+    stopbtn.text="Power"
+  :?powerlvl=0
+    ?powerarrow<=6
+      powerlvl=1
+    :?powerarrow<=12
+      powerlvl=2
+    :
+      powerlvl=3
+    stopbtn.text="Accuracy"
+    stonehead.Load(powerup)
+    stonehead.Play()
+  :?accuracylvl=0
+    ?accuracyarrow<=3|accuracyarrow>=12
+      accuracylvl=1
+    :?accuracyarrow<=6|accuracyarrow>=9
+      accuracylvl=2
+    :
+      accuracylvl=3
+    ?attempts<3
+      stopbtn.text="Next"
+      DetermineOutcome()
+  :?attempts<3
+    targetpos=rng%3+1
+    powerlvl=0
+    accuracylvl=0
+    stopbtn.text="Power"
+    stonehead.Load(idle)
+    ?attempts=1
+      rack.frame=2
+    :
+      rack.frame=3
+  :
+    targetpos=rng%3+1
+    attempts=0
+    powerlvl=0
+    accuracylvl=0
+    score=0
+    totalscore=0
+    stopbtn.text="Power"
+    stonehead.Load(idle)
+    rack.frame=1
+
+func DetermineOutcome()
+  ?targetpos=1 //0% score bonus
+    ?powerlvl=1
+      ?accuracylvl=1
+        score=400+rng%(700-400+1) //(50%)
+        stonehead.Load(throw3)
+        stonehead.Play()
+      :?accuracylvl=2
+        score=650+rng%(950-650+1) //(75%)
+        stonehead.Load(throw2)
+        stonehead.Play()
+      :?accuracylvl=3
+        score=900+rng%(1000-900+1) //(100%)
+        stonehead.Load(throw1)
+        stonehead.Play()
+    :?powerlvl=2
+      score=150+rng%(450-150+1) //(25%)
+      stonehead.Load(throw6)
+      stonehead.Play()
+    :
+      score=0+rng%(100-0+1) //(0%)
+      stonehead.Load(throw9)
+      stonehead.Play()
+  :?targetpos=2 //10% score bonus
+    ?powerlvl=2
+      ?accuracylvl=1
+        score=(400+rng%(700-400+1))*1.1 //(50%)
+        stonehead.Load(throw6)
+        stonehead.Play()
+      :?accuracylvl=2
+        score=(650+rng%(950-650+1))*1.1 //(75%)
+        stonehead.Load(throw5)
+        stonehead.Play()
+      :?accuracylvl=3
+        score=(900+rng%(1000-900+1))*1.1 //(100%)
+        stonehead.Load(throw4)
+        stonehead.Play()
+    :?powerlvl=3
+      score=(150+rng%(450-150+1))*1.1 //(25%)
+      stonehead.Load(throw9)
+      stonehead.Play()
+    :
+      score=(150+rng%(450-150+1))*1.1 //(25%)
+      stonehead.Load(throw3)
+      stonehead.Play()
+  :?targetpos=3 //25% score bonus
+    ?powerlvl=3
+      ?accuracylvl=1
+        score=(400+rng%(700-400+1))*1.25 //(50%)
+        stonehead.Load(throw9)
+        stonehead.Play()
+      :?accuracylvl=2
+        score=(650+rng%(950-650+1))*1.25 //(75%)
+        stonehead.Load(throw8)
+        stonehead.Play()
+      :?accuracylvl=3
+        score=(900+rng%(1000-900+1))*1.25 //(100%)
+        stonehead.Load(throw7)
+        stonehead.Play()
+    :?powerlvl=2
+      score=(150+rng%(450-150+1))*1.25 //(25%)
+      stonehead.Load(throw6)
+      stonehead.Play()
+    :
+      score=(0+rng%(100-0+1))*1.25 //(0%)
+      stonehead.Load(throw3)
+      stonehead.Play()
+  luckrng=rng
+  ?luckrng%3=1
+    luckrng=rng
+    ?luckrng%3<2
+      score=score+(10+rng%(100-10+1))
+    :
+      score=score+(50+rng%(250-10+1))
+  :?luckrng%3=2
+    luckrng=rng
+    ?luckrng%3<2
+      score=score-(10+rng%(100-10+1))
+    :
+      score=score-(50+rng%(250-10+1))
+  totalscore=totalscore+score
+  attempts++
+  ?attempts=3
+    ?totalscore>highscore
+      highscore=totalscore
+      ?highscore>=3268.3
+        highscores.Add([totalscore,player.name])
+      :
+        highscores.Insert(highscores.Count()-1,[totalscore,player.name])
+      ?highscores.Count()>6
+        highscores.RemoveAt(0)
+      storage.set("highscore",highscore)
+      storage.set("highscores",A2S.Stringify(highscores))
+    stopbtn.text="Retry?"
+      
+
+func ShowScore()
+  ?highscores.Count()>0
+    for s = 0..highscores.Count()-1
+      >`3,@24-3*s@,@highscores[s][0]@
+      >`3,@23-3*s@,@highscores[s][1]@
+
+?loc="waterfall"
+  ?totaltime=1
+    CreateUI()
+    targetpos=rng%3+1
+    highscore=storage.Get("highscore",0)
+    highscores=A2S.Arrayify(storage.Get("highscores"))
+    ui.ShowBanner("Spear Throwing")
+  ?start
+    Arrows()
+  ShowScore()
+
+  >`3,2,@score@
+  >`3,4,@totalscore@

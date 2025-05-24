@@ -1,0 +1,16 @@
+// Defective Faceplate cosmetic
+// by: michael.g.g.
+// ver 1.0
+
+//Puts a faceplate on the stonehead
+//import the path to this file in in the mindstone and use big head mode.
+
+>h-3,-1,#D5CDAB,ascii
+-.'`.-
+`. 8.'
+asciiend 
+
+>h-4,-1,#BBDDFF,ascii
+#
+####8
+asciiend 

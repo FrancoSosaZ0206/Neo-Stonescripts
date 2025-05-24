@@ -1,0 +1,928 @@
+// ~ Mech ¤ by ¤ EdisniDaed ~ \\
+
+/* version 1.1, first weapons added. This
+version contains the base mech movement, Blade
+of a Fallen God (without attack animations),
+repeating crossbow or rifle cosmetics (without
+animations), left and right handed short swords,
+right and left handed crossbows, basic shield 
+and customizable colors */
+
+//ascii art, instructions, and code below\\
+//power switch is at the bottom\\
+
+var MechIdle = ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［\  \_.'
+###‾##/ /#\ \
+#####í Í###Ì ì
+#####| |###| |
+####(_/｝###｛\_)
+asciiend 
+
+var MechWlkR = ［ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［\  \_.'
+###‾##/ / \ \
+#####í Í###Ì ì
+#####| |###| |
+####(_/｝###｛\_)
+asciiend,ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［‾) \_.'
+###‾##/ /  \ \
+#####í Í###| /
+#####| |###｛\_)
+####(_/｝###
+asciiend,ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［‾`•\_.'
+###‾##/ /  `• |
+#####í Í###| \
+#####| |####｛\_)
+####(_/｝##
+asciiend,ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［‾• \_.'
+###‾##/ /  \ \
+#####í Í####\ Ì
+#####| |####| \
+####(_/｝####｛\_)
+asciiend,ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［\  \_.'
+###‾##/ / \ \
+#####í Í###Ì ì
+#####| |###| |
+####(_/｝###｛\_)
+asciiend,ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. / •‾］U［\  \_.'
+###‾#/ /  \ \
+#####\ |###Ì ì
+####(_/｝###| |
+###########｛\_)
+asciiend,ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［\  \_.'
+###‾##/ / \ \
+######\ \##Ì ì
+#####(_/｝##| |
+###########｛\_)
+asciiend,ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#_##</^_/ \_^\>##_
+( )#|o/［《¤》］\o|#( )
+\ \/ ］ \   / ［ \/ /
+#'. /  /］U［\  \_.'
+###‾##• / \ \
+######| |##Ì ì
+######| |##| |
+#####(_/｝##｛\_)
+asciiend］
+
+var MechGunner1 = ascii
+#######.=≡=.
+######/__ __\
+######\‾‾ ‾‾/
+#######`• •´
+#   </^_/ \_^\>   #
+  .•´o/［《¤》］\o \.  #
+################|
+######_#####_####
+####•(_)###(_)‾,/
+##############‾
+#
+#
+asciiend
+
+var MechGunner2 = ascii
+#
+#
+#
+#
+#
+   #############   #
+ •------°-----^\#   #
+#［ /\ #_____#  ｝>===≡
+#`-'#•_´/‾‾###‾
+#
+#
+#
+asciiend
+
+var MechGunnerAmmo = ascii
+#
+#
+#
+#
+#
+#
+#
+#
+#########［(
+#
+#
+#
+asciiend
+
+//right hand crossbow\\
+var MechCrossbowsR1 = ascii
+#
+#
+#
+#
+############^\>##_
+############\o|#( )
+############ ［ \/ /
+############  \_.'
+#
+#
+#
+#
+asciiend
+
+var MechCrossbowsR2 = ascii
+#
+#
+#
+###############║│
+###############║│
+###############║###|
+###############`
+#
+#
+#
+#
+#
+asciiend
+
+var MechCrossbowsR3 = ascii
+#
+#
+#
+#
+#######_/ \_^\>## #
+#######［《¤》］\o|#   #
+#######\   /［ \_
+########］U［# \__(_)
+#
+#
+#
+#
+asciiend
+
+var MechCrossbowsR4 = ascii
+#
+#
+#
+#
+#
+#
+################,═════
+###################‾‾‾
+#################‾
+#
+#
+#
+asciiend
+
+var MechCrossbowsR5 = ascii
+#
+#
+#
+#
+#######_/ \_^\>## #
+#######［《¤》］|o/#   #
+#######\   //<_
+########］U［#\__(_)
+#
+#
+#
+#
+asciiend
+
+var MechCrossbowsR6 = ascii
+#
+#
+#
+#
+#
+##
+###############,═════
+##################‾‾‾
+################‾
+#
+#
+#
+asciiend
+
+//left hand crossbow\\
+var MechCrossbowsL1 = ascii
+#
+#
+#
+#
+##_##</^_/ \_
+#( )#|o/［《¤》］
+#\ \/ ］ \   /
+##'. /  #］U［
+####‾#
+#
+#
+#
+asciiend
+
+var MechCrossbowsL2 = ascii
+#
+#
+#
+###│║
+###│║
+|###║
+####´
+#
+#
+#
+#
+#
+asciiend
+
+var MechCrossbowsL3 = ascii
+#
+#
+#
+#
+## ##</^_/ \_
+#   #|o/［《¤》］
+#    ［ \
+##    \_(_)
+#### #
+#
+#
+#
+asciiend
+
+var MechCrossbowsL4 = ascii
+#
+#
+#
+#
+#
+#
+########,═════
+###########‾‾‾
+#########‾
+#
+#
+#
+asciiend
+
+var MechCrossbowsL5 = ascii
+#
+#
+#
+#
+## ##</^_/ \_
+#   #/o/［《¤》］
+#   ［ <
+##   \_(_)
+#### #
+#
+#
+#
+asciiend
+
+var MechCrossbowsL6 = ascii
+#
+#
+#
+#
+#
+#
+#######,═════
+##########‾‾‾
+########‾
+#
+#
+#
+asciiend
+
+var MechBlade1 = ascii
+###########.=≡=.
+##########/__ __\
+##########\‾‾ ‾‾/
+###########`• •´
+##### ##</^_/ \_^
+####   #|o/［《¤》
+####    \  \  #####)
+         `• `•.( )
+          #`•.( )### #
+##    #
+#
+#
+asciiend
+
+var MechBlade2 = ascii
+#################/|
+################/,|
+###############/  |
+##############/  /
+#############/  / #
+###########_┘• /   #
+###########`. <#   #
+##############`‾  #
+#
+#
+#
+#
+asciiend
+
+//right hand sword\\
+var MechSwordsR1 = ascii
+#
+#
+#
+#
+#######_/ \_^\>###  #
+#######［《¤》］\o|###  #
+#######\   /［ \###  #
+########］U［# \_(‾)  #
+################‾   #
+#
+#
+#
+asciiend
+
+var MechSwordsR2 = ascii
+#
+#
+#
+################|
+############### ║  #
+############### ║  #
+###############═╬═ #
+#
+#
+#
+#
+#
+asciiend
+
+var MechSwordsR3 = ascii
+#############(‾)
+#############\‾\
+##############\ \
+##############/ /
+#######_/ \_^/ /   #
+#######［《¤》］|o/    #
+#######\   /´      #
+########］U［#      #
+#
+#
+#
+#
+asciiend
+
+var MechSwordsR4 = ascii
+#######─════╬
+#
+#
+#
+#
+###############  #
+#############    #
+############    #
+#
+#
+#
+#
+asciiend
+
+var MechSwordsR5 = ascii
+#
+#
+#
+#
+#######_/ \_^\>     #
+#######［《¤》］\o‾‾‾‾(‾)
+#######\   / ‾‾‾‾‾‾‾#
+########］U［#        #
+#
+#
+#
+#
+asciiend
+
+var MechSwordsR6 = ascii
+#
+#
+#
+#
+#
+#####################╬════─
+#
+############      #
+#
+#
+#
+#
+asciiend
+
+//left hand sword\\
+var MechSwordsL1 = ascii
+#
+#
+#
+#
+### ###</^_/ \_
+### ###|o/［《¤》］
+### ###/ ］\   /
+### (‾)_/ #］U［
+###  ‾ #
+#
+#
+#
+asciiend
+
+var MechSwordsL2 = ascii
+#
+#
+#
+#####|
+#### ║ #
+#### ║ #
+####═╬═
+#
+#
+#
+#
+#
+asciiend
+
+var MechSwordsL3 = ascii
+######(‾)
+######/‾/
+#####/ /
+#####\ \
+###   \ \^_/ \_
+###    \o|［《¤》］
+###      `\   /
+####      #］U［
+###### #
+#
+#
+#
+asciiend
+
+var MechSwordsL4 = ascii
+─════╬#
+#
+#
+#
+#
+#####  #
+#####    #
+######    #
+#
+#
+#
+#
+asciiend
+
+var MechSwordsL5 = ascii
+#
+#
+#
+#
+#
+##    </^_/ \_
+##     \o‾‾‾‾(‾)
+##      ‾‾‾‾‾‾‾
+##       #］U［
+#####   #
+#
+#
+#
+asciiend
+
+var MechSwordsL6 = ascii
+#
+#
+#
+#
+#
+#
+################╬════─
+#
+#
+#
+#
+#
+#
+asciiend
+
+var MechShield1 = ascii
+#
+#
+#
+#
+#######_/ \_^\>
+#######［《¤》］\o|
+#######\   / `•
+########］U［
+#
+#
+#
+#
+asciiend
+
+var MechShield2 = ascii
+#
+#
+#
+##############\‾‾‾‾‾‾\
+###############|      |
+###############|      |
+###############|      |
+############## |      |
+##############/______/
+#
+#
+#
+asciiend
+
+//right hand wand\\
+var MechWandsR1 = ascii
+#
+#
+#
+#
+#######_/ \_^\>###  #
+#######［《¤》］\o|###  #
+#######\   /［ \###  #
+########］U［# \_(‾)  #
+################‾   #
+#
+#
+#
+asciiend
+
+var MechWandsR2 = ascii
+#
+#
+################_
+###############(_)
+################║  #
+################║# #
+################║# #
+#
+#
+#
+#
+#
+asciiend
+
+var MechWandsR3 = ascii
+#############(‾)
+#############\‾\
+##############\ \
+##############/ /
+#######_/ \_^/ /   #
+#######［《¤》］|o/    #
+#######\   /´      #
+########］U［#      #
+#
+#
+#
+#
+asciiend
+
+var MechWandsR4 = ascii
+#####(‾)═════
+######‾
+#
+#
+#
+###############  #
+#############    #
+############    #
+#
+#
+#
+#
+asciiend
+
+var MechWandsR5 = ascii
+#
+#
+#
+#
+#######_/ \_^\>     #
+#######［《¤》］\o\     #
+#######\   / \‾‾‾‾(‾)
+########］U［#  ‾‾‾‾‾‾#
+#
+#
+#
+#
+asciiend
+
+var MechWandsR6 = ascii
+#
+#
+#
+#
+#
+###########################_
+#####################═════(_)
+############      #
+#
+#
+#
+#
+asciiend
+
+//left hand wand\\
+var MechWandsL1 = ascii
+#
+#
+#
+#
+##### ###</^_/ \_
+##### ###|o/［《¤》］
+##### ###/ ］\   /
+##### (‾)_/ #］U［
+#####  ‾ #
+#
+#
+#
+asciiend
+
+var MechWandsL2 = ascii
+#
+#
+#######_
+######(_)
+###### ║
+#######║
+#######║
+#
+#
+#
+#
+#
+asciiend
+
+var MechWandsL3 = ascii
+########(‾)
+########/‾/
+#######/ /
+#######\ \
+#####   \ \^_/ \_
+#####    \o|［《¤》］
+#####      `\   /
+######      #］U［
+######## #
+#
+#
+#
+asciiend
+
+var MechWandsL4 = ascii
+(‾)═════
+#‾
+#
+#
+#
+#######  #
+#######    #
+########    #
+#
+#
+#
+#
+asciiend
+
+var MechWandsL5 = ascii
+#
+#
+#
+#
+#
+####    </^_/ \_
+####     \oL《¤》］_
+####      \____(_)
+####       #］U［
+######   #
+#
+#
+#
+asciiend
+
+var MechWandsL6 = ascii
+#
+#
+#
+#
+#
+#
+########################_
+##################═════(_)
+#
+#
+#
+#
+#
+asciiend
+
+//keep the ＂#＂\\
+
+//color of mech can be changed\\
+var MechColor = #red
+
+/* default is rainbow for all weapons but you
+can switch it for individual weapons by 
+replacing ＂@MechWeaponColor@＂ with the desired
+color */
+var MechWeaponColor = #rainbow
+
+/* default is rainbow for all shields but you
+can switch it for individual weapons by 
+replacing ＂@MechShieldColor@＂ with the desired
+color */
+var MechShieldColor = #rainbow
+
+/* default is rainbow for all items but you
+can switch it for individual weapons by 
+replacing ＂@MechItemColor@＂ with the desired
+color */
+var MechItemColor = #rainbow
+
+var MechProgram
+
+?MechProgram
+  ?ai.walking
+   ?item.right = triskelion
+    >o-9,-5,@MechColor@,
+    ^@MechWlkR［time/2%MechWlkR.Count()］@
+   :
+    >o-9,-5,@MechColor@,
+    ^@MechWlkR［time/4%MechWlkR.Count()］@
+
+  :?item.right.state >= 1 |
+  ^item.left.state >= 1
+   >o-9,-5,@MechColor@,@MechIdle@
+  :?Debuffs.string = stun
+   >o-9,-5,@MechColor@,@MechIdle@
+  :?ai.idle & 
+  ^item.right.state <= 1 | 
+  ^item.left.state <= 1
+   >o-9,-5,@MechColor@,@MechIdle@
+
+  ?item.right = repeating crossbow
+   >o-9,-5,@MechWeaponColor@,@MechGunner2@
+   >o-9,-5,@MechColor@,@MechGunner1@
+   >o-9,-5,@MechWeaponColor@,@MechGunnerAmmo@
+
+  ?item.right = shield
+   >o-9,-5,@MechColor@,@MechShield1@
+   >o-9,-5,@MechShieldColor@,@MechShield2@
+
+  ?item.right = sword
+   ?item.right.state = 1
+    >o-9,-5,@MechColor@,
+    ^@MechSwordsR1@
+    >o-9,-5,@MechWeaponColor@,
+    ^@MechSwordsR2@
+   :?item.right.state = 2
+    >o-9,-5,@MechColor@,
+    ^@MechSwordsR3@
+    >o-9,-5,@MechWeaponColor@,
+    ^@MechSwordsR4@
+   :?item.right.state = 3
+    >o-9,-5,@MechColor@,
+    ^@MechSwordsR5@
+    >o-9,-5,@MechWeaponColor@,
+    ^@MechSwordsR6@
+
+  ?item.left = sword
+   ?item.left.state = 1
+    >o-12,-5,@MechColor@,
+    ^@MechSwordsL1@
+    >o-12,-5,@MechWeaponColor@,
+    ^@MechSwordsL2@
+   :?item.left.state = 2
+    >o-12,-5,@MechColor@,
+    ^@MechSwordsL3@
+    >o-12,-5,@MechWeaponColor@,
+    ^@MechSwordsL4@
+   :?item.left.state = 3
+    >o-11,-6,@MechColor@,
+    ^@MechSwordsL5@
+    >o-11,-6,@MechWeaponColor@,
+    ^@MechSwordsL6@
+
+  ?item.right = wand
+   ?item.right.state = 1
+    >o-9,-5,@MechColor@,@MechWandsR1@
+    >o-9,-5,@MechWeaponColor@,@MechWandsR2@
+   :?item.right.state = 2
+    >o-9,-5,@MechColor@,@MechWandsR3@
+    >o-9,-5,@MechWeaponColor@,@MechWandsR4@
+   :?item.right.state = 3
+    >o-9,-5,@MechColor@,@MechWandsR5@
+    >o-9,-5,@MechWeaponColor@,@MechWandsR6@
+
+  ?item.left = wand
+   ?item.left.state = 1
+    >o-14,-5,@MechColor@,@MechWandsL1@
+    >o-14,-5,@MechWeaponColor@,@MechWandsL2@
+   :?item.left.state = 2
+    >o-14,-5,@MechColor@,@MechWandsL3@
+    >o-14,-5,@MechWeaponColor@,@MechWandsL4@
+   :?item.left.state = 3
+    >o-14,-6,@MechColor@,@MechWandsL5@
+    >o-14,-6,@MechWeaponColor@,@MechWandsL6@
+
+  ?item.right = crossbow 
+  ^& item.right ! repeating crossbow
+   ?item.right.state = 1
+    >o-9,-5,@MechColor@,@MechCrossbowsR1@
+    >o-9,-5,@MechWeaponColor@,@MechCrossbowsR2@
+   :?item.right.state = 2
+    >o-9,-5,@MechColor@,@MechCrossbowsR3@
+    >o-9,-5,@MechWeaponColor@,@MechCrossbowsR4@
+   :?item.right.state = 3
+    >o-9,-5,@MechColor@,@MechCrossbowsR5@
+    >o-9,-5,@MechWeaponColor@,@MechCrossbowsR6@
+
+  ?item.left = crossbow 
+  ^& item.left ! repeating crossbow
+   ?item.left.state = 1
+    >o-10,-5,@MechColor@,@MechCrossbowsL1@
+    >o-10,-5,@MechWeaponColor@,@MechCrossbowsL2@
+   :?item.left.state = 2
+    >o-10,-5,@MechColor@,@MechCrossbowsL3@
+    >o-10,-5,@MechWeaponColor@,@MechCrossbowsL4@
+   :?item.left.state = 3
+    >o-10,-5,@MechColor@,@MechCrossbowsL5@
+    >o-10,-5,@MechWeaponColor@,@MechCrossbowsL6@
+
+  ?item.right = Blade
+   >o-13,-5,@MechColor@,@MechBlade1@
+   >o-9,-5,@MechWeaponColor@,@MechBlade2@
+
+//power switch, true = on, false = off\\
+MechProgram = true

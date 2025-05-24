@@ -1,0 +1,191 @@
+//DragController
+/* v1.0 by Ket
+
+Utility that enables dragging any type of ui component that you register with Add(component) around the screen.
+Will keep position between loops unless you disable this functionality by setting keepPos to false. 
+Can unregister by calling Remove(component), or temporarily disable dragging by using CanDrag(component, false)
+
+To use:
+----------------------------
+var drag = import UI/DragController
+
+Then during your ui component setup use:
+drag.Add(component)
+to add your ui component to the list of draggables.
+The last one added is the one that has priority in the case of overlaps.
+
+Then use drag.Update() every frame you want components to be draggable.
+
+Optionally you can use drag.Remove(component) to remove a component from the list of draggables,
+but note that this will make it no longer keep its position across loops.
+If you want to just disable dragging, use drag.CanDrag(comp, false) instead.
+
+Use drag.keepPos = false if you don't want to keep position between loop
+
+Alternatively copy paste this script into your mindstone
+then rename any variables or function names if they overlap with your own
+then use the functions directly. Make sure the variables have been created
+before you try to use the functions.
+---------------------------
+
+Note that keeping position between loops can be unreliable if you change the order you add components,
+as the current implementation relies on the order being the same.
+This may be fixed in the future with a different way to identify what metadata belongs to what component
+*/
+
+//--User Configureable variables
+var keepPos = true
+
+//--Internal variables, may change on updates
+var draggables = []
+var draggablesX = []
+var draggablesY = []
+var draggablesCanDrag = []
+var ix
+var iy
+var oldix
+var oldiy
+var curIndex
+var touched = false
+var screenw = screen.w
+var screenh = screen.h
+var hasCleared = false
+
+
+//--Public Functions
+//Adds component to the array of tracked draggables.
+func Add(comp)
+  ?!hasCleared & loc.loop
+    draggables.Clear()
+    hasCleared=true
+  ?draggables.Contains(comp)
+    return
+    
+  draggables.Add(comp)
+  var index = draggables.Count()-1
+  ?draggablesX.Count() >= draggables.Count()
+    ?keepPos
+      comp.x = draggablesX[index]
+      comp.y = draggablesY[index]
+  :
+    draggablesCanDrag.Add(true)
+    draggablesX.Add(comp.x)
+    draggablesY.Add(comp.y)
+  
+//Removes component from array of draggables, it will no longer be tracked
+func Remove(comp)
+  var index = draggables.IndexOf(comp)
+  ?index ! -1
+    draggables.RemoveAt(index)
+    draggablesX.RemoveAt(index)
+    draggablesY.RemoveAt(index)
+    draggablesCanDrag.RemoveAt(index)
+
+//Clears all draggables, for use if you want a full reset mid-run
+func Clear()
+  draggables.Clear()
+  draggablesX.Clear()
+  draggablesY.Clear()
+  draggablesCanDrag.Clear()
+  
+//Changes in which order the components will be dragged if they overlap,
+//as if you had called Add(comp) in a different order.
+//Highest index is the priority when picking a component to move.
+//Components added later will be on top.
+//Note: can mix up position after loop.
+func SetIndex(comp,index)
+  var oldindex = draggables.IndexOf(comp)
+  ?oldindex ! -1
+    var tCanDrg = draggablesCanDrag[oldindex]
+    Remove(comp)
+    ?index < 0
+      draggables.Insert(0,comp)
+      draggablesCanDrag.Insert(0,tCanDrg)
+      draggablesX.Insert(0,comp.x)
+      draggablesY.Insert(0,comp.y)
+    :?index < draggables.Count()
+      draggables.Insert(index,comp)
+      draggablesCanDrag.Insert(index,tCanDrg)
+      draggablesX.Insert(index,comp.x)
+      draggablesY.Insert(index,comp.y)
+    :
+      draggables.Add(comp)
+      draggablesCanDrag.Add(tCanDrg)
+      draggablesX.Add(comp.x)
+      draggablesY.Add(comp.y)
+      
+//Get index of component, for use with SetIndex
+func GetIndex(comp)
+  return draggables.IndexOf(comp)
+  
+//Enables/Disables dragging for a single component.
+//true to enable drag, false to disable.
+func CanDrag(comp,bool)
+  var index = draggables.IndexOf(comp)
+  ?index ! -1
+    ?bool
+      draggablesCanDrag[index] = true
+    :
+      draggablesCanDrag[index] = false
+
+//Checks for drag and updates component position
+func Update()
+  var key_ = key
+  ?hasCleared
+    hasCleared = false
+  ?key_ = primary
+    ix = clamp(input.x,0,screenw-1)
+    iy = clamp(input.y,0,screenh-1)
+    ?key_ = primaryBegin
+      touched = false
+      ?draggables.Count() ! 0
+        for i = (draggables.Count()-1)..0
+          ?draggables[i].parent = null
+            Remove(draggables[i])
+          :?touching(draggables[i],ix,iy) &
+          ^draggablesCanDrag[i]
+            curIndex = i
+            touched = true
+            break
+      ?touched
+        oldix = ix
+        oldiy = iy
+    ?touched & (key_ = primaryEnd |
+    ^draggablesCanDrag[curIndex] = false)
+      draggablesX[curIndex] =
+      ^draggables[curIndex].x
+      draggablesY[curIndex] =
+      ^draggables[curIndex].y
+      touched = false
+    :?touched
+      draggables[curIndex].x += ix-oldix
+      draggables[curIndex].y += iy-oldiy
+      oldix = ix
+      oldiy = iy
+
+//--Internal Functions
+//Checks if X and Y are touching the component
+//Relative to top left of the screen
+func touching(comp,x,y)
+  ?x = null
+    x = clamp(input.x,0,screenw-1)
+  ?y = null
+    y = clamp(input.y,0,screenh-1)
+  var compx = comp.absoluteX
+  var compy = comp.absoluteY
+  var w = comp.w
+  var h = comp.h
+  ?x >= compx &
+  ^x < (compx + w) &
+  ^y >= compy &
+  ^y < (compy + h)
+    return true
+  :
+    return false
+//Stonescript math.clamp for better performance.
+func clamp(num,min,max)
+  ?num < min
+    return min
+  ?num > max
+    return max
+  return num

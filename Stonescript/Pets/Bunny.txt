@@ -1,0 +1,194 @@
+// Pet Bunny
+
+// by: Kash
+
+// Poorly based off PetFrog from Standardcombo
+
+
+// @Fixes and Updates@
+
+//Fix of the last 3 frames of
+//the animation being cutted off
+
+// Thanks ☆Sven☆ @teumessiansven
+//for pointing it out
+
+
+var rabbitColor
+rabbitColor = #white
+
+var keepDistance = -20
+var maxX = -12
+
+var maxDistance
+maxDistance = -80
+
+var targetZ = -1
+
+var x = 0
+var y = 0
+var myX = 0
+var myZ = 0
+var lastPlayerX = 0
+var lastPlayerZ = 0
+
+var stateNone = 0
+var stateIdle = 1
+var stateJump = 2
+var currentState = stateNone
+var stateTime = 0
+
+
+func SetState(newState)
+  ?newState = stateJump
+    play open_note 400
+
+  currentState = newState
+  stateTime = 0
+
+
+?currentState = stateNone | time = 1
+  lastPlayerX = pos.x
+  lastPlayerZ = pos.z
+  myX = keepDistance
+  myZ = targetZ
+
+ 
+  ?time > 1
+    myX = maxDistance
+
+  SetState(stateIdle)
+
+
+myX = myX - (pos.x - lastPlayerX)
+
+stateTime++
+
+?currentState = stateIdle
+  ?myX < maxDistance | myX > -maxDistance
+    myX = maxDistance
+  myZ = myZ - (pos.z - lastPlayerZ)
+
+  ?myX < keepDistance
+    SetState(stateJump)
+
+:?currentState = stateJump
+  ?myX < maxX
+    myX++
+
+  ?stateTime >= 9
+    ?myZ > targetZ
+      myZ--
+    :?myZ < targetZ
+      myZ++
+
+  ?stateTime >= 16
+    SetState(stateIdle)
+
+
+lastPlayerX = pos.x
+lastPlayerZ = pos.z
+
+// Draw
+
+?currentState = stateIdle
+  >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+######\\
+#####__()
+###α(_-\
+asciiend
+
+  ?face = ＂°°＂
+    ?time % 4 <= 1
+      >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+###### ||
+asciiend
+    ?time % 4 > 1
+      >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+###### ((
+asciiend
+  
+?currentState = stateJump
+  ?stateTime/2 = 0
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+#
+#####_\\
+###α(_.()
+asciiend
+
+  :?stateTime/2 = 1
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+#######_
+#####_‾()
+###α(_-/
+asciiend
+
+  :?stateTime/2 = 2
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+#######_
+######‾()
+#####/´)
+###α(_
+asciiend
+
+  :?stateTime/2 = 3
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+######\\
+#####__()
+###α( -\
+#####)
+asciiend
+
+  :?stateTime/2 = 4
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+######((
+#####__()
+###α(_-‾'
+#####
+asciiend
+
+  :?stateTime/2 = 5
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+#####__((
+###α(_-.()
+########‾'
+asciiend
+
+  :?stateTime/2 = 6
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+#####_
+###α( \\
+#####\.()
+asciiend
+
+  :?stateTime/2 = 7
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+#
+####_\\
+##α(_.()
+asciiend
+
+  :?stateTime/2 = 8
+    >o@myX@,@myZ@,@rabbitColor@,ascii
+#
+#
+#######_
+#####_‾()
+###α(_-(
+asciiend

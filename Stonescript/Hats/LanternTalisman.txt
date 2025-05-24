@@ -1,0 +1,55 @@
+//lantern fire talisman
+//By: Sterella 1.0
+var lanterntalisman
+lanterntalisman = ascii
+#i#
+(φ)
+＂ï＂
+asciiend
+
+?item.left = fire_talisman
+  ?item.left = ＂golden＂
+    >o-3,1,#FFCC66,@lanterntalisman@
+  :?item.left = ＂+0＂
+    >o-3,1,#white,@lanterntalisman@
+  :?item.left = ＂+1＂
+    >o-3,1,#cyan,@lanterntalisman@
+  :?item.left = ＂+2＂ | item.left = ＂+3＂
+    >o-3,1,#yellow,@lanterntalisman@
+  :?item.left = ＂+4＂ | item.left = ＂+5＂ |
+  ^item.left = ＂+6＂
+    >o-3,1,#green,@lanterntalisman@
+  :?item.left = ＂+7＂ | item.left = ＂+8＂ |
+  ^item.left = ＂+9＂ | item.left = ＂+10＂
+    >o-3,1,#blue,@lanterntalisman@
+  :?item.left = ＂+11＂ | item.left = ＂+12＂ |
+  ^item.left = ＂+13＂ | item.left = ＂+14＂ |
+  ^item.left = ＂+15＂
+    >o-3,1,#red,@lanterntalisman@
+  :
+    >o-3,1,#rainFF,@lanterntalisman@
+  ?item.left.state ! 1
+    >o-2,2,#FFCC99,φ
+:?item.right = fire_talisman
+  ?item.right = ＂golden＂
+    >o1,1,#FFCC66,@lanterntalisman@
+  :?item.right = ＂+0＂
+    >o1,1,#white,@lanterntalisman@
+  :?item.right = ＂+1＂
+    >o1,1,#cyan,@lanterntalisman@
+  :?item.right = ＂+2＂ | item.right = ＂+3＂
+    >o1,1,#yellow,@lanterntalisman@
+  :?item.right = ＂+4＂ | item.right = ＂+5＂ |
+  ^item.right = ＂+6＂
+    >o1,1,#green,@lanterntalisman@
+  :?item.right = ＂+7＂ | item.right = ＂+8＂ |
+  ^item.right = ＂+9＂ | item.right = ＂+10＂
+    >o1,1,#blue,@lanterntalisman@
+  :?item.right = ＂+11＂ | item.right = ＂+12＂ |
+  ^item.right = ＂+13＂ | item.right = ＂+14＂ |
+  ^item.right = ＂+15＂
+    >o1,1,#red,@lanterntalisman@
+  :
+    >o1,1,#rainFF,@lanterntalisman@
+  ?item.right.state ! 1
+    >o2,2,#FFCC99,φ

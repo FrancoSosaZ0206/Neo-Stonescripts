@@ -1,0 +1,85 @@
+//StoneClause 1.0
+//By: GaelDavino
+h-4,-2,#FF2222,ascii
+ .•~~.
+(,.###)
+#
+asciiend
+
+h-4,-2,#FFFFFF,ascii
+ #####
+###___#
+ʘ
+asciiend
+
+
+h-8,-1,#FF2222,ascii
+  
+ ####
+#############
+####(          )
+####`-,----,---´ 
+##
+asciiend
+
+
+h-8,-1,#EFCE10,ascii
+  __
+#(, #`
+##### '––.__.-.
+###############
+################ _
+   _____________)
+asciiend 
+
+h-20,0,#A50000,ascii
+   
+  '--'
+.´¯¯¯¯`.
+(      )
+(______)
+asciiend
+
+
+ var animframes = ［ascii
+  
+☺
+#┴#  
+#####_☺#####☺
+######)####¯
+########
+asciiend,ascii
+  
+☺
+#┴#    
+#####_☺#####☺
+######)####¯
+########
+asciiend,ascii
+  
+☺
+#┴#   
+#####_☺#####☺
+######)####¯
+######v##v
+asciiend,ascii
+  
+☺
+#┴#    
+#####_☺#####☺
+######)####¯
+#########
+asciiend,ascii
+  
+☺
+#┴#  
+#####_☺#####☺
+######)####¯
+######## 
+asciiend］ 
+ var i = 0
+ h-17,-1,#FFFFFF,@animframes［i］@
+ totaltime % 7 = 0 
+   i++
+ i = animframes.Count()
+  i = 0

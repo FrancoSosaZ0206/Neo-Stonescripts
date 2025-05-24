@@ -1,0 +1,394 @@
+﻿//*******************************
+// File Info
+//*******************************
+// Mindstone Button
+// Version: 1.5
+//
+// Designed and verified on
+// SSRPG v3.53.6
+//
+// Authors:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//     
+//
+// Description:
+// ------------
+// Adds a button, similar to
+// other item buttons in-game,
+// that allows a user to open 
+// the mindstone mid-run by
+// tapping the button. 
+//
+// By default the button will 
+// only display on standard
+// levels, won't display
+// during quests, and will 
+// be located directly below
+// the potion location. See
+// Advanced Instructions to 
+// change these settings.
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Import the Mindstone button
+// with default settings using 
+// the following command:
+//  import UI/MindstoneButton
+//
+//
+// Advanced Instructions:
+// ----------------------
+// Import the Mindstone button
+// using the following command
+// (must be implemented this way
+// to show button when location
+// loops):
+//  var mind
+//  ?totaltime = 1
+//    mind = import UI/MindstoneButton
+//
+// Set the location of the button
+// using the following command,
+// replacing a and b with 
+// desired x and y values (see 
+// SetXY() for more info):
+//  mind.SetXY(a,b)
+//
+// Control when the button is 
+// displayed using the following
+// command, setting true or false
+// for each parameter, where 
+// a = standard levels
+// b = scenery levels
+// c = quests
+// d = unknown levels
+// (see Display() for more info):
+//  mind.Display(a,b,c,d)
+//
+// Example (Display & Set can be inside
+// or outside time check as preferred):
+// var mind 
+// ?totaltime = 1
+//   mind = import UI/MindstoneButton
+//   mind.Display(true,true,false,false)
+// mind.SetXY(1,10)
+//
+// Extra Advanced Instructions:
+// ----------------------------
+// (For PC Only) Manually set
+// the default parameters by 
+// changing the User Configurable
+// Variables below, save the file, 
+// and import using the Quickstart 
+// Instructions above.
+//
+//
+// Enjoy!
+//
+//
+//*******************************
+// Version Information
+//*******************************
+//
+// 1.5: Encapsulated Draw and
+//      Display function calls
+//      within a totaltime = 1
+//      check to both A) ensure
+//      MindstoneButton is drawn
+//      upon location loop (thanks
+//      Agerak for the simple 
+//      fix!), and B) reduce lag 
+//      by only checking Display 
+//      when location loads 
+//      initially (still keeps 
+//      Display functionality 
+//      when transistioning 
+//      locations so button only 
+//      displays when desired).
+//      
+// 1.4: Replaced loc.id checks 
+//      with var lvl to reduce
+//      laggy performance. 
+//      Replaced lvl checks with
+//      array.Contains() and 
+//      added ascenery, alevels,
+//      and adisable arrays to 
+//      significantly improve
+//      speed and allow for easy
+//      addition of future 
+//      levels. 
+//      (Thanks to Ket & 
+//       qrupafjzvm1 for these
+//       improvements!)
+//
+// 1.3: Reworked code to allow
+//      more control of the 
+//      button once it's 
+//      imported.
+//      Removed LocationType()
+//      function and replaced 
+//      with Display() function,
+//      and added level, scene, 
+//      quest, and unknown 
+//      variables to allow user 
+//      to directly control when 
+//      to display the button.
+//      Added global variable
+//      to access button panel
+//      parameters and added 
+//      SetXY() function to 
+//      allow user to move the
+//      location of the button.
+//
+// 1.2: Removed quotes around 
+//      battle level names. 
+//      Don't seem to work 
+//      with imported files.
+//
+// 1.1: Updated to use new 
+//      ui.OpenMind() function.
+//      Updated Location check to
+//      account for quests. 
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+// Button location parameters
+var buttonanchor = top_left
+var buttondock = top_left
+var buttonx = 1
+var buttony = 6
+
+var level   = true
+var scene   = false
+var quest   = false
+var unknown = false
+
+//*******************************
+// Global Variables
+//*******************************
+
+var mindart = ascii
+,TT,
+│░░│
+`──´
+asciiend
+
+var ascenery = [
+"waterfall",
+"undead_crypt_intro"]
+
+var alevels =  [
+"rocky_plateau",
+"deadwood_valley",
+"caustic_caves", 
+"fungus_forest",
+"undead_crypt",
+"bronze_mine", 
+"icy_ridge", 
+"temple"]
+
+var adisabled = [
+"mushroom_shop",
+"uulaa_shop",
+"cross_deadwood_river",
+"bronze_gate",
+"cross_bridge"]
+
+
+//*******************************
+// Function Calls
+//*******************************
+
+var button 
+?totaltime=1
+  button = DrawMindstoneButton()
+  Display(level,scene,quest,unknown)
+//
+
+//*******************************
+// Functions
+//*******************************
+
+//*******************************
+// DrawMindstoneButton()
+//
+// Draws Mindstone button as a
+// parent panel holding the ascii
+// art and interactive button
+//
+//*******************************
+func DrawMindstoneButton()
+
+    var p = ui.AddPanel()
+    p.anchor = buttonanchor
+    p.dock = buttondock
+    p.visible = false
+    p.color = #888888
+    p.style = 1
+    p.w = 8
+    p.h = 5
+    p.x = buttonx
+    p.y = buttony
+
+    var b = ui.AddButton()
+    b.anchor = center_center
+    b.dock = center_center
+    b.visible = inherit
+    b.style = 1
+    b.text = “”
+    b.w = 8
+    b.h = 5
+    b.SetPressed(BtnPressed)
+    p.Add(b)
+
+    var a = ui.AddAnim(mindart)
+    a.anchor = center_center
+    a.dock = center_center
+    a.visible = inherit
+    a.color = #white
+    p.Add(a)
+
+    // Only displays text on PC
+    // to match other buttons
+    ?sys.isPC
+      var t = ui.AddText()
+      t.anchor = bottom_right
+      t.dock = bottom_right
+      t.visible = inherit
+      t.color = #888888
+      t.text = "[M]"
+      t.w = 3
+      t.h = 1
+      t.x = -1
+      p.Add(t)
+
+  return p
+//
+    
+
+//*******************************
+// BtnPressed()
+//
+// Intermediary function to
+// properly call Mindstone
+// function
+//*******************************
+func BtnPressed()
+  ui.OpenMind()
+
+
+//*******************************
+// SetXY(x,y)
+//
+// Allows repositioning of 
+// Mindstone Button after 
+// initial creation
+//
+// x: Distance from left side 
+//    of the screen to the 
+//    left side of the button
+//
+// y: Distance from top of the
+//    screen to the top of the
+//    button
+//
+//*******************************
+func SetXY(x,y)
+  button.x = x
+  button.y = y
+//
+
+
+//*******************************
+// Display(levels,scenery,
+//        ^quests,unknown)
+//
+// Determines when to display the
+// Mindstone Button based on the
+// level type, if a quest is 
+// active, or if the level is 
+// new. Hides the button 
+// automatically on levels that 
+// run stonescript but don't 
+// allow use of the mindstone
+// (e.g. Uulaa's Hotspring Shop)
+//
+// levels:  Controls display of 
+//          button on the 
+//          following levels:
+//          - rocky_plateau 
+//          - deadwood_valley
+//          - caustic_caves 
+//          - fungus_forest 
+//          - undead_crypt 
+//          - bronze_mine 
+//          - icy_ridge
+//          - temple
+// true:    Displays button
+// false:   Hides button
+//
+// scenery: Controls display of 
+//          button on the
+//          following levels:
+//          - waterfall
+//          - undead_crypt_intro
+// true:    Displays button
+// false:   Hides button
+//
+// quests:  Controls display of
+//          button during active
+//          quests
+// true:    Displays button
+// false:   Hides Button
+// 
+// unknown: Controls display of
+//          button during levels
+//          that aren't in the
+//          game as of release
+//          of this code. 
+//          (Included as stop-
+//          gap feature for 
+//          future game updates)
+// true:    Displays button
+// false:   Hides Button
+//
+//*******************************
+func Display(levels,scenery,
+            ^quests,unknown)
+
+  ?!quests & loc.isquest
+    button.visible = false
+    return
+
+  var lvl = loc.id
+
+  ?ascenery.Contains(lvl)
+    lvl = 1 //Scenery
+  :?alevels.Contains(lvl)
+    lvl = 2 //Levels
+  :?adisabled.Contains(lvl)
+    lvl = 3 //loc where unable to 
+            //use Mindstone
+  :
+    lvl = 4 //Unknown/new levels
+
+  ?scenery & lvl = 1
+    button.visible = true
+  :?levels & lvl = 2
+    button.visible = true
+  :?unknown & lvl = 4
+    button.visible = true
+  :
+    button.visible = false
+//
+
+//*******************************
+// End of File
+//*******************************

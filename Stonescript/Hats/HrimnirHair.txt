@@ -1,0 +1,55 @@
+/*
+Hrimnir Hair
+by: michael.g.g.
+ver 1.0
+
+This script will give you Hrimnir's Hairstyle which sways even when there is no wind.
+Low HP will make hair messy like when Hrimnir is frozen.
+Only works in bighead mode.
+*/
+
+var HairFrame
+
+?loc.begin 
+  HairFrame = 0
+
+?bighead
+  ?HP < (maxHP / 2)
+    HairFrame = -1
+    >h-4,-3,#FFFFFF,ascii
+########
+###)`''(
+##(. _-`
+asciiend
+
+  ?HairFrame >= 0 & HairFrame < 2
+    >h-4,-3,#FFFFFF,ascii
+#####.-
+###_/(
+##(. _)
+asciiend
+
+  ?(HairFrame > 1 & HairFrame <= 3) | (HairFrame > 9 & HairFrame <= 11)
+    >h-4,-3,#FFFFFF,ascii
+####.-
+###_)\
+##(. _)
+asciiend
+
+  ?(HairFrame > 3 & HairFrame <= 5) | (HairFrame > 7 & HairFrame <= 9)
+    >h-4,-3,#FFFFFF,ascii
+####(
+###_)\
+##(. _)
+asciiend
+
+  ?(HairFrame > 5 & HairFrame <= 7)
+    >h-4,-3,#FFFFFF,ascii
+#####\
+###__/)
+##(. _/
+asciiend
+HairFrame++
+
+?HairFrame = 12
+  HairFrame = 0

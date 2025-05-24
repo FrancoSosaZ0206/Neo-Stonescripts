@@ -1,0 +1,785 @@
+// Cosmetic Wisp pet for Stone Story RPG
+// Version 1.3 by Night / Apocryphic, October 2023
+
+//  1.3   Fix some chatter triggers
+//        Removed glyph cheat sheet
+
+//
+// Configuration
+//
+var ShowChest = true      // Show daily chest with sparkles
+var Chatter = true        // Enable chatter
+var NaviMode = false      // Hey! Listen!
+var NaviChance = 100      // 1 in n chance to enable on init
+var AnimInterval = 3      // Animations update every n frames
+var ChatInterval = 300    // Minimum frames before next chatter
+var ChatDuration = 45     // Base chatter duration
+var ChanceAttack = 0.2    // foe.state chatter
+var ChanceBoss = 0.5      // boss chatter
+var ChanceLocation = 0.5  // location chatter
+var ChanceOther = 0.5     // other chatter
+
+//
+// Variable declarations
+//
+
+// Chatter
+var QuoteTime = 0
+var Chatting = false
+var ThisQuote = ""
+var ForceQuote = false
+
+// Wisp
+var ShowWisp = false
+var WispColor
+var WispX = 0
+var WispY = 0
+var LastPX = 0
+var LastPY = 0
+var LastXMove = 0
+var LastYMove = 0
+var WispXNear = -2
+var WispXFar = -10
+var WispYLower = -2
+var WispYUpper = -8
+var LastScreen = 0
+
+// System object offloads
+var T = 0   // time
+var TT = 0  // totaltime
+var SI = 0  // screen.i
+var SW = 0  // screen.w
+var SH = 0  // screen.h
+var F = ""  // foe
+var FS = 0  // foe.state
+var FT = 0  // foe.time
+var FD = 0  // foe.distance
+var FH = 0  // foe.hp
+var FHX = 0 // foe.maxhp
+var FA = 0  // foe.armor
+var FAX = 0 // foe.maxarmor
+var L = ""  // loc
+var PX = 0  // pos.x
+var PZ = 0  // pos.z
+
+// Wisp animation
+var WispF1 = ascii
+###
+#ʘ#
+###
+asciiend
+var WispF2 = ascii
+###
+#☺#
+###
+asciiend
+var WispF3 = ascii
+###
+#•#
+###
+asciiend
+var WispF4 = ascii
+###
+#·#
+###
+asciiend
+
+// Spinning animation
+var SpinF1 = ascii
+#│#
+###
+#│#
+asciiend
+var SpinF2 = ascii
+##/
+###
+/##
+asciiend
+var SpinF3 = ascii
+###
+─#─
+###
+asciiend
+var SpinF4 = ascii
+\##
+###
+##\
+asciiend
+
+// Horizontal flapping animation
+var FlapHF1 = ascii
+\##
+###
+/##
+asciiend
+var FlapHF2 = ascii
+#│#
+###
+#│#
+asciiend
+var FlapHF3 = ascii
+##/
+###
+##\
+asciiend
+
+// Vertical flapping animation
+var FlapVF1 = ascii
+\#/
+###
+###
+asciiend
+var FlapVF2 = ascii
+###
+─#─
+###
+asciiend
+var FlapVF3 = ascii
+###
+###
+/#\
+asciiend
+
+// Animation variables
+var WispAnim = [WispF1,WispF2,WispF3,WispF4,WispF3,WispF2]
+var WispIndex = 3
+var Cycle = 0
+var SpinAnim = [SpinF1,SpinF2,SpinF3,SpinF4]
+var SpinIndex = 0
+var SpinDirection = true
+var SpinDuration = 0
+var FlapAnimH = [FlapHF1,FlapHF2,FlapHF3,FlapHF2]
+var FlapAnimV = [FlapVF1,FlapVF2,FlapVF3,FlapVF2]
+var FlapAnim = []
+var FlapIndex = 0
+var FlapDuration = 0
+var Busy = false
+var Spinning = false
+var Flapping = false
+var Sparkling = false
+var SparkleDuration = 0
+
+// Spinning animation
+func SpinWisp()
+  >o@WispX@,@WispY@,@WispColor@,@SpinAnim[SpinIndex]@
+
+// Flapping animation
+func FlapWisp()
+  >o@WispX@,@WispY@,@WispColor@,@FlapAnim[FlapIndex]@
+
+// Sparkle at absolute X,Y
+var SparklePoint1X
+var SparklePoint1Y
+var SparklePoint2X
+var SparklePoint2Y
+func SparklePoint(x,y)
+  ?TT % AnimInterval = 0 | !SparklePoint1X
+    SparklePoint1X = x + ((rng % 8) - 3)
+    SparklePoint1Y = y + ((rng % 4) - 2)
+    SparklePoint2X = x + ((rng % 6) - 2)
+    SparklePoint2Y = y + ((rng % 3) - 1)
+  >`@SparklePoint1X@,@SparklePoint1Y@,#rainbow,·
+  >`@SparklePoint2X@,@SparklePoint2Y@,#rainbow,•
+
+// Sparkle at wisp
+var SparkleWisp1X
+var SparkleWisp1Y
+var SparkleWisp2X
+var SparkleWisp2Y
+func SparkleWisp()
+  ?TT % AnimInterval = 0 | !SparkleWisp1X
+    SparkleWisp1X = WispX + (rng % 5) - 1
+    SparkleWisp1Y = WispY + (rng % 5) - 1
+    SparkleWisp2X = WispX + (rng % 3)
+    SparkleWisp2Y = WispY + (rng % 3)
+  >o@SparkleWisp1X@,@SparkleWisp1Y@,#rainbow,·
+  >o@SparkleWisp2X@,@SparkleWisp2Y@,#rainbow,•
+
+//
+// Quotes for chattering
+//
+
+// Annoying chatter!
+var Navi = [
+  "Hello!",
+  "Hey!",
+  "Listen!",
+  "Look!",
+  "Watch out!",
+  "Hey! Listen!"
+]
+// Boss attacks
+var QBossAttack = [
+  "Oh, no!",
+  "Watch out!",
+  "Beware!",
+  "Incoming!"
+]
+// Bosses
+var QDysangelos1 = [
+  "He's a lot uglier now.",
+  "Time to chill out!"
+]
+var QDysangelos2 = [
+  "Uh, this isn't even my final form?",
+  "Elemental, my dear Watson."
+]
+var QDysangelos3 = [
+  "Wow, he hulked out!",
+  "We're almost there!"
+]
+var QXyloalgia = [
+  "This is tree-son!",
+  "Inappropriate tree-tment!",
+  "Treebeard he's not!",
+  "Make like a tree and leaf!"
+]
+var QPoena = [
+  "Creepy!",
+  "Gee, that's not creepy at all."
+]
+var QBolesh = [
+  "Ewwwwww!",
+  "That's a big spider!",
+  "Don't let it bite you!"
+]
+var QAngryShroom = [
+  "We're in so much truffle!",
+  "Knock the spores out of him!"
+]
+var QMorel = [
+  "There's morel of them?",
+  "Another one?"
+]
+var QEnoki = [
+  "He doesn't look like a fun guy!",
+  "Spoooooring..."
+]
+var QPallas1 = [
+  "We've got a bone to pick with you!",
+  "What a numbskull!"
+]
+var QPallas2 = [
+  "Not even a leg to stand on!",
+  "That's not very humerous.",
+  "We're down to a skeleton crew!"
+]
+var QGuardian1 = [
+  "The bigger they are...",
+  "Hammer time!",
+  "Smash him into spare parts!"
+]
+var QGuardian2 = [
+  "The harder they fall!",
+  "You've got him now!"
+]
+var QHrimnir = [
+  "Wow, ugliest foe yeti.",
+  "Time to bring the heat!",
+  "Ice him!",
+  "Water the odds?"
+]
+var QNagaraja = [
+  "♫ Na ga ra ja na ga ra! ♫",
+  "That's why you're careful of strange holes!"
+]
+// Passed a foe
+var Missed = [
+  "Hey, you missed one!",
+  "Leaving foes behind?"
+]
+// Locations
+var Plateau = [
+  "The stars at night...",
+  "...are big and bright!",
+  "Ready to rock?"
+]
+var Deadwood = [
+  "Got wood?",
+  "This place bugs me...",
+  "Down by the river..."
+]
+var Fear = [
+  "I hope you're not claustrophobic...",
+  "I hope you're not arachnophobic...",
+  "A lunk spelunks for gunk!",
+  "What a poisonous atmosphere..."
+]
+var Forest = [
+  "Such vigorous growth!",
+  "There's not mush room in here..."
+]
+var Haunted = [
+  "OooOOOooooOOoOOooOOoOO...",
+  "Welcome to the bone zone!",
+  "This is a grave situation!"
+]
+var Boiling1 = [
+  "It's getting hot in here.",
+  "Crack that whip!",
+  "Whip it!",
+  "Back to work, pusher!"
+]
+var Boiling2 = [
+  "A boiling lake?",
+  "I'm sure nothing bad will happen here!"
+]
+var IcyR = [
+  "Brrrrrrrr...",
+  "What an ice place..."
+]
+var Temple0 = [
+  "Looking to join a cult?",
+  "Are they expecting visitors?"
+]
+var Temple1 = [
+  "So many cultists!",
+  "Have you heard of our lord and worm?",
+  "These cultists have a poisonous attitude!"
+]
+var Temple2 = [
+  "Don't let yourself be sacrificed!",
+  "What did you say this room was called?",
+  "Sacrificial Chamber? Uh oh."
+]
+var Scotty = [
+  "Don't get a head of yourself.",
+  "Time for a skull session?"
+]
+var Bridge = [
+  "We'll burn that bridge when we get to it!",
+  "It's a long way down!"
+]
+var StreamSilent = [
+  "What a magical view.",
+  "The stream of the silent...",
+  "..."
+]
+var HotSpring = [
+  "Nice, are we having a spa day?",
+  "Hi, Uulaa!",
+  "Time to relax!"
+]
+var Falls = [
+  "Are we going fishing?",
+  "Don't fall off the edge!"
+]
+// Other foes
+var Acro = [
+  "An Acronian? Down here?",
+  "You'd better be careful!"
+]
+var Explosive = [
+  "Don't get too close!",
+  "That looks dangerous!"
+]
+
+//
+// Functions
+//
+
+// Update system variables once per frame
+func UpdateVars()
+  T = time
+  TT = totaltime
+  SI = screen.i
+  SW = screen.w
+  SH = screen.h
+  F = foe
+  ?F
+    FD = foe.distance
+    FS = foe.state
+    FT = foe.time
+    FH = foe.hp
+    FHX = foe.maxhp
+    FA = foe.armor
+    FAX = foe.maxarmor
+  L = loc
+  PX = pos.x
+  PZ = pos.z
+
+// Reset location and movement bounds
+func Init()
+  ShowWisp = true
+  LastPX = PX
+  LastPY = PZ
+  WispX = -3
+  WispY = -3
+  LastXMove = TT
+  LastYMove = TT
+  QuoteTime = 0
+  LastScreen = 0
+  ?TT = 1
+    ?!NaviMode & rng % NaviChance = 0
+      NaviMode = true
+    ?NaviMode
+      Chatter = true
+      ChatInterval = 150
+      ChatDuration = 15
+
+// Wisp movement
+func WispMovement()
+  WispX = WispX - (PX - LastPX)
+  WispY = WispY - (PZ - LastPY)
+  LastPX = PX
+  LastPY = PZ
+  ?!Chatting
+    ?WispX < WispXFar
+      WispX++
+      LastXMove = TT
+    :?WispX > WispXNear
+      WispX--
+      LastXMove = TT
+    :?TT > LastXMove + 4
+      WispX = WispX + ((rng%3)-1)
+      LastXMove = TT
+    ?WispY > WispYLower
+      WispY--
+      LastYMove = TT
+    :?WispY < WispYUpper
+      WispY++
+      LastYMove = TT
+    :?TT > LastYMove + 4
+      WispY = WispY + ((rng%3)-1)
+      LastYMove = TT
+
+// Color selection is rainbow because I'm lazy.
+func GetWispColor()
+  return #rainbow
+
+// As above, so below.
+func GetChatColor()
+  return #rainbow
+
+// False rotates to widdershins.
+func CoinFlip()
+  ?rng % 2 = 1
+    return true
+  :
+    return false
+
+// Check for location changes.
+func CheckScreenChange()
+  ?LastScreen <= SI
+    LastScreen = SI
+  :
+    LastScreen = SI
+    Init()
+
+// Process animations.
+func Animate()
+  ?!Busy
+    Cycle = (rng % 3) - 1
+    ?Cycle > 0
+      WispIndex++
+    :?Cycle < 0
+      WispIndex--
+    ?WispIndex < 0
+      WispIndex = WispAnim.Count() - 1
+    :?WispIndex >= WispAnim.Count()
+      WispIndex = 0
+    ?WispIndex = 3 & SparkleDuration = 0
+      ?rng % 20 = 0
+        Busy = true
+        Sparkling = true
+        SparkleDuration = (rng % 10) + 4
+    :?WispIndex = 0 & SpinDuration = 0 & FlapDuration = 0
+      ?rng % 10 = 0
+        ?CoinFlip()
+          SpinDuration = (rng % 20) + 4
+          SpinDirection = CoinFlip()
+          SpinIndex = rng % SpinAnim.Count()
+          Busy = true
+          Spinning = true
+        :
+          FlapDuration = (rng % 20) + 4
+          ?CoinFlip()
+            FlapAnim = FlapAnimH
+          :
+            FlapAnim = FlapAnimV
+          FlapIndex = rng % FlapAnim.Count()
+          Busy = true
+          Flapping = true
+  :?Spinning
+    ?SpinDuration > 0
+      SpinDuration--
+      ?SpinDirection
+        SpinIndex++
+        ?SpinIndex >= SpinAnim.Count()
+          SpinIndex = 0
+      :
+        SpinIndex--
+        ?SpinIndex < 0
+          SpinIndex = SpinAnim.Count() - 1
+    ?SpinDuration = 0
+      Busy = false
+      Spinning = false
+  :?Flapping
+    ?FlapDuration > 0
+      FlapDuration--
+      FlapIndex++
+      ?FlapIndex >= FlapAnim.Count()
+        FlapIndex = 0
+    ?FlapDuration = 0
+      Busy = false
+      Flapping = false
+  :?Sparkling
+    ?SparkleDuration > 0
+      SparkleDuration--
+    ?SparkleDuration = 0
+      Busy = false
+      Sparkling = false
+
+// Check quote chance and select quote.
+func Quote(quotes)
+  ?ForceQuote
+    Chatting = true
+    QuoteTime = TT
+    ThisQuote = quotes[rng % quotes.Count()]
+  :?NaviMode
+    Chatting = true
+    QuoteTime = TT
+    ThisQuote = quotes[rng % quotes.Count()]
+  :?F = boss
+    ?Unhurt()
+      ?rngf > ChanceBoss
+        QuoteTime = TT
+      :
+        Chatting = true
+        QuoteTime = TT
+        ThisQuote = quotes[rng % quotes.Count()]
+    :?AttackState()
+      ?rngf > ChanceAttack
+        QuoteTime = TT
+      :
+        Chatting = true
+        QuoteTime = TT
+        ThisQuote = quotes[rng % quotes.Count()]
+  :?SI = 0
+    ?rngf > ChanceLocation
+      QuoteTime = TT
+    :
+      Chatting = true
+      QuoteTime = TT
+      ThisQuote = quotes[rng % quotes.Count()]
+  :
+    ?rngf > ChanceOther
+      QuoteTime = TT
+    :
+      Chatting = true
+      QuoteTime = TT
+      ThisQuote = quotes[rng % quotes.Count()]
+
+// Is it time for another quote?
+func CanQuote()
+  ?!Chatting &
+  ^(TT > QuoteTime + ChatInterval | QuoteTime = 0)
+    return true
+  :
+    return false
+
+// Is foe undamaged?
+func Unhurt()
+  return FH = FHX & FA = FAX
+
+// Is foe attacking?
+func AttackState()
+  return FS = 33 | FS = 112 | FS = 115 | FS = 133 | FS = 142
+
+// Chatter
+func WispChatter()
+  ?NaviMode
+    Quote(Navi)
+  :?F & FD <= -5
+    Quote(Missed)
+  :?AttackState() & F = boss
+    Quote(QBossAttack)
+  :?F = acronian_scout | F = acronian_cultist & FD <= 23
+    Quote(Acro)
+  :?F = explode & FD <= 23
+    Quote(Explosive)
+  :?L = Rocky
+    ?T = 15
+      Quote(Plateau)
+    :?Unhurt() & FD <= 28
+      ?F = dysangelos
+        ?F = dysangelos_bearer
+          Quote(QDysangelos1)
+        :?F = dysangelos_elementalist
+          Quote(QDysangelos3)
+        :?F = dysangelos_perfected
+          Quote(QDysangelos3)
+  :?L = Canyon
+    ?T = 15
+      Quote(Deadwood)
+    :?Unhurt() & FD <= 28
+      ?F = tree_boss
+        Quote(QXyloalgia)
+      :?F = poena
+        Quote(QPoena)
+  :?L = Caves
+    ?T = 15
+      Quote(Fear)
+    :?Unhurt() & FD <= 28
+      ?F = spider_boss
+        Quote(QBolesh)
+  :?L = Mushroom
+    ?T = 5
+      Quote(Forest)
+    :?Unhurt() & FD <= 28
+      ?F = mushroom_boss_skinny
+        Quote(QEnoki)
+      :?F = mushroom_boss_fat
+        Quote(QMorel)
+      :?F = mushroom_boss
+        Quote(QAngryShroom)
+  :?L = Halls
+    ?T = 90
+      Quote(Haunted)
+    :?Unhurt() & FD <= 28
+      ?F = skeleton_boss
+        ?F = phase1
+          Quote(QPallas1)
+        :?F = phase2
+          Quote(QPallas2)
+  :?L = Guardian
+    ?T = 30
+      Quote(Boiling2)
+    :?F = bronze_guardian
+      ?FA <= 0
+        Quote(QGuardian2)
+      :
+        Quote(QGuardian1)
+  :?L = Mine
+    ?T = 30
+      Quote(Boiling1)
+  :?L = icy_ridge
+    ?T = 30
+      Quote(IcyR)
+    :?F = hrimnir | F = yeti
+      Quote(QHrimnir)
+  :?L = Sacrificial
+    ?T = 90
+      Quote(Temple2)
+    :?F = nagaraja
+      Quote(QNagaraja)
+  :?L = Temple
+    ?T = 30
+      Quote(Temple1)
+  :?L = "undead_crypt_intro"
+    ?T = 30
+      Quote(Scotty)
+  :?L = "uulaa_shop"
+    ?T = 30
+      Quote(HotSpring)
+  :?L = "waterfall"
+    ?T = 90
+      Quote(Falls)
+  :?L = "cross_bridge"
+    ?T = 90
+      Quote(Bridge)
+    :?PX = 134
+      Quote(StreamSilent)
+    :?PX = 318
+      Quote(Temple0)
+
+// Render wisp on screen.
+func DisplayWisp()
+  ?SpinDuration > 0
+    SpinWisp()
+  :?FlapDuration > 0
+    FlapWisp()
+  :?SparkleDuration > 0
+    SparkleWisp()
+  WispColor = GetWispColor()
+  >o@WispX@,@WispY@,@WispColor@,@WispAnim[WispIndex]@
+
+// Render quote on screen.
+func DisplayChatter()
+  >o@WispX + 3@,@WispY - 1@,@GetChatColor()@,/
+  >o@WispX + 4@,@WispY - 2@,@GetChatColor()@,@ThisQuote@
+
+//
+// Track daily chest in Haunted Gate
+//
+var LCheckX
+var LCheckY
+var RCheckX
+var RCheckY
+var ChestLX
+var ChestLY
+var ChestMX
+var ChestMY
+var ChestRX
+var ChestRY
+var CheckL
+var CheckR
+var SwapTime = 0
+var ChestL = false
+var ChestM = true
+var ChestR = false
+var ChestChatter = [
+  "Shining treasure!",
+  "Fairy dust!",
+  "Sparkle time!"
+]
+// Chest Tracking
+func TrackChest()
+  ForceQuote = true
+  ?PX = 50 & !Chatting
+    Quote(ChestChatter)
+  :?PX = 52
+    LCheckX = (SW/2)-4
+    LCheckY = (SH/2)-7
+    RCheckX = (SW/2)+1
+    RCheckY = (SH/2)-5
+    ChestLX = (SW/2)-4
+    ChestLY = (SH/2)-10
+    ChestMX = (SW/2)+2
+    ChestMY = (SH/2)-7
+    ChestRX = (SW/2)+8
+    ChestRY = (SH/2)-4
+    // Check for left swap
+    CheckL = draw.GetSymbol(LCheckX, LCheckY)
+      ?TT > SwapTime + 3
+        ?CheckL = "(" | CheckL = ")"
+          ?ChestL | ChestM
+            SwapTime = TT
+            ChestL = !ChestL
+            ChestM = !ChestM
+    // Check for right swap
+    CheckR = draw.GetSymbol(RCheckX, RCheckY)
+      ?TT > SwapTime + 3
+        ?CheckR = "(" | CheckR = ")"
+          ?ChestR | ChestM
+            SwapTime = TT
+            ChestR = !ChestR
+            ChestM = !ChestM
+    ?ChestL
+      SparklePoint(ChestLX,ChestLY)
+    :?ChestM
+      SparklePoint(ChestMX,ChestMY)
+    :?ChestR
+      SparklePoint(ChestRX,ChestRY)
+
+//
+// Wisp process flow
+//
+UpdateVars()
+?TT = 1
+  Init()
+?TT % AnimInterval = 0
+  Animate()
+?ShowWisp
+  CheckScreenChange()
+  WispMovement()
+  DisplayWisp()
+  ?L = "undead_crypt_intro" & ShowChest
+    TrackChest()
+  ?Chatter & CanQuote()
+    WispChatter()
+  ?Chatting & TT < QuoteTime + ChatDuration
+    DisplayChatter()
+  :
+    Chatting = false
+    ThisQuote = ""

@@ -1,0 +1,203 @@
+//SpringBuddy
+//By:Toast, 1.0
+
+var SpringJump = ascii
+
+
+
+
+
+.-.-.
+(•)•)
+｛_…—｝
+｛_…—｝
+｛_…—｝
+｛_…—｝
+%%
+
+
+
+.-.-.
+(•)•)
+ _…—｝
+｛_…—｝
+｛_…—｝
+｛_…—｝
+｛_…—
+%%
+
+
+.-.-.
+(•)•)
+ _…—｝
+｛_…—｝
+｛_…—｝
+｛_…—｝
+｛_…—
+%%
+.-.-.
+(•)•)
+｛_…—,
+ _…—
+｛_…—,
+ _…—
+｛_…—,
+ _…—
+｛_…—,
+%%
+.-.-.
+(•)•)
+｛_…—,
+ _…—
+｛_…—,
+ _…—
+｛_…—,
+ _…—
+｛_…—,
+%%
+
+
+.-.-.
+(•)•)
+ _…—｝
+｛_…—｝
+｛_…—｝
+｛_…—｝
+｛_…—
+%%
+
+
+
+.-.-.
+(•)•)
+ _…—｝
+｛_…—｝
+｛_…—｝
+｛_…—｝
+｛_…—
+%%
+
+
+
+
+
+.-.-.
+(•)•)
+｛_…—｝
+｛_…—｝
+｛_…—｝
+｛_…—｝
+asciiend
+
+var Quips = [
+^["I served in the Yugoslav People's Army. That's where I met Clippy. He saved my coiled ass back during the Croatian War of Independence",5],
+^["Just like my coil, Yugoslavia had its ups and downs. Unfortunately, it couldn't spring back the last time",4],
+^["Ah, the good ol' days of SFRY (Socialist Federal Rebulic of Yugoslavia).. When we were all tightly wound together. Now, it feels like I'm just unraveling",5],
+^["I thought I knew tension, but the breakup of Yugoslavia? That was a real stretch",3],
+^["I was a proud Yugoslav, always ready to jump into action for my country.. or what's left of it",4],
+^["Life as a sentient spring in Yugoslavia was complex. I was involved in mechanical engineering, politics, and even gymnastics!",4],
+^["We spoke Serbo-Croatian.. or was it Croato-Serbian?",3],
+^["Ah, Tito! He managed to keep the Soviets at bay, the West interested, and the Non-Aligned Movement aligned",4],
+^["Yugoslavia's national sport? Political gymnastics! No one could perform a split like we could!",4],
+^["We had a unique economic model: socialist self-managment. It meant you could be your own boss and still complain about the managment!",4],
+^["Being Yugoslav was great! You could be anyone from 6 republics and 2 autonomous provinces, and still argue about who made the best burek!",5],
+^["Slobodan Praljak was a Croatian General who died in 2017 when he drank poison in court after being convicted of war crimes",4],
+^["I heard that Clippy fled Europe once the ICTY tribunal (International Criminal Tribunal for the former Yugoslavia) began its investigations",5],
+^["After Yugoslavia broke up, Croatia got a large coastline due to the way the historical and administrative borders were drawn and left Bosnia and Herzegovina almost entirely landlocked. Ha! No beaches for you!",7],
+^["Josip Broz Tito's death in 1980 led to a period of instability and eventual dissolution of Yugoslavia. Tito's strong leadership had held the country together, and his passing created a power vacuum that contributed to internal tensions",7],
+^["The 'Titovka' was a distinctive cap worn by members of the Yugoslav People's Army. Its design was inspired by the Soviet ushanka hat but featured a star with a red five-pointed star badge",6],
+^["The Yugo was a compact car manufactured in Yugoslavia during the 1980s it gained notoriety for its low cost and reputation for low quality. It became the butt of many jokes and was often cited as an example of automotive incompetence",7],
+^["In Socialist Yugoslavia, car doesn't break down on road — road breaks down under car!                       ...Also car breaks down on road",5],
+^]
+
+var SpringXPosition
+var SpringYPosition
+var SpringYVector
+var ResetPosition
+var PlayerX
+var Spring
+PlayerX = pos.x
+
+var Said_A_Quip_Already
+var Quip_Activation_Time = -1
+var Quip_Text
+var Quip_Text_Box
+var Quip_Text_Draw = ""
+var Quip_Text_Max_Length = 0
+var Quip_Text_Max_Time
+var Quip_X
+var Quip_Y
+var RandomSelection
+
+?totaltime = 1
+  Said_A_Quip_Already = false
+  Spring = ui.AddAnim(SpringJump)
+  Spring.duration = 20
+  Spring.loop = false
+  Spring.gamePause = true
+  Spring.anchor = top_left
+  Spring.dock = top_left
+  SpringXPosition = pos.x - 10
+  SpringYPosition = pos.z - 10
+  Spring.y = SpringYPosition
+  ResetPosition = true
+
+?PlayerX - SpringXPosition > 20
+  ?!Spring.playing
+    Spring.Play()
+    SpringYVector = SpringYPosition - (pos.z - 10)
+    play haunted_gate_point_lost 50
+
+?Spring.playing
+  SpringXPosition++
+  ?SpringYVector ! 0
+    ?time % (20/SpringYVector) = 0
+      ?SpringYVector > 0 
+        SpringYPosition--
+      :
+        SpringYPosition++
+      Spring.y = SpringYPosition
+
+?time ! totaltime & ResetPosition
+  ?loc=harder
+    SpringXPosition = PlayerX - 20
+    ResetPosition = false
+
+?ai.paused& !ai.walking & !Said_A_Quip_Already
+  var RngFactor = 10000 / Quips.Count() + 1
+  RandomSelection = math.FloorToInt(rng/RngFactor)
+  Quip_Text_Max_Length = string.Size(Quips[RandomSelection][0])
+  Quip_Text_Box = ui.AddPanel()
+  Quip_Text = ui.AddText("")
+  Quip_X = math.Max(screen.FromWorldX(SpringXPosition - 15),0)
+  Quip_Y = math.Max(SpringYPosition - Quips[RandomSelection][1]/2 - 1, 0)
+
+  Quip_Text.anchor = top_left
+  Quip_Text.dock = top_left
+  Quip_Text_Box.anchor = top_left
+  Quip_Text_Box.dock = top_left
+
+  Quip_Text.x = Quip_X+1
+  Quip_Text.y = Quip_Y+1
+  Quip_Text.w = 35
+  Quip_Text.h = Quips[RandomSelection][1]
+  Quip_Text_Box.x = Quip_X
+  Quip_Text_Box.y = Quip_Y
+  Quip_Text_Box.w = 37
+  Quip_Text_Box.h = Quips[RandomSelection][1]+2
+  Said_A_Quip_Already = true
+  Quip_Text_Max_Time = 45*Quips[RandomSelection][1]
+  Quip_Activation_Time = Quip_Text_Max_Time
+
+  play scotty_out_of_treasure 100
+
+?Quip_Activation_Time > 0
+  Quip_Activation_Time--
+  Quip_Text_Draw = string.Sub( Quips[RandomSelection][0] ,0 ,(math.Min(Quip_Text_Max_Time-Quip_Activation_Time,Quip_Text_Max_Length)))
+  Quip_Text.text = Quip_Text_Draw
+:?Quip_Activation_Time = 0
+  Quip_Text_Box.Recycle()
+  Quip_Text.Recycle()
+  Quip_Activation_Time = -1
+
+Spring.x = screen.FromWorldX(SpringXPosition)

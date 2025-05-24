@@ -1,0 +1,19 @@
+// Silent Skull cosmetic
+// by: michael.g.g.
+// ver 1.0
+
+//Puts a horned skull on the stonehead
+//import the path to this file in in the mindstone and use big head mode.
+
+?bighead
+  >h-8,-2,#F7EFDE,ascii
+_.-=.`\-`\
+#####`-.  '
+#########\|
+asciiend
+
+  >h-8,-2,#808080,ascii
+#
+########`o
+#
+asciiend

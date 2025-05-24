@@ -1,0 +1,32 @@
+//Infect you and ants too!!! xD
+//Infected by Radak
+var bigMush = ascii
+,.###,.
+´ζ###/‾
+######-*
+*´#=#ζ_
+#####`´
+asciiend
+
+var smallmush = ascii
+,.
+´ζ,.
+#*#`
+asciiend
+
+?bighead
+  >h-3,-2,#rainFF,@bigMush@
+:
+  >h-2,-1,#rainFF,@smallmush@
+>(▄ ▀) bruhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+var Zom=ascii
+,.
+´ζ#↑
+asciiend
+?foe=＂ant＂
+  >f-1,0,#rainFF,@Zom@
+>o-10,2,#565656,ascii
+/\
+`´
+asciiend

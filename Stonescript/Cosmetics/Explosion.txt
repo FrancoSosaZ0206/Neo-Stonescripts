@@ -1,0 +1,137 @@
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+Explosion V1.3
+
+If imported directly via "import Cosmetics/Explosion" it will simply cause explosions where-ever
+the player clicks. It is however possible to call this within a seperate script to cause an exploson
+at the given coordinates.
+
+To do this you must call the function: "Explosion(x,y)"
+And run the following function in your code: "ExplosionStatus()"
+Here's an example usage:
+
+-------------------------------------------
+var Boom = import Cosmetics/Explosion
+
+Boom.ExplosionStatus()
+
+? *your chosen conditions are met*
+  Boom.Explosion(0,0)
+-------------------------------------------
+
+
+
+You can also adjust some of the variables to make the explosion a different colour. 
+Here's an example of a frost coloured explosion:
+
+-------------------------------------------
+var Boom = import Cosmetics/Explosion
+
+?loc.begin
+  Boom.ExplosionBaseFGShade = [64,128,256]
+  Boom.ExplosionBaseBGShade = [8,8,12]
+  Boom.ExplosionParticleBGShade = [20,20,20]
+
+Boom.ExplosionStatus()
+
+?key = PrimaryBegin
+  Boom.Explosion(input.x,input.y)
+-------------------------------------------
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+var ExplosionParticles = []
+var ExplosionMaxRadius = 15
+var ExplosionMaxDuration = 10
+var ExplosionFrameTick = 2
+var ExplosionMaxTicks = ExplosionMaxDuration/ExplosionFrameTick
+var ExplosionRadialExpansion = (1.0*ExplosionMaxRadius) / ExplosionMaxTicks
+
+var CanvasHeight = 4
+
+var ExplosionBaseFGShade = [256,50,0]
+var ExplosionBaseBGShade = [24,4,0]
+var ExplosionParticleBGShade = [25,20,0]
+
+var shadeFG
+var shadeBG
+var shade3
+var ExplosionCanvas = []
+var R
+var G
+var B
+var RGMultiplier
+
+var ExplosionCurrentDuration = -1
+var ExplosionCurrentRadius
+var ExplosionX = 0
+var ExplosionY = 0
+
+var screenw = screen.w/2
+var screenh = screen.h/2
+
+func Explosion(Ex,Ey)
+  ExplosionX = Ex
+  ExplosionY = Ey
+  ExplosionCurrentDuration = ExplosionMaxDuration
+  ?ExplosionCanvas.Count()>0
+    for d=0..ExplosionCanvas.Count()-1
+      ExplosionCanvas[d].Recycle()
+  ExplosionCanvas.Clear()
+  play bomb_cart_explosion (80+((40*rng)/10000))
+
+?key = PrimaryBegin
+  Explosion(input.x,input.y)
+
+func ColourFade(Colour)
+  return (ExplosionCurrentDuration*Colour)/ExplosionMaxDuration
+
+func ExplosionCanvasBar(num)
+  ExplosionCanvas[num].w = math.CeilToInt((CanvasHeight/7+ExplosionCurrentRadius)*2 - math.Abs(0.8*math.Pow((ExplosionCurrentRadius/2.0)-num,2)))
+  ExplosionCanvas[num].h = CanvasHeight
+  ExplosionCanvas[num].x = ExplosionX-screenw
+  ExplosionCanvas[num].y = ExplosionY-screenh+(ExplosionCurrentRadius/2)-num
+
+  ExplosionCanvas[num].blend = add
+  ExplosionCanvas[num].SetFG(shadeFG)
+  ExplosionCanvas[num].SetBG(shadeBG)
+
+  ExplosionCanvas[num].SetBG((ExplosionCurrentRadius*rng)/10050+2,0, shade3)
+
+func ExplosionStatus()
+  ?ExplosionCurrentDuration > -1
+    var ExplosionLastRadius = 0
+    ExplosionCurrentDuration --
+    ExplosionCurrentRadius = math.RoundToInt(((ExplosionMaxDuration - ExplosionCurrentDuration)/ExplosionFrameTick) * ExplosionRadialExpansion)
+
+    R = (ColourFade( ExplosionBaseFGShade[0] ) ) / CanvasHeight
+    G = (ColourFade( ExplosionBaseFGShade[1] ) ) / CanvasHeight
+    B = (ColourFade( ExplosionBaseFGShade[2] ) ) / CanvasHeight
+    shadeFG = color.FromRGB(R,G,B)
+
+    R = ColourFade(ExplosionBaseBGShade[0])
+    G = ColourFade(ExplosionBaseBGShade[1])
+    B = ColourFade(ExplosionBaseBGShade[2])
+    shadeBG = color.FromRGB(R,G,B)
+
+    R = ColourFade(ExplosionParticleBGShade[0])
+    G = ColourFade(ExplosionParticleBGShade[1])
+    B = ColourFade(ExplosionParticleBGShade[2])
+    shade3 = color.FromRGB(R,G,B)
+
+    ?ExplosionCurrentRadius ! ExplosionLastRadius
+      ?ExplosionCurrentRadius>0
+        for c = ExplosionCanvas.Count()..ExplosionCurrentRadius
+          ExplosionCanvas.Add(ui.AddCanvas())
+        for c = 0..ExplosionCanvas.Count()-1
+          ExplosionCanvasBar(c)
+
+    ExplosionLastRadius = ExplosionCurrentRadius
+
+    ?ExplosionCurrentDuration = -1
+      ExplosionLastRadius = 0
+      for d=0..ExplosionCanvas.Count()-1
+        ExplosionCanvas[d].Recycle()
+      ExplosionCanvas.Clear()
+
+ExplosionStatus()

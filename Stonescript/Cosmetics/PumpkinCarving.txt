@@ -1,0 +1,1082 @@
+﻿//*******************************
+// Pumpkin Carving
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v4.1.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Celebrate Halloween and ward 
+// off those evil spirits by 
+// carving your very own pumpkin
+// into a jack-o-lantern! Carve 
+// any design you want: make him
+// happy, angry, confused, or 
+// just punch a big hole in the 
+// front and watch the candlelight 
+// flicker! Enjoy one of Halloweens
+// best past times in the world of 
+// Stone Story!
+//
+//             ,ý
+//       __,.…/ζι…._#__
+//   .─-´/´  ;   \  ¯`\`-.
+//  /   ,   :     ;   ¡   \
+// ¡    |   ;     |   │    ¡
+// |    ┊   ║     |   |    |
+// ║    :   |     ;   ┊    ║
+// !    |   !     ┊   |    !
+//  \   '   ·     ,   ,   /
+//   '._,\._,\___/__,/._,'
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that's it! If using as 
+// an import, place in your 
+// Games folder, and use:
+//
+// import Games/PumpkinCarving
+//
+// Advanced Instructions:
+// ------------------------
+// If you want to move the 
+// pumpkin to a different
+// location on your screen, 
+// either use SetPosition(x,y) 
+// and open/close the 
+// carving panel to update 
+// the pumpkins position, or 
+// manually change
+// pumpkinorigin(x/y) values 
+// below. 
+//
+// If importing this script, to
+// call SetPosition(x,y), import 
+// it as a variable first, call
+// the Run() function first, then
+// call the SetPosition(x,y) func,
+// and open/close the carving 
+// panel:
+//
+// var pumpkin = import Games/PumpkinCarving
+// pumpkin.Run()
+// pumpkin.SetPosition(x,y)
+// 
+// If you want to clear all data
+// saved in storage, run the 
+// ClearStorage() function and
+// then exit the level.
+//
+// Enjoy!
+//
+//
+//*******************************
+
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+var pumpkinoriginx = 3
+var pumpkinoriginy = screen.h - 12
+
+
+//*******************************
+// Global Variables
+//*******************************
+
+var smilingpumpkin = [
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,2,3,2,0,0,0,0,0,2,3,2,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,3,1,3,2,0,0,0,2,3,1,3,2,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,1,3,2,2,2,0,2,2,2,0,2,2,2,3,1,0,0,0,0,0,
+0,0,0,0,0,0,0,1,3,1,3,3,3,3,3,3,3,1,3,1,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+var frowningpumpkin = [
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,3,2,0,1,2,0,2,1,0,2,3,2,0,0,0,0,0,0,
+0,0,0,0,0,0,2,3,1,3,2,0,0,0,0,0,2,3,1,3,2,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,2,3,2,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,2,2,0,2,2,0,2,2,0,2,2,0,2,2,0,2,2,0,0,0,0,
+0,0,0,0,3,3,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,3,3,0,0,0,
+0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+var lightarray = [
+12,12,12,12,11,10,9,8,7,7,7,7,7,7,7,7,7,7,8,9,10,11,12,12,12,12,
+12,12,12,11,10, 9,8,7,6,6,6,6,6,6,6,6,6,6,7,8, 9,10,11,12,12,12,
+12,12,11,10, 9, 8,7,6,5,5,5,5,5,5,5,5,5,5,6,7, 8, 9,10,11,12,12,
+12,11,10, 9, 8, 7,6,5,4,4,4,4,4,4,4,4,4,4,5,6, 7, 8, 9,10,11,12,
+11,10, 9, 8, 7, 6,5,4,4,3,3,3,3,3,3,3,3,4,4,5, 6, 7, 8, 9,10,11,
+11,10, 9, 8, 7, 6,5,4,3,3,2,2,2,2,2,2,3,3,4,5, 6, 7, 8, 9,10,11,
+11,10, 9, 8, 7, 6,5,4,3,2,2,1,1,1,1,2,2,3,4,5, 6, 7, 8, 9,10,11,
+11,10, 9, 8, 7, 6,5,4,3,2,1,0,0,0,0,1,2,3,4,5, 6, 7, 8, 9,10,11,
+11,10, 9, 8, 7, 6,5,4,3,2,1,0,0,0,0,1,2,3,4,5, 6, 7, 8, 9,10,11,
+12,11,10, 9, 8, 7,6,5,4,3,2,1,1,1,1,2,3,4,5,6, 7, 8, 9,10,11,12,
+12,12,11,10, 9, 8,7,6,5,4,3,2,2,2,2,3,4,5,6,7, 8, 9,10,11,12,12]
+
+var colorarray = [
+#FFFFFF,
+#EEEEEE,
+#DDDDDD,
+#CCCCCC,
+#BBBBBB,
+#AAAAAA,
+#999999,
+#888888,
+#777777,
+#666666,
+#555555,
+#444444,
+#333333]
+
+var pumpkin = ascii
+############,ý
+######__,.…/ζι…._#__
+##.─-´/´  ;   \  ¯`\`-.
+#/   ,   :     ;   ¡   \
+¡    |   ;     |   │    ¡
+|    ┊   ║     |   |    |
+║    :   |     ;   ┊    ║
+!    |   !     ┊   |    !
+#\   '   ·     ,   ,   /
+##'._,\._,\___/__,/._,'
+asciiend
+
+var pixelart = ascii
+
+%%
+▀
+%%
+▄
+%%
+█
+asciiend
+
+var tileart = ascii
+
+
+%%
+██
+
+%%
+
+██
+%%
+██
+██
+asciiend
+
+var squareart = ascii
+┌┐
+└┘
+asciiend
+
+var tooltop = ui.AddStyle(＂
+^┌─┐
+^│#│
+^├─┤＂)
+
+var toolmid = ui.AddStyle(＂
+^├─┤
+^│#│
+^├─┤＂)
+
+var toolbot = ui.AddStyle(＂
+^├─┤
+^│#│
+^└─┘＂)
+
+var transparent = ui.AddStyle(＂
+^###
+^###
+^###＂)
+
+var toolstyle = [tooltop,toolmid,toolmid,toolbot]
+var tileswidth  = 25
+var tilesheight = 10
+
+var tiles = ［］
+var pixels = []
+var tools = []
+
+//Main Window Variables
+var carvepanel = null
+var tilespanel = null
+var imagepanel = null
+var toolspanel = null
+var imageinitx = 0
+var toolstate = 3
+var toggletilesbtn = null
+var toggleimagebtn = null
+var togglesavebtn = null
+var creatorstate = 0
+
+//Save Panel Variables
+var default = 0
+var filetooltexts = ["→⚿","⚿→","⚿X","⚿*"]
+var savepanel = null
+var savearray = []
+var filebuttons = []
+var activefiletool = null
+var activefile    = null
+var cancelbutton  = null
+var confirmbutton = null
+var toolselectedpanel = null
+var fileselectedpanel = null
+var toolselectedtext = null
+var fileselectedtext = null
+var arrowtext = null
+var files = []
+var saves = []
+
+var carvingdisabled = [
+"mushroom_shop",
+"uulaa_shop",
+"cross_deadwood_river",
+"bronze_gate",
+"cross_bridge"]
+
+var initialize = 0
+
+
+//*******************************
+// Functions
+//*******************************
+
+func SetDimensions(component,anchor,dock,x,y,w,h)
+  component.anchor = anchor
+  component.dock = dock
+  component.x = x
+  component.y = y
+  component.w = w
+  component.h = h
+//
+
+func CheckLocation()
+  var lvl = loc.id
+
+  for i=0..carvingdisabled.Count()-1
+    ?lvl = carvingdisabled[i]
+      initialize = -1
+      return
+//
+
+func SetPosition(x,y)
+  pumpkinoriginx = x
+  pumpkinoriginy = y
+//
+
+func DrawTile(parent,x,y)
+  var p = null
+  var a = null
+  var b = null
+  var t = null
+  var tile = ［
+    0,     //state
+    null,  //panel id
+    null,  //anim id
+    null,  //button id
+    null]  //text id
+
+  p = ui.AddPanel()
+  p.anchor = top_left
+  p.dock = top_left
+  p.x = x
+  p.y = y
+  p.w = 2
+  p.h = 2
+  p.style = transparent
+  p.color = #555555
+  parent.Add(p)
+
+  a = ui.AddAnim(squareart)
+  a.w = 2
+  a.h = 2
+  a.visible = inherit
+  a.color = #555555
+  p.Add(a)
+  
+  a = ui.AddAnim(tileart)
+  a.w = 2
+  a.h = 2
+  a.visible = inherit
+  a.frame = 0
+  p.Add(a)
+
+  b = ui.AddButton()
+  b.w = 2
+  b.h = 2
+  b.style = transparent 
+  b.text = ＂#＂
+  b.hcolor = #FFFFFF
+  b.SetPressed(ClickTile)
+  p.Add(b)
+
+  t = ui.AddText()
+  t.w = 1
+  t.h = 1
+  t.text = "0"
+  t.visible = false
+  p.Add(t)
+ 
+  tile［0］ = 0
+  tile［1］ = p
+  tile［2］ = a
+  tile［3］ = b
+  tile[4] = t
+
+  return tile
+//
+  
+func DrawPixel(parent,x,y)
+  var a = null
+ 
+  a = ui.AddAnim(pixelart)
+  a.anchor = top_left
+  a.dock = top_left
+  a.x = x
+  a.y = y
+  a.visible = inherit
+  a.frame = 0
+  parent.Add(a)
+  
+  return a
+//
+
+func DrawPumpkinCarving()
+  var p = null
+  var b = null
+
+  p = ui.AddPanel()
+  SetDimensions(p,top_left,top_left,
+               ^-(((tileswidth+2)*2)+4),1,
+               ^((tileswidth+2)*2)+4,(tilesheight+2)*2)
+  p.style = 0
+  carvepanel = p
+
+  //Draw Tiles
+  tilespanel = ui.AddPanel()
+  SetDimensions(tilespanel,top_left,top_left,4,0,
+               ^(tileswidth+2)*2,(tilesheight+2)*2)
+  carvepanel.Add(tilespanel)  
+
+  var temp = null
+
+  for i=0..tilesheight
+    for j=0..tileswidth
+      temp = DrawTile(tilespanel,1+j*2,1+i*2)
+      tiles.Add(temp)
+
+  //Draw Tools
+  toolspanel = ui.AddPanel()
+  SetDimensions(toolspanel,top_left,top_left,
+               ^0,0,4,13)
+  carvepanel.Add(toolspanel)
+  toolspanel.color = #555555
+
+  var temp = null
+
+  for i=0..3
+    temp = DrawTile(toolspanel,0,i*3)
+    temp[0] = i
+    temp[1].w = 4
+    temp[1].h = 4
+    temp[4].text = "" + i
+    temp[2].frame = i
+    tools.Add(temp)
+
+  tools[toolstate][1].color = #FFFFFF
+  tools[toolstate][1].style = toolstyle[toolstate]
+
+  //Draw Menu
+  b = ui.AddButton()
+  SetDimensions(b,top_left,top_left,
+               ^0,22,4,3)
+  b.style = 1
+  b.text = ＂←─＂
+  b.hcolor = #FFFFFF
+  b.SetPressed(ToggleTiles)
+  toggletilesbtn = b
+
+  b = ui.AddButton()
+  SetDimensions(b,top_left,top_left,
+               ^0,13,4,3)
+  carvepanel.Add(b)
+  b.style = 1
+  b.text = ＂<>"
+  b.hcolor = #FFFFFF
+  b.SetPressed(ToggleImage)
+  toggleimagebtn = b
+  
+  b = ui.AddButton()
+  SetDimensions(b,top_left,top_left,
+               ^0,16,4,3)
+  carvepanel.Add(b)
+  b.style = 1
+  b.text = ＂⚿☺"
+  b.hcolor = #FFFFFF
+  b.SetPressed(ToggleSavepanel)
+  togglesavebtn = b
+//
+
+func DrawImage()
+  imagepanel = ui.AddPanel()
+  SetDimensions(imagepanel,top_left,top_left,
+               ^pumpkinoriginx,pumpkinoriginy,
+               ^(tileswidth+3),(tilesheight+3))
+  imagepanel.visible = inherit
+  imagepanel.style = transparent
+  imageinitx = screen.ToWorldX(imagepanel.x)  
+
+  var a = ui.AddAnim(pumpkin)
+  a.w = 25
+  a.h = 10
+  imagepanel.Add(a)
+  
+  var temp = null
+
+  for i=0..tilesheight
+    for j=0..tileswidth
+      temp = DrawPixel(imagepanel,1+j,1+i)
+      pixels.Add(temp)    
+//
+
+func DrawSavePanel()
+  var p = null
+  var a = null
+  var t = null
+  var b = null
+  var dash = ""
+
+  p = ui.AddPanel()
+  SetDimensions(p, center_center, center_center,
+               ^0,0,tilespanel.w,tilespanel.h)
+  p.style = 1
+  p.visible = false
+  savepanel = p
+  tilespanel.Add(p)
+
+  p = ui.AddPanel()
+  SetDimensions(p, center_center, center_center,
+               ^0,0,tilespanel.w-2,tilespanel.h-2)
+  p.style = 1
+  savepanel.Add(p)
+
+  t = ui.AddText()
+  SetDimensions(t,center_center,center_center,
+               ^1,-2,savepanel.w-2,1)
+  savepanel.Add(t)
+  t.text = ""
+  for i=0..(savepanel.w-4)-1
+    dash = dash + "─"
+  t.text = dash
+
+
+  //Dialog Panel
+
+  var dialogpanel = null
+
+  p = ui.AddPanel()
+  SetDimensions(p,center_center,center_center,
+               ^0,4,24,13)
+  p.style = transparent
+  savepanel.Add(p)
+  dialogpanel = p
+
+
+  b = ui.AddButton()
+  SetDimensions(b,center_center,center_center,
+               ^-9,-4,4,3)
+  dialogpanel.Add(b)
+  b.style = 1
+  b.text = filetooltexts[0] //Save
+  b.bcolor = #888888
+  b.tcolor = #888888
+  b.hcolor = #FFFFFF
+  b.SetPressed(SelectFileTool)
+  filebuttons.Add(b)
+  
+  b = ui.AddButton()
+  SetDimensions(b,center_center,center_center,
+               ^-3,-4,4,3)
+  dialogpanel.Add(b)
+  b.style = 1
+  b.text = filetooltexts[1] //Load
+  b.bcolor = #888888
+  b.tcolor = #888888
+  b.hcolor = #FFFFFF
+  b.SetPressed(SelectFileTool)
+  filebuttons.Add(b)
+
+  b = ui.AddButton()
+  SetDimensions(b,center_center,center_center,
+               ^3,-4,4,3)
+  dialogpanel.Add(b)
+  b.style = 1
+  b.text = filetooltexts[2] //Delete
+  b.bcolor = #888888
+  b.tcolor = #888888
+  b.hcolor = #FFFFFF
+  b.SetPressed(SelectFileTool)
+  filebuttons.Add(b)
+  
+  b = ui.AddButton()
+  SetDimensions(b,center_center,center_center,
+               ^9,-4,4,3)
+  dialogpanel.Add(b)
+  b.style = 1
+  b.text = filetooltexts[3] //Default
+  b.bcolor = #888888
+  b.tcolor = #888888
+  b.hcolor = #FFFFFF
+  b.SetPressed(SelectFileTool)
+  filebuttons.Add(b)
+
+
+  p = ui.AddPanel()
+  SetDimensions(p,center_center,center_center,
+               ^-4,0,4,3)
+  p.style = 1
+  p.visible = false
+  toolselectedpanel = p
+  dialogpanel.Add(p)
+  
+  t = ui.AddText()
+  SetDimensions(t,center_center,center_center,
+               ^0,0,2,1)
+  t.text = "⚿→"
+  toolselectedtext = t
+  p.Add(t)
+
+
+  p = ui.AddPanel()
+  SetDimensions(p,center_center,center_center,
+               ^4,0,4,3)
+  p.style = 1
+  p.visible = false
+  fileselectedpanel = p
+  dialogpanel.Add(p)
+  
+  t = ui.AddText()
+  SetDimensions(t,center_center,center_center,
+               ^0,0,2,1)
+  t.text = "07"
+  fileselectedtext = t
+  p.Add(t)
+
+  t = ui.AddText()
+  SetDimensions(t,center_center,center_center,
+               ^0,0,2,1)
+  t.text = "─→"
+  t.visible = false
+  arrowtext = t
+  dialogpanel.Add(t)
+  
+
+  b = ui.AddButton()
+  SetDimensions(b,center_center,center_center,
+               ^-5,4,7,3)
+  dialogpanel.Add(b)
+  b.style = 1
+  b.text = ＂N"
+  b.bcolor = #FFFFFF
+  b.tcolor = #FFFFFF
+  b.hcolor = #FFFFFF
+  b.visible = false
+  b.SetPressed(FileAction)
+  cancelbutton = b
+
+  b = ui.AddButton()
+  SetDimensions(b,center_center,center_center,
+               ^4,4,7,3)
+  dialogpanel.Add(b)
+  b.style = 1
+  b.text = ＂Y"
+  b.bcolor = #FFFFFF
+  b.tcolor = #FFFFFF
+  b.hcolor = #FFFFFF
+  b.visible = false
+  b.SetPressed(FileAction)
+  confirmbutton = b
+
+  var filespanel = null
+
+  p = ui.AddPanel()
+  SetDimensions(p,top_center,top_center,
+               ^0,1,savepanel.w-2,8)
+  p.style = transparent
+  filespanel = p
+  savepanel.Add(p)
+
+  var temp = null
+
+  for i=0..1
+    for j=0..9
+      temp = DrawFile(((4*j)+5),((3*i)+2),((i*10)+j+1))
+      filespanel.Add(temp[0])
+      files.Add(temp)
+
+  SaveArray(smilingpumpkin,0)
+  files[0][4] = 1 //Permanent
+
+  var savename
+  for i=0..files.Count()-1
+    savename = "save" + files[i][1].text
+    ?storage.Has(savename)
+      files[i][3] = 1
+
+  ?files[1][3] = 0
+    SaveArray(frowningpumpkin,1)
+    files[1][3] = 1
+
+  ?storage.Has("default")
+    default = storage.Get("default")
+  :
+    default = 0
+
+  files[default][3] = 2
+
+  UpdateFiles()
+//
+
+func DrawFile(x,y,num)
+  var p = null
+  var b = null
+  var t = null
+  var file = [null, //Panel ID
+              null, //Button ID
+              null, //Text ID
+              0,    //Save State 
+              0]    //Permanent State
+
+  p = ui.AddPanel()
+  SetDimensions(p,top_left,top_left,x,y,4,3)
+  p.style = 1
+  file[0] = p
+  
+  b = ui.AddButton()
+  SetDimensions(b,center_center,center_center,0,0,4,3)
+  b.style = 1
+  b.tcolor = #888888
+  b.hcolor = #FFFFFF
+  ?num < 10
+    b.text = "0" + num
+  :
+    b.text = "" + num  
+  b.SetPressed(SelectFile)
+  file[1] = b
+  p.Add(b)
+
+  t = ui.AddText()
+  SetDimensions(t,top_right,top_right,0,0,1,1)
+  t.text = "*"
+  t.visible = false
+  file[2] = t
+  p.Add(t)
+  
+  return file
+//
+
+func ToggleTiles(btn)
+  ?btn = toggletilesbtn
+    ?creatorstate = 1
+      creatorstate = 0
+      toggletilesbtn.text = "←─"
+      
+      imagepanel.style = transparent
+      imagepanel.x = pumpkinoriginx
+      imagepanel.y = pumpkinoriginy
+      imagepanel.visible = inherit
+      toggleimagebtn.text = "<>"
+
+      ?savepanel.visible ! false
+        ToggleSavepanel()
+
+    :?creatorstate = 0
+      creatorstate = 1
+      toggletilesbtn.text = "─→"
+      imagepanel.visible = false
+      imagepanel.style = 1
+
+
+  ?creatorstate = 0
+    enable pause
+    ?(carvepanel.x > 0 - carvepanel.w)
+      carvepanel.x = carvepanel.x - 2
+  :?creatorstate = 1
+    ?carvepanel.x < 0
+      carvepanel.x = carvepanel.x + 2
+    :
+      ?screen.w < 64
+        disable pause
+      :
+        enable pause
+//
+
+func ToggleImage()
+  ?imagepanel.visible = false
+    ?screen.w < tilespanel.w + imagepanel.w + 5
+      imagepanel.x = carvepanel.x
+      imagepanel.y = carvepanel.y
+    :
+      imagepanel.x = carvepanel.x + carvepanel.w + 1
+      imagepanel.y = carvepanel.y
+    imagepanel.visible = inherit
+    toggleimagebtn.text = "◀▶"
+  :
+    imagepanel.visible = false
+    toggleimagebtn.text = "<>"
+//
+
+func ToggleSavepanel()
+  ?savepanel.visible = false
+    savepanel.visible = true
+    tilespanel.visible = false
+    togglesavebtn.text = ＂⚿◙"
+  :
+    tilespanel.visible = inherit
+    savepanel.visible = false
+    SelectFileTool(null)
+    SelectFile(null)
+    togglesavebtn.text = ＂⚿☺" 
+//   
+
+func ClickTile(btn)
+  for i=0..tools.Count()-1
+    ?tools［i］［3］ = btn
+      tools[toolstate][1].style = transparent
+      toolstate = i
+      tools[toolstate][1].color = #FFFFFF
+      tools[toolstate][1].style = toolstyle[toolstate]
+      return
+
+  for i=0..tiles.Count()-1
+    ?tiles［i］［3］ = btn
+      ?tiles[i][0] = toolstate
+        tiles[i][0] = 0
+      :
+        tiles［i］［0］ = toolstate
+      tiles［i］［2］.frame = tiles［i］［0］
+      tiles［i］［4］.text = "" + tiles[i][0]
+      pixels[i].frame = tiles[i][0]
+      return
+//
+
+func FlickerRand()
+  var light = 0
+  var rand  = 0
+
+  ?time % 3 = 0
+    for i=0..pixels.Count()-1
+      light = lightarray[i]
+      rand = rng % 2
+      ?light <= 0
+        light = light + rand
+      :
+        light = light - rand
+      pixels[i].color = colorarray[light]
+//
+
+func SelectFileTool(btn)
+  var temp = null
+
+  for i=0..filebuttons.Count()-1
+    filebuttons[i].bcolor = #888888
+    filebuttons[i].tcolor = #888888
+    filebuttons[i].style = 1
+
+  temp = activefiletool
+  activefiletool = null
+
+  for i=0..filebuttons.Count()-1
+    ?btn = filebuttons[i]
+      ?i ! temp
+        activefiletool = i
+        filebuttons[i].bcolor = #FFFFFF
+        filebuttons[i].tcolor = #FFFFFF
+        filebuttons[i].style = 3
+
+  UpdateFileDialog()
+//
+
+func SelectFile(btn)
+  var temp = null
+
+  for i=0..files.Count()-1
+    ?files[i][3] > 0
+      files[i][1].style = 1
+      files[i][1].bcolor = #CCCCCC
+    :
+      files[i][1].style = 2
+      files[i][1].bcolor = #888888
+
+  temp = activefile
+  activefile = null
+
+  for i=0..files.Count()-1
+    ?btn = files[i][1]
+      ?i ! temp
+        activefile = i
+        files[i][1].bcolor = #FFFFFF
+        files[i][1].style = 3
+
+  ?activefile ! null 
+    ?files[activefile][3] > 0
+      for i=0..filebuttons.Count()-1
+        filebuttons[i].visible = inherit
+      ?files[activefile][3] = 2
+        filebuttons[3].visible = false
+
+      ?files[activefile][4] ! 0
+        filebuttons[0].visible = false
+        filebuttons[2].visible = false
+    :
+      for i=0..filebuttons.Count()-1
+        filebuttons[i].visible = false
+      filebuttons[0].visible = inherit 
+
+    ?activefiletool ! null & 
+     ^filebuttons[activefiletool].visible = false
+      activefiletool = null
+      SelectFileTool(null)  
+  :
+    for i=0..filebuttons.Count()-1
+      filebuttons[i].visible = inherit
+
+  UpdateFileDialog()
+//
+
+func UpdateFileDialog()
+  var filesel = 0
+  var toolsel = 0
+
+  ?activefile ! null
+    filesel = 1
+    fileselectedpanel.visible = inherit
+    fileselectedtext.text = files[activefile][1].text
+  :
+    fileselectedpanel.visible = false
+
+  ?activefiletool ! null
+    toolsel = 1
+    toolselectedpanel.visible = inherit
+    toolselectedtext.text = filetooltexts[activefiletool]
+  :
+    toolselectedpanel.visible = false
+
+  ?filesel & toolsel
+    arrowtext.visible = inherit
+    cancelbutton.visible = inherit
+    confirmbutton.visible = inherit
+  :
+    arrowtext.visible = false
+    cancelbutton.visible = false
+    confirmbutton.visible = false
+//
+
+func FileAction(btn)
+  ?btn = confirmbutton
+    confirmbutton.visible = false
+    cancelbutton.visible = false
+    ?activefiletool = 0 //Save
+      SaveFile()   
+    :?activefiletool = 1 //Load
+      LoadFile()
+    :?activefiletool = 2 //Delete
+      DeleteFile()
+    :?activefiletool = 3 //Default
+      DefaultFile()
+
+    var temp = activefile
+    SelectFileTool(null)
+    SelectFile(files[temp][1])
+    SelectFile(files[temp][1]) 
+    toolselectedpanel.visible = inherit  
+    arrowtext.visible = inherit  
+  :
+    SelectFileTool(null)
+    SelectFile(null)
+//
+
+func UpdateFiles()
+  for i=0..files.Count()-1
+
+    ?files[i][3] = 0 //Empty File
+      files[i][1].bcolor = #888888
+      files[i][1].tcolor = #888888
+      files[i][1].style = 2
+      files[i][2].visible = false
+
+    :?files[i][3] = 1 //Saved File
+      files[i][1].bcolor = #CCCCCC
+      files[i][1].tcolor = #FFFFFF
+      files[i][1].style = 1
+      files[i][2].visible = false
+      
+    :?files[i][3] = 2 //Default File
+      files[i][1].bcolor = #CCCCCC
+      files[i][1].tcolor = #FFFFFF
+      files[i][1].style = 1
+      files[i][2].visible = inherit    
+//
+
+func SaveFile()
+  ?files[activefile][3] = 0
+    files[activefile][3] = 1
+  savearray.Clear()
+  for i=0..tiles.Count()-1
+    savearray.Add(tiles[i][0])
+  SaveArray(savearray,activefile)
+  UpdateFiles()
+//
+
+func SaveArray(array, filenumber)
+  var save = PixelsToString(array)
+  var savename = "save" + files[filenumber][1].text
+  storage.Set(savename, save)
+//
+
+func LoadFile()
+  var savename = "save" + files[activefile][1].text
+  ?storage.Has(savename)
+    var save = storage.Get(savename)
+    savearray = StringToPixels(save)
+    LoadArray(savearray)
+//
+
+func LoadArray(array)
+  var len = 0
+
+  ?tiles.Count() ! array.Count()
+    >Warning: Loaded Array not Correct Length
+    ?array.Count() < tiles.Count()
+      len = array.Count()
+    :
+      len = tiles.Count()
+  :
+    len = tiles.Count()   
+
+  for i=0..len-1
+    tiles[i][0] = array[i]
+
+  for i = 0..tiles.Count()-1
+    tiles[i][2].frame = tiles[i][0]
+    pixels[i].frame = tiles[i][0]
+//
+
+func LoadDefault()
+  var savename = "save" + files[default][1].text
+  ?storage.Has(savename)
+    var save = storage.Get(savename)
+    savearray = StringToPixels(save)
+    LoadArray(savearray)
+  :
+    LoadArray(smilingpumpkin)
+//
+
+func DeleteFile()
+  files[activefile][3] = 0
+  var savename = "save" + files[activefile][1].text
+  ?storage.Has(savename)
+    storage.Delete(savename)
+  ?activefile = default
+    default = 0
+    files[default][3] = 2
+    ?storage.Has("default")
+      storage.Delete("default")
+  UpdateFiles()
+//
+
+func DefaultFile()
+  files[default][3] = 1
+  files[activefile][3] = 2
+  default = activefile
+  storage.Set("default",default)
+  UpdateFiles() 
+//
+
+func PixelsToString(array)
+  var string = ""
+  ?array.Count() > 0
+    for i=0..array.Count()-1
+      string = string + array[i]
+
+  return string
+//
+
+func StringToPixels(string)
+  var stringarray = string.Break(string, 1)
+
+  var numarray = []
+  for i=0..stringarray.Count()-1
+    for j = 0..9
+      ?stringarray[i] = "" + j
+        numarray.Add(j)
+
+  return numarray
+//
+  
+func ClearStorage()
+  var a = storage.Keys()
+  var numitems = a.Count()
+  ?numitems > 0
+    for i=0..numitems-1
+      storage.Delete(a[i])
+      >Storage Empty. Deleted @numitems@ Items
+//
+
+func Run()
+  ?initialize
+    FlickerRand()
+    ToggleTiles(1)
+//
+
+
+//*******************************
+// Drawing Code 
+//*******************************
+
+?initialize = 0
+  CheckLocation()
+
+?initialize = 0
+  DrawPumpkinCarving()
+  DrawImage()
+  DrawSavePanel()
+  LoadDefault()
+  initialize = 1
+
+?initialize = 1
+  Run()
+//
+
+//*******************************
+// End of File
+//*******************************

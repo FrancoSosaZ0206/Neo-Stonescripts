@@ -1,0 +1,674 @@
+//-~-~-Information-~-~-\\
+/*By: CitrionDragon☆\
+Version 1.0
+  Full release
+
+Credits to Deymon and Bitty45 for the WavyScarf
+*/
+
+var headless=true
+var blood= import Cosmetics/WavyScarf
+var refX = 0
+var refZ = 0
+refX = screen.FromWorldX(pos.x)
+refZ = pos.z
+var disableattack=true
+var batarray=[]
+var spiderarray=[]
+var skelearray=[]
+var ghostarray=[]
+var delete=[]
+var random
+var fC
+fC=foe.count
+
+var smallbat=ascii
+#
+###,,
+##,"-\
+##|,#|;
+%%
+#
+###,,
+#.'"-`.
+#\####/
+%%
+#_####__
+#`\,,/.'
+###"-'
+%%
+#
+#\_,,_/.
+##`"-`'
+asciiend
+/*%%
+#
+###,,
+##,ö-\
+##|,#|;
+%%
+#
+###,,
+#.'ö-`.
+#\####/
+%%
+#_####__
+#`\,,/.'
+###ö-'
+%%
+#
+#\_,,_/.
+##`ö-`'
+asciiend
+*/
+var bigbat=ascii
+###_##__
+##|(#/_(
+##\(#|\(
+###v)`/#
+###＂─'##
+%%
+#########
+#_#####__
+|(####/_(
+`.\V)/.'#
+##`＂─'###
+%%
+#######
+#######
+#######
+###v)_#
+##/＂─#\
+##|(#|(
+##\(#\)
+%%
+########
+########
+########
+##.v)─.#
+#/#＂─\.\
+#\(###)/
+asciiend
+
+var smallspider=ascii
+#
+###,-,
+#/∞|¯\
+%%
+#
+###,-,
+#(∞/<\
+%%
+#
+###,-,
+#<∞|/>
+%%
+#
+###,-,
+#/∞(|)
+%%
+#
+###,-,
+#|∞<(|
+%%
+#
+###,-,
+#/∞|<\
+asciiend
+/*%%
+#
+###,-,
+#¯∞/|\
+%%
+#
+##\#,-,
+## ∞`))
+%%
+#
+##(#\-,
+## ∞ ))
+%%
+#
+##(#(-,
+## ∞ ))
+%%
+##,.
+#/ /-,
+( ' |\
+#`'
+asciiend
+*/
+var bigspider=ascii
+#####_
+####( )
+#/`∞|´\\
+´###'##``
+%%
+#####_
+####( )
+#|`(`^´|
+#'#####'
+%%
+#####_
+####( )
+#(`∞/<´\
+##`´####`
+%%
+#####_
+####( )
+#<;∞|/#`.
+####'####`
+%%
+#####_
+#_##( )#_
+'#`∞(|#`#'
+#####`
+%%
+#####_
+####( )_
+,´`∞<'|#)
+######'
+%%
+#####_
+###_( )
+#/'∞`´\)
+´######`
+%%
+#####_
+####( )
+#/'∞<#\)
+´######`
+%%
+#####_
+####( )
+#/`∞|´\\
+´###'##``
+asciiend
+/*%%
+     _
+    ( )
+´¯`∞/´\\
+    `  ``
+%%
+     _
+ -. ( )
+   (`´\\
+      ' `
+%%
+     _
+ `\_( )
+   ∞`´\\
+      ' `
+%%
+    , _
+   (\( )
+    ∞`´)\
+      ´ '
+%%
+    ,,_
+   ((( )
+    ∞`´)\
+      ´ '
+%%
+    ,,_
+   ((( )
+    ∞`´)\
+      ´ '
+%%
+  ,´/_
+ / .( )
+(  | ´\\
+ \ '  ' `
+  ``
+%%
+  ,´/_
+ / .( )
+(  | ´\\
+ \ '  ' `
+  ``
+%%
+     _
+    ( )
+  ,∞.´\\
+  \ |  ``
+asciiend
+*/
+
+var smallskele=ascii
+#
+#_{)
+''¯)
+##/(
+%%
+#
+#_{)
+''¯)
+##(V
+%%
+#
+#_{)
+''¯)
+##<|
+%%
+#
+#_{)
+''¯)
+##/|
+asciiend
+
+var bigskele=ascii
+####__
+###,o_)
+###"':_
+##_.-/)\
+#"`,-´_/
+##'"###;
+######/¯
+####,-`\
+#######,/
+%%
+####__
+###,o_)
+###"':_
+##_.-/)\
+#"`,-´_/
+##'"###;
+######`/
+######/#\
+####,-'#,/
+%%
+####__
+###,o_)
+###"':_
+"`¯¯,-'\
+#'"¯#\_/
+#######;
+######//
+######`|/
+#####,-'
+%%
+####__
+###,o_)
+###"':_
+"`¯¯,-'\
+#'"¯#\_/
+#######;
+#####\¯#|
+#####,/#|
+######,-'
+%%
+####__
+###,o_)
+###"':_
+"`¯¯,-'\
+#'"¯#\_/
+#######;
+#####/¯#|
+###,-`##\
+########,/
+%%
+####__
+###,o_)
+###"':_
+"`¯¯,-'\
+#'"¯#\_/
+#######;
+######/#\
+#####/###\
+###,-'###,/
+%%
+####__
+###,o_)
+###"':_
+##_.-/)\
+#"`,-´_/
+##'"###;
+######|/
+######|\_;
+####,-'##'
+%%
+####__
+###,o_)
+###"':_
+##_.-/)\
+#"`,-´_/
+##'"###;
+######\¯
+######,/
+######,-'
+asciiend
+
+var smallghost=ascii
+##.-.
+#(* *)
+-' ° '-
+##\ (_,
+###`-'
+%%
+##.-.
+#(* *)
+^´ ° `^
+##) /_,
+##'--'
+%%
+##.-.
+#(* *)
+-' ° '-
+##) /,
+#'--'
+%%
+##.-.
+#(* *)
+^´ ° `^
+##) /
+#'-'
+%%
+##.-.
+#(* *)
+-' ° '-
+##\ (
+##'-'
+%%
+##.-.
+#(* *)
+^´ ° `^
+##\ (,
+###`-'
+asciiend
+
+var bigghost=ascii
+\`-.-.-´/
+#) \ / (
+_\ * * /_
+`   .   ´
+##\   (_.\
+###`~...~'
+%%
+\`-.-.-´/
+#) \ / (
+#\ * * /
+<'  .  `>
+##)   /.-)
+##'~...~'
+%%
+\`-.-.-´/
+#) \ / (
+_\ * * /_
+`   .   ´
+##)   /-/
+##'~..~'
+%%
+\`-.-.-´/
+#) \ / (
+#\ * * /
+<'  .  `>
+##)   //
+##'~.~'
+%%
+\`-.-.-´/
+#) \ / (
+_\ * * /_
+`   .   ´
+##\   ((
+##'~..~'
+%%
+\`-.-.-´/
+#) \ / (
+#\ * * /
+<'  .  `>
+##\   (.\
+###`~..~'
+asciiend
+
+func CreateBat(x,y)
+  var asci
+  ?rng%5=0
+    asci=bigbat
+  :
+    asci=smallbat
+  var bat=UI.AddAnim(asci)
+  bat.dock=top_left
+  bat.anchor=top_left
+  bat.x=x+3
+  bat.y=y-2
+  bat.flipX=true
+  var attacktime=0
+  batarray.Add([bat,attacktime])
+
+func CreateSpider(x,y)
+  var asci
+  ?rng%5=0
+    asci=bigspider
+  :
+    asci=smallspider
+  var bat=UI.AddAnim(asci)
+  bat.dock=top_left
+  bat.anchor=top_left
+  bat.x=x+3
+  bat.y=y-2
+  bat.flipX=true
+  var attacktime=0
+  spiderarray.Add([bat,attacktime])
+
+func CreateSkele(x,y)
+  var asci
+  ?rng%5=0
+    asci=bigskele
+  :
+    asci=smallskele
+  var bat=UI.AddAnim(asci)
+  bat.dock=top_left
+  bat.anchor=top_left
+  bat.x=x+3
+  bat.y=y-2
+  bat.flipX=true
+  var attacktime=0
+  skelearray.Add([bat,attacktime])
+
+func CreateGhost(x,y)
+  var asci
+  ?rng%5=0
+    asci=bigghost
+  :
+    asci=smallghost
+  var bat=UI.AddAnim(asci)
+  bat.dock=top_left
+  bat.anchor=top_left
+  bat.x=x+3
+  bat.y=y-2
+  bat.flipX=true
+  var attacktime=0
+  ghostarray.Add([bat,attacktime])
+
+func RunBat()
+  var count=0
+  var targetx
+  var targety
+  var remove
+  ?fC=0
+    targetx="none"
+    targety="none"
+  :
+    targetx=refX+foe.distance-2
+    targety=refZ-4
+  for b : batarray
+    ?time%2=0
+      ?fC=0|disableattack
+        b[0].x=b[0].x+1
+        b[0].frame=b[0].frame+1
+        //?b[0].frame>=4
+        //  b[0].frame=b[0].frame-4
+      :
+        ?b[0].x<targetx|b[0].x>targetx+3
+          b[0].x=b[0].x+1
+          b[0].frame=b[0].frame+1
+          ?b[0].frame>=4
+            b[0].frame=b[0].frame-4
+        :?b[1]>=10
+          b[0].frame=b[0].frame+1
+          ?b[0].frame<=3
+            b[0].frame=b[0].frame+4
+          b[1]=b[1]+1
+          ?b[1]>=15
+            b[1]=0
+        :
+          b[1]=b[1]+1
+          b[0].frame=b[0].frame+1
+          ?b[0].frame>=4
+            b[0].frame=b[0].frame-4
+        ?b[0].y<targety
+          b[0].y=b[0].y+1
+        :?b[0].y>targety
+          b[0].y=b[0].y-1
+      ?b[0].x>screen.w
+        delete.Add(count)
+          b[0].Recycle()
+    count++
+  count=0
+    ?delete.Count()>0
+      for d : delete
+        batarray.Emplace(d,0)
+      for d : delete
+        remove=batarray.IndexOf(0)
+        batarray.RemoveAt(remove)
+      delete.Clear()
+
+func RunSpider()
+  var count=0
+  var targetx
+  var targety
+  var remove
+  ?fC=0
+    targetx="none"
+    targety="none"
+  :
+    targetx=refX+foe.distance-2
+    targety=refZ-4
+  for b : spiderarray
+    ?time%3=0
+      ?fC=0|disableattack
+        b[1]=0
+        b[0].x=b[0].x+1
+        b[0].frame=b[0].frame+1
+        //?b[0].frame>=6
+        //  b[0].frame=0
+      :
+        ?b[0].x<targetx|b[0].x>targetx+3
+          b[1]=0
+          b[0].x=b[0].x+1
+          b[0].frame=b[0].frame+1
+          ?b[0].frame>=6
+            b[0].frame=0
+        :?b[1]>=5
+          b[0].frame=b[0].frame+1
+          ?b[0].frame<=5
+            b[0].frame=6
+          b[1]=b[1]+1
+          ?b[1]>=10
+            b[1]=0
+        :
+          b[1]=b[1]+1
+          b[0].frame=0
+        ?b[0].y<targety
+          b[0].y=b[0].y+1
+        :?b[0].y>targety
+          b[0].y=b[0].y-1
+      ?b[0].x>screen.w
+        delete.Add(count)
+          b[0].Recycle()
+    count++
+  count=0
+    ?delete.Count()>0
+      for d : delete
+        spiderarray.Emplace(d,0)
+      for d : delete
+        remove=spiderarray.IndexOf(0)
+        spiderarray.RemoveAt(remove)
+      delete.Clear()
+
+func RunSkele()
+  var count=0
+  var targetx
+  var targety
+  var remove
+  ?fC=0
+    targetx="none"
+    targety="none"
+  :
+    targetx=refX+foe.distance-2
+    targety=refZ-4
+  for b : skelearray
+    ?time%5=0
+      ?fC=0|disableattack
+        b[1]=0
+        b[0].x=b[0].x+1
+        b[0].frame=b[0].frame+1
+      ?b[0].x>screen.w
+        delete.Add(count)
+          b[0].Recycle()
+    count++
+  count=0
+    ?delete.Count()>0
+      for d : delete
+        skelearray.Emplace(d,0)
+      for d : delete
+        remove=skelearray.IndexOf(0)
+        skelearray.RemoveAt(remove)
+      delete.Clear()
+
+func RunGhost()
+  var count=0
+  var targetx
+  var targety
+  var remove
+  ?fC=0
+    targetx="none"
+    targety="none"
+  :
+    targetx=refX+foe.distance-2
+    targety=refZ-4
+  for b : ghostarray
+    ?time%4=0
+      ?fC=0|disableattack
+        b[1]=0
+        b[0].x=b[0].x+1
+        b[0].frame=b[0].frame+1
+      ?b[0].x>screen.w
+        delete.Add(count)
+          b[0].Recycle()
+    count++
+  count=0
+    ?delete.Count()>0
+      for d : delete
+        ghostarray.Emplace(d,0)
+      for d : delete
+        remove=ghostarray.IndexOf(0)
+        ghostarray.RemoveAt(remove)
+      delete.Clear()
+
+?totaltime=1
+  blood._bighead=true
+  batarray.Clear()
+  spiderarray.Clear()
+  skelearray.Clear()
+  ghostarray.Clear()
+?headless
+  blood.ScarfMain()
+  ?bighead
+    >h-3,-1,       
+    >h-3,0,       
+    >h1,1, 
+?key=primaryBegin
+  random=rng
+  ?random%4=0
+    CreateBat(input.x,input.y)
+  :?random%4=1
+    CreateSpider(input.x,input.y)
+  :?random%4=2
+    CreateSkele(input.x,input.y)
+  :
+    CreateGhost(input.x,input.y)
+RunBat()
+RunSpider()
+RunSkele()
+RunGhost()

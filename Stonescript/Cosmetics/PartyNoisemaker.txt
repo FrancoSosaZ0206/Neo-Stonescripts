@@ -1,0 +1,72 @@
+//Party Noisemaker
+//by: michael.g.g.
+//ver 1.1
+
+//Made for SSRPG's 10 Annversary!
+//This script will put a party noisemaker in the stonehead's mouth.
+//Will play repeatedly when you get a treasure chest with big head on.
+//Left Click to use it and make some noise.
+
+var actionFrame
+var stripeColor1 = #cyan
+var stripeColor2 = #CC00CC
+
+?loc.begin 
+  actionFrame = 0
+
+?actionFrame = 0
+ >h-2,0,@stripeColor1@,ascii
+######_
+####-`-'
+asciiend
+ >h-2,0,@stripeColor2@,ascii
+#
+#####`#'
+asciiend
+
+?actionFrame > 0 & actionFrame < 5
+ >h-2,0,@stripeColor1@,ascii
+#######_
+####----'
+asciiend
+ >h-2,0,@stripeColor2@,ascii
+#######_
+#####-#-
+asciiend
+  actionFrame++
+
+?actionFrame >= 5  & actionFrame < 10
+ >h-2,0,@stripeColor1@,ascii
+########
+####-----'
+asciiend
+ >h-2,0,@stripeColor2@,ascii
+########
+#####-#-#'
+asciiend
+  actionFrame++
+
+?actionFrame >= 10  & actionFrame < 15
+ >h-2,0,@stripeColor1@,ascii
+########
+####------
+asciiend
+ >h-2,0,@stripeColor2@,ascii
+########
+#####-#-#-
+asciiend
+  actionFrame++
+
+?actionFrame >= 14
+    actionFrame = 0
+
+
+?bighead
+ >h-2,0,#white,ascii
+####
+###=
+asciiend
+
+?key = primaryBegin | face = "^^"
+  play uulaa_voice
+  actionFrame++

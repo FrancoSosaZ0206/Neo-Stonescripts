@@ -1,0 +1,412 @@
+
+func core()
+  ?mainWindow.visible = false
+    return
+  loopPrint()
+  loopEvent()
+
+func initUI()
+  sudoNum.Clear()
+  buttonList.Clear()
+
+  mainWindow = ui.AddPanel()
+  mainWindow.visible = false
+  mainWindow.clip = true
+
+  mainWindow.x = 0
+  mainWindow.y = 0
+  mainWindow.anchor = center_center
+  mainWindow.dock = center_center
+	mainWindow.w = screen.w
+	mainWindow.h = screen.h
+  var customStyle = ui.AddStyle("╔═╗║ ║╚═╝")
+  mainWindow.style = customStyle
+
+  sudoWindowInit()
+
+  buttonInit(buttonX + buttonPos[0][0],buttonPos[0][1],readText(delText))
+  buttonList[0].w = 15
+  for i = 1..9
+    buttonInit(buttonX + buttonPos[i][0],buttonPos[i][1],i)
+  buttonInit(buttonX + buttonPos[buttonPos.Count()-1][0],buttonPos[buttonPos.Count()-1][1],readText(verifyText))
+  buttonList[buttonList.Count()-1].w = 15
+  buttonList[buttonList.Count()-1].SetDown(verifyPressed)
+  
+  for i = 0..8
+    var sudoNum_ = []
+    for j = 0..8
+      posX = (i*4+2)
+      posY = (j*2+1)
+      sudoNumInit(sudoNum_,posX,posY)
+    sudoNum.Add(sudoNum_)
+  matInit(0,0)
+
+  noteInit()
+
+func sudoWindowInit()
+
+  sudoWindow = ui.AddPanel()
+  mainWindow.Add(sudoWindow)
+  sudoWindow.clip = true
+  sudoWindow.x = sudoX
+  sudoWindow.y = sudoY
+  sudoWindow.anchor = center_center
+  sudoWindow.dock = center_center
+	sudoWindow.w = sudoW
+	sudoWindow.h = sudoH
+
+  var sudoWindowText_ = ui.AddText()
+  sudoWindow.Add(sudoWindowText_)
+  sudoWindowText_.x = 0
+  sudoWindowText_.y = 0
+  sudoWindowText_.ay = center
+  sudoWindowText_.dy = center
+  sudoWindowText_.w = sudoW
+  sudoWindowText_.h = sudoH
+  sudoWindowText_.text = string.Format(sudoWindowText)
+  sudoWindowText_.color = #999999
+
+  sudoAnim = ui.AddAnim(sudoAnimText)
+  sudoWindow.Add(sudoAnim)
+  sudoAnim.duration = 30
+  sudoAnim.loop = true
+  sudoAnim.color = #FF0000
+  sudoAnim.Play()
+  sudoAnim.dock = top_left
+  sudoAnim.w = 3
+  sudoAnim.h = 1
+  sudoAnim.x = -1
+  sudoAnim.y = -1
+  
+
+func sudoNumInit(sudoNum_,x_,y_)
+  var sudoNumText_ = ui.AddText()
+  sudoNumText_.x = x_
+  sudoNumText_.y = y_
+	sudoNumText_.w = 3
+	sudoNumText_.h = 1
+	sudoNumText_.align = center
+  sudoNumText_.dock = top_left
+
+	sudoWindow.Add(sudoNumText_)
+  sudoNum_.Add(sudoNumText_)
+  
+
+func loopEvent()
+  ?key = primaryEnd
+    ifEvent = true
+    posX = (input.x - screen.w/2 + sudoW/2 - sudoX)
+    posY = (input.y - screen.h/2 + sudoH/2 - sudoY)
+    ?posX/4 >= 0 & posX/4 < 9 & posY/2 >= 0 & posY/2 < 9 & posX%4 ! 0 & posY%2 ! 0
+      clickX = posX/4
+      clickY = posY/2
+      ?!string.Equals(sudoNum[clickX][clickY].text,"")
+        highLightNum = int.Parse(sudoNum[clickX][clickY].text)
+      ?ifReadOnly(sudoNum[clickX][clickY].color)
+        resetClick()
+    :?clickX_ >= 0 & clickY_ >= 0 
+      buttonClick()
+    :
+      resetClick()
+      highLightNum = -1
+
+func loopPrint()
+  ?ifEvent
+    ifEvent = false
+    ?clickX < 0 & clickY < 0
+      sudoAnim.x = -1
+      sudoAnim.y = -1
+    :
+      sudoAnim.x = clickX*4+2
+      sudoAnim.y = clickY*2+1
+    for i = 0..8
+      for j = 0..8
+        ?string.Equals(sudoNum[i][j].text,highLightNum+"")
+          ?ifReadOnly(sudoNum[i][j].color)
+            sudoNum[i][j].color = colorReadOnly[1]
+          :
+            sudoNum[i][j].color = colorEdit[1]
+        :
+          ?ifReadOnly(sudoNum[i][j].color)
+            sudoNum[i][j].color = colorReadOnly[0]
+          :
+            sudoNum[i][j].color = colorEdit[0]
+
+  ?vectory = 0
+    vectoryTime = totaltime
+  :?vectory = -1
+    ?dt(vectoryTime) = 1
+      play error
+      buttonList[buttonList.Count()-1].text = readText(errorText)
+      buttonList[buttonList.Count()-1].bcolor = #FF0000
+      buttonList[buttonList.Count()-1].tcolor = #FF0000
+    :?dt(vectoryTime) > 60
+      buttonList[buttonList.Count()-1].text = readText(verifyText)
+      buttonList[buttonList.Count()-1].bcolor = #7F7F7F
+      buttonList[buttonList.Count()-1].tcolor = #FFFFFF
+      vectory = 0
+  :?vectory = 1
+    ?dt(vectoryTime) = 1
+      play ui_starnew
+      buttonList[buttonList.Count()-1].text = readText(successText)
+      buttonList[buttonList.Count()-1].bcolor = #00FF00
+      buttonList[buttonList.Count()-1].tcolor = #00FF00
+    :?dt(vectoryTime) > 180
+      buttonList[buttonList.Count()-1].text = readText(verifyText)
+      buttonList[buttonList.Count()-1].bcolor = #7F7F7F
+      buttonList[buttonList.Count()-1].tcolor = #FFFFFF
+      vectory = 0
+
+func buttonInit(x_,y_,i_)
+  var button_ = ui.AddButton()
+  button_.SetDown(numPressed)
+  button_.style = 4
+  button_.x = x_
+  button_.y = y_
+  button_.w = 5
+  button_.h = 3
+  button_.text = string.Format(i_+"")
+
+  mainWindow.Add(button_)
+  buttonList.Add(button_)
+
+func numPressed(btn)
+  ?clickX >= 0 & clickX < 9 & clickY >= 0 & clickY < 9
+    ?string.Equals(btn.text,readText(delText))
+      sudoNum[clickX][clickY].text = string.Format("")
+      highLightNum = -1
+    :
+      sudoNum[clickX][clickY].text = string.Format(btn.text)
+      highLightNum = int.Parse(btn.text)
+  clickX_ = clickX
+  clickY_ = clickY
+
+func verifyPressed(btn)
+  vectory = 0
+  var sudoArray = []
+  var sudoArray_ = []
+  for i = 0..8
+    for j = 0..8
+      ?string.Equals(sudoNum[i][j].text,"")
+        sudoMat[j][i] = 0
+        vectory = -1
+        i = 9
+        j = 9
+      :
+        sudoMat[j][i] = int.Parse(sudoNum[i][j].text)
+  ?vectory >= 0
+    for i = 0..8
+      sudoArray.Clear()
+      sudoArray_.Clear()
+      for j = 0..8
+        sudoArray.Add(sudoMat[j][i])
+        sudoArray_.Add(sudoMat[i][j])
+      sudoArray.Sort()
+      sudoArray_.Sort()
+      for v = 0..8
+        ?sudoArray[v] ! v+1 | sudoArray_[v] ! v+1
+          vectory = -1
+          i = 9
+          v = 9
+
+  ?vectory >= 0
+    for i = 0..2
+      for j = 0..2
+        sudoArray.Clear()
+        for i_ = 0..2
+          for j_ = 0..2
+            sudoArray.Add(sudoMat[3*i+i_][3*j+j_])
+        sudoArray.Sort()
+        for v = 0..8
+          ?sudoArray[v] ! v+1
+            vectory = -1
+            i = 3
+            j = 3
+            v = 9
+
+  ?vectory >= 0
+    vectory = 1
+  :
+    vectory = -1
+
+func noteInit()
+  noteButton = ui.AddButton()
+  mainWindow.Add(noteButton)
+  noteButton.SetDown(noteDown)
+  noteButton.SetUp(noteUp)
+  noteButton.style = 2
+  noteButton.dock = top_right
+  noteButton.anchor = top_right
+  noteButton.x = -1
+  noteButton.y = 1
+  noteButton.w = 5
+  noteButton.h = 3
+  noteButton.text = string.Format("?")
+
+  noteTextPanel = ui.AddPanel()
+  mainWindow.Add(noteButton)
+  noteTextPanel.visible = false
+  var customStyle = ui.AddStyle("O_O▒ ▒O‾O")
+  noteTextPanel.style = customStyle
+  noteTextPanel.dock = top_right
+  noteTextPanel.anchor = top_right
+  noteTextPanel.x = noteButton.x - noteButton.w
+  noteTextPanel.w = 42
+  noteTextPanel.h = 5
+
+  var noteText = ui.AddText()
+  noteTextPanel.Add(noteText)
+  noteText.text = readText(methodNote)
+  ?te.language = "ZH-CN" | te.language = "ZH-TW"
+    noteTextPanel.w = 28
+  noteText.w = noteTextPanel.w - 4
+  noteText.h = noteTextPanel.h - 2
+  
+
+func noteDown(btn)
+  noteTextPanel.visible = inherit
+  
+func noteUp(btn)
+  noteTextPanel.visible = false
+
+func matInit(diff_,level_)
+  var sudoStore = import Games/Sudoku/SudokuStore
+  var array_ = sudoStore.sudoMat[diff_][level_]
+  array2Mat(array_,sudoMat0)
+  sudoMat = sudoMat0
+
+  var n_ = 0
+  for i = 0..8
+    for j = 0..8
+      n_ = sudoMat0[j][i]
+      
+      ?n_ > 0 & n_ <=9
+        sudoNum[i][j].text = string.Format(n_+"")
+        sudoNum[i][j].color = colorReadOnly[0]
+      :
+        sudoNum[i][j].text = string.Format("")
+        sudoNum[i][j].color = colorEdit[0]
+
+func array2Mat(array_,mat_)
+  var sudoLength = string.Size(array_)
+  ?sudoLength = 9*9
+    mat_.Clear()
+    var temp = ""
+    for i = 0 .. 8
+      temp = string.Sub(array_, i*9, 9)
+      var row_ = [] 
+      for j = 0 .. 8 
+        row_.Add(int.Parse(string.Sub(temp, j, 1)))
+      mat_.Add(row_)
+
+func readText(textList)
+  ?te.language = "ZH-CN" | te.language = "ZH-TW"
+    return textList[1]
+  :
+    return textList[0]
+  
+func resetClick()
+  clickX = -1
+  clickY = -1
+  clickX_ = -1
+  clickY_ = -1
+
+func buttonClick()
+  clickX = clickX_
+  clickY = clickY_
+  clickX_ = -1
+  clickY_ = -1
+
+func dt(time_)
+  return (totaltime - time_)
+
+func ifReadOnly(color_)
+  for i = 0..1
+    ?color_ = colorReadOnly[i]
+      return true
+  return false
+
+
+
+var sudoWindowText = ascii
+╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗
+║   |   |   ║   |   |   ║   |   |   ║
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
+║   |   |   ║   |   |   ║   |   |   ║
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
+║   |   |   ║   |   |   ║   |   |   ║
+╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣
+║   |   |   ║   |   |   ║   |   |   ║
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
+║   |   |   ║   |   |   ║   |   |   ║
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
+║   |   |   ║   |   |   ║   |   |   ║
+╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣
+║   |   |   ║   |   |   ║   |   |   ║
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
+║   |   |   ║   |   |   ║   |   |   ║
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
+║   |   |   ║   |   |   ║   |   |   ║
+╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝
+asciiend
+
+var sudoAnimText = ascii
+[#]
+%%
+###
+asciiend
+
+var delText = ["Delete","删除"]
+var verifyText = ["Verify","验证"]
+var errorText = ["Error!","错误！"]
+var successText = ["Success!","完成！"]
+
+var methodNote = [
+"A Sudoku! Fill the panel and maintain the uniqueness of the number in each row, column, and grid.",
+"这看上去像是一个数独！\n填满面板并保持每个行、列和大格中数字的独特性。"
+]
+
+var sudoMat0 = [
+[8,3,9,6,5,7,2,1,4],
+[6,7,2,9,4,1,5,8,3],
+[1,5,4,8,3,2,9,6,7],
+[5,4,1,2,8,3,7,9,6],
+[2,8,7,4,9,6,3,5,1],
+[9,6,3,7,1,5,4,2,8],
+[7,1,8,3,2,9,6,4,5],
+[3,2,5,1,6,4,8,0,9],
+[4,9,6,5,7,8,1,3,0]
+]
+var sudoMat = sudoMat0
+
+var mainWindow
+
+var sudoWindow
+var clickX = -1
+var clickY = -1
+var clickX_ = -1
+var clickY_ = -1
+var ifEvent = false
+
+var sudoX = -10
+var sudoY = 0
+var sudoW = 37
+var sudoH = 19
+var posX
+var posY
+
+var sudoNum = []
+var colorReadOnly = [#27AE60,#FF008F]
+var colorEdit = [#FFFFFF,#FF5A49]
+var highLightNum = -1
+var sudoAnim
+
+var noteButton
+var noteTextPanel
+
+var vectory = 0
+var vectoryTime
+
+var buttonList = []
+var buttonX = 20
+var buttonPos = [[0,3],[-5,-6],[0,-6],[5,-6],[-5,-3],[0,-3],[5,-3],[-5,0],[0,0],[5,0],[0,6]]

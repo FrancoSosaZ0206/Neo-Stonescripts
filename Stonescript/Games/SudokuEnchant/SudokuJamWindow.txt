@@ -1,0 +1,163 @@
+func initUI()
+  jamWindow = ui.AddPanel()
+  jamWindow.visible = false
+  jamWindow.clip = false
+
+  jamWindow.x = 0
+  jamWindow.y = screen.h +3
+  jamWindow.anchor = center_center
+  jamWindow.dock = center_center
+	jamWindow.w = screen.w -24
+	jamWindow.h = screen.h - 8
+  var customStyle = ui.AddStyle("·─·| |·─·")
+  jamWindow.style = customStyle
+
+  var yellowJam = ui.AddText()
+  jamWindow.Add(yellowJam)
+  yellowJam.color = #EAD142
+  yellowJam.text = yellowJamText
+  yellowJam.w = 21
+  yellowJam.h = 13
+
+  var jamCloseButton = ui.AddButton()
+  jamWindow.Add(jamCloseButton)
+  jamCloseButton.SetDown(flyOut)
+  jamCloseButton.style = 2
+  jamCloseButton.dock = top_right
+  jamCloseButton.anchor = top_right
+  jamCloseButton.x = -1
+  jamCloseButton.y = 1
+  jamCloseButton.w = 5
+  jamCloseButton.h = 3
+  jamCloseButton.text = string.Format("×")
+
+  var jamNote = ui.AddText()
+  jamWindow.Add(jamNote)
+  jamNote.color = #FFFFFF
+  jamNote.align = center
+  jamNote.w = jamWindow.w - 8
+  jamNote.h = 2
+  jamNote.y = 7
+  ?te.language = "ZH-CN"
+    jamNote.text = jamNoteText[0]
+  :?te.language = "ZH-TW"
+    jamNote.text = jamNoteText[1]
+  :
+    jamNote.text = jamNoteText[2]
+    jamNote.y = 6
+
+  for i = 0..5
+    var jamShinymAnim_ = ui.AddAnim(jamShiny)
+    jamShinymAnim_.duration = 11
+    jamShinymAnim_.color = #F7D930
+    jamShinymAnim_.loop = false
+    jamShinymAnim_.dock = top_left
+    jamShinymAnim_.x = rng % jamWindow.w
+    jamShinymAnim_.y = rng % jamWindow.h
+    jamShinyAnimList.Add(jamShinymAnim_)
+    jamWindow.Add(jamShinymAnim_)
+
+func shinyAnimPlay()
+  ?totaltime % 2 = 0
+    var i = (totaltime % 12)/2
+    jamShinyAnimList[i].x = rng % jamWindow.w
+    jamShinyAnimList[i].y = rng % jamWindow.h
+    jamShinyAnimList[i].Play()
+
+
+
+func fly()
+  ?flyDirection = 1
+    jamWindow.visible = true
+    ?jamWindow.y > 0
+      jamWindow.y = screen.h + 3 - dt(flyTime)
+    :?jamWindow.y <= 0
+      jamWindow.y = 0
+      flyDirection = 0
+  :?flyDirection = -1
+    jamWindow.visible = true
+    ?jamWindow.y < screen.h + 3
+      jamWindow.y = dt(flyTime)
+    :?jamWindow.y >= screen.h + 3
+      flyDirection = -2
+      jamWindow.Clear()
+      jamWindow.Recycle()
+
+
+func flyIn()
+  flyDirection = 1
+  flyTime = totaltime
+  play level_up
+
+func flyOut()
+  flyDirection = -1
+  flyTime = totaltime
+
+func dt(time_)
+  return (totaltime - time_)
+
+
+var jamWindow
+var flyTime = -1
+var flyDirection = -2
+
+var yellowJamText = ascii
+           _._
+       ,<‾´ \ ‾`:
+      / /\,.-^-.'\
+     / |  :     \ \
+    /  |,-┤      \ \
+   / ,´\  \       ├-┤
+  /,´   \  \      | |
+ /´      \  \_    | |
+  ‾‾`──.__\ / `V´‾`;´
+          ‾`--_|_-´
+               ‾
+asciiend
+
+var jamNoteText = [
+"一颗黄宝石，如同闪耀的星星碎片，蕴含着对抗黑暗的力量。\n(在Stone Dungeon标题输入←←→→后开始游戏以使用宝石)",
+"一顆黃寶石，如同閃耀的星星碎片，蘊含著對抗黑暗的力量。\n(在Stone Dungeon標題輸入←←→→後開始遊戲以使用寶石)",
+"A yellow gem, like sparkling fragments of stars, contains the power to fight against darkness.\n(Input ←←→→ at Stone Dungeon's title then start the game with this gem.)"
+]
+
+var jamShinyAnimList = []
+var jamShiny = ascii
+
+
+##·
+
+
+%%
+
+
+##*
+
+
+%%
+
+
+##┼
+
+
+%%
+
+##|
+#-┼-
+##|
+
+%%
+##|
+##|
+--#--
+##|
+##|
+%%
+##|
+###
+-###-
+###
+##|
+asciiend
+
+//#EAD142

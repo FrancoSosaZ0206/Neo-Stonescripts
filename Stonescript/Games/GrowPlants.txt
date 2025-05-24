@@ -1,0 +1,556 @@
+/*
+    Grow Plants Version 1.2
+    Author: Satsuki
+
+v1.1
+ - Added a retry button after the game end
+ - Removed the restriction on Waterfall, allowing progress to carried through loops
+ - Other minor fixes
+
+v1.2
+ - Fixed waterCast values
+
+What is this game?
+  A game where Leuce, realizing she’s turning into a tree, uses her remaining time to grow a flower.
+
+Estimated play time
+  Approx. 5 min.
+
+Instructions
+  Place this text file in "Stonescript/Games" and type "import Games/GrowPlants" into the Mind Stone,
+  or copy all the text and paste it into the Mind Stone.
+  After that, head to Deadwood Waterfall.
+
+How to Play
+ Use two buttons to nurture the flower:
+  ┌────────┐
+  │     ^  │
+  │ <- ( ) │
+  │     ¯  │
+  └────────┘
+  Watering
+  Press the button to increase the "Water" parameter after a set amount of time.
+  After watering, there is a 30-second cooldown.
+
+  ┌────────┐
+  │        │
+  │ <-  @  │
+  │        │
+  └────────┘
+  Adding Ki
+  Press the button to increase the "Ki" parameter after a set amount of time.
+  Adding Ki reduces the Water Cooldown by 5 seconds, but it accelerates the progression of the Tree Stage.
+
+ Status
+  Water:
+  - Shows the current water level. It decreases over time.
+  Ki:
+  - Shows the current Ki level. It decreases over time.
+  Flower Stage:
+  - Max of 10. The goal of the game is to reach a Flower Stage of 10.
+  Tree Stage:
+  - Max of 10. As this increases, the time it takes to water or add Ki also increases.
+  - If it reaches the maximum, you will become a tree. Be careful to avoid letting it rise.
+  Water Cooldown:
+  - After watering, there is a 30-second cooldown.
+  - Adding Ki shortens the cooldown by 5 seconds.
+  Growth Mult:
+  - Affects the growth rate of the flower.
+  - It increases when Water and Ki parameters are above a certain level and decreases when they fall below that level.
+
+Enjoy!
+
+*/
+
+// UI
+var titleText
+var startButton
+
+var flowerWindow
+var flowerPot
+var flowerText
+var dialogWindow
+var dialogText
+var waterGauge
+var kiGauge
+var waterButton
+var waterDrop
+var kiButton
+var retryButton
+var growthStatus
+
+var flowerTextNum = 0
+var treeTextNum = 0
+
+// Game State
+var gameMode = TITLE
+/* Game Mode
+TITLE
+START_GAME
+END_GAME
+*/
+
+var elapsedTime = 0
+var waterCast = 0
+var kiCast = 0
+var waterCastTime = 0
+var kiCastTime = 0
+
+var waterLevel = 0
+var kiLevel = 0
+var growthMult = 0
+var waterCooldown = 0
+var flowerGrowth = 0
+var treeGrowth = 0
+
+// ASCII Art
+var TITLE_STRING = ascii
+    ____                                       
+   / ___|  _                                   
+  | |  __ \ \,´¯; ___  __      __              
+  | | |_ | |  ,´ / _ \ \ \ /\ / /              
+  | |__| | | |  | (_) | \ V  V /   .--.        
+   \____/  |_|   \___/   \_/\_/  ,(    ;       
+           _____   ║            /  `    \      
+          |  __ \  ║            \_\` ,_,/      
+          | |__) | ║   __ _  _ __ `| ´/  ___   
+          |  ___/_ ║  / _` || '_ \ | |  / __|  
+          | |   \ \║/| (_| || | | || |  \__ \  
+          |_|    \ ║ /\__,_||_| |_-/`,\-|___/  
+               [¯¯¯¯¯¯¯]                       
+                \     /                        
+                 \___/                         
+                                               
+asciiend
+
+var FLOWER_POT = ascii
+[¯¯¯¯¯¯¯]
+#\#####/
+##\___/
+asciiend
+
+var FLOWER_GROWTH = ascii
+
+%%
+
+
+
+
+
+
+
+####^
+%%
+
+
+
+
+
+
+####•
+###.|,
+%%
+
+
+
+
+
+####o
+####|
+###.|;
+%%
+
+
+
+
+####O
+####|
+####|
+###\|/
+%%
+
+
+####,
+###(#)
+####ζ
+####|
+##.#|#,
+###\|/
+%%
+
+
+###`(
+###(()
+####ζ
+####|
+##.#|#,
+###\|/
+%%
+
+
+###,'(
+##((#,)
+###`ζ´
+####|
+##\#|#/
+###\|/
+%%
+
+
+##,#',(
+#`.(#),´
+###`ζ´
+####|
+##\\|//
+###\|/
+%%
+#####_
+####|#)
+.-.#|/__
+#`.\•/__)
+###`;´  
+##_#|#_
+#(_\|/_)
+###\|/
+asciiend
+
+var WATER_DROP = ascii
+#^
+(#)
+#¯
+asciiend
+
+////////////////////////////////////////////////////////////
+
+func Setup()
+	titleText = ui.AddText()
+	titleText.anchor = top_center
+	titleText.dock = top_center
+	titleText.y = 2
+	titleText.w = 50
+	titleText.h = 20
+	titleText.text = TITLE_STRING
+
+	startButton = ui.AddButton()
+	startButton.y = 7
+	startButton.w = 11
+	startButton.h = 5
+	startButton.text = "Start"
+	startButton.SetPressed(StartGame)
+
+	flowerWindow = ui.AddPanel()
+	flowerWindow.y = -2
+	flowerWindow.w = 19
+	flowerWindow.h = 14
+
+	flowerPot = ui.AddText(FLOWER_POT)
+	flowerPot.anchor = bottom_center
+	flowerPot.dock = bottom_center
+	flowerPot.y = -1
+	flowerPot.w = 9
+	flowerPot.h = 3
+	flowerPot.color = #808080
+
+	flowerText = ui.AddAnim(FLOWER_GROWTH)
+	flowerText.anchor = top_center
+	flowerText.dock = top_center
+	flowerText.y = 2
+	flowerText.w = 9
+	flowerText.h = 8
+
+	dialogWindow = ui.AddPanel()
+	dialogWindow.anchor = bottom_center
+	dialogWindow.dock = bottom_center
+	dialogWindow.y = -2
+	dialogWindow.w = 41
+	dialogWindow.h = 6
+
+	dialogText = ui.AddText()
+	dialogText.anchor = top_left
+	dialogText.dock = top_left
+	dialogText.x = 1
+	dialogText.y = 1
+	dialogText.w = 39
+	dialogText.h = 4
+
+	waterButton = ui.AddButton()
+	waterButton.anchor = bottom_left
+	waterButton.dock = bottom_right
+	waterButton.x = 1
+	waterButton.w = 10
+	waterButton.h = 5
+	waterButton.text = "<-    "
+	waterButton.SetPressed(GiveWater)
+
+	waterDrop = ui.AddText(WATER_DROP)
+	waterDrop.anchor = bottom_left
+	waterDrop.dock = bottom_right
+	waterDrop.x = 6
+	waterDrop.y = -1
+	waterDrop.w = 3
+	waterDrop.h = 3
+	waterDrop.color = #blue
+
+	kiButton = ui.AddButton()
+	kiButton.anchor = bottom_left
+	kiButton.dock = bottom_right
+	kiButton.x = 1
+	kiButton.y = -5
+	kiButton.w = 10
+	kiButton.h = 5
+	kiButton.text = "<-  @ "
+	kiButton.SetPressed(GiveKi)
+
+	retryButton = ui.AddButton()
+	retryButton.anchor = bottom_left
+	retryButton.dock = bottom_right
+	retryButton.x = 1
+	retryButton.w = 10
+	retryButton.h = 5
+	retryButton.text = "Retry "
+	retryButton.SetPressed(StartGame)
+
+	waterGauge = ui.AddText()
+	waterGauge.anchor = top_left
+	waterGauge.dock = top_right
+	waterGauge.x = 1
+	waterGauge.w = 8
+	waterGauge.h = 1
+
+	kiGauge = ui.AddText()
+	kiGauge.anchor = top_left
+	kiGauge.dock = top_right
+	kiGauge.x = 1
+	kiGauge.y = 2
+	kiGauge.w = 8
+	kiGauge.h = 1
+
+	growthStatus = ui.AddText()
+	growthStatus.anchor = top_right
+	growthStatus.dock = top_left
+	growthStatus.x = -1
+	growthStatus.w = 25
+	growthStatus.h = 8
+	growthStatus.align = right
+
+	flowerWindow.Add(flowerPot)
+	flowerWindow.Add(flowerText)
+	flowerWindow.Add(waterGauge)
+	flowerWindow.Add(kiGauge)
+	flowerWindow.Add(waterButton)
+	flowerWindow.Add(waterDrop)
+	flowerWindow.Add(kiButton)
+	flowerWindow.Add(retryButton)
+	flowerWindow.Add(growthStatus)
+
+	dialogWindow.Add(dialogText)
+
+
+func ShowTitle()
+	titleText.visible = true
+	startButton.visible = true
+	flowerWindow.visible = false
+	dialogWindow.visible = false
+
+func ShowGame()
+	titleText.visible = false
+	startButton.visible = false
+	flowerWindow.visible = true
+	dialogWindow.visible = true
+	waterButton.visible = true
+	waterDrop.visible = true
+	kiButton.visible = true
+	retryButton.visible = false
+
+func ShowRetryButton()
+	waterButton.visible = false
+	waterDrop.visible = false
+	kiButton.visible = false
+	retryButton.visible = true
+
+
+////////////////////////////////////////////////////////////
+
+func InitializeGame()
+	elapsedTime = 0
+	waterCast = 45
+	kiCast = 30
+	waterCastTime = 0
+	kiCastTime = 0
+
+	waterLevel = 30
+	kiLevel = 20
+	waterCooldown = 0
+	flowerGrowth = 0
+	treeGrowth = 10
+
+	dialogText.text = " "
+
+func StartGame()
+	InitializeGame()
+	ShowGame()
+	gameMode = START_GAME
+
+
+func IsCasting()
+	return waterCastTime > 0 | kiCastTime > 0
+
+func UpdateResources()
+	?elapsedTime%30 = 0
+		?waterLevel > 0
+			waterLevel -= 0.75
+		?kiLevel > 0
+			kiLevel -= 0.5
+
+	?waterCastTime > 0
+		waterCastTime++
+		?waterCastTime = waterCast
+			?treeGrowth > 70 & treeTextNum >= 4
+				treeGrowth += 7
+			waterLevel = math.Min(100, waterLevel + 20)
+			waterCooldown = 900
+			dialogText.text = "Water added!"
+			waterCastTime = 0
+	?kiCastTime > 0
+		kiCastTime++
+		?kiCastTime = kiCast
+			kiLevel = math.Min(100, kiLevel + 10)
+			treeGrowth += 3
+			?waterCooldown > 0
+				waterCooldown = math.Max(0, waterCooldown - 150)
+			dialogText.text = "Ki added!"
+			kiCastTime = 0
+
+	waterGauge.text = string.Format("Water {0}/100", math.FloorToInt(waterLevel))
+	kiGauge.text = string.Format("Ki {0}/100", math.FloorToInt(kiLevel))
+
+func CheckGrowthMult()
+	?waterLevel >= 85 & kiLevel >= 85
+		growthMult = 2.5
+	:?waterLevel >= 70 & kiLevel >= 70
+		growthMult = 2.0
+	:?waterLevel >= 50 & kiLevel >= 50
+		growthMult = 1.5
+	:?waterLevel >= 30 & kiLevel >= 30
+		growthMult = 1.0
+	:?waterLevel >= 5
+		growthMult = 0.5
+	:
+		growthMult = 0
+		dialogText.text = "The flower's growth seems to have halted. It needs water."
+
+func GiveWater()
+	?waterCooldown <= 0 & !IsCasting()
+		waterCastTime++
+		dialogText.text = "Watering..."
+	:?waterCooldown > 0
+		dialogText.text = "I can’t water the flower too much in such a short time."
+
+func GiveKi()
+	? !IsCasting()
+		kiCastTime++
+		dialogText.text = "Nourishing with Ki..."
+
+func CheckGrowthStatus()
+	?elapsedTime%30 = 0
+		flowerGrowth += growthMult * 0.5
+		treeGrowth += 0.25
+
+	?flowerGrowth >= 100
+		flowerText.frame = 9
+		dialogText.text = "I did it! The flower has bloomed! I'm so fortunate to witness such a beautiful flower at the very end. Yes, I'll call this flower 'Moonbloom.'"
+		gameMode = END_GAME
+	:?flowerGrowth >= 95
+		flowerText.frame = 8
+		?flowerTextNum ! 4 & !IsCasting()
+			dialogText.text = "It's about to bloom!"
+			flowerTextNum++
+	:?flowerGrowth >= 80
+		flowerText.frame = 7
+		?flowerTextNum ! 3 & !IsCasting()
+			dialogText.text = "The bud is growing bigger!"
+			flowerTextNum++
+	:?flowerGrowth >= 60
+		flowerText.frame = 6
+	:?flowerGrowth >= 50
+		flowerText.frame = 5
+		?flowerTextNum ! 2 & !IsCasting()
+			dialogText.text = "A small bud has formed!"
+			flowerTextNum++
+	:?flowerGrowth >= 40
+		flowerText.frame = 4
+	:?flowerGrowth >= 25
+		flowerText.frame = 3
+	:?flowerGrowth >= 10
+		flowerText.frame = 2
+	:?flowerGrowth >= 5
+		flowerText.frame = 1
+		?flowerTextNum ! 1 & !IsCasting()
+			dialogText.text = "A sprout has appeared!"
+			flowerTextNum++
+	:
+		flowerText.frame = 0
+
+	?treeGrowth >= 100
+		dialogText.text = "I became a tree before I could witness the flower bloom. But even if it had bloomed, my fate would not have changed."
+		gameMode = END_GAME
+	:?treeGrowth >= 80
+		?treeTextNum ! 5 & !IsCasting()
+			dialogText.text = "My whole body is in pain... My mind is growing foggy...\nAll actions are less effective."
+			waterCast = 75
+			kiCast = 60
+			treeTextNum++
+	:?treeGrowth >= 70
+		?treeTextNum ! 4 & !IsCasting()
+			dialogText.text = "My arms have turned into wood, and I can't move them anymore. I can't hold the watering can, so I'll have to convert my Ki into water instead."
+			treeTextNum++
+	:?treeGrowth >= 60
+		?treeTextNum ! 3 & !IsCasting()
+			dialogText.text = "My body is losing strength, and I can no longer focus properly...\nFeeding efficiency has decreased."
+			treeTextNum++
+	:?treeGrowth >= 50
+		?treeTextNum ! 2 & !IsCasting()
+			dialogText.text = "Looking down, I see roots spreading from my feet."
+			kiCast = 45
+			treeTextNum++
+	:?treeGrowth >= 40
+		?treeTextNum ! 1 & !IsCasting()
+			dialogText.text = "My fingertips are aching, it's becoming difficult to hold the watering can...\nWatering efficiency has decreased."
+			waterCast = 60
+			treeTextNum++
+
+	growthStatus.text = string.Format(ascii
+Growth Status
+Flower Stage : {0}
+Tree Stage: {1}
+Growth Mult: {2}
+
+Water Cooldown
+{3}s {4}f
+asciiend,
+^flowerText.frame + 1,
+^math.FloorToInt(treeGrowth / 10),
+^growthMult,
+^waterCooldown / 30, waterCooldown % 30)
+
+////////////////////////////////////////////////////////////
+
+func Update()
+	?gameMode = TITLE
+		ShowTitle()
+	:?gameMode = START_GAME
+		ShowGame()
+		elapsedTime++
+		?waterCooldown > 0
+			waterCooldown--
+		UpdateResources()
+		CheckGrowthStatus()
+		CheckGrowthMult()
+	:?gameMode = END_GAME
+		ShowRetryButton()
+
+?loc.begin | loc.loop
+	Setup()
+Update()
+
+//////////////////////////////////////////////////////////

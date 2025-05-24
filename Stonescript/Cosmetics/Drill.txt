@@ -1,0 +1,249 @@
+//————————————————Drill(5)—1.0————————————————
+//By: Poly
+var mount
+
+mount = 5
+
+?mount = 0
+ enable player
+:
+ disable player
+
+?mount = 5
+ >`0,26,#yellow,ascii
+［O］>:
+asciiend
+
+?mount = 5
+ >o0,0,#yellow,ascii
+≈~.
+=-~\
+≈~-/
+=-'
+asciiend
+
+?mount = 5 &
+^item.right.state > 1 &
+^time % 2 = 1
+ play scorpion_death 35
+ >o0,0,#yellow,ascii
+=-,
+≈~-)
+=-~)
+≈~＂
+asciiend
+
+?mount = 5
+ >o-14,-2,#white,ascii
+##########o
+#/‾\#####/|\
+´##|‾‾‾‾‾‾‾‾‾|
+###|: |‾|   :|
+###|:  ‾    :|
+###|_________|
+asciiend
+
+?mount = 5 &
+^item.right.state = 1 &
+^item.right.time >= 5
+ >o-2,-1,#yellow,ascii
+T
+asciiend
+:?mount = 5 &
+^item.right.state > 1 |
+^mount = 5 &
+^item.right.state = 1 &
+^item.right.time < 5
+ >o-2,-1,#yellow,ascii
+_
+asciiend
+
+?mount = 5 &
+^foe = boss &
+^time % 30 <= 15
+ >o-5,-1,#white,ascii
+v|v
+asciiend
+
+?mount = 5 &
+^foe = boss &
+^time % 30 > 15
+ >o-5,-2,#white,ascii
+\o/
+ | 
+asciiend
+
+?mount = 5 &
+^hp < foe.damage * 2 &
+^foe ! boss |
+^mount = 5 &
+^hp < foe.damage
+ >o-5,-2,#white,ascii
+ <o>
+ ( 
+asciiend
+
+?mount = 5 &
+^hp < foe.damage * 2 &
+^time % 8 <= 4 &
+^foe ! boss |
+^mount = 5 &
+^time % 8 <= 4 &
+^hp < foe.damage
+ >o-1,-3,#red,ascii
+!
+asciiend
+
+?mount = 5 &
+^item.left.id = vigor
+ >o-9,1,#red,ascii
+♥
+asciiend
+
+?mount = 5 &
+^item.left.id = poison
+ >o-9,1,#green,ascii
+∞
+asciiend
+
+?mount = 5 &
+^item.left.id = ice
+ >o-9,1,#cyan,ascii
+❄
+asciiend
+
+?mount = 5 &
+^item.left.id = fire
+ >o-9,1,#yellow,ascii
+φ
+asciiend
+
+?mount = 5 &
+^item.left.id = aether
+ >o-9,1,#magenta,ascii
+*
+asciiend
+
+?mount = 5 &
+^item.left.id = stone |
+^mount = 5 &
+^item.left.id ! socketed
+ >o-9,1,#white,ascii
+o
+asciiend
+
+?mount = 5 &
+^＂ ＂ = item.left
+ >o-9,1,#blue,ascii
+@
+asciiend
+
+?mount = 5 &
+^item.right.id = vigor
+ >o-5,1,#red,ascii
+♥
+asciiend
+
+?mount = 5 &
+^item.right.id = poison
+ >o-5,1,#green,ascii
+∞
+asciiend
+
+?mount = 5 &
+^item.right.id = ice
+ >o-5,1,#cyan,ascii
+❄
+asciiend
+
+?mount = 5 &
+^item.right.id = fire
+ >o-5,1,#yellow,ascii
+φ
+asciiend
+
+?mount = 5 &
+^item.right.id = aether
+ >o-5,1,#magenta,ascii
+*
+asciiend
+
+?mount = 5 &
+^item.right.id = stone |
+^mount = 5 &
+^item.right.id ! socketed
+ >o-5,1,#white,ascii
+o
+asciiend
+
+?mount = 5 &
+^＂ ＂ = item.right
+ >o-5,1,#blue,ascii
+@
+asciiend
+
+?mount = 5
+ >o-12,3,#B3B3B3,ascii
+/‾‾‾‾‾‾‾‾‾‾‾\
+\___________/
+asciiend
+
+?mount = 5 &
+^!ai.walking |
+^mount = 5 &
+^ai.walking &
+^time % 40 <= 20
+ >o-12,3,#8C8C8C,ascii
+#‾#‾#‾#‾#‾#‾#
+\#_#_#_#_#_#/
+asciiend
+
+?mount = 5 &
+^ai.walking &
+^time % 40 > 20
+ >o-12,3,#8C8C8C,ascii
+/#‾#‾#‾#‾#‾#\
+#_#_#_#_#_#_#
+asciiend
+
+?mount = 5 &
+^ai.walking &
+^loc ! icy ridge
+ play mine_walker_attack_hit 115
+
+?mount = 5 &
+^ai.walking &
+^loc = icy ridge
+ play ki_slerper_walk 100
+
+?mount = 5 &
+^item.left.state < 3 &
+^foe.distance <= 10
+ >o-9,2,#yellow,ascii
+#//_
+#|__=—
+asciiend
+
+?mount = 5 &
+^item.left.state > 2 &
+^item.left.time < 5
+ >o-9,2,#yellow,ascii
+,´≤
+|__=—
+asciiend
+
+?mount = 5 &
+^item.left.state > 2 &
+^item.left.time < 1
+ play bomb_cart_explosion 100
+ >o-5,2,#yellow,ascii
+#_
+(_)
+asciiend
+
+?mount = 5 &
+^item.left.state > 2 &
+^item.left.time = 2
+ >o-4,3,#yellow,ascii
+O
+asciiend

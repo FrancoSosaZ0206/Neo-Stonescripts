@@ -1,0 +1,86 @@
+/* MAIN SCRIPT - FILE INFO
+  Made by MetalEagle26 (Tom Crow)
+  Platform: Mobile
+
+HOW TO USE - Follow these steps:
+  1. Paste this code into your mindstone.
+  2. Enter any location and leave it.
+  3. Close the game and re-enter.
+  4. Uncomment the script procedure by 
+     putting a '/' char at the end
+     of line 46.
+  5. Enter the desired location.
+
+  Tip: if you get any errors, repeat steps 3
+       to 5 in different orders until it works.
+
+........................................................
+
+WARNINGS:
+
+- IMPORTANT - Make sure you remove any 
+  indentation (tabs or whitespace 
+  characters) before each line, otherwise 
+  it won't work.
+- Keep in mind that SetFileUrl()
+  has many bugs.
+- Changes made to the scripts imported here
+  take time to process.
+  Patience is adviced.
+
+........................................................
+
+*/
+
+
+
+// SETTING URL TO CUSTOM FILES
+
+sys.SetFileUrl(
+^"https://raw.githubusercontent.com/
+^FrancoSosaZ0206/My-Stonescripts/main/
+^Stonescript/")
+
+
+
+/* ************************************* *
+
+// VARIABLES
+
+// We don't need to import the whole
+// Performance lib to get this:
+var l = loc
+
+
+
+// PROCEDURE
+
+import MyScripts/MAIN/MyPlayerCosmetics
+
+?!loc.isQuest & (
+^l = "Waterfall" |
+^l = "cross_deadwood_river" |
+^l = "cross_bridge")
+  loc.Leave()
+
+:?l = "undead_crypt_intro" // Haunted Gate
+  import MyScripts/Gate
+
+:?l = "Rocky"
+  import MyScripts/1-Rocky
+:?l = "Deadwood"
+  import MyScripts/2-Deadwood
+:?l = "Caves"
+  import MyScripts/3-Caves
+:?l = "Mushroom"
+  import MyScripts/4-Mushroom
+:?l = "Halls"
+  import MyScripts/5-Halls
+:?l = "Mine"
+  import MyScripts/6-Mine
+:?l = "Ridge"
+  import MyScripts/7-Ridge
+:?l = "Temple"
+  import MyScripts/8-Temple
+
+/* ************************************* */

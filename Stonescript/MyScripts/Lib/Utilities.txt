@@ -1,0 +1,130 @@
+﻿// *******************************************************
+//                     Utilities.txt                      
+// *******************************************************
+
+
+
+/* FILE INFO
+  Library of utilities
+  Made by MetalEagle26 (Tom Crow)
+
+DESCRIPTION
+This library provides a pack of useful
+  general purpose variables and
+  functions to make your script-making
+  tasks easier!
+
+HOW TO IMPORT
+  var u = new Lib/Utilities
+
+HOW TO USE
+  ?u.sec // example */
+
+
+
+// VARIABLES:
+
+//Units
+
+var sec = 30 // frames
+var scr = 69 // 1 screen = 69 units
+
+
+
+//FUNCTIONS:
+
+func max(n1,n2)
+  ?n1 >= n2
+    return n1
+  :
+    return n2
+
+/* Finds the largest string in an array of strings. */
+func getLargestStr(arrStr)
+  ?arrStr.Count() > 0
+    var maxStr = arrStr[0]
+    var maxInd = -1
+
+    for str : arrStr
+      ?string.Size(str) > string.Size(maxStr)
+        maxStr = str
+
+    return maxStr
+  
+  :
+    return null
+
+func myFormatDigital(frames)
+  ?frames <= 0
+    return "00:00"
+  :
+    var timeStr
+    var secs
+    var mins
+    var secStr
+    var minStr
+
+    secs = frames/30
+    mins = (frames/30)/60
+
+    secs -= mins*60
+
+    ?mins < 10
+      minStr = "0" + mins
+    :
+      minStr = mins
+      
+    ?secs < 10
+      secStr = "0" + secs
+    :
+      secStr = secs
+    
+    return minStr + ":" + secStr
+
+/* returns time in a similar format to time.FormatDigital,
+   but with frame presition. */
+func formatSpeedrun(frames)
+
+  var timeStr = "00:00 00f"
+
+  ?frames > 0
+
+    var frms
+    var secs
+    var mins
+    var frmStr
+    var secStr
+    var minStr
+
+    frms = frames % 30 // the rest of the division is the added frames between each second
+    secs = frames/30
+    mins = (frames/30)/60
+
+    secs -= mins*60
+
+    ?frms < 10
+      frmStr = "0" + frms
+    :
+      frmStr = frms
+
+    frmStr += "f"
+
+    ?secs < 10
+      secStr = "0" + secs
+    :
+      secStr = secs
+      
+    ?mins < 10
+      minStr = "0" + mins
+    :
+      minStr = mins
+
+    timeStr = minStr + ":" + secStr + " " + frmStr
+    
+  return timeStr
+
+
+
+// *******************************************************
+//                 END OF "Utilities.txt"                 
+// *******************************************************

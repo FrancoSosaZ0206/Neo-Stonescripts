@@ -1,0 +1,537 @@
+// Pomeranian
+// By Buku
+// Initial frame by Kash
+// Original pet movement by StandardCombo
+// Colour fade effect by link2_thepast
+// Candle glow by Toast
+
+// Changelog:
+// v1.0: Initial release
+// v1.1: Fixed sitting time
+// v2.0: Added backpack
+// v2.1: Added candle
+// v2.2: Fixed z position
+
+var dogColour = #FFFFFF
+var backpackColour = #AD7A40
+var candleColour = #fff0af
+var fireColour = #ff7300
+var lightColour = #0e0a07
+var lightColour2 = #26201a
+// var lightColour = #ff7300
+
+var keepDistance = -10                     // Distance from Stonehead
+var maxX = -9                              // Closest to Stonehead
+
+var maxDistance = -20                      // Max distance before teleporting back     
+
+var targetZ = 0                           // Z position relative
+
+var x = 0
+var y = 0
+var myX = 0
+var myZ = 0
+var lastPlayerX = 0
+var lastPlayerZ = 0
+
+var stateNone = 0
+var stateIdle = 1                          // Standing around
+var stateSit = 2                           // Standing too long
+var stateWalk = 3                          // Walking
+var currentState = stateNone
+var stateTime = 0                          // Time in current state
+var sitting = 0                            // Time to determine sit
+
+func SetState(newState)
+  currentState = newState                  // Set new state
+  stateTime = 0                            // Reset time
+
+?currentState = stateNone | time = 1       // If start
+  lastPlayerX = pos.x                      // Set last player position
+  lastPlayerZ = pos.z                      // Set last player position
+  myX = keepDistance                       // Set distance from Stonehead
+  myZ = targetZ                            // Set Z position
+
+  ?time > 1                                // If you're already in
+    myX = maxDistance                      // Set to farthest
+
+  SetState(stateWalk)                      // Start walking
+
+myX = myX - (pos.x - lastPlayerX)          // Move with player
+
+stateTime++                                // Increment time
+
+?currentState = stateIdle                  // If he's idle
+  ?myX < maxDistance | myX > -maxDistance  // If not in range
+    myX = maxDistance                      // Set to farthest
+  myZ = myZ - (pos.z - lastPlayerZ)        // Set height
+
+  ?myX < keepDistance                      // If too far
+    SetState(stateWalk)                    // Start walking
+
+:?currentState = stateWalk                 // If he's walking
+  ?myX < maxX                              // and too far
+    myX++                                  // Move closer
+  
+  ?loc = "waterfall"
+    ?rng % 10 = 0 & myZ < 0
+      myZ++
+    :?rng % 10 = 1 & myZ > -4
+      myZ--
+  :
+    ?rng % 10 = 0 & myZ < 7
+      myZ++
+    :?rng % 10 = 1 & myZ > 0
+      myZ--
+
+// ?stateTime >= 6                            // If more than 6 frames
+//   ?myZ > targetZ                           // Reset Z position
+//     myZ--
+//   :?myZ < targetZ
+//     myZ++
+
+?currentState = stateWalk                  // If he's walking
+  >c0,2,Why
+  sitting = 0                              // Reset sitting timer
+  ?!ai.walking                             // But if you're not walking
+    SetState(stateIdle)                    // Set him to idle
+
+?currentState = stateIdle                  // If he's idle
+  sitting++                                // Start counting
+  ?sitting >= 50 & foe.distance = 9999     // If the count is high enough and no enemies
+    SetState(stateSit)                     // Sit
+
+lastPlayerX = pos.x                        // Set last player position
+lastPlayerZ = pos.z
+
+?currentState = stateSit & stateTime % 6 < 3
+    >o@myX@,@myZ@,@dogColour@,ascii
+##;"|
+ι/, ;
+asciiend
+:?currentState = stateSit & stateTime % 6 >= 3
+    >o@myX@,@myZ@,@dogColour@,ascii
+##;"|
+_/, ;
+asciiend
+:?currentState = stateIdle
+    >o@myX@,@myZ@,@dogColour@,ascii
+:_;"|
+;.,,'
+asciiend
+:?currentState = stateWalk & stateTime % 3 = 0
+^| stateTime % 3 = 1
+    >o@myX@,@myZ@,@dogColour@,ascii
+:_;"|
+:.,.'
+asciiend
+:?currentState = stateWalk & stateTime % 3 = 2
+    >o@myX@,@myZ@,@dogColour@,ascii
+:_;"|
+;.メ'
+asciiend
+
+// Backpack
+?currentState = stateWalk
+^& stateTime % 20 < 5
+  >o@myX@,@myZ@,@backpackColour@,ascii
+#⌐
+#´
+asciiend
+:?currentState = stateWalk
+^& stateTime % 20 < 10
+  >o@myX@,@myZ@,@backpackColour@,ascii
+#⌐
+#'
+asciiend
+:?currentState = stateWalk
+^& stateTime % 20 < 15
+  >o@myX@,@myZ@,@backpackColour@,ascii
+#⌐
+#`
+asciiend
+:?currentState = stateWalk
+^& stateTime % 20 < 20
+  >o@myX@,@myZ@,@backpackColour@,ascii
+#⌐
+#'
+asciiend
+:?currentState = stateIdle
+  >o@myX@,@myZ@,@backpackColour@,ascii
+#⌐
+#'
+asciiend
+:?currentState = stateSit
+  >o@myX@,@myZ@,@backpackColour@,ascii
+#┌
+#y
+asciiend
+
+// candle
+>o@myX@,@myZ@,@candleColour@,ascii
+###╨
+asciiend
+
+var fireStill = []
+fireStill = [
+ascii
+#
+·
+asciiend,
+ascii
+#
+'
+asciiend,
+ascii
+#
+·
+asciiend,
+ascii
+#
+'
+asciiend,
+ascii
+#
+·
+asciiend,
+ascii
+#
+'
+asciiend,
+ascii
+#
+•
+asciiend,
+ascii
+#
+:
+asciiend,
+ascii
+.
+·
+asciiend,
+ascii
+·
+'
+asciiend,
+ascii
+'
+'
+asciiend
+]
+
+var fireWalk = []
+fireWalk = [
+ascii
+#
+###·
+asciiend,
+ascii
+#
+###`
+asciiend,
+ascii
+#
+###·
+asciiend,
+ascii
+#
+###`
+asciiend,
+ascii
+#
+###·
+asciiend,
+ascii
+#
+###`
+asciiend,
+ascii
+#
+###•
+asciiend,
+ascii
+#
+###:
+asciiend,
+ascii
+##.
+###·
+asciiend,
+ascii
+#·
+###`
+asciiend,
+ascii
+'
+###`
+asciiend
+]
+
+// fire
+var fireTimer = 0
+?currentState = stateIdle
+^| currentState = stateSit
+  >o@myX+3@,@myZ-2@,@fireColour@,@fireStill[fireTimer]@
+:?currentState = stateWalk
+  >o@myX@,@myZ-2@,@fireColour@,@fireWalk[fireTimer]@
+?fireTimer >= 6 & totaltime % 5 = 0
+    fireTimer++
+:?fireTimer % 2 = 0 & totaltime % 10 = 0
+  fireTimer++
+:?totaltime % 30 = 0
+  fireTimer++
+?fireTimer = fireStill.Count()
+  fireTimer = 0
+
+var fireLightA
+var fireLightB
+var fireLightC
+var fireLightD
+var fireLightE
+var fireLightF
+var basePanel
+var customStyle = ui.AddStyle("
+^###
+^###
+^###")
+
+func SetFire()
+  basePanel = ui.AddPanel()
+  basePanel.style = customStyle
+
+  fireLightA = ui.AddCanvas()
+  fireLightB = ui.AddCanvas()
+  fireLightC = ui.AddCanvas()
+  fireLightD = ui.AddCanvas()
+  fireLightE = ui.AddCanvas()
+  fireLightF = ui.AddCanvas()
+
+  basePanel.x = 20
+  basePanel.y = 10
+  basePanel.anchor = top_left
+  basePanel.dock = top_left
+
+  fireLightA.w = 12
+  fireLightA.h = 16
+  fireLightB.w = 20
+  fireLightB.h = 14
+  fireLightC.w = 24
+  fireLightC.h = 12
+  fireLightD.w = 28
+  fireLightD.h = 10
+  fireLightE.w = 32
+  fireLightE.h = 6
+
+  fireLightA.blend = Add
+  fireLightB.blend = Add
+  fireLightC.blend = Add
+  fireLightD.blend = Add
+  fireLightE.blend = Add
+
+  fireLightA.SetBG(lightColour)
+  fireLightB.SetBG(lightColour)
+  fireLightC.SetBG(lightColour)
+  fireLightD.SetBG(lightColour)
+  fireLightE.SetBG(lightColour)
+
+  fireLightA.SetFG(lightColour2)
+  fireLightB.SetFG(lightColour2)
+  fireLightC.SetFG(lightColour2)
+  fireLightD.SetFG(lightColour2)
+  fireLightE.SetFG(lightColour2)
+
+  basePanel.Add(fireLightA)
+  basePanel.Add(fireLightB)
+  basePanel.Add(fireLightC)
+  basePanel.Add(fireLightD)
+  basePanel.Add(fireLightE)
+
+?totaltime = 1
+  SetFire()
+:
+  basePanel.x = screen.FromWorldX(pos.x + myX - 1)
+  basePanel.y = screen.FromWorldZ(pos.z + myZ - 6)
+
+var barkColour = #FFFFFF
+var barkCount = 4
+var num
+
+var rng_x = 0
+var rng_xmax = 2
+var rng_xmin = -2
+
+var rng_z = 0
+var rng_zmax = -1
+var rng_zmin = -2
+
+var barks_xpos = []
+var barks_zpos = []
+
+var draw_x
+var draw_z
+
+//extract integer color channels from hex value
+var c_ints = colorToInt(barkColour)
+var c_ints_r = c_ints[0]
+var c_ints_g = c_ints[1]
+var c_ints_b = c_ints[2]
+
+//modify integer values to get note colors
+var c_ints_age1 = [c_ints_r, c_ints_g, c_ints_b]
+var c_ints_age2 = [math.Clamp(c_ints_r-68,0,512), math.Clamp(c_ints_g-68,0,512), math.Clamp(c_ints_b-68,0,512)]
+var c_ints_age3 = [math.Clamp(c_ints_r-136,0,256), math.Clamp(c_ints_g-136,0,256), math.Clamp(c_ints_b-136,0,256)]
+
+//generate hex color values from modified color channels
+var color_age1 = intToColor(c_ints_age1)
+var color_age2 = intToColor(c_ints_age2)
+var color_age3 = intToColor(c_ints_age3)
+
+rng_x = rng_xmin + rng % (rng_xmax - rng_xmin + 1)
+rng_z = rng_zmin + rng % (rng_zmax - rng_zmin + 1)
+
+barks_xpos.Add((myX + rng_x))
+barks_zpos.Add((myZ + rng_z))
+
+?barks_xpos.Count() > barkCount
+  barks_xpos.RemoveAt(0)
+  barks_zpos.RemoveAt(0)
+
+?rng % foe.distance = 0
+  num = barks_xpos.Count()
+  ?num > 0
+    ?num > barkCount
+      num = barkCount
+    for i = 0 .. num-1
+      draw_x = barks_xpos[i]
+      draw_z = barks_zpos[i]
+
+      ?i = 0
+        >o@draw_x@,@draw_z@,@color_age1@,-bark-
+      :?i < 3
+        >o@draw_x@,@draw_z@,@color_age2@,-bark-
+      :?i < barkCount
+        >o@draw_x@,@draw_z@,@color_age3@,-bark-
+
+//color conversion helper functions
+
+//converts 6-digit color code to integers
+//returns a 3-element array containing r,g,b as integers
+func colorToInt(color)
+  ?string.Size(color) < 7
+    return [0,0,0]
+
+  ?color = "#rainbow"
+    return [1024,1024,1024]
+
+  var r = hexInt(string.Sub(color, 1, 2))
+  var g = hexInt(string.Sub(color, 3, 2))
+  var b = hexInt(string.Sub(color, 5, 2))
+
+  return [r,g,b]
+
+
+//converts 3-element integer array to 6-digit color code
+//returns a hex color code in the form #rrggbb
+func intToColor(ints)
+  var t = ints[0]
+  ?t > 512
+    return "#rainFF"
+  :?t > 256
+    return "#rain88"
+  :?t > 255
+    return "#rain44"
+
+  var r = minLength(intHex(ints[0]), 2, 0)
+  var g = minLength(intHex(ints[1]), 2, 0)
+  var b = minLength(intHex(ints[2]), 2, 0)
+
+  return "#"+r+g+b
+
+
+//converts 2-digit hex to integer
+func hexInt(hex)
+  var int = 0
+  var size = string.Size(hex)
+  var digit = string.Sub(hex, 0, 1)
+
+  var msb = 1
+  var lsb = 0
+
+  ?string.Size(hex) > 1
+    int = hexInt(string.Sub(hex, 1, size-1)) + int
+
+  :?string.Size(hex) = 1
+    msb = 0
+    lsb = 1
+
+  ?digit = "0"
+    int = int + 0 * (16*msb)
+  :?digit = "1"
+    int = int + 1 * (16*msb + lsb)
+  :?digit = "2"
+    int = int + 2 * (16*msb + lsb)
+  :?digit = "3"
+    int = int + 3 * (16*msb + lsb)
+  :?digit = "4"
+    int = int + 4 * (16*msb + lsb)
+  :?digit = "5"
+    int = int + 5 * (16*msb + lsb)
+  :?digit = "6"
+    int = int + 6 * (16*msb + lsb)
+  :?digit = "7"
+    int = int + 7 * (16*msb + lsb)
+  :?digit = "8"
+    int = int + 8 * (16*msb + lsb)
+  :?digit = "9"
+    int = int + 9 * (16*msb + lsb)
+  :?digit = "A"
+    int = int + 10 * (16*msb + lsb)
+  :?digit = "B"
+    int = int + 11 * (16*msb + lsb)
+  :?digit = "C"
+    int = int + 12 * (16*msb + lsb)
+  :?digit = "D"
+    int = int + 13 * (16*msb + lsb)
+  :?digit = "E"
+    int = int + 14 * (16*msb + lsb)
+  :?digit = "F"
+    int = int + 15 * (16*msb + lsb)
+  :
+    int = int + 0
+  return int
+
+
+//function by DarkLucifer69
+//backfills a string to a particular length with a specified value
+func minLength(string, length, append)
+ ?string.Size(string) < length
+  string = append + minLength(string, length-1, append)
+
+ return string
+
+
+//function by DarkLucifer69
+//converts integer to hex value
+func intHex(int)
+ var hex = ""
+ 
+ ?int >= 16
+  hex = intHex(int/16) + hex 
+  
+ ?int % 16 <= 9
+  hex = hex + (int % 16)
+ :?int % 16 = 10
+  hex = hex + "A"
+ :?int % 16 = 11
+  hex = hex + "B"
+ :?int % 16 = 12
+  hex = hex + "C"
+ :?int % 16 = 13
+  hex = hex + "D"
+ :?int % 16 = 14
+  hex = hex + "E"
+ :?int % 16 = 15
+  hex = hex + "F"
+ 
+ return hex

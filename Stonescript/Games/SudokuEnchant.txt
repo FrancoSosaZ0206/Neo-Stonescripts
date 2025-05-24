@@ -1,0 +1,31 @@
+/*
+Sudoku of Enchantment 
+//Version:v1.0
+//Author: JianShang36
+
+Introduction: 
+You accidentally stumble into The Grand Treasury of the Acropolis and see a strange lock. Maybe you can try opening it?
+Trying to fill the enchantment panel in front of you, with your intelligence
+
+How to Play:
+Put 1. SudokuEnchant.txt and 2. SudokuEnchant folder together into Stonescript\Games folder, then 3. type the following script into your mind stone:
+import Games/SudokuEnchant
+
+Please go to Deadwood Waterfall to play this game, the game will load at the begin of local waferfall.
+The game will be automatically saved. If you wants to reset the game progress, please use the reset button in the game.
+
+(Chinses)支持中文，在本地化语言中使用简体中文或繁体中文即可
+介绍：
+你无意中进入了卫城的大宝库，并看到一把奇怪的锁。也许你可以试着打开它？
+尝试使用你的智慧，填满你面前的镶嵌附魔面板！
+如何开始游戏？
+将1. SudokuEnchant.txt和2. SudokuEnchant文件夹一起放入Stonescript\Games文件夹，然后3. 在你的意念石输入以下脚本：
+import Games/SudokuEnchant
+请前往枯木瀑布游玩，游戏将在进入瀑布时加载。
+游戏将自动保存。如果要重置游戏进度，请使用游戏中的重置按钮。
+
+*/
+
+var sudokuEnchant = import Games/SudokuEnchant/SudokuStart
+sudokuEnchant.main()
+

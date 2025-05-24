@@ -1,0 +1,1141 @@
+//StoneDungeon
+//Version: v1.0
+//Author: Okamiroy
+
+//This script is based on game version of 3.68.2
+
+//How to Play
+//Put this txt file in to Stonescript\Games folder, then type the following script into your mind stone:
+//import Games/StoneDungeon
+
+//Go to Deadwood Waterfall to play this game.
+//If you have any custom UI or pets or other activated script, 
+//please deactivate them temporarily for a better game playing.
+
+//This game should not be modified to run at other levels
+//because everything will be forced to be cleared when a new loop is beginning, 
+//and the minigame may be a mess with those uninitialized varibles.
+
+var STATE_DEFAULT = 0
+var STATE_FINISHED = 999
+var REAL_WIDTH = screen.w / 2 * 2
+var REAL_HEIGHT = screen.h
+
+var GAME_STATE_INIT_LANGUAGE = 0
+var GAME_STATE_SHOW_GAME_TITLE = 1
+var GAME_STATE_CLEAR_TITLE_UI = 2
+var GAME_STATE_SHOW_TITLE_STORY = 3
+var GAME_STATE_RESET_ALL_STATE = 4
+var GAME_STATE_INIT_COMPONENT = 5
+var GAME_STATE_GENERATE_DUNGEON = 6
+var GAME_STATE_DRAW_DUNGEON = 7
+var GAME_STATE_SHOW_BEGINNING_STORY = 8
+var GAME_STATE_PLAYING = 9
+var GAME_STATE_SHOW_ENDING_STORY = 10
+var GAME_STATE_CLEAR_GAME_UI = 11
+var gameState = GAME_STATE_INIT_LANGUAGE
+
+var LANGUAGE_EN = "EN"
+var LANGUAGE_ZH_CN = "ZH-CN"
+var LANGUAGE_ZH_TW = "ZH-TW"
+var LANGUAGE_CODE_EN = 0
+var LANGUAGE_CODE_CN = 1
+var LANGUAGE_CODE_OTHER = LANGUAGE_CODE_EN
+var languageCode = LANGUAGE_CODE_EN
+
+var GAME_MODE_HARD = 0
+var GAME_MODE_NORMAL = 1
+var GAME_MODE_EASY = 2
+var gameMode = GAME_MODE_HARD
+
+//------------------------------------------------------------------------------------------------------
+
+var STRING_ENTER_TO_START
+var STRING_ENTER_TO_CONTINUE
+var STRING_ENTER_TO_RETURN
+var HINT_INITIALIZING
+var HINT_GENERATING
+var HINT_DRAWING
+var HINT_COMPLETED
+var GLYPH_DESCRIPTIONS = []
+var TITLE_STORY = []
+var BEGINNING_STORY= []
+var ENDING_STORY = []
+func InitLanguageSettings()
+  ?te.language = LANGUAGE_EN
+    languageCode = LANGUAGE_CODE_EN
+  :?te.language = LANGUAGE_ZH_CN | te.language = LANGUAGE_ZH_TW
+    languageCode = LANGUAGE_CODE_CN
+  :
+    languageCode = LANGUAGE_CODE_OTHER
+
+  ?languageCode = LANGUAGE_CODE_CN
+    STRING_ENTER_TO_START = "按 回车 键开始"
+    STRING_ENTER_TO_CONTINUE = "按 回车 键继续"
+    STRING_ENTER_TO_RETURN = "按 回车 键返回"
+    HINT_INITIALIZING = "正在初始化..."
+    HINT_GENERATING = "正在生成地牢..."
+    HINT_DRAWING = "正在绘制地牢..."
+    HINT_COMPLETED = "已完成"
+
+    GLYPH_DESCRIPTIONS.Clear()
+    GLYPH_DESCRIPTIONS.Add("我过不去。")
+    GLYPH_DESCRIPTIONS.Add("不知道通向哪里的道路。")
+    GLYPH_DESCRIPTIONS.Add("普普通通的房间.")
+    GLYPH_DESCRIPTIONS.Add("石之屋。到处都是碎石。")
+    GLYPH_DESCRIPTIONS.Add("水之屋。我讨厌潮湿的空气。")
+    GLYPH_DESCRIPTIONS.Add("火之屋。太热了，我得赶紧离开这里。")
+    GLYPH_DESCRIPTIONS.Add("冰之屋。我快要冻僵了。")
+
+    TITLE_STORY.Clear()
+    TITLE_STORY.Add("\"好不容易逃出了那该死的矿坑！我只想要活下去！\"")
+    TITLE_STORY.Add("在一场混乱中，我跟着同伴逃离了灼热矿坑，但左臂上突然出现了几道蛇形印记。")
+    TITLE_STORY.Add("一位路过的商人操着奇怪的口音向我透露，这些印记意味着我被蛇神选为了祭品。")
+    TITLE_STORY.Add("但是在卫城的宝庫中，或许会有万灵药可以解除这道诅咒。")
+    TITLE_STORY.Add("我倾尽所有从商人手中购得这条传送护符，据说它可以直接送我去往宝庫。")
+    TITLE_STORY.Add("我别无选择，不论真假我只能激活这条护符。而结果是，我真的来到了宝庫内部。那位商人到底是谁？")
+    TITLE_STORY.Add("我无视遍地的金银财宝，只专注于寻找万灵药。忽然，一道强光闪过，我失去了意识......")
+    TITLE_STORY.Add("游戏玩法：寻找 [color=#1abc9c]<>[/color] 标记从而逃出地牢。")
+
+    BEGINNING_STORY.Clear()
+    var hardBeginningStory = []
+    BEGINNING_STORY.Add(hardBeginningStory)
+    hardBeginningStory.Add("不知过了多久，我醒了过来。四周十分昏暗，只有墙上的火把有微弱的光亮。")
+    hardBeginningStory.Add("看来我是中了陷阱，被传送到了这个阴森的地牢。我到底该怎么逃出去？")
+    hardBeginningStory.Add("我拿起墙上的火把，沿着不知通往何方的道路前行。")
+    hardBeginningStory.Add("\"要是至少能在刚才的宝庫中找到些发光的宝贝也好啊......\"")
+    var normalBeginningStory = []
+    BEGINNING_STORY.Add(normalBeginningStory)
+    normalBeginningStory.Add("不知过了多久，我醒了过来。与此同时，我发现我的口袋正在发光。")
+    normalBeginningStory.Add("我拿出口袋里的东西，是一颗之前得到的绿色宝石。它闪烁着光芒，似乎在指引我向着某个方向前行。")
+    normalBeginningStory.Add("虽然应该是被陷阱传送到了这个地牢，但是还好有这颗宝石在。它应该能带我逃出去吧......")
+    var easyBeginningStory = []
+    BEGINNING_STORY.Add(easyBeginningStory)
+    easyBeginningStory.Add("一阵温暖让我醒了过来。原来是我的口袋正在发出强烈的光芒。")
+    easyBeginningStory.Add("我拿出口袋里的东西，是之前在宝庫中获得的黄色宝石，它正闪烁着温暖的光芒。")
+    easyBeginningStory.Add("在房间的角落，我发现了一根被废弃的法杖，它的顶端似乎缺了点什么。")
+    easyBeginningStory.Add("我尝试将这颗宝石放上去。忽然，黑暗被彻底驱散，整个地牢都被照亮了。")
+
+    ENDING_STORY.Clear()
+    var hardEndingStory = []
+    ENDING_STORY.Add(hardEndingStory)
+    hardEndingStory.Add("地上有一个奇怪的魔法阵，然而为了逃出去，我似乎也只能踩上去了。")
+    hardEndingStory.Add("一阵炫目的光芒过后，我回到了地面，就在遇到那位商人的地方，只是商人已经不见。")
+    hardEndingStory.Add("我看了看我的左臂，蛇形印记依然存在。没有万灵药，我该怎么逃脱蛇神的追捕啊......")
+    var normalEndingStory = []
+    ENDING_STORY.Add(normalEndingStory)
+    normalEndingStory.Add("地上有一个奇怪的魔法阵，我手中的宝石似乎就是指引着我来到这里。")
+    normalEndingStory.Add("虽然犹豫了一会儿，但我还是决定踩了上去。")
+    normalEndingStory.Add("一阵炫目的光芒过后，我回到了地面，那位商人还在那里，面带微笑。")
+    normalEndingStory.Add("\"找到万灵药了吗？\"")
+    normalEndingStory.Add("我刚想冲上去质问他地牢是怎么回事，只见他指了指我的左臂。")
+    normalEndingStory.Add("只见蛇形印记已经消失得无影无踪。待我再次看向那位商人时，他也消失得无影无踪了......")
+    var easyEndingStory = []
+    ENDING_STORY.Add(easyEndingStory)
+    easyEndingStory.Add("地上有一个奇怪的魔法阵，配合着手杖上的黄色宝石，闪烁着柔和的光芒。")
+    easyEndingStory.Add("我毫不犹豫地踩了上去，顿时一阵温暖围绕着我的左臂。")
+    easyEndingStory.Add("等我回过神来，我已经回到了地面，就在遇到那位商人的地方，只是商人已经不见。")
+    easyEndingStory.Add("我想向那位商人道谢，但是却发现我根本不知道他叫什么，更是连他的样貌和声音也完全忘却了......")
+  :
+    STRING_ENTER_TO_START = "Press ENTER to Start"
+    STRING_ENTER_TO_CONTINUE = "Press ENTER to Continue"
+    STRING_ENTER_TO_RETURN = "Press ENTER to Return"
+
+    HINT_INITIALIZING = "Initializing..."
+    HINT_GENERATING = "Generating Dungeon..."
+    HINT_DRAWING = "Drawing Dungeon..."
+    HINT_COMPLETED = "Completed"
+    
+    GLYPH_DESCRIPTIONS.Clear()
+    GLYPH_DESCRIPTIONS.Add("It blocks me.")
+    GLYPH_DESCRIPTIONS.Add("Road to somewhere.")
+    GLYPH_DESCRIPTIONS.Add("An ordinary room.")
+    GLYPH_DESCRIPTIONS.Add("Room of stone. Crushed stones every where.")
+    GLYPH_DESCRIPTIONS.Add("Room of water. I don't like the damp air.")
+    GLYPH_DESCRIPTIONS.Add("Room of fire. So hot. I should leave here quickly.")
+    GLYPH_DESCRIPTIONS.Add("Room of ice. I'm almost freezing.")
+
+    TITLE_STORY.Clear()
+    TITLE_STORY.Add("\"I finally managed to escape from that damn mine! I just want to live on! \"")
+    TITLE_STORY.Add("During a disturbance, I fled the Boiling Mine along with my companions, but serveral snake-like tattoos appeared on my left arm soon after. ")
+    TITLE_STORY.Add("A passing merchant with a strange accent told me that I had been chosen to be the sacrifice for Nagaraja. ")
+    TITLE_STORY.Add("\"In the Grand Treasury of Acropolis, it should have some Elixir to dispel your curse. \"")
+    TITLE_STORY.Add("I spent all I have to buy this Talisman of Teleportation, which could take me directly to the treasury, the merchant explained. ")
+    TITLE_STORY.Add("I had no choice, only touched and activated the talisman. As a result, I did arrive at the inside of the treasury. Who exactly is that merchant? ")
+    TITLE_STORY.Add("Gold and treasures were piled up everywhere, while I only focused on finding the Elixir. Suddenly, a strong light flashed from the ground. I lost my consciousness...... ")
+    TITLE_STORY.Add("Game Play: Find the [color=#1abc9c]<>[/color] mark to escape from the dungeon! ")
+
+    BEGINNING_STORY.Clear()
+    var hardBeginningStory = []
+    BEGINNING_STORY.Add(hardBeginningStory)
+    hardBeginningStory.Add("I don't know how long it's been. I woke up. It was very dark all around. Only the torch on the wall gave off a weak light. ")
+    hardBeginningStory.Add("It seems the trap in the treasury sent me to this scary dungeon. How could I get out? ")
+    hardBeginningStory.Add("I took the torch on the wall and walked through the road to anywhere unknown. ")
+    hardBeginningStory.Add("\"If I could have something to light up the dungeon, at least it would not be this hard......\"")
+    var normalBeginningStory = []
+    BEGINNING_STORY.Add(normalBeginningStory)
+    normalBeginningStory.Add("I don't know how long it's been. I woke up, while I found my pocket was shinning. ")
+    normalBeginningStory.Add("I took it out. It's a piece of green gem I had obtained before. Its light seems to guide me to somewhere. ")
+    normalBeginningStory.Add("Maybe it was the trap in the treasury sent me to this dungeon, but at least I hoped this gem could help me escape from here......")
+    var easyBeginningStory = []
+    BEGINNING_STORY.Add(easyBeginningStory)
+    easyBeginningStory.Add("A warm feeling woke me up. It was my pocket, shining a bright light. ")
+    easyBeginningStory.Add("I took it out. It's the yellow gem found from the box in the treasury. Its light made me feel warm and calm. ")
+    easyBeginningStory.Add("In the corner of the room, I found a broken staff lying there, with something lost on its crown. ")
+    easyBeginningStory.Add("I tried to set the gem on the staff. Suddenly, darkness was banished, all the dungeon was lit up. ")
+
+    ENDING_STORY.Clear()
+    var hardEndingStory = []
+    ENDING_STORY.Add(hardEndingStory)
+    hardEndingStory.Add("There was a weird magic circle on the ground. To get out of here, it seems stepping on it is the only choice. ")
+    hardEndingStory.Add("After a dazzling light flashing past my eyes, I came back to where I had met the merchant, but nowhere to found him. ")
+    hardEndingStory.Add("I looked at my left arm, snake-like tattoos were still there. Without the Elixir, how could I escaped from Nagaraja......")
+    var normalEndingStory = []
+    ENDING_STORY.Add(normalEndingStory)
+    normalEndingStory.Add("There was a weird magic circle on the ground. It seems it's the gem guided me to come here. ")
+    normalEndingStory.Add("Although I had some hesitation, I still decided to step on it. ")
+    normalEndingStory.Add("After a dazzling light flashing past my eyes, I came back to earth, where the merchant stood there, smiling. ")
+    normalEndingStory.Add("\"Did you find the Elixir? \"")
+    normalEndingStory.Add("When I rushed to him for my questions of the dungeon, he just pointed at my left arm with his finger. ")
+    normalEndingStory.Add("I looked at my left arm, none tattoo was existing. When I wanted to spoke something to the merchant again, he was nowhere to find......")
+    var easyEndingStory = []
+    ENDING_STORY.Add(easyEndingStory)
+    easyEndingStory.Add("There was a weird magic circle on the ground, flashing a soft light, along with the yellow gem on the staff. ")
+    easyEndingStory.Add("I stepped on it without any hesitation, and soon I felt a relaxing warmth embracing my left arm. ")
+    easyEndingStory.Add("When I came back to myself again, I was on the earth, where I had met the merchant, but nowhere to found him. ")
+    easyEndingStory.Add("I wanted to thank that guy, but I just found I don't know his name. And what's more, I had forgot everything about his appearance, his words, and his voice......")
+
+//------------------------------------------------------------------------------------------------------
+
+var SHOW_TITLE_STEP_INIT = 0
+var SHOW_TITLE_STEP_SHOW_TEXT = 1
+var showTitleStep = SHOW_TITLE_STEP_INIT
+func ShowTitleScreen()
+  ?showTitleStep = SHOW_TITLE_STEP_INIT
+    InitTileScreen()
+    showTitleStep = SHOW_TITLE_STEP_SHOW_TEXT
+  :?showTitleStep = SHOW_TITLE_STEP_SHOW_TEXT
+    ShowTitleText()
+    ?ReadTitleCommand() = STATE_FINISHED
+      showTitleStep = STATE_FINISHED
+  return showTitleStep
+
+var TITLE_WIDTH = 75
+var TITLE_HEIGHT = 21
+var TITLE_POS_Y = (screen.h - TITLE_HEIGHT) / 2
+var TITLE_STRING = ascii
+                                                                          
+              SSSSSS  TTTTTTTT    OOOO    NN     NN  EEEEEEEE             
+            SS           TT     OO    OO  NNNN   NN  EE                   
+              SSSS       TT     OO    OO  NN  N  NN  EEEEEEE              
+                  SS     TT     OO    OO  NN   NNNN  EE                   
+            SSSSSS       TT       OOOO    NN     NN  EEEEEEEE             
+                                                                          
+  DDDDDD    UU    UU  NN     NN    GGGGG   EEEEEEEE    OOOO    NN     NN  
+  DD    DD  UU    UU  NNNN   NN  GG        EE        OO    OO  NNNN   NN  
+  DD    DD  UU    UU  NN  N  NN  GG  GGGG  EEEEEEE   OO    OO  NN  N  NN  
+  DD    DD  UU    UU  NN   NNNN  GG    GG  EE        OO    OO  NN   NNNN  
+  DDDDDD      UUUU    NN     NN    GGGG    EEEEEEEE    OOOO    NN     NN  
+                                                                          
+                                                                          
+                                                       Coded By Okamiroy  
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+asciiend
+
+var SELECTION_POS_Y = TITLE_POS_Y + TITLE_HEIGHT - 3
+var COMMAND_COUNT = 4
+var COMMAND_DEFAULT = "xxxx"
+var DIRECTION_RIGHT = 0
+var DIRECTION_DOWN = 1
+var DIRECTION_LEFT = 2
+var DIRECTION_UP = 3
+var titleText
+var selectiongText
+var commandLine = COMMAND_DEFAULT
+func InitTileScreen()
+  titleText = ui.AddText()
+  titleText.anchor = top_center
+  titleText.dock = top_center
+  titleText.w = TITLE_WIDTH
+  titleText.h = TITLE_HEIGHT
+  titleText.y = TITLE_POS_Y
+
+  selectiongText = ui.AddText()
+  selectiongText.anchor = top_center
+  selectiongText.dock = top_center
+  selectiongText.w = string.Size(STRING_ENTER_TO_START)
+  selectiongText.y = TITLE_POS_Y + TITLE_HEIGHT - 3
+
+  commandLine = COMMAND_DEFAULT
+
+var c1 = "#ff4400"
+var c2 = "#8888ff"
+var t = 0.5
+//Changing text color by manual example.
+func ShowTitleText()
+  titleText.text = TITLE_STRING
+  selectiongText.text = STRING_ENTER_TO_START
+  t = math.sin(time * 0.1) / 2 + 0.5
+  selectiongText.color = color.Lerp(c1, c2, t)
+
+//Normal is up->left->down->right
+var MODE_NORMAL_COMMAND_LINE = "3210"
+
+//Easy is left->left->right->right
+var MODE_EASY_COMMAND_LINE = "2200"
+
+//Read the command to set the difficulty and start the game.
+//If you find the secret by reading this code, please just keep it in your own mind.
+//These hints will be mentioned in other minigames.
+func ReadTitleCommand()
+  ?key = leftBegin
+    commandLine = string.Sub(commandLine, 1) + DIRECTION_LEFT
+  :?key = rightBegin
+    commandLine = string.Sub(commandLine, 1) + DIRECTION_RIGHT
+  :?key = upBegin
+    commandLine = string.Sub(commandLine, 1) + DIRECTION_UP
+  :?key = downBegin
+    commandLine = string.Sub(commandLine, 1) + DIRECTION_DOWN
+  :?key = primaryBegin
+    ?commandLine = MODE_EASY_COMMAND_LINE
+      gameMode = GAME_MODE_EASY
+    :?commandLine = MODE_NORMAL_COMMAND_LINE
+      gameMode = GAME_MODE_NORMAL
+    :
+      gameMode = GAME_MODE_HARD
+    showTitleStep = STATE_FINISHED
+
+//------------------------------------------------------------------------------------------------------
+
+var INIT_STEP_CANVAS = 0
+var INIT_STEP_EXPLORE_RANGE = 1
+var INIT_STEP_MARKS = 2
+var INIT_STEP_RIGHT_BLACK = 3
+var INIT_STEP_LOG = 4
+var initStep = INIT_STEP_CANVAS
+
+//I use several components of canvas to draw the whole map, which is larger than the screen.
+//However, by my tests, I found the attribute "visible" would not work on canvas.
+//And canvas cannot be clipped in panel by panel.Clip().
+//So the addition order of components will be the stack order.
+//To make log panel on the top, I should add it at the last.
+func InitComponent()
+  ?initStep = INIT_STEP_CANVAS
+    ?InitCanvas() = STATE_FINISHED
+      initStep = INIT_STEP_EXPLORE_RANGE
+  :?initStep = INIT_STEP_EXPLORE_RANGE
+    InitExploreRange()
+    initStep = INIT_STEP_MARKS
+  :?initStep = INIT_STEP_MARKS
+    InitMarks()
+    initStep = INIT_STEP_RIGHT_BLACK
+  :?initStep = INIT_STEP_RIGHT_BLACK
+    InitRightBlack()
+    initStep = INIT_STEP_LOG
+  :?initStep = INIT_STEP_LOG
+    InitLog()
+    initStep = STATE_FINISHED
+  return initStep
+
+var LOG_PANEL_WIDTH = REAL_WIDTH
+var LOG_PANEL_HEIGHT = 5
+var CANVAS_WIDTH = REAL_WIDTH
+var CANVAS_HEIGHT = REAL_HEIGHT - LOG_PANEL_HEIGHT
+var CANVAS_ROW_COUNT = 2
+var CANVAS_COL_COUNT = 2
+var gameCanvasArray = []
+var initCanvasStep = 0
+var workingCanvasRowIndex = 0
+var workingCanvasColIndex = 0
+
+//Init canvas of dungeon map
+func InitCanvas()
+  ?initCanvasStep = 0
+    for oneCanvasRow : gameCanvasArray
+      oneCanvasRow.Clear()
+    gameCanvasArray.Clear()
+    for i = 0 .. CANVAS_ROW_COUNT - 1
+      var oneRow = []
+      gameCanvasArray.Add(oneRow)
+    initCanvasStep = 1
+  :?initCanvasStep = 1
+    var gameCanvas = ui.AddCanvas()
+    gameCanvas.anchor = top_left
+    gameCanvas.dock = top_left
+    gameCanvas.x = workingCanvasColIndex * CANVAS_WIDTH
+    gameCanvas.y = workingCanvasRowIndex * CANVAS_HEIGHT
+    gameCanvas.w = CANVAS_WIDTH
+    gameCanvas.h = CANVAS_HEIGHT
+    gameCanvasArray[workingCanvasRowIndex].Add(gameCanvas)
+
+    ?workingCanvasRowIndex = CANVAS_ROW_COUNT - 1 & workingCanvasColIndex = CANVAS_COL_COUNT - 1
+      workingCanvasRowIndex = 0
+      workingCanvasColIndex = 0
+      initCanvasStep = STATE_FINISHED
+    :
+      ?workingCanvasColIndex = CANVAS_COL_COUNT - 1
+        workingCanvasColIndex = 0
+        workingCanvasRowIndex++
+      :
+        workingCanvasColIndex++
+
+  return initCanvasStep
+
+var EXPLORE_RANGE = 6
+var EXPLORE_CENTER_X = EXPLORE_RANGE
+var EXPLORE_CENTER_Y = EXPLORE_RANGE
+var REAL_EXPLORE_WIDTH = (EXPLORE_RANGE * 2 + 1) * 2
+var REAL_EXPLORE_HEIGHT = EXPLORE_RANGE * 2 + 1
+var exploreCanvas
+
+//Player exploring range is a diamond shape over the map.
+//I use blend mode for a shade effect.
+//More closer,  more brighter.
+func InitExploreRange()
+  exploreCanvas = ui.AddCanvas()
+  exploreCanvas.anchor = top_left
+  exploreCanvas.dock = top_left
+  exploreCanvas.w = REAL_EXPLORE_WIDTH
+  exploreCanvas.h = REAL_EXPLORE_HEIGHT
+  exploreCanvas.x = 0 - REAL_EXPLORE_WIDTH
+  exploreCanvas.y = 0 - REAL_EXPLORE_HEIGHT
+  exploreCanvas.SetFG(#000000)
+
+  for level = 1 .. EXPLORE_RANGE
+    var color
+    ?level = 1 | level = 2
+      color = #dddddd
+    :?level = 3 | level = 4
+      color = #aaaaaa
+    :?level = 5
+      color = #777777
+    :
+      color = #444444
+
+    for i = level .. 1
+      exploreCanvas.SetFG((EXPLORE_CENTER_X + i) * 2, EXPLORE_CENTER_Y + (level - i), color)
+      exploreCanvas.SetFG((EXPLORE_CENTER_X + i) * 2 + 1, EXPLORE_CENTER_Y + (level - i), color)
+
+      exploreCanvas.SetFG((EXPLORE_CENTER_X - (level - i)) * 2, EXPLORE_CENTER_Y + i, color)
+      exploreCanvas.SetFG((EXPLORE_CENTER_X - (level - i)) * 2 + 1, EXPLORE_CENTER_Y + i, color)
+
+      exploreCanvas.SetFG((EXPLORE_CENTER_X - i) * 2, EXPLORE_CENTER_Y - (level - i), color)
+      exploreCanvas.SetFG((EXPLORE_CENTER_X - i) * 2 + 1, EXPLORE_CENTER_Y - (level - i), color)
+
+      exploreCanvas.SetFG((EXPLORE_CENTER_X + (level - i)) * 2, EXPLORE_CENTER_Y - i, color)
+      exploreCanvas.SetFG((EXPLORE_CENTER_X + (level - i)) * 2 + 1, EXPLORE_CENTER_Y - i, color)
+
+  exploreCanvas.blend = add
+
+var TARGET_GLYPH = "<>"
+var TARGET_COLOR = #1abc9c
+var targetText
+var targetPosX = screen.w
+var targetPosY = screen.h
+
+var PLAYER_GLYPH_ARRAY = []
+var PLAYER_COLOR = #f08080
+var playerText
+var playerPosX = -1
+var playerPosY = -1
+
+var GLYPH_ARRAY = []
+var GLYPH_WALL_INDEX = 0
+var GLYPH_ROAD_INDEX = 1
+var ROOM_TYPE_COUNT = 5
+
+//Player will finally step on target, so add target later than player.
+func InitMarks()
+  targetText = ui.AddText(TARGET_GLYPH)
+  targetText.anchor = top_left
+  targetText.dock = top_left
+  targetText.w = 2
+  targetText.h = 1
+  targetText.x = targetPosX
+  targetText.y = targetPosY
+  targetText.color = TARGET_COLOR
+  targetText.visible = false
+
+  PLAYER_GLYPH_ARRAY.Clear()
+  PLAYER_GLYPH_ARRAY = ["EE", "MM", "33", "WW"]  //right, down, left, up
+  playerText = ui.AddText(PLAYER_GLYPH_ARRAY[0])
+  playerText.anchor = top_left
+  playerText.dock = top_left
+  playerText.w = 2
+  playerText.h = 1
+  playerText.x = playerPosX * 2
+  playerText.y = playerPosY
+  playerText.color = PLAYER_COLOR
+
+  GLYPH_ARRAY.Clear()
+  GLYPH_ARRAY = [
+                  ["█", "█", GLYPH_DESCRIPTIONS[0]],  //wall
+                  [".", ".", GLYPH_DESCRIPTIONS[1]],  //road
+                  [":", ":", GLYPH_DESCRIPTIONS[2]],  //common
+                  ["^", " ", GLYPH_DESCRIPTIONS[3]],  //stone
+                  ["~", " ", GLYPH_DESCRIPTIONS[4]],  //water
+                  ["φ", " ", GLYPH_DESCRIPTIONS[5]],  //fire
+                  ["❄", " ", GLYPH_DESCRIPTIONS[6]]  //ice
+                ]
+                       
+var blackPanel
+
+//Two screen cells combine into one map cell.
+//If screen.w is an odd number, I should make the extra one colomn if screen cells black.
+//Because the canvas cannot be clipped in panel, I must hide the cells out of the screen.
+func InitRightBlack()
+  ?screen.w - REAL_WIDTH = 1
+    blackPanel = ui.AddPanel()
+    blackPanel.anchor = top_right
+    blackPanel.dock = top_right
+    blackPanel.style = 0
+    blackPanel.w = 1
+    blackPanel.h = screen.h
+
+var LOG_PANEL_X = REAL_WIDTH - LOG_PANEL_WIDTH
+var LOG_PANEL_Y = 0
+var LOG_LINE_COUNT = LOG_PANEL_HEIGHT - 2
+var logTextArray = []
+var logPanel
+var logQueue = []
+var logDataArray = []
+var logHistory = []
+//Rolling log panel.
+//Later log message may push older messages up.
+func InitLog()
+  logPanel = ui.AddPanel()
+  logPanel.anchor = bottom_left
+  logPanel.dock = bottom_left
+  logPanel.w = LOG_PANEL_WIDTH
+  logPanel.h = LOG_PANEL_HEIGHT
+
+  logTextArray.Clear()
+  logQueue.Clear()
+  logDataArray.Clear()
+  logHistory.Clear()
+  var logText
+  for i = 1 .. LOG_LINE_COUNT
+    logText = ui.AddText()
+    logText.anchor = top_left
+    logText.dock = top_left
+    logText.x = 1
+    logText.y = 0 + i
+    logText.w = logPanel.w - 2
+    logDataArray.Add("")
+    logPanel.Add(logText)
+    logTextArray.Add(logText)
+
+//I use message queue for log panel.
+//All the log message only needs to be write into the queue, and wait to be consumed for drawing.
+func WriteLog(logContent)
+  ?logContent ! null 
+    ?Type(logContent) = string
+      logQueue.Add(logContent)
+    :
+      ?logContent.Count() > 0
+        for i = 0 .. logContent.Count() - 1
+          logQueue.Add(logContent[i])
+
+//Consume one line of log message per frame, and then do rolling update for current messages.
+func ShowLog(log)
+  ?logQueue.Count() > 0
+    for i = 0 .. LOG_LINE_COUNT - 1
+      ?i = 0
+        logHistory.Add(logDataArray[i])
+      ?i < LOG_LINE_COUNT - 1
+        logDataArray[i] = logDataArray[i + 1]
+      :
+        logDataArray[i] = logQueue[0]
+    logQueue.RemoveAt(0)
+  
+  for i = 0 .. LOG_LINE_COUNT - 1
+    logTextArray[i].text = logDataArray[i]
+
+//------------------------------------------------------------------------------------------------------
+
+var GENERATE_STEP_PATTERN_DATA = 0
+var GENERATE_STEP_PATTERN_DETAIL = 1
+var GENERATE_STEP_DUNGEON_DATA = 2
+var GENERATE_STEP_FAST_DATA = 3
+var generateStep = GENERATE_STEP_PATTERN_DATA
+func GenerateDungeon()
+  ?generateStep = GENERATE_STEP_PATTERN_DATA
+    WriteLog(HINT_GENERATING + "0%")
+    GenreatePatternData()
+    generateStep = GENERATE_STEP_PATTERN_DETAIL
+    WriteLog(HINT_GENERATING + "10%")
+  :?generateStep = GENERATE_STEP_PATTERN_DETAIL
+    ?GeneratePatternDetail() = STATE_FINISHED
+      generateStep = GENERATE_STEP_DUNGEON_DATA
+      WriteLog(HINT_GENERATING + "30%")
+  ?generateStep = GENERATE_STEP_DUNGEON_DATA
+    ?GenerateDungeonData() = STATE_FINISHED
+      generateStep = GENERATE_STEP_FAST_DATA
+      WriteLog(HINT_GENERATING + "80%")
+  ?generateStep = GENERATE_STEP_FAST_DATA
+    ?GenerateFastData() = STATE_FINISHED
+      generateStep = STATE_FINISHED
+      WriteLog(HINT_GENERATING + HINT_COMPLETED)
+  return generateStep
+
+var ROOM_ROW_COUNT = 4
+var ROOM_COL_COUNT = 6
+var PATTERN_WIDTH = ROOM_COL_COUNT + (ROOM_COL_COUNT - 1)
+var PATTERN_HEIGHT = ROOM_ROW_COUNT + (ROOM_ROW_COUNT - 1)
+var BASIC_PATTERN_DATA = [[2, 1, 2, 0, 2, 0, 2, 0, 2, 1, 2], 
+                          [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0], 
+                          [2, 1, 2, 0, 2, 0, 2, 0, 2, 1, 2], 
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                          [2, 0, 2, 0, 2, 1, 2, 0, 2, 0, 2], 
+                          [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1], 
+                          [2, 0, 2, 0, 2, 1, 2, 0, 2, 0, 2]]
+var patternData = []
+
+//1.Genrating pattern data.
+//Basic map is an n*n rooms with roads between soom adjoining rooms.
+//Then add random roads between other adjoining rooms.
+//And in my design, every room must connect to at least one road.
+func GenreatePatternData()
+  patternData = BASIC_PATTERN_DATA
+
+  var toRandomLinkRoad = []
+  for i = 1 .. patternData.Count() - 2
+    for j = 1 .. patternData[i].Count() - 2
+      ?patternData[i][j - 1] = 0 & patternData[i][j + 1] = 0
+        toRandomLinkRoad.Add(i + "_" + (j - 1) + "_" + i + "_" + (j + 1))
+        j += 3
+      :
+        j++
+    i++
+
+  for j = 1 .. patternData[0].Count() - 2
+    for i = 1 .. patternData.Count() - 2
+      ?patternData[i - 1][j] = "0" & patternData[i + 1][j] = 0
+        toRandomLinkRoad.Add((i - 1) + "_" + j + "_" + (i + 1) + "_" + j)
+        i += 3
+      :
+        i++
+    j++
+
+  var factor = 2
+  for posStr : toRandomLinkRoad
+    var posStrArray = string.Split(posStr, "_")
+    var rowA = int.Parse(posStrArray[0])
+    var colA = int.Parse(posStrArray[1])
+    var rowB = int.Parse(posStrArray[2])
+    var colB = int.Parse(posStrArray[3])
+    ?rng % factor < factor / 2
+      patternData[rowA][colA] = 1
+    :
+      patternData[rowB][colB] = 1
+    factor *= 2
+
+var GAME_WIDTH = REAL_WIDTH / 2 * 2
+var GAME_HEIGHT = (REAL_HEIGHT - LOG_PANEL_HEIGHT) * 2
+var GAP_SIZE = 3
+var MIN_ROOM_WIDTH = 4
+var MAX_ROOM_WIDTH = (GAME_WIDTH - 2 - GAP_SIZE * (ROOM_COL_COUNT - 1)) / ROOM_COL_COUNT
+var MIN_ROOM_HEIGHT = 3
+var MAX_ROOM_HEIGHT = (GAME_HEIGHT - 2 - GAP_SIZE * (ROOM_ROW_COUNT - 1)) / ROOM_ROW_COUNT
+var patternDetailData = []
+var generateDetailStep = 0
+var workingCellIndex = 0
+
+//2.Genrating pattern detail.
+//With pattern data, randomly generate detailed parameters of room size, room position, and other data of rooms and roads.
+//Generate one room per frame.
+//When it has road on right or bottom side, generate the road parameters of beginning.
+//When it has road on left or top side, complete the road parameters of ending.
+func GeneratePatternDetail()
+  ?generateDetailStep = 0
+    patternDetailData.Clear()
+    for i = 0 .. patternData.Count() - 1
+      var oneDetailRow = []
+      patternDetailData.Add(oneDetailRow)
+      for j = 0 .. patternData[i].Count() - 1
+        oneDetailRow.Add("0")
+
+    generateDetailStep = 1
+  :?generateDetailStep = 1
+    var rowIndex = workingCellIndex / PATTERN_WIDTH
+    var colIndex = workingCellIndex % PATTERN_WIDTH
+
+    ?patternData[rowIndex][colIndex] ! 2
+      ?colIndex = 0
+        workingCellIndex += PATTERN_WIDTH
+        rowIndex++
+      :
+        workingCellIndex++
+        colIndex++
+
+    var offsetX = 1 + (MAX_ROOM_WIDTH + GAP_SIZE) * (colIndex / 2)
+    var offsetY = 1 + (MAX_ROOM_HEIGHT + GAP_SIZE) * (rowIndex / 2)
+    var roomType = rng % (ROOM_TYPE_COUNT * 10) / 10 + 2
+    var roomWidth = rng % (MAX_ROOM_WIDTH - MIN_ROOM_WIDTH + 1) + MIN_ROOM_WIDTH
+    var roomHeight = rng % (MAX_ROOM_HEIGHT - MIN_ROOM_HEIGHT + 1) + MIN_ROOM_HEIGHT
+    var roomX = offsetX + rng % (MAX_ROOM_WIDTH - roomWidth + 1)
+    var roomY = offsetY + rng % (MAX_ROOM_HEIGHT - roomHeight + 1) 
+
+    patternDetailData[rowIndex][colIndex] = roomType + "_" + roomWidth + "_" + roomHeight + "_" + roomX + "_" + roomY
+
+    var roadX = 0
+    var roadY = 0
+    var gapX = 0
+    var gapY = 0
+    ?colIndex + 1 < PATTERN_WIDTH & patternData[rowIndex][colIndex + 1] = 1
+      roadX = roomX + roomWidth
+      roadY = roomY + rng % roomHeight
+      gapX = offsetX + MAX_ROOM_WIDTH + GAP_SIZE / 2
+      gapY = 0
+      //第一个参数roadTyppe，0表示水平通路，1表示竖直通路
+      patternDetailData[rowIndex][colIndex + 1] = "0_" + gapX + "_" + gapY + "_" + roadX + "_" + roadY
+    ?rowIndex + 1 < PATTERN_HEIGHT & patternData[rowIndex + 1][colIndex] = 1
+      roadX = roomX + rng % roomWidth
+      roadY = roomY + roomHeight
+      gapX = 0
+      gapY = offsetY + MAX_ROOM_HEIGHT + GAP_SIZE / 2
+      patternDetailData[rowIndex + 1][colIndex] = "1_" + gapX + "_" + gapY + "_" + roadX + "_" + roadY
+    ?colIndex - 1 >= 0 & patternData[rowIndex][colIndex - 1] = 1
+      roadX = roomX - 1
+      roadY = roomY + rng % roomHeight
+      patternDetailData[rowIndex][colIndex - 1] += "_" + roadX + "_" + roadY
+    ?rowIndex - 1 >= 0 & patternData[rowIndex - 1][colIndex] = 1
+      roadX = roomX + rng % roomWidth
+      roadY = roomY - 1
+      patternDetailData[rowIndex - 1][colIndex] += "_" + roadX + "_" + roadY
+  
+    ?rowIndex = PATTERN_HEIGHT - 1 & colIndex = PATTERN_WIDTH - 1
+      workingCellIndex = 0
+      generateDetailStep = STATE_FINISHED
+    :
+      workingCellIndex++
+
+  return generateDetailStep
+
+var GENERATE_TARGET_RATE = 10
+var dungeonMapData = []
+var generateDungeonDataStep = 0
+var hasTarget = false
+
+//3.Generate dungeon map data.
+//With pattern detail data, write everything into the map data array.
+//GAP_SIZE is the smallest distance between rooms.
+//This ensure all the roads can have a "Z" shape.
+//For example: 
+//     GAP   
+//     ↓↓↓   
+//000000↓0000
+//022200↓0000
+//0222111←←←←
+//02220010220
+//→→→→→→11220
+//000000↑0220
+//000000↑0000
+func GenerateDungeonData()
+  ?generateDungeonDataStep = 0
+    dungeonMapData.Clear()
+    for i = 0 .. GAME_HEIGHT - 1
+      var row = []
+      dungeonMapData.Add(row)
+      for j = 0 .. GAME_WIDTH - 1
+        row.Add(0)
+    generateDungeonDataStep = 1
+
+  ?generateDungeonDataStep = 1
+    var rowIndex = workingCellIndex / PATTERN_WIDTH
+    var colIndex = workingCellIndex % PATTERN_WIDTH
+    ?patternData[rowIndex][colIndex] >= 2
+      var roomParams = string.Split(patternDetailData[rowIndex][colIndex], "_")
+      var roomType = int.Parse(roomParams[0])
+      var roomWidth = int.Parse(roomParams[1])
+      var roomHeight = int.Parse(roomParams[2])
+      var roomX = int.Parse(roomParams[3])
+      var roomY = int.Parse(roomParams[4])
+      for i = roomY .. roomY + roomHeight - 1
+        for j = roomX .. roomX + roomWidth - 1
+          dungeonMapData[i][j] = roomType
+      
+      ?rowIndex = 0 & colIndex = 0
+        playerPosX = roomX + 1
+        playerPosY = roomY + 1
+      
+      ?!hasTarget
+        ?rowIndex / 2 = ROOM_ROW_COUNT - 1 & colIndex / 2 = ROOM_COL_COUNT - 1
+          targetPosX = roomX + roomWidth / 2
+          targetPosY = roomY + roomHeight / 2
+          hasTarget = true
+        :?rowIndex / 2 > ROOM_ROW_COUNT - 2 | colIndex / 2 > ROOM_COL_COUNT - 3
+          ?rng % 100 < GENERATE_TARGET_RATE
+            targetPosX = roomX + roomWidth / 2
+            targetPosY = roomY + roomHeight / 2
+            hasTarget = true
+
+    :?patternData[rowIndex][colIndex] = 1
+      var roadParams = string.Split(patternDetailData[rowIndex][colIndex], "_")
+      var roadType = int.Parse(roadParams[0])
+      var gapX = int.Parse(roadParams[1])
+      var gapY = int.Parse(roadParams[2])
+      var roadStartX = int.Parse(roadParams[3])
+      var roadStartY = int.Parse(roadParams[4])
+      var roadEndX = int.Parse(roadParams[5])
+      var roadEndY = int.Parse(roadParams[6])
+      ?roadType = 0
+        for i = roadStartX .. gapX
+          dungeonMapData[roadStartY][i] = 1
+        for i = roadEndX .. gapX 
+          dungeonMapData[roadEndY][i] = 1
+        for i = roadStartY .. roadEndY
+          dungeonMapData[i][gapX] = 1
+      :
+        for i = roadStartY .. gapY
+          dungeonMapData[i][roadStartX] = 1
+        for i = roadEndY .. gapY
+          dungeonMapData[i][roadEndX] = 1
+        for i = roadStartX .. roadEndX
+          dungeonMapData[gapY][i] = 1
+    
+    ?rowIndex = PATTERN_HEIGHT - 1 & colIndex = PATTERN_WIDTH - 1
+      workingCellIndex = 0
+      generateDungeonDataStep = STATE_FINISHED
+    :
+      workingCellIndex++
+  
+  return generateDungeonDataStep
+
+var PARAM_OFFSET = 1000
+var fastDataOfPosX = []
+var generateFastDataStep = 0
+
+//4. Generate fast data for drawing.
+//Instead of drawing walls, I "dig the hole" to draw the map.
+//First fill the backgroud with wall, and then draw rooms and roads.
+//The fast data contains cell type and x-position. Row index of array is cell y-position.
+func GenerateFastData()
+  ?generateFastDataStep = 0
+    fastDataOfPosX.Clear()
+    generateFastDataStep = 1
+  :?generateFastDataStep = 1
+    var fastDataRow = []
+    fastDataOfPosX.Add(fastDataRow)
+    for i = 0 .. dungeonMapData[workingCellIndex].Count() - 1
+      ?dungeonMapData[workingCellIndex][i] ! 0
+        fastDataRow.Add(dungeonMapData[workingCellIndex][i] * PARAM_OFFSET + i)
+    
+    ?workingCellIndex < GAME_HEIGHT - 1
+      workingCellIndex++
+    :
+      workingCellIndex = 0
+      generateFastDataStep = STATE_FINISHED
+
+  return generateFastDataStep
+
+//------------------------------------------------------------------------------------------------------
+
+var drawStep = 0
+func DrawDungeon()
+  ?drawStep = 0
+    WriteLog(HINT_DRAWING)
+    drawStep = 1
+  ?drawStep = 1
+    ?DrawRoomAndRoad() = STATE_FINISHED
+      drawStep = STATE_FINISHED  
+      WriteLog(HINT_DRAWING + HINT_COMPLETED)
+  return drawStep
+
+var ONE_SCREEN_CELL_WIDTH = CANVAS_WIDTH / 2
+var ONE_SCREEN_CELL_HEIGHT = CANVAS_HEIGHT
+var drawRoomAndRoadStep = 0
+
+//With fast data, only set the glyphs on each own canvas.
+//Set one canvas per frame.
+func DrawRoomAndRoad()
+  var currentCanvas = gameCanvasArray[workingCanvasRowIndex][workingCanvasColIndex]
+  currentCanvas.Set(GLYPH_ARRAY[GLYPH_WALL_INDEX][0])
+  ?gameMode = GAME_MODE_EASY
+    currentCanvas.SetFG(#aaaaaa)
+  :  
+    currentCanvas.SetFG(#000000)
+
+  var drawOffsetY = workingCanvasRowIndex * ONE_SCREEN_CELL_HEIGHT
+  var drawOffsetX = workingCanvasColIndex * ONE_SCREEN_CELL_WIDTH
+  var groundType = 0
+  var cellPosX = 0
+  var glyphL = ""
+  var glyphR = ""
+  for i = 0 .. ONE_SCREEN_CELL_HEIGHT - 1
+    ?fastDataOfPosX[drawOffsetY + i].Count() > 0
+      for j = 0 .. fastDataOfPosX[drawOffsetY + i].Count() - 1
+        groundType = fastDataOfPosX[drawOffsetY + i][j] / PARAM_OFFSET
+        cellPosX = fastDataOfPosX[drawOffsetY + i][j] % PARAM_OFFSET
+        ?cellPosX < drawOffsetX
+          continue
+        :?cellPosX > drawOffsetX + ONE_SCREEN_CELL_WIDTH - 1
+          break
+        :
+          ?i % 2 = 0
+            glyphL = GLYPH_ARRAY[groundType][0]
+            glyphR = GLYPH_ARRAY[groundType][1]
+          :
+            glyphL = GLYPH_ARRAY[groundType][1]
+            glyphR = GLYPH_ARRAY[groundType][0]
+          currentCanvas.Set((cellPosX - drawOffsetX) * 2, i, glyphL)
+          currentCanvas.Set((cellPosX - drawOffsetX) * 2 + 1, i, glyphR)
+  
+  ?workingCanvasRowIndex = CANVAS_ROW_COUNT - 1 & workingCanvasColIndex = CANVAS_COL_COUNT - 1
+    workingCanvasRowIndex = 0
+    workingCanvasColIndex = 0
+    drawRoomAndRoadStep = STATE_FINISHED
+  :
+    ?workingCanvasColIndex = CANVAS_COL_COUNT - 1
+      workingCanvasColIndex = 0
+      workingCanvasRowIndex++
+    :
+      workingCanvasColIndex++
+
+  return drawRoomAndRoadStep
+
+//------------------------------------------------------------------------------------------------------
+
+var POPUP_PANEL_WIDTH = 40
+var POPUP_PANEL_HEIGHT = 12
+var popupPanel
+var popupStep = 0
+var scaleLevel = 0
+var MAX_SCALE_LEVEL = 5
+func popupMessagePanel(message, hint)
+  ?popupStep = 0
+    popupPanel = ui.AddPanel()
+    popupPanel.w = 1
+    popupPanel.h = 1
+    popupPanel.style = 2
+    popupPanel.clip = true
+
+    var messageText = ui.AddText(message)
+    messageText.anchor = top_center
+    messageText.dock = top_center
+    messageText.w = POPUP_PANEL_WIDTH - 6
+    messageText.y = 2
+    popupPanel.Add(messageText)
+
+    var hintText = ui.AddText(hint)
+    hintText.anchor = top_center
+    hintText.dock = top_center
+    hintText.w = string.Size(hint)
+    hintText.y = POPUP_PANEL_HEIGHT - 3
+    popupPanel.Add(hintText)
+
+    popupStep = 1
+  :?popupStep = 1
+    scaleLevel++
+      popupPanel.w = POPUP_PANEL_WIDTH / MAX_SCALE_LEVEL * scaleLevel
+      popupPanel.h = POPUP_PANEL_HEIGHT / MAX_SCALE_LEVEL * scaleLevel
+    ?scaleLevel = MAX_SCALE_LEVEL
+      popupPanel.w = POPUP_PANEL_WIDTH
+      popupPanel.h = POPUP_PANEL_HEIGHT
+      scaleLevel = 0
+      popupStep = 2
+  :?popupStep = 2
+    ?key = primaryBegin
+      popupStep = 3
+  :?popupStep = 3
+    scaleLevel++
+    popupPanel.w = POPUP_PANEL_WIDTH - POPUP_PANEL_WIDTH / MAX_SCALE_LEVEL * scaleLevel
+    popupPanel.h = POPUP_PANEL_HEIGHT - POPUP_PANEL_HEIGHT / MAX_SCALE_LEVEL * scaleLevel
+    ?scaleLevel = MAX_SCALE_LEVEL
+      popupPanel.Recycle()
+      scaleLevel = 0
+      popupStep = 0
+      return STATE_FINISHED
+
+  return popupStep
+
+var canvasOffsetX = 0
+var canvasOffsetY = 0
+var currentDirection = 0
+var currentGround = 0
+
+//Draw other marks on map.
+//Move player, target and canvas.
+func DrawMarks()
+  var realTargetPosX = (targetPosX + canvasOffsetX) * 2
+  var realTargetPosY = targetPosY + canvasOffsetY
+  targetText.x = realTargetPosX
+  targetText.y = realTargetPosY
+  ?gameMode = GAME_MODE_EASY | gameMode = GAME_MODE_NORMAL
+    targetText.visible = true
+  :?math.Abs(targetPosX - playerPosX) + math.Abs(targetPosY - playerPosY) <= EXPLORE_RANGE
+    targetText.visible = true
+  :
+    targetText.visible = false
+  
+  var realPlayerPosX = (playerPosX + canvasOffsetX) * 2
+  var realPlayerPosY = playerPosY + canvasOffsetY
+  playerText.text = PLAYER_GLYPH_ARRAY[currentDirection]
+  playerText.x = realPlayerPosX
+  playerText.y = realPlayerPosY
+
+  exploreCanvas.x = (playerPosX + canvasOffsetX - EXPLORE_CENTER_X) * 2
+  exploreCanvas.y = playerPosY + canvasOffsetY - EXPLORE_CENTER_Y
+
+var LEFT_MOVE_CAMERA_BORDER = ONE_SCREEN_CELL_WIDTH / 2
+var RIGHT_MOVE_CAMERA_BORDER = GAME_WIDTH - 2 - ONE_SCREEN_CELL_WIDTH / 2
+var UP_MOVE_CAMERA_BORDER = ONE_SCREEN_CELL_HEIGHT / 2
+var DOWN_MOVE_CAMERA_BORDER = GAME_HEIGHT - 2 - ONE_SCREEN_CELL_HEIGHT / 2
+
+//When player moves in the center area of the map, move the canvas instead of move player on screen.
+func MovePlayer(direction)
+  currentDirection = direction
+  var shouldMoveCanvas = false
+  ?direction = DIRECTION_RIGHT
+    ?playerPosX + 1 <= GAME_WIDTH - 1 & dungeonMapData[playerPosY][playerPosX + 1] ! 0
+      playerPosX++
+      ?playerPosX >= LEFT_MOVE_CAMERA_BORDER & playerPosX <= RIGHT_MOVE_CAMERA_BORDER + 1
+        canvasOffsetX -= 1
+        shouldMoveCanvas = true
+  :?direction = DIRECTION_DOWN
+    ?playerPosY + 1 <= GAME_HEIGHT - 1 & dungeonMapData[playerPosY + 1][playerPosX] ! 0
+      playerPosY++
+      ?playerPosY >= UP_MOVE_CAMERA_BORDER & playerPosY <= DOWN_MOVE_CAMERA_BORDER + 1
+        canvasOffsetY -= 1
+        shouldMoveCanvas = true
+  :?direction = DIRECTION_LEFT
+    ?playerPosX - 1 > 0 & dungeonMapData[playerPosY][playerPosX - 1] ! 0
+      playerPosX--
+      ?playerPosX >= LEFT_MOVE_CAMERA_BORDER - 1 & playerPosX <= RIGHT_MOVE_CAMERA_BORDER
+        canvasOffsetX += 1
+        shouldMoveCanvas = true
+  :
+    ?playerPosY - 1 > 0 & dungeonMapData[playerPosY - 1][playerPosX] ! 0
+      playerPosY--
+      ?playerPosY >= UP_MOVE_CAMERA_BORDER - 1 & playerPosY <= DOWN_MOVE_CAMERA_BORDER
+        canvasOffsetY += 1
+        shouldMoveCanvas = true
+
+  ?shouldMoveCanvas
+    for i = 0 .. CANVAS_ROW_COUNT - 1
+      for j = 0 .. CANVAS_COL_COUNT - 1
+        gameCanvasArray[i][j].x = canvasOffsetX * 2 + j * CANVAS_WIDTH
+        gameCanvasArray[i][j].y = canvasOffsetY + i * CANVAS_HEIGHT
+  
+  var groundType = dungeonMapData[playerPosY][playerPosX]
+  ?groundType >= 2 & groundType ! currentGround
+    WriteLog(GLYPH_ARRAY[groundType][2])
+  currentGround = groundType
+
+func CheckFinished()
+  ?playerPosX = targetPosX & playerPosY = targetPosY
+    return true
+  :
+    return false
+
+var showTitleStoryStep = 0
+func ShowTitleStory()
+  ?popupMessagePanel(TITLE_STORY[showTitleStoryStep], STRING_ENTER_TO_CONTINUE) = STATE_FINISHED
+    showTitleStoryStep++
+  ?showTitleStoryStep = TITLE_STORY.Count()
+    showTitleStoryStep = STATE_FINISHED
+  return showTitleStoryStep    
+
+var showBeginningStoryStep = 0
+func ShowBeginningStory()
+  ?popupMessagePanel(BEGINNING_STORY[gameMode][showBeginningStoryStep], STRING_ENTER_TO_CONTINUE) = STATE_FINISHED
+    showBeginningStoryStep++
+  ?showBeginningStoryStep = BEGINNING_STORY[gameMode].Count()
+    showBeginningStoryStep = STATE_FINISHED
+  return showBeginningStoryStep 
+
+var showEndingStoryStep = 0
+func ShowEndingStory()
+  var hintString = STRING_ENTER_TO_CONTINUE
+  ?showEndingStoryStep = ENDING_STORY[gameMode].Count() - 1
+    hintString = STRING_ENTER_TO_RETURN
+  ?popupMessagePanel(ENDING_STORY[gameMode][showEndingStoryStep], hintString) = STATE_FINISHED
+    showEndingStoryStep++
+  ?showEndingStoryStep = ENDING_STORY[gameMode].Count()
+    showEndingStoryStep = STATE_FINISHED
+  return showEndingStoryStep 
+
+func ResetAllStates()
+  showTitleStep = SHOW_TITLE_STEP_INIT
+  initStep = INIT_STEP_CANVAS
+  initCanvasStep = 0
+  workingCanvasRowIndex = 0
+  workingCanvasColIndex = 0
+  generateStep = GENERATE_STEP_PATTERN_DATA
+  generateDetailStep = 0
+  workingCellIndex = 0
+  generateDungeonDataStep = 0
+  generateFastDataStep = 0
+  drawStep = 0
+  drawRoomAndRoadStep = 0
+  popupStep = 0
+  showTitleStoryStep = 0
+  showBeginningStoryStep = 0
+  showEndingStoryStep = 0
+
+  targetPosX = screen.w
+  targetPosY = screen.h
+  playerPosX = -1
+  playerPosY = -1
+  hasTarget = false
+  canvasOffsetX = 0
+  canvasOffsetY = 0
+  currentDirection = 0
+  currentGround = 0
+
+?loc = waterfall
+  ?gameState = GAME_STATE_INIT_LANGUAGE
+    InitLanguageSettings()
+    gameState = GAME_STATE_SHOW_GAME_TITLE
+  :?gameState = GAME_STATE_SHOW_GAME_TITLE
+    ?ShowTitleScreen() = STATE_FINISHED
+      gameState = GAME_STATE_CLEAR_TITLE_UI
+  :?gameState = GAME_STATE_CLEAR_TITLE_UI
+    ui.Clear()
+    gameState = GAME_STATE_SHOW_TITLE_STORY
+  :?gameState = GAME_STATE_SHOW_TITLE_STORY
+    ?ShowTitleStory() = STATE_FINISHED
+      gameState = GAME_STATE_RESET_ALL_STATE
+  :?gameState = GAME_STATE_RESET_ALL_STATE
+    ResetAllStates()
+    gameState = GAME_STATE_INIT_COMPONENT
+  :?gameState = GAME_STATE_INIT_COMPONENT
+    ?InitComponent() = STATE_FINISHED
+      gameState = GAME_STATE_GENERATE_DUNGEON
+  :?gameState = GAME_STATE_GENERATE_DUNGEON
+    ?GenerateDungeon() = STATE_FINISHED
+      gameState = GAME_STATE_DRAW_DUNGEON
+  :?gameState = GAME_STATE_DRAW_DUNGEON
+    ?DrawDungeon() = STATE_FINISHED
+      gameState = GAME_STATE_SHOW_BEGINNING_STORY
+  :?gameState = GAME_STATE_SHOW_BEGINNING_STORY
+    DrawMarks()
+    ?ShowBeginningStory() = STATE_FINISHED
+      gameState = GAME_STATE_PLAYING
+  :?gameState = GAME_STATE_PLAYING
+    ?key = leftBegin
+      MovePlayer(DIRECTION_LEFT)
+    :?key = rightBegin
+      MovePlayer(DIRECTION_RIGHT)
+    :?key = upBegin
+      MovePlayer(DIRECTION_UP)
+    :?key = downBegin
+      MovePlayer(DIRECTION_DOWN)
+    DrawMarks()
+    ?CheckFinished()
+      gameState = GAME_STATE_SHOW_ENDING_STORY
+  :?gameState = GAME_STATE_SHOW_ENDING_STORY
+    ?ShowEndingStory() = STATE_FINISHED
+      gameState = GAME_STATE_CLEAR_GAME_UI
+  :?gameState = GAME_STATE_CLEAR_GAME_UI
+    ui.Clear()
+    gameState = GAME_STATE_SHOW_GAME_TITLE
+  
+  ?gameState > GAME_STATE_INIT_COMPONENT
+    ShowLog(log)
+  

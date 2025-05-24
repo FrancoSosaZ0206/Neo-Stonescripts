@@ -1,0 +1,172 @@
+//Overhaul base
+//By: Poly
+//Vr : 4.0
+
+var ICR
+var ICL
+var IR
+var IL
+var IRD
+var ILD
+var IRS
+var ILS
+var IRT
+var ILT
+var IRE
+var ILE
+var IRI
+var ILI
+var T
+var FD
+var Idl
+
+T=time
+FD=foe.distance
+IR=item.right.id
+IL=item.left.id
+IRD=item.right
+ILD=item.left
+
+ILE=stone
+IRE=stone
+ILI=o
+IRI=o
+
+?IR=fire
+ IRE=fire
+ IRI=φ
+?IR=ice
+ IRE=ice
+ IRI=❄
+?IR=poison
+ IRE=poison
+ IRI=∞
+?IR=vigor
+ IRE=vigor
+ IRI=❤
+?IR=aether
+ IRE=aether
+ IRI=＂*＂
+?IR=stone
+ IRE=stone
+ IRI=o
+?IL=fire
+ ILE=fire
+ ILI=φ
+?IL=ice
+ ILE=ice
+ ILI=❄
+?IL=poison
+ ILE=poison
+ ILI=∞
+?IL=vigor
+ ILE=vigor
+ ILI=❤
+?IL=aether
+ ILE=aether
+ ILI=＂*＂
+?IL=stone
+ ILE=stone
+ ILI=o
+?IRD = ＂+0 ＂
+ ICR = #white
+?IR = Common
+ ICR = #cyan
+?IR = Rare
+ ICR = #yellow
+?IR = Heroic
+ ICR = #green
+?IR = Epic
+ ICR = #blue
+?IR = Legendary
+ ICR = #red
+?IR = Transcendent
+ ICR = #rainbow
+?IRD = ＂golden＂&
+^time%20 <=15
+ ICR = #e6b000
+?IRD = ＂golden＂&
+^time%30<=20&
+^time%30>15
+ ICR = #fac61b
+?IRD = ＂golden＂&
+^time%30<=25&
+^time%30>20
+ ICR = #d9b02b
+?IRD = ＂golden＂&
+^time%30>25
+ ICR = #bf9611
+?IRD = ＂prismatic＂
+ ICR = #magenta
+?ILD = ＂+0 ＂
+ ICL = #white
+?IL = Common
+ ICL = #cyan
+?IL = Rare
+ ICL = #yellow
+?IL = Heroic
+ ICL = #green
+?IL = Epic
+ ICL = #blue
+?IL = Legendary
+ ICL = #red
+?IL = Transcendent
+ ICL = #rainbow
+?ILD = ＂golden＂&
+^time%20 <=15
+ ICL = #e6b000
+?ILD = ＂golden＂&
+^time%30<=20&
+^time%30>15
+ ICL = #fac61b
+?ILD = ＂golden＂&
+^time%30<=25&
+^time%30>20
+ ICL = #d9b02b
+?ILD = ＂golden＂&
+^time%30>25
+ ICL = #bf9611
+?ILD = ＂prismatic＂
+ ICL = #magenta
+
+IRS=item.right.state
+ILS=item.left.state
+IRT=item.right.time
+ILT=item.left.time
+
+disable player
+
+?Idl=Y
+ >o0,1,#white,ascii
+O
+|
+asciiend
+
+?!ai.walking&
+^Idl=Y
+ >o-1,3,#white,ascii
+/#\
+asciiend
+
+?ai.walking &
+^time % 15 <= 5&
+^Idl=Y
+ >o-1,3,#white,ascii
+/#>
+asciiend
+
+?ai.walking &
+^time % 15 > 5 &
+^time % 15 <= 10&
+^Idl=Y
+ >o-1,3,#white,ascii
+#>\
+asciiend
+
+?ai.walking &
+^time % 15 > 10&
+^Idl=Y
+ >o-1,3,#white,ascii
+#X#
+asciiend
+Idl=Y

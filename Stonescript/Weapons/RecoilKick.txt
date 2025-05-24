@@ -1,0 +1,231 @@
+//Rf : Bardiche
+//By: Poly
+//Vr : 1.2
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+?ai.walking&
+^base.T%5=1&
+^base.IR=Bardiche
+ play blade_drag 75
+ >o-4,3,#bdbdbd,ascii
+.
+asciiend
+
+?ai.walking&
+^base.T%5=2&
+^base.IR=Bardiche
+ >o-4,3,#999999,ascii
+`
+asciiend
+
+?ai.walking&
+^base.T%5=3&
+^base.IR=Bardiche
+ >o-4,3,#808080,ascii
+´
+asciiend
+
+?ai.walking&
+^base.T%5=4&
+^base.IR=Bardiche
+ >o-4,3,#6b6b6b,ascii
+,
+asciiend
+
+?base.IR=Bardiche&
+^base.T%2=1
+ >o-3,3,@base.ICR@,ascii
+ʘ__
+asciiend
+?base.IR=Bardiche&
+^base.T%2=0
+ >o-3,3,@base.ICR@,ascii
+ʘ__
+asciiend
+?ai.walking &
+^base.IR=Bardiche&
+^time % 15 > 5 &
+^time % 15 <= 10&
+^base.T%2=1
+ >o-3,3,@base.ICR@,ascii
+ʘ_,
+asciiend
+?ai.walking &
+^base.IR=Bardiche&
+^time % 15 > 5 &
+^time % 15 <= 10&
+^base.T%2=0
+ >o-3,3,@base.ICR@,ascii
+ʘ_,
+asciiend
+
+?base.IR=Bardiche
+ Idl=N
+
+var BStompX
+var BStompY
+?base.T=1
+ BStompX=0
+ BStompY=0
+
+?base.IR=Bardiche&
+^base.IRS=1
+ >o0,1,#white,ascii
+#O
+/|
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=2&
+^base.IRT<=2
+ >o0,1,#white,ascii
+#O
+/)
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=2&
+^base.IRT=3
+ >o-1,1,#white,ascii
+#O
+'|`
+/#¯
+asciiend
+?base.IR=Bardiche&
+^base.IRS=2&
+^base.IRT>3
+ >o-2,1,#white,ascii
+O
+|\/
+#|
+asciiend
+
+?base.IR=Bardiche&
+^!ai.walking&
+^base.IRS=2&
+^base.IRT<=2
+ >o-1,3,#white,ascii
+/#\
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT<=1
+ BStompX=0
+ BStompY=0
+ >o-2,1,#white,ascii
+_O
+/
+)\
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT>1
+ >o-2,1,#white,ascii
+#\O
+#/
+/ \
+asciiend
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT>1&
+^base.IRT<=2
+ play fire_geyser
+ >o-3,0,@base.ICR@,ascii
+#/\^/\
+#)###(
+/#####\
+`.#_#.´
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT=3
+ play fire_elemental_attack_hit
+ >o-3,2,@base.ICR@,ascii
+.-_._-.
+'.#_#.'
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT>1&
+^base.ICR!#blue&
+^base.ICR!#red&
+^base.ICR!#rainbow
+ play player_kick
+ BStompX=2+BStompX
+ >o@BStompX@,@2+BStompY@,@base.ICR@,ascii
+.—.
+#¯
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT>1&
+^base.ICR=#blue
+ play player_punch
+ BStompX=2+BStompX
+ >o@BStompX@,@2+BStompY@,@base.ICR@,ascii
+.^.
+#¯
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT>1&
+^base.ICR=#red
+ play tree_boss_spike
+ BStompX=2+BStompX
+ >o@BStompX@,@1+BStompY@,@base.ICR@,ascii
+#∆
+/＂\
+#¯
+asciiend
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT>1&
+^base.ICR=#rainbow
+ play bearer_attack_hit
+ BStompX=2+BStompX
+ >o@BStompX@,@1+BStompY@,@base.ICR@,ascii
+#*
+｛^｝
+#¯
+asciiend
+
+?base.IR=Bardiche&
+^base.IRS=3&
+^base.IRT>1&
+^BStompY=0
+ BStompY=1
+:?BStompY=1
+ BStompY=0
+
+?ai.walking &
+^base.IR=Bardiche&
+^time % 15 <= 5&
+^base.IRS=1
+ >o-1,3,#white,ascii
+/#┘
+asciiend
+
+?ai.walking &
+^base.IR=Bardiche&
+^time % 15 > 5 &
+^time % 15 <= 10&
+^base.IRS=1
+ >o0,3,#white,ascii
+┘\
+asciiend
+
+?ai.walking &
+^base.IR=Bardiche&
+^time % 15 > 10&
+^base.IRS=1
+ >o0,3,#white,ascii
+X
+asciiend

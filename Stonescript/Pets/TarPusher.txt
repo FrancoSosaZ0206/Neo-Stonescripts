@@ -1,0 +1,128 @@
+// pet tar pusher
+// by: basic.gameplay
+
+var tarX = 14
+var tarY = 1
+var tar
+var pusherX = 14
+var pusherY = 1
+var pusherFrame = 1
+var pusher
+?loc.begin | loc.loop
+  tarX = 14
+  pusherX = 14
+  pusherFrame = 1
+?time%4 = 0
+  pusherFrame++
+?pusherFrame > 4
+  pusherFrame = 1
+
+// editable
+
+var tarcolour = #FFFFFF
+
+// FRAMES START HERE
+
+?(pusherFrame = 1 | !ai.walking)
+  pusher = ascii
+###O#####
+##/‾│‾‾‾‾│
+#/#\└()()┘
+asciiend
+:?pusherFrame = 2
+  pusher = ascii
+###O#####
+##/‾│‾‾‾‾│
+#/|#└()()┘
+asciiend
+:?pusherFrame = 3
+  pusher = ascii
+###O#####
+##/‾│‾‾‾‾│
+#V|#└()()┘
+asciiend
+:?pusherFrame = 4
+  pusher = ascii
+###O#####
+##/‾│‾‾‾‾│
+##|>└()()┘
+asciiend
+
+?foe = boss & ai.walking = false & pusherFrame
+^ = 1
+  pusher = ascii
+#########
+#<O>│‾‾‾‾│
+#<'>└()()┘
+asciiend
+?foe = boss & ai.walking = false & pusherFrame
+^ = 2
+  pusher = ascii
+#.#,#####
+#<O>│‾‾‾‾│
+#<'>└()()┘
+asciiend
+?foe = boss & ai.walking = false & pusherFrame
+^ = 3
+  pusher = ascii
+`###´####
+#<O>│‾‾‾‾│
+#<'>└()()┘
+asciiend
+?foe = boss & ai.walking = false & pusherFrame
+^ = 4
+  pusher = ascii
+#########
+#<O>│‾‾‾‾│
+#<'>└()()┘
+asciiend
+
+?foe = boss & ai.walking = true & pusherFrame
+^ = 1
+  pusher = ascii
+###O#####
+##/‾│‾‾‾‾│
+#/#\└()()┘
+asciiend
+?foe = boss & ai.walking = true & pusherFrame
+^ = 2
+  pusher = ascii
+##.O#####
+##/‾│‾‾‾‾│
+#/|#└()()┘
+asciiend
+?foe = boss & ai.walking = true & pusherFrame
+^ = 3
+  pusher = ascii
+#`#O´####
+##/‾│‾‾‾‾│
+#V|#└()()┘
+asciiend
+?foe = boss & ai.walking = true & pusherFrame
+^ = 4
+  pusher = ascii
+###O#####
+##/‾│‾‾‾‾│
+##|>└()()┘
+asciiend
+
+?pickup.distance < 5 & ai.walking = false
+  pusher = ascii
+#\O/#####
+##|#│‾‾‾‾│
+#/#\└()()┘
+asciiend
+
+// THE TAR
+
+tar = ascii
+#####.≈≈,
+##########
+##########
+asciiend
+
+>o-@tarX@,@tarY@,@tarcolour@,@tar@
+
+>o-@pusherX@,@pusherY@,@pusher@
+
+// END

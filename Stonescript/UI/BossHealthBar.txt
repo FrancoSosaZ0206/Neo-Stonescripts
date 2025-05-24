@@ -1,0 +1,142 @@
+//by Clpb
+//v1
+/*
+A health bar that show's the boss' hp compared to their max hp
+Instructions on how to use it
+1. Open the Mind Stone. In a new line write: import UI\BossHealthBar
+2. Go to any location with a boss
+Instructions on how to customize it
+1. Put BossHealthBar.txt in the directory: Stonescript\UI
+2. Open the Mind Stone. In a new line write: var BossHealthBar = import UI\BossHealthBar
+3. In a new line write: BossHealthBar.Draw()
+4. In a new line write "BossHealthBar." the parameter you wanna change " = " the value you want it to have
+4.1. Parameter: offset; Value: Offset from the edge of the screen (measured in ASCII characters)
+4.2. Parameter: delay; Value: Delay from when you first encounter the boss (measured in frames, 30f = 1s)
+4.3. Parameter: phaseOneColor; Value: Color of the health bar for the first phase of the boss
+4.4. Parameter: phaseTwoColor; Value: Color of the health bar for the second phase of the boss and for the missing hp of the first
+4.5. Parameter: phaseThreeColor; Value: Color of the health bar for the third phase of the boss and for the missing hp of the second
+4.6. Parameter: armorColor; Value: Color of the health bar for when the boss has armor
+4.7. Parameter: noColor; Value: Color of the health bar for the missing hp when there are no more phases
+*/
+
+//customization variables
+var offset = 2
+var phaseOneColor = "#F00"
+var phaseTwoColor = "#00F"
+var phaseThreeColor ="#0F0"
+var armorColor = "#888"
+var noColor = "#444"
+var delay = 30
+
+//code variables
+var percent
+var startup
+var healthColor
+var emptyColor
+var bossCount
+var foeValue
+var foeMaxValue
+
+//performance variables
+var begin_ = true
+var foe_
+var foeHp_
+var foeMaxHp_
+var foeArmor_
+var foeMaxArmor_
+var time_
+var screenW_ = screen.w
+foe_ = foe
+foeHp_ = foe.hp
+foeMaxHp_ = foe.maxhp
+foeArmor_ = foe.armor
+foeMaxArmor_ = foe.maxarmor
+
+//store the amount of bosses in the loc
+?begin_
+    ?loc = caves|loc = mine|loc = ridge|loc = temple
+        bossCount = 1
+    :?loc = forest|loc = halls
+        ?loc.stars = 3
+            bossCount = 1
+        :
+            bossCount = 2
+    :?loc = canyon
+        ?loc.stars < 6
+            bossCount = 1
+        :
+            bossCount = 2
+    :
+        ?loc.stars = 3
+            bossCount = 1
+        :?loc.stars = 4
+            bossCount = 2
+        :
+            bossCount = 3
+    begin_ = false
+
+//main function
+func Draw()
+    ?foe_ = phase
+        time_ = totaltime
+        ?foeArmor_ > 0
+            foeValue = foeArmor_
+            foeMaxValue = foeMaxArmor_
+            ?foe_ = phase1
+                healthColor = armorColor
+                emptyColor = phaseOneColor
+            :?foe_ = phase2
+                healthColor = armorColor
+                emptyColor = phaseTwoColor
+            :
+                healthColor = armorColor
+                emptyColor = phaseThreeColor
+        :
+            foeValue = foeHp_
+            foeMaxValue = foeMaxHp_
+            ?foe_ = phase1
+                healthColor = phaseOneColor
+                ?bossCount > 1
+                    emptyColor = phaseTwoColor
+                :
+                    emptyColor = noColor
+            :?foe_ = phase2
+                healthColor = phaseTwoColor
+                ?bossCount > 2
+                    emptyColor = phaseThreeColor
+                :
+                    emptyColor = noColor
+            :
+                healthColor = phaseThreeColor
+                emptyColor = noColor
+        ?foeValue*delay < (time_-startup)*foeMaxValue
+            percent = 1.0*foeValue/foeMaxValue
+            draw.Bg(offset, 1, emptyColor, screenW_-2*offset, 2)
+            draw.Bg(offset, 1, healthColor, math.FloorToInt((screenW_-2*offset)*percent), 2)
+            ?foeValue ! foeMaxValue & 0 < foeValue
+                draw.Bg(offset+math.FloorToInt((screenW_-2*offset)*percent), 1, color.Lerp(emptyColor, healthColor, ((screenW_-2*offset)*percent)%1.0), 1, 2)
+            for i = offset..screenW_-offset
+                >`@i@,1, 
+                >`@i@,2, 
+            >`@offset@,1,@string.Break(foe.name, screenW_-2*offset)[0]@
+            ?foeArmor_ > 0
+                >`@offset@,2,@foeHp_@/@foeMaxHp_@[@foeArmor_@/@foeMaxArmor_@]
+            :
+                >`@offset@,2,@foeHp_@/@foeMaxHp_@
+        :
+            percent = 1.0*(time_-startup)/delay
+            draw.Bg(offset, 1, noColor, screenW_-2*offset, 2)
+            draw.Bg(offset, 1, healthColor, math.FloorToInt((screenW_-2*offset)*percent), 2)
+            ?foeValue ! foeMaxValue & 0 < foeValue
+                draw.Bg(offset+math.FloorToInt((screenW_-2*offset)*percent), 1, color.Lerp(noColor, healthColor, ((screenW_-2*offset)*percent)%1.0), 1, 2)
+            for i = offset..screenW_-offset
+                >`@i@,1, 
+                >`@i@,2, 
+            >`@offset@,1,@string.Break(foe.name, screenW_-2*offset)[0]@
+            ?foeArmor_ > 0
+                >`@offset@,2,@foeHp_@/@foeMaxHp_@[@foeArmor_@/@foeMaxArmor_@]
+            :
+                >`@offset@,2,@foeHp_@/@foeMaxHp_@
+    :
+        startup = totaltime
+Draw()

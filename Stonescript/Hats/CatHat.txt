@@ -1,0 +1,164 @@
+//CatHat by sun(  UωU)
+
+//v2.0
+
+//to use CatHat you need to turn on
+//big head in the Moondial... Stone
+//if you don't have a big head
+//the cat will float
+//new update : 1.Adding shock and joy 
+//2.Add some sway with the wind
+
+//Instructions : copy the code and put it in 
+//the Mind Stone 
+
+var catColor = #FFBFFF
+var catTW = 0
+
+?loc = icy_ridge
+^|loc = cross_bridge & screen.i < 5
+^|foe = dysangelos & foe.state = 117
+  catTW = 1
+
+:?foe = dysangelos & foe = phase3 & foe.hp <= 0
+^|loc = cross_bridge & screen.i > 4
+  catTW = 0
+
+?catTW = 1
+  ?time % 9 < 3 * 1
+    >h-8,-2,@catColor@,ascii
+,_.-·.
+`.   
+###'´
+asciiend
+  :?time % 9 < 3 * 2
+    >h-8,-1,@catColor@,ascii
+_,•´¯
+`. _.'
+asciiend
+  :?time % 9 < 3 * 3
+    >h-8,-2,@catColor@,ascii
+#,'¯¯`
+;•´-,
+asciiend
+:?time % 81 < 3 * 21
+  >h-6,-4,@catColor@,ascii
+#,
+#)`,
+(  ;
+`-·
+asciiend
+:?time % 81 < 3 * 22
+  >h-7,-4,@catColor@,ascii
+#,
+(`.,
+'   ;
+#`-·
+asciiend
+:?time % 81 < 3 * 23
+  >h-8,-2,@catColor@,ascii
+,_.-·.
+`.   
+###'´
+asciiend
+:?time % 81 < 3 * 24
+  >h-8,-1,@catColor@,ascii
+_,•´¯
+`. _.'
+asciiend
+:?time % 81 < 3 * 25
+  >h-8,-2,@catColor@,ascii
+#,'¯¯`
+;•´-,
+asciiend
+:?time % 81 < 3 * 26
+  >h-8,-3,@catColor@,ascii
+,-~-,
+¯\   `
+##`-·
+asciiend
+:?time % 81 < 3 * 27
+  >h-6,-4,@catColor@,ascii
+,
+ì`.
+;  :
+`-·
+asciiend
+>h-3,-2,@catColor@,ascii
+#/` ,|
+(_`,|;
+asciiend
+?catTW = 1
+  ?time % 6 < 3 * 1
+    >h-2,-5,@catColor@,ascii
+####,
+-.-´'\
+\ ###)
+asciiend
+  :?time % 6 < 3 * 2
+    >h-3,-5,@catColor@,ascii
+####,
+__.-'`•
+`. ###)
+asciiend
+:?time % 114 < 3 * 36
+  >h-2,-5,@catColor@,ascii
+####,
+-.-´'\
+\ ###)
+asciiend
+:?time % 114 < 3 * 37
+  >h-3,-5,@catColor@,ascii
+######,
+__.-'´|
+`. ###)
+asciiend
+:?time % 114 < 3 * 38
+  >h-2,-5,@catColor@,ascii
+####,
+-.-´'\
+\ ###)
+asciiend
+?face = ＂°°＂
+  >h0,-3,@catColor@,ascii
+•w'
+asciiend
+  ?time % 6 < 3 * 1
+    >h-1,-5,ascii
+#####/.
+#####´-
+'
+asciiend
+  :?time % 6 < 3 * 2
+    >h-1,-5,ascii
+#####,´
+######——
+＂
+asciiend
+:?face = ＂^^＂
+  ?time % 8 < 4 * 1
+    >h0,-3,@catColor@,ascii
+^ω´
+asciiend
+  :?time % 8 < 4 * 2
+    >h0,-3,@catColor@,ascii
+^W´
+asciiend
+  ?time % 8 < 4 * 1
+    >h5,-5,ascii
+/.
+´-
+asciiend
+  :?time % 8 < 4 * 2
+    >h4,-5,ascii
+,´
+ ——
+asciiend
+:?time % 114 < 3 * 36
+  >h0,-3,@catColor@,ascii
+oω°
+asciiend
+:?time % 114 < 3 * 38
+  >h0,-3,@catColor@,ascii
+-ω´
+asciiend

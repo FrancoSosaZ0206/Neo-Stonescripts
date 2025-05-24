@@ -1,0 +1,861 @@
+/*
+STONE PHONE
+
+Author = ark (ark.brr)
+
+Import Authors are listed
+^ right on top of each import.
+
+Version 1.04
+
+Instructions:
+Copy and paste everything,
+go to any loc and press the
+main button
+Feel free to select whatever you want!
+
+*/
+
+// Custom Colors Skins
+
+var scarfColor = #ff227a
+var hatColor = #333388
+var mushColor_ = #ffaaaa
+
+
+// Ui Elements
+
+var pPanel
+var CosmeticsApp
+var CosmeticsPanel
+var sleepSH
+var wavyS
+var santahat
+var chefhat
+var mushhat
+var UIsApp
+var PetsPanel
+var petpanda
+var legsturkeypet
+var tarpusher
+var petsnowman
+var StatsApp
+var StatsPanel
+var SettingsApp
+var SettingsPanel
+var scarfC
+var hatColorC
+var styleTr
+var styleNC
+var sChange
+var resetXY
+
+var flipflop_cell = false
+var flipflop_cosm = false
+var flipflop_ssh = false
+var flipflop_ws = false
+var flipflop_sh = false
+var flipflop_ch = false
+var flipflop_mhH = false
+var flipflop_pets = false
+var flipflop_pp = false
+var flipflop_ltp = false
+var flipflop_tp = false
+var flipflop_ps = false
+var flipflop_stats = false
+var flipflop_settings = false
+var flipflop_styleTr = true
+
+var xi = storage.get(＂xStone＂, 5)
+var yi = storage.get(＂yStone＂, 6)
+?totaltime = 1
+  pPanel = Ui.AddPanel()
+  pPanel.w = 21
+  pPanel.h = 19
+  pPanel.dock = top_left
+  pPanel.anchor = top_left
+
+  CosmeticsApp=Ui.AddButton()
+  CosmeticsApp.w = 7
+  CosmeticsApp.h = 4
+  CosmeticsApp.text = ＂＂
+  CosmeticsApp.x = -4
+  CosmeticsApp.y = 0
+  CosmeticsApp.SetPressed(CosmeticsF)
+  pPanel.Add(CosmeticsApp)
+
+  CosmeticsPanel = Ui.AddPanel()
+  CosmeticsPanel.w = 21
+  CosmeticsPanel.h = 19
+  CosmeticsPanel.dock = top_left
+  CosmeticsPanel.anchor = top_left
+
+  sleepSH = Ui.AddButton()
+  sleepSH.w = 17
+  sleepSH.h = 3
+  sleepSH.dock = top_left
+  sleepSH.y = 2
+  sleepSH.x = 10
+  sleepSH.text = ＂SleepyStonehead＂
+  CosmeticsPanel.Add(sleepSH)
+
+  wavyS = Ui.AddButton()
+  wavyS.w = 17
+  wavyS.h = 3
+  wavyS.dock = top_left
+  wavyS.y = 5
+  wavyS.x = 10
+  wavyS.text = ＂WavyScarf＂
+  wavyS.SetPressed(wavySF)
+  CosmeticsPanel.Add(wavyS)
+
+  santahat = Ui.AddButton()
+  santahat.w = 17
+  santahat.h = 3
+  santahat.dock = top_left
+  santahat.y = 8
+  santahat.x = 10
+  santahat.text = ＂SantaHat＂
+  santahat.SetPressed(santaHF)
+  CosmeticsPanel.Add(santahat)
+
+  chefhat = Ui.AddButton()
+  chefhat.w = 17
+  chefhat.h = 3
+  chefhat.dock = top_left
+  chefhat.y = 11
+  chefhat.x = 10
+  chefhat.text = ＂ChefHat＂
+  chefhat.SetPressed(chefHF)
+  CosmeticsPanel.Add(chefhat)
+
+  mushhat = Ui.AddButton()
+  mushhat.w = 17
+  mushhat.h = 3
+  mushhat.dock = top_left
+  mushhat.y = 14
+  mushhat.x = 10
+  mushhat.text = ＂MushroomHat＂
+  mushhat.SetPressed(mushhF)
+  CosmeticsPanel.Add(mushhat)
+
+  UIsApp = Ui.AddButton()
+  UIsApp.w = 7
+  UIsApp.h = 4
+  UIsApp.text = ＂＂
+  UIsApp.x = 4
+  UIsApp.y = 0
+  UIsApp.SetPressed(PetsF)
+  pPanel.Add(UIsApp)
+
+  PetsPanel = Ui.AddPanel()
+  PetsPanel.w = 21
+  PetsPanel.h = 19
+  PetsPanel.dock = top_left
+  PetsPanel.anchor = top_left
+
+  petpanda = Ui.AddButton()
+  petpanda.w = 17
+  petpanda.h = 3
+  petpanda.dock = top_left
+  petpanda.y = 2
+  petpanda.x = 10
+  petpanda.text = ＂PetPanda＂
+  petpanda.SetPressed(petpandaF)
+  PetsPanel.Add(petpanda)
+
+  legsturkeypet = Ui.AddButton()
+  legsturkeypet.w = 17
+  legsturkeypet.h = 3
+  legsturkeypet.dock = top_left
+  legsturkeypet.y = 5
+  legsturkeypet.x = 10
+  legsturkeypet.text = ＂LegsTurkeyPet＂
+  legsturkeypet.SetPressed(legsturkeypetF)
+  PetsPanel.Add(legsturkeypet)
+
+  tarpusher = Ui.AddButton()
+  tarpusher.w = 17
+  tarpusher.h = 3
+  tarpusher.dock = top_left
+  tarpusher.y = 8
+  tarpusher.x = 10
+  tarpusher.text = ＂TarPusher＂
+  tarpusher.SetPressed(tarpusherF)
+  PetsPanel.Add(tarpusher)
+
+  petsnowman = Ui.AddButton()
+  petsnowman.w = 17
+  petsnowman.h = 3
+  petsnowman.dock = top_left
+  petsnowman.y = 11
+  petsnowman.x = 10
+  petsnowman.text = ＂PetSnowman＂
+  petsnowman.SetPressed(petsnowmanF)
+  PetsPanel.Add(petsnowman)
+
+  StatsApp = Ui.AddButton()
+  StatsApp.w = 7
+  StatsApp.h = 4
+  StatsApp.text = ＂＂
+  StatsApp.x = -4
+  StatsApp.y = 5
+  pPanel.Add(StatsApp)
+  StatsApp.SetPressed(StatsF)
+
+  StatsPanel = Ui.AddPanel()
+  StatsPanel.w = 21
+  StatsPanel.h = 19
+  StatsPanel.dock = top_left
+  StatsPanel.anchor = top_left
+
+  SettingsApp = Ui.AddButton()
+  SettingsApp.w = 7
+  SettingsApp.h = 4
+  SettingsApp.text = ＂＂
+  SettingsApp.x = 4
+  SettingsApp.y = 5
+  pPanel.Add(SettingsApp)
+  SettingsApp.SetPressed(SettingsF)
+
+  SettingsPanel = Ui.AddPanel()
+  SettingsPanel.w = 21
+  SettingsPanel.h = 19
+  SettingsPanel.dock = top_left
+  SettingsPanel.anchor = top_left
+  
+  scarfC = Ui.AddButton()
+  scarfC.w = 17
+  scarfC.h = 3
+  scarfC.dock = top_left
+  scarfC.y = 2
+  scarfC.x = 10
+  scarfC.text = ＂＂
+  scarfC.SetPressed(scarfCF)
+  SettingsPanel.Add(scarfC)
+
+  hatColorC = Ui.AddButton()
+  hatColorC.w = 17
+  hatColorC.h = 3
+  hatColorC.dock = top_left
+  hatColorC.y = 5
+  hatColorC.x = 10
+  hatColorC.text = ＂＂
+  hatColorC.SetPressed(hatColorF)
+  SettingsPanel.Add(hatColorC)
+
+  styleTr = Ui.AddButton()
+  styleTr.w = 17
+  styleTr.h = 3
+  styleTr.dock = top_left
+  styleTr.y = 9
+  styleTr.x = 10
+  styleTr.text = ＂Transparent＂
+  styleTr.SetPressed(styleTrF)
+  SettingsPanel.Add(styleTr)
+
+  styleNC = Ui.AddButton()
+  styleNC.w = 17
+  styleNC.h = 3
+  styleNC.dock = top_left
+  styleNC.y = 12
+  styleNC.x = 10
+  styleNC.SetPressed(styleNF)
+  SettingsPanel.Add(styleNC)
+
+  resetXY = Ui.AddButton()
+  resetXY.w = 17
+  resetXY.h = 3
+  resetXY.dock = top_left
+  resetXY.x = 10
+  resetXY.y = 15
+  resetXY.text = ＂Reset＂
+  resetXY.SetPressed(resetF)
+  SettingsPanel.Add(resetXY)
+
+  sChange = Ui.AddButton()
+  sChange.dock = top_left
+  sChange.anchor = top_left
+  sChange.w = 7
+  sChange.h = 3
+  sChange.text = ＂ -=- ＂
+  sChange.SetPressed(sChangeF)
+  sChange.style = -1
+
+pPanel.x = xi
+pPanel.y = yi
+
+CosmeticsPanel.x = xi
+CosmeticsPanel.y = yi
+CosmeticsPanel.color = pPanel.color
+
+PetsPanel.x = xi
+PetsPanel.y = yi
+PetsPanel.color = pPanel.color
+
+StatsPanel.x = xi
+StatsPanel.y = yi
+StatsPanel.color = pPanel.color
+
+SettingsPanel.x = xi
+SettingsPanel.y = yi
+SettingsPanel.color = pPanel.color
+
+sChange.y = yi+17
+sChange.x = xi+7
+
+var xi_ = xi
+var yi_ = yi
+var prevXi = 0
+var prevYi = 0
+var delay = 30
+?input.x >= xi+2
+^& input.x <= xi+20
+^& input.y >= yi
+^& input.y <= yi+19
+^& key = Primary
+^& delay >=0
+  delay--
+  ?delay = 0
+    prevXi = input.x
+    prevYi = input.y
+  ?delay<20
+    pPanel.color = #aaffaa
+:?delay < 0 & input.y < 26 & input.y >1
+^& input.x > 1 & input.x < 91
+^& key = Primary
+  xi = xi_+(input.x-prevXi)
+  yi = yi_+(input.y-prevYi)
+  pPanel.color = #77df77
+  storage.Set(＂xStone＂, xi)
+  storage.Set(＂yStone＂, yi)
+:
+  delay = 30
+  pPanel.color = #ffffff
+  storage.Set(＂xStone＂, xi)
+  storage.Set(＂yStone＂, yi)
+  xi_ = xi
+  yi_ = yi
+
+var s = -9
+?storage.Has(＂SS＂) = false
+  storage.Set(＂SS＂, 1)
+:?s ! storage.Get(＂SS＂) & s ! -9 & s ! 9
+  storage.Set(＂SS＂, s)
+
+styleNC.text = ＂Style ＂ + storage.Get(＂SS＂)
+
+?s = 7
+  s = 1
+
+var sN = s
+
+func styleTrF()
+  flipflop_styleTr =
+^!storage.Get(＂flipflopTR＂)
+  storage.Set(＂flipflopTR＂, flipflop_styleTr)
+
+?storage.Get(＂flipflopTR＂) = true
+  styleTr.tcolor = #88da88
+  ?storage.Get(＂SS＂) > 0
+    storage.Set(＂SS＂, storage.Get(＂SS＂)*-1) 
+:
+  styleTr.tcolor = #5a5a5a
+  ?storage.Get(＂SS＂) < 0
+    storage.Set(＂SS＂, storage.Get(＂SS＂)*-1)
+
+func styleNF()
+  ?storage.Get(＂SS＂) = 6 | storage.Get(＂SS＂) =-6
+    storage.Set(＂SS＂, 1)
+  :?storage.Get(＂SS＂) < 0
+    storage.Set(＂SS＂, storage.Get(＂SS＂)-1)
+  :
+    storage.Incr(＂SS＂)
+
+func sChangeF()
+  flipflop_cell = ! flipflop_cell
+  flipflop_cosm = false
+  flipflop_pets = false
+  flipflop_stats = false
+  flipflop_settings = false
+
+
+pPanel.style = storage.Get(＂SS＂)
+
+CosmeticsPanel.style = storage.Get(＂SS＂)
+PetsPanel.style = storage.Get(＂SS＂)
+StatsPanel.style = storage.Get(＂SS＂)
+SettingsPanel.style = storage.Get(＂SS＂)
+
+pPanel.visible = flipflop_cell
+CosmeticsApp.visible = flipflop_cell
+CosmeticsPanel.visible = flipflop_cosm
+sleepSH.visible = flipflop_cosm
+wavyS.visible = flipflop_cosm
+santahat.visible = flipflop_cosm
+chefhat.visible = flipflop_cosm
+mushhat.visible = flipflop_cosm
+UIsApp.visible = flipflop_cell
+PetsPanel.visible = flipflop_pets
+petpanda.visible = flipflop_pets
+legsturkeypet.visible = flipflop_pets
+tarpusher.visible = flipflop_pets
+petsnowman.visible = flipflop_pets
+StatsApp.visible = flipflop_cell
+StatsPanel.visible = flipflop_stats
+SettingsApp.visible = flipflop_cell
+SettingsPanel.visible = flipflop_settings
+scarfC.visible = flipflop_settings
+hatColorC.visible = flipflop_settings
+styleTr.visible = flipflop_settings
+styleNC.visible = flipflop_settings
+
+
+// Hour clock
+
+var min
+min = time.minute
+var period
+var hour
+
+?time.hour < 12
+  hour = time.hour
+  period = ＂a.m.＂
+:?time.hour = 12
+  hour = time.hour
+  period = ＂p.m.＂
+:
+  hour = time.hour-12
+  period = ＂p.m.＂
+
+var nArr = ［ascii
+ _
+| |
+|_|
+asciiend, ascii
+  _
+ /|
+  |
+asciiend, ascii
+ _
+ _］
+［_
+asciiend, ascii
+ _
+ _］
+ _］
+asciiend, ascii
+   
+/_|
+  |
+asciiend, ascii
+ _
+［_
+ _］
+asciiend, ascii
+ _
+|_
+|_|
+asciiend, ascii
+__
+ _|
+  |
+asciiend, ascii
+ _
+［_］
+［_］
+asciiend, ascii
+ _
+［_|
+ _|
+asciiend］
+
+var hh = 0
+var hours
+hours = ＂＂+(hour/10.0)
+var hArr
+hArr = string.Split(hours, ＂,＂)
+var nH
+nH = int.Parse(hArr［0］)
+var NH = 0
+?string.Size(hours) > 1
+  NH = int.Parse(hArr［1］)
+var NHA
+NHA = nArr［NH］
+var nHA
+nHA = nArr［nH］
+
+var mm = 0
+var mins
+?min < 1
+  mins = ＂0,0＂
+:?min < 10
+  mins = ＂＂+ (0 + (min/10.0))
+:
+  mins = ＂＂+ (min/10.0)+＂,0＂
+var mArr
+mArr = string.Split(mins,＂,＂)
+var mH
+mH = int.Parse(mArr［0］)
+var MH
+MH = int.Parse(mArr［1］)
+var MHA
+MHA = nArr［MH］
+var mHA
+mHA = nArr［mH］
+
+?totaltime%2 = 0
+  hArr.Clear()
+  mArr.Clear()
+
+?flipflop_cell = true
+  >`@xi+12@,@yi+1@,@mHA@ 
+  >`@xi+15@,@yi+1@,@MHA@ 
+  ?NH = 0 & nH ! 1
+    >`@xi+3@,@yi+1@,@NHA@ 
+    >`@xi+6@,@yi+1@,@nHA@ 
+  :
+    >`@xi+3@,@yi+1@,@nHA@ 
+    >`@xi+6@,@yi+1@,@NHA@
+  >`@xi+10@,@yi+2@,'\n'
+  >`@xi+6@,@yi+4@,   @period@
+  ^\n@time.month@/@time.day@/@time.year@
+
+  >`@xi+4@,@yi+8@, _◘_ ###( '')\n
+        ^ `-´ ### / /
+  >`@xi+5@,@yi+13@,  ▓#####───\n
+         ^▓ ▓#####───
+
+
+// Cosmetics Panel
+
+func CosmeticsF()
+  flipflop_cosm = ! flipflop_cosm
+  flipflop_cell = false
+
+?flipflop_cosm = true & !bighead
+  >`@xi+2@,@yi+17@,#red,*Activate bighead
+
+// SleepyStonehead
+  // Author: mr doo doo fart (or Cem )
+  // v1.0
+
+?storage.Get(＂flipflopSSH＂) = true
+  sleepSH.tcolor = #33ff33
+  
+  // Hat
+  >h-3,-2,@hatColor@,ascii
+#____
+/____|
+o
+asciiend
+
+  // Scarf
+  >h-2,1,@scarfColor@,ascii
+#==:
+|
+asciiend
+
+  // Eyes
+  >h-2,0,#white,( --)
+:
+  sleepSH.tcolor = #5a5a5a
+sleepSH.SetPressed(sleepSHF)
+
+func sleepSHF()
+  flipflop_ssh = !storage.Get(＂flipflopSSH＂)
+  storage.Set(＂flipflopSSH＂, flipflop_ssh)
+
+
+// Wavy Scarf
+  // Bighead Wavy Scarf animated by electronic
+  // Script by Deaymon
+  // Edited by Bitty45
+
+?storage.Get(flipflopWS) = true
+  var wavyS_ = import Cosmetics/WavyScarf
+  wavyS_.scarfColor = scarfColor
+  wavyS_._bighead = bighead
+  import Cosmetics/WavyScarf
+  wavyS.tcolor = #33ff33
+:
+  wavyS.tcolor = #5a5a5a
+
+func wavySF()
+  flipflop_ws = !storage.Get(flipflopWS)
+  storage.Set(flipflopWS, flipflop_ws)
+
+
+// ChefHat
+  // by: Fyda
+  // edited by bitty45 to allow smallhead
+  // small guidance on the smallhat
+  // ^art from standardcombo
+
+var bigHat = ascii
+## _ _ _
+##( | | )
+###|   |
+###╘═══╛
+asciiend
+
+var smallhat = ascii
+CCO
+|_|
+`#´
+asciiend
+
+?storage.Get(flipflopCH)=true
+  ?bighead
+    >h-5,-4,@hatColor@,@bigHat@
+  :
+    >h-1,-1,@hatColor@,@smallhat@
+
+  chefhat.tcolor = #33ff33
+:
+  chefhat.tcolor = #5a5a5a
+
+func chefHF()
+  flipflop_ch = !storage.Get(flipflopCH)
+  storage.Set(flipflopCH, flipflop_ch)
+
+
+// MushroomHat
+  // Created by TeumessianSven
+
+?!bighead
+  mushhat.tcolor = #ff3333
+  flipflop_mhH = false
+:?storage.Get(flipflopMHH) = true
+  var mush_ = import Hats/MushroomHat
+  mush_.topcolor = hatColor
+  import Hats/MushroomHat
+  mushhat.tcolor = #33ff33
+:
+  mushhat.tcolor = #5a5a5a
+
+func mushhF()
+  ?bighead
+    flipflop_mhH = !storage.Get(flipflopMHH)
+    storage.Set(flipflopMHH, flipflop_mhH)
+  :
+    play smithy_hammer_fail
+
+
+// SantaHat
+  // by: link2_thepast, martosss
+
+?storage.Get(flipflopSH) = true
+  import Cosmetics/Hats/SantaHat
+  santahat.tcolor = #33ff33
+:
+  santahat.tcolor = #5a5a5a
+
+func santaHF()
+  flipflop_sh = !storage.Get(flipflopSH)
+  storage.Set(flipflopSH, flipflop_sh)
+
+
+// Pets Panel
+
+func PetsF()
+  flipflop_pets = ! flipflop_pets
+  flipflop_cell = false
+
+// PetPanda
+  // by Mind Stone Thief and xx.
+
+?storage.Get(flipflopPP) = true
+  import Pets/Panda
+  petpanda.tcolor = #33ff33
+:
+  petpanda.tcolor = #5a5a5a
+
+func petpandaF()
+  flipflop_pp = !storage.Get(flipflopPP)
+  storage.Set(flipflopPP, flipflop_pp)
+
+
+// LegsTurkeyPet
+  // by Link2_thepast
+
+?storage.Get(flipflopLTP) = true
+  import Pets/LegsTurkey
+  legsturkeypet.tcolor = #33ff33
+:
+  legsturkeypet.tcolor = #5a5a5a
+
+func legsturkeypetF()
+  flipflop_ltp = !storage.Get(flipflopLTP)
+  storage.Set(flipflopLTP, flipflop_ltp)
+
+// TarPusher
+  // by: basic.gameplay
+
+?storage.Get(flipflopTP) = true
+  import Pets/TarPusher
+  tarpusher.tcolor = #33ff33
+:
+  tarpusher.tcolor = #5a5a5a
+
+func tarpusherF()
+  flipflop_tp = !storage.Get(flipflopTP)
+  storage.Set(flipflopTP, flipflop_tp)
+
+
+// PetSnowman
+  // by: micahel.g.g
+
+?storage.Get(flipflopPS) = true
+  import Pets/Snowman
+  petsnowman.tcolor = #33ff33
+:
+  petsnowman.tcolor = #5a5a5a
+
+func petsnowmanF()
+  flipflop_ps = !storage.Get(flipflopPS)
+  storage.Set(flipflopPS, flipflop_ps)
+
+
+// Stats Panel
+
+var prevsec = 0
+var storedtime = 0
+var fps = 0
+?time.second ! prevsec
+ fps = (totaltime - storedtime) / 
+ ^ (time.second - prevsec)
+ prevsec = time.second
+ storedtime = totaltime
+
+// BragMeter
+  // Made by insult2
+
+var bragScore = 0
+var bragImport_ = import UI/BragMeter
+bragScore = bragImport_.acgr
+
+///
+
+var RunCount_c = 0
+?totaltime = 1
+  RunCount_c++
+?flipflop_stats = true
+  >`@xi+2@,@yi+1@,Brag Score: 
+^@math.FloorToInt(bragScore)@%
+  ?loc.besttime/30>=60
+    >`@xi+2@,@yi+3@,@loc.name@ @loc.stars@☆\n
+    ^Best Time: 
+    ^@(loc.besttime/30)/60@m
+    ^@(loc.besttime/30)-60@s
+  :?loc = ＂waterfall＂
+    >`@xi+2@,@yi+3@,Deadwood Waterfall
+    >`@xi+2@,@yi+4@,Best Time: 
+    ^@loc.besttime/30@s
+  :
+    >`@xi+2@,@yi+3@,@loc.name@ @loc.stars@☆
+    ^\nBest Time: 
+    ^@loc.besttime/30@s
+  ?totaltime/30>=60
+    >`7,11,Total Time: 
+    ^@(totaltime/30)/60@m
+    ^@(totaltime/30)-60@s
+  :
+    >`@xi+2@,@yi+5@,Total Time: 
+    ^@totaltime/30@s
+  >`@xi+2@,@yi+7@,@fps-1@ FPS\n\n
+  ^Screen: @screen.i@\n
+  ^Foe Count: @foe.count@\n
+  ^@foe.name@#\n
+  ^Name: @player.name@\n
+  ^Level: 
+^@(item.GetTreasureLimit()-100)/5@\n
+  ^Run Count: @RunCount_c@
+
+func StatsF()
+  flipflop_stats = ! flipflop_stats
+  flipflop_cell = false
+
+
+// Settings Panel
+
+func SettingsF()
+  flipflop_settings = ! flipflop_settings
+  flipflop_cell = false
+
+?flipflop_settings = true
+  >`@xi+5@,@yi+2@,@scarfColor@,ScarfColor
+  >`@xi+6@,@yi+5@,@hatColor@,HatColor
+
+
+// Changing Scarf Color
+
+var scarfCArr = ［＂#blue＂, ＂#red＂,＂#green＂,
+^＂#ff339a＂, ＂#yellow＂, ＂#rainbow＂］
+
+?!storage.Has(＂scarfCIND＂)
+  storage.Set(＂scarfCIND＂, 0)
+scarfColor = scarfCArr［storage.Get(＂scarfCIND＂)］
+
+func scarfCF()
+  ?storage.Get(＂scarfCIND＂)<scarfCArr.Count()-1
+    storage.Incr(＂scarfCIND＂)
+  :
+    storage.Set(＂scarfCIND＂, 0)
+
+
+// Changing Hat Color
+
+var hatColorArr = ［＂#blue＂, ＂#red＂, ＂#green＂,
+^＂#ff339a＂, ＂#yellow＂, ＂#rainbow＂］
+
+?storage.Has(＂hatColorIND＂) = false
+  storage.Set(＂hatColorIND＂, 1)
+
+hatColor =
+^ hatColorArr［storage.Get(＂hatColorIND＂)-1］
+
+func hatColorF()
+  ?storage.Get(hatColorIND)<hatColorArr.Count()
+    storage.Incr(hatColorIND)
+  :
+    storage.Set(hatColorIND, 1)
+
+// Reset
+
+func resetF()
+  xi = 5
+  yi = 6
+  flipflop_ssh = false
+  storage.Set(＂flipflopSSH＂, false)
+
+  flipflop_ws = false
+  storage.Set(＂flipflopWS＂, false)
+
+  flipflop_sh = false
+  storage.Set(＂flipflopSH＂, false)
+
+  flipflop_ch = false
+  storage.Set(＂flipflopCH＂, false)
+
+  flipflop_mhH = false
+  storage.Set(＂flipflopMHH＂, false)
+
+  flipflop_pp = false
+  storage.Set(＂flipflopPP＂, false)
+
+  flipflop_ltp = false
+  storage.Set(＂flipflopLTP＂, false)
+
+  flipflop_tp = false
+  storage.Set(＂flipflopTP＂, false)
+
+  flipflop_ps = false
+  storage.Set(＂flipflopPS＂, false)
+
+  flipflop_styleTr = true
+  storage.Set(＂flipflopTR＂, true)
+
+  storage.Delete(＂SS＂)
+  storage.Delete(＂scarfCIND＂)
+  storage.Delete(＂hatColorIND＂)

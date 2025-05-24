@@ -1,0 +1,207 @@
+//By:Mallathor
+//Version 1.1
+
+var skeletonArt = ascii
+#####__
+####,o_)
+####"':_
+#"`¯¯,-'\
+##'"¯#\ /
+#######¯;
+#######/#\
+######/###\
+####,-'###,/
+%%
+#####__
+####,o_)
+####"':_
+###_.-/)\
+##'`,-´ /
+###'"##¯;
+#######|/
+#######|\_;
+#####,-'##'
+%%
+#####__
+####,o_)
+####"':_
+###_.-/)\
+##'`,-´ /
+###'"##¯;
+#######\¯
+#######,/
+#######,-'
+%%
+#####__
+####,o_)
+####"':_
+###_.-/)\
+##'`,-´ /
+###'"##¯;
+#######/¯
+#####,-`\
+########,/
+%%
+#####__
+####,o_)
+####"':_
+#"`¯¯,-'\
+##'"¯#\ /
+#######¯;
+#######//
+#######`|/
+######,-'
+%%
+#####__
+####,o_)
+####"':_
+#"`¯¯,-'\
+##'"¯#\ /
+#######¯;
+######\¯#|
+######,/#|
+#######,-'
+%%
+#####__
+####,o_)
+####"':_
+#"`¯¯,-'\
+##'"¯#\ /
+#######¯;
+######/¯#|
+####,-`##\
+#########,/
+asciiend
+var danceList = []
+var skelly1
+var skelly2
+var skelly3
+var skelly4
+/* state list:
+Going down: state 1
+Going up: state 2
+Going left: state 3
+Going right: state 4
+Going right and down diagonally: state 5
+Going left and down diagonally: state 6
+Going right and up diagonally: state 7
+Going left and up diagonlly: state 8
+*/
+var skellyState1 = 1
+var skellyState2 = 1
+var skellyState3 = 3
+var skellyState4 = 2
+?totaltime = 1
+ danceList.Clear()
+ skellyState1 = 1
+ skellyState2 = 1
+ skellyState3 = 3
+ skellyState4 = 2
+ skelly1 = ui.AddAnim(skeletonArt)
+ skelly1.duration = 32
+ skelly1.loop = true
+ skelly1.Play()
+ skelly1.dock = top_left
+ skelly1.x = 7
+ skelly1.y = 5
+ danceList.Add(skelly1)
+ skelly2 = ui.AddAnim(skeletonArt)
+ skelly2.duration = 32
+ skelly2.loop = true
+ skelly2.Play()
+ skelly2.dock = top_left
+ skelly2.x = 7
+ skelly2.y = 21
+ danceList.Add(skelly2)
+ skelly3 = ui.AddAnim(skeletonArt)
+ skelly3.duration = 32
+ skelly3.loop = true
+ skelly3.Play()
+ skelly3.dock = top_left
+ skelly3.x = screen.w - 7
+ skelly3.y = 5
+ danceList.Add(skelly3)
+ skelly4 = ui.AddAnim(skeletonArt)
+ skelly4.duration = 32
+ skelly4.loop = true
+ skelly4.Play()
+ skelly4.dock = top_left
+ skelly4.x = screen.w - 7
+ skelly4.y = screen.h - 4
+ skelly4.visible = false
+ danceList.Add(skelly4)
+func updateSkellies(number,state)
+ ?state = 1 // down
+  danceList[number].y += 1
+  danceList[number].color = #green
+ :?state = 2 //up
+  danceList[number].y -= 1
+  danceList[number].color = #blue
+ :?state = 3 //left
+  danceList[number].x -= 1
+  danceList[number].color = #cyan
+ :?state = 4 //right
+  danceList[number].x += 1
+  danceList[number].color = #yellow
+ :?state = 5 //right and down
+  danceList[number].x += 1
+  danceList[number].y += 1
+  danceList[number].color = #FF7312
+ :?state = 6 //left and down
+  danceList[number].x -= 1
+  danceList[number].y += 1
+  danceList[number].color = #red
+ :?state = 7 //right and up
+  danceList[number].x += 1
+  danceList[number].y -= 1
+  danceList[number].color = #C59CC5
+ :?state = 8 //left and up
+  danceList[number].x -= 1
+  danceList[number].y -= 1
+  danceList[number].color = #magenta
+ ?danceList[number].y >= screen.h - 5
+   ?number = 0
+    ?state = 1
+     skellyState1 = 4
+   :?number = 1
+    ?state = 1
+     skellyState2 = 4
+ ?danceList[number].x >= screen.h - 1
+  ?number = 0
+   skellyState1 = 8
+  ?number = 1
+   skellyState2 = 8
+ ?danceList[number].x <= 7 & danceList[number].y <= 6
+  ?number = 0
+   skellyState1 = 1
+  ?number = 1
+   skellyState2 = 1
+  //for right side skellies:
+  ?skelly3.y <= screen.h + 9 & skelly3.x <= screen.w + 7 & skellyState3 = 5
+    skellyState3 = 2 
+  ?skelly3.y <= 5 & skellyState3 = 2 //& number = 2
+    skellyState3 = 3
+  ?skelly4.y <= 5 & skellyState4 = 2 & number = 3
+    skellyState4 = 3
+  :?skelly4.y <= screen.h + 9 & skelly4.x <= screen.w + 7 & skellyState4 = 5
+    skellyState4 = 2
+?totaltime % 6 = 1
+ updateSkellies(0,skellyState1)
+ updateSkellies(1,skellyState2)
+ updateSkellies(2,skellyState3)
+ //updateSkellies(3,skellyState4)
+/*
+>`0,0,#cyan,@skellyState1@
+
+>`1,1,oneY:@skelly1.y@  oneX:@skelly1.x@  twoY:@skelly2.y@  twoX:@skelly2.x@
+>`2,2,@screen.w - skelly3.x@   @screen.h@   threey:@skelly3.y@   threeX:@skelly3.x@  foury:@skelly4.y@   fourX:@skelly4.x@
+>`2,3,                    width@screen.w@ height:@screen.h@
+*/
+?(screen.w - skelly3.x) >= screen.h - 1
+    skellyState3 = 5
+?(screen.w - skelly4.x) >= screen.h - 1 
+    skellyState4 = 5
+?skelly4.y <= 4 & skellyState4 = 2
+    skellyState4 = 3
+
+>`0,4,state1:@skellyState1@   state2:@skellyState2@  state3:@skellyState3@ state4:@skellyState4@

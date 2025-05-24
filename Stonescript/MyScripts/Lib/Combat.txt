@@ -1,0 +1,559 @@
+﻿// *******************************************************
+//                       Combat.txt                       
+// *******************************************************
+
+
+/* FILE INFO
+  Combat functions library
+  Made by MetalEagle26 (Tom Crow)
+
+This library provides some game-related
+functions to make the task of doing a
+farming script easier.
+
+- How to use:
+  var c = new Combat
+
+- Tip: If you want to use the variables here,
+       put c.Main() at the top of your script.
+
+- Use the functions that you need like this:
+  ?c.useBlade() // example */
+
+
+
+// IMPORTS
+
+var p
+p = import MyScripts/Lib/Performance
+
+
+
+// VARIABLES
+
+// Status
+
+var midhp
+var lowhp
+var hihp
+
+
+
+// FUNCTIONS
+
+func Main()
+  p.pmhp = maxhp
+
+  midhp = p.pmhp / 2
+  lowhp = p.pmhp / 3
+  hihp = (4 * p.pmhp) / 5
+
+  ?p.ll
+    apsTimer = 0
+
+  return
+
+
+// Lost items
+
+func canUseBlade()
+  return p.tt >= p.bladeDelay & p.canAct
+
+// cannot be interrupted, doesn't need a cooldown check
+func useBlade()
+  equip blade
+  activate R
+
+  p.bladeDelay = p.tt + p.bladeCd
+
+  return
+
+/* Checks if Blade of the Fallen God
+can be used in 2 screens of distance,
+according to a certain screen index. */
+func canUseBladeDS(nScreen)
+  return canUseBlade()
+  ^& p.si = nScreen
+
+var slideCount = 0 // counter to give screen.Next() time to slide
+func useBladeDS()
+  ?slideCount = 0
+    screen.Next()
+    slideCount = 20
+  
+  :?slideCount > 0
+    slideCount--
+  
+    ?slideCount = 0
+      useBlade()
+      screen.ResetOffset()
+      return
+
+
+func canUseArm()
+  return p.tt >= p.armDelay &
+  ^3 < p.fd & p.fd < 9
+  ^& p.canAct
+
+func useArm()
+  equip arm
+  activate R
+
+  p.armDelay = p.tt + p.armCd
+
+  return
+
+
+func canUseMask()
+  return p.tt >= p.maskDelay & p.canAct
+
+func useMask()
+  equipL triskelion
+  equipR mask
+  activate R
+
+  p.maskDelay = p.tt + p.maskCd
+
+  return
+
+func canUseMaskDS(nScreen)
+  return canUseMask()
+  ^& p.si = nScreen
+
+func useMaskDS()
+  ?slideCount = 0
+    screen.Next()
+    slideCount = 20
+  
+  :?slideCount > 0
+    slideCount--
+  
+    ?slideCount = 0
+      useMask()
+      screen.ResetOffset()
+      return
+
+
+func canUseFTali()
+  return
+  ^summon.GetId() ! "cinderwisp" &
+  ^p.tt >= p.fTaliDelay &
+  ^p.canAct |
+  ^(p.il = "fire_talisman" & p.ils = 2) |
+  ^(p.ir = "fire_talisman" & p.irs = 2)
+
+func canHideFTali()
+  return summon.GetId() = "cinderwisp"
+  ^& p.tt >= p.fTaliDelay
+  ^& p.canAct |
+  ^(p.il = "fire_talisman" & p.ils = 2) |
+  ^(p.ir = "fire_talisman" & p.irs = 2)
+
+func useFTali(hand)
+  ?hand = "l"
+    equipL fire_talisman
+    activate L
+  :?hand = "r"
+    equipR fire_talisman
+    activate R
+
+  p.fTaliDelay = p.tt + p.fTaliCd + p.castTime
+
+  return
+
+/* Checks if you can use the cinderwisp's "devour"
+ability. */
+func canUseCind()
+  return summon.GetId() = "cinderwisp"
+  ^& p.tt >= p.cindDelay & p.canAct
+
+/* Checks if the estimated damage of
+cinderwisp's "devour" ability will kill the foe,
+leaving a damage margin.
+  - foeTotalHP: foe hp + armor
+  - nIgnitions: amount of ignition debuffs currently
+                applied to the foe.
+  - cindDmg: damage dealt by cinderwisp for each ignition.
+  - margin: number representing a health margin to add
+            to the remaining foe's health. This is
+            necessary because the ability has a cast time
+            that will alter the estimations done here.
+            Send 0 if you don't want to use a margin. */
+func canKillCind(foeTotalHP, nIgnitions, cindDmg, margin)
+  return foeTotalHP <= (nIgnitions * cindDmg) + margin
+
+func useCind()
+  activate cinderwisp
+  p.cindDelay = p.tt + p.cindCd + p.castTime
+  return
+
+
+func canUseAETali()
+  return
+  ^summon.GetId() ! "voidweaver" &
+  ^p.tt >= p.aeTaliDelay &
+  ^p.canAct |
+  ^(p.il = "aether_talisman" & p.ils = 2) |
+  ^(p.ir = "aether_talisman" & p.irs = 2)
+
+func useAETali(hand)
+  ?hand = "l"
+    equipL aether_talisman
+    activate L
+  :?hand = "r"
+    equipR aether_talisman
+    activate R
+
+  p.aeTaliDelay = p.tt + p.aeTaliCd + p.castTime
+
+  return
+
+/* Checks if you can use the voidweaver's "devour"
+ability. */
+func canUseWeav()
+  return summon.GetId() = "voidweaver"
+  ^& p.tt >= p.weavDelay & p.canAct
+
+func useWeav()
+  activate voidweaver
+  p.weavDelay = p.tt + p.weavCd + p.castTime
+  return
+
+func canUseWeavDS(nScreen)
+  return canUseWeav()
+  ^& p.si = nScreen
+
+func useWeavDS()
+  ?slideCount = 0
+    screen.Next()
+    slideCount = 20
+
+  :?slideCount > 0
+    slideCount--
+  
+    ?slideCount = 0
+      useWeav()
+      screen.ResetOffset()
+
+      return
+
+
+/* Checks if you can use the
+bashing shield's ability. */
+func canBash()
+  return p.tt >= p.bashDelay & !p.aiI
+  ^& 11 <= p.fd & p.fd <= 15
+  ^& p.canAct
+
+func bash(lItem)
+  equipL @lItem@
+  equipR bashing shield
+
+  p.bashDelay = p.tt + p.bashCd
+
+  return
+
+
+// Special Weapons
+
+func canUseHamm()
+  return p.tt >= p.hammDelay &
+  ^p.canAct |
+  ^(p.ir = "heavy hammer" &
+  ^p.irs = 2)
+
+var hammCdSlower
+func canUseHamm2()
+  hammCdSlower = item.GetCooldown("hammer") <= 0
+  return hammCdSlower &
+  ^p.canAct |
+  ^(p.ir = "heavy hammer" &
+  ^p.irs = 2)
+
+func useHamm(yourHamm)
+  equip @yourHamm@
+  activate R
+
+  p.hammDelay = p.tt + p.hammCd + p.castTime
+
+  return
+
+
+func canUseBard()
+  return p.tt >= p.bardDelay &
+  ^p.canAct |
+  ^(p.ir = "bardiche" &
+  ^p.irs = 2)
+
+var bardCdSlower
+func canUseBard2()
+  bardCdSlower = item.GetCooldown("bardiche") <= 0
+  return bardCdSlower &
+  ^p.canAct |
+  ^(p.ir = "bardiche" &
+  ^p.irs = 2)
+
+func useBard(yourBard)
+  ?p.fd < 10
+    equip @yourBard@
+    activate R
+
+    p.bardDelay = p.tt + p.bardCd + p.castTime
+
+  return
+
+
+/* Checks if you can use the
+dashing shield's ability. */
+func canDash()
+  return item.GetCooldown("dash") <= 0 & !p.aiI
+  ^& 11 <= p.fd & p.fd <= 15
+  ^& p.canAct
+
+func dash(lItem, yourDshield)
+  equipL @lItem@
+  equipR @yourDshield@
+
+  p.dashDelay = p.tt + p.dashCd
+
+  return
+
+
+func canUseQstaff()
+
+  ?p.tt >= p.qstaffDelay
+    return p.canAct |
+    ^(p.ir = "quarterstaff"
+    ^& p.irs = 2)
+
+  :
+    return false
+
+func canUseQstaff_OG()
+  var result = false
+
+  ?item.CanActivate()
+    ?item.GetCooldown("quarterstaff") <= 0
+      result = true
+    :?item.right = "quarterstaff" & item.right.state = 2
+      result = true
+
+  return result
+
+// recieves a string
+func useQstaff(yourQstaff)
+  equip @yourQstaff@
+  activate R
+
+  p.qstaffDelay = p.tt + p.qstaffCd
+
+  return
+
+
+func canUseMind()
+  return item.GetCooldown("mind") <= 0 & p.canAct
+
+
+// Tools
+
+func canUseHatchet()
+  return item.GetCooldown("hatchet") <= 0
+  ^& p.canAct
+  ^& harvest.distance < 5
+  ^& p.ir = "hatchet"
+
+func useHatchet()
+  activate R
+  return
+
+
+// Potions
+
+func canUsePot()
+  return p.ip ! "empty" & p.canAct
+
+/* Checks if a healing type potion
+can be used.
+Healing type potions are considered:
+  - healing
+  - defensive
+  - vampiric */
+func canUsePotHeal()
+  ?canUsePot()
+    ?p.ip = "healing" |
+    ^p.ip = "vampiric"
+      return hp < lowhp
+
+    :?p.ip = "defensive"
+      return hp < midhp
+    
+    :
+      return false
+  :
+    return false
+
+/* Determines if a damage buff potion
+is brewed. Generally used for bosses.
+Potions related:
+  - berserk
+  - lucky */
+func canUsePotDmg()
+  return canUsePot() &
+  ^(p.ip = "berserk" | p.ip = "lucky")
+
+/* Determines if a special potion
+can be activated, given a special
+condition that's different for each potion type.
+Valid potion types and conditions:
+  - cleansing | min. no. of debuffs to cleanse
+  - strength | min. amount of foe's armor
+  - lightning, | ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  - experience | min. no. of foes to activate
+  - invisibility | NONE (will activate if foe = boss)
+    + (send true as condition for this type) */
+func canUsePotSpecial(type,cond)
+  ?canUsePot()
+
+    ?p.ip = type
+      ?p.ip = "cleansing"
+        return hp < midhp &
+        ^debuffs.count >= cond
+        // ^^^ = no. of debuffs to cleanse
+    
+      :?p.ip = "strength"
+        return foe.armor & foe.armor > cond
+
+      :?p.ip = "lightning"
+      ^|p.ip = "experience"
+        return foe.count >= cond
+
+      :?p.ip = "invisibility"
+        return p.f = boss
+
+      :
+        >c-10,0,#red,
+        ^func canUsePotSpecial() - Potion recieved\n
+        ^does not belong to this function: "@type@"
+        return false
+
+    :
+      >c-10,0,#red,
+      ^func canUsePotSpecial() - Potion recieved\n
+      ^is not valid or equipped: "@type@"
+      return false
+
+  : // potion hasn't been brewed, it's been used,
+    return false //or just can't be activated atm
+
+
+// Others
+
+var moonTimer = 0
+var moonFrame
+func doMoondial(weapon1, weapon2, mode)
+
+  ?mode = 0 // Normal moondialing
+    moonTimer++
+    moonFrame = moonTimer % 3
+
+    ?moonFrame = 1
+      equipL moon
+      equipR @weapon1@
+    :?moonFrame = 2
+      equipL moon
+      equipR @weapon2@
+    :
+      equipL @weapon1@
+      equipR @weapon2@
+
+  :?mode = 1
+    /* Berserk Moondialing (For non-speed enchanted *max
+    swords) */
+    moonTimer++
+    moonFrame = moonTimer % 4
+
+    ?moonFrame = 1
+      equipL @weapon2@ // on cooldown
+      equipR @weapon1@
+    :?moonFrame = 2
+      equipL moon
+      equipR @weapon1@
+    :?moonFrame = 3
+      equipL @weapon1@ // on cooldown
+      equipR @weapon2@
+    :?moonFrame = 4
+      equipL moon
+      equipR @weapon2@
+  
+  :?mode = 2
+    /* Not moondialing, but useful to have here (speed
+    enchant *max swords) */
+    equipL @weapon2@
+    equipR @weapon1@
+
+  :?mode = 3
+    /* For when you have just 1 +21 sword (weapon2 can be
+    anything, it will not be used) */
+    ?p.fd <= 5
+      equipL moon
+    :
+      equipL @weapon2@
+    equipR @weapon1@
+
+  return
+
+var apsTimer = 0
+/* Fastest moondialing variant with all dual D rune swords.
+Requires them all to be *21 speed enchanted. */
+func doAps(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
+  apsTimer++
+
+  equipL moon
+  ?apsTimer = 0
+    equipR @s1@
+
+  :?apsTimer = 1
+    equipR @s2@
+
+  :?apsTimer = 2
+    equipR @s3@
+
+  :?apsTimer = 3
+    equipR @s4@
+
+  :?apsTimer = 4
+    equipR @s5@
+
+  :?apsTimer = 5
+    equipR @s6@
+
+  :?apsTimer = 6
+    equipR @s7@
+
+  :?apsTimer = 7
+    equipR @s8@
+
+  :?apsTimer = 8
+    equipR @s9@
+
+  :?apsTimer = 9
+    equipR @s10@
+  :
+    return
+
+
+func doAAC(itemLeft, itemRight)
+  ?p.ils = 3
+    equipL @itemLeft@
+    equipL @p.il@
+  ?p.irs = 3
+    equipR @itemRight@
+    equipR @p.ir@
+
+  return
+
+
+
+// *******************************************************
+//                  END OF "Combat.txt"                   
+// *******************************************************

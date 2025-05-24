@@ -1,0 +1,813 @@
+//*******************************
+// FIREWORKS
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v4.7.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Celebrate the New Year and your
+// triumphs in style with your own
+// personal firework show!
+// Set it to showcase your victories 
+// in battle or illuminate your way 
+// as you explore!
+//
+// Willow
+//  .''.'.''.
+// · .··*··. .
+// '' .'.'. ''
+// ' ·  .  · '
+//   '  .  ' 
+// 
+// Rings
+//    .·•·.
+//   '.·:·.'
+//  :•:•*•:•:
+//   .'·:·'.
+//    '·•·'
+// 
+// Dhalia
+//      .
+//   '.·:·.'
+//  '·.\¡/.·'
+// ··•-—*—-•··
+//  .·'/!\'·.
+//   .'·:·'.
+//      '
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that's it! 
+//
+// Advanced Instructions:
+// ------------------------
+// Set theAlwaysOn variable 
+// below to 1 to have a 
+// constant fireworks show!
+// Increase maxfw to increase
+// amount of fireworks on
+// screen at once!
+//
+// Enjoy!
+//
+//
+//*******************************
+
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// User Configurable Variables 
+//*******************************
+
+var AlwaysOn = 0
+var maxfw = 10
+
+var fcol = ［
+#FF0000,#00FF00,#0000FF,
+#FFFF00,#FF00FF,#00FFFF,
+#FF7700,#7700FF,#0077FF］
+
+var xmin = 0
+var xmax = screen.w - 11
+var ymin = 1
+var ymax = 3
+
+//*******************************
+// Art
+//*******************************
+
+//**** RINGS ****
+var rings = ascii
+#
+#
+#
+#
+#
+%%
+#
+#
+#####*
+#
+#
+%%
+#
+#####.
+####•*• 
+#####'
+#
+%%
+#
+####·:· 
+###:•*•:
+####·:· 
+#
+%%
+#####•
+###.·:·. 
+##•:•*•:• 
+###'·:·'
+#####• 
+%%
+###.#•#.
+##'.·:·.'
+##•:•*•:• 
+##.'·:·'.
+###'#•#'
+%%
+###.·•·.
+##'.·:·.'
+#:•:•*•:•:
+##.'·:·'.
+###'·•·'
+asciiend
+
+var rfade = ascii
+###.·•·.
+##'.·:·.'
+#:•:•*•:•:
+##.'·:·'.
+###'·•·'
+%%
+###.·•·.
+##'.·:·.'
+#:•:•*•:•:
+##.'·:·'.
+###'·•·'
+%%
+###.·•·.
+##'.·:·.'
+#:•:•*•:•:
+##.'·:·'.
+###'·•·'
+%% //Start fade
+###.·•·.
+##'.·:·.'
+#:•:•#•:•:
+##.'·:·'.
+###'·•·'
+%%
+###.·•·.
+##'.·'·.'
+#:•:###:•:
+##.'·.·'.
+###'·•·'
+%%
+###.·•·.
+##'.###.'
+#:•#####•:
+##.'###'.
+###'·•·'
+%%
+###.·•·.
+##'#####'
+#:•#####•:
+##.#####.
+###'·•·'
+%%
+###.·•·.
+##'#####'
+#:#######:
+##.#####.
+###'·•·'
+%%
+####·#· 
+#
+#:#######:
+#
+####·#· 
+%%
+#
+#
+#
+#
+#
+%%
+#
+#
+#
+#
+#
+asciiend
+
+//**** WILLOW ****
+var willow = ascii
+#
+#####*
+#
+#
+#
+%%
+####.'.
+####·*·
+####'.'
+#
+#
+%%
+###'.'.'
+###··*··
+###.'.'.
+#
+#
+%%
+##''.'.''
+##.··*··.
+###.'.'. 
+##·##.##·
+#
+%%
+#.''.'.''.
+##.··*··.
+#'#.'.'.#'
+##·##.##·
+##'##.##'
+%%
+#.''.'.''.
+·#.··*··.#·
+#'#.'.'.#'
+'#·##.##·#'
+##'##.##'
+%%
+#.''.'.''.
+·#.··*··.#·
+''#.'.'.#''
+'#·##.##·#'
+##'##.##'
+asciiend
+
+var wfade = ascii
+#.''.'.''.
+·#.··*··.#·
+''#.'.'.#''
+'#·##.##·#'
+##'##.##'
+%%
+#.''.'.''.
+·#.··*··.#·
+''#.'.'.#''
+'#·##.##·#'
+##'##.##'
+%%
+#.''.'.''.
+·#.·· ··.#·
+''#.'.'.#''
+'#·##.##·#'
+##'##.##'
+%% //Start Fade
+#.''###''.
+·#.·###·.#·
+''#.###.#''
+'#·##.##·#'
+##'##.##'
+%%
+#.'#####'.
+·#.#####.#·
+''#.###.#''
+'#·##.##·#'
+##'##.##'
+%%
+#.#######.
+·#########·
+''#######''
+'#·##.##·#'
+##'##.##'
+%%
+#
+·#########·
+'#########'
+'#·##.##·#'
+##'##.##'
+%%
+#
+#
+'#########'
+'#########'
+##'##.##'
+%%
+#
+#
+#
+#
+##'##.##'
+%%
+#
+#
+#
+#
+#####.
+%%
+#
+#
+#
+#
+#
+asciiend
+
+var wcrackle = ascii
+#.''.'.''.
+·#.··*··.#·
+''#.'.'.#''
+'#·##.##·#'
+##'##.##'
+%%
+#.''.'.''.
+·#.··*··.#·
+''#.'.'.#''
+'#·##.##·#'
+##'##.##'
+%% //2
+#.#'.'#''.
+##.··##·.#·
+#'#.'#'.#'
+'#·##.####'
+##'##.
+%% //4
+#.''#'.'#.
+·#.#·#··##·
+''##'.'##''
+'####.##·#'
+#####.##'
+%% //3
+#.'#.'.#'.
+·##··#·#.#·
+'##.'.#.#''
+##·##.##·
+##'##.##'
+%% //1
+##''.#.''
+·#.·##··.
+''#.#.'.##'
+'#·#####·#'
+##'#####'
+%% //4
+#.''#'.'#.
+·#.#·#··##·
+''##'.'##''
+'####.##·#'
+#####.##'
+%% //2
+#.#'.'#''.
+##.··##·.#·
+#'#.'#'.#'
+'#·##.####'
+##'##.
+%% //1
+##''.#.''
+·#.·##··.
+''#.#.'.##'
+'#·#####·#'
+##'#####'
+%% //3
+#.'#.'.#'.
+·##··#·#.#·
+'##.'.#.#''
+##·##.##·
+##'##.##'
+%%
+#
+#
+#
+#
+#
+asciiend
+
+//**** DHALIA ****
+var dahlia = ascii
+#
+#
+#
+#####*
+#
+#
+#
+%%
+#
+#
+#####¡
+####-*-
+#####!
+#
+#
+%%
+#
+#
+####\¡/
+###-—*—-
+####/!\
+#
+#
+%%
+#
+#####.
+###.\¡/.
+##•-—*—-•
+###'/!\' 
+#####'
+#
+%%
+#
+###.#:#.
+###.\¡/. 
+##•-—*—-•
+###'/!\' 
+###'#:#'
+#
+%%
+#
+###.·:·.
+##·.\¡/.·
+#·•-—*—-•·
+##·'/!\'·
+###'·:·'
+#
+%%
+#.###'###.
+##'.·:·.'
+#'·.\¡/.·'
+··•-—*—-•··
+#.·'/!\'·.
+##.'·:·'.
+#'###.###'
+asciiend
+
+var dfade = ascii
+#.###'###.
+##'.·:·.'
+#'·.\¡/.·'
+··•-—*—-•··
+#.·'/!\'·.
+##.'·:·'.
+#'###.###'
+%%
+#.###'###.
+##'.·:·.'
+#'·.\¡/.·'
+··•-—*—-•··
+#.·'/!\'·.
+##.'·:·'.
+#'###.###'
+%%
+#.###'###.
+##'.·:·.'
+#'·.\¡/.·'
+··•-—*—-•··
+#.·'/!\'·.
+##.'·:·'.
+#'###.###'
+%% //Start Fade
+#####.
+##'.·:·.'
+#'·.\¡/.·'
+··•-—#—-•··
+#.·'/!\'·.
+##.'·:·'.
+#####'
+%%
+#####.
+##'.·:·.'
+#'·.\'/.·'
+··•-###-•··
+#.·'/.\'·.
+##.'·:·'.
+#####'
+%%
+#####.
+##'.·:·.'
+#'·.###.·'
+··•#####•··
+#.·'###'·.
+##.'·:·'.
+#####'
+%%
+#####.
+##'.·'·.'
+#'·#####·'
+··#######··
+#.·#####·.
+##.'·.·'.
+#####'
+%%
+#####.
+##'#·#·#'
+#'·#####·'
+·#########·
+#.·#####·.
+##.#·#·#.
+#####'
+%%
+#####.
+##'#####'
+#'#######'
+·#########·
+#.#######.
+##.#####.
+#####'
+%%
+#####.
+#
+#
+·#########·
+#
+#
+#####'
+%%
+#
+#
+#
+#
+#
+#
+#
+asciiend
+
+//*******************************
+// Global Variables
+//*******************************
+
+var farr = ［］
+
+var win = 0
+var bossbattle = 0
+
+var fx = 0
+var fy = 1
+var fc = fcol［0］
+
+var rings_params = ［
+rings,
+top_left,
+top_left,
+fx,fy,11,5,
+true,fc,
+10,0,true,true,
+true,1］
+
+var rfade_params = ［
+rfade,
+top_left,
+top_left,
+fx,fy,11,5,
+false,fc,
+15,0,true,false,
+false,0］
+
+var willow_params = ［
+willow,
+top_left,
+top_left,
+fx,fy,11,5,
+true,fc,
+10,0,true,true,
+true,1］
+
+var wfade_params = ［
+wfade,
+top_left,
+top_left,
+fx,fy,11,5,
+false,fc,
+30,0,true,false,
+false,0］
+
+var wcrckl_params = ［
+wcrackle,
+top_left,
+top_left,
+fx,fy,11,5,
+false,fc,
+40,0,true,false,
+false,0］
+
+var dahlia_params = ［
+dahlia,
+top_left,
+top_left,
+fx,fy,11,7,
+true,fc,
+10,0,true,true,
+true,1］
+
+var dfade_params = ［
+dfade,
+top_left,
+top_left,
+fx,fy,11,7,
+false,fc,
+40,0,true,false,
+false,0］
+
+
+//*******************************
+// Functions
+//*******************************
+
+func DrawAnim(parent,params,id)
+  ?id = 0
+    var a = ui.AddAnim(params［0］)
+    a.anchor = params［1］
+    a.dock = params［2］
+    a.x = params［3］
+    a.y = params［4］
+    a.w = params［5］
+    a.h = params［6］
+    a.visible = params［7］
+    a.color = params［8］
+    a.duration = params［9］
+    a.frame = params［10］
+    a.gamePause = params［11］
+    a.loop = params［12］
+    a.playOnStart = params［13］
+    ?params［14］ = 0
+      a.Stop()
+    :
+      a.Play()
+    parent.Add(a)
+    return a
+  return id
+//
+
+func UpdateFireworks()
+  ?farr.Count() > 0
+    for i=0..farr.Count()-1
+      UpdateFirework(farr［i］)
+//
+
+func CleanupFireworks()
+  ?farr.Count() > 0
+    for i=0..farr.Count()-1
+      ?farr［i］［0］ = 2
+        farr［i］［4］.Recycle()
+        farr［i］［5］.Recycle()
+        farr.RemoveAt(i)
+        return
+//
+
+func CreateFirework()
+  var style = 1
+  var btype = 1
+  var ftype = 1
+  var fstep = 1
+  var fcolor = #white
+  var banim = 0
+  var fanim = 0
+  
+  //randomly select style
+  style = (1 + rng % 3)
+
+  ?style = 1 //willow
+    btype = 1
+    ftype = (1 + rng % 2)
+
+  :?style = 2 //ring
+    btype = 2
+    ftype = 3
+
+  :?style = 3 //dahlia
+    btype = 3
+    ftype = 4
+
+  ?btype = 1
+    banim = DrawAnim(
+    ^ui.root,willow_params,banim)
+  :?btype = 2
+    banim = DrawAnim(
+    ^ui.root,rings_params,banim)
+  :?btype = 3
+    banim = DrawAnim(
+    ^ui.root,dahlia_params,banim)
+
+  ?ftype = 1
+    fanim = DrawAnim(
+    ^ui.root,wfade_params,fanim)
+  :?ftype = 2
+    fanim = DrawAnim(
+    ^ui.root,wcrckl_params,fanim)
+  :?ftype = 3
+    fanim = DrawAnim(
+    ^ui.root,rfade_params,fanim)
+    fstep = 0
+  :?ftype = 4
+    fanim = DrawAnim(
+    ^ui.root,dfade_params,fanim)
+
+  fcolor = rng % fcol.Count()
+  fcolor = fcol［fcolor］
+
+  banim.color = fcolor
+  fanim.color = fcolor
+
+  fx = xmin + rng % xmax
+  fy = ymin + rng % ymax
+ 
+  banim.x = fx
+  fanim.x = fx
+  banim.y = fy
+  fanim.y = fy
+
+  var arr = ［-1,fstep,
+      ^btype,ftype,
+      ^banim,fanim］
+
+  return arr
+//
+
+func UpdateFirework(params)
+  var stepflag = params［0］
+  var fallstep = params［1］
+  var btype = params［2］
+  var ftype = params［3］
+  var bframe = params［4］.frame
+  var fframe = params［5］.frame
+  var posy = params［5］.y
+
+  ?stepflag < 0
+    ?bframe >= 6
+      params［5］.visible=true
+      params［5］.Play()
+      params［4］.visible=false
+      params［4］.Stop()
+      stepflag = 0
+  :
+    ?fframe >= 10
+      params［5］.visible = false
+      params［5］.Stop()
+      stepflag = 2
+    :?fframe = 9
+      ?stepflag = 0
+        posy = posy + fallstep
+        stepflag = 1
+    :?fframe = 8
+      stepflag = 0
+    :?fframe = 7
+      ?stepflag = 0
+        posy = posy + fallstep
+        stepflag = 1
+    :?fframe = 6
+      stepflag = 0
+    :?fframe = 5
+      ?stepflag = 0
+        posy = posy + fallstep
+        stepflag = 1
+    :?fframe = 4
+      stepflag = 0
+    :?fframe = 3
+      ?stepflag = 0
+        posy = posy + fallstep
+        stepflag = 1
+    :?fframe = 2
+      stepflag = 0
+    :?fframe = 1
+      ?stepflag = 0
+        posy = posy + 0
+        stepflag = 1
+    :?fframe = 0
+      stepflag = 0
+
+    params［5］.y = posy
+
+  params［0］ = stepflag
+//
+
+
+//*******************************
+// Main Code
+//*******************************
+
+?totaltime <= 1
+  win = AlwaysOn
+  bossbattle = 0
+:?face = ＂^^＂
+  win = 1
+:?foe = phase1 & foe.hp > 0
+  bossbattle = 1
+:?bossbattle = 1 & foe.count <= 0
+  win = 1
+
+?win &
+^(time % 10 = 0) & 
+^(1 + rng % 2 = 2) &
+^(farr.Count() <= maxfw)
+  farr.Add(CreateFirework())
+
+UpdateFireworks()
+CleanupFireworks()
+
+//*******************************
+// End of File
+//*******************************

@@ -1,0 +1,334 @@
+/*
+
+   █████████    ████████   █████████ 
+  ███░░░░░███  ███░░░░███ ███░░░░░███
+ ░███    ░███ ░░░    ░███░███    ░░░ 
+ ░███████████    ███████ ░░█████████ 
+ ░███░░░░░███   ███░░░░   ░░░░░░░░███
+ ░███    ░███  ███      █ ███    ░███
+ █████   █████░██████████░░█████████ 
+░░░░░   ░░░░░ ░░░░░░░░░░  ░░░░░░░░░  
+
+v1.2                  by MaxMinMedian
+
+If you've always wanted to dump an array into
+Storage (and get it back whole),this script is
+for you!
+
+FEATURES: - Able to handle all primitives (ints,
+            floats, strings, bools, null).
+          - Able to handle multidimensional
+            (nested) arrays.
+
+LIMITATIONS: - Cannot handle StonescriptObjects
+               such as UI components.
+
+INSTRUCTIONS: - Import A2S as a new object. E.g.
+                'var A2S = new A2S'. Then, use
+                the functions as follows:
+
+1. A2S.Stringify(arr) - returns a string representation
+                        of array 'arr'. The string
+                        resembles how you would
+                        normally initialize an array
+                        except that strings are quoted.
+
+2. A2S.Arrayify(str) - returns an array when given a
+                       string previously made with
+                       Stringify.
+
+3. A2S.Printify(arr) - returns a (somewhat) nicely
+                       formatted printout of the array
+                       (as a string) that you can then
+                       print on screen using >.
+
+Example: Suppose you have an array to store your
+         weapon info: weaponArray = [["bardiche", "+13", 10],
+                                     ["heavy hammer", "+12", 8],
+                                     ...]
+
+Write to storage:
+  storage.Set("weapons", A2S.Stringify(weaponArray))
+
+Retrieve from storage:
+  var weaponArray = A2S.Arrayify(storage.Get("weapons"))
+
+*/
+
+var dquote = ascii
+"
+asciiend
+
+func Stringify(arr)
+  var stringBuilder = []
+  for e : arr
+    ?Type(e) = "string"
+      stringBuilder.Add(dquote + e + dquote)
+    :?Type(e) = "array"
+      stringBuilder.Add(Stringify(e))
+    :?Type(e) = "null"
+      stringBuilder.Add("null")
+    :
+      stringBuilder.Add("" + e)
+  return "[" + string.Join(",", stringBuilder) + "]"
+
+func Trim(str)
+  var strStartIndex = -1
+  var strEndIndex = -1
+  ?"" = str
+    return ""
+  for i = 0 .. string.Size(str) - 1
+    ?string.Sub(str, i, 1) ! " "
+      strStartIndex = i
+      break
+  ?strStartIndex = -1
+    return ""
+  for i = string.Size(str) .. strStartIndex
+    ?string.Sub(str, i, 1) ! " "
+      strEndIndex = i
+      break
+  return string.Sub(str, strStartIndex, strEndIndex - strStartIndex + 1)
+
+func Arrayify(str)
+  return Arrayify_Main(str, 0)
+
+/*
+States:
+  - bef array (ok to read spaces and "[" only)
+    > spaces (ignore)
+    > "[" (-> bef field)
+    > NO other chars (error)
+  - bef field (ok to read spaces, but NOT commas)
+    > spaces (ignore)
+    > dquote (-> within str),
+    > "-" (-> within int),
+    > digits (-> within float),
+    > "n"/"t"/"f" (-> within special), or
+    > "[" (call Arrayify again)
+    > "]" only allowable if size of array is 0, if not throws error.
+    > NO other chars (error)
+  - within str
+    > dquote (write, -> after field)
+    > most other chars
+  - within int
+    > digits
+    > "." (-> within float)
+    > space (write, -> after field)
+    > comma (write, -> bef field)
+    > "]" (write, -> after array)
+    > NO other chars (error)
+  - within float
+    > digits
+    > space (write, -> after field)
+    > comma (write, -> bef field)
+    > "]" (write, return arr and endpos)
+    > NO "." (error)
+    > NO other characters (error)
+  - within special
+    > space (test, write, -> after field)
+    > comma (test, write, -> bef field)
+    > "UNREALS"
+    > "]" (write, -> after array)
+    > NO other characters (error)
+  - after field
+    > space (ignore)
+    > comma (-> bef field)
+    > "]" (return array, unless startPos = 0 then -> after array)
+    > NO other characters (error)
+  - after array (this state is only entered after the main array)
+    > spaces
+    > NO other characters (error)
+*/
+
+var BEF_ARRAY = 11
+var BEF_FIELD = 12
+var WITHIN_STR = 13
+var WITHIN_INT = 14
+var WITHIN_FLOAT = 15
+var WITHIN_SPECIAL = 16
+var AFT_FIELD = 17
+var AFT_ARRAY = 18
+
+func Arrayify_Main(str,startPos)
+  var len = string.Size(str) - startPos
+  ?len < 2
+    return "ERROR: String too short to contain an array"
+  var state = BEF_ARRAY
+  var resultArray = []     // [actual array, continuePos]
+  var stringBuilder = []   // speed up string reading
+  var negative = 1         // 1 for positive numbers/floats, -1 for negative numbers/floats.
+  var divisor = 1
+
+  for i = startPos .. string.Size(str)-1
+    var ch = string.Sub(str, i, 1)
+
+    ?state = BEF_ARRAY
+      ?"［[" = ch
+        state = BEF_FIELD
+      :?ch ! " "
+        return "ERROR (pos " + i + "): Invalid character before starting array."
+    :?state = BEF_FIELD
+      ?ch = dquote  // just started a new string
+        state = WITHIN_STR
+      :?ch = "-"    // just started a new negative int/float
+        state = WITHIN_INT
+        negative = -1
+      :?"1234567890" = ch  // just started a new int/float
+        state = WITHIN_INT
+        stringBuilder.Add(ch)
+      :?"NTF" = ch   // just started a new special type
+        state = WITHIN_SPECIAL
+        stringBuilder.Add(ch)
+      :?"［[" = ch   // nested array
+        var nestedArray = Arrayify_Main(str, i)  //  [array, continuePos]
+        ?Type(nestedArray) = "string"
+          return nestedArray + "\n" + "within array @ pos:" + startPos
+        :
+          resultArray.Add(nestedArray[0])
+          i = nestedArray[1]
+          state = AFT_FIELD
+      :?"]］" = ch
+        ?resultArray.Count() = 0
+          return [resultArray, i]
+        :
+          return "ERROR (pos " + i + "): Unexpected end of array " + dquote + "]" + dquote
+      :?ch ! " "
+        return "ERROR (pos " + i + "): Unknown element"
+    :?state = WITHIN_STR
+      ?ch = dquote
+        resultArray.Add(string.Join("", stringBuilder))
+        stringBuilder.Clear()
+        state = AFT_FIELD
+      :
+        stringBuilder.Add(ch)
+    :?state = WITHIN_INT
+      ?"1234567890" = ch
+        stringBuilder.Add(ch)
+      :?ch = "."
+        state = WITHIN_FLOAT
+        divisor = 1.0
+      :?"]］ ," = ch
+        resultArray.Add(negative * int.Parse(string.Join("", stringBuilder)))
+        negative = 1
+        stringBuilder.Clear()
+        ?ch = " "
+          state = AFT_FIELD
+        :?ch = ","
+          state = BEF_FIELD
+        :?"]］" = ch
+          ?startPos = 0
+            state = AFT_ARRAY
+          :
+            return [resultArray, i]
+      :
+        return "ERROR (pos " + i + "): Unexpected character in int"
+    :?state = WITHIN_FLOAT
+      ?"1234567890" = ch
+        stringBuilder.Add(ch)
+        divisor *= 10
+      :?"]］ ," = ch
+        resultArray.Add(negative * int.Parse(string.Join("", stringBuilder)) / divisor)
+        divisor = 1.0
+        stringBuilder.Clear()
+        ?ch = " "
+          state = AFT_FIELD
+        :?ch = ","
+          state = BEF_FIELD
+        :?"]］" = ch
+          ?startPos = 0
+            state = AFT_ARRAY
+          :
+            return [resultArray, i]
+      :?ch = "."
+        return "ERROR (pos " + i + "): Multiple decimal points in float"
+      :
+        return "ERROR (pos " + i + "): Unexpected character in float"
+    :?state = WITHIN_SPECIAL
+      ?"UNREALS" = ch
+        stringBuilder.Add(ch)
+      :?"]］ ," = ch
+        var specialType = string.Join("", stringBuilder)
+        ?specialType = "null" & "null" = specialType
+          resultArray.Add(null)
+          stringBuilder.Clear()
+        :?specialType = "false" & "false" = specialType
+          resultArray.Add(false)          
+          stringBuilder.Clear()
+        :?specialType = "true" & "true" = specialType
+          resultArray.Add(true)
+          stringBuilder.Clear()
+        :
+          return "ERROR (pos " + i + "): Unrecognized special constant"
+        ?ch = " "
+          state = AFT_FIELD
+        :?ch = ","
+          state = BEF_FIELD
+        :?"]］" = ch
+          ?startPos = 0
+            state = AFT_ARRAY
+          :
+            return [resultArray, i]
+      :
+        return "ERROR (pos " + i + "): Unexpected character " + dquote + ch + dquote + " in special constant"
+    :?state = AFT_FIELD
+      ?ch = ","
+        state = BEF_FIELD
+      :?"]］" = ch
+        ?startPos = 0
+          state = AFT_ARRAY
+        :
+          return [resultArray, i]
+      :?ch ! " "
+        return "ERROR (pos " + i + "): Unexpected character " + dquote + ch + dquote + " after field"
+    :?state = AFT_ARRAY
+      ?ch ! " "
+        return "ERROR (pos " + i + "): Unexpected character " + dquote + ch + dquote + " after main array"
+
+  ?state = AFT_ARRAY
+    return resultArray
+  :
+    return "ERROR: Unexpected end of input string"
+
+func Printify_Main(arr, prefixStr)
+  var dquote = string.Sub(＂\＂＂, 1)
+  var stringBuilder = []
+  ?!prefixStr
+    stringBuilder.Add("Array has " + arr.Count() + " elements.")
+  ?!arr.Count()
+    stringBuilder.Add(prefixStr + ": [] (empty array)")
+  :
+    for i = 0 .. arr.Count()-1
+      ?Type(arr[i]) = "array"
+        stringBuilder.Add(Printify_Main(arr[i], prefixStr + "[" + i + "]"))   
+      :?Type(arr[i]) = "string"
+        stringBuilder.Add(prefixStr + "[" + i + "]: (string) " + dquote + arr[i] + dquote)   
+      :?Type(arr[i]) = "null"
+        stringBuilder.Add(prefixStr + "[" + i + "]: (" + Type(arr[i]) + ")")
+      :
+        stringBuilder.Add(prefixStr + "[" + i + "]: (" + Type(arr[i]) + ") " + arr[i])
+  return string.Join("\n", stringBuilder)
+
+func Printify(arr)
+  ?Type(arr) ! array
+    return arr
+  return Printify_Main(arr, "")
+
+var a = [[1,2.01,false],
+         "this is a string",
+         ["tigers",",",[true,null,false]]
+        ]
+var simpleString = "[11.25,[-557],-0.005]"
+var simpleArray = [11.25,[-557],-0.005]
+var b = "[[1,2.01,false],3,5," + dquote + "abc" + dquote + "]"
+var bArr = [[1,2.01,false],3,5.78,["abc","d",[true,false,null]]]
+var stringOfEmptyArrays = "[  [], [[], [ [],[] ] ]  ]"
+var s2 = "[  [3], [  [        ], [ [4  ,5 , " + dquote + cat + dquote + "   ], [] ] ]  ]"
+var s2compacted = Stringify(Arrayify(s2))
+
+>`2,1,@Printify(bArr)@
+>`30,1,@Printify(Arrayify(Stringify(bArr)))@
+>`2,13,@Printify(Arrayify(simpleString))@
+>`30,13,@Printify(simpleArray)@
+>`2,18,@Printify(Arrayify(stringOfEmptyArrays))@
+>`30,18,@Printify(Arrayify(s2))@
+>`30,25,@s2compacted@

@@ -1,0 +1,1415 @@
+﻿//*******************************
+// WhackaMole
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v3.68.3
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Step right up, folks! Don't be
+// shy! Come try your hand at the 
+// classic game of Whack-A-Mole!
+// Watch as the wily moles pop
+// up and try to bop them before
+// they get away! Try out the 
+// easier difficulty for some
+// relaxation, or try and follow
+// along on hard mode to bop them
+// all!
+//
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that's it!
+//
+// Enjoy!
+//
+//
+//*******************************
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// Initialization Check
+//
+// Keeps game from initializing 
+// any variables or running any
+// functions unless entering 
+// Deadwood Waterfall with the
+// file already imported
+//*******************************
+
+var initialized = 0
+
+?initialized = 0
+  ?loc ! waterfall | totaltime > 1
+    initialized = -1
+
+
+?initialized = 0
+
+  //*******************************
+  //** GLOBAL VARIABLES
+  //*******************************
+
+  var dynamic_screen = true //dynamic screen adjustment
+  var gamelayout = 0
+  var assist = 0
+  var gametime = 30
+  var anmtime = 40
+  var rngtime = 0
+  var easyanmtime = 60
+  var easyrngtime = 60
+  var medanmtime  = 40
+  var medrngtime  = 20
+  var hardanmtime = 40
+  var hardrngtime = 10 
+  var misspenalty = -10
+  var hitsound = smithy_hammer
+  var hitpitch = 150
+  var misssound = 
+      ^smithy_hammer_fail
+  var misspitch = 150
+  var moleupsound = 
+      ^haunted_gate_shuffle_fast
+  var moleuppitch = 100
+  var easydesc = 
+      ^＂Plenty of time to spot ＂
+      ^+＂the mole\nand line up ＂
+      ^+＂a good 'Whack'!\n＂
+      ^+＂［Missed moles don't ＂
+      ^+＂count against you.］＂
+  var meddesc = 
+      ^＂Moles come one after ＂
+      ^+＂another.\nExcellent ＂
+      ^+＂for practicing.\n＂
+      ^+＂［Missed moles subtract ＂
+      ^+＂10 points each.］＂
+  var harddesc =
+      ^＂Moles appear in rapid ＂
+      ^+＂fire.\nHit moles in order＂
+      ^+＂ or risk missing one!\n＂
+      ^+＂［Missed moles subtract ＂
+      ^+＂20 points each!］＂
+
+  var molestate = ［0,0,0,0,0,0,0,0,0,0］
+  var playing = 0
+  var timer = 0
+  var timerstr = ＂000＂
+  var score = 0
+  var scorestr = ＂000＂
+  var instrstr = ＂MASH!\nMASH!＂
+  var starttime = time.msbn
+  var deltatime = time.msbn
+  var deltasecs = 0
+  var mframe
+  var finishing = 0
+  var screenw = screen.w
+  var screenh = screen.h
+  var dimx = 0
+  var dimy = 0
+  var dimw = screenw
+  var dimh = screenh
+
+
+  //*******************************
+  // ASCII Art
+  //*******************************
+
+  var bear = ascii
+####_
+(‾;:_)
+│   ..
+`_   T
+¡ . ‾;¡
+│ ¡  ｝;-..
+! ; ‾‾. !!
+#‾#‾‾‾#‾‾
+asciiend
+
+  var ball = ascii
+ .'´:'·
+:`·.·.´:
+:.·'·'·:
+#·,_;_.'
+asciiend
+
+  var ball1 = ascii
+
+
+#.·
+#·,_;
+asciiend
+
+  var ball2 = ascii
+
+######´:
+######·:
+
+asciiend
+
+  var ball3 = ascii
+#.'´:
+#`·
+
+
+asciiend
+
+  var balloon = ascii
+#.·¯¯¯·.
+·     ;.·
+│     `!│
+'       '
+#`.   .´ 
+###·.·
+####∞
+####│`,
+####│#;
+####│#'
+####│
+####│
+####│
+####│
+####│
+####│
+####│
+####│
+####│
+####│
+###_∞_
+##｛.;:｝
+###‾‾‾
+asciiend
+
+  var llamawscarf = ascii
+;'.-.':
+`.•_•.´
+#¡'='¡
+#!   !
+#;;~~:
+asciiend
+
+  var fox = ascii
+¡\-/¡
+:^ ^;
+,\./,
+n·-·n
+asciiend
+
+  var mole = ascii
+
+
+
+
+
+%%
+
+
+# …-… 
+#:• •:
+
+%%
+
+# …-… 
+#:• •:
+#:>•<:
+
+%%
+# …-… 
+#:• •:
+#:>•<:
+#m   m
+
+%%
+# …-… 
+#:• •:
+#:>•<:
+#m   m
+
+%%
+# …-… 
+#:• •:
+#:>•<:
+#m   m
+
+%%
+# …-… 
+#:• •:
+#:>•<:
+#m   m
+
+%%
+
+# …-… 
+#:• •:
+#:>•<:
+
+%%
+
+
+# …-… 
+#:• •:
+
+%%
+
+
+
+
+
+asciiend
+
+
+  var gameboard = ascii
+.~.´^`~._.~´^`~._.~´^`~._.~´^`~._.~´^`.~.
+║/│     )~TIMER~(       )~SCORE~(     │\║
+║ │     ｛  000  ｝       ｛  000  ｝     │ ║
+║ ├───────────────────────────────────┤ ║
+║/│)(         )(         )(         )(│\║
+║ │()  ｛   ｝  ()  ｛   ｝  ()  ｛   ｝  ()│ ║
+║ │)(         )(         )(         )(│ ║
+║ │() .─────. () .─────. () .─────. ()│ ║
+║ │)( `─────´ )( `─────´ )( `─────´ )(│ ║
+║ │~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~│ ║
+║/│)(         )(         )(         )(│\║
+║ │()  ｛   ｝  ()  ｛   ｝  ()  ｛   ｝  ()│ ║
+║ │)(         )(         )(         )(│ ║
+║ │() .─────. () .─────. () .─────. ()│ ║
+║ │)( `─────´ )( `─────´ )( `─────´ )(│ ║
+║ │~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~│ ║
+║/│)(         )(         )(         )(│\║
+║ │()  ｛   ｝  ()  ｛   ｝  ()  ｛   ｝  ()│ ║
+║ │)(         )(         )(         )(│ ║
+║ │() .─────. () .─────. () .─────. ()│ ║
+║ │)( `─────´ )( `─────´ )( `─────´ )(│ ║
+║ ├───────────────────────────────────┤ ║
+║/                                     \║
+║                                       ║
+╫───────────────────────────────────────╫
+║.~´^`~._.~´^`~._.~´^`~._.~´^`~._.~´^`~.║
+║                                       ║
+asciiend
+
+
+
+  var boardlights = ascii
+)(#########)(#########)(#########)(
+()#########()#########()#########()
+)(#########)(#########)(#########)(
+()#########()#########()#########()
+)(#########)(#########)(#########)(
+()~~~~~~~~~()~~~~~~~~~()~~~~~~~~~()
+)(#########)(#########)(#########)(
+()#########()#########()#########()
+)(#########)(#########)(#########)(
+()#########()#########()#########()
+)(#########)(#########)(#########)(
+()~~~~~~~~~()~~~~~~~~~()~~~~~~~~~()
+)(#########)(#########)(#########)(
+()#########()#########()#########()
+)(#########)(#########)(#########)(
+()#########()#########()#########()
+)(#########)(#########)(#########)(
+asciiend
+
+  var sign1 = ascii
+┊#############################┊
+║´¯¯¯`~·._.·~´¯¯¯`~·._.·~´¯¯¯`║
+╠═════════════════════════════╣
+║:::~´ . . . .  _   _ .  `~:::║
+║:>´   \^/ │─│ /─\ (_ │<   `<:║
+║｛     _     .   _  .   _    ｝║
+║:>.  /─\ ─ /v\ ( ) │  │─  .<:║
+║:::~.' '   ' '  ‾   ‾  ‾.~:::║
+╠═════════════════════════════╣
+'.___.~·´¯`·~.___.~·´¯`·~.___.'
+asciiend
+
+  var sign2 = ascii
+ . . . .  _   _ .
+ \^/ │─│ /─\ (_ │<
+ _     .   _  .   _
+/─\ ─ /v\ ( ) │  │─
+' '   ' '  ‾   ‾  ‾
+asciiend
+
+  var sign3 = ascii
+###~´###################`~
+#>´#######################`<
+｛###########################｝
+#>.#######################.<
+###~.###################.~
+asciiend
+
+  var trspstyl = ui.AddStyle(＂
+^###
+^###
+^###＂)
+
+
+  //*******************************
+  // Component Parameters
+  //*******************************
+
+  var blankpnl
+  var blankpnl_params = ［
+blankpnl,
+center_center,
+center_center,
+0,0,screen.w,screen.h,
+true,0,#888888,1］
+
+  var gamepnl
+  var gamepnl_params = ［
+gamepnl,
+center_center,
+center_center,
+0,0,screenw,screenh,
+false,trspstyl,#888888,true］
+
+  var board1anim
+  var board2anim
+  var board3anim
+  var boardanim_params = ［
+board1anim,
+gameboard,
+top_center,
+top_center,
+0,0,41,29,
+inherit,#white,
+0,0,true,true,
+true,1］
+
+  var balloonanim
+  var balloonanim_params = ［
+balloonanim,
+balloon,
+top_center,
+top_center,
+37,1,9,23,
+inherit,#00FF00,
+0,0,true,true,
+true,1］
+
+  var menupnl
+  var menupnl_params = ［
+menupnl,
+top_center,
+top_center,
+-26,0,31,29,
+inherit,trspstyl,#888888,false］
+
+  var bearanim
+  var bearanim_params = ［
+bearanim,
+bear,
+top_center,
+top_center,
+-13,16,10,9,
+inherit,#EE99EE,
+0,0,true,true,
+true,1］
+
+  var ballpnl
+  var ballpnl_params = ［
+ballpnl,
+top_center,
+top_center,
+-25,20,8,4,//12,20,8,4,
+true,trspstyl,#888888,1］
+
+  var ballanim
+  var ballanim_params = ［
+ballanim,
+ball,
+center_center,
+center_center,
+0,0,8,4,
+inherit,#yellow,
+0,0,true,true,
+true,1］
+
+  var ball1anim
+  var ball1anim_params = ［
+ball1anim,
+ball1,
+center_center,
+center_center,
+0,0,8,4,
+inherit,#FF0000,
+0,0,true,true,
+true,1］
+
+  var ball2anim
+  var ball2anim_params = ［
+ball2anim,
+ball2,
+center_center,
+center_center,
+0,0,8,4,
+inherit,#00FF00,
+0,0,true,true,
+true,1］
+
+  var ball3anim
+  var ball3anim_params = ［
+ball3anim,
+ball3,
+center_center,
+center_center,
+0,0,8,4,
+inherit,#00FFFF,
+0,0,true,true,
+true,1］
+
+  var signpnl
+  var signpnl_params = ［
+signpnl,
+top_center,
+top_center,
+-3,0,31,10,
+inherit,trspstyl,#888888,1］
+
+  var sign1anim
+  var sign1anim_params = ［
+sign1anim,
+sign1,
+top_center,
+top_center,
+0,0,31,10,
+inherit,#A0522D,//#white,
+0,0,true,true,
+true,1］
+
+  var sign2anim
+  var sign2anim_params = ［
+sign2anim,
+sign2,
+top_center,
+top_center,
+0,3,19,5,
+inherit,#white,
+0,0,true,true,
+true,1］
+
+  var sign3anim
+  var sign3anim_params = ［
+sign3anim,
+sign3,
+top_center,
+top_center,
+0,3,29,5,
+inherit,#DAA520,//#FFD700,
+0,0,true,true,
+true,1］
+
+  var mbtnpnl
+  var mbtnpnl_params = ［
+mbtnpnl,
+top_center,
+top_center,
+-1,11,17,9,
+inherit,trspstyl,#888888,1］
+
+  var diffbtn
+  var diffbtn_params = ［
+diffbtn,
+top_center,
+top_center,
+0,0,17,3,
+inherit,＂GAME DIFFICULTY＂,#white,
+#888888,#880000,
+torch_idle,
+3,1,DiffBtnPress］
+
+  var modebtn
+  var modebtn_params = ［
+modebtn,
+top_center,
+top_center,
+0,3,17,3,
+inherit,＂GAME MODE＂,#888888,
+#888888,#880000,
+torch_idle,
+3,1,ModeBtnPress］
+
+  var exitbtn
+  var exitbtn_params = ［
+exitbtn,
+top_center,
+top_center,
+0,6,17,3,
+inherit,＂LEAVE＂,#white,
+#888888,#880000,
+torch_idle,
+3,1,ExitBtnPress］
+
+  var menubtn
+  var menubtn_params = ［
+menubtn,
+top_right,
+top_right,
+0,0,5,3,
+false,＂←＂,#white,
+#888888,#008888,
+torch_idle,
+3,1,MenuBtnPress］
+
+  var boardpnl
+  var boardpnl_params = ［
+boardpnl,
+top_center,
+top_center,
+10,0,41,29,
+inherit,trspstyl,#888888,false］
+
+  var lightsanim
+  var lightsanim2
+  var lightsanim_params = ［
+lightsanim,
+boardlights,
+top_center,
+top_center,
+0,4,35,17,
+inherit,#white,
+0,0,true,true,
+true,1］
+
+  var timertxt
+  var timertxt_params = ［
+timertxt,
+top_center,
+top_center,
+-8,2,3,1,
+inherit,center,
+#red,timerstr］
+
+  var scoretxt
+  var scoretxt_params = ［
+scoretxt,
+top_center,
+top_center,
+8,2,3,1,
+inherit,center,
+#green,scorestr］
+
+  var molespnl
+  var molespnl_params = ［
+molespnl,
+top_center,
+top_center,
+0,0,41,29,
+inherit,trspstyl,#888888,false］
+
+  var molepnl = ［
+0,0,0,0,0,0,0,0,0,0］
+  var molepnl_params = ［
+molepnl,
+top_center,
+top_center,
+0,0,9,5,
+inherit,trspstyl,#888888,1］
+
+  var moletxt = ［
+0,0,0,0,0,0,0,0,0,0］
+  var moletxt_params = ［
+moletxt,
+center_center,
+center_center,
+0,-1,5,1,
+inherit,center,
+#AAAAAA,＂｛   ｝＂］
+
+  var moleanm = ［
+0,0,0,0,0,0,0,0,0,0］
+  var moleanm_params = ［
+moleanm,
+mole,
+center_center,
+center_center,
+0,0,7,5,
+inherit,#D2845F,
+anmtime,0,true,true,
+false,1］
+
+  var molebtn = ［
+0,0,0,0,0,0,0,0,0,0］
+  var molebtn_params = ［
+molebtn,
+center_center,
+center_center,
+0,0,9,5,
+false,＂#＂,#white,
+#FFFF00,#880000,
+torch_idle,
+trspstyl,1,MoleBtnPress］
+
+  var startbtn
+  var startbtn_params = ［
+startbtn,
+top_center,
+top_center,
+0,21,17,3,
+inherit,＂#＂,#red,
+#white,#000000,
+confirm,
+4,2,StartBtnPress］
+
+  var instrtxt
+  var instrtxt_params = ［
+instrtxt,
+top_center,
+top_center,
+0,22,21,2,
+inherit,center,
+#red,instrstr］
+
+  var diffpnl
+  var diffpnl_params = ［
+diffpnl,
+center_center,
+center_center,
+10,0,41,22,
+false,3,#888888,1］
+
+  var easybtn
+  var easybtn_params = ［
+easybtn,
+top_center,
+top_center,
+0,1,17,3,
+inherit,＂EASY MODE＂,#green,
+#white,#green,
+confirm,
+3,1,EasyBtnPress］
+
+  var easytxt
+  var easytxt_params = ［
+easytxt,
+top_center,
+top_center,
+0,4,41,3,
+inherit,center,
+#white,easydesc］
+
+  var medbtn
+  var medbtn_params = ［
+medbtn,
+top_center,
+top_center,
+0,8,17,3,
+inherit,＂NORMAL MODE＂,#cyan,
+#white,#cyan,
+confirm,
+3,1,MedBtnPress］
+
+  var medtxt
+  var medtxt_params = ［
+medtxt,
+top_center,
+top_center,
+0,11,41,3,
+inherit,center,
+#white,meddesc］
+
+  var hardbtn
+  var hardbtn_params = ［
+hardbtn,
+top_center,
+top_center,
+0,15,17,3,
+inherit,＂HARD MODE＂,#red,
+#white,#red,
+confirm,
+3,1,HardBtnPress］
+
+  var hardtxt
+  var hardtxt_params = ［
+hardtxt,
+top_center,
+top_center,
+0,18,41,3,
+inherit,center,
+#white,harddesc］
+
+
+
+  //*******************************
+  //** Initialization
+  //*******************************
+
+  disable hud
+  disable pause
+  disable abilities
+  disable loadout input
+  ambient.Stop()
+  equip shovel
+  equipR stone
+
+  DrawGame()
+  UpdateLayout()
+  MedBtnPress()
+  gamepnl.visible = true
+  initialized = 1
+//
+
+//*******************************
+//** Main
+//*******************************
+
+?initialized = 1
+//Classic Mode
+  ?dynamic_screen
+    UpdateLayout()
+  UpdatePlayBtn()
+  GenerateMole()
+  UpdateTimer()
+  UpdateMoles()
+  CheckFinished()
+//
+
+//*******************************
+//** Game Functions
+//*******************************
+
+func DiffBtnPress()
+  ?diffpnl.visible ! false
+    menupnl.visible = inherit
+    startbtn.visible = inherit
+    diffpnl.visible = false
+    molespnl.visible = inherit
+  :
+    QuickFinish()
+    ?gamelayout = 1
+      menupnl.visible = false
+    startbtn.visible = false
+    diffpnl.visible = inherit
+    molespnl.visible = false
+//
+
+func EasyBtnPress()
+  menupnl.visible = inherit
+  startbtn.visible = inherit
+  diffpnl.visible = false
+  anmtime = easyanmtime
+  rngtime = easyrngtime
+  for i=1..9
+    moleanm［i］.duration = anmtime
+    molebtn［i］.hcolor = #00AA00
+  lightsanim.color = #00FF00
+  score = 0
+  UpdateScore(0)
+  startbtn.visible = inherit
+  molespnl.visible = inherit
+//
+
+func MedBtnPress()
+  menupnl.visible = inherit
+  startbtn.visible = inherit
+  diffpnl.visible = false
+  anmtime = medanmtime
+  rngtime = medrngtime
+  for i=1..9
+    moleanm［i］.duration = anmtime
+    molebtn［i］.hcolor = #00AAAA
+  lightsanim.color = #00FFFF
+  score = 0
+  UpdateScore(0)
+  startbtn.visible = inherit
+  molespnl.visible = inherit
+//
+
+func HardBtnPress()
+  menupnl.visible = inherit
+  startbtn.visible = inherit
+  diffpnl.visible = false
+  anmtime = hardanmtime
+  rngtime = hardrngtime
+  for i=1..9
+    moleanm［i］.duration = anmtime
+    molebtn［i］.hcolor = #AA0000
+  lightsanim.color = #FF0000
+  score = 0
+  UpdateScore(0)
+  startbtn.visible = inherit
+  molespnl.visible = inherit
+//
+
+func ModeBtnPress()
+  >Under development: Future use
+//
+
+func ExitBtnPress()
+  loc.Leave()
+//
+
+func MenuBtnPress()
+  QuickFinish()
+  menupnl.visible = inherit
+  menubtn.visible = false
+  startbtn.y = 11
+  board3anim.color = #CCCCCC
+//
+
+func StartBtnPress()
+  ?gamelayout = 1
+    menupnl.visible = false
+    menubtn.visible = inherit
+    startbtn.y = 21
+    board3anim.color = #FFFFFF
+  molespnl.visible = inherit
+  playing = 1
+  startbtn.visible = false
+  timer = gametime
+  score = 0
+  UpdateScore(0)
+  starttime = time.msbn
+//
+
+func MoleBtnPress(btn)
+  var hit = 0
+  for i=1..9
+    ?btn = molebtn［i］
+      hit = 1
+      molebtn［i］.visible = false
+      moleanm［i］.frame = 0
+      moleanm［i］.Stop()
+      molestate［i］ = 0
+      UpdateScore(20)
+  ?hit = 1
+    play @hitsound@ @hitpitch@
+  :
+    play @misssound@ @misspitch@
+//
+
+func GenerateMole()
+  var r = 1
+  ?(time % rngtime) = 0 & timer > 0
+    r = 1 + rng % (9 - 1 + 1)
+
+    ?molestate［r］ < 1
+      molestate［r］ = 1
+      moleanm［r］.Play()
+      molebtn［r］.visible = inherit
+      play @moleupsound@ @moleuppitch@
+//
+
+func UpdateTimer()
+  ?timer > 0
+    deltatime = time.msbn
+    deltatime.Sub(starttime)
+    deltatime.Div(1000)
+
+    deltasecs = int.Parse(deltatime.ToString())
+    timer = gametime - deltasecs
+
+  UpdateGameTimer()
+//
+
+func UpdateGameTimer()
+  ?timer < 0
+    timer = 0
+  :?timer > 999
+    timer = 999
+  
+  ?timer >= 100
+    timerstr = ＂＂ + timer
+  :?timer >= 10
+    timerstr = ＂0＂ + timer
+  :?timer >= 1
+    timerstr = ＂00＂ + timer
+  :
+    timerstr = ＂000＂
+ 
+  timertxt.text = timerstr
+//
+
+func UpdateGameDiff(delta)
+  var t = 0.0
+  var t1 = 0.0
+  var t2 = 0.0
+
+  ?delta < (gametime / 2)
+    anmtime = anmmaxtimer
+    rngtime = rngmaxtimer
+ :
+    t = deltasecs + (gametime/8.0)
+    t = t - (gametime/2.0)
+    t = t / (gametime/2.0)
+
+    t1 = (anmmaxtimer - anmmintimer) * t
+    t1 = anmmaxtimer - t1
+    t1 = math.CeilToInt(t1)
+    ?t1 < anmmintimer
+      t1 = anmmintimer
+    nextanmtime = t1
+    
+    t2 = (rngmaxtimer - rngmintimer) * t
+    t2 = rngmaxtimer - t2
+    t2 = math.CeilToInt(t2)
+    ?t2 < rngmintimer
+      t2 = rngmintimer
+    nextrngtime = t2
+//
+
+func UpdateGameTime()
+  var moleup = 0
+  ?playing = 1
+    for i=1..9
+      ?molestate［i］ > 0
+        moleup = 1
+    ?moleup < 1
+      anmtime = nextanmtime
+      for i=1..9
+        moleanm［i］.duration = anmtime
+      rngtime = nextrngtime 
+//
+
+func UpdateScore(points)
+  score = score + points
+  ?score < 0
+    score = 0
+  :?score > 999
+    score = 999
+  
+  ?score >= 100
+    scorestr = ＂＂ + score
+  :?score >= 10
+    scorestr = ＂0＂ + score
+  :?score >= 1
+    scorestr = ＂00＂ + score
+  :
+    scorestr = ＂000＂
+ 
+  scoretxt.text = scorestr
+//
+
+func UpdatePlayBtn()
+  ?playing = 1
+    instrstr = ＂MASH THE SCREEN\n＂
+    ^+ ＂TO 'WHACK' YOUR MOLE!＂
+  :?playing = 2
+    instrstr = ＂＂
+    startbtn.text = ＂PLAY AGAIN!＂
+  :
+    instrstr = ＂＂
+    startbtn.text = ＂PLAY!＂
+
+  instrtxt.text = instrstr
+//
+
+func UpdateMoles()
+  for i=1..9
+    mframe = moleanm［i］.frame
+    ?mframe >= 9
+      ?molestate［i］ > 0
+        molestate［i］ = 0
+        UpdateScore(misspenalty)
+        play haunted_gate_point_lost 200
+      moleanm［i］.Stop()
+      molebtn［i］.visible = false
+//
+
+func CheckFinished()
+  finishing = 0
+  ?timer <= 0 & playing = 1
+    for i=1..9
+      ?molestate［i］ > 0
+        finishing = 1
+    ?finishing = 0
+      play treasure_item_show 100
+      playing = 2
+      UpdatePlayBtn()
+      startbtn.visible = inherit
+//
+
+func QuickFinish()
+  timer = 0
+  UpdateTimer()
+  score = 0
+  UpdateScore(0)
+  for i=1..9
+    molestate［i］ = 0
+    moleanm［i］.Stop()
+    moleanm［i］.frame = 9
+    molebtn［i］.visible = false
+    molespnl.visible = false
+    playing = 2
+    UpdatePlayBtn()
+    startbtn.visible = inherit
+//
+
+
+//*******************************
+//** UI Functions
+//*******************************
+
+func DrawPanel(parent,params)
+  ?loc.begin | loc.loop
+    var p = ui.AddPanel()
+    p.anchor = params［1］
+    p.dock = params［2］
+    p.x = params［3］
+    p.y = params［4］
+    p.w = params［5］
+    p.h = params［6］
+    p.visible = params［7］
+    p.style = params［8］
+    p.color = params［9］
+    p.clip = params［10］
+    parent.Add(p)
+    params［0］ = p
+    return p
+  return params［0］
+//
+
+func DrawText(parent,params)
+  ?loc.begin | loc.loop
+    var t = ui.AddText()
+    t.anchor = params［1］
+    t.dock = params［2］
+    t.x = params［3］
+    t.y = params［4］
+    t.w = params［5］
+    t.h = params［6］
+    t.visible = params［7］
+    t.align = params［8］
+    t.color = params［9］
+    t.text = params［10］
+    parent.Add(t)
+    params［0］ = t
+    return t
+  return params［0］
+//
+
+func DrawButton(parent,params)
+  ?loc.begin | loc.loop
+    var b = ui.AddButton()
+    b.anchor = params［1］
+    b.dock = params［2］
+    b.x = params［3］
+    b.y = params［4］
+    b.w = params［5］
+    b.h = params［6］
+    b.visible = params［7］
+    b.text = params［8］
+    b.tcolor = params［9］
+    b.bcolor = params［10］
+    b.hcolor = params［11］
+    b.sound = params［12］
+    b.style = params［13］
+    ?params［14］ = 2
+      b.SetDown(params［15］)
+    :?params［14］ = 3
+      b.SetUp(params［15］)
+    :
+      b.SetPressed(params［15］)
+    parent.Add(b)
+    params［0］ = b
+    return b
+  return params［0］
+//
+
+func DrawAnim(parent,params)
+  ?loc.begin | loc.loop
+    var a = ui.AddAnim(params［1］)
+    a.anchor = params［2］
+    a.dock = params［3］
+    a.x = params［4］
+    a.y = params［5］
+    a.w = params［6］
+    a.h = params［7］
+    a.visible = params［8］
+    a.color = params［9］
+    a.duration = params［10］
+    a.frame = params［11］
+    a.gamePause = params［12］
+    a.loop = params［13］
+    a.playOnStart = params［14］
+    ?params［15］ = 0
+      a.Stop()
+    :
+      a.Play()
+    parent.Add(a)
+    params［0］ = a
+    return a
+  return params［0］
+//
+
+func DrawColCanvas(parent,params)
+  ?loc.begin | loc.loop
+    var c = ui.AddCanvas()
+    c.anchor = params［1］
+    c.dock = params［2］
+    c.x = params［3］
+    c.y = params［4］
+    c.w = params［5］
+    c.h = params［6］
+    c.visible = params［7］
+    c.blend = params［8］
+    c.SetFG(params［9］)
+    c.SetBG(params［10］)
+    parent.Add(c)
+    params［0］ = c
+    return c
+  return params［0］
+//
+
+func DrawGame()
+
+  blankpnl = DrawPanel(
+    ^ui.root,blankpnl_params)
+
+  gamepnl = DrawPanel(
+  ^ui.root,gamepnl_params)
+
+  boardanim_params［0］ = board1anim
+  board1anim = DrawAnim(
+  ^gamepnl,boardanim_params)
+  board1anim.x = -26
+  board1anim.color = #555555
+
+  boardanim_params［0］ = board2anim
+  board2anim = DrawAnim(
+  ^gamepnl,boardanim_params)
+  board2anim.x = 44
+  board2anim.color = #555555
+
+  balloonanim = DrawAnim(
+  ^gamepnl,balloonanim_params)
+
+  boardpnl = DrawPanel(
+  ^gamepnl,boardpnl_params)
+
+  menupnl = DrawPanel(
+  ^gamepnl,menupnl_params)
+
+  bearanim = DrawAnim(
+  ^menupnl,bearanim_params)
+
+  signpnl = DrawPanel(
+  ^menupnl,signpnl_params)
+
+  sign1anim = DrawAnim(
+  ^signpnl,sign1anim_params)
+
+  sign2anim = DrawAnim(
+  ^signpnl,sign2anim_params)
+
+  sign3anim = DrawAnim(
+  ^signpnl,sign3anim_params)
+
+  mbtnpnl = DrawPanel(
+  ^menupnl,mbtnpnl_params)
+
+  diffbtn = DrawButton(
+  ^mbtnpnl,diffbtn_params)
+
+  modebtn = DrawButton(
+  ^mbtnpnl,modebtn_params)
+
+  exitbtn = DrawButton(
+  ^mbtnpnl,exitbtn_params)
+
+  menubtn = DrawButton(
+  ^gamepnl,menubtn_params)
+
+  boardanim_params［0］ = board3anim
+  board3anim = DrawAnim(
+  ^boardpnl,boardanim_params)
+  board3anim.color = #white
+
+  lightsanim = DrawAnim(
+  ^boardpnl,lightsanim_params)
+  lightsanim.color = #00FFFF
+
+  ballpnl = DrawPanel(
+  ^boardpnl,ballpnl_params)
+
+  ballanim = DrawAnim(
+  ^ballpnl,ballanim_params)
+
+  ball1anim = DrawAnim(
+  ^ballpnl,ball1anim_params)
+
+  ball2anim = DrawAnim(
+  ^ballpnl,ball2anim_params)
+
+  ball3anim = DrawAnim(
+  ^ballpnl,ball3anim_params)
+
+  timertxt = DrawText(
+  ^boardpnl,timertxt_params)
+
+  scoretxt = DrawText(
+  ^boardpnl,scoretxt_params)
+
+  molespnl = DrawPanel(
+    ^boardpnl,molespnl_params)
+
+  for i=1..9
+    molepnl_params［0］ = molepnl［i］
+    molepnl［i］ = DrawPanel(
+    ^molespnl,molepnl_params)
+
+  molepnl［1］.x = -11
+  molepnl［1］.y = 16
+
+  molepnl［2］.x = 0
+  molepnl［2］.y = 16
+
+  molepnl［3］.x = 11
+  molepnl［3］.y = 16
+
+  molepnl［4］.x = -11
+  molepnl［4］.y = 10
+
+  molepnl［5］.x = 0
+  molepnl［5］.y = 10
+
+  molepnl［6］.x = 11
+  molepnl［6］.y = 10
+
+  molepnl［7］.x = -11
+  molepnl［7］.y = 4
+
+  molepnl［8］.x = 0
+  molepnl［8］.y = 4
+
+  molepnl［9］.x = 11
+  molepnl［9］.y = 4
+
+  for i=1..9
+    moletxt_params［0］ = moletxt［i］
+    moletxt［i］ = DrawText(
+    ^molepnl［i］,moletxt_params)
+    moletxt［i］.text = ＂｛ ＂+i+＂ ｝＂
+
+  for i=1..9
+    molebtn_params［0］ = molebtn［i］
+    molebtn［i］ = DrawButton(
+    ^molepnl［i］,molebtn_params)
+
+  for i=1..9
+    moleanm_params［0］ = moleanm［i］
+    moleanm［i］ = DrawAnim(
+    ^molepnl［i］,moleanm_params)
+  play @moleupsound@ @moleuppitch@
+
+  ?assist = 1
+    for i=1..9
+      molebtn［i］.style = -1
+  :
+    for i=1..9
+      molebtn［i］.style = trspstyl
+
+  startbtn = DrawButton(
+  ^boardpnl,startbtn_params)
+  
+  instrtxt = DrawText(
+  ^boardpnl,instrtxt_params)
+
+  diffpnl = DrawPanel(
+    ^gamepnl,diffpnl_params)
+
+  easybtn = DrawButton(
+  ^diffpnl,easybtn_params)
+
+  easytxt = DrawText(
+    ^diffpnl,easytxt_params)
+
+  medbtn = DrawButton(
+  ^diffpnl,medbtn_params)
+
+  medtxt = DrawText(
+    ^diffpnl,medtxt_params)
+
+  hardbtn = DrawButton(
+  ^diffpnl,hardbtn_params)
+
+  hardtxt = DrawText(
+    ^diffpnl,hardtxt_params)
+//
+
+func UpdateLayout()
+  screenw = screen.w
+  screenh = screen.h
+
+  gamepnl.w = screenw
+  gamepnl.h = screenh
+
+  var spc = screenw - (boardpnl.w + menupnl.w)
+
+  //>`0,1,#green,@screenw@,@screenh@
+
+  ?screenw < boardpnl.w + menupnl.w
+    gamelayout = 1
+
+    boardpnl.x = 0
+    board1anim.x = -35
+    board2anim.x =  35
+    board3anim.color = #CCCCCC
+    menupnl.x = 0
+    signpnl.x = 0
+    mbtnpnl.x = 0
+    mbtnpnl.y = 15
+    startbtn.y = 11
+    balloonanim.x = 26
+    diffpnl.x = 0
+    bearanim.x = -13
+
+  :?screenw >= boardpnl.w + menupnl.w & screenw < 80
+    gamelayout = 0
+   
+    boardpnl.x = 15 + math.CeilToInt(spc/2.0)
+    menupnl.x = -screenw/2+18+math.CeilToInt(spc/2.0)
+    bearanim.x = -13-math.CeilToInt(spc/2.0)
+    ?bearanim.x < -15
+      bearanim.x = -15
+    board1anim.x = -23 + math.CeilToInt(spc/2.0)
+    board2anim.x =  44
+    board3anim.color = #FFFFFF
+    signpnl.x = -3
+    mbtnpnl.x = -1
+    mbtnpnl.y = 11
+    startbtn.y = 21
+    balloonanim.x = 37
+    diffpnl.x = boardpnl.x
+
+  :?screenw >= 80
+    gamelayout = 0
+   
+    boardpnl.x = -screenw/2 + boardpnl.w + 17
+    menupnl.x = -screenw/2 + menupnl.w/2 + 7
+    bearanim.x = -13-math.CeilToInt(spc/2.0)
+    ?bearanim.x < -15
+      bearanim.x = -15
+    board1anim.x = -screenw/2 + board1anim.w/2
+    board2anim.x = boardpnl.x + boardpnl.w/2 + board2anim.w/2 - 8
+    board3anim.color = #FFFFFF
+    signpnl.x = -3
+    mbtnpnl.x = -1
+    mbtnpnl.y = 11
+    startbtn.y = 21
+    balloonanim.x = boardpnl.x + boardpnl.w/2 + 5
+    ?screenw < 84
+      balloonanim.x = screenw
+    diffpnl.x = boardpnl.x
+//
+
+//*******************************
+// End of File
+//*******************************

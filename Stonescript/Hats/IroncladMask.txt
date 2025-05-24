@@ -1,0 +1,35 @@
+// IronClad Mask cosmetic
+// by: michael.g.g.
+// ver 1.0
+
+//Puts a mask on the stonehead
+//import the path to this file in in the mindstone and use big head mode.
+
+?bighead
+  >h-5,-2,#white,ascii
+###_ ._ 
+##,\'-.'
+##||'.'-
+##',###'
+asciiend
+
+  >h-5,-2,#C09F46,ascii
+###_ ._ 
+###\'-.\
+####\.'/
+#####`' 
+asciiend
+
+  >h-5,-2,#DF7C31,ascii
+####### 
+#########
+#####`~
+#########
+asciiend
+
+  >h-5,-2,#008800,ascii
+####### 
+#########
+#########
+####`####
+asciiend 

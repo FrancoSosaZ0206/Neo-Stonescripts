@@ -1,0 +1,197 @@
+//By:Inconherant Toast
+//Version 1.0
+
+var NumberOfPumpkins = 10
+
+
+var Init = true
+var InitTime = totaltime
+var Eyes
+var Stem
+var Pumpkin
+var PumpkinX
+var PumpkinList = []
+var PumpkinArt = ascii
+.'` ´'.
+\     /
+#`´'`´
+%%
+#.- -.
+{     }
+#`-'-´
+%%
+.'` ´'.
+i     ;
+#`´'`´
+asciiend
+
+var EyeArt = ascii
+`~´
+%%
+`^´
+%%
+`▼´
+%%
+°~°
+%%
+°^°
+%%
+°o°
+%%
+°_°
+%%
+°▼°
+%%
+°3°
+%%
+@~@
+%%
+@.@
+%%
+O_O
+%%
+O~O
+%%
+'u'
+%%
+❤▄❤
+%%
+❤3❤
+%%
+❤ε❤
+%%
+í~ì
+%%
+í^ì
+%%
+ò^ó
+%%
+ò.ó
+%%
+ò_ó
+%%
+ó^ò
+%%
+ó.ò
+%%
+ó_ò
+%%
+óΘò
+%%
+q~q
+%%
+$o$
+asciiend
+
+var StemArt = ascii
+##;
+#´
+%%
+(@
+#`
+%%
+`,
+#`
+%%
+´)
+#`
+%%
+#`,
+#´
+%%
+,-.
+#`
+%%
+.-,
+#´
+%%
+#;
+#`
+%%
+,`
+#`
+asciiend
+
+func CheckYOffset()
+  var Location = loc
+  ?Location = "deadwood_valley"
+    return 3
+  :?Location = "temple"
+    return 11
+  :?Location = "undead_crypt"
+    return 10
+  :?Location = "fungus_forest"
+    return 8
+  :?Location = "caustic_caves"
+    return 9
+  :?Location = "icy_ridge"
+    return 9
+  :?Location = "bronze_mine"
+    return 4
+  :?Location = "rocky_plateau"
+    return 7
+  :
+    return 0
+
+
+var YOffset = CheckYOffset()
+
+func Rand(Min, Max)
+  var range = Max - Min + 1
+  return rng % range + Min
+
+func AddLayer(Layer,X,Y,Colour)
+  Layer.pivotX = X
+  Layer.pivotY = Y
+  Layer.color = Colour
+  Layer.frame = Rand(0,50)
+  return Layer
+
+func GeneratePumpkin()
+  var P = ui.AddAnim(PumpkinArt)
+  P.Stop()
+  P.color = #AA8000
+  P.frame = Rand(0,2)
+
+  Stem = AddLayer( P.AddLayer(StemArt), -2,1, "#105510")
+  Eyes = AddLayer( P.AddLayer(EyeArt) , -2,-1,"#553500")
+  return P
+
+func SetX(Min)
+  return Rand( Min, Min + NumberOfPumpkins * 15)
+
+func Run()
+  ?Init
+    Pumpkin = GeneratePumpkin()
+    PumpkinX = SetX(pos.x - 40)
+    Pumpkin.y = Rand(-1,2) + YOffset
+    Init = false
+  ?PumpkinX + 120 < pos.x | PumpkinX > pos.x + 250
+    PumpkinX = SetX(pos.x + 50)
+    Pumpkin.y = Rand(-1,2) + YOffset
+    Pumpkin.frame = Rand(0,2)
+    Stem.frame = Rand(0,50)
+    Eyes.frame = Rand(0,50)
+  Pumpkin.x = screen.FromWorldX(PumpkinX)
+
+func RunAll()
+  ?totaltime = 1
+    InitTime = 1
+    PumpkinList.Clear()
+  ?totaltime > InitTime
+    >h-1,0,#004400,ascii
+#¸
+“#”
+asciiend
+    >h0,1,#AA4400,ω
+    ?PumpkinList.Count() < NumberOfPumpkins
+      for a = PumpkinList.Count()..NumberOfPumpkins - 1
+        var TempNew = new Cosmetics/Pumpkins
+        PumpkinList.Add(TempNew)
+    :?PumpkinList.Count() > NumberOfPumpkins
+      for a = PumpkinList.Count()..NumberOfPumpkins + 1
+        PumpkinList[0].Pumpkin.Recycle()
+        PumpkinList.RemoveAt(0)
+  for a : PumpkinList
+    a.Run()
+RunAll()

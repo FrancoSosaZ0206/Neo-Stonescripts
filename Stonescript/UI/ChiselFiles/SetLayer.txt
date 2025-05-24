@@ -1,0 +1,32 @@
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+Version: 1.0
+
+This is called from the main Chisel script with: new Components/ChiselFiles/SetLayer
+There's not much else that goes on here, it's just an easier way to list UI layers instead of making complicated arrays.
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+var TextList
+var CanvasBlankTextLine = "############################################################################"
+var String
+var Width =  screen.w - 38
+
+func CanvasStartUp()
+  String = ""
+  TextList = []
+  for a = 1..screen.h - 2
+    TextList.Add(string.Sub(CanvasBlankTextLine,0,Width))
+  return CanvasLineAdder()
+
+func CanvasLineAdder()
+  String = ""
+  for a : TextList
+    String += a+"\n"
+  return String
+
+var TextUI = ui.AddText(CanvasStartUp())
+TextUI.w = screen.w - 38
+TextUI.y = -10
+TextUI.align = center

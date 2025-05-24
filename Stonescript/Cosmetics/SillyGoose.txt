@@ -1,0 +1,537 @@
+//Silly Goose skin
+//Made by tapititon          
+//Version 6.29
+
+//Description: This is a skin that is drawn
+//over the player avatar. It is able to
+//switch between calm mode and angry mode
+//depending on how close foes are, and it also
+//has different animation depending on 
+//whether or not the Goose is moving while
+//engaging foes. The skin will work
+//regardless of equipment used.
+//
+//How to implement: Copy and paste the content
+//of this file at the top of your script.
+//
+//How to activate: The skin will
+//automatically overwrite the player's
+//appearance, no input is required.
+
+disable player
+var timerGoose = 0
+var timerGoose2 = 0
+var timerGoose3 = 0
+var timerGoose4 = 0
+var GooseEat = 0
+
+?GooseEat ! 1 &
+^((pickup.distance > 3) |
+^((item.right = star stone) |
+^(item.left = star stone)))
+ GooseEat = 0
+
+?pickup.distance <= 3 &
+^((item.right ! star stone) &
+^(item.left ! star stone)) &
+^!ai.walking
+ GooseEat = 1
+
+?GooseEat = 1
+ timerGoose4++
+ ?timerGoose4 < 3
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+ :?timerGoose4 < 6
+  >o-4,-1,#white,ascii
+#
+#######_
+######/'l
+#,###((
+( ‾‾‾  )
+#\____/
+#
+asciiend
+  >o-4,-1,#yellow,ascii
+#
+#
+#########<
+#
+#
+#
+###L#L
+asciiend
+ :?timerGoose4 < 9
+  >o-4,-1,#white,ascii
+#
+#
+#
+#,######_
+( ‾‾‾.`~'l
+#\____ì'
+#
+asciiend
+  >o-4,-1,#yellow,ascii
+#
+#
+#
+#
+##########<
+#
+###L#L
+asciiend
+ :?timerGoose4 < 12
+  >o-4,-1,#white,ascii
+#
+#
+#
+#,######_
+( ‾‾‾.`~'l
+#\____ì'
+#
+asciiend
+  >o-4,-1,#yellow,ascii
+#
+#
+#
+#
+##########=
+#
+###L#L
+asciiend
+ :?timerGoose4 < 15
+  >o-4,-1,#white,ascii
+#
+#######_
+######/~l
+#,###((
+( ‾‾‾  )
+#\____/
+#
+asciiend
+  >o-4,-1,#yellow,ascii
+#
+#
+#########=
+#
+#
+#
+###L#L
+asciiend
+ :?timerGoose4 < 25
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+ :
+  timerGoose4 = 0
+  GooseEat = 0
+
+
+?ai.walking & 
+^(foe.distance > 23 |
+^pickup.distance < 23)
+ timerGoose2 = 0
+ timerGoose3 = 0
+ timerGoose++
+ ?timerGoose < 5
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+##<###v
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 10
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L##L
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 15
+  >o-4,-1,#yellow,ascii
+#
+#######<
+#
+#
+#
+#
+###V#<
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l###*Honk*
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 20
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\|
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 25
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+##<###v
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\\
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 30
+  >o-4,-1,#yellow,ascii
+#
+##########<
+#
+#
+#
+#
+###L#L
+asciiend
+  >o-4,-1,#white,ascii
+########_
+#######('l##*Honk*
+#######//
+#,####//
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 35
+  >o-4,-1,#yellow,ascii
+#
+########<
+#
+#
+#
+#
+###V#<
+asciiend
+  >o-4,-1,#white,ascii
+######_##########*Honk*
+#####('l
+######\\
+#,####//
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 40
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 45
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+##<###v
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 50
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 55
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###V#<
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ :?timerGoose < 61
+  >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+  >o-4,-1,#white,ascii
+#####_
+####/~l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+
+ ?timerGoose >= 60
+  timerGoose = 0
+
+
+?(ai.paused |
+^ai.idle) &
+^GooseEat = 0 &
+^((foe.distance > 23) |
+^((foe = boss) &
+^(foe.hp = 0)) |
+^(pickup.distance < 23 &
+^pickup ! stone &
+^pickup ! wood &
+^pickup ! tar))
+ >o-4,-1,#white,ascii
+#####_
+####/'l
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+
+
+?ai.paused &
+^!ai.walking &
+^foe = boss &
+^pickup.distance > 23 &
+^GooseEat = 0 &
+^foe.hp > 0
+ >o-4,-1,#white,ascii
+#####_
+####/òl
+####\(
+#,###\\
+( ‾‾‾  )
+#\____/
+#
+asciiend
+ >o-4,-1,#yellow,ascii
+#
+#######=
+#
+#
+#
+#
+###L#L
+asciiend
+ >o-4,-1,#red,ascii
+#
+#####ò
+asciiend
+
+?(foe.distance <= 23 |
+^(foe = spawner &
+^foe.hp = 0)) &
+^GooseEat = 0 &
+^pickup.distance > 23
+ timerGoose = 0
+ timerGoose2++
+ ?timerGoose2 <= 2
+  >o-6,0,#white,ascii
+###_##*HONK*
+##( \\###_
+,.#( \\_/ò］
+( ‾ ` .,-'
+#\____/##*HONK*
+#
+asciiend
+  >o-6,0,#yellow,ascii
+#
+#
+###########<
+#
+#
+#
+asciiend
+ :
+  >o-6,-1,#white,ascii
+###########*HONK*
+#
+#########_
+,.(‾,\\_/ò］
+((_/` .,-'
+#\____/
+#
+asciiend
+  >o-6,0,#yellow,ascii
+#
+#
+###########=
+#
+#
+#
+asciiend
+ ?timerGoose2 >= 6
+  timerGoose2 = 0
+
+ ?ai.walking
+  timerGoose3++
+  ?timerGoose3 = 0 |
+  ^timerGoose3 = 1 |
+  ^timerGoose3 = 2 |
+  ^timerGoose3 = 3
+   >o-5,5,#yellow,ascii
+#<###v
+asciiend
+  ?timerGoose3 = 4 |
+  ^timerGoose3 = 5 |
+  ^timerGoose3 = 6 |
+  ^timerGoose3 = 7
+   >o-5,5,#yellow,ascii
+##V#<
+asciiend
+ ?!ai.walking
+  timerGoose3++
+  ?timerGoose3 = 0 |
+  ^timerGoose3 = 1 |
+  ^timerGoose3 = 2 |
+  ^timerGoose3 = 3
+   >o-5,5,#yellow,ascii
+##L#L
+asciiend
+  ?timerGoose3 = 4 |
+  ^timerGoose3 = 5 |
+  ^timerGoose3 = 6 |
+  ^timerGoose3 = 7
+   >o-5,5,#yellow,ascii
+##V#v
+asciiend
+ ?timerGoose3 >= 8
+  timerGoose3 = 0

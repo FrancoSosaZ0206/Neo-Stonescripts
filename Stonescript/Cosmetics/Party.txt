@@ -1,0 +1,667 @@
+//-~-~-Information-~-~-\\
+/*By:CitrionDragon☆\
+Made for the 10th Anniversary Art Jam
+Who doesnt love opening presents with wands,
+or placing so many balloons that it covers the entire screen?
+Now you can with import Cosmetics/Party !
+
+some code and insparation from SpringBloom by Sven
+*/
+var uiAA=ui.AddAnim
+var uiAP=ui.AddPanel
+var uiAB=ui.AddButton
+
+//var banner=true  //Debating, put with ui?
+
+//Party Hat
+var partyhat=true
+?partyhat
+  ?bighead
+    >h-2,-2,#rainff,ascii
+*
+| `.
+'
+asciiend
+  :
+    >h-1,-1,#rainff,ascii
+*
+|.
+asciiend
+
+//Presents
+var presents=true
+?presents
+  ?foe!boss&foe
+    >f-3,0,ascii
+####________
+##/         /│
+#/         / │
+│¯¯¯¯¯¯¯¯¯│  │
+│         │  │
+│         │  !
+│         │ /
+│_________│/
+asciiend
+    >f-2,-1,#rainff,ascii
+##.-.###.-.
+#.###...###.
+#'._.'-'._.'
+####/ /   /│
+###│¯│####││
+###│ │####││
+###│ │####││
+###│ │####│
+###│_│#
+asciiend
+//?foe!boss&foe
+//  >f0,-1,ascii
+//###____
+//#/     /│
+//│¯¯¯¯¯│ │
+//│     │ !
+//│_____│/
+//asciiend
+//  >f1,-1,#rainff,ascii
+//.'.#.'.
+//'.'-'.'
+//#│¯│##│
+//#│ │##│
+//#│_│#
+//asciiend
+
+//Balloons
+var balloons=true
+var TapToPlant = true
+var ShowButton = true
+var MaxBalloons = 1000
+var apanel = []
+var aballoons = []
+var aballoonsx = []
+var cleanup = []
+var buttonanchor = top_right
+var buttondock = top_right
+var sbuttonx = -1
+?TapToPlant
+  var sbuttony = 11
+:
+  var sbuttony = 6
+var sbutton
+var fbuttonx = -1
+var fbuttony = 6
+var fbutton
+var planting = false
+var init = screen.FromWorldX(0)
+var diff = 0
+diff = init - screen.FromWorldX(0)
+var custstyle = ui.AddStyle("
+^###
+^###
+^###")
+
+var pinart=ascii
+_
+┬
+asciiend
+
+var balloon1=ascii
+#
+.-.
+\ /
+#^
+%%
+#
+#.-.
+#\ /
+##^
+%%
+#.-.
+#\ /
+##^
+#
+%%
+#
+#.-.
+#\ /
+##^
+asciiend
+
+var balloon2=ascii
+#
+#
+#|
+#!
+/
+%%
+#
+#
+##!
+#/
+/
+%%
+#
+##|
+##'
+#/
+/
+%%
+#
+#
+##!
+#/
+/
+asciiend
+
+func FBtnPressed()
+  ?!planting 
+    planting = true
+    fbutton.color = #FFFFFF
+  :
+    planting = false
+    fbutton.color = #888888
+
+func SBtnPressed()
+  Prune()
+
+func DrawButton(type)
+  var vis
+  var buttonx
+  var buttony
+  var art
+  var text
+  var function
+
+  ?type = 1 //flower
+    vis = TapToPlant
+    buttonx = fbuttonx
+    buttony = fbuttony
+    art = balloon1
+    text = "[F]"
+    function = FBtnPressed
+    key.Bind("Up", "F")
+  :?type = 2 //shovel
+    vis = false
+    buttonx = sbuttonx
+    buttony = sbuttony
+    art = pinart
+    text = "[S]"
+    function = SBtnPressed
+  :
+    return 0
+
+  var p = ui.AddPanel()
+  p.anchor = buttonanchor
+  p.dock = buttondock
+  p.visible = vis
+  p.color = #888888
+  p.style = 1
+  p.w = 7
+  p.h = 5
+  p.x = buttonx
+  p.y = buttony
+
+  var b = ui.AddButton()
+  b.anchor = center_center
+  b.dock = center_center
+  b.visible = inherit
+  b.style = 0
+  b.text = ""
+  b.w = 5
+  b.h = 3
+  b.SetPressed(function)
+  p.Add(b)
+
+  var a = ui.AddAnim(art)
+  a.anchor = center_center
+  a.dock = center_center
+  a.visible = inherit
+  a.color = #white
+  p.Add(a)
+
+  // Only displays text on PC
+  // to match other buttons
+  ?sys.isPC
+    var t = ui.AddText()
+    t.anchor = bottom_right
+    t.dock = bottom_right
+    t.visible = inherit
+    t.color = #888888
+    t.text = text
+    t.w = 3
+    t.h = 1
+    t.x = -1
+    p.Add(t)
+  //
+
+  return p
+
+func BuildRows()
+  apanel.Clear()
+  var p
+  var t
+  for i = 0 .. screen.h
+    p = ui.AddPanel()
+    p.anchor = top_center
+    p.dock = top_center
+    p.visible = true
+    p.color = #888888
+    p.style = custstyle 
+    p.w = screen.w
+    p.h = 1
+    p.x = 0
+    p.y = i
+    apanel.Add(p)
+
+func Tend()
+  cleanup.Clear()
+  ?aballoons.Count() >= 1
+    sbutton.visible = true
+    for i = 0 .. aballoons.Count() - 1
+      aballoons[i].x = screen.FromWorldX(
+                      ^aballoonsx[i]-diff)
+      ?aballoons[i].x < -20
+        cleanup.Add(i)
+    ?cleanup.Count() >= 1
+      for i = cleanup.Count() - 1 .. 0
+        aballoons[(cleanup[i])].Recycle()
+        aballoons.RemoveAt(cleanup[i])
+        aballoonsx.RemoveAt(cleanup[i])
+  :
+    sbutton.visible = false
+
+func Prune()
+  ?aballoons.Count() >= 1
+    for i = 0 .. aballoons.Count() - 1
+      aballoons[i].Recycle()
+    aballoons.Clear()
+    aballoonsx.Clear()
+
+func Balloon(posx,posy)
+  ?(aballoons.Count()+1) > MaxBalloons
+    return 0
+
+  ?posx < (screen.w + fbutton.x) & 
+   ^posx > (screen.w + fbutton.x - 8) &
+   ^posy > fbutton.y & posy < fbutton.y + 5
+    return 0 
+
+  var art1 = balloon1
+  var art2 = balloon2
+  var col1 = #AAAAAA
+  var col2 = #FFFFFF
+  var r = rng % (10)
+
+  ?Colors
+    ?r = 0
+      col1 = #rainff
+    :
+      col1 = color.Random()
+    col2 = #white
+
+  var p = ui.AddPanel()
+  p.style = custstyle
+  p.anchor = top_left
+  p.dock = top_left
+  p.x = posx-2
+  p.y = -3
+  p.w = 5
+  p.h = 4
+
+  var a1 = ui.AddAnim(art1)
+  a1.duration = 60
+  a1.color = col1
+  a1.loop=true
+  a1.Play()
+  a1.x=1
+  a1.y=-1
+
+  var a2 = ui.AddAnim(art2)
+  a2.duration = 60
+  a2.color = col2
+  a2.loop=true
+  a2.Play()
+
+  p.Add(a1)
+  p.Add(a2)
+
+  apanel[posy].Add(p)
+  aballoons.Add(p)
+  aballoonsx.Add(screen.ToWorldX(
+                 ^posx-2) + diff)
+
+  a1.Play()
+  a2.Play()
+
+  return 1
+
+?time <= 1 & totaltime <= 1
+  BuildRows()
+  fbutton = DrawButton(1)
+  sbutton = DrawButton(2)
+:?time <= 1 
+  Prune()
+:?time > 5
+  Tend()
+?planting & key = PrimaryBegin
+  Balloon(input.x,input.y)
+?balloons
+  fbutton.visible=true
+:
+  fbutton.visible=false
+  planting=false
+  fbutton.color = #888888
+
+//Confetti
+var confetti=true
+var prtcls=[]
+var delete=[]
+var remove
+var count=0
+var particle=ascii
+.
+%%
+-
+%%
+,
+%%
+*
+%%
+`
+%%
++
+asciiend
+
+func CreateConfetti()
+  var prtcl=uiAA(particle)
+  prtcl.dock=top_left
+  prtcl.y=0
+  prtcl.x=rng%screen.w
+  prtcl.color=color.Random()
+  prtcl.frame=rng%6
+  return prtcl
+
+func ParticleMove(p)
+    ?rng%25=0
+      p.y=p.y+1
+    ?p.y=screen.h
+      return true
+    return false
+
+func ParticleRun()
+  ?prtcls.Count()>0
+    for p : prtcls
+      ?ParticleMove(p)
+        delete.Add(count)
+        p.Recycle()
+      count++
+    count=0
+    ?delete.Count()>0
+      for d : delete
+        prtcls.Emplace(d,0)
+      for d : delete
+        remove=prtcls.IndexOf(0)
+        prtcls.RemoveAt(remove)
+      delete.Clear()
+
+?confetti
+  ?totaltime=1
+    prtcls.Clear()
+  ?rng%50=0
+    prtcls.Add(CreateConfetti())
+  ParticleRun()
+
+//Cake
+var cake=true
+
+var frogColor
+frogColor = #white
+
+var keepDistance = -17
+var maxX = -11
+
+var maxDistance
+maxDistance = -70
+
+var targetZ = -1
+
+var x = 0
+var y = 0
+var myX = 0
+var myZ = 0
+var lastPlayerX = 0
+var lastPlayerZ = 0
+
+var stateNone = 0
+var stateIdle = 1
+var stateJump = 2
+var currentState = stateNone
+var stateTime = 0
+
+
+func SetState(newState)
+  ?newState = stateJump
+    >`0,25, 
+    //play splat
+
+  currentState = newState
+  stateTime = 0
+
+?cake
+  ?currentState = stateNone | time = 1
+    lastPlayerX = pos.x
+    lastPlayerZ = pos.z
+    myX = keepDistance
+    myZ = targetZ
+  
+    // Start further away if the frog is summoned while the location is already running
+    ?time > 1
+      myX = maxDistance
+  
+    SetState(stateIdle)
+  
+  
+  myX = myX - (pos.x - lastPlayerX)
+  
+  stateTime++
+  
+  ?currentState = stateIdle
+    ?myX < maxDistance | myX > -maxDistance
+      myX = maxDistance
+    myZ = myZ - (pos.z - lastPlayerZ)
+  
+    ?myX < keepDistance
+      SetState(stateJump)
+  
+  :?currentState = stateJump
+    ?myX < maxX
+      myX++
+  
+    ?stateTime >= 6
+      ?myZ > targetZ
+        myZ--
+      :?myZ < targetZ
+        myZ++
+  
+    ?stateTime >= 12
+      SetState(stateIdle)
+  
+  
+  lastPlayerX = pos.x
+  lastPlayerZ = pos.z
+  
+  // Draw
+  
+  ?currentState = stateIdle
+    >o@myX@,@myZ@,@frogColor@,ascii
+#
+####¡
+#¡_¯¯¯_¡
+│ o¯¯¯o │
+!__'-'__!
+###¯¯¯
+asciiend
+    x = myX + 5
+    y = myZ + 2
+  
+  ?currentState = stateJump
+    ?stateTime/2 = 0
+      >o@myX@,@myZ@,@frogColor@,ascii
+#
+#
+####¡
+#¡_¯¯¯_¡
+│ o¯¯¯o │
+'──___──'
+asciiend
+  
+    :?stateTime/2 = 1
+      >o@myX@,@myZ@,@frogColor@,ascii
+#
+####¡
+#¡_¯¯¯_¡
+│ o¯¯¯o │
+!__'-'__!
+###¯¯¯
+asciiend
+  
+    :?stateTime/2 = 2
+      >o@myX@,@myZ@,@frogColor@,ascii
+####¡
+#¡_¯¯¯_¡
+│ o¯¯¯o │
+│  '-'  │
+#¯¯───¯¯
+#
+asciiend
+  
+    :?stateTime/2 = 3
+      >o@myX@,@myZ@,@frogColor@,ascii
+####¡
+#¡_¯¯¯_¡
+│ o¯¯¯o │
+│  '-'  │
+#¯¯───¯¯
+#
+asciiend
+  
+    :?stateTime/2 = 4
+      >o@myX@,@myZ@,@frogColor@,ascii
+####¡
+#¡_¯¯¯_¡
+│ o¯¯¯o │
+│  '-'  │
+#¯¯───¯¯
+#
+asciiend
+  
+    :?stateTime/2 = 5
+      >o@myX@,@myZ@,@frogColor@,ascii
+#
+####¡
+#¡_¯¯¯_¡
+│ o¯¯¯o │
+!__'-'__!
+###¯¯¯
+asciiend
+
+//UI
+
+var button=ascii
+[]
+%%
+##[]
+asciiend
+var buttonback=ascii
+||||
+asciiend
+var back=[1,2,3,4,5]
+var buttons=[hat,present,balloon,confetti,cake]
+var uipnl
+var uiopen=false
+var uibtn
+
+func UIOpen()
+  uiopen=!uiopen
+  ?uiopen
+    uipnl.visible=true
+  :
+    uipnl.visible=false
+
+func Buttons()
+  uibtn=uiAB()
+  uibtn.h=3
+  uibtn.w=3
+  uibtn.dock=top_right
+  uibtn.y=4
+  uibtn.x=-3
+  uibtn.text="☼"
+  uibtn.tcolor=color.Random()
+  uibtn.SetPressed(UIOpen)
+  uipnl=uiAP()
+  uipnl.w=21
+  uipnl.h=17
+  uipnl.visible=false
+  for q = 0..4
+    back[q]=uiAA("||||")
+    back[q].anchor=top_left
+    back[q].dock=top_left
+    back[q].x=16
+    back[q].y=(q*3)+2
+    back[q].h=3
+    back[q].color=#808080
+    buttons[q]=uiAB()
+    buttons[q].anchor=top_left
+    buttons[q].dock=top_left
+    buttons[q].x=16
+    buttons[q].y=(q*3)+1
+    buttons[q].h=3
+    buttons[q].w=4
+    buttons[q].text="##[]"
+    buttons[q].style=custstyle
+    buttons[q].SetPressed(Toggle)
+    uipnl.Add(back[q])
+    uipnl.Add(buttons[q])
+
+func Toggle(btn)
+  ?btn=buttons[0]
+    partyhat=!partyhat
+    ?partyhat
+      buttons[0].text="##[]"
+    :
+      buttons[0].text="[]##"
+  :?btn=buttons[1]
+    presents=!presents
+    ?presents
+      buttons[1].text="##[]"
+    :
+      buttons[1].text="[]##"
+  :?btn=buttons[2]
+    balloons=!balloons
+    ?balloons
+      buttons[2].text="##[]"
+    :
+      buttons[2].text="[]##"
+  :?btn=buttons[3]
+    confetti=!confetti
+    ?confetti
+      buttons[3].text="##[]"
+    :
+      buttons[3].text="[]##"
+      for p : prtcls
+        p.Recycle()
+      prtcls.Clear()
+  :?btn=buttons[4]
+    cake=!cake
+    ?cake
+      buttons[4].text="##[]"
+    :
+      buttons[4].text="[]##"
+
+?totaltime=1
+  Buttons()
+?uiopen
+  >c-9,-8,#rainff,10th Anniversery!!!
+  >c-9,-6,Party Hat
+  >c-9,-3,Presents
+  >c-9,0,Balloons
+  >c-9,3,Confetti
+  >c-9,6,Cake

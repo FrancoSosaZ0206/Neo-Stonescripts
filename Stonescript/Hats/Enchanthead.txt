@@ -1,0 +1,130 @@
+//—————————————————EnchantHead——————————————————
+//Crtr: Telos6857
+//
+//Vrsn: 1.0
+//
+//Inst: Copy and paste the txt file into your
+//      mindstone and have Big Head turned on
+//
+//Note: The enchant that appears in the head
+//      is currently set to #rainbow and is
+//      a transcended enchant. To change this,
+//      you need to change the value of
+//      EnchantColor to a different hex code
+//
+//      Change the value of EnchantColor to...
+//      ＂#cyan＂ for a common enchantment,
+//      ＂#yellow＂ for a rare enchantment,
+//      ＂#green＂ for a heroic enchantment,
+//      ＂#blue＂ for an epic enchantment,
+//      ＂#red＂ for a legendary enchanment and
+//      ＂#rainbow＂ for a transcended enchantment
+//
+//      Lastly, you're free to remove all of the
+//      comment lines '//' once you're done
+//      since they're not part of the code
+
+var AnimCycle = 0
+AnimCycle++
+var FrameDuration = 3
+?AnimCycle = (FrameDuration*46)+1
+ AnimCycle = 0
+var EnchantColor = #rainbow
+
+>h-2,-1,#353535,ascii
+#.-.
+(###)
+#`.´
+asciiend
+?AnimCycle <= FrameDuration*1
+ >h-1,0,@EnchantColor@,(_ #
+:?AnimCycle <= FrameDuration*2
+  >h-1,0,@EnchantColor@,(¯ #
+:?AnimCycle <= FrameDuration*3
+  >h-1,0,@EnchantColor@,´¯`
+:?AnimCycle <= FrameDuration*4
+  >h-1,0,@EnchantColor@, ¯)
+:?AnimCycle <= FrameDuration*5
+  >h-1,0,@EnchantColor@, _)
+:?AnimCycle <= FrameDuration*6
+  >h-1,0,@EnchantColor@,._.
+:?AnimCycle <= FrameDuration*7
+  >h-1,0,@EnchantColor@,(_ #
+:?AnimCycle <= FrameDuration*8
+  >h-1,0,@EnchantColor@,(¯ #
+:?AnimCycle <= FrameDuration*9
+  >h-1,0,@EnchantColor@,´¯`
+:?AnimCycle <= FrameDuration*10
+  >h-1,0,@EnchantColor@, ¯:
+:?AnimCycle <= FrameDuration*11
+  >h-1,0,@EnchantColor@, '¡
+:?AnimCycle <= FrameDuration*12
+  >h-1,0,@EnchantColor@, .:
+:?AnimCycle <= FrameDuration*13
+  >h-1,0,@EnchantColor@,._.
+:?AnimCycle <= FrameDuration*14
+  >h-1,0,@EnchantColor@,:_ #
+:?AnimCycle <= FrameDuration*15
+  >h-1,0,@EnchantColor@,!. #
+:?AnimCycle <= FrameDuration*16
+  >h-1,0,@EnchantColor@,:' #
+:?AnimCycle <= FrameDuration*17
+  >h-1,0,@EnchantColor@,´¯`
+:?AnimCycle <= FrameDuration*18
+  >h-1,0,@EnchantColor@, ¯:
+:?AnimCycle <= FrameDuration*19
+  >h-1,0,@EnchantColor@, '¡
+:?AnimCycle <= FrameDuration*20
+  >h-1,0,@EnchantColor@, .:
+:?AnimCycle <= FrameDuration*21
+  >h-1,0,@EnchantColor@,._.
+:?AnimCycle <= FrameDuration*22
+  >h-1,0,@EnchantColor@,(_ #
+:?AnimCycle <= FrameDuration*23
+  >h-1,0,@EnchantColor@,(¯ #
+:?AnimCycle <= FrameDuration*24
+  >h-1,0,@EnchantColor@,´¯`
+:?AnimCycle <= FrameDuration*25
+  >h-1,0,@EnchantColor@, ¯)
+:?AnimCycle <= FrameDuration*26
+  >h-1,0,@EnchantColor@, .)
+:?AnimCycle <= FrameDuration*27
+  >h-1,0,@EnchantColor@, ¡,
+:?AnimCycle <= FrameDuration*28
+  >h-1,0,@EnchantColor@,´! #
+:?AnimCycle <= FrameDuration*29
+  >h-1,0,@EnchantColor@,(` #
+:?AnimCycle <= FrameDuration*30
+  >h-1,0,@EnchantColor@,(_ #
+:?AnimCycle <= FrameDuration*31
+  >h-1,0,@EnchantColor@,._.
+:?AnimCycle <= FrameDuration*32
+  >h-1,0,@EnchantColor@, _)
+:?AnimCycle <= FrameDuration*33
+  >h-1,0,@EnchantColor@, ¯)
+:?AnimCycle <= FrameDuration*34
+  >h-1,0,@EnchantColor@,(¯ #
+:?AnimCycle <= FrameDuration*35
+  >h-1,0,@EnchantColor@,(_ #
+:?AnimCycle <= FrameDuration*36
+  >h-1,0,@EnchantColor@,._.
+:?AnimCycle <= FrameDuration*37
+  >h-1,0,@EnchantColor@, _)
+:?AnimCycle <= FrameDuration*38
+  >h-1,0,@EnchantColor@, ¯)
+:?AnimCycle <= FrameDuration*39
+  >h-1,0,@EnchantColor@,´¯`
+:?AnimCycle <= FrameDuration*40
+  >h-1,0,@EnchantColor@,(¯ #
+:?AnimCycle <= FrameDuration*41
+  >h-1,0,@EnchantColor@,(, #
+:?AnimCycle <= FrameDuration*42
+  >h-1,0,@EnchantColor@,.¡ #
+:?AnimCycle <= FrameDuration*43
+  >h-1,0,@EnchantColor@, !`
+:?AnimCycle <= FrameDuration*44
+  >h-1,0,@EnchantColor@, ´)
+:?AnimCycle <= FrameDuration*45
+  >h-1,0,@EnchantColor@, _)
+:?AnimCycle <= FrameDuration*46
+  >h-1,0,@EnchantColor@,._.

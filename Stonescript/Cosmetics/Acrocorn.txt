@@ -1,0 +1,193 @@
+//ACROCORN 1.0
+//By: Poly
+
+var mount
+
+mount = 1
+
+?mount = 0
+ enable player
+:
+ disable player
+
+?mount = 1
+ >`0,26,#white,ascii
+UNII:
+asciiend
+
+?mount = 1 &
+^time % 20 = 15 &
+^ai.walking
+ play crossbow_hit 55
+
+?mount = 1 &
+^time % 20 = 20 &
+^ai.walking
+ play crossbow_hit 55
+
+?mount = 1
+ >o-9,-1,#white,ascii
+######O
+#####/|\
+##(‾)¯7, )
+asciiend
+
+?mount = 1 &
+^bighead
+ >o-5,-3,#white,ascii
+#.-.
+( '')
+#`.´
+asciiend
+
+?mount = 1 &
+^item.left = triskelion &
+^ai.walking |
+^mount = 1 &
+^item.right = triskelion &
+^ai.walking
+ >o-12,1,#white,ascii
+—===;
+asciiend
+:?mount = 1 &
+^item.left ! triskelion |
+^mount = 1 &
+^item.right ! triskelion
+ >o-11,1,#white,ascii
+##,;
+#//
+#'
+asciiend
+
+?!ai.walking &
+^mount = 1
+ >o-9,2,#white,ascii
+##||###//
+##|,###\,
+asciiend
+
+?ai.walking &
+^mount = 1 &
+^time % 20 < 5
+ >o-9,2,#white,ascii
+##//###//
+##\,###\,
+asciiend
+
+?ai.walking &
+^mount = 1 &
+^time % 20 < 10 &
+^time % 20 > 5
+ >o-9,2,#white,ascii
+##//####|/'
+##\,####´
+asciiend
+
+?ai.walking &
+^mount = 1 &
+^time % 20 < 15 &
+^time % 20 > 10
+ >o-9,2,#white,ascii
+##|/'####\\
+##´#######\,
+asciiend
+
+?ai.walking &
+^mount = 1 &
+^time % 20 <= 20 &
+^time % 20 > 15
+ >o-9,2,#white,ascii
+##\\###||
+###\,##|,
+asciiend
+
+?mount = 1 &
+^item.right.state ! 3
+ >o-2,-1,#white,ascii
+##,--._
+#/ /\|
+#####´
+asciiend
+
+?mount = 1 &
+^item.right.state = 3 &
+^item.right.time <= 4
+ >o-2,-2,#white,ascii
+###.|`-.
+##/ ,—`#'
+#/ /##
+#####
+asciiend
+
+?mount = 1 &
+^item.right.state = 3 &
+^item.right.time > 4
+ >o-2,-2,#white,ascii
+###.|_
+##/ ,—`
+#/ /##
+#####
+asciiend
+
+?mount = 1 &
+^item.left.state = 2 &
+^item.right.state ! 3
+ play wand_aether_cast 100
+ >o4,-1,#green,ascii
+_*
+asciiend
+
+?mount = 1 &
+^item.left.state = 3 &
+^item.right.state ! 3
+ >o4,-2,#green,ascii
+##_
+_(_)
+asciiend
+
+?mount = 1 &
+^item.left.state = 4 &
+^item.right.state ! 3
+ >o4,-1,#green,ascii
+_
+asciiend
+
+?mount = 1 &
+^item.left.state = 2 &
+^item.right.state = 3
+ play wand_aether_cast 100
+ >o2,-3,#green,ascii
+*
+|
+asciiend
+
+?mount = 1 &
+^item.left.state = 3 &
+^item.right.state = 3
+ >o1,-4,#green,ascii
+#_
+(_)
+#|
+asciiend
+
+?mount = 1 &
+^item.left.state = 4 &
+^item.right.state = 3
+ >o2,-3,#green,ascii
+☤
+|
+asciiend
+
+?mount = 1 &
+^item.left.state = 3
+ play wand_aether_hit 100
+ >f-1,-1,#green,ascii
+#_
+(_)
+asciiend
+
+?mount = 1 &
+^item.left.state = 4
+ >f0,0,#green,ascii
+O
+asciiend

@@ -1,0 +1,180 @@
+//Rf : Staff
+//By: Poly
+//Vr : 1.2
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+?base.IR=Staff&
+^Buffs.string=berserk
+ base.ICR=#magenta
+
+var SIU
+var SID
+var SIL
+var SIR
+var SI2
+
+?base.IRE=Stone
+ SIU=¯
+ SID=_
+ SIL=＂=＂
+ SIR=═
+ SI2=＂*＂
+?base.IRE=Poison
+ SIU=O
+ SID=o
+ SIL=O
+ SIR=o
+ SI2=•
+?base.IRE=Fire
+ SIU=＂^＂
+ SID=v
+ SIL=＂<＂
+ SIR=＂>＂
+ SI2=＂-＂
+?base.IRE=Ice
+ SIU=＂+＂
+ SID=x
+ SIL=＂+＂
+ SIR=x
+ SI2=•
+?base.IRE=Aether
+ SIU='
+ SID=＂,＂
+ SIL=＂-＂
+ SIR=＂-＂
+ SI2=＂.＂
+?base.IRE=Vigor
+ SIU=＂/＂
+ SID=＂\＂
+ SIL=＂(＂
+ SIR=＂)＂
+ SI2=»
+
+?base.IR=Staff
+ >o-1,2,#white,ascii
+v
+asciiend    
+?base.IR=Staff&
+^base.IRS=1&
+^FD>15|
+^base.IR=Staff&
+^base.IRS!2
+ >o1,2,#white,ascii
+\
+asciiend
+
+?base.IR=Staff&
+^base.IRS!2&
+^base.IRT=1
+ >o1,1,@base.ICR@,ascii
+`,
+asciiend
+
+?base.IR=Staff&
+^base.IRS!2&
+^base.IRT=2
+ >o2,1,@base.ICR@,ascii
+.
+asciiend
+
+?base.IR=Staff&
+^base.IRS=1&
+^FD<=15
+ >o1,2,#white,ascii
+>
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT<3
+ >o1,2,#white,ascii
+¯
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT>=3
+ >o1,1,#white,ascii
+/
+asciiend
+
+?base.IR=Staff
+ >o-4,1,@base.ICR@,ascii
+#_
+|@base.IRI@|
+#¯
+asciiend
+
+?base.IR=Staff&
+^base.IRS=1&
+^FD<=15
+ >o-5,1,@base.ICR@,ascii
+@SID@
+
+@SIU@
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT<3
+ >o-6,1,@base.ICR@,ascii
+@SID@
+
+@SIU@
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT=3
+ >o-6,1,@base.ICR@,ascii
+|
+@SIR@
+|
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT>=4&
+^base.IRT<6
+ >o-6,2,@base.ICR@,ascii
+@SIR@
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT>=6&
+^base.IRT<8
+ >o-7,2,@base.ICR@,ascii
+@SIL@
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT>=8&
+^base.IRT<9
+ >o-7,2,@base.ICR@,ascii
+@SIR@
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT=9
+ >o-6,2,@base.ICR@,ascii
+@SIR@
+asciiend
+
+?base.IR=Staff&
+^base.IRS=2&
+^base.IRT>=10
+ >o-5,2,@base.ICR@,ascii
+@SIR@
+asciiend
+
+?base.IR=Staff&
+^base.IRS=3&
+^base.IRT=1
+ >o-5,2,@base.ICR@,ascii
+@SI2@
+asciiend

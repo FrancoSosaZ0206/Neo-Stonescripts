@@ -1,0 +1,45 @@
+//Rf : Shield
+//By: Poly
+//Vr : 1.2
+
+var base = import Components/OVERHAUL
+import Components/OVERHAUL
+
+?base.IR=Shield&
+^armor=maxarmor
+ base.ICR=#7d7d7d
+
+?base.IR=Shield&
+^base.IRT%8<2
+ >o1,1,@base.ICR@,ascii
+#ζ
+«@base.IRI@╞
+#¯
+asciiend
+
+?base.IR=Shield&
+^base.IRT%8<=4&
+^base.IRT%8>2
+ >o1,1,@base.ICR@,ascii
+#_
+«—╞
+#¯
+asciiend
+
+?base.IR=Shield&
+^base.IRT%8<=6&
+^base.IRT%8>4
+ >o1,1,@base.ICR@,ascii
+#_
+«@base.IRI@╞
+#ζ
+asciiend
+
+?base.IR=Shield&
+^base.IRT%8<=8&
+^base.IRT%8>6
+ >o1,1,@base.ICR@,ascii
+#_
+«@base.IRI@╞
+#¯
+asciiend

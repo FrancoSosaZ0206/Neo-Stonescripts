@@ -1,0 +1,248 @@
+//*******************************
+// CHRISTMAS TREE
+//*******************************
+// Version: 1.0
+//
+// Designed and verified on
+// SSRPG v4.7.0
+//
+// Author:
+// Created by TeumessianSven
+// on the Stone Story RPG
+// Discord
+//
+//
+// Description:
+// ------------
+// Celebrate the Christmas Season
+// with a shining, beautiful tree
+// at the start of every level!
+// Each tree reflects the location
+// it’s displayed in so be sure to 
+// see them all!
+// 
+//   __λ__
+//   `.☆.´
+//   /•^•\
+//    /,\
+//   /o·°\
+//   ´,.’o
+//  /o.°.`\
+//  ´, .o.`
+// /o·°,.’o\
+// ´‘`¡^¡´’`
+//  _-·‾‾-.
+// 
+//
+// Quickstart Instructions:
+// ------------------------
+// Copy this code and paste
+// into your mindstone, and
+// that's it! 
+//
+//
+// Enjoy!
+//
+//
+//*******************************
+
+// Version Information
+//*******************************
+//
+// 1.0: Initial Release
+//
+//*******************************
+
+//*******************************
+// Art
+//*******************************
+
+var tree = ascii
+##__λ__
+##`.☆.´
+##/•^•\
+###/,\
+##/´·'\
+##´,.’`
+#/·.,.`\
+#´, .’.`
+/´·’,.’`\
+´‘`¡^¡´’`
+##´,’,`
+asciiend
+
+var star = ascii
+##__λ__
+##`.☆.´
+##/•^•\
+asciiend
+
+var lights = ascii
+###o#°
+######o
+##o#°
+#####o
+#o#°###o
+asciiend
+
+var trunk = ascii
+###¡#¡
+#´//’,\`
+asciiend
+
+var roots = ascii
+###}#{
+#´/,`\\-
+asciiend
+
+var pot = ascii
+###¡#¡
+##\‾‾‾/
+###‾‾‾
+asciiend
+
+var fog = ascii
+###¡#¡
+#_-·‾‾-.
+asciiend
+
+//*******************************
+// Global Variables
+//*******************************
+
+var tx
+var ty
+var rx
+var ry
+var sx = 0
+var sy
+var sxo = -2
+var syo = -15
+var lvl
+var sclr = #FF0000
+var tclr = #00AA00
+var lclr = #rainFF
+var bttm = pot
+var bclr = #8B4513
+
+//*******************************
+// Functions
+//*******************************
+
+func DrawColCanvas(parent,params)
+  ?loc.begin | loc.loop
+    var c = ui.AddCanvas()
+    c.anchor = params[1]
+    c.dock = params[2]
+    c.x = params[3]
+    c.y = params[4]
+    c.w = params[5]
+    c.h = params[6]
+    c.visible = params[7]
+    c.blend = params[8]
+    c.SetFG(params[9])
+    c.SetBG(params[10])
+    parent.Add(c)
+    params[0] = c
+    return c
+  return params[0]
+//
+
+//*******************************
+// Main Code
+//*******************************
+
+?loc.begin | loc.loop
+  lvl = loc
+  tx = pos.x - 7
+
+  ?lvl = rocky_plateau
+    ty = 24
+    bttm = trunk
+    bclr = #8B4513
+  :?lvl = deadwood_valley
+    ty = 21
+    tclr = #999999
+    bttm = roots
+    bclr = #555555
+  :?lvl = caustic_caves
+    ty = 21
+    bttm = roots
+    bclr = #555555
+  :?lvl = waterfall
+    ty = 20
+  :?lvl = fungus_forest
+    ty = 20
+    bttm = trunk
+    bclr = #8B4513
+  :?lvl = undead_crypt_intro
+    ty = 20
+    syo = -14
+    bttm = trunk
+    bclr = #555555
+  :?lvl = undead_crypt
+    ty = 22
+    tclr = #FF00FF
+    lclr = #FFAA00
+    bttm = fog
+    bclr = #555555
+  :?lvl = cross_deadwood_river
+    ty = 20
+  :?lvl = bronze_mine
+    ty = 20
+    bttm = pot
+    bclr = #8B4513
+  :?lvl = icy_ridge
+    ty = 23
+    tclr = #white
+    bttm = trunk
+    bclr = #8B4513
+  :?lvl = cross_bridge
+    ty = 20
+  :?lvl = temple
+    ty = 24
+    bttm = pot
+    bclr = #555555//8B4513
+  
+var scnv 
+var scnv_params = [
+scnv,
+top_left,top_left,
+0,0,5,3,
+true,multiply,
+@sclr@,#010101]
+
+scnv = DrawColCanvas(
+       ^ui.root,scnv_params)
+
+?sx >= 0
+  rx = tx - pos.x
+  ry = ty - pos.z
+
+  sx = screen.FromWorldX(tx)+sxo
+  sy = screen.FromWorldZ(ty)+syo
+
+  scnv.x = sx
+  scnv.y = sy
+  scnv.SetFG(sclr)
+
+  >o@rx-4@,@ry-12@,@tclr@,@tree@
+  >o@rx-4@,@ry-12@,#rainFF,@star@
+  >o@rx-4@,@ry-8@,@lclr@,@lights@
+  >o@rx-4@,@ry-3@,@bclr@,@bttm@
+  /*
+  >`0,1,#green,tx: @tx@
+  >`0,2,#green,ty: @ty@
+
+  >`0,3,#green,rx: @rx@
+  >`0,4,#green,ry: @ry@
+
+  >`0,5,#green,sx: @sx@
+  >`0,6,#green,sy: @sy@
+  */
+:?sx > -5
+  scnv.Recycle()
+
+//*******************************
+// End of File
+//*******************************

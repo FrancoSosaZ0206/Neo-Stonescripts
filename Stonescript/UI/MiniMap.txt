@@ -1,0 +1,419 @@
+/*
+MiniMap v10 by fwzuw
+- Fixed the bug where knocking a small boss 
+into the next screen would cause an error 
+in the MiniMap.
+
+Example:
+Option 1: Import the script
+var MiniMap = import UI/MiniMap
+MiniMap.Show(0,0,true)
+
+Or Option 2: Copy and paste
+Place this code after Variable Declaration:
+Show(0,0,true)
+
+
+The first two parameters are the 
+XY coordinate offsets from the preset position,
+the last parameter is whether to store map data.
+
+Note that changing 'true' to 'false' will
+delete stored map data.
+Data is stored in the Stonescript folder and
+is bound to the script path,
+do not change it randomly.
+*/
+
+//Variable Declaration
+var miniMapVersion = 9
+var miniMapMinimumVersion = 9
+var miniMapLastVersion = 0
+var miniMapIsVersionUpdate = 0
+var miniMapFlickerTime = 0
+var miniMapInfo = []
+var miniMapInfoHere = ""
+var miniMapBossBegin = 0
+var miniMapX = 0
+var miniMapLastX = 0
+var miniMapLastScreenI = 0
+var miniMapLastFoeGetCount = 0
+var miniMapLoops = 0
+var miniMapNumber = 0
+var miniMapId = ""
+var miniMapUI
+var miniMapUIText = ""
+var miniMapIsMapCountIncreased = 0
+var miniMapLastPosX = 0
+var miniMapLastPosY = 0
+var miniMapIsBeforeBoss = 0
+var miniMapPickupItems = [Stone,Wood,Tar,Bronze]
+var miniMapLastMapCountIncrease = 0
+var miniMapReverseCount = 0
+var miniMapLastSmallBoss = ""
+var miniMapExcessTileCount = 0
+
+//If you choose to copy and paste,
+//remove the "//" from the following code
+//Show(0,0,true)
+   
+func Show(posX,posY,isStorage)
+
+ //Read map data from storage
+ ?loc.begin | loc.loop
+  miniMapUI = ui.AddText()
+  miniMapUI.anchor = bottom_center
+  miniMapUI.dock = bottom_center
+  miniMapId = loc.id + "*" + loc.stars
+
+  ?storage.Has("miniMapLastVersion")
+   miniMapLastVersion = 
+   ^storage.Get("miniMapLastVersion")
+  :
+   miniMapLastVersion = 99999
+
+  ?!isStorage | 
+  ^miniMapLastVersion < miniMapMinimumVersion
+   ?storage.Keys().Count() > 0
+    for i = 0..storage.Keys().Count()-1
+     storage.Delete(storage.Keys()[0])
+
+  ?isStorage
+   ?miniMapInfo.Count() = 0 & 
+   ^storage.Has(miniMapId)
+    miniMapInfo = string.Split(
+    ^storage.Get(miniMapId),";",true) 
+
+   ?miniMapLastVersion < miniMapMinimumVersion
+    miniMapIsVersionUpdate = 1
+
+   storage.Set("miniMapLastVersion",
+   ^miniMapVersion)
+
+ //Disable at non-boss 0-star locations
+ ?miniMapId = "*0"
+  return
+
+ //Prevent mid-level map mapping
+ ?string.Size(miniMapId) = 0
+  >`0,0,#ffff00,
+  ^MiniMap needs to restart or loop the level.
+  return
+
+ ?miniMapIsVersionUpdate & totaltime < 150
+  >`0,0,
+  ^MiniMap version has been updated, 
+  ^and the map data needs to be redrawn.
+
+ //Map survey
+ ?!miniMapInfo.Contains("bigBoss")
+
+  //Big boss B
+  ?miniMapId ! loc.id + "*" + loc.stars
+   //If the previous frame has already reached
+   //the screen edge, resulting in 
+   //additional map generation, delete it.
+   ?miniMapLastMapCountIncrease > totaltime - 5
+    miniMapInfo.RemoveAt(miniMapInfo.Count()-1)
+
+   miniMapInfo.Emplace(miniMapInfo.Count()-1,
+   ^"bigBoss")
+  :?foe.distance <= 23 & foe = boss &
+  ^foe ! miniMapLastSmallBoss & (
+  ^loc.stars <= 10 |loc.stars > 10 & (
+  ^miniMapInfo.Contains("smallBoss") |
+  ^miniMapInfo.Contains("pickup smallBoss")) &
+  ^!(miniMapInfoHere = "smallBoss"))|
+  ^loc.loop &
+  ^miniMapInfo[miniMapInfo.Count()-2] =
+  ^"smallBoss"
+   miniMapInfo.Emplace(miniMapX / 3,
+   ^"bigBoss")
+   miniMapExcessTileCount = miniMapInfo.Count()-
+   ^1 - miniMapX / 3
+   ?miniMapExcessTileCount > 0
+    for i = 1..miniMapExcessTileCount
+     miniMapInfo.RemoveAt(miniMapInfo.Count()-1)
+
+  //begin o
+  :?miniMapX < 2 & miniMapInfo.Count() = 0
+   miniMapInfo.Add("begin")
+   ?foe.GetCount(9999) = 0
+    miniMapInfo.Add("noFoe")
+   :
+    miniMapInfo.Add("Foe")
+
+  //foe/nofoe =/-
+  :?screen.i ! miniMapLastScreenI &
+  ^miniMapInfo.Count() = screen.i + 1
+   ?foe.GetCount(9999) > miniMapLastFoeGetCount
+     miniMapInfo.Add("Foe")
+   :
+     miniMapInfo.Add("noFoe")
+   miniMapLastScreenI = screen.i
+   miniMapIsMapCountIncreased = 1
+   miniMapLastMapCountIncrease = totaltime
+  :
+   miniMapLastFoeGetCount = foe.GetCount(9999)
+   miniMapIsMapCountIncreased = 0
+
+ //small boss b
+ ?!miniMapInfo.Contains("smallBoss") &
+ ^!miniMapInfo.Contains("pickup smallBoss") &
+ ^loc.stars > 10 & foe.distance <= 23 &
+ ^(foe = boss | foe = wasp_nest)
+  ?miniMapInfoHere = "pickup"
+   miniMapInfo.Emplace(
+   ^miniMapX / 3,"pickup smallBoss")
+  :
+   miniMapInfo.Emplace(miniMapX / 3,"smallBoss")
+  miniMapLastSmallBoss = foe
+
+ //pickup ~
+ ?pickup.distance < 5 & 
+ ^miniMapPickupItems.Contains(pickup) &
+ ^!(miniMapInfoHere = "pickup") &
+ ^!(pickup = "Stone" &
+ ^!(miniMapInfoHere = "noFoe"))
+  miniMapInfo.Emplace(miniMapX / 3,
+  ^"pickup " + miniMapInfoHere)
+
+ //Map storage
+ ?isStorage
+  storage.Set(miniMapId,
+  ^string.Join(;,miniMapInfo))
+
+
+ //Draw the map
+ //Player position calculation
+ ?miniMapId = loc.id + "*" + loc.stars
+  ?screen.i = 0
+   miniMapBossBegin = 0
+   ?pos.x < -3
+    miniMapX = 1
+   :
+    miniMapX = 2
+  :?miniMapInfoHere = "bigBoss"
+   ?foe = boss & foe.distance <= 23 &
+   ^ai.enabled & item.CanActivate() |
+   ^miniMapBossBegin = 1
+    miniMapX = miniMapInfo.Count()*3-1
+    miniMapBossBegin = 1
+   :
+    miniMapX = miniMapInfo.Count()*3-2
+  :
+   miniMapX = (pos.x-20+23)/23+2
+ :?foe = boss & foe.distance <= 23 &
+  ^ai.enabled & item.CanActivate() |
+  ^miniMapBossBegin = 1
+   miniMapX = miniMapInfo.Count()*3-1
+   miniMapBossBegin = 1
+ :
+  miniMapX = miniMapInfo.Count()*3-2
+
+ miniMapInfoHere = miniMapInfo[miniMapX/3]
+
+ //Flicker when overlapping with boss
+ ?miniMapInfoHere = "smallBoss" &
+ ^(miniMapX + 1) % 3 = 0 |
+ ^miniMapInfoHere = "bigBoss" &
+ ^(miniMapX + 1) % 3 = 0
+  miniMapFlickerTime++
+  ?miniMapFlickerTime = 30
+   miniMapFlickerTime = 0
+ :
+  miniMapFlickerTime = 0
+
+ //Long map splitting display
+ //Fold every ten screens once
+ ?miniMapInfo.Count() % 10 ! 0 |
+ ^miniMapInfo.Count() = 0
+  miniMapLoops = miniMapInfo.Count() / 10 + 1
+ :
+  miniMapLoops = miniMapInfo.Count() / 10
+
+ //Evenly divide the number
+ //of screens for each loop
+ ?miniMapInfo.Count() % miniMapLoops ! 0
+  miniMapNumber = miniMapInfo.Count() /
+  ^miniMapLoops + 1
+ :
+  miniMapNumber = miniMapInfo.Count() /
+  ^miniMapLoops
+
+ //Update Map
+ ?miniMapIsMapCountIncreased |
+ ^miniMapX ! miniMapLastX & ((miniMapX % 3 ! 0 |
+ ^miniMapX % 3 = 0 &
+ ^miniMapX / 3 < miniMapInfo.Count() - 1 ) |
+ ^miniMapInfo.Contains("bigBoss")) |
+ ^miniMapFlickerTime =1 | miniMapFlickerTime =16
+  miniMapLastX = miniMapX
+  for i = 0..miniMapInfo.Count()*3-1
+   //Use "/" to perform floor division
+   ?i >= miniMapNumber * 3 *
+   ^(miniMapX / (miniMapNumber * 3)) &
+   ^i < miniMapNumber * 3 *
+   ^(miniMapX / (miniMapNumber * 3) +1)
+
+    ?i=0
+     miniMapUIText = "#"
+    :?miniMapX >= miniMapNumber*3 & 
+    ^i%(miniMapNumber*3*
+    ^(miniMapX/(miniMapNumber*3)))=0
+     miniMapUIText = ""
+
+    ?i = miniMapX & miniMapFlickerTime <= 15
+     miniMapUIText = miniMapUIText + "x"
+
+    :?i = 1
+      miniMapUIText = miniMapUIText + 
+      ^StarColorDull("o")
+      
+    :?i = 2
+     ?i >= miniMapX
+      miniMapUIText = miniMapUIText + "-"
+     :
+      miniMapUIText = miniMapUIText + 
+      ^"[color=#8c8c8c]-[/color]"
+
+    :?i = 3 * miniMapNumber
+     miniMapUIText = miniMapUIText + 
+     ^StarColorDull(
+     ^(miniMapX/(miniMapNumber*3)+1)
+     ^)
+
+    :?i % 3 = 0 & i ! 0
+     ?i >= miniMapX
+      miniMapUIText = miniMapUIText + "|"
+     :
+      miniMapUIText = miniMapUIText + 
+      ^"[color=#8c8c8c]|[/color]"
+
+    :?miniMapInfo[i / 3] = "pickup" &
+    ^(i - 1) % 3 = 0
+     ?i >= miniMapX
+      miniMapUIText = miniMapUIText + "~"
+     :
+      miniMapUIText = miniMapUIText + 
+      ^"[color=#8c8c8c]~[/color]"
+
+    :?miniMapInfo[i / 3] = "noFoe"
+     ?i >= miniMapX
+      miniMapUIText = miniMapUIText + "-"
+     :
+      miniMapUIText = miniMapUIText + 
+      ^"[color=#8c8c8c]-[/color]"
+
+    :?miniMapInfo[i / 3] = "foe"
+     ?i >= miniMapX
+      miniMapUIText = miniMapUIText + "="
+     :
+      miniMapUIText = miniMapUIText + 
+      ^"[color=#8c8c8c]=[/color]"
+
+    :?miniMapInfo[i / 3] = "smallBoss"
+     ?(i - 1) % 3 = 0
+      ?i >= miniMapX
+       miniMapUIText = miniMapUIText + "-"
+      :
+       miniMapUIText = miniMapUIText + 
+      ^"[color=#8c8c8c]-[/color]"
+     :?i >= miniMapX
+      miniMapUIText = miniMapUIText + "b"
+     :
+      miniMapUIText = miniMapUIText + 
+      ^StarColorDull("b")
+
+    :?miniMapInfo[i / 3] = "bigBoss"
+     ?(i - 1) % 3 = 0
+      ?i > miniMapX
+       miniMapUIText = miniMapUIText + "-"
+      :
+       miniMapUIText = miniMapUIText + 
+      ^"[color=#8c8c8c]-[/color]"
+     :?i >= miniMapX
+      miniMapUIText = miniMapUIText + "B"
+     :
+      miniMapUIText = miniMapUIText + 
+      ^StarColorDull("B")
+
+  //Update MiniMapUI
+  miniMapUI.text = miniMapUIText
+  ?miniMapX/(miniMapNumber*3) = miniMapLoops - 1
+   miniMapUI.w = (miniMapInfo.Count() - 
+   ^miniMapNumber*(miniMapLoops-1))*3
+  :
+   miniMapUI.w = miniMapNumber*3
+
+ //Downward Compatibility
+ ?posX = "C"
+  posX = 0
+ ?posY = "D"
+  posY = 0
+
+ ?miniMapUI.y = 0 | posY ! miniMapLastPosY
+  miniMapUI.y = 0
+  miniMapUI.y = screen.h - 
+  ^miniMapUI.absoluteY - 1 + posY
+  miniMapLastPosY = posY
+  
+ ?miniMapLastPosX ! posX
+  miniMapUI.x = -1 + posX
+  miniMapLastPosX = posX
+
+ //Determine if you are about to
+ //face a boss soon.
+ ?loc = Temple | loc = Ridge | loc = Caves
+  miniMapReverseCount = 2
+ :
+  miniMapReverseCount = 1
+ ?miniMapInfo.Contains("bigBoss") & miniMapX/3= 
+ ^miniMapInfo.Count()-1 - miniMapReverseCount
+  miniMapIsBeforeBoss = 1
+ :
+  miniMapIsBeforeBoss = 0
+
+func StarColor(a)
+ ?loc.stars > 15
+  return "[color=#32da5a]" + a + "[/color]" 
+ :?loc.stars > 10
+  return "[color=#ffff62]" + a + "[/color]"
+ :?loc.stars > 5
+  return "[color=#02e5ff]" + a + "[/color]"
+ :
+  return a 
+
+func StarColorDull(a)
+ ?loc.stars > 15
+  return "[color=#1b7831]" + a + "[/color]" 
+ :?loc.stars > 10
+  return "[color=#8c8c36]" + a + "[/color]"
+ :?loc.stars > 5
+  return "[color=#017e8c]" + a + "[/color]"
+ :
+  return "[color=#8c8c8c]" + a + "[/color]"
+
+/*
+old changelog
+v9
+- Fixed the bug where festival resources 
+would be added to the MiniMap. Now, it will 
+only respond to stone, wood, tar, and bronze.
+- Fixed the issue introduced in v8 where tiles
+were incorrectly deleted in certain locations.
+
+v8
+- Green stars are now supported.
+- Fixed the bug where picking up resources
+while the screen camera moves would repeatedly
+store map information (if enabled).
+- Fixed the bug where an extra tile of the map
+would be generated when entering the boss room
+in the Bronze Mine.
+- All bosses are displayed in white before being
+defeated to prevent eye strain from flickering.
+- New variables added: `miniMapInfoHere` and 
+`miniMapIsBeforeBoss`. You can access their 
+values when using the minimap.
+*/
