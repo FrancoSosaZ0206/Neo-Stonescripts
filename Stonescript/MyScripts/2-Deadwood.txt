@@ -10,8 +10,6 @@
 
 var u = new MyScripts/Lib/Utilities
 var uimkr = new MyScripts/Lib/UI_Maker
-var p
-p = import MyScripts/Lib/Performance
 var a = new MyScripts/Lib/MyArsenal
 var i = new MyScripts/Lib/MyBetterInfo
 var c = new MyScripts/Lib/Combat
@@ -117,11 +115,7 @@ func ldtF(mode)
       equipR @a.vshield2@
 
   :?mode = "unmkDmg"
-    ?totaltime % 2 = 0
-      equipL triskelion
-      equipR hatchet
-    :
-      equip @a.dUstaff@
+    equip @a.dUstaff@
 
   :?mode = "poenaStun"
     ?!keepMask
@@ -140,11 +134,7 @@ func ldtF(mode)
         equipL @a.dFwand@
 
     :
-      ?totaltime % 2 = 0
-        equipL triskelion
-        equipR hatchet
-
-      :?canDebI
+      ?canDebI
         equip @a.dIstaff@
       :?canDebP
         equip @a.dPstaff@
@@ -376,12 +366,8 @@ getting ignition debuff reflected */
         ?c.canUseHamm() & keepMask &
         ^foe.GetCount(15) >= 5 & !c.canUseBlade()
           c.useHamm(a.myHamm)
-        :?foe.GetCount(15) = 1 | (foe = "immune_to_ranged" & keepMask)
-          ?totaltime % 2 = 0 & ai.walking
-            equipL triskelion
-            equipR hatchet
-          :
-            fight1v1()
+        :?(foe.GetCount(15) = 1 | (foe = "immune_to_ranged" & keepMask)) & !ai.walking
+          fight1v1()
         :
           canDebI = (foe.debuffs.string ! "chill:6" & foe ! "immune_to_debuff_chill")
           canDebP = (foe.debuffs.string ! "damage" & foe ! "immune_to_debuff_damage")
