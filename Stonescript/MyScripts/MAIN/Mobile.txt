@@ -38,7 +38,7 @@ WARNINGS:
 
 sys.SetFileUrl(
 ^"https://raw.githubusercontent.com/
-^FrancoSosaZ0206/My-Stonescripts/main/
+^FrancoSosaZ0206/Neo-Stonescripts/main/
 ^Stonescript/")
 
 
@@ -47,9 +47,6 @@ sys.SetFileUrl(
 
 // VARIABLES
 
-// We don't need to import the whole
-// Performance lib to get this:
-var l = loc
 
 
 
@@ -58,29 +55,29 @@ var l = loc
 import MyScripts/MAIN/MyPlayerCosmetics
 
 ?!loc.isQuest & (
-^l = "Waterfall" |
-^l = "cross_deadwood_river" |
-^l = "cross_bridge")
+^loc = "Waterfall" |
+^loc = "cross_deadwood_river" |
+^loc = "cross_bridge")
   loc.Leave()
 
-:?l = "undead_crypt_intro" // Haunted Gate
+:?loc = "undead_crypt_intro" // Haunted Gate
   import MyScripts/Gate
 
-:?l = "Rocky"
+:?loc = "Rocky"
   import MyScripts/1-Rocky
-:?l = "Deadwood"
+:?loc = "Deadwood"
   import MyScripts/2-Deadwood
-:?l = "Caves"
+:?loc = "Caves"
   import MyScripts/3-Caves
-:?l = "Mushroom"
+:?loc = "Mushroom"
   import MyScripts/4-Mushroom
-:?l = "Halls"
+:?loc = "Halls"
   import MyScripts/5-Halls
-:?l = "Mine"
+:?loc = "Mine"
   import MyScripts/6-Mine
-:?l = "Ridge"
+:?loc = "Ridge"
   import MyScripts/7-Ridge
-:?l = "Temple"
+:?loc = "Temple"
   import MyScripts/8-Temple
 
 /* ************************************* */
