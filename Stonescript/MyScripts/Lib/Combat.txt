@@ -42,13 +42,11 @@ var hihp
 // FUNCTIONS
 
 func Main()
-  p.pmhp = maxhp
+  midhp = maxhp / 2
+  lowhp = maxhp / 3
+  hihp = (4 * maxhp) / 5
 
-  midhp = p.pmhp / 2
-  lowhp = p.pmhp / 3
-  hihp = (4 * p.pmhp) / 5
-
-  ?p.ll
+  ?loc.loop
     apsTimer = 0
 
   return
@@ -57,14 +55,14 @@ func Main()
 // Lost items
 
 func canUseBlade()
-  return p.tt >= p.bladeDelay & p.canAct
+  return totaltime >= p.bladeDelay & item.CanActivate()
 
 // cannot be interrupted, doesn't need a cooldown check
 func useBlade()
   equip blade
   activate R
 
-  p.bladeDelay = p.tt + p.bladeCd
+  p.bladeDelay = totaltime + p.bladeCd
 
   return
 
@@ -73,7 +71,7 @@ can be used in 2 screens of distance,
 according to a certain screen index. */
 func canUseBladeDS(nScreen)
   return canUseBlade()
-  ^& p.si = nScreen
+  ^& screen.i = nScreen
 
 var slideCount = 0 // counter to give screen.Next() time to slide
 func useBladeDS()
@@ -91,34 +89,34 @@ func useBladeDS()
 
 
 func canUseArm()
-  return p.tt >= p.armDelay &
-  ^3 < p.fd & p.fd < 9
-  ^& p.canAct
+  return totaltime >= p.armDelay &
+  ^3 < foe.distance & foe.distance < 9
+  ^& item.CanActivate()
 
 func useArm()
   equip arm
   activate R
 
-  p.armDelay = p.tt + p.armCd
+  p.armDelay = totaltime + p.armCd
 
   return
 
 
 func canUseMask()
-  return p.tt >= p.maskDelay & p.canAct
+  return totaltime >= p.maskDelay & item.CanActivate()
 
 func useMask()
   equipL triskelion
   equipR mask
   activate R
 
-  p.maskDelay = p.tt + p.maskCd
+  p.maskDelay = totaltime + p.maskCd
 
   return
 
 func canUseMaskDS(nScreen)
   return canUseMask()
-  ^& p.si = nScreen
+  ^& screen.i = nScreen
 
 func useMaskDS()
   ?slideCount = 0
@@ -137,17 +135,17 @@ func useMaskDS()
 func canUseFTali()
   return
   ^summon.GetId() ! "cinderwisp" &
-  ^p.tt >= p.fTaliDelay &
-  ^p.canAct |
-  ^(p.il = "fire_talisman" & p.ils = 2) |
-  ^(p.ir = "fire_talisman" & p.irs = 2)
+  ^totaltime >= p.fTaliDelay &
+  ^item.CanActivate() |
+  ^(item.left = "fire_talisman" & item.left.state = 2) |
+  ^(item.right = "fire_talisman" & item.right.state = 2)
 
 func canHideFTali()
   return summon.GetId() = "cinderwisp"
-  ^& p.tt >= p.fTaliDelay
-  ^& p.canAct |
-  ^(p.il = "fire_talisman" & p.ils = 2) |
-  ^(p.ir = "fire_talisman" & p.irs = 2)
+  ^& totaltime >= p.fTaliDelay
+  ^& item.CanActivate() |
+  ^(item.left = "fire_talisman" & item.left.state = 2) |
+  ^(item.right = "fire_talisman" & item.right.state = 2)
 
 func useFTali(hand)
   ?hand = "l"
@@ -157,7 +155,7 @@ func useFTali(hand)
     equipR fire_talisman
     activate R
 
-  p.fTaliDelay = p.tt + p.fTaliCd + p.castTime
+  p.fTaliDelay = totaltime + p.fTaliCd + p.castTime
 
   return
 
@@ -165,7 +163,7 @@ func useFTali(hand)
 ability. */
 func canUseCind()
   return summon.GetId() = "cinderwisp"
-  ^& p.tt >= p.cindDelay & p.canAct
+  ^& totaltime >= p.cindDelay & item.CanActivate()
 
 /* Checks if the estimated damage of
 cinderwisp's "devour" ability will kill the foe,
@@ -184,17 +182,17 @@ func canKillCind(foeTotalHP, nIgnitions, cindDmg, margin)
 
 func useCind()
   activate cinderwisp
-  p.cindDelay = p.tt + p.cindCd + p.castTime
+  p.cindDelay = totaltime + p.cindCd + p.castTime
   return
 
 
 func canUseAETali()
   return
   ^summon.GetId() ! "voidweaver" &
-  ^p.tt >= p.aeTaliDelay &
-  ^p.canAct |
-  ^(p.il = "aether_talisman" & p.ils = 2) |
-  ^(p.ir = "aether_talisman" & p.irs = 2)
+  ^totaltime >= p.aeTaliDelay &
+  ^item.CanActivate() |
+  ^(item.left = "aether_talisman" & item.left.state = 2) |
+  ^(item.right = "aether_talisman" & item.right.state = 2)
 
 func useAETali(hand)
   ?hand = "l"
@@ -204,7 +202,7 @@ func useAETali(hand)
     equipR aether_talisman
     activate R
 
-  p.aeTaliDelay = p.tt + p.aeTaliCd + p.castTime
+  p.aeTaliDelay = totaltime + p.aeTaliCd + p.castTime
 
   return
 
@@ -212,16 +210,16 @@ func useAETali(hand)
 ability. */
 func canUseWeav()
   return summon.GetId() = "voidweaver"
-  ^& p.tt >= p.weavDelay & p.canAct
+  ^& totaltime >= p.weavDelay & item.CanActivate()
 
 func useWeav()
   activate voidweaver
-  p.weavDelay = p.tt + p.weavCd + p.castTime
+  p.weavDelay = totaltime + p.weavCd + p.castTime
   return
 
 func canUseWeavDS(nScreen)
   return canUseWeav()
-  ^& p.si = nScreen
+  ^& screen.i = nScreen
 
 func useWeavDS()
   ?slideCount = 0
@@ -241,15 +239,15 @@ func useWeavDS()
 /* Checks if you can use the
 bashing shield's ability. */
 func canBash()
-  return p.tt >= p.bashDelay & !p.aiI
-  ^& 11 <= p.fd & p.fd <= 15
-  ^& p.canAct
+  return totaltime >= p.bashDelay & !ai.idle
+  ^& 11 <= foe.distance & foe.distance <= 15
+  ^& item.CanActivate()
 
 func bash(lItem)
   equipL @lItem@
   equipR bashing shield
 
-  p.bashDelay = p.tt + p.bashCd
+  p.bashDelay = totaltime + p.bashCd
 
   return
 
@@ -257,48 +255,48 @@ func bash(lItem)
 // Special Weapons
 
 func canUseHamm()
-  return p.tt >= p.hammDelay &
-  ^p.canAct |
-  ^(p.ir = "heavy hammer" &
-  ^p.irs = 2)
+  return totaltime >= p.hammDelay &
+  ^item.CanActivate() |
+  ^(item.right = "heavy hammer" &
+  ^item.right.state = 2)
 
 var hammCdSlower
 func canUseHamm2()
   hammCdSlower = item.GetCooldown("hammer") <= 0
   return hammCdSlower &
-  ^p.canAct |
-  ^(p.ir = "heavy hammer" &
-  ^p.irs = 2)
+  ^item.CanActivate() |
+  ^(item.right = "heavy hammer" &
+  ^item.right.state = 2)
 
 func useHamm(yourHamm)
   equip @yourHamm@
   activate R
 
-  p.hammDelay = p.tt + p.hammCd + p.castTime
+  p.hammDelay = totaltime + p.hammCd + p.castTime
 
   return
 
 
 func canUseBard()
-  return p.tt >= p.bardDelay &
-  ^p.canAct |
-  ^(p.ir = "bardiche" &
-  ^p.irs = 2)
+  return totaltime >= p.bardDelay &
+  ^item.CanActivate() |
+  ^(item.right = "bardiche" &
+  ^item.right.state = 2)
 
 var bardCdSlower
 func canUseBard2()
   bardCdSlower = item.GetCooldown("bardiche") <= 0
   return bardCdSlower &
-  ^p.canAct |
-  ^(p.ir = "bardiche" &
-  ^p.irs = 2)
+  ^item.CanActivate() |
+  ^(item.right = "bardiche" &
+  ^item.right.state = 2)
 
 func useBard(yourBard)
-  ?p.fd < 10
+  ?foe.distance < 10
     equip @yourBard@
     activate R
 
-    p.bardDelay = p.tt + p.bardCd + p.castTime
+    p.bardDelay = totaltime + p.bardCd + p.castTime
 
   return
 
@@ -306,25 +304,25 @@ func useBard(yourBard)
 /* Checks if you can use the
 dashing shield's ability. */
 func canDash()
-  return item.GetCooldown("dash") <= 0 & !p.aiI
-  ^& 11 <= p.fd & p.fd <= 15
-  ^& p.canAct
+  return item.GetCooldown("dash") <= 0 & !ai.idle
+  ^& 11 <= foe.distance & foe.distance <= 15
+  ^& item.CanActivate()
 
 func dash(lItem, yourDshield)
   equipL @lItem@
   equipR @yourDshield@
 
-  p.dashDelay = p.tt + p.dashCd
+  p.dashDelay = totaltime + p.dashCd
 
   return
 
 
 func canUseQstaff()
 
-  ?p.tt >= p.qstaffDelay
-    return p.canAct |
-    ^(p.ir = "quarterstaff"
-    ^& p.irs = 2)
+  ?totaltime >= p.qstaffDelay
+    return item.CanActivate() |
+    ^(item.right = "quarterstaff"
+    ^& item.right.state = 2)
 
   :
     return false
@@ -345,22 +343,22 @@ func useQstaff(yourQstaff)
   equip @yourQstaff@
   activate R
 
-  p.qstaffDelay = p.tt + p.qstaffCd
+  p.qstaffDelay = totaltime + p.qstaffCd
 
   return
 
 
 func canUseMind()
-  return item.GetCooldown("mind") <= 0 & p.canAct
+  return item.GetCooldown("mind") <= 0 & item.CanActivate()
 
 
 // Tools
 
 func canUseHatchet()
   return item.GetCooldown("hatchet") <= 0
-  ^& p.canAct
+  ^& item.CanActivate()
   ^& harvest.distance < 5
-  ^& p.ir = "hatchet"
+  ^& item.right = "hatchet"
 
 func useHatchet()
   activate R
@@ -370,7 +368,7 @@ func useHatchet()
 // Potions
 
 func canUsePot()
-  return p.ip ! "empty" & p.canAct
+  return item.potion ! "empty" & item.CanActivate()
 
 /* Checks if a healing type potion
 can be used.
@@ -380,11 +378,11 @@ Healing type potions are considered:
   - vampiric */
 func canUsePotHeal()
   ?canUsePot()
-    ?p.ip = "healing" |
-    ^p.ip = "vampiric"
+    ?item.potion = "healing" |
+    ^item.potion = "vampiric"
       return hp < lowhp
 
-    :?p.ip = "defensive"
+    :?item.potion = "defensive"
       return hp < midhp
     
     :
@@ -399,7 +397,7 @@ Potions related:
   - lucky */
 func canUsePotDmg()
   return canUsePot() &
-  ^(p.ip = "berserk" | p.ip = "lucky")
+  ^(item.potion = "berserk" | item.potion = "lucky")
 
 /* Determines if a special potion
 can be activated, given a special
@@ -414,21 +412,21 @@ Valid potion types and conditions:
 func canUsePotSpecial(type,cond)
   ?canUsePot()
 
-    ?p.ip = type
-      ?p.ip = "cleansing"
+    ?item.potion = type
+      ?item.potion = "cleansing"
         return hp < midhp &
         ^debuffs.count >= cond
         // ^^^ = no. of debuffs to cleanse
     
-      :?p.ip = "strength"
+      :?item.potion = "strength"
         return foe.armor & foe.armor > cond
 
-      :?p.ip = "lightning"
-      ^|p.ip = "experience"
+      :?item.potion = "lightning"
+      ^|item.potion = "experience"
         return foe.count >= cond
 
-      :?p.ip = "invisibility"
-        return p.f = boss
+      :?item.potion = "invisibility"
+        return foe = boss
 
       :
         >c-10,0,#red,
@@ -494,7 +492,7 @@ func doMoondial(weapon1, weapon2, mode)
   :?mode = 3
     /* For when you have just 1 +21 sword (weapon2 can be
     anything, it will not be used) */
-    ?p.fd <= 5
+    ?foe.distance <= 5
       equipL moon
     :
       equipL @weapon2@
@@ -543,12 +541,12 @@ func doAps(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
 
 
 func doAAC(itemLeft, itemRight)
-  ?p.ils = 3
+  ?item.left.state = 3
     equipL @itemLeft@
-    equipL @p.il@
-  ?p.irs = 3
+    equipL @item.left@
+  ?item.right.state = 3
     equipR @itemRight@
-    equipR @p.ir@
+    equip @item.right@ // equip works for two-handed items as well
 
   return
 

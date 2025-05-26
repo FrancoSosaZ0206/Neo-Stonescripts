@@ -24,8 +24,6 @@ HOW TO USE
 // IMPORTS
 
 var uimkr = new MyScripts/Lib/UI_Maker
-var p
-p = import MyScripts/Lib/Performance
 
 
 
@@ -95,9 +93,9 @@ func getBuffInfo(nameid, inFoe, infoIndex)
 
   // if inFoe = true, checks foe's buffs, else, player's buffs
   ?inFoe
-    arrBuffs = string.Split(p.fbs,",", true)
+    arrBuffs = string.Split(foe.buffs.string,",", true)
   :
-    arrBuffs = string.Split(p.bs,",", true)
+    arrBuffs = string.Split(buffs.string,",", true)
     
   ?arrBuffs & !buffFound
     for buff : arrBuffs
@@ -129,9 +127,9 @@ func getDebuffLvl(nameid, inFoe)
 
   // if inFoe = true, checks foe's debuffs, else, player's debuffs
   ?inFoe
-    arrDebuffs = string.Split(p.fds,",", true)
+    arrDebuffs = string.Split(foe.debuffs.string,",", true)
   :
-    arrDebuffs = string.Split(p.ds,",", true)
+    arrDebuffs = string.Split(debuffs.string,",", true)
 
 
   ?arrDebuffs & !debuffFound
@@ -167,14 +165,14 @@ RETURNS:
     UI panel if isUI = true, nothing otherwise.
   else, returns nothing. */
 func showDebuffs(inFoe,x,y,col,isUI)
-  ?(inFoe & p.fds)
-  ^|(!inFoe & p.ds)
+  ?(inFoe & foe.debuffs.string)
+  ^|(!inFoe & debuffs.string)
     var arrDebuffs
 
     ?inFoe
-      arrDebuffs = string.Split(p.fds,",", true)
+      arrDebuffs = string.Split(foe.debuffs.string,",", true)
     :
-      arrDebuffs = string.Split(p.ds,",",true)
+      arrDebuffs = string.Split(debuffs.string,",",true)
 
     ?arrDebuffs
       ?isUI
@@ -237,14 +235,14 @@ RETURNS:
     UI panel if isUI = true, nothing otherwise.
   else, returns nothing. */
 func showBuffs(inFoe,x,y,col,isUI)
-  ?(inFoe & p.fbs)
-  ^|(!inFoe & p.bs)
+  ?(inFoe & foe.buffs.string)
+  ^|(!inFoe & buffs.string)
     var arrBuffs
 
     ?inFoe
-      arrBuffs = string.Split(p.fbs,",", true)
+      arrBuffs = string.Split(foe.buffs.string,",", true)
     :
-      arrBuffs = string.Split(p.bs,",",true)
+      arrBuffs = string.Split(buffs.string,",",true)
 
     ?arrBuffs
       ?isUI
@@ -306,7 +304,7 @@ func showEffects(isBuff,inFoe,x,y,col,isUI)
 
 
 func getFoeTotalHP()
-  return p.fhp + p.fa
+  return foe.hp + foe.armor
 
 
 // Strings

@@ -10,8 +10,6 @@
 
 var u = new MyScripts/Lib/Utilities
 var uimkr = new MyScripts/Lib/UI_Maker
-var p
-p = import MyScripts/Lib/Performance
 var a = new MyScripts/Lib/MyArsenal
 var i = new MyScripts/Lib/MyBetterInfo
 var c = new MyScripts/Lib/Combat
@@ -53,14 +51,14 @@ var smiteScr = 2
 var keepMask = true
 var keepFTali = false
 
-?p.f = "boss"
+?foe = "boss"
   keepFTali = true
 
 var canDebI
 var canDebP
 var canDebF
 
-?p.ll
+?loc.loop
   keepMask = false
   keepFTali = false
 
@@ -102,18 +100,18 @@ func ldtF(mode) // loadouts
   :?mode = "magic"
     ?keepMask
       ?canDebI
-        equipL @a.dIwand1@
+        equipL Frosty Crust
       :?canDebP
         equipL @a.dPwand@
       :?canDebF
         equipL @a.dFwand@
 
     :
-      ?p.tt % 2 = 0
+      /*?totaltime % 2 = 0
         equipL triskelion
-        equipR hatchet
+        equipR hatchet*/
 
-      :?canDebI
+      ?canDebI
         equip @a.dIstaff@
       :?canDebP
         equip @a.dPstaff@
@@ -126,18 +124,16 @@ func ldtF(mode) // loadouts
   return
 
 func fight1v1()
-  p.fds = foe.debuffs.string
-  p.bs = buffs.string
 
   /* How to apply debuffs:
   - apply all except the ones the foe is immune to.
   Finish when:
   - all possible debuffs have been applied. */
-  canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
-  canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
-  canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
+  canDebI = (foe.debuffs.string ! "chill:6" & foe ! "immune_to_debuff_chill")
+  canDebP = (foe.debuffs.string ! "damage" & foe ! "immune_to_debuff_damage")
+  canDebF = (foe.debuffs.string ! "dot" & foe ! "immune_to_debuff_dot")
 
-  ?(keepMask | p.bs = "berserk") & (canDebI | canDebP | canDebF)
+  ?(keepMask | buffs.string = "berserk") & (canDebI | canDebP | canDebF)
     ?keepMask
       ?canDebI
         equipL @a.dIsword@
@@ -152,7 +148,7 @@ func fight1v1()
       :?canDebF
         equipL @a.dFsword@
       :?canDebI
-        equipL @a.dIwand1@
+        equipL Frosty Crust
 
       //Right hand:
       ?canDebI
@@ -161,8 +157,7 @@ func fight1v1()
   :?keepMask
     equipL Bifrost
   :
-    p.bs = buffs.string
-    ?p.bs = "berserk"
+    ?buffs.string = "berserk"
       c.doMoondial(Bifrost, a.isword, 2)
     :
       c.doMoondial(Bifrost, a.isword, 0)
@@ -176,21 +171,20 @@ func fight1v1()
 
 c.doAAC("sword 0*", a.cshield1)
 
+>`15,2,#yellow,@foe.debuffs.string@
+
 ?hp < maxhp & !keepMask
   loc.Leave()
 
-?p.lb // AUTO BREWING
-  p.rs = res.stone
-  p.rw = res.wood
-  p.rb = res.bronze
+?loc.begin // AUTO BREWING
 
-  ?p.rb >= 10
-    ?p.rs >= 10
-      ?p.ip ! "lucky"
+  ?res.bronze >= 10
+    ?res.stone >= 10
+      ?item.potion ! "lucky"
         brew stone + bronze
 
-    :?p.rw >= 10
-      ?p.ip ! "berserk"
+    :?res.wood >= 10
+      ?item.potion ! "berserk"
         brew wood + bronze
     :
       loc.Leave()
@@ -198,12 +192,12 @@ c.doAAC("sword 0*", a.cshield1)
     loc.Leave()
 
 ?keepMask
-  ?p.ir ! "bardiche" &
-  ^p.ir ! "quarterstaff" &
-  ^p.ir ! "heavy hammer"
+  ?item.right ! "bardiche" &
+  ^item.right ! "quarterstaff" &
+  ^item.right ! "heavy hammer"
     equipR mask
 
-?p.lb | p.ll
+?loc.begin | loc.loop
   equipL triskelion
   equipR @a.cshield1@
 
@@ -230,41 +224,36 @@ c.doAAC("sword 0*", a.cshield1)
   :
     ldtF("magnet")
 :
-  p.fd = foe.distance
-  p.aiE = ai.enabled
 
   ?c.canUseBladeDS(smiteScr)
-    ?p.fd <= 33
+    ?foe.distance <= 33
       c.useBladeDS()
 
-  ?c.canUseQstaff() & p.aiE
-    ?p.ir ! "bardiche" & p.ir ! Kubikiribocho
-    ^& p.ir ! "heavy hammer" & (
+  ?c.canUseQstaff() & ai.enabled
+    ?item.right ! "bardiche" & item.right ! Kubikiribocho
+    ^& item.right ! "heavy hammer" & (
     ^(!c.canBash() & !c.canDash())
-    ^| (p.fd < 11 | p.fd > 15))
+    ^| (foe.distance < 11 | foe.distance > 15))
       c.useQstaff(a.myqstaff)
 
-  :?p.fd > 35
-    p.pa = armor
-    ?14 <= p.pa & p.pa <= a.cMaxArmor
+  :?foe.distance > 35
+    ?14 <= armor & armor <= a.cMaxArmor
       ldtF("default")
-    :?p.pa < 14
+    :?armor < 14
       ldtF("armorRegen")
     :
       equipL triskelion
       equipR mask
 
-  :?p.fd > 15
+  :?foe.distance > 15
     ldtF("engage")
 
     var isAbtToDash
-    isAbtToDash = (p.fd <= 17)
+    isAbtToDash = (foe.distance <= 17)
     ?keepMask & isAbtToDash
       equipR @a.ishield@
 
-    p.fds = foe.debuffs.string
-    p.bs = buffs.string
-    canDebI = (p.fds ! "chill" &
+    canDebI = (foe.debuffs.string ! "chill" &
     ^f ! "immune_to_debuff_chill")
 
     ?!keepMask & canDebI & isAbtToDash &
@@ -272,38 +261,33 @@ c.doAAC("sword 0*", a.cshield1)
       equipR @a.aiShield@
 
   :
-    ?p.f ! "nagaraja"
+    ?foe ! "nagaraja"
       ?c.canBash()
         c.bash(Bifrost)
       :?c.canDash()
         c.dash(Bifrost, a.dshield)
       :
-        ?p.f = "acronian_cultist"
+        ?foe = "acronian_cultist"
           ?c.canUseMask()
             c.useMask()
           :
             fight1v1()  
         :
-          p.fc = foe.count
-
-          ?p.fc >= 7 &
+          ?foe.count >= 7 &
           ^c.canUseHamm() & !keepMask
           ^!c.canUseBlade()
             c.useHamm(a.myHamm)
 
-          ://?p.fc > 1
+          ://?foe.count > 1
             ldtF("magic")
-          /*:?p.fd < 7
+          /*:?foe.distance < 7
             fight1v1()*/
 
 
     : // foe = "nagaraja"
-      p.fds = foe.debuffs.string
-      p.fs = foe.state
-      p.ft = foe.time
 
       ?c.canUseCind() & dpsm.DPS ! "N/A"
-        ?p.fds = a.maxIgnitions_Default |
+        ?foe.debuffs.string = a.maxIgnitions_Default |
         ^c.canKillCind(i.getFoeTotalHP(),
         ^              i.getDebuffLvl("ignition", true),
         ^              a.cindDmg_Default, dpsm.DPS)
@@ -312,8 +296,8 @@ c.doAAC("sword 0*", a.cshield1)
       ?c.canUsePot()
         activate potion
 
-      ?(p.fs = 112 | p.fs = 102)
-      ^& p.ft >= 55 & p.ft <= 65
+      ?(foe.state = 112 | foe.state = 102)
+      ^& foe.time >= 55 & foe.time <= 65
         ?c.canUseMind()
           ldtF("escape")
 
@@ -322,7 +306,7 @@ c.doAAC("sword 0*", a.cshield1)
         :
           equip @a.ibow@
 
-      :?p.fs ! 4 // if it's not dying
+      :?foe.state ! 4 // if it's not dying
         ?c.canBash()
           c.bash(Bifrost)
         :?c.canDash()

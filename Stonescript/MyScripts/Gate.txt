@@ -6,7 +6,6 @@
 
 // IMPORTS
 
-import Cosmetics/PetStonehead
 var a = new MyScripts/Lib/MyArsenal
 var c = new MyScripts/Lib/Combat
 

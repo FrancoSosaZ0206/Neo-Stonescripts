@@ -5,12 +5,10 @@
 
 
 /* FILE INFO
-  Performance library (version 2)
+  Performance library (version 3)
   Made by MetalEagle26 (Tom Crow)
 
-  version 2.0--
-    - Where is the first one, though?
-    - Nobody knows...
+  version 3.0 (paritally in desuse)
 
 DESCRIPTION
   This library provides some custom

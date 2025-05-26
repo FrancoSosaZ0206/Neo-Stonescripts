@@ -1,6 +1,6 @@
 ?loc = "Caves"
-  import Cosmetics/Hats/Helmet
-  import Cosmetics/PetSpider
+  import Hats/Helmet
+  import Pets/Spider
 :
   import Cosmetics/WavyScarf
-  //import Cosmetics/PetSkully
+  import Pets/Skully

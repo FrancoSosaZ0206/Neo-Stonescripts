@@ -137,9 +137,9 @@ var DPS = "N/A" // damage per second
 
 func Update()
   // Calculate only when desired:
-  ?ENABLED & p.f = "boss" // only works when there's a boss
+  ?ENABLED & foe = "boss" // only works when there's a boss
 
-    currhp  = p.fhp + p.fa
+    currhp  = foe.hp + foe.armor
     nethp   = foe.maxhp + foe.maxarmor
 
     ?0 < currhp & currhp < nethp // boss lost hp/armor, but isn't dead
@@ -150,13 +150,13 @@ func Update()
         totalDmg  = totalDmg + dmg // and we accumulate it in this variable
 
     : // else, reset temporal variables
-      startTime = p.tt
+      startTime = totaltime
       hits      = 0
       dmg       = 0
       totalDmg  = 0
 
 
-    FRM = p.tt - startTime // total time minus the time the first hit was dealt
+    FRM = totaltime - startTime // total time minus the time the first hit was dealt
     ?hits > 1
       FPH = FRM      / (hits /*- 1*/) // -1 is there to avoid stat flicking
     :
@@ -180,7 +180,7 @@ func Update()
     auxhp = currhp
 
 
-    return p.tt % refreshRate = 0
+    return totaltime % refreshRate = 0
   :
     return false
 

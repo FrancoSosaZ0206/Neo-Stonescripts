@@ -43,6 +43,7 @@ Speedy Hammer = stone hammer *max
 Kubikiribocho = bardiche *max (enchanted: crit)
 
 theVwand = vigor wand D golden
+Frosty Crust = ice wand dI *max
 
 Death's Kiss = poison sword dP shiny (enchanted: P) */
 
@@ -89,8 +90,7 @@ var dIsword = "ice sword dI *max"
 var isword = "ice sword -dI *max"
 var ishield = "ice shield -ai *max"
 var aiShield = "ice shield ai *max"
-var dIwand1 = "ice wand dI *max +16"
-var dIwand2 = "ice wand dI *max +11"
+var dIwand = "ice wand dI *max +15"
 var ibow = "ice crossbow D *max"
 var dIstaff = "ice staff dI *max"
 
