@@ -57,7 +57,8 @@ var pBow = "poison bow -dP *max"
 var dPbow = "poison bow dP *max"
 var dPwand = "poison wand dP *max"
 var dPstaff = "poison staff dP *max"
-
+var hPwand = "wand_hidden_poison *max" // aka Plague Wand
+var hPstaff = "staff_hidden_poison *max" // aka Berserker Staff
 
 //vigor:
 var dLsword = "vigor sword dL *max"
@@ -66,6 +67,8 @@ var vshield = "vigor shield -ah *max"
 var ahShield = "vigor shield ah *max"
 var ahHammer = "vigor hammer ah *max"
 var vwand = "vigor wand D *max"
+var hVwand = "wand_hidden_vigor *max" // aka Reset Wand
+var hVstaff = "staff_hidden_vigor *max" // aka Prevention Staff
 
 //aether:
 var aesword = "aether sword -dU *max"
@@ -76,6 +79,8 @@ var auShield = "aether shield au *max"
 var aebow = "aether crossbow D *max"
 var dUstaff = "aether staff dU *max"
 var dUwand = "aether wand dU *max"
+var HaeWand = "wand_hidden_aether *max" // aka Calamity Wand
+var HaeStaff = "staff_hidden_aether *max" // aka Grasping Staff
 
 //fire:
 var dFsword = "fire sword dF *max"
@@ -84,6 +89,8 @@ var fshield = "fire shield A *max"
 var fbow = "fire crossbow dF *max"
 var dFwand = "fire wand dF *max"
 var dFstaff = "fire staff dF *max"
+var hFwand = "wand_hidden_fire *max" // aka Explosive Wand
+var hFstaff = "staff_hidden_fire *max" // aka Infernal Staff
 
 //ice:
 var dIsword = "ice sword dI *max"
@@ -93,6 +100,15 @@ var aiShield = "ice shield ai *max"
 var dIwand = "ice wand dI *max +15"
 var ibow = "ice crossbow D *max"
 var dIstaff = "ice staff dI *max"
+var hIwand = "wand_hidden_ice *max" // aka Frost Wand
+var hIstaff = "staff_hidden_ice *max" // aka Eternity Staff
+
+//stone:
+var sbow = "stone crossbow *max"
+var ssword1 = "stone sword *max"
+var ssword1 = "stone sword *max"
+var sWand = "wand_hidden_stone *max" // aka Gravity Wand
+var sStaff = "staff_hidden_stone *max" //aka Acrobatic Staff
 
 //alternate:
 var altbow = "crossbow *max golden"
@@ -103,7 +119,6 @@ var myqstaff = "quarterstaff golden"
 var fastBard = "bardiche *max" // enchanted: speed
 var myHamm = "heavy hammer *max"
 var rbow = "repeating crossbow *max golden"
-var sbow = "stone crossbow *max"
 var cshield1 = "compound shield *max shiny"
 var cshield2 = "compound shield *max -shiny"
 var tshield = "towering shield *max golden"
