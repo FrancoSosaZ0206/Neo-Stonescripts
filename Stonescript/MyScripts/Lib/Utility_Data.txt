@@ -1,0 +1,15 @@
+// *******************************************************
+//                     Utility_Data.txt                   
+// *******************************************************
+
+var bardiche_range = 9
+
+// These count both for dashing and bashing shields:
+var dash_range_min = 11
+var dash_range_max = 15
+
+var hatchet_range = 5
+
+// *******************************************************
+//                 END OF "Utility_Data.txt"              
+// *******************************************************

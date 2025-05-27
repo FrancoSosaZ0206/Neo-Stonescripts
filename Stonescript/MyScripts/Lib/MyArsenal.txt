@@ -49,113 +49,120 @@ Death's Kiss = poison sword dP shiny (enchanted: P) */
 
 
 //poison:
-var dPsword = "poison sword dP *max" // enchanted: speed
-var psword = "poison sword -dP *max"
-var pshield = "poison shield -ap *max"
-var apShield = "poison shield ap *max"
-var pBow = "poison bow -dP *max"
-var dPbow = "poison bow dP *max"
-var dPwand = "poison wand dP *max"
-var dPstaff = "poison staff dP *max"
-var hPwand = "wand_hidden_poison *max" // aka Plague Wand
-var hPstaff = "staff_hidden_poison *max" // aka Berserker Staff
+var swordPoisonDebuff = "shield poison *max dP" // enchanted: speed
+var swordPoisonDmg = "sword poison -dP *max"
+var shieldPoisonDefense = "shield poison *max -ap"
+var shieldPoisonBuff = "shield poison *max ap"
+var bowPoisonDmg = "bow poison *max -dP"
+var bowPoisonDebuff = "bow poison *max dP"
+var wandPoisonDebuff = "wand poison *max dP -hidden"
+var wandPoisonHidden = "wand_hidden_poison *max" // aka Plague Wand
+var staffPoisonDebuff = "staff poison *max dP -hidden"
+var staffPoisonHidden = "staff_hidden_poison *max" // aka Berserker Staff
 
 //vigor:
-var dLsword = "vigor sword dL *max"
-var vsword = "vigor sword -dL *max Spring24"
-var vshield = "vigor shield -ah *max"
-var ahShield = "vigor shield ah *max"
-var ahHammer = "vigor hammer ah *max"
-var vwand = "vigor wand D *max"
-var hVwand = "wand_hidden_vigor *max" // aka Reset Wand
-var hVstaff = "staff_hidden_vigor *max" // aka Prevention Staff
+var swordVigorBuff = "sword vigor *max dL"
+var swordVigorDmg = "sword vigor *max -dL Spring24"
+var shieldaVigorDefense = "shield vigor *max -ah"
+var shieldVigorBuff = "shield vigor *max ah"
+var hammerVigorBuff = "hammer vigor *max ah"
+var wandVigorDmg = "wand vigor *max D -hidden"
+var wandVigorHidden = "wand_hidden_vigor *max" // aka Reset Wand
+var staffVigorHidden = "staff_hidden_vigor *max" // aka Prevention Staff
 
 //aether:
-var aesword = "aether sword -dU *max"
-var dUsword1 = "aether sword dU *max -big golden"
-var dUSWORD2 = "big aether sword dU *max golden"
-var aeshield = "aether shield -au *max"
-var auShield = "aether shield au *max"
-var aebow = "aether crossbow D *max"
-var dUstaff = "aether staff dU *max"
-var dUwand = "aether wand dU *max"
-var HaeWand = "wand_hidden_aether *max" // aka Calamity Wand
-var HaeStaff = "staff_hidden_aether *max" // aka Grasping Staff
+var swordAetherDmg = "sword aether -dU *max"
+var swordAetherDebuff = "sword aether dU *max -big golden"
+var bigSwordAetherDebuff = "big sword aether *max dU golden"
+var shieldAetherDefense = "shield aether *max -au"
+var shieldAetherDebuff = "shield aether *max au"
+var bowAetherDmg = "crossbow aether *max D"
+var wandAetherDebuff = "wand aether *max dU -hidden"
+var wandAetherHidden = "wand_hidden_aether *max" // aka Calamity Wand
+var staffAetherDebuff = "staff aether *max dU -hidden"
+var staffAetherHidden = "staff_hidden_aether *max" // aka Grasping Staff
 
 //fire:
-var dFsword = "fire sword dF *max"
-var fsword = "fire sword -dF *max"
-var fshield = "fire shield A *max"
-var fbow = "fire crossbow dF *max"
-var dFwand = "fire wand dF *max"
-var dFstaff = "fire staff dF *max"
-var hFwand = "wand_hidden_fire *max" // aka Explosive Wand
-var hFstaff = "staff_hidden_fire *max" // aka Infernal Staff
+var swordFireDebuff = "sword fire *max dF"
+var swordFireDmg = "sword fire *max -dF"
+var shieldFireDefense = "shield fire *max A"
+var bowFireDebuff = "crossbow fire *max dF"
+var wandFireDebuff = "wand fire *max dF -hidden"
+var wandFireHidden = "wand_hidden_fire *max" // aka Explosive Wand
+var staffFireDebuff = "staff fire *max dF -hidden"
+var staffFireHidden = "staff_hidden_fire *max" // aka Infernal Staff
 
 //ice:
-var dIsword = "ice sword dI *max"
-var isword = "ice sword -dI *max"
-var ishield = "ice shield -ai *max"
-var aiShield = "ice shield ai *max"
-var dIwand = "ice wand dI *max +15"
-var ibow = "ice crossbow D *max"
-var dIstaff = "ice staff dI *max"
-var hIwand = "wand_hidden_ice *max" // aka Frost Wand
-var hIstaff = "staff_hidden_ice *max" // aka Eternity Staff
+var swordIceDebuff = "sword ice *max dI"
+var swordIceDmg = "sword ice *max -dI"
+var shieldIceDefense = "shield ice *max -ai"
+var shieldIceDebuff = "shield ice *max ai"
+var bowIceDmg = "crossbow ice *max D"
+var wandIceDebuff = "wand ice *max dI +15 -hidden"
+var wandIceHidden = "wand_hidden_ice *max" // aka Frost Wand
+var staffIceDebuff = "staff ice *max dI -hidden"
+var staffIceHidden = "staff_hidden_ice *max" // aka Eternity Staff
 
 //stone:
-var sbow = "stone crossbow *max"
-var ssword1 = "stone sword *max"
-var ssword1 = "stone sword *max"
-var sWand = "wand_hidden_stone *max" // aka Gravity Wand
-var sStaff = "staff_hidden_stone *max" //aka Acrobatic Staff
+var bowStone = "crossbow stone *max"
+var swordStone1 = "sword stone *max +4"
+var swordStone2 = "sword stone *max +3"
+var wandStoneHidden = "wand_hidden_stone *max" // aka Gravity Wand
+var staffStoneHidden = "staff_hidden_stone *max" //aka Acrobatic Staff
 
 //alternate:
-var altbow = "crossbow *max golden"
+var bowAlternate = "crossbow *max golden"
 
 //special weapons:
-var dshield = "dashing shield *max HoH24"
-var myqstaff = "quarterstaff golden"
-var fastBard = "bardiche *max" // enchanted: speed
-var myHamm = "heavy hammer *max"
-var rbow = "repeating crossbow *max golden"
-var cshield1 = "compound shield *max shiny"
-var cshield2 = "compound shield *max -shiny"
-var tshield = "towering shield *max golden"
+var shieldDashing = "shield dashing *max HoH24"
+var myQuarterstaff = "quarterstaff golden"
+var fastBardiche = "bardiche *max" // enchanted: speed
+var myHeavyHammer = "heavy hammer *max"
+var bowRepeating = "crossbow repeating *max golden"
+var shieldCompound1 = "shield compound *max shiny"
+var shieldCompound2 = "shield compound *max -shiny"
+var shieldTowering = "shield towering *max golden"
 
 
 
 // Weapons damage and stats
 
-var cMaxArmor = 35
-var boostedPdeb = 4 // [Death's Kiss]'s damage penalty (boosted)
+var compoundMaxArmor = 35
+var boostedPoisonDebuff = 4 // [Death's Kiss]'s damage penalty (boosted)
 
+// Blade of the Fallen God
 var bladeDmg = 310
-var bladeRDmg = 95
-var smiteMult = 8.8 // mult = multiplier
+var bladeRDmg = 170
+var smiteDmg = 40 // smite flat bonus damage
 
+// Skeleton Arm
 var armDmg = 56
 var armRDmg = armDmg / 2
 var maxArmBuffs = 4
 
+// Cinderwisp
 // multiplied by the amount of Ignition buffs:
-var cindDmg_Default = 36
-var cindDmg_Boosted = 96
+var cinderwispDmg_Default = 36
+var cinderwispDmg_Boosted = 96
 var maxIgnitions_Default = "ignition:10"
 var maxIgnitions_Boosted = "ignition:17"
 
-var weavDmg = 1
-var weavUnmkChance = 0.14 // %
-var weavArmor = 1.35
+// Voidweaver
+var voidweaverDmg = 1
+var voidweaverUnmakeChance = 0.14 // %
+var voidweaverArmor = 1.35
 
-var hammDmg = 145
+// Heavy Hammer
+var heavyHammerDmg = 145
 
-/* WARNING: These stats are for
-[Kubikiribocho] only, not for the
-other bardiche! */
-var bardDmg = 52
-var bardCrit = 13.5
-var bardRDmg = (bardDmg + 17) * bardCrit
+// Bardiche
+/* *************************************
+WARNING: These stats
+only apply for [Kubikiribocho]! */
+var bardicheDmg = 52
+var bardicheCrit = 13.5
+var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
+/* ************************************* */
 
 
 

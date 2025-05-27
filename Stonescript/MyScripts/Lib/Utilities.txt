@@ -22,6 +22,13 @@ HOW TO USE
 
 
 
+// IMPORTS
+
+var uimkr = new MyScripts/Lib/UI_Maker
+
+
+
+
 // VARIABLES:
 
 //Units
@@ -122,6 +129,141 @@ func formatSpeedrun(frames)
     timeStr = minStr + ":" + secStr + " " + frmStr
     
   return timeStr
+
+
+// Strings
+
+/* shows a big string, broken down into several lines.
+PARAMETERS:
+  - str = the string in question
+  - x
+  - y
+  - maxW = maximum width to show the string
+  - col (optional) = resulting text's color
+  - isUI:
+    - true = returns an UI component with the string
+    - false = prints out the broken down string directly.
+              DOES NOT RETURN ANYTHING. */
+func showBigStr(x,y,maxW,str,col,isUI)
+
+  ?isUI
+    var txtbox
+    var panel
+
+    txtbox = uimkr.mkTxtbox(1,1,maxW,null,
+    ^top_left,top_left,
+    ^str,null,col)
+
+    panel = uimkr.mkPanel(x,y,
+    ^txtbox.w + 2,
+    ^txtbox.h + 2,
+    ^top_left,top_left,
+    ^col,-1,txtbox)
+    
+    return panel
+  
+  :
+    var arr = string.Break(str, maxW)
+
+    for i = 0 .. arr.Count()-1
+      ?col
+        >`@x@,@y + i@,@col@,@arr[i]@
+      :
+        >`@x@,@y + i@,@arr[i]@
+
+    return
+
+/* Shows a string centered in the screen,
+   breaking it down into several lines if necessary.
+PARAMETERS:
+  - y
+  - maxW = maximum width to show the string
+  - str = the string in question
+  - col = output color of the string
+  - isUI:
+    - true = returns an UI component with the string
+    - false = prints out the centered, broken down
+              string directly.
+              DOES NOT RETURN ANYTHING. */
+func showStrCtr(y,maxW,str,col,isUI)
+
+  ?isUI
+    var txtbox
+    var panel
+
+    txtbox = uimkr.mkTxtbox(1,1,maxW,null,
+    ^top_left,top_left,
+    ^str,center,col)
+
+    panel = uimkr.mkPanel(
+    ^- (txtbox.w / 2),y,
+    ^txtbox.w + 2,
+    ^txtbox.h + 2,
+    ^center_center,center_centere,
+    ^col,-1,txtbox)
+    
+    return panel
+
+  :
+
+    var arr = string.Break(str, maxW)
+
+    for i = 0 .. arr.Count()-1
+      var x
+      x = - ( string.Size(arr[i]) - 1 ) / 2
+      ?col
+        >c@x@,@y + i@,@col@,@arr[i]@
+      :
+        >c@x@,@y + i@,@arr[i]@
+
+    return
+
+
+// Helper functions
+
+/* Converts widely used color names into
+their respective hexadecimal representation. */
+func colorToHex(colorName)
+  ?colorName = "red"
+    return #FF0000
+  :?colorName = "orange"
+    return #FF7518
+  :?colorName = "yellow"
+    return #FFFF00
+  :?colorName = "gold"
+    return #E49B0F
+  :?colorName = "blue"
+    return #0000FF
+  :?colorName = "cyan"
+    return #00FFFF
+  :?colorName = "magenta"
+    return #FF00FF
+  :?colorName = "pink"
+    return #E0115F
+  :?colorName = "purple"
+    return #800080
+  :?colorName = "violet"
+    return #7F00FF
+  :?colorName = "green"
+    return #008000
+  :?colorName = "darkGreen"
+    return #023020
+  :?colorName = "white"
+    return #FFFFFF
+  :?colorName = "gray"
+    return #808080
+  :?colorName = "black"
+    return #000000
+  :?colorName = "brown"
+    return #7B3F00
+  :?colorName = "turquoise" | colorName = "turquesa"
+    return #40E0D0
+  :?colorName = "rainbow" | colorName = "rgb"
+    return #rainbow
+  :
+    >c-20,0,#red,ERROR: colorToHex() got unexisting color: @colorName@
+
+
 
 
 

@@ -18,15 +18,7 @@ farming script easier.
        put c.Main() at the top of your script.
 
 - Use the functions that you need like this:
-  ?c.useBlade() // example */
-
-
-
-// IMPORTS
-
-var p
-p = import MyScripts/Lib/Performance
-
+  ?c.useBFG() // example */
 
 
 // VARIABLES
@@ -41,7 +33,7 @@ var hihp
 
 // FUNCTIONS
 
-func Main()
+func Init()
   midhp = maxhp / 2
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
@@ -54,27 +46,29 @@ func Main()
 
 // Lost items
 
-func canUseBlade()
-  return totaltime >= p.bladeDelay & item.CanActivate()
+func canUseBFG()
+  return item.GetCooldown("blade") <= 0
+  ^& item.CanActivate()
 
 // cannot be interrupted, doesn't need a cooldown check
-func useBlade()
+func useBFG()
   equip blade
   activate R
-
-  p.bladeDelay = totaltime + p.bladeCd
 
   return
 
 /* Checks if Blade of the Fallen God
 can be used in 2 screens of distance,
 according to a certain screen index. */
-func canUseBladeDS(nScreen)
-  return canUseBlade()
+func canUseBFG_DS(nScreen)
+  return canUseBFG()
   ^& screen.i = nScreen
 
-var slideCount = 0 // counter to give screen.Next() time to slide
-func useBladeDS()
+/* counter to give
+screen.Next()
+time to slide */
+var slideCount = 0
+func useBFG_DS()
   ?slideCount = 0
     screen.Next()
     slideCount = 20
@@ -83,42 +77,39 @@ func useBladeDS()
     slideCount--
   
     ?slideCount = 0
-      useBlade()
+      useBFG()
       screen.ResetOffset()
       return
 
 
-func canUseArm()
-  return totaltime >= p.armDelay &
-  ^3 < foe.distance & foe.distance < 9
+func canUseSkeletonArm()
+  return item.GetCooldown("skeleton_arm") <= 0
   ^& item.CanActivate()
+  ^& 3 < foe.distance & foe.distance < 9
 
-func useArm()
+func useSkeletonArm()
   equip arm
   activate R
-
-  p.armDelay = totaltime + p.armCd
 
   return
 
 
-func canUseMask()
-  return totaltime >= p.maskDelay & item.CanActivate()
+func canUseCultistMask()
+  return item.GetCooldown("mask") <= 0
+  ^& item.CanActivate()
 
-func useMask()
+func useCultistMask()
   equipL triskelion
   equipR mask
   activate R
 
-  p.maskDelay = totaltime + p.maskCd
-
   return
 
-func canUseMaskDS(nScreen)
-  return canUseMask()
+func canUseCultistMask_DS(nScreen)
+  return canUseCultistMask()
   ^& screen.i = nScreen
 
-func useMaskDS()
+func useCultistMask_DS()
   ?slideCount = 0
     screen.Next()
     slideCount = 20
@@ -127,48 +118,53 @@ func useMaskDS()
     slideCount--
   
     ?slideCount = 0
-      useMask()
+      useCultistMask()
       screen.ResetOffset()
       return
 
 
-func canUseFTali()
+func canUseFireTalisman()
   return
-  ^summon.GetId() ! "cinderwisp" &
-  ^totaltime >= p.fTaliDelay &
-  ^item.CanActivate() |
+  ^item.GetCooldown("fire_talisman") <= 0 & // if it's not on cooldown
+  ^item.CanActivate() & // if you can use the ability
+  ^summon.GetId() ! "cinderwisp" | // if it's not summoned already
+  ^(item.left = "fire_talisman" & item.left.state = 2) | // if it's equipped in the left hand
+  ^(item.right = "fire_talisman" & item.right.state = 2) // or in the right hand
+
+/* Same as canUseFireTalisman,
+But now we check if it
+is summoned.*/
+func canHideFireTalisman()
+  return
+  ^item.GetCooldown("fire_talisman") &
+  ^item.CanActivate() &
+  ^summon.GetId() = "cinderwisp" |
   ^(item.left = "fire_talisman" & item.left.state = 2) |
   ^(item.right = "fire_talisman" & item.right.state = 2)
 
-func canHideFTali()
-  return summon.GetId() = "cinderwisp"
-  ^& totaltime >= p.fTaliDelay
-  ^& item.CanActivate() |
-  ^(item.left = "fire_talisman" & item.left.state = 2) |
-  ^(item.right = "fire_talisman" & item.right.state = 2)
-
-func useFTali(hand)
-  ?hand = "l"
+func useFireTalisman(hand)
+  ?hand = "l" | hand = "left"
     equipL fire_talisman
     activate L
-  :?hand = "r"
+  :?hand = "r" | hand = "right"
     equipR fire_talisman
     activate R
 
-  p.fTaliDelay = totaltime + p.fTaliCd + p.castTime
-
   return
 
-/* Checks if you can use the cinderwisp's "devour"
-ability. */
-func canUseCind()
-  return summon.GetId() = "cinderwisp"
-  ^& totaltime >= p.cindDelay & item.CanActivate()
+/* Checks if the
+cinderwisp's "devour"
+ability can be used. */
+func canUseCinderwisp()
+  return
+  ^item.GetCooldown("cinderwisp") <= 0 &
+  ^item.CanActivate() &
+  ^summon.GetId() = "cinderwisp"
 
-/* Checks if the estimated damage of
-cinderwisp's "devour" ability will kill the foe,
-leaving a damage margin.
-  - foeTotalHP: foe hp + armor
+/* Checks if the cinderwisp's
+"devour" ability damage will
+kill the foe.
+  - foeTotalHP: sum of the foe's current hp and armor
   - nIgnitions: amount of ignition debuffs currently
                 applied to the foe.
   - cindDmg: damage dealt by cinderwisp for each ignition.
@@ -177,51 +173,61 @@ leaving a damage margin.
             necessary because the ability has a cast time
             that will alter the estimations done here.
             Send 0 if you don't want to use a margin. */
-func canKillCind(foeTotalHP, nIgnitions, cindDmg, margin)
+func canKillCinderwisp(foeTotalHP, nIgnitions, cindDmg, margin)
   return foeTotalHP <= (nIgnitions * cindDmg) + margin
 
-func useCind()
+func useCinderwisp()
   activate cinderwisp
-  p.cindDelay = totaltime + p.cindCd + p.castTime
   return
 
 
-func canUseAETali()
+func canUseAetherTalisman()
   return
-  ^summon.GetId() ! "voidweaver" &
-  ^totaltime >= p.aeTaliDelay &
-  ^item.CanActivate() |
+  ^item.GetCooldown("aether_talisman") <= 0 &
+  ^item.CanActivate() &
+  ^summon.GetId() ! "voidweaver" |
   ^(item.left = "aether_talisman" & item.left.state = 2) |
   ^(item.right = "aether_talisman" & item.right.state = 2)
 
-func useAETali(hand)
-  ?hand = "l"
+/* Same as canUseAetherTalisman,
+But now we check if it
+is summoned.*/
+func canHideAetherTalisman()
+  return
+  ^item.GetCooldown("aether_talisman") &
+  ^item.CanActivate() &
+  ^summon.GetId() = "voidweaver" |
+  ^(item.left = "aether_talisman" & item.left.state = 2) |
+  ^(item.right = "aether_talisman" & item.right.state = 2)
+
+func useAetherTalisman(hand)
+  ?hand = "l" | hand = "left"
     equipL aether_talisman
     activate L
-  :?hand = "r"
+  :?hand = "r" | hand = "right"
     equipR aether_talisman
     activate R
 
-  p.aeTaliDelay = totaltime + p.aeTaliCd + p.castTime
-
   return
 
-/* Checks if you can use the voidweaver's "devour"
-ability. */
-func canUseWeav()
-  return summon.GetId() = "voidweaver"
-  ^& totaltime >= p.weavDelay & item.CanActivate()
+/* Checks if the
+voidweaver's "devour"
+ability can be used. */
+func canUseVoidweaver()
+  return
+  ^item.GetCooldown("voidweaver") <= 0 &
+  ^item.CanActivate() &
+  ^summon.GetId() = "voidweaver"
 
-func useWeav()
+func useVoidweaver()
   activate voidweaver
-  p.weavDelay = totaltime + p.weavCd + p.castTime
   return
 
-func canUseWeavDS(nScreen)
-  return canUseWeav()
+func canUseVoidweaver_DS(nScreen)
+  return canUseVoidweaver()
   ^& screen.i = nScreen
 
-func useWeavDS()
+func useVoidweaver_DS()
   ?slideCount = 0
     screen.Next()
     slideCount = 20
@@ -230,126 +236,93 @@ func useWeavDS()
     slideCount--
   
     ?slideCount = 0
-      useWeav()
+      useVoidweaver()
       screen.ResetOffset()
 
       return
 
 
-/* Checks if you can use the
-bashing shield's ability. */
-func canBash()
-  return totaltime >= p.bashDelay & !ai.idle
-  ^& 11 <= foe.distance & foe.distance <= 15
-  ^& item.CanActivate()
+/* Checks if the
+bashing shield's
+ability can be used. */
+func canUseBashingShield()
+  return
+  ^item.GetCooldown("bash") <= 0 &
+  ^item.CanActivate() &
+  ^11 <= foe.distance & foe.distance <= 15 &
+  ^!ai.idle
 
-func bash(lItem)
+func useBashingShield(lItem)
   equipL @lItem@
   equipR bashing shield
-
-  p.bashDelay = totaltime + p.bashCd
 
   return
 
 
 // Special Weapons
 
-func canUseHamm()
-  return totaltime >= p.hammDelay &
+func canUseHeavyHammer()
+  return item.GetCooldown("heavy_hammer") <= 0 &
   ^item.CanActivate() |
   ^(item.right = "heavy hammer" &
   ^item.right.state = 2)
 
-var hammCdSlower
-func canUseHamm2()
-  hammCdSlower = item.GetCooldown("hammer") <= 0
-  return hammCdSlower &
-  ^item.CanActivate() |
-  ^(item.right = "heavy hammer" &
-  ^item.right.state = 2)
-
-func useHamm(yourHamm)
-  equip @yourHamm@
+func useHeavyHammer(yourHeavyHammer)
+  equip @yourHeavyHammer@
   activate R
 
-  p.hammDelay = totaltime + p.hammCd + p.castTime
-
   return
 
 
-func canUseBard()
-  return totaltime >= p.bardDelay &
+func canUseBardiche()
+  return item.GetCooldown("bardiche") <= 0 &
   ^item.CanActivate() |
   ^(item.right = "bardiche" &
   ^item.right.state = 2)
 
-var bardCdSlower
-func canUseBard2()
-  bardCdSlower = item.GetCooldown("bardiche") <= 0
-  return bardCdSlower &
-  ^item.CanActivate() |
-  ^(item.right = "bardiche" &
-  ^item.right.state = 2)
 
-func useBard(yourBard)
-  ?foe.distance < 10
-    equip @yourBard@
-    activate R
-
-    p.bardDelay = totaltime + p.bardCd + p.castTime
+func useBardiche(yourBardiche)
+  equip @yourBardiche@
+  activate R
 
   return
 
 
-/* Checks if you can use the
-dashing shield's ability. */
-func canDash()
-  return item.GetCooldown("dash") <= 0 & !ai.idle
-  ^& 11 <= foe.distance & foe.distance <= 15
-  ^& item.CanActivate()
+/* Checks if the
+dashing shield's
+ability can be used. */
+func canUseDashingShield()
+  return
+  ^item.GetCooldown("dash") <= 0 &
+  ^item.CanActivate() &
+  ^11 <= foe.distance & foe.distance <= 15 &
+  ^!ai.idle
 
-func dash(lItem, yourDshield)
+func useDashingShield(lItem, yourDashingShield)
   equipL @lItem@
-  equipR @yourDshield@
-
-  p.dashDelay = totaltime + p.dashCd
+  equipR @yourDashingShield@
 
   return
 
 
-func canUseQstaff()
+func canUseQuarterstaff()
+  return
+  ^item.GetCooldown("quarterstaff") <= 0 &
+  ^item.CanActivate() |
+  ^(item.right = "quarterstaff"
+  ^& item.right.state = 2)
 
-  ?totaltime >= p.qstaffDelay
-    return item.CanActivate() |
-    ^(item.right = "quarterstaff"
-    ^& item.right.state = 2)
 
-  :
-    return false
-
-func canUseQstaff_OG()
-  var result = false
-
-  ?item.CanActivate()
-    ?item.GetCooldown("quarterstaff") <= 0
-      result = true
-    :?item.right = "quarterstaff" & item.right.state = 2
-      result = true
-
-  return result
-
-// recieves a string
-func useQstaff(yourQstaff)
-  equip @yourQstaff@
+func useQuarterstaff(yourQuarterstaff)
+  equip @yourQuarterstaff@
   activate R
 
-  p.qstaffDelay = totaltime + p.qstaffCd
-
   return
 
 
-func canUseMind()
-  return item.GetCooldown("mind") <= 0 & item.CanActivate()
+func canUseMindstone()
+  return item.GetCooldown("mind") <= 0 &
+  ^item.CanActivate()
 
 
 // Tools
@@ -367,23 +340,27 @@ func useHatchet()
 
 // Potions
 
-func canUsePot()
-  return item.potion ! "empty" & item.CanActivate()
+func canUsePotion()
+  return
+  ^item.CanActivate() &
+  ^item.potion ! "empty"
 
 /* Checks if a healing type potion
 can be used.
-Healing type potions are considered:
+These potions are considered as healing:
   - healing
   - defensive
   - vampiric */
-func canUsePotHeal()
-  ?canUsePot()
-    ?item.potion = "healing" |
-    ^item.potion = "vampiric"
+func canUsePotionHeal()
+  ?canUsePotion()
+    ?item.potion = "healing"
+      return hp + armor <= foe.damage
+
+    :?item.potion = "vampiric"
       return hp < lowhp
 
     :?item.potion = "defensive"
-      return hp < midhp
+      return hp <= midhp
     
     :
       return false
@@ -392,12 +369,16 @@ func canUsePotHeal()
 
 /* Determines if a damage buff potion
 is brewed. Generally used for bosses.
-Potions related:
+These potions are considered as damaging:
   - berserk
   - lucky */
-func canUsePotDmg()
-  return canUsePot() &
-  ^(item.potion = "berserk" | item.potion = "lucky")
+func canUsePotionDmg()
+  ?canUsePotion()
+    return
+    ^item.potion = "berserk" |
+    ^item.potion = "lucky"
+  :
+    return false
 
 /* Determines if a special potion
 can be activated, given a special
@@ -409,8 +390,8 @@ Valid potion types and conditions:
   - experience | min. no. of foes to activate
   - invisibility | NONE (will activate if foe = boss)
     + (send true as condition for this type) */
-func canUsePotSpecial(type,cond)
-  ?canUsePot()
+func canUsePotionSpecial(type,cond)
+  ?canUsePotion()
 
     ?item.potion = type
       ?item.potion = "cleansing"
@@ -430,13 +411,13 @@ func canUsePotSpecial(type,cond)
 
       :
         >c-10,0,#red,
-        ^func canUsePotSpecial() - Potion recieved\n
+        ^func canUsePotionSpecial() - Potion recieved\n
         ^does not belong to this function: "@type@"
         return false
 
     :
       >c-10,0,#red,
-      ^func canUsePotSpecial() - Potion recieved\n
+      ^func canUsePotionSpecial() - Potion recieved\n
       ^is not valid or equipped: "@type@"
       return false
 
@@ -540,6 +521,9 @@ func doAps(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
     return
 
 
+/* AAC = Attack Animation Cancelling
+Widely used trick to enable a
+massive attack speed boost*/
 func doAAC(itemLeft, itemRight)
   ?item.left.state = 3
     equipL @itemLeft@
@@ -548,7 +532,7 @@ func doAAC(itemLeft, itemRight)
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
 
-  return
+  // return
 
 
 

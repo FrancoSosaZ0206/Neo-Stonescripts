@@ -110,9 +110,9 @@ func ldtF(mode)
     ?!keepMask
       equipR triskelion
   :?mode = "aidActive"
-    equipL @a.vhammer3@
+    equipL @a.dLsword@
     ?!keepMask
-      equipR @a.vshield2@
+      equipR @a.ahHammer@
 
   :?mode = "unmkDmg"
     equip @a.dUstaff@
@@ -127,7 +127,7 @@ func ldtF(mode)
   :?mode = "magic"
     ?keepMask
       ?canDebI
-        equipL @a.dIwand1@
+        equipL @a.dIwand@
       :?canDebP
         equipL @a.dPwand@
       :?canDebF
@@ -175,7 +175,7 @@ func fight1v1()
       :?canDebF
         equipL @a.dFsword@
       :?canDebI
-        equipL @a.dIwand1@
+        equipL @a.dIwand@
 
       //Right hand:
       ?canDebI
@@ -190,20 +190,46 @@ func fight1v1()
       equipR @a.dLsword@
 
   :
-    equip arm
-    /*?keepMask
-      equipL Bifrost
-    :
-      ?buffs.string = "berserk"
-        c.doMoondial(Bifrost, a.isword, 2)
+    ?loc.stars <= 15
+      equip arm
+
+    :?foe = "tree_boss"
+      >c0,-1,#green,FIGHTING GREEN TREE BOSS
+      ?foe.state = 32 & foe.time >= 70
+        >c0,0,#red,ESCAPE
+        ?c.canUseMind()
+          ldtF("escape")
+        :?foe.distance < 9 &
+        ^armor >= 1 & item.GetCooldown("staff_ice") <= 0
+          >c0,1,#cyan,USING ICE STAFF
+          equip @a.hIstaff@
+          activate R
       :
-        c.doMoondial(Bifrost, a.isword, 0)*/
+        >c0,0,#red,DAMAGE
+        equipL Bifrost
+        ?!keepMask
+          equipR @a.isword@
+        
+
+    :?foe ! "immune_to_stun"
+      ldtF("poenaStun")
+    :
+      dontDash = true
+      ?
+
 
   return
 
 
 
 // PROCEDURE:
+
+?foe = "elite" | foe = "boss"
+  i.showBigStr(1,15,40,foe,null,false)
+  >`1,12,#yellow,state=@foe.state@\ntime=@foe.time@
+  i.showBigStr(1,7,40,"left=" + item.left + "\n\nright=" + item.right,null,false)
+
+
 
 var choice = false
 var btnPressed = false
@@ -284,9 +310,7 @@ c.doAAC("sword 0*", a.cshield1)
     loc.Leave()
 
 ?keepMask
-  ?item.right ! "bardiche" &
-  ^item.right ! "quarterstaff" &
-  ^item.right ! "heavy hammer"
+  ?item.right.state = -1 | item.right.state > 2
     equipR mask
 
 ?loc.begin | loc.loop
@@ -309,9 +333,9 @@ c.doAAC("sword 0*", a.cshield1)
 
 /* hide cinderwisp to avoid
 getting ignition debuff reflected */
-:?c.canHideFTali()
-^& foe = "poena"
-^& !c.canUseBard()
+:?c.canHideFTali() &
+^foe = "poena" &
+^!c.canUseBard()
   ?keepMask
     c.useFTali("l")
   :
@@ -335,25 +359,19 @@ getting ignition debuff reflected */
 
   ?c.canUseQstaff()
   ^& foe ! "tree_boss" & foe ! "poena"
-  ^& ai.enabled & item.right ! "hatchet"
-  ^& item.right ! "heavy hammer"
-  ^& item.right ! "bardiche"
-  ^& item.right ! Kubikiribocho
+  ^& ai.enabled & item.right.state ! 2
   ^& ((!c.canBash() & !c.canDash())
   ^| (foe.distance < 11 | foe.distance > 15))
     c.useQstaff(a.myqstaff)
 
   :?((foe = "tree_boss" | foe = "poena") & foe.distance > 22)
   ^|(foe ! "tree_boss" & foe ! "poena" & foe.distance > 15)
-    ?hp ! maxhp
-      ldtF("aidPassive")
+    ?14 <= armor & armor <= 29
+      ldtF("default")
+    :?armor < 14
+      ldtF("armorRegen")
     :
-      ?14 <= armor & armor <= 29
-        ldtF("default")
-      :?armor < 14
-        ldtF("armorRegen")
-      :
-        ldtF("extend")
+      ldtF("extend")
 
   :
     ?c.canBash() & !dontDash
@@ -363,7 +381,16 @@ getting ignition debuff reflected */
 
     :
       ?foe ! "tree_boss" & foe ! "poena"
-        ?c.canUseHamm() & keepMask &
+        ?!keepMask &
+        ^(foe = "wasp" | foe = "wasp_nest") &
+        ^item.GetCooldown("wand_fire") <= 0 &
+        ^item.GetCooldown("wand_aether") <= 0 &
+        ^armor >= 18
+          equipL @a.HaeWand@
+          activate L
+          equipR @a.hFwand@
+          activate R
+        :?c.canUseHamm() & keepMask &
         ^foe.GetCount(15) >= 5 & !c.canUseBlade()
           c.useHamm(a.myHamm)
         :?(foe.GetCount(15) = 1 | (foe = "immune_to_ranged" & keepMask)) & !ai.walking
@@ -426,24 +453,44 @@ getting ignition debuff reflected */
           :?foe.distance <= 9
             ?c.canUseMask()
               c.useMask()
-            :?c.canUseBard() & foe.distance <= 9
+            :?c.canUseBard()
               c.useBard(Kubikiribocho)
 
             :
-              var smiteBuffs
-              smiteBuffs = i.getBuffInfo("smite", false, 2)
+              ?hp ! maxhp
+                ldtF("aidActive")
 
-              ?smiteBuffs >= 25
+              :?buffs.string ! "pick_pocket:4" & !keepMask
                 equip arm
 
               :
+                var totalHammDmg = a.hammDmg
+                ?buffs.string = "smite" // we add the bonus damage to the hammer ability damage
+                  totalHammDmg += a.smiteDmg
+
                 ?c.canUseBard() & foe.hp <= a.bardRDmg
                   c.useBard(Kubikiribocho)
 
                 :?c.canUseHamm() &
-                ^foe.hp <= a.hammDmg +
-                ^(a.smiteMult * smiteBuffs)
+                ^foe.hp <= totalHammDmg
                   c.useHamm(a.myHamm)
+
+                :?!keepMask & armor >= 4 & foe.buffs.string = "poena_mirror" &
+                ^item.GetCooldown("wand_vigor") <= 0 & item.CanActivate()
+                  equipR @a.hVwand@
+                  activate R
+
+                :?foe.buffs.string ! "mirror" & !keepMask
+                  >c0,2,DEBUFFING POENA
+                  ?item.GetCooldown("staff_fire") <= 0 & armor >= 6
+                    equip @a.hFstaff@
+                    activate R
+                  :?item.GetCooldown("staff_poison") <= 0 & armor >= 8
+                    equip @a.hPstaff@
+                    activate R
+                  :
+                    fight1v1()
+
                 :
                   ldtF("poenaStun")
 

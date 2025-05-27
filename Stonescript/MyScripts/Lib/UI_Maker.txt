@@ -22,12 +22,6 @@ usage of them.
 
 
 
-// IMPORTS
-
-var u = new MyScripts/Lib/Utilities
-
-
-
 // FUNCTIONS
 
 /* Common properties/parameters:
@@ -132,9 +126,27 @@ func mkTxtbox(x,y,w,h, anchor,dock, txt, align, col)
   ?w
     txtbox.w = w
   :
-    txtbox.w = string.Size(
-    ^            u.getLargestStr(
-    ^              string.Split(txt, "\n")))
+    var largestStr
+    
+    // **************************************
+    // borrowed from MyScripts/Lib/Utilities:
+    var arrStr = string.Split(txt, "\n")
+
+    ?arrStr.Count() > 0
+      var maxStr = arrStr[0]
+      var maxInd = -1
+
+      for str : arrStr
+        ?string.Size(str) > string.Size(maxStr)
+          maxStr = str
+
+      largestStr = maxStr
+    
+    :
+      largestStr = null
+    // **************************************
+
+    txtbox.w = string.Size(largestStr)
     
   ?h
     txtbox.h = h

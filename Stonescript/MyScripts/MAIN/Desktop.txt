@@ -36,22 +36,41 @@ import MyScripts/MAIN/MyPlayerCosmetics
 :?loc = "undead_crypt_intro" // Haunted Gate
   import MyScripts/Gate
 
-:?loc = "Rocky"
-  import MyScripts/1-Rocky
-:?loc = "Deadwood"
-  import MyScripts/2-Deadwood
-:?loc = "Caves"
-  import MyScripts/3-Caves
-:?loc = "Mushroom"
-  import MyScripts/4-Mushroom
-:?loc = "Halls"
-  import MyScripts/5-Halls
-:?loc = "Mine"
-  import MyScripts/6-Mine
-:?loc = "Ridge"
-  import MyScripts/7-Ridge
-:?loc = "Temple"
-  import MyScripts/8-Temple
+:?loc.stars >= 15
+  ?loc = "Rocky"
+    import MyScripts/Green/1-Rocky
+  :?loc = "Deadwood"
+    import MyScripts/Green/2-Deadwood
+  :?loc = "Caves"
+    import MyScripts/Green/3-Caves
+  :?loc = "Mushroom"
+    import MyScripts/Green/4-Mushroom
+  :?loc = "Halls"
+    import MyScripts/Green/5-Halls
+  :?loc = "Mine"
+    import MyScripts/Green/6-Mine
+  :?loc = "Ridge"
+    import MyScripts/Green/7-Ridge
+  :?loc = "Temple"
+    import MyScripts/Green/8-Temple
+
+:
+  ?loc = "Rocky"
+    import MyScripts/1-Rocky
+  :?loc = "Deadwood"
+    import MyScripts/2-Deadwood
+  :?loc = "Caves"
+    import MyScripts/3-Caves
+  :?loc = "Mushroom"
+    import MyScripts/4-Mushroom
+  :?loc = "Halls"
+    import MyScripts/5-Halls
+  :?loc = "Mine"
+    import MyScripts/6-Mine
+  :?loc = "Ridge"
+    import MyScripts/7-Ridge
+  :?loc = "Temple"
+    import MyScripts/8-Temple
 
 /* ************************************* */
 

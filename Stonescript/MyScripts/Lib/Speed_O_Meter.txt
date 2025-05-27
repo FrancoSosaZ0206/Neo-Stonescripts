@@ -101,47 +101,44 @@ Enjoy! */
 
 // IMPORTS:
 
-var u = new MyScripts/Lib/Utilities
 var uimkr = new MyScripts/Lib/UI_Maker
-
-var p
-p = import MyScripts/Lib/Performance
+var u = new MyScripts/Lib/Utilities
 
 
 
 // VARIABLES:
 
 // Times in seconds
-var ttDigital = u.myFormatDigital(p.tt)
-var pb = u.myFormatDigital(p.lbt)
-var avg = u.myFormatDigital(p.lavg)
+var ttDigital = u.myFormatDigital(totaltime)
+var pb = u.myFormatDigital(loc.bestTime)
+var avg = u.myFormatDigital(loc.averageTime)
 
 // Times in seconds and frames
-var ttSpeedrun = u.formatSpeedrun(p.tt)
-var pbSpeedrun = u.formatSpeedrun(p.lbt)
-var avgSpeedrun = u.formatSpeedrun(p.lavg)
+var ttSpeedrun = u.formatSpeedrun(totaltime)
+var pbSpeedrun = u.formatSpeedrun(loc.bestTime)
+var avgSpeedrun = u.formatSpeedrun(loc.averageTime)
 
 
 // PUBLIC FUNCTIONS
 
 func Update(isSpeedrun)
   // Variable updating frequency:
-  ?p.tt % u.sec = 0
-    ttDigital = u.myFormatDigital(p.tt)
-  ttSpeedrun = u.formatSpeedrun(p.tt)
+  ?totaltime % u.sec = 0
+    ttDigital = u.myFormatDigital(totaltime)
+  ttSpeedrun = u.formatSpeedrun(totaltime)
 
-  ?p.ll
-    pb = u.myFormatDigital(p.lbt)
-    avg = u.myFormatDigital(p.lavg)
+  ?loc.loop
+    pb = u.myFormatDigital(loc.bestTime)
+    avg = u.myFormatDigital(loc.averageTime)
 
-    pbSpeedrun = u.formatSpeedrun(p.lbt)
-    avgSpeedrun = u.formatSpeedrun(p.lavg)
+    pbSpeedrun = u.formatSpeedrun(loc.bestTime)
+    avgSpeedrun = u.formatSpeedrun(loc.averageTime)
 
 
   ?isSpeedrun
     return true
   :
-    return p.lb | p.ll | (p.tt % u.sec = 0)
+    return loc.begin | loc.loop | (totaltime % u.sec = 0)
 
 func ToString(isSlim, isSpeedrun)
 
@@ -163,9 +160,9 @@ func ToString(isSlim, isSpeedrun)
       return
       ^"####SPEED-O-METER" + "\n" +
       ^"·····················" + "\n" +
-      ^"#PB##" + pbSpeedrun + "#(" + p.lbt + "f)" + "\n" +
-      ^"#AVG#" + avgSpeedrun + "#(" + p.lavg + "f)" + "\n" +
-      ^"#CUR#" + ttSpeedrun + "#(" + p.tt + "f)"
+      ^"#PB##" + pbSpeedrun + "#(" + loc.bestTime + "f)" + "\n" +
+      ^"#AVG#" + avgSpeedrun + "#(" + loc.averageTime + "f)" + "\n" +
+      ^"#CUR#" + ttSpeedrun + "#(" + totaltime + "f)"
 
     :
       return
