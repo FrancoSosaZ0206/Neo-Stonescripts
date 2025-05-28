@@ -10,6 +10,13 @@ var dash_range_max = 15
 
 var hatchet_range = 5
 
+var star_stone_range = 12
+
+var crossbow_rune_range = 23
+var crossbow_range = 22
+var crossbow_stone_range = 22
+var sword_range = 5
+
 // *******************************************************
 //                 END OF "Utility_Data.txt"              
 // *******************************************************
