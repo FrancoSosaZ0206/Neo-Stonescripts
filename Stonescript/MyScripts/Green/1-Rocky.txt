@@ -19,7 +19,7 @@ import UI/FoeStateTracker
 var moondialMode = 0
 
 ?buffs.string = "buff_inf_speed" |
-^item.potion ! "berserk"
+^item.potion = "berserk"
   moondialMode = 2
 :
   moondialMode = 0
@@ -37,9 +37,6 @@ var keepFireTalisman = false
 
 
 // PROCEDURE
-
-?encounter.isElite // print elite modifier
-  >`1,12,#red,eliteMod=@encounter.eliteMod@
 
 disable npcDialog
 c.doAAC("sword 0*", a.shieldCompound1)
@@ -71,15 +68,16 @@ c.doAAC("sword 0*", a.shieldCompound1)
   equip @a.staffFireHidden@
   activate R
 
-:?c.canUseAetherTalisman()
+:?foe ! "boss" & foe.distance ! 9999 &
+^c.canUseAetherTalisman()
   equipL triskelion
   c.useAetherTalisman("r")
-:?foe = "phase" & foe.distance <= 23 &
+:?foe = "boss" & foe.distance <= 23 &
 ^c.canUseFireTalisman()
   equipL triskelion
   c.useFireTalisman("r")
 
-:?pickup.distance < 5 // collect stones or chest
+:?pickup.distance < 12 // collect stones or chest
   equipL star
 
   ?armor >= 14
@@ -142,14 +140,14 @@ c.doAAC("sword 0*", a.shieldCompound1)
     /*?foe.armor
       equip @a.myHeavyHammer@
     :*/
-    equip @a.bowRepeating@
+    equip @a.staffAetherDebuff@
 
   : // 1 on 1
     ?foe.armor
       equipL moon
       equipR "Speedy Hammer"
     :
-      c.doMoondial("Vantum Phoenix", a.swordFireDmg, 0)
+      c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
 
 :?encounter.eliteMod = "metamorph" // same as dysan phase2
 
@@ -161,11 +159,14 @@ c.doAAC("sword 0*", a.shieldCompound1)
     :?foe.debuffs.string ! "dot"
       equip @a.staffFireDebuff@
 
+    :
+      equip @a.staffAetherDebuff@
+    /*
     :?foe.armor
       equip @a.myHeavyHammer@
     :
       equip @a.staffFireDebuff@
-
+    */
   : // 1 on 1
     ?foe.debuffs.string ! "chill:6" // slow down
       c.doMoondial("Vantum Phoenix", a.swordIceDebuff, moondialMode)
@@ -193,36 +194,43 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
 :?foe = "acronian_soldier"
   ?encounter.isElite
-    ?c.canUseVoidweaver()
-      c.useVoidweaver()
-
     ?c.canUseWandCalamity()
       equipL @a.wandAetherHidden@
       activate L
 
-    ?c.canUseBFG()
+    :?c.canUseBFG()
       c.useBFG()
 
     :?c.canUseHeavyHammer()
       c.useHeavyHammer(a.myHeavyHammer)
+    
+    : // try to unmake foes (TESTING)
+      equip @a.staffAetherDebuff@
 
   /*?c.canUseWandGravity()
     c.useWandGravity(a.wandStoneHidden, "l")*/
+
+  :?c.canUseVoidweaver()
+    c.useVoidweaver()
 
   :?hp ! maxhp // heal up
     c.doMoondial("Dothaneel", a.swordVigorBuff, moondialMode)
 
   :?foe.count > 1
+    
     ?encounter.eliteMod ! "tenacious"
       ?foe.debuffs.string ! "chill:6"
         equip @a.staffIceDebuff@
       :?foe.debuffs.string ! "damage"
         equip @a.staffPoisonDebuff@
-
-    :?foe.armor
+      :
+        equip @a.staffAetherDebuff@
+    :
+      equip @a.staffAetherDebuff@
+    /*:?foe.armor
       equip @a.myHeavyHammer@
     :
-      equip @a.staffFireDebuff@
+      equip @a.staffFireDebuff@*/
 
   : // 1 on 1
     c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
@@ -243,11 +251,11 @@ c.doAAC("sword 0*", a.shieldCompound1)
   c.doMoondial("Dothaneel", a.swordVigorBuff, moondialMode)
 
 :?foe = "acronian_scout"
-  ?c.canUseBardiche()
-    c.useBardiche("Kubikiribocho")
-  :?c.canUseStaffBerserker()
+  ?c.canUseStaffBerserker()
     equip @a.staffPoisonHidden@
     activate R
+  :?c.canUseBardiche()
+    c.useBardiche("Kubikiribocho")
   :
     // focus on damage
     c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
@@ -258,9 +266,12 @@ c.doAAC("sword 0*", a.shieldCompound1)
     c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
 
   :?foe = "phase2"
-
+    >`1,10,#cyan,foe buffs=@foe.buffs.string@
     ?foe.buffs.string = "buff_protection" & // against debuffs
     ^item.GetCooldown("wand_vigor") <= 0 // and it's not on cooldown
+      >c0,0,#red,cleansing buff protection
+      loc.Pause()
+
       ?armor >= 1
         equipL @a.wandVigorHidden@
         activate L
@@ -288,14 +299,18 @@ c.doAAC("sword 0*", a.shieldCompound1)
       c.useCultistMask()
 
     ?c.canUseCinderwisp()
-      ?foe.debuffs.string = a.maxIgnitions_Default |
+      ?foe.debuffs.string = a.maxIgnitions_Default/* |
       ^c.canKillCinderwisp(i.getFoeTotalHP(),
       ^                    i.getDebuffLvl("ignition", true),
       ^                    a.cinderwispDmg_Default,
-      ^                    0                                )
+      ^                    0                                )*/
         c.useCinderwisp()
 
-    ?foe.buffs.string ! "defense_fire" // doesn't have the element immunity shield
+    ?(foe.state = 32 & foe.time >= 53
+    ^& foe.damage = 3) |
+    ^foe.state = 115 & foe.time >= 150
+      equipL mind
+    :?foe.buffs.string ! "defense_fire" // doesn't have the element immunity shield
       c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
 
     : // immune to fire

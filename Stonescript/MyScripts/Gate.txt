@@ -15,8 +15,8 @@ var set = new MyScripts/Borrowed/scottyEyeTracker
 
 // PROCEDURE:
 
-?c.canUseQstaff_OG() & ai.walking
-  c.useQstaff(a.myqstaff)
+?c.canUseQuarterstaff() & ai.walking
+  c.useQstaff(a.myQuarterstaff)
 :
   equipL triskelion
 
