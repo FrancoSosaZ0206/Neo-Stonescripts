@@ -250,38 +250,15 @@ c.doAAC("sword 0*", a.shieldCompound1)
   ldtF("magnet")
 
 :?foe = "explode" & // Mr. Puff
-^foe.distance <= 20 // wand range
-  ?foe.distance < 11
-    // try to back off
-    ?c.canUseMindstone()
-      ldtF("escape")
-    :?c.canUseStaffAcrobatic()
-      equip @a.staffStoneHidden@
-      activate R
-
-    
-    : // else, try to avoid getting debuffed
-      ?foe.hp < 100
-        ?c.canUseWandFrost()
-          equipL @a.wandIceHidden@
-          activate L
-        :?foe.debuffs.string ! "stun" &
-        ^c.canUseStaffPrevention()
-          equip @a.staffVigorHidden@
-          activate R
-
-      // else, just defeat it ASAP
-      :?canDebuffIce | canDebuffPoison | canDebuffFire
-        ldtF("meleeDebuff")
-      :
-        ldtF("meleeDmg")
-
-  :?canDebuffIce | canDebuffPoison | canDebuffFire
-    ldtF("magic")
-  :?keepCultistMask
-    equipL @a.wandPoisonDebuff@
-  :
-    ldtF("rangedDmg")
+^foe.distance < 5 // explosion range
+  ?c.canUseMindstone()
+    ldtF("escape")
+  :?c.canUseStaffAcrobatic()
+    c.useStaffHidden(a.staffStoneHidden)
+  :?c.canUseStaffPrevention()
+    c.useStaffHidden(a.staffVigorHidden)
+  :?c.canUseStaffEternity()
+    c.useStaffHidden(a.staffIceHidden)
 
 :?ai.walking &
 ^(foe.distance < 11 | foe.distance > 15 ) &

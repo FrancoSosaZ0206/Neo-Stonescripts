@@ -56,7 +56,6 @@ func Init()
 func canUseBFG()
   return item.GetCooldown("blade") <= 0
   ^& item.CanActivate()
-
 // cannot be interrupted, doesn't need a cooldown check
 func useBFG()
   equip blade
@@ -70,7 +69,6 @@ according to a certain screen index. */
 func canUseBFG_DS(nScreen)
   return canUseBFG()
   ^& screen.i = nScreen
-
 /* counter to give
 screen.Next()
 time to slide */
@@ -93,7 +91,6 @@ func canUseSkeletonArm()
   return item.GetCooldown("skeleton_arm") <= 0
   ^& item.CanActivate()
   ^& 3 < foe.distance & foe.distance < 9
-
 func useSkeletonArm()
   equip arm
   activate R
@@ -104,7 +101,6 @@ func useSkeletonArm()
 func canUseCultistMask()
   return item.GetCooldown("mask") <= 0
   ^& item.CanActivate()
-
 func useCultistMask()
   equipL triskelion
   equipR mask
@@ -115,7 +111,6 @@ func useCultistMask()
 func canUseCultistMask_DS(nScreen)
   return canUseCultistMask()
   ^& screen.i = nScreen
-
 func useCultistMask_DS()
   ?slideCount = 0
     screen.Next()
@@ -137,6 +132,15 @@ func canUseFireTalisman()
   ^summon.GetId() ! "cinderwisp" | // if it's not summoned already
   ^(item.left = "fire_talisman" & item.left.state = 2) | // if it's equipped in the left hand
   ^(item.right = "fire_talisman" & item.right.state = 2) // or in the right hand
+func useFireTalisman(hand)
+  ?hand = "l" | hand = "left"
+    equipL fire_talisman
+    activate L
+  :?hand = "r" | hand = "right"
+    equipR fire_talisman
+    activate R
+
+  return
 
 /* Same as canUseFireTalisman,
 But now we check if it
@@ -149,16 +153,6 @@ func canHideFireTalisman()
   ^(item.left = "fire_talisman" & item.left.state = 2) |
   ^(item.right = "fire_talisman" & item.right.state = 2)
 
-func useFireTalisman(hand)
-  ?hand = "l" | hand = "left"
-    equipL fire_talisman
-    activate L
-  :?hand = "r" | hand = "right"
-    equipR fire_talisman
-    activate R
-
-  return
-
 /* Checks if the
 cinderwisp's "devour"
 ability can be used. */
@@ -167,6 +161,9 @@ func canUseCinderwisp()
   ^item.GetCooldown("cinderwisp") <= 0 &
   ^item.CanActivate() &
   ^summon.GetId() = "cinderwisp"
+func useCinderwisp()
+  activate cinderwisp
+  return
 
 /* Checks if the cinderwisp's
 "devour" ability damage will
@@ -183,10 +180,6 @@ kill the foe.
 func canKillCinderwisp(foeTotalHP, nIgnitions, cindDmg, margin)
   return foeTotalHP <= (nIgnitions * cindDmg) + margin
 
-func useCinderwisp()
-  activate cinderwisp
-  return
-
 
 func canUseAetherTalisman()
   return
@@ -195,6 +188,15 @@ func canUseAetherTalisman()
   ^summon.GetId() ! "voidweaver" |
   ^(item.left = "aether_talisman" & item.left.state = 2) |
   ^(item.right = "aether_talisman" & item.right.state = 2)
+func useAetherTalisman(hand)
+  ?hand = "l" | hand = "left"
+    equipL aether_talisman
+    activate L
+  :?hand = "r" | hand = "right"
+    equipR aether_talisman
+    activate R
+
+  return
 
 /* Same as canUseAetherTalisman,
 But now we check if it
@@ -207,15 +209,6 @@ func canHideAetherTalisman()
   ^(item.left = "aether_talisman" & item.left.state = 2) |
   ^(item.right = "aether_talisman" & item.right.state = 2)
 
-func useAetherTalisman(hand)
-  ?hand = "l" | hand = "left"
-    equipL aether_talisman
-    activate L
-  :?hand = "r" | hand = "right"
-    equipR aether_talisman
-    activate R
-
-  return
 
 /* Checks if the
 voidweaver's "devour"
@@ -225,7 +218,6 @@ func canUseVoidweaver()
   ^item.GetCooldown("voidweaver") <= 0 &
   ^item.CanActivate() &
   ^summon.GetId() = "voidweaver"
-
 func useVoidweaver()
   activate voidweaver
   return
@@ -233,7 +225,6 @@ func useVoidweaver()
 func canUseVoidweaver_DS(nScreen)
   return canUseVoidweaver()
   ^& screen.i = nScreen
-
 func useVoidweaver_DS()
   ?slideCount = 0
     screen.Next()
@@ -258,7 +249,6 @@ func canUseBashingShield()
   ^item.CanActivate() &
   ^11 <= foe.distance & foe.distance <= 15 &
   ^!ai.idle
-
 func useBashingShield(lItem)
   equipL @lItem@
   equipR bashing shield
@@ -274,24 +264,20 @@ func canUseHeavyHammer()
   ^foe.distance <= u.heavyHammer_range |
   ^(item.right = "heavy hammer" &
   ^item.right.state = 2)
-
-func useHeavyHammer(yourHeavyHammer)
-  equip @yourHeavyHammer@
+func useHeavyHammer(weaponName)
+  equip @weaponName@
   activate R
 
   return
 
-
 func canUseBardiche()
   return item.GetCooldown("bardiche") <= 0 &
   ^item.CanActivate() &
-  ^foe.distance <= 9 |
+  ^foe.distance <= u.bardiche_ability_range |
   ^(item.right = "bardiche" &
   ^item.right.state = 2)
-
-
-func useBardiche(yourBardiche)
-  equip @yourBardiche@
+func useBardiche(weaponName)
+  equip @weaponName@
   activate R
 
   return
@@ -306,10 +292,9 @@ func canUseDashingShield()
   ^item.CanActivate() &
   ^11 <= foe.distance & foe.distance <= 15 &
   ^!ai.idle
-
-func useDashingShield(lItem, yourDashingShield)
+func useDashingShield(lItem, weaponName)
   equipL @lItem@
-  equipR @yourDashingShield@
+  equipR @weaponName@
 
   return
 
@@ -320,9 +305,8 @@ func canUseQuarterstaff()
   ^item.CanActivate() |
   ^(item.right = "quarterstaff"
   ^& item.right.state = 2)
-
-func useQuarterstaff(yourQuarterstaff)
-  equip @yourQuarterstaff@
+func useQuarterstaff(weaponName)
+  equip @weaponName@
   activate R
 
   return
@@ -336,16 +320,15 @@ func canUseMindstone()
 func canUseWandGravity()
   return item.GetCooldown("wand_stone") <= 0 &
   ^item.CanActivate() |
-  ^(item.left = "staff_hidden_stone" & item.left.state = 2) |
-  ^(item.right = "staff_hidden_stone" & item.right.state = 2)
-
-func useWandGravity(yourWandGravity, hand)
+  ^(item.left = "wand_hidden_stone" & item.left.state = 2) |
+  ^(item.right = "wand_hidden_stone" & item.right.state = 2)
+func useWandGravity(weaponName, hand)
   ?hand = "l" | hand = "left"
-    equipL @yourWandGravity@
+    equipL @weaponName@
   :?hand = "r" | hand = "right"
-    equipR @yourWandGravity@
+    equipR @weaponName@
 
-  activate E
+  activate wand_stone
 
   return
 
@@ -354,18 +337,75 @@ func canUseWandPlague()
   ^item.GetCooldown("wand_poison") <= 0 &
   ^item.CanActivate() &
   ^armor >= 6
+func useWandPlague(weaponName, hand)
+  ?hand = "l" | hand = "left"
+    equipL @weaponName@
+  :?hand = "r" | hand = "right"
+    equipR @weaponName@
+
+  activate wand_poison
+
+  return
+
+func canUseWandReset()
+  return
+  ^item.GetCooldown("wand_vigor") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 1
+func useWandReset(weaponName, hand)
+  ?hand = "l" | hand = "left"
+    equipL @weaponName@
+  :?hand = "r" | hand = "right"
+    equipR @weaponName@
+
+  activate wand_vigor
+
+  return
 
 func canUseWandCalamity()
   return
   ^item.GetCooldown("wand_aether") <= 0 &
   ^item.CanActivate() &
   ^armor >= 14
+func useWandCalamity(weaponName, hand)
+  ?hand = "l" | hand = "left"
+    equipL @weaponName@
+  :?hand = "r" | hand = "right"
+    equipR @weaponName@
+
+  activate wand_aether
+
+  return
+
+func canUseWandExplosive()
+  return
+  ^item.GetCooldown("wand_fire") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 4
+func useWandExplosive(weaponName, hand)
+  ?hand = "l" | hand = "left"
+    equipL @weaponName@
+  :?hand = "r" | hand = "right"
+    equipR @weaponName@
+
+  activate wand_fire
+
+  return
 
 func canUseWandFrost()
   return
   ^item.GetCooldown("wand_ice") <= 0 &
   ^item.CanActivate() &
   ^armor >= 3
+func useWandFrost(weaponName, hand)
+  ?hand = "l" | hand = "left"
+    equipL @weaponName@
+  :?hand = "r" | hand = "right"
+    equipR @weaponName@
+
+  activate wand_ice
+
+  return
 
 
 func canUseStaffAcrobatic()
@@ -373,30 +413,36 @@ func canUseStaffAcrobatic()
   ^item.GetCooldown("staff_stone") <= 0 &
   ^item.CanActivate() &
   ^armor >= 3
-
 func canUseStaffBerserker()
   return
   ^item.GetCooldown("staff_poison") <= 0 &
   ^item.CanActivate() &
   ^armor >= 8
-
 func canUseStaffPrevention()
   return
   ^item.GetCooldown("staff_vigor") <= 0 &
   ^item.CanActivate() &
   ^armor >= 4
-
+func canUseStaffGrasping()
+  return
+  ^item.GetCooldown("staff_aether") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 2
 func canUseStaffInfernal()
   return
   ^item.GetCooldown("staff_fire") <= 0 & // not on cooldown
   ^item.CanActivate() &
   ^armor >= 6 // enough armor to activate ability
-
 func canUseStaffEternity()
   return
   ^item.GetCooldown("staff_ice") <= 0 &
   ^item.CanActivate() &
   ^armor >= 1
+
+func useStaffHidden(weaponName)
+  equip @weaponName@
+  activate R
+  return
 
 
 // Tools
@@ -406,7 +452,6 @@ func canUseHatchet()
   ^& item.CanActivate()
   ^& harvest.distance < 5
   ^& item.right = "hatchet"
-
 func useHatchet()
   activate R
   return
@@ -440,7 +485,6 @@ func canUsePotionHeal()
       return false
   :
     return false
-
 /* Determines if a damage buff potion
 is brewed. Generally used for bosses.
 These potions are considered as damaging:
@@ -453,7 +497,6 @@ func canUsePotionDmg()
     ^item.potion = "lucky"
   :
     return false
-
 /* Determines if a special potion
 can be activated, given a special
 condition that's different for each potion type.
@@ -497,6 +540,55 @@ func canUsePotionSpecial(type,cond)
 
   : // potion hasn't been brewed, it's been used,
     return false //or just can't be activated atm
+
+
+// Status effects
+
+/* Returns true if the foe is
+vulnerable to Chill and if the
+debuff isn't applied yet. */
+func canDebuffChill()
+  return
+  ^foe.debuffs.string ! "chill:6" &
+  ^foe ! "immune_to_debuff_chill"
+/* Returns true if the foe is
+vulnerable to Weaken and if the
+debuff isn't applied yet. */
+func canDebuffWeaken()
+  return
+  ^foe.debuffs.string ! "damage" &
+  ^foe ! "immune_to_debuff_damage"
+/* Returns true if the foe is
+vulnerable to Burn and if the
+debuff isn't applied yet. */
+func canDebuffBurn()
+  return
+  ^foe.debuffs.string ! "dot" &
+  ^foe ! "immune_to_debuff_dot"
+
+/* checks if the foe is vulnerable
+to at least one of the following
+typical debuffs:
+- Chill (attack and movement speed reduction)
+- Weaken (damage reduction)
+- Burn (damage over time) */
+func canDebuffAny()
+  return
+  ^canDebuffChill() |
+  ^canDebuffWeaken() |
+  ^canDebuffBurn()
+/* checks if the foe is vulnerable
+to ALL of the following
+typical debuffs:
+- Chill (attack and movement speed reduction)
+- Weaken (damage reduction)
+- Burn (damage over time) */
+func canDebuffAll()
+  return
+  ^foe ! "immune_to_debuff_chill" &
+  ^foe ! "immune_to_debuff_damage" &
+  ^foe ! "immune_to_debuff_dot"
+
 
 
 // Others
@@ -593,7 +685,6 @@ func doAps(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
     equipR @s10@
   :
     return
-
 
 /* AAC = Attack Animation Cancelling
 Widely used trick to enable a

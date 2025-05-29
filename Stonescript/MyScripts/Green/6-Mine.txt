@@ -58,7 +58,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     equipR @a.shieldCompound2@
 
 :?foe = "explode" & // Bomb Cart foe
-^foe.distance <= 5 & // sword range
+^foe.distance <= 5 & // explosion range
 ^item.GetCooldown("mind") <= 0 // mindstone can be used
   equipL mind
   equipR @a.shieldAetherDefense@ // to get more armor on the way
