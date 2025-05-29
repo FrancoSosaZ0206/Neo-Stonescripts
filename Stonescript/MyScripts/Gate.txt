@@ -18,7 +18,7 @@ var set = new MyScripts/Borrowed/scottyEyeTracker
 ?loc.begin
   equipL triskelion
   equipR @a.shieldCompound1@
-:?c.canUseStaffInfernal()
+:?c.canUseStaffInfernal() & ai.walking
   equip @a.staffFireHidden@
   activate R
 :?c.canUseQuarterstaff() & ai.walking
