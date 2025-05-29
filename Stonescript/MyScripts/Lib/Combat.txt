@@ -21,6 +21,13 @@ farming script easier.
   ?c.useBFG() // example */
 
 
+// IMPORTS
+
+var u = import MyScripts/Lib/Utility_Data
+
+
+
+
 // VARIABLES
 
 // Status
@@ -263,7 +270,8 @@ func useBashingShield(lItem)
 
 func canUseHeavyHammer()
   return item.GetCooldown("heavy_hammer") <= 0 &
-  ^item.CanActivate() |
+  ^item.CanActivate() &
+  ^foe.distance <= u.heavyHammer_range |
   ^(item.right = "heavy hammer" &
   ^item.right.state = 2)
 
@@ -276,7 +284,8 @@ func useHeavyHammer(yourHeavyHammer)
 
 func canUseBardiche()
   return item.GetCooldown("bardiche") <= 0 &
-  ^item.CanActivate() |
+  ^item.CanActivate() &
+  ^foe.distance <= 9 |
   ^(item.right = "bardiche" &
   ^item.right.state = 2)
 
@@ -340,11 +349,23 @@ func useWandGravity(yourWandGravity, hand)
 
   return
 
+func canUseWandPlague()
+  return
+  ^item.GetCooldown("wand_poison") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 6
+
 func canUseWandCalamity()
   return
   ^item.GetCooldown("wand_aether") <= 0 &
   ^item.CanActivate() &
   ^armor >= 14
+
+func canUseWandFrost()
+  return
+  ^item.GetCooldown("wand_ice") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 3
 
 
 func canUseStaffAcrobatic()
@@ -370,6 +391,12 @@ func canUseStaffInfernal()
   ^item.GetCooldown("staff_fire") <= 0 & // not on cooldown
   ^item.CanActivate() &
   ^armor >= 6 // enough armor to activate ability
+
+func canUseStaffEternity()
+  return
+  ^item.GetCooldown("staff_ice") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 1
 
 
 // Tools

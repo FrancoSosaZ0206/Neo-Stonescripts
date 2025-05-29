@@ -53,6 +53,7 @@ var swordPoisonDebuff = "sword poison *max dP" // enchanted: speed
 var swordPoisonDmg = "sword poison -dP *max"
 var shieldPoisonDefense = "shield poison *max -ap"
 var shieldPoisonBuff = "shield poison *max ap"
+var hammerPoisonDefense = "hammer poison *max aP"
 var bowPoisonDmg = "bow poison *max -dP"
 var bowPoisonDebuff = "bow poison *max dP"
 var wandPoisonDebuff = "wand poison *max dP -hidden"

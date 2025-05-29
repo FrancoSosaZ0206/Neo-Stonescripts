@@ -93,9 +93,11 @@ func ldtF(mode)
     ?!keepCultistMask
       equipR @a.shieldCompound2@
   :?mode = "engage"
-    equipL triskelion
-    //?!keepCultistMask
-    equipR @a.shieldPoisonDefense@
+    ?keepCultistMask
+      equipL @a.hammerPoisonDefense@
+    :
+      equipL triskelion
+      equipR @a.shieldPoisonDefense@
   :?mode = "escape"
     equipL mind
     ?!keepCultistMask
@@ -217,30 +219,38 @@ c.doAAC("sword 0*", a.shieldCompound1)
   ^item.right ! "quarterstaff" &
   ^item.right ! "heavy hammer" &
   ^item.right ! "quarterstaff"
+    equipL triskelion
     equipR mask
 
 
 ?c.canUsePotionDmg() & keepCultistMask
   activate potion
 
-:?c.canUseStaffInfernal() &
-^foe.state ! -1
+:?c.canUseStaffInfernal()
   equip @a.staffFireHidden@
   activate R
 
-?c.canUseAetherTalisman()
+?foe ! "boss" & foe.distance ! 9999 &
+^c.canUseAetherTalisman()
   ?keepCultistMask
     c.useAetherTalisman("l")
   :
     equipL triskelion
     c.useAetherTalisman("r")
 
+:?foe = "boss" & foe.distance <= 23 &
+^c.canUseFireTalisman()
+  ?keepCultistMask
+    c.useFireTalisman("l")
+  :
+    equipL triskelion
+    c.useFireTalisman("r")
+
 :?pickup.distance < 15
   ldtF("magnet")
 
 :?foe = "explode" & // Mr. Puff
 ^foe.distance <= 20 // wand range
-
   ?foe.distance < 11
     // try to back off
     ?c.canUseMindstone()
@@ -249,18 +259,22 @@ c.doAAC("sword 0*", a.shieldCompound1)
       equip @a.staffStoneHidden@
       activate R
 
-    // if we can't, try to avoid getting debuffed
-    :?foe.hp < 100 &
-    ^c.canUseStaffPrevention()
-      equip @a.staffVigorHidden@
-      activate R
+    
+    : // else, try to avoid getting debuffed
+      ?foe.hp < 100
+        ?c.canUseWandFrost()
+          equipL @a.wandIceHidden@
+          activate L
+        :?foe.debuffs.string ! "stun" &
+        ^c.canUseStaffPrevention()
+          equip @a.staffVigorHidden@
+          activate R
 
-
-    // else, just defeat it ASAP
-    :?canDebuffIce | canDebuffPoison | canDebuffFire
-      ldtF("meleeDebuff")
-    :
-      ldtF("meleeDmg")
+      // else, just defeat it ASAP
+      :?canDebuffIce | canDebuffPoison | canDebuffFire
+        ldtF("meleeDebuff")
+      :
+        ldtF("meleeDmg")
 
   :?canDebuffIce | canDebuffPoison | canDebuffFire
     ldtF("magic")
@@ -269,7 +283,8 @@ c.doAAC("sword 0*", a.shieldCompound1)
   :
     ldtF("rangedDmg")
 
-:?foe.distance > 15 &
+:?ai.walking &
+^(foe.distance < 11 | foe.distance > 15 ) &
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 
@@ -281,7 +296,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
 ^(ai.idle & foe.distance > 11) | // if we're waiting
 ^foe.state = -1 | foe.state = 4 | // foe death states
 ^foe.distance > 15 // or we can't engage in a fight
-  ?14 <= armor & armor <= 29
+  ?armor > 29
+    ldtF("engage")
+  :?14 <= armor & armor <= 29
     ldtF("default")
   :
     ldtF("armorRegen")
@@ -293,10 +310,23 @@ c.doAAC("sword 0*", a.shieldCompound1)
   ?c.canUsePotionDmg()
     activate potion
 
-  :?foe.state = 32 & foe.time >= 80 // boss's punch attack
-    ?c.canUseMindstone() &
-    ^foe.distance <= 10
-      ldtF("escape")
+  :?foe.armor > foe.maxarmor / 2 &
+  ^c.canUseHeavyHammer()
+    c.useHeavyHammer(a.myHeavyHammer)
+
+  :?foe.state = 32 & foe.time >= 75 // boss's punch attack
+    ?foe.distance < 20
+      ?c.canUseMindstone()
+        ldtF("escape")
+      :?c.canUseStaffAcrobatic()
+        equip @a.staffStoneHidden@
+        activate R
+      :?c.canUseStaffEternity()
+        equip @a.staffIceHidden@
+        activate R
+      :
+        ldtF("meleeDmg")
+
     :
       ?keepCultistMask
         equipL @a.wandPoisonDebuff@
@@ -324,6 +354,17 @@ c.doAAC("sword 0*", a.shieldCompound1)
   :?c.canUseDashingShield()
     c.useDashingShield(Mamba Negra, a.shieldDashing)
 
+  ?foe = "snail" & foe = "boss" // The snail that's always with Mr. Puff
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(a.myHeavyHammer)
+    :?c.canUseBardiche()
+      c.useBardiche(a.fastBardiche)
+
+    :?canDebuffIce | canDebuffPoison | canDebuffFire
+      ldtF("meleeDebuff")
+    :
+      ldtF("meleeDmg")
+
   :?foe ! "phase2"
     ?c.canUseHeavyHammer() & foe.count >= 5 &
     ^!c.canUseBFG() & keepCultistMask
@@ -337,15 +378,19 @@ c.doAAC("sword 0*", a.shieldCompound1)
       :?keepCultistMask
         equipL @a.wandPoisonDebuff@
       :
-        ldtF("rangedDmg")
+        equip @a.staffAetherDebuff@
 
 
   : // foe = "phase2" (Enoki & Morel)
     /* ?foe.state ! 1 // boss appearing animation
     ^&foe.state ! 4 // dying */
-    
-    ?c.canUseMindstone()
-      ldtF("escape")
+
+    ?c.canUseWandPlague() // reduce their damage
+      equipL @a.wandPoisonHidden@
+      activate L
+
+    /*:?!ai.paused & c.canUseMindstone()
+      ldtF("escape")*/
     :?c.canUseCultistMask()
       c.useCultistMask()
     : 
