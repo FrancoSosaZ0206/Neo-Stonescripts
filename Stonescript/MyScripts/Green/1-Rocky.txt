@@ -278,7 +278,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
       :
         equipR @a.shieldCompound2@
 
-    ?foe = "poison" // use ice
+    :?foe = "poison" // use ice
       c.doMoondial("Bifrost", a.swordIceDmg, moondialMode)
     :?foe = "vigor" // use poison
       c.doMoondial("Mamba Negra", a.swordPoisonDmg, moondialMode)
