@@ -15,10 +15,17 @@ var set = new MyScripts/Borrowed/scottyEyeTracker
 
 // PROCEDURE:
 
-?c.canUseQuarterstaff() & ai.walking
-  c.useQstaff(a.myQuarterstaff)
+?loc.begin
+  equipL triskelion
+  equipR @a.shieldCompound1@
+:?c.canUseStaffInfernal() & ai.walking
+  equip @a.staffFireHidden@
+  activate R
+:?c.canUseQuarterstaff() & ai.walking
+  c.useQuarterstaff(a.myQuarterstaff)
 :
   equipL triskelion
+  equipR @a.shieldCompound2@
 
 set.scottyEyeTracker("#red")
 
