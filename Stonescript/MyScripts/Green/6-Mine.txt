@@ -51,6 +51,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
 :?ai.paused | // if we're waiting
 ^foe.distance > 23 // or we can't engage in a fight
 	equipL triskelion // to go faster
+  
   ?armor >= 14 | loc.begin
     equipR @a.shieldCompound1@
   :

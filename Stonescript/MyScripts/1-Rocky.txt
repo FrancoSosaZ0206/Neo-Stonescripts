@@ -8,31 +8,31 @@
 
 // IMPORTS
 
-var u = new MyScripts/Lib/Utilities
 var uimkr = new MyScripts/Lib/UI_Maker
+var u = new MyScripts/Lib/Utilities
 var a = new MyScripts/Lib/MyArsenal
 var i = new MyScripts/Lib/MyBetterInfo
 
 var c = new MyScripts/Lib/Combat
-c.Main()
+c.Init()
 
 /***************************************************************/
 
 var som = new MyScripts/Lib/Speed_O_Meter
-var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
-var bosTmr
-bosTmr = import MyScripts/Borrowed/BossfightTimer2
 
-var somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+var somPanel = som.mkUI(0, 1, u.colorToHex("red"), true, false)
 ?som.Update(false)
   somPanel.Recycle()
   somPanel = null
 
-  somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+  somPanel = som.mkUI(0, 1, u.colorToHex("red"), true, false)
 
+/***************************************************************/
+
+var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
 
 dpsm.ENABLED = true
-dpsm.refreshRate = 5
+dpsm.refreshRate = 30
 
 var dpsPanel
 ?dpsm.Update()
@@ -43,6 +43,8 @@ var dpsPanel
   dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
 
 /***************************************************************/
+
+import UI/FoeStateTracker
 
 
 // VARIABLES
@@ -55,7 +57,7 @@ var nRuns = 0
 var dysanToPhase3Done = false
 var dysanToPhase3Timer = -1
 
-var keepMask = true
+var keepCultistMask = true
 
 var resetApsTimer = true
 var restAps = false
@@ -64,7 +66,7 @@ var restAps = false
   dysanToPhase3Timer = -1
   dysanToPhase3Done = false
 
-  keepMask = false
+  keepCultistMask = false
 
   resetApsTimer = true
   restAps = false
@@ -72,8 +74,13 @@ var restAps = false
   ?totaltime = 1
     nRuns++
 
-var moondialingMode = -1
+var moondialMode = -1
 
+?buffs.string = "buff_inf_speed" |
+^item.potion = "berserk"
+  moondialMode = 2
+:
+  moondialMode = 0
 
 // FUNCTIONS
 
@@ -89,102 +96,103 @@ func harvFunc(btn)
 func bossFight()
 
   ?foe = "phase1"
-    ?!keepMask & hp = maxhp
-      c.doMoondial("Vantum Phoenix", a.fsword, moondialingMode)
+    ?!keepCultistMask & hp = maxhp
+      c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
     :
       equipL Vantum Phoenix
 
   :?foe = "phase2"
     ?foe = "poison"
-      ?!keepMask & hp = maxhp
-        c.doMoondial("Bifrost", a.isword, moondialingMode)
+      ?!keepCultistMask & hp = maxhp
+        c.doMoondial("Bifrost", a.swordIceDmg, moondialMode)
       :
         equipL Bifrost
     :?foe = "vigor"
-      ?!keepMask & hp = maxhp
-        c.doMoondial("Mamba Negra", a.psword, moondialingMode)
+      ?!keepCultistMask & hp = maxhp
+        c.doMoondial("Mamba Negra", a.swordPoisonDmg, moondialMode)
       :
         equipL Mamba Negra
     :?foe = "aether"
-      ?!keepMask & hp = maxhp
-        c.doMoondial("Dothaneel", a.vsword, moondialingMode)
+      ?!keepCultistMask & hp = maxhp
+        c.doMoondial("Dothaneel", a.swordVigorDmg, moondialMode)
       :
         equipL Dothaneel
     :?foe = "fire"
-      ?!keepMask & hp = maxhp
-        c.doMoondial("Void Slayer", a.aesword, moondialingMode)
+      ?!keepCultistMask & hp = maxhp
+        c.doMoondial("Void Slayer", a.swordAetherDmg, moondialMode)
       :
         equipL Void Slayer
     :?foe = "ice"
-      ?!keepMask & hp = maxhp
-        c.doMoondial("Vantum Phoenix", a.fsword, moondialingMode)
+      ?!keepCultistMask & hp = maxhp
+        c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
       :
         equipL Vantum Phoenix
 
   : // ?foe = phase3
-    ?c.canUsePotDmg()
+    ?c.canUsePotionDmg()
       activate potion
-    :?c.canUseMask()
-      c.useMask()
+    :?c.canUseCultistMask()
+      c.useCultistMask()
+    :?c.canUseStaffBerserker()
+      equip @a.staffPoisonHidden@
+      activate R
 
-    ?c.canUseCind() & dpsm.DPS
+    ?c.canUseCinderwisp() & dpsm.DPS
       ?foe.debuffs.string = a.maxIgnitions_Default |
-      ^c.canKillCind(i.getFoeTotalHP(),
+      ^c.canKillCinderwisp(i.getFoeTotalHP(),
       ^              i.getDebuffLvl("ignition", true),
-      ^              a.cindDmg_Default, dpsm.DPS + a.cindDmg_Default)
-        c.useCind()
+      ^              a.cinderwispDmg_Default, dpsm.DPS + a.cinderwispDmg_Default)
+        c.useCinderwisp()
 
-    :?c.canUseCind() & !dpsm.DPS
+    :?c.canUseCinderwisp() & !dpsm.DPS
       ?foe.debuffs.string = a.maxIgnitions_Default
-        c.useCind()
-
-    foe.time = foe.time
+        c.useCinderwisp()
 
     ?((foe.state = 115 & foe.time < 70) |
     ^(foe.state = 32 & foe.damage = 1))
     ^& foe.time >= 42 // putting up shield
       dontDash = true
 
-      ?c.canUseMind()
+      ?c.canUseMindstone()
         ldtF("escape")
       :?foe.distance > 7
-        equip @a.aebow@
-      :?c.canUseMask()
-        c.useMask()
+        equip @a.bowAetherDmg@
+      :?c.canUseCultistMask()
+        c.useCultistMask()
 
     :
       dontDash = false
-      ?c.canUseHamm() & foe.armor > 0 & foe.distance < 11
-        c.useHamm(a.myHamm)
-      :?c.canUseQstaff() & foe.distance > 6 & foe.distance < 11
-        c.useQstaff(a.myqstaff)
+      ?c.canUseHeavyHammer() & foe.armor > 0 & foe.distance < 11
+        c.useHeavyHammer(a.myHeavyHammer)
+      :?c.canUseQuarterstaff() & foe.distance > 6 & foe.distance < 11
+        c.useQuarterstaff(a.myQuarterstaff)
       :
         ?foe.buffs.string ! "defense_fire"
-          ?!keepMask & hp = maxhp
+          ?!keepCultistMask & hp = maxhp
             ?c.apsTimer < 10
-              c.doAps("Vantum Phoenix", a.fsword,
-              ^       "Bifrost", a.isword,
-              ^       "Dothaneel", a.vsword,
-              ^       "Mamba Negra", a.psword,
-              ^       "Void Slayer", a.aesword)
+              c.doAps("Vantum Phoenix", a.swordFireDmg,
+              ^       "Bifrost", a.swordIceDmg,
+              ^       "Dothaneel", a.swordVigorDmg,
+              ^       "Mamba Negra", a.swordPoisonDmg,
+              ^       "Void Slayer", a.swordAetherDmg)
 
             :
-              c.doMoondial("Vantum Phoenix", a.fsword, moondialingMode)
+              c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
 
           :
             equipL Vantum Phoenix
         :
-          ?!keepMask & hp = maxhp
-            c.doMoondial("Bifrost", a.isword, moondialingMode)
+          ?!keepCultistMask & hp = maxhp
+            c.doMoondial("Bifrost", a.swordIceDmg, moondialMode)
           :
             equipL Bifrost
 
 
   ?hp < maxhp
-  ^& !c.canBash() & !c.canDash()
-  ^& !keepMask
+  ^& !c.canUseBashingShield() & !c.canUseDashingShield()
+  ^& !keepCultistMask
     equipL moon
-    equipR @a.dLsword@
+    equipR @a.swordVigorBuff@
 
 
   return
@@ -196,21 +204,22 @@ func bossFight()
 func ldtF(mode)
   ?mode = "default"
     equipL triskelion
-    ?!keepMask
-      equipR @a.cshield1@
+    ?!keepCultistMask
+      equipR @a.shieldCompound1@
   :?mode = "armorRecover"
     equipL triskelion
-    ?!keepMask
-      equipR @a.cshield2@
+    ?!keepCultistMask
+      equipR @a.shieldCompound2@
   :?mode = "escape"
     equipL mind
-    equipR @a.cshield2@
+    equipR @a.shieldCompound2@
 
-    //p.mindDelay = totaltime + p.mindCd
   :?mode = "magnet"
     equipL star
-    ?!keepMask
+    ?!keepCultistMask
       equipR triskelion
+    :
+      equipR mask
 
 
   :?mode = "harv"
@@ -219,31 +228,31 @@ func ldtF(mode)
 
   //buffs/debuffs (oriented to duration)
   :?mode = "pDeb1"
-    ?keepMask
-      equipL @a.dPsword@
+    ?keepCultistMask
+      equipL @a.swordPoisonDebuff@
       equipR mask
     :
       equipL moon
-      equipR @a.dPsword@
+      equipR @a.swordPoisonDebuff@
   :?mode = "pDeb2"
-    ?keepMask
-      equipL Death's Kiss
+    ?keepCultistMask
+      equipL "Death's Kiss"
       equipR mask
     :
       equipL moon
-      equipR Death's Kiss
+      equipR "Death's Kiss"
   :?mode = "aidActive"
-    equipL @a.ahHammer@
-    equipR @a.ahShield@
+    equipL @a.hammerVigorBuff@
+    equipR @a.shieldVigorBuff@
   :?mode = "pDebActive" // idk what to name it lol
-    equipL @a.dPsword@
-    equipR @a.apShield@
+    equipL @a.swordPoisonDebuff@
+    equipR @a.shieldPoisonBuff@
 
   :?mode = "fDeb"
-    equipL @a.dFsword@
+    equipL @a.swordFireDebuff@
     equipR mask
   :?mode = "iDeb"
-    equipL @a.dIsword@
+    equipL @a.swordIceDebuff@
     equipR mask
 
   : // print error message on screen
@@ -287,7 +296,7 @@ var dontShowAgain = false
     ^null,null,null) // down, up, sound
 
 
-  i.showStrCtr(6,30,
+  u.showStrCtr(6,30,
   ^"Harvest boulders?","#yellow",
   ^false)
 
@@ -304,11 +313,11 @@ var dontShowAgain = false
     var aux = totaltime + 3*u.sec
     ?totaltime < aux
       ?choice
-        i.showStrCtr(6, 30,
+        u.showStrCtr(6, 30,
         ^"Harvest boulders is enabled","#green",
         ^false)
       :
-        i.showStrCtr(6, 30,
+        u.showStrCtr(6, 30,
         ^"Harvest boulders is disabled","#red",
         ^false)
     :
@@ -317,49 +326,54 @@ var dontShowAgain = false
 
 
 
-?item.right.state ! a.apShield &
-^item.left.state ! a.ahHammer & item.right.state ! a.ahShield
-  c.doAAC("sword 0*", a.cshield1)
+c.doAAC("sword 0*", a.shieldCompound1)
 
 ?debuffs.string
   loc.Leave()
 
-?loc.begin // AUTO BREWING
+?loc.begin
+  // initial equipment
+  equipL triskelion
+  equipR @a.shieldCompound1@
 
+  // ///////////////////////////// //
+  // AUTO BREWING
   ?res.bronze >= 10
     ?res.stone >= 10
       ?item.potion ! "lucky"
         brew stone + bronze
 
-      moondialingMode = 0
-
     :?res.wood >= 10
       ?item.potion ! "berserk"
         brew wood + bronze
 
-      moondialingMode = 2
     :
       loc.Leave()
   :
     loc.Leave()
+  // ///////////////////////////// //
 
-?keepMask
+:?keepCultistMask
   ?item.right ! "bardiche" &
   ^item.right ! "quarterstaff" &
-  ^item.right ! "heavy hammer"
+  ^item.right ! "heavy hammer" &
+  ^item.right ! "quarterstaff"
     equipR mask
 
-?loc.begin | loc.loop
-  /* ldtF("default") but w/o considering keepMask*/
-  equipL triskelion
-  equipR @a.cshield1@
 
-:?c.canUseFTali()
-  equipL triskelion
-  c.useFTali("r")
 
-:?c.canUsePotDmg() & keepMask
+?c.canUsePotionDmg() & keepCultistMask
   activate potion
+
+// speed up
+:?c.canUseStaffInfernal() &
+^screen.i ! 4 & foe.state ! -1
+  equip @a.staffFireHidden@
+  activate R
+
+?c.canUseFireTalisman()
+  equipL triskelion
+  c.useFireTalisman("r")
 
 :?choice & harvest.distance < 5
   ldtF("harv")
@@ -367,98 +381,97 @@ var dontShowAgain = false
 :?pickup.distance < 15
   ldtF("magnet")
 
-  ?screen.i ! 3 & c.canUseQstaff()
-    c.useQstaff(a.myqstaff)
+:?screen.i < 3 & foe.distance > 15 &
+^screen.i > 3 & foe.distance > 15 &
+^c.canUseQuarterstaff()
+  >c0,0,#red,using qstaff
+  loc.pause()
+  c.useQuarterstaff(a.myQuarterstaff)
+
+:?ai.paused |
+^(ai.idle & foe.distance > 11) | // if we're waiting
+^foe.state = -1 | foe.state = 4 | // foe death states
+^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
+^(foe.state = 107 & foe.damage = 3) | // dsangelos' flying animation
+^foe.state = 108 | // dysangelos phase 2 to 3 states
+^foe.state = 116 | // dysangelos phase 3 death animation state
+^foe.distance > 15 // or we can't engage in a fight
+  ?14 <= armor & armor <= a.compoundMaxArmor
+    ldtF("default")
+  :
+    ldtF("armorRecover")
+
 
 :
   ?foe = "dysangelos" & foe.state = 108
-  ^& dysanToPhase3Timer = -1 & !keepMask
+  ^& dysanToPhase3Timer = -1 & !keepCultistMask
     dysanToPhase3Timer = 0
 
   ?dysanToPhase3Timer ! -1 & dysanToPhase3Timer < 90
     dysanToPhase3Timer++
 
 
-  ?c.canUseQstaff() & screen.i < 3 & foe.distance > 15
-    c.useQstaff(a.myqstaff)
-
-  :?foe = "dysangelos" & foe.distance <= 22
-  ^& c.canUseBard2() &
+  ?foe = "dysangelos" & foe.distance <= 22
+  ^& c.canUseBardiche() &
   ^(foe.state = 100 | foe.state = 101 |
   ^foe.state = 102 | foe.state = 126) // Dysan's pre-dialog strat
-    ?c.canUseHamm2()
-      c.useHamm(a.myHamm)
-    :?c.canUseQstaff()
-      c.useQstaff(a.myqstaff)
-    :?c.canDash()
-      c.dash("Vantum Phoenix", a.dshield)
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(a.myHeavyHammer)
+    :?c.canUseQuarterstaff()
+      c.useQuarterstaff(a.myQuarterstaff)
+    :?c.canUseDashingShield()
+      c.useDashingShield("Vantum Phoenix", a.shieldDashing)
     :
-      buffs.string = buffs.string
       ?buffs.string = "berserk"
-        c.useBard("Kubikiribocho")
+        c.useBardiche("Kubikiribocho")
       :
-        c.useBard(a.fastBard)
+        c.useBardiche(a.fastBardiche)
 
-  :?foe = "dysangelos" & foe.state = 127 & !restAps & !keepMask // "reloading" aps strat
+  :?foe = "dysangelos" & foe.state = 127 & !restAps & !keepCultistMask // "reloading" aps strat
     ?c.apsTimer >= 10
       c.apsTimer = 0
 
-    : // ?c.apsTimer < 10
-      c.doAps("Vantum Phoenix", a.fsword,
-      ^       "Bifrost", a.isword,
-      ^       "Dothaneel", a.vsword,
-      ^       "Mamba Negra", a.psword,
-      ^       "Void Slayer", a.aesword)
+    : // c.apsTimer < 10
+      c.doAps("Vantum Phoenix", a.swordFireDmg,
+      ^       "Bifrost", a.swordIceDmg,
+      ^       "Dothaneel", a.swordVigorDmg,
+      ^       "Mamba Negra", a.swordPoisonDmg,
+      ^       "Void Slayer", a.swordAetherDmg)
 
       ?c.apsTimer = 9
         restAps = true
 
-  :?c.canUseQstaff() & screen.i = 4 &
-  ^foe.distance > 15 & foe.distance <= 18 & ai.enabled
-    c.useQstaff(a.myqstaff)
+  
+    ?dysanToPhase3Timer >= 0 & !dysanToPhase3Done // Dysan's phase3 transformation cutscene strat
 
-  :?dysanToPhase3Timer >= 0 & !dysanToPhase3Done // Dysan's phase3 transformation cutscene strat
+    ?c.canUseQuarterstaff()
+      c.useQuarterstaff(a.myQuarterstaff)
 
-    ?c.canUseQstaff()
-      c.useQstaff(a.myqstaff)
+    :?c.canUseBashingShield()
+      c.useBashingShield(a.swordVigorBuff)
+    :?c.canUseDashingShield()
+      c.useDashingShield(a.swordVigorBuff, a.shieldDashing)
 
-    :?c.canBash()
-      c.bash(a.dLsword)
-    :?c.canDash()
-      c.dash(a.dLsword, a.dshield)
-
-    :?c.canUseBard()
-      c.useBard("Kubikiribocho")
-    :?c.canUseHamm()
-      c.useHamm(a.myHamm)
+    :?c.canUseBardiche()
+      c.useBardiche("Kubikiribocho")
+    :?c.canUseHeavyHammer()
+      c.useHeavyHammer(a.myHeavyHammer)
     :
       dysanToPhase3Done = true
 
 
+  :?ai.enabled // & foe.state ! -1
 
-  :?foe.distance > 15 | !ai.enabled |
-  ^(foe.state = 124 | foe.state = -1 |
-  ^(foe.state = 107 & foe.damage = 3)) // Dysan's flying animation (after putting shield on phase3)
-  ^| (foe = "dysangelos" & foe.state = 4)
-  ^| foe.state = 116
-
-    ?14 <= armor & armor <= a.cMaxArmor
-      ldtF("default")
-    :
-      ldtF("armorRecover")
-
-  :?ai.enabled & foe.state ! -1
     // fighting range
-
     ?foe = "acronian_scout"
 
-      ?c.canBash()
-        c.bash("Vantum Phoenix")
+      ?c.canUseBashingShield()
+        c.useBashingShield("Vantum Phoenix")
 
-      :?foe.state = 32 & foe.time > 40
+      :?foe.state = 32 & foe.time > 40 & !keepCultistMask
         ldtF("pDebActive")
 
-      :?keepMask
+      :?keepCultistMask
         ?foe.debuffs.string ! "chill:6"
           ldtF("iDeb")
         :?foe.debuffs.string ! "damage"
@@ -469,16 +482,16 @@ var dontShowAgain = false
           equipL Vantum Phoenix
 
       :?hp ! maxhp
-        c.doMoondial(a.dLsword, "Vantum Phoenix", moondialingMode)
+        c.doMoondial(a.swordVigorBuff, "Vantum Phoenix", moondialMode)
 
       :?c.apsTimer < 10
-        c.doAps("Vantum Phoenix", a.fsword,
-        ^       "Bifrost", a.isword,
-        ^       "Dothaneel", a.vsword,
-        ^       "Mamba Negra", a.psword,
-        ^       "Void Slayer", a.aesword)
+        c.doAps("Vantum Phoenix", a.swordFireDmg,
+        ^       "Bifrost", a.swordIceDmg,
+        ^       "Dothaneel", a.swordVigorDmg,
+        ^       "Mamba Negra", a.swordPoisonDmg,
+        ^       "Void Slayer", a.swordAetherDmg)
       :
-        c.doMoondial("Vantum Phoenix", a.fsword, moondialingMode)
+        c.doMoondial("Vantum Phoenix", a.swordFireDmg, moondialMode)
 
 
 
@@ -500,10 +513,10 @@ var dontShowAgain = false
         c.apsTimer = 0
         resetApsTimer = false
 
-      ?c.canBash() & !dontDash
-        c.bash("Vantum Phoenix")
-      :?c.canDash() & !dontDash
-        c.dash("Vantum Phoenix", a.dshield)
+      ?c.canUseBashingShield() & !dontDash
+        c.useBashingShield("Vantum Phoenix")
+      :?c.canUseDashingShield() & !dontDash
+        c.useDashingShield("Vantum Phoenix", a.shieldDashing)
 
 
       :?foe.state = 32 & (
@@ -514,16 +527,17 @@ var dontShowAgain = false
       ^  ((foe.debuffs.string = "chill" & foe.time > 80) // final phase, about to normal attack
       ^ | (foe.debuffs.string ! "chill" & 48 < foe.time & foe.time < 55)      )) ) // same, but w/o chill
 
-        ?armor < trueDmg
-          ldtF("aidActive")
-        :
-          ldtF("pDebActive")
+        ?!keepCultistMask
+          ?armor < trueDmg
+            ldtF("aidActive")
+          :
+            ldtF("pDebActive")
 
 
       :?foe ! "immune_to_debuff_damage"
       ^& foe.buffs.string ! "buff_protection"
       ^& loc.stars > 5
-        ?keepMask
+        ?keepCultistMask
           ?foe.debuffs.string ! "chill:6"
             ldtF("iDeb")
 

@@ -312,7 +312,6 @@ func canUseQuarterstaff()
   ^(item.right = "quarterstaff"
   ^& item.right.state = 2)
 
-
 func useQuarterstaff(yourQuarterstaff)
   equip @yourQuarterstaff@
   activate R
@@ -323,6 +322,48 @@ func useQuarterstaff(yourQuarterstaff)
 func canUseMindstone()
   return item.GetCooldown("mind") <= 0 &
   ^item.CanActivate()
+
+
+func canUseWandGravity()
+  return item.GetCooldown("wand_stone") <= 0 &
+  ^item.CanActivate() |
+  ^(item.left = "staff_hidden_stone" & item.left.state = 2) |
+  ^(item.right = "staff_hidden_stone" & item.right.state = 2)
+
+func useWandGravity(yourWandGravity, hand)
+  ?hand = "l" | hand = "left"
+    equipL @yourWandGravity@
+  :?hand = "r" | hand = "right"
+    equipR @yourWandGravity@
+
+  activate E
+
+  return
+
+func canUseWandCalamity()
+  return
+  ^item.GetCooldown("wand_aether") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 14
+
+
+func canUseStaffAcrobatic()
+  return
+  ^item.GetCooldown("staff_stone") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 3
+
+func canUseStaffBerserker()
+  return
+  ^item.GetCooldown("staff_poison") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 8
+
+func canUseStaffInfernal()
+  return
+  ^item.GetCooldown("staff_fire") <= 0 & // not on cooldown
+  ^item.CanActivate() &
+  ^armor >= 6 // enough armor to activate ability
 
 
 // Tools

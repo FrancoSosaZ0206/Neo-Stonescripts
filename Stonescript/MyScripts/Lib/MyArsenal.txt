@@ -49,7 +49,7 @@ Death's Kiss = poison sword dP shiny (enchanted: P) */
 
 
 //poison:
-var swordPoisonDebuff = "shield poison *max dP" // enchanted: speed
+var swordPoisonDebuff = "sword poison *max dP" // enchanted: speed
 var swordPoisonDmg = "sword poison -dP *max"
 var shieldPoisonDefense = "shield poison *max -ap"
 var shieldPoisonBuff = "shield poison *max ap"
