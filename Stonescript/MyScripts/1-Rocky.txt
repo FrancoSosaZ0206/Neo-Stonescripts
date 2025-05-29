@@ -361,7 +361,6 @@ c.doAAC("sword 0*", a.shieldCompound1)
     equipR mask
 
 
-
 ?c.canUsePotionDmg() & keepCultistMask
   activate potion
 

@@ -359,6 +359,12 @@ func canUseStaffBerserker()
   ^item.CanActivate() &
   ^armor >= 8
 
+func canUseStaffPrevention()
+  return
+  ^item.GetCooldown("staff_vigor") <= 0 &
+  ^item.CanActivate() &
+  ^armor >= 4
+
 func canUseStaffInfernal()
   return
   ^item.GetCooldown("staff_fire") <= 0 & // not on cooldown

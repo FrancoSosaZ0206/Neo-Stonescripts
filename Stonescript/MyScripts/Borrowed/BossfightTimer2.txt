@@ -7,13 +7,7 @@
 // IMPORTS
 
 var u = new MyScripts/Lib/Utilities
-var p
-p = import MyScripts/Lib/Performance
 var i = new MyScripts/Lib/MyBetterInfo
-
-p.fn = foe.name
-p.fs = foe.state
-p.ft = foe.time
 
 
 
@@ -31,7 +25,7 @@ var bftKillText = ""
 // editing these probably will break stuff
 var prebos = 0
 var endbos = 0
-var thebos = p.fn
+var thebos = foe.name
 var fip    = false
 var pebb   = "#ea#sports"
 
@@ -43,37 +37,37 @@ bftKillText = thebos + "#killed#in#" +
 
 // PROCEDURE:
 
-?(p.tt - prebos) % 21 <= 7
+?(totaltime - prebos) % 21 <= 7
   pebb = "."
 
-:?(p.tt - prebos) % 21 <= 14
+:?(totaltime - prebos) % 21 <= 14
   pebb = ".."
 :
   pebb = "..."
 
-?p.f = "boss" & thebos ! p.fn
-  prebos  = p.tt
-  thebos  = p.fn
+?foe = "boss" & thebos ! foe.name
+  prebos  = totaltime
+  thebos  = foe.name
 
-  ?p.irs = 2 | p.ils = 2 | t = 1
+  ?item.right.state = 2 | item.left.state = 2 | t = 1
     fip     = true
 
-?p.f = "boss" & p.fhp < 1 & p.fs ! 125 & p.fs ! 108 &
-^(p.tt - endbos ! 1 & p.ft = 1 | p.ft = 0) | t = 1
-  endbos  = p.tt
+?foe = "boss" & foe.hp < 1 & foe.state ! 125 & foe.state ! 108 &
+^(totaltime - endbos ! 1 & foe.time = 1 | foe.time = 0) | t = 1
+  endbos  = totaltime
   fip     = false
 
-?(p.tt - endbos) % 10 >= 5 | key = primary | !bftBlink
+?(totaltime - endbos) % 10 >= 5 | key = primary | !bftBlink
 
-  ?endbos - prebos > 0 & p.tt - 120 <= endbos
+  ?endbos - prebos > 0 & totaltime - 120 <= endbos
 
     ?bftXpos ! "default" & bftYpos ! "default"
       >`@bftXpos@,@bftYpos@,@bftColor@,@bftKillText@
     :
-      i.showStrCtr(8, 30, bftKillText, bftColor, false)
+      u.showStrCtr(8, 30, bftKillText, bftColor, false)
 
   :?fip = true
-    i.showStrCtr(8, 30, "fight#in#progress#" + pebb, bftColor, false)
+    u.showStrCtr(8, 30, "fight#in#progress#" + pebb, bftColor, false)
   
 
 

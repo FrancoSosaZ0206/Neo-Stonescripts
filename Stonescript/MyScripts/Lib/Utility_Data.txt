@@ -16,6 +16,7 @@ var crossbow_rune_range = 23
 var crossbow_range = 22
 var crossbow_stone_range = 22
 var sword_range = 5
+var wand_rune_range = 20
 
 // *******************************************************
 //                 END OF "Utility_Data.txt"              

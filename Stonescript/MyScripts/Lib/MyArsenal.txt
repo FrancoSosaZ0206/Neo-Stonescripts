@@ -115,7 +115,7 @@ var bowAlternate = "crossbow *max golden"
 
 //special weapons:
 var shieldDashing = "shield dashing *max HoH24"
-var myQuarterstaff = "quarterstaff golden"
+var myQuarterstaff = "quarterstaff *max glitched"
 var fastBardiche = "bardiche *max" // enchanted: speed
 var myHeavyHammer = "heavy hammer *max"
 var bowRepeating = "crossbow repeating *max golden"
