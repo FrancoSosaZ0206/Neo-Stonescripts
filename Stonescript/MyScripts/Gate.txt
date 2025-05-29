@@ -25,7 +25,7 @@ var set = new MyScripts/Borrowed/scottyEyeTracker
   c.useQuarterstaff(a.myQuarterstaff)
 :
   equipL triskelion
-  equipR mask
+  equipR @a.shieldCompound2@
 
 set.scottyEyeTracker("#red")
 
