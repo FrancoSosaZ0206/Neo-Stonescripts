@@ -42,12 +42,7 @@ var dpsPanel
 
 /***************************************************************/
 
-var bossTimer
-bossTimer = import MyScripts/Borrowed/BossfightTimer2
-
-/***************************************************************/
-
-import UI/FoeStateTracker
+// import UI/FoeStateTracker
 
 
 
