@@ -59,11 +59,13 @@ var dpsPanel
 var blowing
 
 var keepCultistMask = true
-
-var smiteScreen = 1
 var voidweaverScreen = 3
+var smiteScreen = 1
 
 var keepFTali = false
+
+var moondialMode = -1
+
 
 ?foe = "boss"
   keepFTali = true
@@ -74,8 +76,6 @@ var keepFTali = false
 
   ?smiteScreen = 1 & loc.stars > 10
     smiteScreen = 2
-
-var moondialMode = -1
 
 ?buffs.string = "berserk"
   moondialMode = 2
@@ -244,9 +244,11 @@ c.doAAC("sword 0*", a.shieldCompound1)
   activate potion
 
 
-?c.canUseBFG_DS(smiteScreen)
+?c.canUseBFG_DS(smiteScreen) &
+^loc.stars <= 15
   c.useBFG_DS()
-
+:?c.canUseBFG()
+  c.useBFG()
 
 ?foe ! "boss" &
 ^foe.state ! 4 &
@@ -415,14 +417,17 @@ c.doAAC("sword 0*", a.shieldCompound1)
     :?c.canUseHeavyHammer()
       c.useHeavyHammer(a.myHeavyHammer)
 
-    :?(foe = "spawner" | loc.stars <= 15 |
-    ^encounter.isElite) &
+    :?(foe = "spawner" | loc.stars <= 15) &
+    ^!encounter.isElite
+    /*(foe = "spawner" | loc.stars <= 15 |
+    ^!encounter.isElite) &
     ^encounter.eliteMod ! "tenacious" &
-    ^encounter.eliteMod ! "monarch"
+    ^encounter.eliteMod ! "monarch"*/
       // unmaking them is often faster than normal
       ldtF("unmakeAOE")
 
-    :?c.canDebuffAny()
+    :?c.canDebuffAny() &
+    ^encounter.eliteMod ! "tenacious"
       ldtF("rangedDebuffAOE")
 
     :
@@ -430,9 +435,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
     
 
   : // 1v1 fight
-    ?foe = "spawner" &
-    ^encounter.eliteMod ! "tenacious" &
-    ^encounter.eliteMod ! "monarch"
+    ?foe = "spawner" & !encounter.isElite
+    /*^encounter.eliteMod ! "tenacious" &
+    ^encounter.eliteMod ! "monarch"*/
       ldtF("unmake1v1")
 
     :
