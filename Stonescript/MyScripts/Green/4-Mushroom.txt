@@ -49,7 +49,7 @@ var dpsPanel
 // VARIABLES
 
 var keepCultistMask = true
-var smiteScreen = 1
+var smiteScreen = 2
 
 ?loc.loop
   keepCultistMask = false
@@ -327,6 +327,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
   :?foe.count > 1 // AOE strategy
     ?!encounter.isElite &
+    ^screen.i ! smiteScreen &
     ^c.canUseVoidweaver()
       c.useVoidweaver()
 
@@ -334,6 +335,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
       c.useBFG_DS()
 
     :?encounter.isElite &
+    ^encounter.eliteMod ! "tenacious" &
     ^c.canUseWandGravity()
       c.useWandGravity(a.wandStoneHidden, "l")
 
