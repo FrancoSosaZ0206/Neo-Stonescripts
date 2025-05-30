@@ -43,6 +43,7 @@ var scr = 69 // 1 screen = 69 units
 
 var bardiche_range = 9
 var bardiche_ability_range = 7
+var heavyHammer_range = 7 // CHECK
 var heavyHammer_ability_range = 20 // CHECK
 
 // These count both for dashing and bashing shields:
@@ -53,13 +54,19 @@ var hatchet_range = 5
 
 var star_stone_range = 12
 
-var crossbow_rune_range = 23
-var crossbow_range = 22
-var crossbow_stone_range = 22
 var sword_range = 5
+var hammer_range = 5
+var quarterstaff_range = 5
+var sword_big_range = 6
 var wand_rune_range = 20
+var staff_range = 20
+var crossbow_range = 22
+var crossbow_rune_range = 23
 
-var staff_grasping_range_buff = 10
+/* the added range that the
+Grasping Staff's ability adds */
+var grasping_buff = 10
+var grasping_cap = 22
 
 
 // /////////////////////////////////////////// //

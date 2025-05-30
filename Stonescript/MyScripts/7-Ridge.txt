@@ -74,7 +74,7 @@ var moondialMode = -1
   keepFTali = false
   keepCultistMask = false
 
-  ?smiteScreen = 1 & loc.stars > 10
+  ?loc.stars > 10
     smiteScreen = 2
 
 ?buffs.string = "berserk"
@@ -208,6 +208,8 @@ func fight1v1()
 
 // PROCEDURE:
 
+>`1,10,#yellow,dist=@foe.distance@
+
 c.doAAC("sword 0*", a.shieldCompound1)
 
 ?loc.begin // AUTO BREWING
@@ -244,11 +246,12 @@ c.doAAC("sword 0*", a.shieldCompound1)
   activate potion
 
 
-?c.canUseBFG_DS(smiteScreen) &
-^loc.stars <= 15
-  c.useBFG_DS()
-:?c.canUseBFG()
-  c.useBFG()
+?c.canUseBFG()
+  ?screen.i = smiteScreen & loc.stars <= 15
+    c.useBFG_DS()
+
+  :?foe.count > 5
+    c.useBFG()
 
 ?foe ! "boss" &
 ^foe.state ! 4 &
@@ -272,6 +275,99 @@ c.doAAC("sword 0*", a.shieldCompound1)
 :?pickup.distance < 15
   ldtF("magnet")
 
+
+:?encounter.isElite & foe.distance <= u.crossbow_rune_range
+  ?c.canUseWandCalamity()
+    c.useWandCalamity(a.wandAetherHidden, "l")
+
+  :?encounter.eliteMod = "monarch"
+    ?foe.count > 1 // eliminate the other foes
+      ?c.canUseBFG()
+        c.useBFG()
+      :?c.canUseWandExplosive()
+        c.useWandExplosive(a.wandFireHidden, "l")
+
+      :?c.canUseStaffGrasping()
+        c.useStaffHidden(a.staffAetherHidden)
+
+      :?buffs.string = "buff_range" &
+      ^foe.distance <= u.sword_range + u.grasping_buff
+        fight1v1()
+
+      :?foe.distance < 7 & // if too close, try to escape
+      ^(c.canUseMindstone() |
+      ^c.canUseStaffAcrobatic())
+        ?c.canUseMindstone()
+          ldtF("escape")
+        :
+          c.useStaffHidden(a.staffStoneHidden)
+
+      :?c.canUseHeavyHammer() // if close, use hammer
+        c.useHeavyHammer(a.myHeavyHammer)
+      :?c.canDebuffAny()
+        ldtF("rangedDebuffAOE")
+      :
+        ldtF("rangedDmgAOE")
+
+    :?c.canUseBashingShield()
+      c.useBashingShield(Vantum Phoenix)
+    :?c.canUseDashingShield()
+      c.useDashingShield(Vantum Phoenix, a.shieldDashing)
+
+    :?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight1v1()
+
+  :?c.canUseWandPlague() &
+  ^encounter.eliteMod ! "tenacious"
+    c.useWandPlague(a.wandPoisonHidden, "l")
+
+  :?encounter.eliteMod ! "stoic" &
+  ^(c.canUseWandExplosive() | c.canUseHeavyHammer())
+    ?c.canUseWandExplosive()
+      c.useWandExplosive(a.wandFireHidden, "l")
+    :?c.canUseHeavyHammer()
+      c.useHeavyHammer(a.myHeavyHammer)
+
+  :?foe.distance <= c.getGraspingRange("sword")
+    ?c.canUseMindstone()
+      ldtF("escape")
+    :?c.canUseStaffAcrobatic()
+      c.useStaffHidden(a.staffStoneHidden)
+
+    :?c.canUseStaffGrasping()
+      c.useStaffHidden(a.staffAetherHidden)
+
+  :?foe.count > 1 &
+  ^foe.distance > c.getGraspingRange("sword")
+    // rangedAOE strat
+    ?encounter.eliteMod ! "tenacious"
+      ?c.canDebuffAny()
+        ldtF("rangedDebuffAOE")
+      :
+        ldtF("unmakeAOE")
+
+    : // can't debuff
+      ldtF("rangedDmgAOE")
+
+  :?c.canUseBashingShield()
+    c.useBashingShield(a.swordIceDebuff)
+  :?c.canUseDashingShield()
+    c.useDashingShield(a.swordIceDebuff, a.shieldDashing)
+
+  : // melee strat
+    ?encounter.eliteMod ! "tenacious"
+      ?c.canDebuffAny()
+        ldtF("meleeDebuff")
+      :
+        ldtF("unmake1v1")
+
+    : // can't debuff
+      fight1v1()
+
+
 :?foe.state ! 133 & // Hrímnir's blowing state
 ^ai.walking &
 ^(foe.distance < 11 | foe.distance > 15 ) &
@@ -290,46 +386,6 @@ c.doAAC("sword 0*", a.shieldCompound1)
     ldtF("default")
   :
     ldtF("armorRegen")
-
-:?encounter.eliteMod = "monarch"
-  ?foe.count > 1 // eliminate the other foes
-    ?c.canUseBFG()
-      c.useBFG()
-    :?c.canUseWandExplosive()
-      c.useWandExplosive(a.wandFireHidden, "l")
-
-    :?c.canUseStaffGrasping()
-      c.useStaffHidden(a.staffAetherHidden)
-
-    :?buffs.string = "buff_range" &
-    ^foe.distance <= u.sword_range + u.staff_grasping_range_buff
-      fight1v1()
-
-    :?foe.distance < 7 & // if too close, try to escape
-    ^(c.canUseMindstone() |
-    ^c.canUseStaffAcrobatic())
-      ?c.canUseMindstone()
-        ldtF("escape")
-      :
-        c.useStaffHidden(a.staffStoneHidden)
-
-    :?c.canUseHeavyHammer() // if close, use hammer
-      c.useHeavyHammer(a.myHeavyHammer)
-    :?c.canDebuffAny()
-      ldtF("rangedDebuffAOE")
-    :
-      ldtF("rangedDmgAOE")
-
-  :?c.canUseBashingShield()
-    c.useBashingShield(Vantum Phoenix)
-  :?c.canUseDashingShield()
-    c.useDashingShield(Vantum Phoenix, a.shieldDashing)
-
-  :?foe.hp + foe.armor >= a.bardicheRDmg &
-  ^c.canUseBardiche()
-    c.useBardiche(Kubikiribocho)
-  :
-    fight1v1()
 
 // Boss fight (Hrímnir)
 :?foe = "yeti"
@@ -385,6 +441,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
   :?loc.stars > 15 & c.canUseWandFrost()
     c.useWandFrost(a.wandIceHidden, "l")
 
+  :?loc.stars > 15 & c.canUseStaffBerserker()
+    c.useStaffHidden(a.staffPoisonHidden)
+
   :?keepCultistMask & c.canUseBardiche()
     c.useBardiche(Kubikiribocho)
 
@@ -401,15 +460,15 @@ c.doAAC("sword 0*", a.shieldCompound1)
       c.useStaffHidden(a.staffFireHidden)
       activate R
 
-  :?foe.count > 5
-    ?c.canUseWandCalamity()
-      c.useWandCalamity(a.wandAetherHidden, "l")
-    :?c.canUseWandExplosive()
-      c.useWandExplosive(a.wandFireHidden, "l")
-
 
 
   ?foe.count > 1 // AOE strategy
+    ?foe.count > 5
+      ?c.canUseWandCalamity()
+        c.useWandCalamity(a.wandAetherHidden, "l")
+      :?c.canUseWandExplosive()
+        c.useWandExplosive(a.wandFireHidden, "l")
+
     ?c.canUseWandGravity() &
     ^!encounter.isElite &
     ^foe.name ! "Ice Wall"
@@ -419,10 +478,10 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
     :?(foe = "spawner" | loc.stars <= 15) &
     ^!encounter.isElite
-    /*(foe = "spawner" | loc.stars <= 15 |
-    ^!encounter.isElite) &
-    ^encounter.eliteMod ! "tenacious" &
-    ^encounter.eliteMod ! "monarch"*/
+      /*(foe = "spawner" | loc.stars <= 15 |
+      ^!encounter.isElite) &
+      ^encounter.eliteMod ! "tenacious" &
+      ^encounter.eliteMod ! "monarch"*/
       // unmaking them is often faster than normal
       ldtF("unmakeAOE")
 

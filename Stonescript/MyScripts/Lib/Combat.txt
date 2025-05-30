@@ -50,6 +50,41 @@ func Init()
 
   return
 
+func getGraspingRange(weaponName)
+  var result = 0
+
+  ?weaponName = "sword"
+    result += u.sword_range
+  :?weaponName = "sword big"
+    result += u.sword_big_range
+  :?weaponName = "hammer" & weaponName ! "heavy"
+    result += u.hammer_range
+
+  :?weaponName = "wand"
+    result += u.wand_range
+  :?weaponName = "crossbow"
+    result += u.crossbow_range
+
+  :?weaponName = "quarterstaff"
+    result += u.staff_range
+  :?weaponName = "staff"
+    result += u.staff_range
+
+  :?weaponName = "bardiche"
+    result += u.bardiche_ability_range
+  :?weaponName = "heavy hammer"
+    result += u.heavyHammer_range
+
+
+  ?buffs.string = "buff_range"
+    result += u.grasping_buff
+
+  ?result ! 0
+    ?result > u.grasping_cap
+      return u.grasping_cap
+    : 
+      return result
+
 
 // Lost items
 
