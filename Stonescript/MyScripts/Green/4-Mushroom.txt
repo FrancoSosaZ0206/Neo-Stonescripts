@@ -382,10 +382,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
         ldtF("meleeDmg")
 
     :
-      ?keepCultistMask
-        equipL @a.wandPoisonDebuff@
-      :
-        ldtF("rangedDmgAOE")
+      ldtF("rangedDmgAOE")
 
   : // Dash or Bash
     ?c.canUseBashingShield()
