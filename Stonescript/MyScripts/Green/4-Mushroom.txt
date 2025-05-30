@@ -358,7 +358,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
   : // 1v1 strategy
     ?encounter.eliteMod = "titan" &
     ^c.canUseBardiche()
-      c.useBardiche(a.fastBardiche)
+      c.useBardiche(Kubikiribocho)
     :
       fight1v1()
 
