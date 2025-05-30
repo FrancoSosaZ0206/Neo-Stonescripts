@@ -81,7 +81,7 @@ func ldtF(mode)
   :?mode = "engage"
     ?keepCultistMask & foe.count
       equipL @a.hammerPoisonDefense@
-    :
+    :!keepCultistMask
       equipL triskelion
       equipR @a.shieldPoisonDefense@
 
