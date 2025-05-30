@@ -4,7 +4,7 @@
 
 var bardiche_range = 9
 var bardiche_ability_range = 7
-var heavyHammer_range = 7 // CHECK
+var heavyHammer_ability_range = 20 // CHECK
 
 // These count both for dashing and bashing shields:
 var dash_range_min = 11

@@ -2,9 +2,11 @@
 //                     4-Mushroom.txt                     
 // *******************************************************
 
-// Script for Mushroom Forest:
+// Script for Mushroom Forest
 
 
+
+// /////////////////////////////////////////// //
 
 // IMPORTS
 
@@ -14,18 +16,24 @@ var a = new MyScripts/Lib/MyArsenal
 var i = new MyScripts/Lib/MyBetterInfo
 var c = new MyScripts/Lib/Combat
 
-/***************************************************************/
+/***********************************************/
+
+// import UI/FoeStateTracker
+
+/***********************************************/
 
 var som = new MyScripts/Lib/Speed_O_Meter
 
-var somPanel = som.mkUI(0, 1, u.colorToHex("red"), true, false)
+var somPanel = som.mkUI(0, 1,
+^u.colorToHex("red"), true, false)
 ?som.Update(false)
   somPanel.Recycle()
   somPanel = null
 
-  somPanel = som.mkUI(0, 1, u.colorToHex("red"), true, false)
+  somPanel = som.mkUI(0, 1,
+  ^u.colorToHex("red"), true, false)
 
-/***************************************************************/
+/***********************************************/
 
 var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
 
@@ -40,45 +48,34 @@ var dpsPanel
 
   dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
 
-/***************************************************************/
-
-var bossTimer
-bossTimer = import MyScripts/Borrowed/BossfightTimer2
-
-/***************************************************************/
-
-import UI/FoeStateTracker
+/***********************************************/
 
 
+
+// /////////////////////////////////////////// //
 
 // VARIABLES
 
 var keepCultistMask = true
-var smiteScreen = 1
-
-var canDebuffIce
-var canDebuffPoison
-var canDebuffFire
-
-canDebuffIce =
-^(foe.debuffs.string ! "chill:6" &
-^foe ! "immune_to_debuff_chill")
-canDebuffPoison =
-^(foe.debuffs.string ! "damage" &
-^foe ! "immune_to_debuff_damage")
-canDebuffFire =
-^(foe.debuffs.string ! "dot" &
-^foe ! "immune_to_debuff_dot")
-
+var smiteScreen = 2
 
 ?loc.loop
   keepCultistMask = false
 
-  ?totaltime = 1 & loc.stars > 5 &
+  ?totaltime = 1 &
   ^smiteScreen ! 3
     smiteScreen++
 
+var moondialMode = -1
 
+?buffs.string = "berserk"
+  moondialMode = 2
+:
+  moondialMode = 0
+
+
+
+// /////////////////////////////////////////// //
 
 // FUNCTIONS:
 
@@ -93,11 +90,12 @@ func ldtF(mode)
     ?!keepCultistMask
       equipR @a.shieldCompound2@
   :?mode = "engage"
-    ?keepCultistMask
+    ?keepCultistMask & foe.count
       equipL @a.hammerPoisonDefense@
-    :
+    :?!keepCultistMask
       equipL triskelion
       equipR @a.shieldPoisonDefense@
+
   :?mode = "escape"
     equipL mind
     ?!keepCultistMask
@@ -108,50 +106,70 @@ func ldtF(mode)
       equipR triskelion
 
   :?mode = "meleeDmg"
-    equipL Mamba Negra
-    ?!keepCultistMask
-      equipR @a.swordPoisonDmg@
-
+    ?keepCultistMask
+      equipL Mamba Negra
+    :
+      c.doMoondial(Mamba Negra, a.swordPoisonDmg, moondialMode)
   :?mode = "meleeDebuff"
     ?keepCultistMask
-      ?canDebuffIce
+      ?c.canDebuffChill()
         equipL @a.swordIceDebuff@
-      :?canDebuffPoison
+      :?c.canDebuffWeaken()
         equipL @a.swordPoisonDebuff@
-      :?canDebuffFire
+      :?c.canDebuffBurn()
         equipL @a.swordFireDebuff@
     :
       //Left hand:
-      ?canDebuffPoison
+      ?c.canDebuffWeaken()
         equipL @a.swordPoisonDebuff@
-      :?canDebuffFire
+      :?c.canDebuffBurn()
         equipL @a.swordFireDebuff@
-      :?canDebuffIce
+      :?c.canDebuffChill()
         equipL @a.wandIceDebuff@
 
       //Right hand:
-      ?canDebuffIce
+      ?c.canDebuffChill()
         equipR @a.swordIceDebuff@
-
-
-  :?mode = "rangedDmg"
-    equip @a.bowPoisonDmg@
-
-  :?mode = "magic"
+  :?mode = "meleeHeal"
     ?keepCultistMask
-      ?canDebuffIce
+      equipL @a.swordVigorBuff@
+    :
+      c.doMoondial(Mamba Negra, a.swordVigorBuff, moondialMode)
+
+  :?mode = "unmakeAOE"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.bigSwordAetherDebuff@
+    : */
+  :?mode = "unmake1v1"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.swordAetherDebuff@
+    :
+      // put a 2nd dU sword when we have it
+      c.doMoondial(a.swordAetherDebuff, Mamba Negra, moondialMode)*/
+
+  :?mode = "rangedDmgAOE"
+    ?keepCultistMask
+      equipL @a.wandPoisonDmg@
+    :
+      equip @a.bowPoisonDmg@
+
+  :?mode = "rangedDebuffAOE"
+    ?keepCultistMask
+      ?c.canDebuffChill()
         equipL @a.wandIceDebuff@
-      :?canDebuffPoison
+      :?c.canDebuffWeaken()
         equipL @a.wandPoisonDebuff@
-      :?canDebuffFire
+      :?c.canDebuffBurn()
         equipL @a.wandFireDebuff@
 
     :
-      ?canDebuffIce
+      ?c.canDebuffChill()
         equip @a.staffIceDebuff@
-      :?canDebuffPoison
+      :?c.canDebuffWeaken()
         equip @a.staffPoisonDebuff@
-      :?canDebuffFire
+      :?c.canDebuffBurn()
         equip @a.staffFireDebuff@
 
   :
@@ -161,38 +179,27 @@ func ldtF(mode)
   return
 
 func fight1v1()
-  /* How to apply debuffs:
-  - apply all except the ones the foe is immune to.
-  Finish when:
-  - all possible debuffs have been applied. */
-  ?canDebuffIce | canDebuffPoison | canDebuffFire
+
+  ?c.canDebuffAny() & // foe can be debuffed
+  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
     ldtF("meleeDebuff")
-  :
-    ?keepCultistMask
-      equipL Mamba Negra
 
-      ?hp ! maxhp & !debuffs.string
-        equipL @a.swordVigorBuff@
-    :
-      ?buffs.string = "berserk"
-        c.doMoondial(Mamba Negra, a.swordPoisonDmg, 2)
-      :
-        c.doMoondial(Mamba Negra, a.swordPoisonDmg, 0)
+  : // all possible debuffs applied
+    ?hp ! maxhp & !debuffs.string // heal up
+      ldtF("meleeHeal")
 
-      ?hp ! maxhp & !debuffs.string
-        equipR @a.swordVigorBuff@
+    : // deal max damage
+      ldtF("meleeDmg")
 
   return
 
 
 
+// /////////////////////////////////////////// //
+
 // PROCEDURE:
 
 c.doAAC("sword 0*", a.shieldCompound1)
-
-?totaltime - bossTimer.endbos = 1 & loc = "harder Angry"
-  activate voidweaver
-
 
 ?loc.begin
   // initial equipment
@@ -205,6 +212,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     ?res.wood >= 10
       ?item.potion ! "berserk"
         brew wood + bronze
+
     :?res.stone >= 10
       ?item.potion ! "lucky"
         brew stone + bronze
@@ -227,8 +235,13 @@ c.doAAC("sword 0*", a.shieldCompound1)
   activate potion
 
 :?c.canUseStaffInfernal()
-  equip @a.staffFireHidden@
+  c.useStaffHidden(a.staffFireHidden)
   activate R
+
+
+?c.canUseBFG_DS(smiteScreen)
+  c.useBFG_DS()
+
 
 ?foe ! "boss" & foe.distance ! 9999 &
 ^c.canUseAetherTalisman()
@@ -245,6 +258,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
   :
     equipL triskelion
     c.useFireTalisman("r")
+
 
 :?pickup.distance < 15
   ldtF("magnet")
@@ -265,15 +279,12 @@ c.doAAC("sword 0*", a.shieldCompound1)
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 
-:?(foe ! "phase" | foe = "phase2") &
-^foe.distance > 15 & foe.distance <= 17
-  ldtF("engage")
-
 :?ai.paused |
 ^(ai.idle & foe.distance > 11) | // if we're waiting
 ^foe.state = -1 | foe.state = 4 | // foe death states
 ^foe.distance > 15 // or we can't engage in a fight
-  ?armor > 29
+  ?armor > 29 |
+  ^(foe ! "phase1" & foe.distance < 20)
     ldtF("engage")
   :?14 <= armor & armor <= 29
     ldtF("default")
@@ -281,8 +292,93 @@ c.doAAC("sword 0*", a.shieldCompound1)
     ldtF("armorRegen")
 
 
+:?foe ! "phase" // not the boss
+
+  ?encounter.eliteMod = "monarch"
+    ?foe.count > 1 // eliminate the other foes
+      ?c.canUseBFG()
+        c.useBFG()
+      :?c.canUseWandExplosive()
+        c.useWandExplosive(a.wandFireHidden, "l")
+
+      :?foe.distance < 7 & // if too close, try to escape
+      ^(c.canUseMindstone() |
+      ^c.canUseStaffAcrobatic())
+        ?c.canUseMindstone()
+          ldtF("escape")
+        :
+          c.useStaffHidden(a.staffStoneHidden)
+
+      :?c.canUseHeavyHammer() // if close, use hammer
+        c.useHeavyHammer(a.myHeavyHammer)
+      :?c.canDebuffAny()
+        ldtF("rangedDebuffAOE")
+      :
+        ldtF("rangedDmgAOE")
+
+    :?c.canUseBashingShield()
+      c.useBashingShield(Mamba Negra)
+    :?c.canUseDashingShield()
+      c.useDashingShield(Mamba Negra, a.shieldDashing)
+
+    :?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight1v1()
+
+  :?c.canUseBashingShield()
+    c.useBashingShield(Mamba Negra)
+  :?c.canUseDashingShield()
+    c.useDashingShield(Mamba Negra, a.shieldDashing)
+
+  :?foe = "snail" & foe = "boss" // The snail that's always with Mr. Puff
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(a.myHeavyHammer)
+    :?c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+
+    :?c.canDebuffAny()
+      ldtF("meleeDebuff")
+    :
+      ldtF("meleeDmg")
+
+  :?foe.count > 1 // AOE strategy
+    ?!encounter.isElite &
+    ^screen.i ! smiteScreen &
+    ^c.canUseVoidweaver()
+      c.useVoidweaver()
+
+    ?encounter.isElite &
+    ^encounter.eliteMod ! "tenacious" &
+    ^c.canUseWandGravity()
+      c.useWandGravity(a.wandStoneHidden, "l")
+
+    // Hinder regen
+    ?encounter.eliteMod = "regen" &
+    ^c.canUseWandExplosive()
+      c.useWandExplosive(a.wandFireHidden, "l")
+
+    // Remove armor
+    :?encounter.eliteMod = "plated" &
+    ^c.canUseHeavyHammer()
+      c.useHeavyHammer(a.myHeavyHammer)
+
+    :?c.canDebuffAny() &
+    ^encounter.eliteMod ! "tenacious"
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  : // 1v1 strategy
+    ?encounter.eliteMod = "titan" &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight1v1()
+
 // Boss fight - phase1
-:?foe = "mushroom_boss" & foe = "phase1"
+:?foe = "phase1"
 
   ?c.canUsePotionDmg()
     activate potion
@@ -296,82 +392,45 @@ c.doAAC("sword 0*", a.shieldCompound1)
       ?c.canUseMindstone()
         ldtF("escape")
       :?c.canUseStaffAcrobatic()
-        equip @a.staffStoneHidden@
-        activate R
+        c.useStaffHidden(a.staffStoneHidden)
       :?c.canUseStaffEternity()
-        equip @a.staffIceHidden@
-        activate R
+        c.useStaffHidden(a.staffIceHidden)
       :
         ldtF("meleeDmg")
 
     :
-      ?keepCultistMask
-        equipL @a.wandPoisonDebuff@
-      :
-        ldtF("rangedDmg")
+      ldtF("rangedDmgAOE")
 
-  :?foe.armor = foe.maxarmor & // foe has full armor
-  ^foe.distance > 10 // we haven't dashed
-    // Dash or Bash
+  : // Dash or Bash
     ?c.canUseBashingShield()
       c.useBashingShield(Mamba Negra)
     :?c.canUseDashingShield()
       c.useDashingShield(Mamba Negra, a.shieldDashing)
-
-  :
-    fight1v1()
-
-
-: // normal foes and boss's phase2
-  ?c.canUseBFG_DS(smiteScreen)
-    c.useBFG_DS()
-
-  ?c.canUseBashingShield()
-    c.useBashingShield(Mamba Negra)
-  :?c.canUseDashingShield()
-    c.useDashingShield(Mamba Negra, a.shieldDashing)
-
-  ?foe = "snail" & foe = "boss" // The snail that's always with Mr. Puff
-    ?c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
-    :?c.canUseBardiche()
-      c.useBardiche(a.fastBardiche)
-
-    :?canDebuffIce | canDebuffPoison | canDebuffFire
-      ldtF("meleeDebuff")
     :
-      ldtF("meleeDmg")
-
-  :?foe ! "phase2"
-    ?c.canUseHeavyHammer() & foe.count >= 5 &
-    ^!c.canUseBFG() & keepCultistMask
-      c.useHeavyHammer(a.myHeavyHammer)
-
-    :?foe.count = 1
       fight1v1()
-    :        
-      ?canDebuffIce | canDebuffPoison | canDebuffFire
-        ldtF("magic")
-      :?keepCultistMask
-        equipL @a.wandPoisonDebuff@
-      :
-        equip @a.staffAetherDebuff@
 
 
-  : // foe = "phase2" (Enoki & Morel)
-    /* ?foe.state ! 1 // boss appearing animation
-    ^&foe.state ! 4 // dying */
+: // Boss fight - phase2 (Enoki & Morel)
+  ?c.canUseCinderwisp() &
+  ^foe.debuffs.string = a.maxIgnitions_Default
+    c.useCinderwisp()
 
-    ?c.canUseWandPlague() // reduce their damage
-      equipL @a.wandPoisonHidden@
-      activate L
+  ?c.canUseWandPlague() // reduce their damage
+    c.useWandPlague(a.wandPoisonHidden, "l")
+  :?c.canUseStaffBerserker() // increase our damage
+    c.useStaffHidden(a.staffPoisonHidden)
 
-    /*:?!ai.paused & c.canUseMindstone()
-      ldtF("escape")*/
-    :?c.canUseCultistMask()
-      c.useCultistMask()
-    : 
+  :?c.canUseCultistMask()
+    c.useCultistMask()
+
+  : // get in melee range
+    ?c.canUseBashingShield()
+      c.useBashingShield(Mamba Negra)
+    :?c.canUseDashingShield()
+      c.useDashingShield(Mamba Negra, a.shieldDashing)
+    :
       fight1v1()
+
 
 
 // *******************************************************

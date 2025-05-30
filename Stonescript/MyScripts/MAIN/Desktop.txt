@@ -44,7 +44,7 @@ import MyScripts/MAIN/MyPlayerCosmetics
   :?loc = "Caves"
     import MyScripts/Green/3-Caves
   :?loc = "Mushroom"
-    import MyScripts/Green/4-Mushroom
+    import MyScripts/4-Mushroom
   :?loc = "Halls"
     import MyScripts/Green/5-Halls
   :?loc = "Mine"

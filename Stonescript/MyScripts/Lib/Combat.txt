@@ -261,7 +261,7 @@ func useBashingShield(lItem)
 func canUseHeavyHammer()
   return item.GetCooldown("heavy_hammer") <= 0 &
   ^item.CanActivate() &
-  ^foe.distance <= u.heavyHammer_range |
+  ^foe.distance <= u.heavyHammer_ability_range |
   ^(item.right = "heavy hammer" &
   ^item.right.state = 2)
 func useHeavyHammer(weaponName)
