@@ -59,7 +59,7 @@ var smiteScreen = 1
 ?loc.loop
   keepCultistMask = false
 
-  ?totaltime = 1 & loc.stars > 5 &
+  ?totaltime = 1 &
   ^smiteScreen ! 3
     smiteScreen++
 
@@ -143,10 +143,13 @@ func ldtF(mode)
       // put a 2nd dU sword when we have it
       c.doMoondial(a.swordAetherDebuff, Mamba Negra, moondialMode)*/
 
-  :?mode = "rangedDmg"
-    equip @a.bowPoisonDmg@
+  :?mode = "rangedDmgAOE"
+    ?keepCultistMask
+      equipL @a.wandPoisonDmg@
+    :
+      equip @a.bowPoisonDmg@
 
-  :?mode = "magicDebuff"
+  :?mode = "rangedDebuffAOE"
     ?keepCultistMask
       ?c.canDebuffChill()
         equipL @a.wandIceDebuff@
@@ -198,13 +201,13 @@ c.doAAC("sword 0*", a.shieldCompound1)
   // ///////////////////////////// //
   // AUTO BREWING
   ?res.bronze >= 10
-    ?res.stone >= 10
-      ?item.potion ! "lucky"
-        brew stone + bronze
-
-    :?res.wood >= 10
+    ?res.wood >= 10
       ?item.potion ! "berserk"
         brew wood + bronze
+
+    :?res.stone >= 10
+      ?item.potion ! "lucky"
+        brew stone + bronze
     :
       loc.Leave()
   :
@@ -278,7 +281,40 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
 :?foe ! "phase" // not the boss
 
-  ?c.canUseBashingShield()
+  ?encounter.eliteMod = "monarch"
+    ?foe.count > 1 // eliminate the other foes
+      ?c.canUseBFG()
+        c.useBFG()
+      :?c.canUseWandExplosive()
+        c.useWandExplosive(a.wandFireHidden, "l")
+      
+      :?foe.distance < 7 & // if too close, try to escape
+      ^(c.canUseMindstone() |
+      ^c.canUseStaffAcrobatic())
+        ?c.canUseMindstone()
+          ldtF("escape")
+        :
+          c.useStaffHidden(a.staffStoneHidden)
+
+      :?c.canUseHeavyHammer() // if close, use hammer
+        c.useHeavyHammer(a.myHeavyHammer)
+      :?c.canDebuffAny()
+        ldtF("rangedDebuffAOE")
+      :
+        ldtF("rangedDmg")
+
+    :?c.canUseBashingShield()
+      c.useBashingShield(Mamba Negra)
+    :?c.canUseDashingShield()
+      c.useDashingShield(Mamba Negra, a.shieldDashing)
+
+    :?foe.hp + foe.armor >= c.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight1v1()
+
+  :?c.canUseBashingShield()
     c.useBashingShield(Mamba Negra)
   :?c.canUseDashingShield()
     c.useDashingShield(Mamba Negra, a.shieldDashing)
@@ -298,7 +334,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
     ?c.canUseBFG_DS(smiteScreen)
       c.useBFG_DS()
-
+    :?encounter.isElite &
+    ^c.canUseWandGravity()
+      c.useWandGravity(a.wandStoneHidden, "l")
     // Hinder regen
     :?encounter.eliteMod = "regen" &
     ^c.canUseWandExplosive()
@@ -311,15 +349,12 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
     :?c.canDebuffAny() &
     ^encounter.eliteMod ! "tenacious"
-      ldtF("magicDebuff")
-    :?encounter.eliteMod ! "monarch"
-      ldtF("unmakeAOE")
-    : // is monarch and a spawner (otherwise foe.count <= 1)
-      ldtF("rangedDmg")
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
 
   : // 1v1 strategy
-    ?(encounter.eliteMod = "monarch" |
-    ^encounter.eliteMod = "titan") &
+    ?encounter.eliteMod = "titan" &
     ^c.canUseBardiche()
       c.useBardiche(a.fastBardiche)
     :
@@ -350,7 +385,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
       ?keepCultistMask
         equipL @a.wandPoisonDebuff@
       :
-        ldtF("rangedDmg")
+        ldtF("rangedDmgAOE")
 
   : // Dash or Bash
     ?c.canUseBashingShield()
@@ -362,8 +397,14 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
 
 : // Boss fight - phase2 (Enoki & Morel)
+  ?c.canUseCinderwisp() &
+  ^foe.debuffs.string = a.maxIgnitions_Default
+    c.useCinderwisp()
+  
   ?c.canUseWandPlague() // reduce their damage
     c.useWandPlague(a.wandPoisonHidden, "l")
+  :?c.canUseStaffBerserker() // increase our damage
+    c.useStaffHidden(a.staffPoisonHidden)
 
   :?c.canUseCultistMask()
     c.useCultistMask()

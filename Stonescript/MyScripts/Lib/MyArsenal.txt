@@ -56,6 +56,7 @@ var shieldPoisonBuff = "shield poison *max ap"
 var hammerPoisonDefense = "hammer poison *max aP"
 var bowPoisonDmg = "bow poison *max -dP"
 var bowPoisonDebuff = "bow poison *max dP"
+var wandPoisonDmg = "wand poison *max -dP -hidden"
 var wandPoisonDebuff = "wand poison *max dP -hidden"
 var wandPoisonHidden = "wand_hidden_poison *max" // aka Plague Wand
 var staffPoisonDebuff = "staff poison *max dP -hidden"
