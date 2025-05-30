@@ -318,10 +318,9 @@ func canUseMindstone()
 
 
 func canUseWandGravity()
-  return item.GetCooldown("wand_stone") <= 0 &
-  ^item.CanActivate() |
-  ^(item.left = "wand_hidden_stone" & item.left.state = 2) |
-  ^(item.right = "wand_hidden_stone" & item.right.state = 2)
+  return
+  ^item.GetCooldown("wand_stone") <= 0 &
+  ^item.CanActivate()
 func useWandGravity(weaponName, hand)
   ?hand = "l" | hand = "left"
     equipL @weaponName@

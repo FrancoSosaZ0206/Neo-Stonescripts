@@ -79,7 +79,7 @@ func ldtF(mode)
     ?!keepCultistMask
       equipR @a.shieldCompound2@
   :?mode = "engage"
-    ?keepCultistMask
+    ?keepCultistMask & foe.count
       equipL @a.hammerPoisonDefense@
     :
       equipL triskelion
@@ -225,6 +225,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
   c.useStaffHidden(a.staffFireHidden)
   activate R
 
+?c.canUseBFG_DS(smiteScreen)
+  c.useBFG_DS()
+
 ?foe ! "boss" & foe.distance ! 9999 &
 ^c.canUseAetherTalisman()
   ?keepCultistMask
@@ -318,7 +321,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     ?c.canUseHeavyHammer()
       c.useHeavyHammer(a.myHeavyHammer)
     :?c.canUseBardiche()
-      c.useBardiche(a.fastBardiche)
+      c.useBardiche(Kubikiribocho)
 
     :?c.canDebuffAny()
       ldtF("meleeDebuff")
@@ -331,16 +334,13 @@ c.doAAC("sword 0*", a.shieldCompound1)
     ^c.canUseVoidweaver()
       c.useVoidweaver()
 
-    ?c.canUseBFG_DS(smiteScreen)
-      c.useBFG_DS()
-
     ?encounter.isElite &
     ^encounter.eliteMod ! "tenacious" &
     ^c.canUseWandGravity()
       c.useWandGravity(a.wandStoneHidden, "l")
 
     // Hinder regen
-    :?encounter.eliteMod = "regen" &
+    ?encounter.eliteMod = "regen" &
     ^c.canUseWandExplosive()
       c.useWandExplosive(a.wandFireHidden, "l")
 
