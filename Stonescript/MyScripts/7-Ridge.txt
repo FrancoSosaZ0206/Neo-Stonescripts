@@ -156,7 +156,7 @@ func ldtF(mode)
       equipL @a.swordAetherDebuff@
     :
       // put a 2nd dU sword when we have it
-      c.doMoondial(a.swordAetherDebuff, Mamba Negra, moondialMode)*/
+      c.doMoondial(a.swordAetherDebuff, Vantum Phoenix, moondialMode)*/
 
   :?mode = "rangedDmgAOE"
     ?keepCultistMask
@@ -259,7 +259,6 @@ c.doAAC("sword 0*", a.shieldCompound1)
     c.useAetherTalisman("r")
 
 :?foe = "boss" &
-^foe.state < 1 &
 ^c.canUseFireTalisman()
   ?keepCultistMask
     c.useFireTalisman("l")
@@ -271,15 +270,17 @@ c.doAAC("sword 0*", a.shieldCompound1)
 :?pickup.distance < 15
   ldtF("magnet")
 
-:?ai.walking &
+:?foe.state ! 133 & // Hrímnir's blowing state
+^ai.walking &
 ^(foe.distance < 11 | foe.distance > 15 ) &
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 
-:?ai.paused |
+:?foe.state ! 133 & // Hrímnir's blowing state
+^(ai.paused |
 ^(ai.idle & foe.distance > 11) | // if we're waiting
 ^foe.state = -1 | foe.state = 4 | // foe death states
-^foe.distance > 15 // or we can't engage in a fight
+^foe.distance > 15) // or we can't engage in a fight
   ?armor > 29 |
   ^(foe ! "phase1" & foe.distance < 25)
     ldtF("engage")
@@ -288,6 +289,45 @@ c.doAAC("sword 0*", a.shieldCompound1)
   :
     ldtF("armorRegen")
 
+:?encounter.eliteMod = "monarch"
+  ?foe.count > 1 // eliminate the other foes
+    ?c.canUseBFG()
+      c.useBFG()
+    :?c.canUseWandExplosive()
+      c.useWandExplosive(a.wandFireHidden, "l")
+
+    :?c.canUseStaffGrasping()
+      c.useStaffHidden(a.staffAetherHidden)
+
+    :?buffs.string = "buff_range" &
+    ^foe.distance <= u.sword_range + u.staff_grasping_range_buff
+      fight1v1()
+
+    :?foe.distance < 7 & // if too close, try to escape
+    ^(c.canUseMindstone() |
+    ^c.canUseStaffAcrobatic())
+      ?c.canUseMindstone()
+        ldtF("escape")
+      :
+        c.useStaffHidden(a.staffStoneHidden)
+
+    :?c.canUseHeavyHammer() // if close, use hammer
+      c.useHeavyHammer(a.myHeavyHammer)
+    :?c.canDebuffAny()
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  :?c.canUseBashingShield()
+    c.useBashingShield(Vantum Phoenix)
+  :?c.canUseDashingShield()
+    c.useDashingShield(Vantum Phoenix, a.shieldDashing)
+
+  :?foe.hp + foe.armor >= a.bardicheRDmg &
+  ^c.canUseBardiche()
+    c.useBardiche(Kubikiribocho)
+  :
+    fight1v1()
 
 // Boss fight (Hrímnir)
 :?foe = "yeti"
@@ -340,8 +380,8 @@ c.doAAC("sword 0*", a.shieldCompound1)
   ?c.canUseCultistMask()
     c.useCultistMask()
 
-  /*:?c.canUseWandPlague()
-    c.useWandPlague(a.wandPoisonHidden, "l")*/
+  :?loc.stars > 15 & c.canUseWandFrost()
+    c.useWandFrost(a.wandIceHidden, "l")
 
   :?keepCultistMask & c.canUseBardiche()
     c.useBardiche(Kubikiribocho)
@@ -352,7 +392,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
 : // normal foes
   ?screen.i = voidweaverScreen
-    ?c.canUseVoidweaver()
+    ?c.canUseVoidweaver() & !encounter.isElite
       c.useVoidweaver()
 
     ?c.canUseStaffInfernal()
@@ -369,7 +409,8 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
   ?foe.count > 1 // AOE strategy
     ?c.canUseWandGravity() &
-    ^encounter.eliteMod ! "tenacious"
+    ^!encounter.isElite &
+    ^foe.name ! "Ice Wall"
       c.useWandGravity(a.wandStoneHidden, "l")
     :?c.canUseHeavyHammer()
       c.useHeavyHammer(a.myHeavyHammer)

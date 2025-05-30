@@ -22,23 +22,49 @@ HOW TO USE
 
 
 
+// /////////////////////////////////////////// //
+
 // IMPORTS
 
 var uimkr = new MyScripts/Lib/UI_Maker
 
 
 
+// /////////////////////////////////////////// //
 
-// VARIABLES:
+// VARIABLES
 
-//Units
+// Units
 
 var sec = 30 // frames
 var scr = 69 // 1 screen = 69 units
 
+// Weapon stats
+
+var bardiche_range = 9
+var bardiche_ability_range = 7
+var heavyHammer_ability_range = 20 // CHECK
+
+// These count both for dashing and bashing shields:
+var dash_range_min = 11
+var dash_range_max = 15
+
+var hatchet_range = 5
+
+var star_stone_range = 12
+
+var crossbow_rune_range = 23
+var crossbow_range = 22
+var crossbow_stone_range = 22
+var sword_range = 5
+var wand_rune_range = 20
+
+var staff_grasping_range_buff = 10
 
 
-//FUNCTIONS:
+// /////////////////////////////////////////// //
+
+// FUNCTIONS
 
 func max(n1,n2)
   ?n1 >= n2
@@ -262,8 +288,6 @@ func colorToHex(colorName)
     return #rainbow
   :
     >c-20,0,#red,ERROR: colorToHex() got unexisting color: @colorName@
-
-
 
 
 
