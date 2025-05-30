@@ -331,12 +331,17 @@ c.doAAC("sword 0*", a.shieldCompound1)
       ldtF("meleeDmg")
 
   :?foe.count > 1 // AOE strategy
+    ?!encounter.isElite &
+    ^c.canUseVoidweaver()
+      c.useVoidweaver()
 
     ?c.canUseBFG_DS(smiteScreen)
       c.useBFG_DS()
+
     :?encounter.isElite &
     ^c.canUseWandGravity()
       c.useWandGravity(a.wandStoneHidden, "l")
+
     // Hinder regen
     :?encounter.eliteMod = "regen" &
     ^c.canUseWandExplosive()
