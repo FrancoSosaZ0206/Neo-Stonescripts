@@ -334,7 +334,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     ?c.canUseBFG_DS(smiteScreen)
       c.useBFG_DS()
 
-    :?encounter.isElite &
+    ?encounter.isElite &
     ^encounter.eliteMod ! "tenacious" &
     ^c.canUseWandGravity()
       c.useWandGravity(a.wandStoneHidden, "l")
