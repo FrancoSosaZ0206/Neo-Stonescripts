@@ -301,7 +301,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
       :?c.canDebuffAny()
         ldtF("rangedDebuffAOE")
       :
-        ldtF("rangedDmg")
+        ldtF("rangedDmgAOE")
 
     :?c.canUseBashingShield()
       c.useBashingShield(Mamba Negra)
