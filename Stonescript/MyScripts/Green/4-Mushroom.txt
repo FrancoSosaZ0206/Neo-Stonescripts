@@ -285,7 +285,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
         c.useBFG()
       :?c.canUseWandExplosive()
         c.useWandExplosive(a.wandFireHidden, "l")
-      
+
       :?foe.distance < 7 & // if too close, try to escape
       ^(c.canUseMindstone() |
       ^c.canUseStaffAcrobatic())
@@ -306,7 +306,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     :?c.canUseDashingShield()
       c.useDashingShield(Mamba Negra, a.shieldDashing)
 
-    :?foe.hp + foe.armor >= c.bardicheRDmg &
+    :?foe.hp + foe.armor >= a.bardicheRDmg &
     ^c.canUseBardiche()
       c.useBardiche(Kubikiribocho)
     :
@@ -399,7 +399,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
   ?c.canUseCinderwisp() &
   ^foe.debuffs.string = a.maxIgnitions_Default
     c.useCinderwisp()
-  
+
   ?c.canUseWandPlague() // reduce their damage
     c.useWandPlague(a.wandPoisonHidden, "l")
   :?c.canUseStaffBerserker() // increase our damage
