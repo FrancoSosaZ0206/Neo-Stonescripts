@@ -162,7 +162,7 @@ func ldtF(mode)
     ?keepCultistMask
       equipL @a.wandFireDmg@
     :
-      equip @a.bowFireDmg@
+      equip @a.staffFireDebuff@ // @a.bowFireDmg@
 
   :?mode = "rangedDebuffAOE"
     ?keepCultistMask
@@ -278,11 +278,10 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
 :?encounter.isElite & foe.distance <= u.crossbow_rune_range
   ?c.canUseWandCalamity() & foe.distance <= u.wand_rune_range
-    loc.Pause()
     c.useWandCalamity(a.wandAetherHidden, "l")
 
   :?encounter.eliteMod = "monarch"
-    ?foe.count > 1 // eliminate the other foes
+    ?foe.GetCount(c.getGraspingRange(sword)) > 1 // eliminate the other foes
       ?c.canUseBFG()
         c.useBFG()
       :?c.canUseWandExplosive()
@@ -290,9 +289,6 @@ c.doAAC("sword 0*", a.shieldCompound1)
 
       :?c.canUseStaffGrasping()
         c.useStaffHidden(a.staffAetherHidden)
-
-      /*:?foe.distance <= c.getGraspingRange("sword")
-        fight1v1()*/
 
       :?foe.distance < 7 & // if too close, try to escape
       ^(c.canUseMindstone() |
@@ -331,7 +327,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
     :?c.canUseHeavyHammer()
       c.useHeavyHammer(a.myHeavyHammer)
 
-  :?foe.distance <= c.getGraspingRange("sword")
+  :?foe.distance <= c.getGraspingRange("sword") &
+  ^(c.canUseMindstone() | c.canUseStaffAcrobatic() |
+  ^c.canUseStaffGrasping())
     ?c.canUseMindstone()
       ldtF("escape")
     :?c.canUseStaffAcrobatic()
