@@ -77,7 +77,8 @@ var moondialMode = -1
   ?loc.stars > 10
     smiteScreen = 2
 
-?buffs.string = "berserk"
+?buffs.string = "berserk" &
+^debuffs.string ! "chill"
   moondialMode = 2
 :
   moondialMode = 0
@@ -163,7 +164,6 @@ func ldtF(mode)
       equipL @a.wandFireDmg@
     :
       equip @a.staffFireDebuff@ // @a.bowFireDmg@
-
   :?mode = "rangedDebuffAOE"
     ?keepCultistMask
       ?c.canDebuffChill()
@@ -180,6 +180,11 @@ func ldtF(mode)
         equip @a.staffPoisonDebuff@
       :?c.canDebuffBurn()
         equip @a.staffFireDebuff@
+  :?mode = "rangedHealAOE"
+    ?keepCultistMask
+      equipL @a.wandVigorBuff@
+    :
+      equip @a.staffVigorBuff@ // @a.bowVigorBuff@
 
   :
     >c-10,0,#red,
@@ -208,9 +213,12 @@ func fight1v1()
 
 // PROCEDURE:
 
->`1,10,#yellow,dist=@foe.distance@
+?buffs.string ! "buff_inf_speed" & // infernal staff
+^totaltime % 2 = 0 & // every even frame
+^item.left = "triskelion"
+  equipL @a.hammerFireDefense@ // gain extra armor without slowing down
 
-c.doAAC("sword 0*", a.shieldCompound1)
+c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 ?loc.begin // AUTO BREWING
   // initial equipment
@@ -246,12 +254,8 @@ c.doAAC("sword 0*", a.shieldCompound1)
   activate potion
 
 
-?c.canUseBFG()
-  ?screen.i = smiteScreen & loc.stars <= 15
-    c.useBFG_DS()
-
-  :?foe.count > 5
-    c.useBFG()
+?c.canUseBFG_DS(smiteScreen)
+  c.useBFG_DS()
 
 ?foe ! "boss" &
 ^foe.state ! 4 &
@@ -276,96 +280,6 @@ c.doAAC("sword 0*", a.shieldCompound1)
   ldtF("magnet")
 
 
-:?encounter.isElite & foe.distance <= u.crossbow_rune_range
-  ?c.canUseWandCalamity() & foe.distance <= u.wand_rune_range
-    c.useWandCalamity(a.wandAetherHidden, "l")
-
-  :?encounter.eliteMod = "monarch"
-    ?foe.GetCount(c.getRange(sword)) > 1 // eliminate the other foes
-      ?c.canUseBFG()
-        c.useBFG()
-      :?c.canUseWandExplosive()
-        c.useWandExplosive(a.wandFireHidden, "l")
-
-      :?c.canUseStaffGrasping()
-        c.useStaffHidden(a.staffAetherHidden)
-
-      :?foe.distance < 7 & // if too close, try to escape
-      ^(c.canUseMindstone() |
-      ^c.canUseStaffAcrobatic())
-        ?c.canUseMindstone()
-          ldtF("escape")
-        :
-          c.useStaffHidden(a.staffStoneHidden)
-
-      :?c.canUseHeavyHammer() // if close, use hammer
-        c.useHeavyHammer(a.myHeavyHammer)
-      :?c.canDebuffAny()
-        ldtF("rangedDebuffAOE")
-      :
-        ldtF("rangedDmgAOE")
-
-    :?c.canUseBashingShield()
-      c.useBashingShield(Vantum Phoenix)
-    :?c.canUseDashingShield()
-      c.useDashingShield(Vantum Phoenix, a.shieldDashing)
-
-    :?foe.hp + foe.armor >= a.bardicheRDmg &
-    ^c.canUseBardiche()
-      c.useBardiche(Kubikiribocho)
-    :
-      fight1v1()
-
-  :?c.canUseWandPlague() &
-  ^encounter.eliteMod ! "tenacious"
-    c.useWandPlague(a.wandPoisonHidden, "l")
-
-  :?encounter.eliteMod ! "stoic" &
-  ^(c.canUseWandExplosive() | c.canUseHeavyHammer())
-    ?c.canUseWandExplosive()
-      c.useWandExplosive(a.wandFireHidden, "l")
-    :?c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
-
-  :?foe.distance <= c.getRange("sword") &
-  ^(c.canUseMindstone() | c.canUseStaffAcrobatic() |
-  ^c.canUseStaffGrasping())
-    ?c.canUseMindstone()
-      ldtF("escape")
-    :?c.canUseStaffAcrobatic()
-      c.useStaffHidden(a.staffStoneHidden)
-
-    :?c.canUseStaffGrasping()
-      c.useStaffHidden(a.staffAetherHidden)
-
-  :?foe.count > 1 &
-  ^foe.distance > c.getRange("sword")
-    // rangedAOE strat
-    ?encounter.eliteMod ! "tenacious"
-      ?c.canDebuffAny()
-        ldtF("rangedDebuffAOE")
-      :
-        ldtF("unmakeAOE")
-
-    : // can't debuff
-      ldtF("rangedDmgAOE")
-
-  :?c.canUseBashingShield()
-    c.useBashingShield(a.swordIceDebuff)
-  :?c.canUseDashingShield()
-    c.useDashingShield(a.swordIceDebuff, a.shieldDashing)
-
-  : // melee strat
-    ?encounter.eliteMod ! "tenacious"
-      ?c.canDebuffAny()
-        ldtF("meleeDebuff")
-      :
-        ldtF("unmake1v1")
-
-    : // can't debuff
-      fight1v1()
-
-
 :?foe.state ! 133 & // Hrímnir's blowing state
 ^ai.walking &
 ^(foe.distance < 11 | foe.distance > 15 ) &
@@ -378,7 +292,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
 ^foe.state = -1 | foe.state = 4 | // foe death states
 ^foe.distance > 15) // or we can't engage in a fight
   ?armor > 29 |
-  ^(foe ! "phase1" & foe.distance < 25)
+  ^(foe ! "phase1" & foe.distance < 40)
     ldtF("engage")
   :?14 <= armor & armor <= 29
     ldtF("default")
@@ -405,7 +319,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
   
   ?foe.state = 132 & foe.time >= 68
     // about to blow air and apply chill
-    ?c.canUseStaffPrevention() // try to prevent the debuff
+    ?c.canUseWandFrost()
+      c.useWandFrost(a.wandIceHidden, "l")
+    :?c.canUseStaffPrevention() // try to prevent the debuff
       c.useStaffHidden(a.staffVigorHidden)
     :
       fight1v1()
@@ -425,12 +341,43 @@ c.doAAC("sword 0*", a.shieldCompound1)
     :
       fight1v1()
 
+:?encounter.eliteMod = "monarch"
+  ?foe.count > 1 // eliminate the other foes
+    ?c.canUseBFG()
+      c.useBFG()
+    :?c.canUseWandExplosive()
+      c.useWandExplosive(a.wandFireHidden, "l")
+
+    :?foe.distance < c.getRange(sword) & // if too close, try to escape
+    ^(c.canUseMindstone() | c.canUseStaffAcrobatic())
+      ?c.canUseMindstone()
+        ldtF("escape")
+      :
+        c.useStaffHidden(a.staffStoneHidden)
+
+    :?c.canUseHeavyHammer() // if close, use hammer
+      c.useHeavyHammer(a.myHeavyHammer)
+    :?c.canDebuffAny()
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  :?c.canUseBashingShield()
+    c.useBashingShield(Vantum Phoenix)
+  :?c.canUseDashingShield()
+    c.useDashingShield(Vantum Phoenix, a.shieldDashing)
+
+  : // 1v1 with the monarch
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight1v1()
 
 :?c.canUseBashingShield()
-  c.useBashingShield(a.swordIceDebuff)
+  c.useBashingShield(Mamba Negra)
 :?c.canUseDashingShield()
-  c.useDashingShield(a.swordIceDebuff, a.shieldDashing)
-
+  c.useDashingShield(Mamba Negra, a.shieldDashing)
 
 :?foe.name = "Giant Ice Elemental" // the miniboss
   ?c.canUseCultistMask()
@@ -448,59 +395,58 @@ c.doAAC("sword 0*", a.shieldCompound1)
   :
     fight1v1()
 
+:?foe.count > 1
+  ?c.canUseBFG_DS(screen.i) &
+  ^screen.i ! smiteScreen
+    c.useBFG_DS()
 
-: // normal foes
-  ?screen.i = voidweaverScreen
-    ?c.canUseVoidweaver() & !encounter.isElite
-      c.useVoidweaver()
+  ?!encounter.isElite &
+  ^screen.i ! smiteScreen &
+  ^c.canUseVoidweaver()
+    c.useVoidweaver()
 
-    ?c.canUseStaffInfernal()
-      c.useStaffHidden(a.staffFireHidden)
-      activate R
+  ?encounter.isElite &
+  ^encounter.eliteMod ! "tenacious" &
+  ^c.canUseWandGravity()
+    c.useWandGravity(a.wandStoneHidden, "l")
+
+  // Hinder regen
+  ?encounter.eliteMod = "regen" &
+  ^c.canUseWandExplosive()
+    c.useWandExplosive(a.wandFireHidden, "l")
+
+  // Remove armor
+  :?c.canUseHeavyHammer()
+    c.useHeavyHammer(a.myHeavyHammer)
 
 
-
-  ?foe.count > 1 // AOE strategy
-    ?foe.count > 5
-      ?c.canUseWandCalamity()
-        c.useWandCalamity(a.wandAetherHidden, "l")
-      :?c.canUseWandExplosive()
-        c.useWandExplosive(a.wandFireHidden, "l")
-
-    ?c.canUseWandGravity() &
-    ^!encounter.isElite &
-    ^foe.name ! "Ice Wall"
-      c.useWandGravity(a.wandStoneHidden, "l")
-    :?c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
-
-    :?(foe = "spawner" | loc.stars <= 15) &
-    ^!encounter.isElite
-      /*(foe = "spawner" | loc.stars <= 15 |
-      ^!encounter.isElite) &
-      ^encounter.eliteMod ! "tenacious" &
-      ^encounter.eliteMod ! "monarch"*/
-      // unmaking them is often faster than normal
-      ldtF("unmakeAOE")
-
-    :?c.canDebuffAny() &
-    ^encounter.eliteMod ! "tenacious"
-      ldtF("rangedDebuffAOE")
-
-    :
-      ldtF("rangedDmgAOE")
-    
-
-  : // 1v1 fight
-    ?foe = "spawner" & !encounter.isElite
-    /*^encounter.eliteMod ! "tenacious" &
-    ^encounter.eliteMod ! "monarch"*/
+  :?foe.hp + foe.armor > 1000 & // tanky normal foe
+  ^foe.GetCount(c.getRange(sword)) = 1 // at melee range
+    ?c.canUseBardiche() &
+    ^foe.hp + foe.armor >= a.bardicheRDmg
+      c.useBardiche(Kubikiribocho)
+    :?encounter.eliteMod ! "tenacious"
       ldtF("unmake1v1")
-
     :
       fight1v1()
 
 
+  :?c.canDebuffAny() &
+  ^encounter.eliteMod ! "tenacious"
+    ldtF("rangedDebuffAOE")
+  
+  :?encounter.eliteMod = "mundane" &
+  ^!keepCultistMask
+    equip @a.bowAetherDmg@
+  :
+    ldtF("rangedDmgAOE")
+
+: // 1 normal foe
+  ?c.canUseBardiche() &
+  ^foe.hp + foe.armor >= a.bardicheRDmg
+    c.useBardiche(Kubikiribocho)
+  :
+    fight1v1()
 
 // *******************************************************
 //                  END OF "7-Ridge.txt"                  

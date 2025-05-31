@@ -199,7 +199,12 @@ func fight1v1()
 
 // PROCEDURE:
 
-c.doAAC("sword 0*", a.shieldCompound1)
+?buffs.string ! "buff_inf_speed" & // infernal staff
+^totaltime % 2 = 0 & // every even frame
+^item.left = "triskelion"
+  equipL @a.hammerPoisonDefense@ // gain extra armor without slowing down
+
+c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
 
 ?loc.begin
   // initial equipment
@@ -284,7 +289,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
 ^foe.state = -1 | foe.state = 4 | // foe death states
 ^foe.distance > 15 // or we can't engage in a fight
   ?armor > 29 |
-  ^(foe ! "phase1" & foe.distance < 20)
+  ^(foe ! "phase1" & foe.distance < 40)
     ldtF("engage")
   :?14 <= armor & armor <= 29
     ldtF("default")
