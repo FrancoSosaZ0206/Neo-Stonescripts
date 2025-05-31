@@ -62,16 +62,10 @@ var keepCultistMask = true
 var voidweaverScreen = 3
 var smiteScreen = 1
 
-var keepFTali = false
-
 var moondialMode = -1
 
 
-?foe = "boss"
-  keepFTali = true
-
 ?loc.loop
-  keepFTali = false
   keepCultistMask = false
 
   ?loc.stars > 10
@@ -220,27 +214,15 @@ func fight1v1()
 
 c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
-?loc.begin // AUTO BREWING
-  // initial equipment
+// Auto Brewing
+?c.canBrewPotion("berserk")
+  c.brewPotion("berserk")
+:?c.canBrewPotion("lucky")
+  c.brewPotion("lucky")
+
+?loc.begin // initial equipment
   equipL triskelion
   equipR @a.shieldCompound1@
-
-  // ///////////////////////////// //
-  // AUTO BREWING
-  ?res.bronze >= 10
-    ?res.wood >= 10
-      ?item.potion ! "berserk"
-        brew wood + bronze
-
-    :?res.stone >= 10
-      ?item.potion ! "lucky"
-        brew stone + bronze
-    :
-      loc.Leave()
-  :
-    loc.Leave()
-  // ///////////////////////////// //
-
 :?keepCultistMask
   ?item.right ! "bardiche" &
   ^item.right ! "quarterstaff" &
@@ -258,15 +240,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useBFG_DS()
 
 ?foe ! "boss" &
-^foe.state ! 4 &
-^foe.state ! -1 &
+^foe.state ! 4 & foe.state ! -1 &
 ^c.canUseAetherTalisman()
   ?keepCultistMask
     c.useAetherTalisman("l")
   :
     equipL triskelion
     c.useAetherTalisman("r")
-
 :?foe = "boss" &
 ^c.canUseFireTalisman()
   ?keepCultistMask
@@ -282,7 +262,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 :?foe.state ! 133 & // Hrímnir's blowing state
 ^ai.walking &
-^(foe.distance < 11 | foe.distance > 15 ) &
+^(foe.distance < 11 | foe.distance > 15) &
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 

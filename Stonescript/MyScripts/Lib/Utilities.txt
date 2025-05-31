@@ -39,8 +39,7 @@ var uimkr = new MyScripts/Lib/UI_Maker
 var sec = 30 // frames
 var scr = 69 // 1 screen = 69 units
 
-// Weapon stats
-
+// Weapon Ranges
 var bardiche_range = 9
 var bardiche_ability_range = 7
 var heavyHammer_range = 7 // CHECK
@@ -63,10 +62,30 @@ var staff_range = 20
 var crossbow_range = 22
 var crossbow_rune_range = 23
 
+
+// Special stats
+
+// Hidden wands
+var wandStoneArmor = 0      // gravity
+var wandPoisonArmor = 6     // plague
+var wandVigorArmor = 1      // reset
+var wandAetherArmor = 14    // calamity
+var wandFireArmor = 4       // explosive
+var wandIceArmor = 3        // frost
+
+// Hidden staves
+var staffStoneArmor = 3     // acrobatic
+var staffPoisonArmor = 8    // berserker
+var staffVigorArmor = 4     // prevention
+var staffAetherArmor = 2    // grasping
+var staffFireArmor = 6      // infernal
+var staffIceArmor = 1       // eternity
+
 /* the added range that the
-Grasping Staff's ability adds */
+Grasping Staff's ability adds: */
 var grasping_buff = 10
 var grasping_cap = 22
+
 
 
 // /////////////////////////////////////////// //

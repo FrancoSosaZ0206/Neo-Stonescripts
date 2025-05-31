@@ -1,0 +1,128 @@
+// ************************************************************
+//                          main.txt                           
+// ************************************************************
+
+/* Multi-location, general script
+
+Written by IronHawk (Tom Crow)
+
+. ............................................................. .
+
+  Description:
+
+    I have several farming scripts and libraries for this game.
+    Some time after I started scripting I noticed the increased
+    baggage I needed to carry everywhere, everytime I had to
+    look or change something.
+
+    That was really tedious, so I decided to write a main script
+    to unify all. That way, I don't need to worry about what
+    location I'm in, and what its corresponding script is. I just
+    have to put this script in the mindstone, enter the location
+    I want, and voilà!
+
+. ............................................................. .
+
+  Q: How to use?
+
+  A: If you're on PC, just save this file into the Stonescripts
+  folder and import it using the correct path to the file.
+
+  Example: if the file is saved in the Stonescript folder,
+    import main
+
+. ............................................................. .
+
+  Q: I'm on mobile, and after some changes to my scripts,
+    it won't work anymore! What do I do?
+
+  R: This is an annoying side effect of trying to import scripts
+    on mobile. To work around it, follow these steps:
+
+    1. Go to the mindstone and comment out the script (find the
+       header down below remove the "/" character).
+    2. Enter any location and leave after a few seconds 
+    3. Close the game (CHECK THAT "SAVED!" APPEARS AT THE TOP
+      LEFT CORNER)
+    4. Change your script or dependencies and upload them to
+      your preferred website
+    5. Wait a few minutes for the changes to take effect
+    6. Enter the game. You should see a loading screen appear
+      for a second. If so, repeat step 2. Else, exit again
+      and try again later.
+    7. Go to the mindstone again and uncomment the script
+    8. Enter your desired location.
+
+    If everything is done correctly, you should see your
+    changes reflected in-game.
+    
+    I can't guarantee it, though. sys.SetFileUrl()
+    has been an unstable function for a while,
+    and I don't know how the process is done under the hood.
+
+. ............................................................. .
+
+Enjoy! ;)
+
+*/
+
+// ///////////////////////////////////////////////////////// //
+
+// VARIABLES
+
+// Paste your url here ↓↓↓
+var mobileUrl = "https://raw.githubusercontent.com/FrancoSosaZ0206/Neo-Stonescripts/main/Stonescript/"
+
+var pathToFile = "" // Paste your path here <<<
+
+
+//                 ↓↓↓ COMMENT OUT HERE ↓↓↓
+/* ///////////////////////////////////////////////////////// */
+//                 ↑↑↑ COMMENT OUT HERE ↑↑↑
+
+// PROCEDURE
+
+
+?sys.isMobile
+  sys.SetFileUrl(mobileUrl)
+
+
+import MyScripts/MyCosmetics
+
+?!loc.isQuest & (
+^loc = "Waterfall" |
+^loc = "cross_deadwood_river" |
+^loc = "cross_bridge")
+  loc.Leave()
+
+:?loc = "undead_crypt_intro" // Haunted Gate
+  import MyScripts/Gate
+
+:?loc.stars >= 15 & loc = "rocky_plateau"
+    import MyScripts/Green/1-Rocky
+:
+  ?loc = "rocky_plateau"
+    import MyScripts/1-Rocky
+  :?loc = "deadwood_valley"
+    import MyScripts/2-Deadwood
+  :?loc = "caustic_caves"
+    import MyScripts/3-Caves
+  :?loc = "fungus_forest"
+    import MyScripts/4-Mushroom
+  :?loc = "undead_crypt"
+    import MyScripts/5-Halls
+  :?loc = "bronze_mine"
+    import MyScripts/6-Mine
+  :?loc = "icy_ridge"
+    import MyScripts/7-Ridge
+  :?loc = "temple"
+    import MyScripts/8-Temple
+
+
+/* ///////////////////////////////////////////////////////// */
+
+
+
+// ************************************************************
+//                       END OF "main.txt"                     
+// ************************************************************

@@ -58,6 +58,7 @@ var dpsPanel
 
 var keepCultistMask = true
 var smiteScreen = 2
+var moondialMode = -1
 
 ?loc.loop
   keepCultistMask = false
@@ -65,8 +66,6 @@ var smiteScreen = 2
   ?totaltime = 1 &
   ^smiteScreen ! 3
     smiteScreen++
-
-var moondialMode = -1
 
 ?buffs.string = "berserk"
   moondialMode = 2
@@ -77,7 +76,7 @@ var moondialMode = -1
 
 // /////////////////////////////////////////// //
 
-// FUNCTIONS:
+// FUNCTIONS
 
 func ldtF(mode)
 
@@ -185,7 +184,7 @@ func fight1v1()
     ldtF("meleeDebuff")
 
   : // all possible debuffs applied
-    ?hp ! maxhp & !debuffs.string // heal up
+    ?hp ! maxhp & debuffs.string ! "puff_debuff_damage" // heal up
       ldtF("meleeHeal")
 
     : // deal max damage
@@ -197,7 +196,7 @@ func fight1v1()
 
 // /////////////////////////////////////////// //
 
-// PROCEDURE:
+// PROCEDURE
 
 ?buffs.string ! "buff_inf_speed" & // infernal staff
 ^totaltime % 2 = 0 & // every even frame
@@ -206,27 +205,15 @@ func fight1v1()
 
 c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
 
-?loc.begin
-  // initial equipment
+// Auto Brewing
+?c.canBrewPotion("berserk")
+  c.brewPotion("berserk")
+:?c.canBrewPotion("lucky")
+  c.brewPotion("lucky")
+
+?loc.begin // initial equipment
   equipL triskelion
   equipR @a.shieldCompound1@
-
-  // ///////////////////////////// //
-  // AUTO BREWING
-  ?res.bronze >= 10
-    ?res.wood >= 10
-      ?item.potion ! "berserk"
-        brew wood + bronze
-
-    :?res.stone >= 10
-      ?item.potion ! "lucky"
-        brew stone + bronze
-    :
-      loc.Leave()
-  :
-    loc.Leave()
-  // ///////////////////////////// //
-
 :?keepCultistMask
   ?item.right ! "bardiche" &
   ^item.right ! "quarterstaff" &
@@ -248,15 +235,15 @@ c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
   c.useBFG_DS()
 
 
-?foe ! "boss" & foe.distance ! 9999 &
+?foe ! "boss" &
+^foe.state ! 4 & foe.state ! -1 &
 ^c.canUseAetherTalisman()
   ?keepCultistMask
     c.useAetherTalisman("l")
   :
     equipL triskelion
     c.useAetherTalisman("r")
-
-:?foe = "boss" & foe.distance <= 23 &
+:?foe = "boss" &
 ^c.canUseFireTalisman()
   ?keepCultistMask
     c.useFireTalisman("l")
@@ -267,6 +254,7 @@ c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
 
 :?pickup.distance < 15
   ldtF("magnet")
+
 
 :?foe = "explode" & // Mr. Puff
 ^foe.distance < 5 // explosion range
@@ -279,8 +267,9 @@ c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
   :?c.canUseStaffEternity()
     c.useStaffHidden(a.staffIceHidden)
 
+
 :?ai.walking &
-^(foe.distance < 11 | foe.distance > 15 ) &
+^(foe.distance < 11 | foe.distance > 15) &
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 

@@ -353,131 +353,158 @@ func canUseMindstone()
   ^item.CanActivate()
 
 
-func canUseWandGravity()
-  return
-  ^item.GetCooldown("wand_stone") <= 0 &
-  ^item.CanActivate()
-func useWandGravity(weaponName, hand)
-  ?hand = "l" | hand = "left"
-    equipL @weaponName@
-  :?hand = "r" | hand = "right"
-    equipR @weaponName@
+/* Checks if a certain hidden wand can be used.
+weaponName: the special name or the element of
+            the wand.
+**********************************************
+****** WAND NAMES MUST BE ALL LOWERCASE ******
+**********************************************
+Examples: "gravity", "fire". */
+func canUseWandHidden(weaponName)
+  var internalName
+  var requiredArmor
+  var isOk = true // only set to false if weaponName is incorrect
 
-  activate wand_stone
+  ?weaponName = "gravity" | weaponName = "stone"
+    internalName = "wand_stone"
+    requiredArmor = u.wandStoneArmor
+  :?weaponName = "plague" | weaponName = "poison"
+    internalName = "wand_poison"
+    requiredArmor = u.wandPoisonArmor
+  :?weaponName = "reset" | weaponName = "vigor"
+    internalName = "wand_vigor"
+    requiredArmor = u.wandVigorArmor
+  :?weaponName = "calamity" | weaponName = "aether"
+    internalName = "wand_aether"
+    requiredArmor = u.wandArmor
+  :?weaponName = "explosive" | weaponName = "fire"
+    internalName = "wand_fire"
+    requiredArmor = u.wandFireArmor
+  :?weaponName = "frost" | weaponName = "ice"
+    internalName = "wand_ice"
+    requiredArmor = u.wandIceArmor
+  :
+    isOk = false
+  
+  ?isOk
+    return item.CanActivate() &
+    ^item.GetCooldown(weaponName) <= 0 &
+    ^armor >= requiredArmor
 
-  return
+  :
+    >c-10,0,#red,ERROR: canUseWandHidden()
+    ^recieved incorrect weaponName: @weaponName@
+    return false
 
-func canUseWandPlague()
-  return
-  ^item.GetCooldown("wand_poison") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 6
-func useWandPlague(weaponName, hand)
-  ?hand = "l" | hand = "left"
-    equipL @weaponName@
-  :?hand = "r" | hand = "right"
-    equipR @weaponName@
+/* Uses a certain hidden wand.
+weaponName: the special name or the element of
+            the wand.
+**********************************************
+****** WAND NAMES MUST BE ALL LOWERCASE ******
+**********************************************
+Examples: "gravity", "fire". */
+func useWandHidden(weapon, weaponName, hand)
+  var internalName
+  var isOk = true // only set to false if weaponName is incorrect
 
-  activate wand_poison
+  ?weaponName = "gravity" | weaponName = "stone"
+    internalName = "wand_stone"
+  :?weaponName = "plague" | weaponName = "poison"
+    internalName = "wand_poison"
+  :?weaponName = "reset" | weaponName = "vigor"
+    internalName = "wand_vigor"
+  :?weaponName = "calamity" | weaponName = "aether"
+    internalName = "wand_aether"
+  :?weaponName = "explosive" | weaponName = "fire"
+    internalName = "wand_fire"
+  :?weaponName = "frost" | weaponName = "ice"
+    internalName = "wand_ice"
+  :
+    isOk = false
 
-  return
+  ?isOk
+    ?hand = "l" | hand = "left"
+      equipL @weaponName@
+    :?hand = "r" | hand = "right"
+      equipR @weaponName@
 
-func canUseWandReset()
-  return
-  ^item.GetCooldown("wand_vigor") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 1
-func useWandReset(weaponName, hand)
-  ?hand = "l" | hand = "left"
-    equipL @weaponName@
-  :?hand = "r" | hand = "right"
-    equipR @weaponName@
+    activate @internalName@
 
-  activate wand_vigor
-
-  return
-
-func canUseWandCalamity()
-  return
-  ^item.GetCooldown("wand_aether") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 14
-func useWandCalamity(weaponName, hand)
-  ?hand = "l" | hand = "left"
-    equipL @weaponName@
-  :?hand = "r" | hand = "right"
-    equipR @weaponName@
-
-  activate wand_aether
-
-  return
-
-func canUseWandExplosive()
-  return
-  ^item.GetCooldown("wand_fire") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 4
-func useWandExplosive(weaponName, hand)
-  ?hand = "l" | hand = "left"
-    equipL @weaponName@
-  :?hand = "r" | hand = "right"
-    equipR @weaponName@
-
-  activate wand_fire
-
-  return
-
-func canUseWandFrost()
-  return
-  ^item.GetCooldown("wand_ice") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 3
-func useWandFrost(weaponName, hand)
-  ?hand = "l" | hand = "left"
-    equipL @weaponName@
-  :?hand = "r" | hand = "right"
-    equipR @weaponName@
-
-  activate wand_ice
+  :
+    >c-10,0,#red,ERROR: useWandHidden()
+    ^recieved incorrect weaponName: @weaponName@
 
   return
 
 
-func canUseStaffAcrobatic()
-  return
-  ^item.GetCooldown("staff_stone") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 3
-func canUseStaffBerserker()
-  return
-  ^item.GetCooldown("staff_poison") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 8
-func canUseStaffPrevention()
-  return
-  ^item.GetCooldown("staff_vigor") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 4
-func canUseStaffGrasping()
-  return
-  ^item.GetCooldown("staff_aether") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 2
-func canUseStaffInfernal()
-  return
-  ^item.GetCooldown("staff_fire") <= 0 & // not on cooldown
-  ^item.CanActivate() &
-  ^armor >= 6 // enough armor to activate ability
-func canUseStaffEternity()
-  return
-  ^item.GetCooldown("staff_ice") <= 0 &
-  ^item.CanActivate() &
-  ^armor >= 1
+/* Checks if a certain hidden staff can be used.
+weaponName: the special name or the element of
+            the staff.
+**********************************************
+****** STAFF NAMES MUST BE ALL LOWERCASE ******
+**********************************************
+Examples: "gravity", "fire". */
+func canUseStaffHidden(weaponName)
+  var internalName
+  var requiredArmor
+  var isOk = true // only set to false if weaponName is incorrect
 
-func useStaffHidden(weaponName)
-  equip @weaponName@
-  activate R
+  ?weaponName = "acrobatic" | weaponName = "stone"
+    internalName = "staff_stone"
+    requiredArmor = u.staffStoneArmor
+  :?weaponName = "berserker" | weaponName = "poison"
+    internalName = "staff_poison"
+    requiredArmor = u.staffPoisonArmor
+  :?weaponName = "prevention" | weaponName = "vigor"
+    internalName = "staff_vigor"
+    requiredArmor = u.staffVigorArmor
+  :?weaponName = "grasping" | weaponName = "aether"
+    internalName = "staff_aether"
+    requiredArmor = u.staffArmor
+  :?weaponName = "infernal" | weaponName = "fire"
+    internalName = "staff_fire"
+    requiredArmor = u.staffFireArmor
+  :?weaponName = "eternity" | weaponName = "ice"
+    internalName = "staff_ice"
+    requiredArmor = u.staffIceArmor
+  
+  :
+    isOk = false
+
+  ?isOk
+    return item.CanActivate() &
+    ^item.GetCooldown(weaponName) <= 0 &
+    ^armor >= requiredArmor
+  :
+    >c-10,0,#red,ERROR: canUseStaffHidden()
+    ^recieved incorrect weaponName: @weaponName@
+
+    return false
+
+/* Uses a certain hidden staff.
+weaponName: the special name or the element of
+            the staff.
+**********************************************
+****** STAFF NAMES MUST BE ALL LOWERCASE ******
+**********************************************
+Examples: "gravity", "fire". */
+func useStaffHidden(weapon, weaponName)
+  ?weaponName = "acrobatic" | weaponName = "stone" |
+  ^weaponName = "berserker" | weaponName = "poison" |
+  ^weaponName = "prevention" | weaponName = "vigor" |
+  ^weaponName = "grasping" | weaponName = "aether" |
+  ^weaponName = "infernal" | weaponName = "fire" |
+  ^weaponName = "eternity" | weaponName = "ice"
+    equip @weapon@
+    activate R
+
+  :
+    >c-10,0,#red,ERROR: useStaffHidden()
+    ^recieved incorrect weaponName: @weaponName@
+
   return
+
+
 
 
 // Tools
@@ -575,6 +602,70 @@ func canUsePotionSpecial(type,cond)
 
   : // potion hasn't been brewed, it's been used,
     return false //or just can't be activated atm
+
+/* Checks if a certain potion can be brewed.
+**********************************************
+REQUISITE: POTION NAMES MUST BE ALL LOWERCASE.
+********************************************** */
+func canBrewPotion(potionName)
+  var result = loc.begin & item.potion ! potionName
+
+  ?potionName = "strength"
+    result = result & res.stone >= 20
+  :?potionName = "experience"
+    result = result & res.wood >= 20
+  :?potionName = "healing"
+    result = result & res.tar >= 20
+  :?potionName = "lightning"
+    result = result & res.bronze >= 20
+  :?potionName = "vampiric"
+    result = result & res.tar >= 10 & res.bronze >= 10
+  :?potionName = "lucky"
+    result = result & res.stone >= 10 & res.bronze >= 10
+  :?potionName = "berserk"
+    result = result & res.wood >= 10 & res.bronze >= 10
+  :?potionName = "cleansing"
+    result = result & res.wood >= 10 & res.tar >= 10
+  :?potionName = "defensive"
+    result = result & res.stone >= 10 & res.tar >= 10
+  :?potionName = "invisibility"
+    result = result & res.wood >= 10 & res.stone >= 10
+
+  :
+    result = false
+
+  return result
+/* Brews a certain potion.
+**********************************************
+REQUISITE: POTION NAMES MUST BE ALL LOWERCASE.
+********************************************** */
+func brewPotion(potionName)
+  ?potionName = "strength"
+    brew stone
+  :?potionName = "experience"
+    brew wood
+  :?potionName = "healing"
+    brew tar
+  :?potionName = "lightning"
+    brew bronze
+  :?potionName = "vampiric"
+    brew tar + bronze
+  :?potionName = "lucky"
+    brew stone + bronze
+  :?potionName = "berserk"
+    brew wood + bronze
+  :?potionName = "cleansing"
+    brew wood + tar
+  :?potionName = "defensive"
+    brew stone + tar
+  :?potionName = "invisibility"
+    brew wood + stone
+  :
+    >c-10,0,#red,
+    ^ERROR: brewPotion() recieved
+    ^incorrect potionName: @potionName@
+
+  return
 
 
 // Status effects
