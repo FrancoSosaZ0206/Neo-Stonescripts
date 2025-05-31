@@ -321,11 +321,12 @@ c.doAAC("sword 0*", a.shieldCompound1)
     :?c.canUseDashingShield()
       c.useDashingShield(Mamba Negra, a.shieldDashing)
 
-    :?foe.hp + foe.armor >= a.bardicheRDmg &
-    ^c.canUseBardiche()
-      c.useBardiche(Kubikiribocho)
-    :
-      fight1v1()
+    : // 1v1 with the monarch
+      ?foe.hp + foe.armor >= a.bardicheRDmg &
+      ^c.canUseBardiche()
+        c.useBardiche(Kubikiribocho)
+      :
+        fight1v1()
 
   :?c.canUseBashingShield()
     c.useBashingShield(Mamba Negra)

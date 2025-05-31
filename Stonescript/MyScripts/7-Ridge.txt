@@ -281,7 +281,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     c.useWandCalamity(a.wandAetherHidden, "l")
 
   :?encounter.eliteMod = "monarch"
-    ?foe.GetCount(c.getGraspingRange(sword)) > 1 // eliminate the other foes
+    ?foe.GetCount(c.getRange(sword)) > 1 // eliminate the other foes
       ?c.canUseBFG()
         c.useBFG()
       :?c.canUseWandExplosive()
@@ -327,7 +327,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     :?c.canUseHeavyHammer()
       c.useHeavyHammer(a.myHeavyHammer)
 
-  :?foe.distance <= c.getGraspingRange("sword") &
+  :?foe.distance <= c.getRange("sword") &
   ^(c.canUseMindstone() | c.canUseStaffAcrobatic() |
   ^c.canUseStaffGrasping())
     ?c.canUseMindstone()
@@ -339,7 +339,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
       c.useStaffHidden(a.staffAetherHidden)
 
   :?foe.count > 1 &
-  ^foe.distance > c.getGraspingRange("sword")
+  ^foe.distance > c.getRange("sword")
     // rangedAOE strat
     ?encounter.eliteMod ! "tenacious"
       ?c.canDebuffAny()

@@ -50,7 +50,7 @@ func Init()
 
   return
 
-func getGraspingRange(weaponName)
+func getRange(weaponName)
   var result = 0
 
   ?weaponName = "sword"
