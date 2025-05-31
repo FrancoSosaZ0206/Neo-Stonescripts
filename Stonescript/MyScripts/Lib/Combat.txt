@@ -4,8 +4,9 @@
 
 
 /* FILE INFO
-  Combat functions library
-  Made by MetalEagle26 (Tom Crow)
+
+Combat functions library
+Made by MetalEagle26 (Tom Crow)
 
 This library provides some game-related
 functions to make the task of doing a
@@ -15,7 +16,7 @@ farming script easier.
   var c = new Combat
 
 - Tip: If you want to use the variables here,
-       put c.Main() at the top of your script.
+  put c.Init() at the top of your script.
 
 - Use the functions that you need like this:
   ?c.useBFG() // example */
@@ -46,7 +47,7 @@ func Init()
   hihp = (4 * maxhp) / 5
 
   ?loc.loop
-    apsTimer = 0
+    burstingTimer = 0
 
   return
 
@@ -681,41 +682,43 @@ func doMoondial(weapon1, weapon2, mode)
 
   return
 
-var apsTimer = 0
-/* Fastest moondialing variant with all dual D rune swords.
-Requires them all to be *21 speed enchanted. */
-func doAps(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
-  apsTimer++
+/* Faster moondialing variant, aka Bursting.
+************************************************
+REQUISITE: HAVING 10 *21 SPEED ENCHANTED SWORDS.
+************************************************ */
+var burstingTimer = 0
+func doBursting(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
+  burstingTimer++
 
   equipL moon
-  ?apsTimer = 0
+  ?burstingTimer = 0
     equipR @s1@
 
-  :?apsTimer = 1
+  :?burstingTimer = 1
     equipR @s2@
 
-  :?apsTimer = 2
+  :?burstingTimer = 2
     equipR @s3@
 
-  :?apsTimer = 3
+  :?burstingTimer = 3
     equipR @s4@
 
-  :?apsTimer = 4
+  :?burstingTimer = 4
     equipR @s5@
 
-  :?apsTimer = 5
+  :?burstingTimer = 5
     equipR @s6@
 
-  :?apsTimer = 6
+  :?burstingTimer = 6
     equipR @s7@
 
-  :?apsTimer = 7
+  :?burstingTimer = 7
     equipR @s8@
 
-  :?apsTimer = 8
+  :?burstingTimer = 8
     equipR @s9@
 
-  :?apsTimer = 9
+  :?burstingTimer = 9
     equipR @s10@
   :
     return

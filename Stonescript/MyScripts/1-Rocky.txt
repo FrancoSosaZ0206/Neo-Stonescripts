@@ -59,8 +59,8 @@ var dysanToPhase3Timer = -1
 
 var keepCultistMask = true
 
-var resetApsTimer = true
-var restAps = false
+var resetBurstingTimer = true
+var restBursting = false
 
 ?loc.loop
   dysanToPhase3Timer = -1
@@ -68,8 +68,8 @@ var restAps = false
 
   keepCultistMask = false
 
-  resetApsTimer = true
-  restAps = false
+  resetBurstingTimer = true
+  restBursting = false
 
   ?totaltime = 1
     nRuns++
@@ -169,8 +169,8 @@ func bossFight()
       :
         ?foe.buffs.string ! "defense_fire"
           ?!keepCultistMask & hp = maxhp
-            ?c.apsTimer < 10
-              c.doAps("Vantum Phoenix", a.swordFireDmg,
+            ?c.burstingTimer < 10
+              c.doBursting("Vantum Phoenix", a.swordFireDmg,
               ^       "Bifrost", a.swordIceDmg,
               ^       "Dothaneel", a.swordVigorDmg,
               ^       "Mamba Negra", a.swordPoisonDmg,
@@ -426,19 +426,19 @@ c.doAAC("sword 0*", a.shieldCompound1)
       :
         c.useBardiche(a.fastBardiche)
 
-  :?foe = "dysangelos" & foe.state = 127 & !restAps & !keepCultistMask // "reloading" aps strat
-    ?c.apsTimer >= 10
-      c.apsTimer = 0
+  :?foe = "dysangelos" & foe.state = 127 & !restBursting & !keepCultistMask // "reloading" bursting strat
+    ?c.burstingTimer >= 10
+      c.burstingTimer = 0
 
-    : // c.apsTimer < 10
-      c.doAps("Vantum Phoenix", a.swordFireDmg,
+    : // c.burstingTimer < 10
+      c.doBursting("Vantum Phoenix", a.swordFireDmg,
       ^       "Bifrost", a.swordIceDmg,
       ^       "Dothaneel", a.swordVigorDmg,
       ^       "Mamba Negra", a.swordPoisonDmg,
       ^       "Void Slayer", a.swordAetherDmg)
 
-      ?c.apsTimer = 9
-        restAps = true
+      ?c.burstingTimer = 9
+        restBursting = true
 
   
     ?dysanToPhase3Timer >= 0 & !dysanToPhase3Done // Dysan's phase3 transformation cutscene strat
@@ -483,8 +483,8 @@ c.doAAC("sword 0*", a.shieldCompound1)
       :?hp ! maxhp
         c.doMoondial(a.swordVigorBuff, "Vantum Phoenix", moondialMode)
 
-      :?c.apsTimer < 10
-        c.doAps("Vantum Phoenix", a.swordFireDmg,
+      :?c.burstingTimer < 10
+        c.doBursting("Vantum Phoenix", a.swordFireDmg,
         ^       "Bifrost", a.swordIceDmg,
         ^       "Dothaneel", a.swordVigorDmg,
         ^       "Mamba Negra", a.swordPoisonDmg,
@@ -508,9 +508,9 @@ c.doAAC("sword 0*", a.shieldCompound1)
       ?foe.debuffs.string = "feeble"
         trueDmg -= 2 * i.getDebuffLvl("feeble", true)
 
-      ?resetApsTimer
-        c.apsTimer = 0
-        resetApsTimer = false
+      ?resetBurstingTimer
+        c.burstingTimer = 0
+        resetBurstingTimer = false
 
       ?c.canUseBashingShield() & !dontDash
         c.useBashingShield("Vantum Phoenix")
