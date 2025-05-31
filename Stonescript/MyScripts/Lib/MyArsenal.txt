@@ -68,8 +68,12 @@ var swordVigorDmg = "sword vigor *max -dL Spring24"
 var shieldVigorDefense = "shield vigor *max -ah"
 var shieldVigorBuff = "shield vigor *max ah"
 var hammerVigorBuff = "hammer vigor *max ah"
-var wandVigorDmg = "wand vigor *max D -hidden"
+var bowVigorBuff = "bow vigor *max dL"
+var bowVigorDmg = "bow vigor *max -dL"
+var wandVigorBuff = "wand vigor *max dL -hidden"
+var wandVigorDmg = "wand vigor *max -dL -hidden"
 var wandVigorHidden = "wand_hidden_vigor *max" // aka Reset Wand
+var staffVigorBuff = "staff vigor *max dL -hidden"
 var staffVigorHidden = "staff_hidden_vigor *max" // aka Prevention Staff
 
 //aether:

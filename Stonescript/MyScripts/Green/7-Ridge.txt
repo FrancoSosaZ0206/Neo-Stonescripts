@@ -164,7 +164,6 @@ func ldtF(mode)
       equipL @a.wandFireDmg@
     :
       equip @a.staffFireDebuff@ // @a.bowFireDmg@
-
   :?mode = "rangedDebuffAOE"
     ?keepCultistMask
       ?c.canDebuffChill()
@@ -181,6 +180,11 @@ func ldtF(mode)
         equip @a.staffPoisonDebuff@
       :?c.canDebuffBurn()
         equip @a.staffFireDebuff@
+  :?mode = "rangedHealAOE"
+    ?keepCultistMask
+      equipL @a.wandVigorBuff@
+    :
+      equip @a.staffVigorBuff@ // @a.bowVigorBuff@
 
   :
     >c-10,0,#red,
@@ -245,9 +249,8 @@ c.doAAC("sword 0*", a.shieldCompound1)
   activate potion
 
 
-?c.canUseBFG_DS(smiteScreen) & 
-^loc.stars <= 15
-  c.useBFG()
+?c.canUseBFG_DS(smiteScreen)
+  c.useBFG_DS()
 
 ?foe ! "boss" &
 ^foe.state ! 4 &
@@ -388,6 +391,10 @@ c.doAAC("sword 0*", a.shieldCompound1)
     fight1v1()
 
 :?foe.count > 1
+  ?c.canUseBFG_DS(screen.i) &
+  ^screen.i ! smiteScreen
+    c.useBFG_DS()
+
   ?!encounter.isElite &
   ^screen.i ! smiteScreen &
   ^c.canUseVoidweaver()
@@ -404,8 +411,7 @@ c.doAAC("sword 0*", a.shieldCompound1)
     c.useWandExplosive(a.wandFireHidden, "l")
 
   // Remove armor
-  :?encounter.eliteMod = "plated" |
-  ^c.canUseHeavyHammer()
+  :?c.canUseHeavyHammer()
     c.useHeavyHammer(a.myHeavyHammer)
 
 
