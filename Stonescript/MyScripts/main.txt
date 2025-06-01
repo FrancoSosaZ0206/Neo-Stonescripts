@@ -18,7 +18,7 @@ Written by IronHawk (Tom Crow)
     That was really tedious, so I decided to write a main script
     to unify all. That way, I don't need to worry about what
     location I'm in, and what its corresponding script is. I just
-    have to put this script in the mindstone, enter the location
+    have to put this script in the Mindstone, enter the location
     I want, and voilà!
 
 . ............................................................. .
@@ -32,36 +32,62 @@ Written by IronHawk (Tom Crow)
     import main
 
   If you're on mobile, go to the MOBILE section and copy-paste
-  that into the Mindstone.
+  that into the Mindstone. Then, upload this script and any
+  others you are using to the web, and replace the URL template
+  with the link to this file.
+
+  URL example template (GitHub repo):
+    "https://raw.githubusercontent.com/
+    ^<USER_NAME>/<REPO_NAME>/main/.../<FILE_NAME>"
+
+  Replace each <> with their respective values.
+  Tip: break your link into several, shorter lines like shown.
+       Otherwise, the Mindstone could butcher the line and break
+       the script.
 
 . ............................................................. .
 
   Q: I'm on mobile, and after some changes to my scripts,
-    it won't work anymore! What do I do?
+     it won't work anymore! What happened!?
 
-  R: This is an annoying side effect of trying to import scripts
-    on mobile. To work around it, follow these steps:
+  R: This is due to the intricacies of how the process of
+     importing works on mobile. To put it simply, the Mindstone
+     only updates upon opening the game and selecting "play",
+     so any changes made while you're in-game will only be
+     applied the next time you enter.
 
-    1. Go to the mindstone and comment out the script (find the
-       header down below remove the "/" character).
+     Furthermore, any errors in the scripts used also prevent
+     updates. As you can see, it's quite a finicky process.
+     
+. ............................................................. .
+
+  Q: Alright, so what do I do?
+
+  R: To work around it, follow these steps:
+
+    1. Go to the Mindstone and comment out the script (find the
+       "COMMENT OUT HERE" headers down below. Use "//" to
+       comment the indicated line).
     2. Enter any location and leave after a few seconds 
     3. Close the game (CHECK THAT "SAVED!" APPEARS AT THE TOP
-      LEFT CORNER)
+       LEFT CORNER)
     4. Change your script or dependencies and upload them to
-      your preferred website
+       your preferred website
     5. Wait a few minutes for the changes to take effect
     6. Enter the game. You should see a loading screen appear
-      for a second. If so, repeat step 2. Else, exit again
-      and try again later.
-    7. Go to the mindstone again and uncomment the script
+       for a second. If so, repeat step 2. Else, exit again
+       and try again later.
+    7. Go to the Mindstone again and uncomment the script
     8. Enter your desired location.
 
+    Make sure your script doesn't have any errors.
     If everything is done correctly, you should see your
     changes reflected in-game.
-    
-    I can't guarantee it, though. sys.SetFileUrl()
-    has been an unstable function for a while,
-    and I don't know how the process is done under the hood.
+
+    I recommend debugging on PC or by pasting your script
+    directly in the Mindstone, though. Importing in mobile
+    is ideal for when your scripts are already done, in my
+    opinion.
 
 . ............................................................. .
 
@@ -77,6 +103,7 @@ var mobileUrl =
 ^"https://raw.githubusercontent.com/
 ^FrancoSosaZ0206/Neo-Stonescripts/
 ^main/Stonescript/"
+
 
 sys.SetFileUrl(mobileUrl)
 
