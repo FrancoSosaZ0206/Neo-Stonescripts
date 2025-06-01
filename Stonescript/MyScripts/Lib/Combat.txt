@@ -415,10 +415,10 @@ func useWandHidden(weapon, weaponName, hand)
   ?isOk
     ?hand = "l" | hand = "left"
       equipL @weaponName@
+      activate L
     :?hand = "r" | hand = "right"
       equipR @weaponName@
-
-    activate @internalName@
+      activate R
 
   :
     >c-10,0,#red,ERROR: useWandHidden()

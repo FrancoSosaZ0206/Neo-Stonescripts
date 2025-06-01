@@ -90,7 +90,7 @@ func ldtF(mode)
   :?mode = "engage"
     ?buffs.string ! "buff_inf_speed" & // infernal staff
     ^totaltime % 2 = 0 // every even frame
-      equipL @a.hammerVigorDefense@
+      equipL @a.hammerVigorBuff@
     :
       equipL triskelion
 
@@ -211,13 +211,11 @@ func fight1v1()
 
 // PROCEDURE
 
-c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
+c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 
 // Auto Brewing
 ?c.canBrewPotion("berserk")
   c.brewPotion("berserk")
-:?c.canBrewPotion("lucky")
-  c.brewPotion("lucky")
 
 ?loc.begin // initial equipment
   equipL triskelion
@@ -237,7 +235,7 @@ c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
   c.useStaffHidden(a.staffFireHidden, "infernal")
 
 
-?c.canUseBFG_DS(smiteScreeneen)
+?c.canUseBFG_DS(smiteScreen)
   c.useBFG_DS()
 
 
@@ -262,37 +260,27 @@ c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
   ldtF("magnet")
 
 // ABOUT TO ATTACK -- ADAPT TO THIS LOCATION
-/* :?foe.distance < 11 & (
-^(foe = "cool_bat" &
-^((foe.state = 33 & foe.time > 12) | foe.state = 2)) |
-^(foe = "spider_boss_harder" &
-^foe.state = 142 & foe.time > 57))
+/* :?foe.distance < 11 & foe = "skeleton" &
+^((foe.state =  & foe.time > ) | foe.state = 2)
   >c0,0,#red,*** ABOUT TO ATTACK! ***
 
-  ?c.canUseStaffHidden("prevention") // prevent Weaken
-    c.useStaffHidden(a.staffVigorHidden, "prevention")
+  ?c.canUseMindstone()  // dash back
+    ldtF("escape")
+  :?c.canUseStaffHidden("acrobatic") &
+  ^foe.distance <= c.getRange("sword")
+    c.useStaffHidden(a.staffStoneHidden, "acrobatic")
 
-  :?buffs.string ! "buff_staff_protection" // couldn't use protection staff
-    ?c.canUseMindstone()  // dash back
-      ldtF("escape")
-    :?c.canUseStaffHidden("acrobatic") &
-    ^foe.distance <= c.getRange("sword")
-      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+  :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
+  ^foe.distance <= c.getRange("sword")
+    c.useStaffHidden(a.staffIceHidden, "eternity")
 
-    :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
-    ^foe.distance <= c.getRange("sword")
-      c.useStaffHidden(a.staffIceHidden, "eternity")
+  :?foe.distance <= c.getRange("sword")  // couldn't dash, try to unmake to prevent attack
+    ldtF("unmake1v1")
 
-    :?foe.distance <= c.getRange("sword")  // couldn't dash, fight melee
-      fight1v1()
-
-    :?c.canDebuffAny() // could dash, fight ranged
-      ldtF("rangedDebuffAOE")
-    :
-      ldtF("rangedDmgAOE")
-
+  :?c.canDebuffAny() // could dash, fight ranged
+    ldtF("rangedDebuffAOE")
   :
-    fight1v1()
+    ldtF("rangedDmgAOE")
 */
 
 :?ai.walking &
@@ -354,15 +342,17 @@ c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
         :
           ldtF("rangedDmgAOE")
 
-
   :?c.canUseBashingShield()
     ldtF("bash")
   :?c.canUseDashingShield()
     ldtF("dash")
 
+  :?foe.name = "R.I.Pieces"
+    fight1v1()
+
   :?foe.count > 1 // AOE strategy
     ?c.canUseVoidweaver() & 
-    !encounter.isElite & !(
+    ^!encounter.isElite & !(
     ^screen.i = smiteScreen |
     ^screen.i = smiteScreen + 1)
       c.useVoidweaver()
@@ -402,7 +392,7 @@ c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
         ldtF("rangedDmgAOE")
 
 
-: // Pallas
+: // Pallas (note: sword can be unmade in phase1)
   ?c.canUseCinderwisp() &
   ^foe.debuffs.string = a.maxIgnitions_Default
     c.useCinderwisp()
@@ -416,6 +406,7 @@ c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
     ldtF("dash")
 
   :?c.canUseWandHidden("plague") // reduce their damage
+    >c0,0,#magenta,USING PLAGUE WAND
     c.useWandHidden(a.wandPoisonHidden, "plague", "l")
   :?c.canUseStaffHidden("berserker") // increase our damage
     c.useStaffHidden(a.staffPoisonHidden, "berserker")
@@ -428,6 +419,7 @@ c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
 
   :?c.canUseBardiche() & keepCultistMask
     c.useBardiche(Kubikiribocho)
+  
   :
     fight1v1()
 
