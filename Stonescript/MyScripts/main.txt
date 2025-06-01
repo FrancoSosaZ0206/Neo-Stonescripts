@@ -73,8 +73,10 @@ Enjoy! ;) */
 // ↓↓↓ COPY FROM HERE ↓↓↓
 
 // Paste your url here ↓↓↓
-var mobileUrl = "https://raw.githubusercontent.com
-^FrancoSosaZ0206/Neo-Stonescripts/main/Stonescript/"
+var mobileUrl =
+^"https://raw.githubusercontent.com/
+^FrancoSosaZ0206/Neo-Stonescripts/
+main/Stonescript/"
 
 // ↓↓↓ COMMENT OUT HERE ↓↓↓
 sys.SetFileUrl(mobileUrl)
