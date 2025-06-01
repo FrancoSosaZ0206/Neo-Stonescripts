@@ -273,11 +273,11 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
     ?c.canUseMindstone()  // dash back
       ldtF("escape")
     :?c.canUseStaffHidden("acrobatic") &
-    ^foe.distance < c.getRange("sword")
+    ^foe.distance <= c.getRange("sword")
       c.useStaffHidden(a.staffStoneHidden, "acrobatic")
 
     :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
-    ^foe.distance < c.getRange("sword")
+    ^foe.distance <= c.getRange("sword")
       c.useStaffHidden(a.staffIceHidden, "eternity")
 
     :?foe.distance <= c.getRange("sword")  // couldn't dash, fight melee
