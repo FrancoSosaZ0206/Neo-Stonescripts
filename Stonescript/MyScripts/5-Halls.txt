@@ -6,31 +6,36 @@
 
 
 
+// /////////////////////////////////////////// //
+
 // IMPORTS
 
-var u = new MyScripts/Lib/Utilities
 var uimkr = new MyScripts/Lib/UI_Maker
-var p
-p = import MyScripts/Lib/Performance
+var u = new MyScripts/Lib/Utilities
 var a = new MyScripts/Lib/MyArsenal
 var i = new MyScripts/Lib/MyBetterInfo
 var c = new MyScripts/Lib/Combat
-c.Main()
 
-/***************************************************************/
+/***********************************************/
+
+import UI/FoeStateTracker
+
+/***********************************************/
 
 var som = new MyScripts/Lib/Speed_O_Meter
-var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
-var bosTmr
-bosTmr = import MyScripts/Borrowed/BossfightTimer2
 
-var somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+var somPanel = som.mkUI(0, 1,
+^u.colorToHex("red"), true, false)
 ?som.Update(false)
   somPanel.Recycle()
   somPanel = null
 
-  somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+  somPanel = som.mkUI(0, 1,
+  ^u.colorToHex("red"), true, false)
 
+/***********************************************/
+
+var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
 
 dpsm.ENABLED = true
 dpsm.refreshRate = 30
@@ -43,161 +48,141 @@ var dpsPanel
 
   dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
 
-/***************************************************************/
+/***********************************************/
 
 
+
+// /////////////////////////////////////////// //
 
 // VARIABLES
 
-var pausedOnce
-var runCount = 0
-var keepMask = true
+var keepCultistMask = true
+var smiteScreen = 1
+var moondialMode = -1
 
-var canDebI
-var canDebP
-var canDebF
+?loc.loop
+  keepCultistMask = false
 
-var smiteScr = 1
-var weavScr = 4
+  ?totaltime = 1 & smiteScreen ! 4
+    smiteScreen++
 
-?smiteScr = 3
-  weavScr = 2
-
-var keepFTali = false
-
-?p.f = "boss"
-  keepFTali = true
-
-?p.lb | p.ll
-  pausedOnce = false
-
-?p.ll
-  keepMask = false
-  keepFTali = false
-  ?p.tt = 1
-    runCount++
-
-    ?p.ls > 5 & smiteScr ! 4
-      smiteScr++
+?buffs.string = "berserk"
+  moondialMode = 2
+:
+  moondialMode = 0
 
 
 
-// FUNCTIONS:
+// /////////////////////////////////////////// //
 
-func fight1v1()
-  p.fds = foe.debuffs.string
-  p.php = hp
-  p.pmhp = maxhp
+// FUNCTIONS
 
-
-  /* How to apply debuffs:
-  - apply all except the ones the foe is immune to.
-  Finish when:
-  - all possible debuffs have been applied. */
-  canDebI = (p.fds ! "chill:6" & p.f ! "immune_to_debuff_chill")
-  canDebP = (p.fds ! "damage" & p.f ! "immune_to_debuff_damage")
-  canDebF = (p.fds ! "dot" & p.f ! "immune_to_debuff_dot")
-  
-  ?canDebI | canDebP | canDebF
-    ?keepMask
-      ?canDebI
-        equipL @a.dIsword@
-      :?canDebP
-        equipL @a.dPsword@
-      :?canDebF
-        equipL @a.dFsword@
-    :
-      //Left hand:
-      ?canDebP
-        equipL @a.dPsword@
-      :?canDebF
-        equipL @a.dFsword@
-      :?canDebI
-        equipL @a.dIwand1@
-
-      //Right hand:
-      ?canDebI
-        equipR @a.dIsword@
-
-  :?p.php ! p.pmhp
-    ?keepMask
-      equipL @a.dLsword@
-    :
-      equipL moon
-      equipR @a.dLsword@
-
-  :
-    ?keepMask
-      equipL Dothaneel
-    :
-      p.bs = buffs.string
-      ?p.bs = "berserk"
-        c.doMoondial(Dothaneel, a.vsword, 2)
-      :
-        c.doMoondial(Dothaneel, a.vsword, 0)
-
-  return
-
-func ldtF(mode) // loadouts
+func ldtF(mode)
 
   ?mode = "default"
     equipL triskelion
-    ?!keepMask
-      equipR @a.cshield1@
-  :?mode = "armorRecover"
+    ?!keepCultistMask
+      equipR @a.shieldCompound1@
+  :?mode = "armorRegen"
     equipL triskelion
-    ?!keepMask
-      equipR @a.cshield2@
+    ?!keepCultistMask
+      equipR @a.shieldCompound2@
   :?mode = "engage"
-    equipL triskelion
-    ?!keepMask
-      equipR @a.vshield@
+    ?buffs.string ! "buff_inf_speed" & // infernal staff
+    ^totaltime % 2 = 0 // every even frame
+      equipL @a.hammerVigorDefense@
+    :
+      equipL triskelion
+
+    ?!keepCultistMask
+      equipR @a.shieldVigorDefense@
+
+  :?mode = "bash"
+    equipL Dothaneel
+    equipR bashing shield
+  :?mode = "dash"
+    equipL Dothaneel
+    equipR @a.shieldDashing@
+
   :?mode = "escape"
     equipL mind
-    ?!keepMask
-      equipR @a.vshield@
+    ?!keepCultistMask
+      equipR @a.shieldVigorDefense@
   :?mode = "magnet"
     equipL star
-    ?!keepMask
+    ?!keepCultistMask
       equipR triskelion
 
-  :?mode = "extend"
-    equipL triskelion
-    equipR mask
-
   :?mode = "meleeDmg"
-    ?keepMask
+    ?keepCultistMask
       equipL Dothaneel
     :
-      equipL @a.vsword@
-      equipR Dothaneel
-  :?mode = "wandDmg"
-    ?keepMask
+      c.doMoondial(Dothaneel, a.swordVigorDmg, moondialMode)
+  :?mode = "meleeDebuff"
+    ?keepCultistMask
+      ?c.canDebuffChill()
+        equipL @a.swordIceDebuff@
+      :?c.canDebuffWeaken()
+        equipL @a.swordPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.swordFireDebuff@
+    :
+      //Left hand:
+      ?c.canDebuffWeaken()
+        equipL @a.swordPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.swordFireDebuff@
+      :?c.canDebuffChill()
+        equipL @a.wandIceDebuff@
+
+      //Right hand:
+      ?c.canDebuffChill()
+        equipR @a.swordIceDebuff@
+  :?mode = "meleeHeal"
+    ?keepCultistMask
+      equipL Soulfetcher
+    :
+      c.doMoondial(Dothaneel, Soulfetcher, moondialMode)
+
+  :?mode = "unmakeAOE"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.bigSwordAetherDebuff@
+    : */
+  :?mode = "unmake1v1"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.swordAetherDebuff@
+    :
+      // put a 2nd dU sword when we have it
+      c.doMoondial(a.swordAetherDebuff, Dothaneel, moondialMode)*/
+
+  :?mode = "rangedDmgAOE"
+    ?keepCultistMask
       equipL theVwand
     :
-      equipL @a.vwand@
-      equipR theVwand
-
-  :?mode = "magic"
-    ?keepMask
-      ?canDebI
-        equipL @a.dIwand1@
-      :?canDebP
-        equipL @a.dPwand@
-      :?canDebF
-        equipL @a.dFwand@
+      equip @a.staffVigorBuff@ // @a.bowVigorDmg@
+  :?mode = "rangedDebuffAOE"
+    ?keepCultistMask
+      ?c.canDebuffChill()
+        equipL @a.wandIceDebuff@
+      :?c.canDebuffWeaken()
+        equipL @a.wandPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.wandFireDebuff@
 
     :
-      ?p.tt % 2 = 0
-        equipL triskelion
-        equipR hatchet
-
-      :?canDebI
-        equip @a.dIstaff@
-      :?canDebP
-        equip @a.dPstaff@
-      :?canDebF
-        equip @a.dFstaff@
+      ?c.canDebuffChill()
+        equip @a.staffIceDebuff@
+      :?c.canDebuffWeaken()
+        equip @a.staffPoisonDebuff@
+      :?c.canDebuffBurn()
+        equip @a.staffFireDebuff@
+  :?mode = "rangedHealAOE"
+    ?keepCultistMask
+      equipL @a.wandVigorBuff@
+    :
+      equip @a.staffVigorBuff@ // @a.bowVigorBuff@
 
   :
     >c-10,0,#red,
@@ -205,162 +190,246 @@ func ldtF(mode) // loadouts
 
   return
 
+func fight1v1()
+
+  ?c.canDebuffAny() & // foe can be debuffed
+  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+    ldtF("meleeDebuff")
+
+  : // all possible debuffs applied
+    ?hp ! maxhp // heal up
+      ldtF("meleeHeal")
+
+    : // deal max damage
+      ldtF("meleeDmg")
+
+  return
 
 
-// PROCEDURE:
 
-c.doAAC("sword 0*", a.cshield1)
+// /////////////////////////////////////////// //
 
-?p.lb
-  p.rs = res.stone
-  p.rw = res.wood
-  p.rb = res.bronze
+// PROCEDURE
 
-  ?p.rb >= 10
-    ?p.rw >= 10
-      ?p.ip ! "berserk"
-        brew wood + bronze
-    :?p.rs >= 10
-      ?p.ip ! "lucky"
-        brew stone + bronze
-    :
-      loc.Leave()
-  :
-    loc.Leave()
+c.doAAC(a.hammerVigorDefense, a.shieldVigorDefense)
 
-?keepMask
-  ?p.ir ! "bardiche" &
-  ^p.ir ! "quarterstaff" &
-  ^p.ir ! "heavy hammer"
+// Auto Brewing
+?c.canBrewPotion("berserk")
+  c.brewPotion("berserk")
+:?c.canBrewPotion("lucky")
+  c.brewPotion("lucky")
+
+?loc.begin // initial equipment
+  equipL triskelion
+  equipR @a.shieldCompound1@
+:?keepCultistMask
+  ?item.right ! "bardiche" &
+  ^item.right ! "quarterstaff" &
+  ^item.right ! "heavy hammer" &
+  ^item.right ! "quarterstaff"
+    equipL triskelion
     equipR mask
 
-?p.lb | p.ll
-  equipL triskelion
-  equipR @a.cshield1@
-
-:?c.canUseAETali() & !keepFTali
-  ?keepMask
-    c.useAETali("l")
-  :
-    equipL triskelion
-    c.useAETali("r")
-
-:?c.canUseFTali() & keepFTali
-  ?keepMask
-    c.useFTali("l")
-  :
-    equipL triskelion
-    c.useFTali("r")
-
-:?c.canUsePot() & keepMask
+?c.canUsePotionDmg() & keepCultistMask
   activate potion
 
-:?pickup.distance ! 9999
-  ldtF("magnet")
-:
-  p.fd = foe.distance
-
-  ?c.canUseQstaff()
-    ?ai.enabled &
-    ^p.ir ! "heavy hammer" &
-    ^p.ir ! "bardiche" &
-    ^p.ir ! Kubikiribocho & (
-    ^(!c.canBash() & !c.canDash()) |
-    ^(p.fd < 11 | p.fd > 15))
-      c.useQstaff(a.myqstaff)
-
-  ?c.canUseBladeDS(smiteScr)
-    c.useBladeDS()
-
-  /****************************/
-  ?c.canUseWeav()
-    ?p.si = weavScr & p.fd < 15
-      c.useWeav()
-  /****************************/
-
-  ?p.fd > 35
-    p.pa = armor
-
-    ?p.pa > 29 & p.php ! p.pmhp
-      ?!keepMask
-        equipL triskelion
-        equipR ouroboros
-      :
-        equipL ouroboros
-
-    :?14 <= p.pa & p.pa <= 29
-      ldtF("default")
-    :?p.pa < 14
-      ldtF("armorRecover")
-    :
-      ldtF("extend")
-
-  :?p.fd > 15
-    ldtF("engage")
-
-    ?hp ! maxhp & p.f = "pallas" & foe.state = 0
-      ?!keepMask
-        equipR ouroboros
-      :
-        equipL ouroboros
-    :
-      var isAbtToDash
-      isAbtToDash = (p.fd <= 17)
-      ?keepMask & isAbtToDash
-        equipR @a.vshield@
-      
-      p.fds = foe.debuffs.string
-      canDebI = (p.fds ! "chill" &
-      ^f ! "immune_to_debuff_chill")
-      p.bs = buffs.string
-
-      ?!keepMask & canDebI & isAbtToDash &
-      ^i.getFoeTotalHP() > i.getBuffInfo("smite", false, 2) * a.smiteMult
-        equipR @a.aiShield@
+:?c.canUseStaffHidden("infernal")
+  c.useStaffHidden(a.staffFireHidden, "infernal")
 
 
-  :?c.canBash()
-    c.bash(a.dLsword)
-  :?c.canDash()
-    c.dash(a.dLsword,a.dshield)
+?c.canUseBFG_DS(smiteScreeneen)
+  c.useBFG_DS()
+
+
+?foe ! "boss" &
+^foe.state ! 4 & foe.state ! -1 &
+^c.canUseAetherTalisman()
+  ?keepCultistMask
+    c.useAetherTalisman("l")
   :
-    p.fc = foe.count
+    equipL triskelion
+    c.useAetherTalisman("r")
+:?foe = "boss" &
+^c.canUseFireTalisman()
+  ?keepCultistMask
+    c.useFireTalisman("l")
+  :
+    equipL triskelion
+    c.useFireTalisman("r")
 
-    ?c.canUseHamm() & keepMask
-    ^& !c.canUseBlade() &
-    ^((smiteScr < 4 & p.si = 5) |
-    ^ (smiteScr = 4 & p.si = 3))
-      c.useHamm(a.myHamm)
 
-    :?p.f = "spawner" & p.fc = 1
+:?pickup.distance < 15
+  ldtF("magnet")
+
+// ABOUT TO ATTACK -- ADAPT TO THIS LOCATION
+/* :?foe.distance < 11 & (
+^(foe = "cool_bat" &
+^((foe.state = 33 & foe.time > 12) | foe.state = 2)) |
+^(foe = "spider_boss_harder" &
+^foe.state = 142 & foe.time > 57))
+  >c0,0,#red,*** ABOUT TO ATTACK! ***
+
+  ?c.canUseStaffHidden("prevention") // prevent Weaken
+    c.useStaffHidden(a.staffVigorHidden, "prevention")
+
+  :?buffs.string ! "buff_staff_protection" // couldn't use protection staff
+    ?c.canUseMindstone()  // dash back
+      ldtF("escape")
+    :?c.canUseStaffHidden("acrobatic") &
+    ^foe.distance <= c.getRange("sword")
+      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+    :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
+    ^foe.distance <= c.getRange("sword")
+      c.useStaffHidden(a.staffIceHidden, "eternity")
+
+    :?foe.distance <= c.getRange("sword")  // couldn't dash, fight melee
       fight1v1()
 
-    :?p.f ! "pallas"
-      p.fds = foe.debuffs.string
-      canDebI = (p.fds ! "chill:6")
-      canDebP = (p.fds ! "damage")
-      canDebF = (p.fds ! "dot")
-      
-      ?canDebI | canDebP | canDebF
-        ldtF("magic")
-      :
-        ldtF("wandDmg")
+    :?c.canDebuffAny() // could dash, fight ranged
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
 
-    : // p.f = "pallas"
-      p.fs = foe.state
+  :
+    fight1v1()
+*/
 
-      ?p.fs = 100 & !pausedOnce
-        // 100 = entering phase2
-        pausedOnce = true
-        ui.OpenInv()
+:?ai.walking &
+^(foe.distance < 11 | foe.distance > 15) &
+^c.canUseQuarterstaff()
+  c.useQuarterstaff(a.myQuarterstaff)
 
-      :?p.fs ! 4
-        ?c.canUsePot()
-          activate potion
-        :?c.canUseMask()
-          c.useMask()
+:?ai.paused |
+^(ai.idle & foe.distance > 11) | // if we're waiting
+^foe.state = -1 | foe.state = 4 | // foe death states
+^foe.distance > 15 // or we can't engage in a fight
+  ?armor > 29 |
+  ^(foe ! "phase1" & foe.distance < 40)
+    ldtF("engage")
+  :?14 <= armor & armor <= 29
+    ldtF("default")
+  :
+    ldtF("armorRegen")
+
+
+:?foe ! "phase"
+
+  ?encounter.eliteMod = "monarch"
+    ?foe.count > 1 // eliminate the other foes
+      ?c.canUseBFG()
+        c.useBFG()
+      :?c.canUseWandHidden("explosive")
+        c.useWandHidden(a.wandFireHidden, "explosive", "l")
+
+      :?foe.distance < 7 & // if too close, try to escape
+      ^(c.canUseMindstone() |
+      ^c.canUseStaffHidden("acrobatic"))
+        ?c.canUseMindstone()
+          ldtF("escape")
         :
-          fight1v1()
+          c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+      :?c.canUseHeavyHammer() // if close, use hammer
+        c.useHeavyHammer(Mjölnir)
+      :?c.canDebuffAny()
+        ldtF("rangedDebuffAOE")
+      :
+        ldtF("rangedDmgAOE")
+
+    :?c.canUseBashingShield()
+      ldtF("bash")
+    :?c.canUseDashingShield()
+      ldtF("dash")
+
+    : // 1v1 with the monarch
+      ?foe.hp + foe.armor >= a.bardicheRDmg &
+      ^c.canUseBardiche()
+        c.useBardiche(Kubikiribocho)
+      :?foe ! "immune_to_physical"
+        fight1v1()
+      :
+        ?c.canDebuffAny()
+          ldtF("rangedDebuffAOE")
+        :
+          ldtF("rangedDmgAOE")
+
+
+  :?c.canUseBashingShield()
+    ldtF("bash")
+  :?c.canUseDashingShield()
+    ldtF("dash")
+
+  :?foe.count > 1 // AOE strategy
+    ?c.canUseVoidweaver() & 
+    !encounter.isElite & !(
+    ^screen.i = smiteScreen |
+    ^screen.i = smiteScreen + 1)
+      c.useVoidweaver()
+
+    ?encounter.isElite &
+    ^encounter.eliteMod ! "tenacious" &
+    ^c.canUseWandGravity()
+      c.useWandGravity(a.wandStoneHidden, "l")
+
+    // Hinder regen
+    ?encounter.eliteMod = "regen" &
+    ^c.canUseWandExplosive()
+      c.useWandExplosive(a.wandFireHidden, "l")
+
+    // Remove armor
+    :?encounter.eliteMod = "plated" &
+    ^c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+
+    :?c.canDebuffAny() &
+    ^encounter.eliteMod ! "tenacious"
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  : // 1v1 strategy
+    ?foe ! "immune_to_physical"
+      ?foe.hp + foe.armor >= a.bardicheRDmg &
+      ^c.canUseBardiche()
+        c.useBardiche(Kubikiribocho)
+      :
+        fight1v1()
+    :
+      ?c.canDebuffAny()
+        ldtF("rangedDebuffAOE")
+      :
+        ldtF("rangedDmgAOE")
+
+
+: // Pallas
+  ?c.canUseCinderwisp() &
+  ^foe.debuffs.string = a.maxIgnitions_Default
+    c.useCinderwisp()
+
+  ?c.canUsePotionDmg()
+    activate potion
+
+  ?c.canUseBashingShield()
+    ldtF("bash")
+  :?c.canUseDashingShield()
+    ldtF("dash")
+
+  :?c.canUseWandHidden("plague") // reduce their damage
+    c.useWandHidden(a.wandPoisonHidden, "plague", "l")
+  :?c.canUseStaffHidden("berserker") // increase our damage
+    c.useStaffHidden(a.staffPoisonHidden, "berserker")
+
+  :?c.canUseCultistMask()
+    c.useCultistMask()
+
+  :?c.canUseWandHidden("frost")
+    c.useWandHidden(a.wandIceHidden, "frost", "l")
+
+  :?c.canUseBardiche() & keepCultistMask
+    c.useBardiche(Kubikiribocho)
+  :
+    fight1v1()
 
 
 

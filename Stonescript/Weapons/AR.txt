@@ -1,0 +1,236 @@
+//Repeating Crossbow Rifle skin
+//Made by tapititon          
+//Version 6.30
+
+//Description: This is a skin for the
+//Repeating Crossbow that is drawn over the
+//player avatar whenever a Repeating
+//Crossbow is currently being held. 
+//The skin replaces the usual Repeating
+//Crossbow appearance with one of a rifle.
+//The skin also includes a reload animation.
+//
+//How to implement: Copy and paste the content
+//of this file at the top of your script.
+//
+//How to activate: The skin is automatically
+//applied whenever a Repeating Crossbow of any
+//level is in the hands of the player avatar.
+
+?item.right ! repeating crossbow
+  return
+
+var timeRC= 0
+
+?!ai.walking & 
+^foe.count = 0
+ >h-1,1,#red,ascii
+###,_
+##l…#\=
+
+asciiend
+ >h-1,1,#white,ascii
+
+<###,
+/#\
+asciiend
+ >h-1,1,#rainbow,ascii
+
+#≠
+asciiend
+
+
+?!ai.walking &
+^foe.count > 0
+ var timeRC = 0
+ timeRC++
+ ?timeRC = 1 | timeRC = 3       // pew pew1 //
+  >h-1,1,#red,ascii
+###,_
+##l…#\=
+
+asciiend
+  >h-1,1,#white,ascii
+
+####,
+<#\
+asciiend
+  >h-1,1,#rainbow,ascii
+
+#≠
+asciiend
+  >h-1,1,#yellow,ascii
+
+#######<
+asciiend
+ ?timeRC = 2 | timeRC = 4       // pew pew2 //
+  >h-1,1,#red,ascii
+###,_##/,
+##l…#\=
+#######\`
+asciiend
+  >h-1,1,#white,ascii
+
+####,
+<#\
+asciiend
+  >h-1,1,#rainbow,ascii
+
+#≠
+asciiend
+  >h-1,1,#yellow,ascii
+#######/,
+
+#######\`
+asciiend
+ ?timeRC >= 4               // pew pew reset //
+  timeRC = 1
+
+
+?ai.walking
+ timeRC++
+ ?timeRC < 50              // discard ammo1 //
+  ?timeRC = 49
+    play pickup_bronze     // discard SFX
+  >h-1,1,#red,ascii
+###,_
+##l…#\=
+asciiend
+  >h-1,1,#white,ascii
+
+<###,
+asciiend
+  >h-1,1,#rainbow,ascii
+
+#≠
+asciiend
+ :?timeRC < 55             // discard ammo2 //
+  >h-3,1,#red,ascii
+#####,_
+####l…#\=
+######
+asciiend
+  >h-3,1,#white,ascii
+##.
+#<####,
+asciiend
+  >h-3,1,#yellow,ascii
+
+##,
+asciiend
+  >h-3,1,#blue,ascii
+
+###=
+asciiend
+ :?timeRC < 60             // discard ammo3 //
+  >h-3,1,#red,ascii
+#####,_#
+####l…#\=
+asciiend
+  >h-3,1,#white,ascii
+
+##/###,
+asciiend
+  >h-3,1,#blue,ascii
+
+###=
+asciiend
+  >h-3,1,#yellow,ascii
+
+##,
+asciiend
+ :?timeRC < 65             // discard ammo4 //
+  >h-3,1,#red,ascii
+#####,_#
+####l…#\=
+asciiend
+  >h-3,1,#white,ascii
+
+##/###,
+asciiend
+  >h-3,1,#blue,ascii
+
+###=
+asciiend
+  >h-3,1,#yellow,ascii
+
+
+,
+asciiend
+ :?timeRC < 80             // discard ammo5 //
+  >h-3,1,#red,ascii
+#####,_#
+####l…#\=
+asciiend
+  >h-3,1,#white,ascii
+
+##/###,
+asciiend
+  >h-3,1,#blue,ascii
+
+###=
+asciiend
+ :?timeRC < 85                // load ammo1 //
+  ?timeRC = 84
+    play error                // reload SFX
+  >h-3,1,#red,ascii
+#####,_
+####l…#\=
+
+asciiend
+  >h-3,1,#white,ascii
+
+#(####,
+asciiend
+  >h-3,1,#cyan,ascii
+
+##,
+asciiend
+  >h-3,1,#blue,ascii
+
+###=
+asciiend
+ :?timeRC < 90                // load ammo2 // 
+  >h-3,1,#red,ascii
+#####,_#
+####l…#\=
+asciiend
+  >h-3,1,#white,ascii
+
+#<####,
+asciiend
+  >h-3,1,#cyan,ascii
+
+##,
+asciiend
+  >h-3,1,#blue,ascii
+
+###=
+asciiend
+ :?timeRC < 100               // load ammo3 //
+  >h-3,1,#red,ascii
+#####,_#
+####l…#\=
+
+asciiend
+  >h-3,1,#white,ascii
+
+##\###,
+asciiend
+  >h-3,1,#rainbow,ascii
+
+###╤
+asciiend
+ :?timeRC >= 100              // load ammo4 //
+  >h-3,1,#red,ascii
+#####,_#
+####l…#\=
+asciiend
+  >h-3,1,#white,ascii
+
+##<###,
+asciiend
+  >h-3,1,#rainbow,ascii
+
+###≠
+asciiend

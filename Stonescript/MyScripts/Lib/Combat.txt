@@ -283,14 +283,9 @@ func canUseBashingShield()
   return
   ^item.GetCooldown("bash") <= 0 &
   ^item.CanActivate() &
-  ^11 <= foe.distance & foe.distance <= 15 &
+  ^u.dash_range_min <= foe.distance &
+  ^foe.distance <= u.dash_range_max &
   ^!ai.idle
-func useBashingShield(lItem)
-  equipL @lItem@
-  equipR bashing shield
-
-  return
-
 
 // Special Weapons
 
@@ -326,14 +321,9 @@ func canUseDashingShield()
   return
   ^item.GetCooldown("dash") <= 0 &
   ^item.CanActivate() &
-  ^11 <= foe.distance & foe.distance <= 15 &
+  ^u.dash_range_min <= foe.distance &
+  ^foe.distance <= u.dash_range_max &
   ^!ai.idle
-func useDashingShield(lItem, weaponName)
-  equipL @lItem@
-  equipR @weaponName@
-
-  return
-
 
 func canUseQuarterstaff()
   return

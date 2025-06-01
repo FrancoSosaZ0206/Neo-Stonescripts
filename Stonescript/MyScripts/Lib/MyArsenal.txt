@@ -41,14 +41,15 @@ Bifrost = sword ice D *max
 
 Soulfetcher = sword vigor *max dL +21/
 
-Speedy Hammer = stone hammer *max
+Speedy Hammer = hammer stone *max
 Kubikiribocho = bardiche *max (enchanted: crit)
-Mjölnir = heavy hammer *max
+Mjölnir = heavy hammer *max (enchanted: damage)
+Guardian's Wrath = heavy hammer *max (enchanted: armor fatigue)
 
-theVwand = vigor wand D golden
-Frosty Crust = ice wand dI *max
+theVwand = wand vigor *max D golden
+Frosty Crust = wand ice *max dI
 
-Death's Kiss = poison sword dP shiny (enchanted: P) */
+Death's Kiss = sword poison shiny dP (enchanted: P) */
 
 
 //poison:
@@ -73,7 +74,7 @@ var hammerVigorBuff = "hammer vigor *max ah"
 var bowVigorBuff = "bow vigor *max dL"
 var bowVigorDmg = "bow vigor *max -dL"
 var wandVigorBuff = "wand vigor *max dL -hidden"
-var wandVigorDmg = "wand vigor *max -dL -hidden"
+var wandVigorDmg = "wand vigor *max -dL -hidden" // 2nd one
 var wandVigorHidden = "wand_hidden_vigor *max" // aka Reset Wand
 var staffVigorBuff = "staff vigor *max dL -hidden"
 var staffVigorHidden = "staff_hidden_vigor *max" // aka Prevention Staff

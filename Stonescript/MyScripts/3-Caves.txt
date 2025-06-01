@@ -203,11 +203,6 @@ func fight1v1()
 
 // PROCEDURE
 
-?buffs.string ! "buff_inf_speed" & // infernal staff
-^totaltime % 2 = 0 & // every even frame
-^item.left = "triskelion"
-  equipL @a.hammerIceDefense@ // gain extra armor without slowing down
-
 c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
 
 // Auto Brewing
