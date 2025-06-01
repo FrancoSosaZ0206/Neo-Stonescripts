@@ -136,9 +136,9 @@ func ldtF(mode)
         equipR @a.swordIceDebuff@
   :?mode = "meleeHeal"
     ?keepCultistMask
-      equipL @a.swordVigorBuff@
+      equipL Soulfetcher
     :
-      c.doMoondial(Vantum Phoenix, a.swordVigorBuff, moondialMode)
+      c.doMoondial(Vantum Phoenix, Soulfetcher, moondialMode)
 
   :?mode = "unmakeAOE"
     equip @a.staffAetherDebuff@
@@ -336,7 +336,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         c.useStaffHidden(a.staffStoneHidden)
 
     :?c.canUseHeavyHammer() // if close, use hammer
-      c.useHeavyHammer(a.myHeavyHammer)
+      c.useHeavyHammer(Mjölnir)
     :?c.canDebuffAny()
       ldtF("rangedDebuffAOE")
     :
@@ -397,7 +397,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   // Remove armor
   :?c.canUseHeavyHammer()
-    c.useHeavyHammer(a.myHeavyHammer)
+    c.useHeavyHammer(Mjölnir)
 
 
   :?foe.hp + foe.armor > 1000 & // tanky normal foe

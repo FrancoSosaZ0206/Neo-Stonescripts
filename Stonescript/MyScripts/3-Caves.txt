@@ -57,7 +57,7 @@ var dpsPanel
 // VARIABLES
 
 var keepCultistMask = true
-var smiteScreen = 1
+var smiteScreen = 2
 var moondialMode = -1
 
 ?loc.loop
@@ -88,7 +88,10 @@ func ldtF(mode)
       equipR @a.shieldCompound2@
   :?mode = "engage"
     ?keepCultistMask & foe.count
-      equipL @a.hammerIceDefense@
+      ?totaltime % 2 = 0
+        equipL @a.hammerIceDefense@
+      :
+        equipL triskelion
     :?!keepCultistMask
       equipL triskelion
       equipR @a.shieldIceDefense@
@@ -129,9 +132,9 @@ func ldtF(mode)
         equipR @a.swordIceDebuff@
   :?mode = "meleeHeal"
     ?keepCultistMask
-      equipL @a.swordVigorBuff@
+      equipL Soulfetcher
     :
-      c.doMoondial(Bifrost, a.swordVigorBuff, moondialMode)
+      c.doMoondial(Bifrost, Soulfetcher, moondialMode)
 
   :?mode = "unmakeAOE"
     equip @a.staffAetherDebuff@
@@ -311,7 +314,7 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
           c.useStaffHidden(a.staffStoneHidden, "acrobatic")
 
       :?c.canUseHeavyHammer() // if close, use hammer
-        c.useHeavyHammer(a.myHeavyHammer)
+        c.useHeavyHammer(Mjölnir)
       :?c.canDebuffAny()
         ldtF("rangedDebuffAOE")
       :
@@ -336,7 +339,7 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
 
   :?foe = "cool_bat" // The miniboss
     ?c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
+      c.useHeavyHammer(Mjölnir)
     :?c.canUseBardiche()
       c.useBardiche(Kubikiribocho)
 
@@ -364,7 +367,7 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
     // Remove armor
     :?encounter.eliteMod = "plated" &
     ^c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
+      c.useHeavyHammer(Mjölnir)
 
     :?c.canDebuffAny() &
     ^encounter.eliteMod ! "tenacious"
@@ -373,7 +376,7 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
       ldtF("rangedDmgAOE")
 
   : // 1v1 strategy
-    ?foe.hp + foe.armor > a.bardiche_ability_range &
+    ?foe.hp + foe.armor > a.bardicheRDmg &
     ^c.canUseBardiche()
       c.useBardiche(Kubikiribocho)
     :

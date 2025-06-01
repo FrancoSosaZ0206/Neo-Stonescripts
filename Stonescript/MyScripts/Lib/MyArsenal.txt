@@ -33,14 +33,17 @@ to work as intended. */
 
 /* Renamed:
 
-Mamba Negra = poison sword D *max
-Dothaneel = vigor sword D *max
-Void Slayer = aether sword D *max
-Vantum Phoenix = fire sword D *max
-Bifrost = ice sword D *max
+Mamba Negra = sword poison D *max
+Dothaneel = sword vigor D *max
+Void Slayer = sword aether D *max
+Vantum Phoenix = sword fire D *max
+Bifrost = sword ice D *max
+
+Soulfetcher = sword vigor *max dL +21/
 
 Speedy Hammer = stone hammer *max
 Kubikiribocho = bardiche *max (enchanted: crit)
+Mjölnir = heavy hammer *max
 
 theVwand = vigor wand D golden
 Frosty Crust = ice wand dI *max
@@ -63,7 +66,6 @@ var staffPoisonDebuff = "staff poison *max dP -hidden"
 var staffPoisonHidden = "staff_hidden_poison *max" // aka Berserker Staff
 
 //vigor:
-var swordVigorBuff = "sword vigor *max dL"
 var swordVigorDmg = "sword vigor *max -dL Spring24"
 var shieldVigorDefense = "shield vigor *max -ah"
 var shieldVigorBuff = "shield vigor *max ah"
@@ -128,7 +130,6 @@ var bowAlternate = "crossbow *max golden"
 var shieldDashing = "shield dashing *max HoH24"
 var myQuarterstaff = "quarterstaff *max glitched"
 var fastBardiche = "bardiche *max" // enchanted: speed
-var myHeavyHammer = "heavy hammer *max"
 var bowRepeating = "crossbow repeating *max golden"
 var shieldCompound1 = "shield compound *max shiny"
 var shieldCompound2 = "shield compound *max -shiny"

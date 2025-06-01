@@ -131,9 +131,9 @@ func ldtF(mode)
         equipR @a.swordIceDebuff@
   :?mode = "meleeHeal"
     ?keepCultistMask
-      equipL @a.swordVigorBuff@
+      equipL Soulfetcher
     :
-      c.doMoondial(Mamba Negra, a.swordVigorBuff, moondialMode)
+      c.doMoondial(Mamba Negra, Soulfetcher, moondialMode)
 
   :?mode = "unmakeAOE"
     equip @a.staffAetherDebuff@
@@ -304,7 +304,7 @@ c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
           c.useStaffHidden(a.staffStoneHidden)
 
       :?c.canUseHeavyHammer() // if close, use hammer
-        c.useHeavyHammer(a.myHeavyHammer)
+        c.useHeavyHammer(Mjölnir)
       :?c.canDebuffAny()
         ldtF("rangedDebuffAOE")
       :
@@ -329,7 +329,7 @@ c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
 
   :?foe = "snail" & foe = "boss" // The snail that's always with Mr. Puff
     ?c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
+      c.useHeavyHammer(Mjölnir)
     :?c.canUseBardiche()
       c.useBardiche(Kubikiribocho)
 
@@ -357,7 +357,7 @@ c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
     // Remove armor
     :?encounter.eliteMod = "plated" &
     ^c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
+      c.useHeavyHammer(Mjölnir)
 
     :?c.canDebuffAny() &
     ^encounter.eliteMod ! "tenacious"
@@ -380,7 +380,7 @@ c.doAAC(a.hammerPoisonDefense, a.shieldPoisonDefense)
 
   :?foe.armor > foe.maxarmor / 2 &
   ^c.canUseHeavyHammer()
-    c.useHeavyHammer(a.myHeavyHammer)
+    c.useHeavyHammer(Mjölnir)
 
   :?foe.state = 32 & foe.time >= 75 // boss's punch attack
     ?foe.distance < 20
