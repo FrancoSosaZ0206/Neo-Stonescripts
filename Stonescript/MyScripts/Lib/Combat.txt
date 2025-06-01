@@ -388,7 +388,7 @@ func canUseWandHidden(weaponName)
   
   ?isOk
     return item.CanActivate() &
-    ^item.GetCooldown(weaponName) <= 0 &
+    ^item.GetCooldown(internalName) <= 0 &
     ^armor >= requiredArmor
 
   :
@@ -473,7 +473,7 @@ func canUseStaffHidden(weaponName)
 
   ?isOk
     return item.CanActivate() &
-    ^item.GetCooldown(weaponName) <= 0 &
+    ^item.GetCooldown(internalName) <= 0 &
     ^armor >= requiredArmor
   :
     >c-10,0,#red,ERROR: canUseStaffHidden()
