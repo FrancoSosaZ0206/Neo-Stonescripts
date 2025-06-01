@@ -31,6 +31,9 @@ Written by IronHawk (Tom Crow)
   Example: if the file is saved in the Stonescript folder,
     import main
 
+  If you're on mobile, go to the MOBILE section and copy-paste
+  that into the Mindstone.
+
 . ............................................................. .
 
   Q: I'm on mobile, and after some changes to my scripts,
@@ -62,30 +65,34 @@ Written by IronHawk (Tom Crow)
 
 . ............................................................. .
 
-Enjoy! ;)
+Enjoy! ;) */
 
-*/
 
-// ///////////////////////////////////////////////////////// //
 
-// VARIABLES
+/* //////////////////////// MOBILE ///////////////////////// //
+// ↓↓↓ COPY FROM HERE ↓↓↓
 
 // Paste your url here ↓↓↓
-var mobileUrl = "https://raw.githubusercontent.com/FrancoSosaZ0206/Neo-Stonescripts/main/Stonescript/"
+var mobileUrl = "https://raw.githubusercontent.com
+^FrancoSosaZ0206/Neo-Stonescripts/main/Stonescript/"
 
-var pathToFile = "" // Paste your path here <<<
+// ↓↓↓ COMMENT OUT HERE ↓↓↓
+sys.SetFileUrl(mobileUrl)
+// ↑↑↑ COMMENT OUT HERE ↑↑↑
+
+import MyScripts/main
+
+// ↑↑↑ COPY UNTIL HERE ↑↑↑
+// ///////////////////////////////////////////////////////// */
 
 
-//                 ↓↓↓ COMMENT OUT HERE ↓↓↓
-/* ///////////////////////////////////////////////////////// */
-//                 ↑↑↑ COMMENT OUT HERE ↑↑↑
+
+// ////////////////////////// PC /////////////////////////// //
 
 // PROCEDURE
 
-
 ?sys.isMobile
-  sys.SetFileUrl(mobileUrl)
-
+  import UI/MindstoneButton
 
 import MyScripts/MyCosmetics
 
@@ -117,9 +124,6 @@ import MyScripts/MyCosmetics
     import MyScripts/7-Ridge
   :?loc = "temple"
     import MyScripts/8-Temple
-
-
-/* ///////////////////////////////////////////////////////// */
 
 
 

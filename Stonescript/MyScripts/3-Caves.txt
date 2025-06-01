@@ -263,7 +263,8 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
 :?foe.distance < 11 & (
 ^(foe = "cool_bat" &
 ^((foe.state = 33 & foe.time > 12) | foe.state = 2)) |
-^(foe = "spider_boss_harder" & foe.state = 142 & foe.time > 57))
+^(foe = "spider_boss_harder" &
+^foe.state = 142 & foe.time > 57))
   >c0,0,#red,*** ABOUT TO ATTACK! ***
 
   ?c.canUseStaffHidden("prevention") // prevent Weaken
@@ -410,7 +411,7 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
   ?c.canUsePotionDmg()
     activate potion
 
-  :?c.canUseBashingShield()
+  ?c.canUseBashingShield()
     c.useBashingShield(Mamba Negra)
   :?c.canUseDashingShield()
     c.useDashingShield(Mamba Negra, a.shieldDashing)
