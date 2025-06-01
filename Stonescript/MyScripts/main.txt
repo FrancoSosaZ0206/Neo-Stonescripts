@@ -78,11 +78,11 @@ var mobileUrl =
 ^FrancoSosaZ0206/Neo-Stonescripts/
 main/Stonescript/"
 
-// ↓↓↓ COMMENT OUT HERE ↓↓↓
 sys.SetFileUrl(mobileUrl)
-// ↑↑↑ COMMENT OUT HERE ↑↑↑
 
+// ↓↓↓ COMMENT OUT HERE ↓↓↓
 import MyScripts/main
+// ↑↑↑ COMMENT OUT HERE ↑↑↑
 
 // ↑↑↑ COPY UNTIL HERE ↑↑↑
 // ///////////////////////////////////////////////////////// */
