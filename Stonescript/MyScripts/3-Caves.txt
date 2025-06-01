@@ -87,13 +87,13 @@ func ldtF(mode)
     ?!keepCultistMask
       equipR @a.shieldCompound2@
   :?mode = "engage"
-    ?keepCultistMask & foe.count
-      ?totaltime % 2 = 0
-        equipL @a.hammerIceDefense@
-      :
-        equipL triskelion
-    :?!keepCultistMask
+    ?buffs.string ! "buff_inf_speed" & // infernal staff
+    ^totaltime % 2 = 0 // every even frame
+      equipL @a.hammerIceDefense@
+    :
       equipL triskelion
+
+    ?!keepCultistMask
       equipR @a.shieldIceDefense@
 
   :?mode = "escape"
@@ -261,21 +261,35 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
 
 
 :?foe.distance < 11 & (
-^(foe = "cool_bat" & foe.state = 33 & foe.time > 27) |
+^(foe = "cool_bat" &
+^((foe.state = 33 & foe.time > 12) | foe.state = 2)) |
 ^(foe = "spider_boss_harder" & foe.state = 142 & foe.time > 57))
-  ?c.canUseMindstone()
-    ldtF("escape")
-  :?c.canUseStaffHidden("acrobatic")
-    c.useStaffHidden(a.staffStoneHidden, "acrobatic")
-  :?c.canUseStaffHidden("prevention")
+  >c0,0,#red,*** ABOUT TO ATTACK! ***
+
+  ?c.canUseStaffHidden("prevention") // prevent Weaken
     c.useStaffHidden(a.staffVigorHidden, "prevention")
-  :?c.canUseStaffHidden("eternity")
-    c.useStaffHidden(a.staffIceHidden, "eternity")
-  :
-    ?c.canDebuffAny()
-      ldtF("magic")
+
+  :?buffs.string ! "buff_staff_protection" // couldn't use protection staff
+    ?c.canUseMindstone()  // dash back
+      ldtF("escape")
+    :?c.canUseStaffHidden("acrobatic") &
+    ^foe.distance < c.getRange("sword")
+      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+    :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
+    ^foe.distance < c.getRange("sword")
+      c.useStaffHidden(a.staffIceHidden, "eternity")
+
+    :?foe.distance <= c.getRange("sword")  // couldn't dash, fight melee
+      fight1v1()
+
+    :?c.canDebuffAny() // could dash, fight ranged
+      ldtF("rangedDebuffAOE")
     :
       ldtF("rangedDmgAOE")
+
+  :
+    fight1v1()
 
 
 :?ai.walking &
@@ -338,13 +352,18 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
     c.useDashingShield(Mamba Negra, a.shieldDashing)
 
   :?foe = "cool_bat" // The miniboss
-    ?c.canUseHeavyHammer()
-      c.useHeavyHammer(Mjölnir)
-    :?c.canUseBardiche()
-      c.useBardiche(Kubikiribocho)
+    >c0,0,#green,*** FIGHTING BIG BAT! ***
+
+    ?c.canUseWandHidden("frost")
+      c.useWandHidden(a.wandIceHidden, "frost", "l")
 
     :?c.canDebuffAny()
       ldtF("meleeDebuff")
+
+    :?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :?c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
     :
       ldtF("meleeDmg")
 
@@ -390,6 +409,11 @@ c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
 
   ?c.canUsePotionDmg()
     activate potion
+
+  :?c.canUseBashingShield()
+    c.useBashingShield(Mamba Negra)
+  :?c.canUseDashingShield()
+    c.useDashingShield(Mamba Negra, a.shieldDashing)
 
   :?c.canUseWandHidden("plague") // reduce their damage
     c.useWandHidden(a.wandPoisonHidden, "plague", "l")

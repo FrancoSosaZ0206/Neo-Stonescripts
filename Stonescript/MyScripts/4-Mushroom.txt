@@ -89,10 +89,13 @@ func ldtF(mode)
     ?!keepCultistMask
       equipR @a.shieldCompound2@
   :?mode = "engage"
-    ?keepCultistMask & foe.count
+    ?buffs.string ! "buff_inf_speed" & // infernal staff
+    ^totaltime % 2 = 0 // every even frame
       equipL @a.hammerPoisonDefense@
-    :?!keepCultistMask
+    :
       equipL triskelion
+
+    ?!keepCultistMask
       equipR @a.shieldPoisonDefense@
 
   :?mode = "escape"
