@@ -76,7 +76,7 @@ Enjoy! ;) */
 var mobileUrl =
 ^"https://raw.githubusercontent.com/
 ^FrancoSosaZ0206/Neo-Stonescripts/
-main/Stonescript/"
+^main/Stonescript/"
 
 sys.SetFileUrl(mobileUrl)
 
