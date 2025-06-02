@@ -260,6 +260,39 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     ldtF("armorRegen")
 
 
+:?foe = "skeleton_boss" & foe.count = 1 // Pallas (note: sword can be unmade in phase1)
+  ?c.canUseCinderwisp() &
+  ^foe.debuffs.string = a.maxIgnitions_Default
+    c.useCinderwisp()
+
+  ?c.canUsePotionDmg()
+    activate potion
+
+  ?c.canUseBashingShield()
+    ldtF("bash")
+  :?c.canUseDashingShield()
+    ldtF("dash")
+
+  :?c.canUseWandHidden("plague") // reduce their damage
+    c.useWandHidden(a.wandPoisonHidden, "plague", "l")
+  :?c.canUseStaffHidden("berserker") // increase our damage
+    c.useStaffHidden(a.staffPoisonHidden, "berserker")
+
+  :?c.canUseCultistMask()
+    c.useCultistMask()
+
+  :?c.canUseWandHidden("frost")
+    c.useWandHidden(a.wandIceHidden, "frost", "l")
+
+  :?foe.state = 1 & ai.paused
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :
+      fight1v1()
+  :
+    fight1v1()
+
+// normal foes
 :?encounter.eliteMod = "monarch"
   ?foe.count > 1 // eliminate the other foes
     ?c.canUseBFG()
@@ -335,50 +368,17 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     ldtF("rangedDmgAOE")
 
 : // 1v1 strategy
-  ?foe = "skeleton_boss" // Pallas (note: sword can be unmade in phase1)
-    ?c.canUseCinderwisp() &
-    ^foe.debuffs.string = a.maxIgnitions_Default
-      c.useCinderwisp()
-  
-    ?c.canUsePotionDmg()
-      activate potion
-  
-    ?c.canUseBashingShield()
-      ldtF("bash")
-    :?c.canUseDashingShield()
-      ldtF("dash")
-  
-    :?c.canUseWandHidden("plague") // reduce their damage
-      c.useWandHidden(a.wandPoisonHidden, "plague", "l")
-    :?c.canUseStaffHidden("berserker") // increase our damage
-      c.useStaffHidden(a.staffPoisonHidden, "berserker")
-  
-    :?c.canUseCultistMask()
-      c.useCultistMask()
-  
-    :?c.canUseWandHidden("frost")
-      c.useWandHidden(a.wandIceHidden, "frost", "l")
-  
-    :?foe.state = 1 & ai.paused
-      ?c.canUseHeavyHammer()
-        c.useHeavyHammer(Mjölnir)
-      :
-        fight1v1()
+  ?foe ! "immune_to_physical"
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
     :
       fight1v1()
-  
-  : // normal foe
-    ?foe ! "immune_to_physical"
-      ?foe.hp + foe.armor >= a.bardicheRDmg &
-      ^c.canUseBardiche()
-        c.useBardiche(Kubikiribocho)
-      :
-        fight1v1()
+  :
+    ?c.canDebuffAny()
+      ldtF("rangedDebuffAOE")
     :
-      ?c.canDebuffAny()
-        ldtF("rangedDebuffAOE")
-      :
-        ldtF("rangedDmgAOE")
+      ldtF("rangedDmgAOE")
 
 
 
