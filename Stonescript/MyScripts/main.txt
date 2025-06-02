@@ -164,9 +164,9 @@ import MyScripts/MyCosmetics
 
   var dpsPanel
   ?dpsm.Update()
-    /*?dpsPanel
+    ?dpsPanel
       dpsPanel.Recycle()
-      dpsPanel = null*/
+      dpsPanel = null
 
     dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
 
