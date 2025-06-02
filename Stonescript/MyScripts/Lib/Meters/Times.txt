@@ -118,10 +118,14 @@ var u = new MyScripts/Lib/Utilities
 
 // ///////////////////// PUBLIC ///////////////////// //
 
+var panel = null
 func main(x, y, colorHex, isSlim, isSpeedrun, mode)
   ?mode = "ui"
     ?Update(isSpeedrun)
-      var panel
+      ?panel
+        panel.Recycle()
+        panel = null
+
       panel = mkUI(x,y,colorHex,isSlim,isSpeedrun)
 
   :?mode = "print"

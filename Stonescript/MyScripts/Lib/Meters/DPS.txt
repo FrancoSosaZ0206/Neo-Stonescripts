@@ -106,10 +106,14 @@ Have fun! */
 
 // ///////////////////// PUBLIC ///////////////////// //
 
+var panel = null
 func main(x, y, colorHex, refreshRate, isSlim, mode)
   ?mode = "ui"
     ?Update(refreshRate)
-      var panel
+      ?panel
+        panel.Recycle()
+        panel = null
+
       panel = mkUI(x,y,colorHex,isSlim)
 
   :?mode = "print"
