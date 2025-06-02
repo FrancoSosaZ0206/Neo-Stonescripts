@@ -28,9 +28,6 @@ var trueDmg
 
 var nRuns = 0
 
-var dysanToPhase3Done = false
-var dysanToPhase3Timer = -1
-
 var keepCultistMask = true
 var moondialMode = -1
 var smiteScreen = null
@@ -39,9 +36,6 @@ var resetBurstingTimer = true
 var restBursting = false
 
 ?loc.loop
-  dysanToPhase3Timer = -1
-  dysanToPhase3Done = false
-
   keepCultistMask = false
 
   resetBurstingTimer = true
@@ -126,14 +120,14 @@ func ldtF(mode)
   :?mode = "aidActive" // heal when hit
     equipL @a.hammerVigorBuff@
     equipR @a.shieldVigorBuff@
-  :?mode = "weakenActive" // weaken when hit
+  :?mode = "empowerActive" // weaken when hit
     equipL @a.swordPoisonDebuff@
     equipR @a.shieldPoisonBuff@
 
 
   :?mode = "meleeDmg"
     ?keepCultistMask
-      ?mode = "meleePoison"
+      ?mode = "meleeDmgPoison"
         equipL Mamba Negra
       :?mode = "meleeDmgVigor"
         equipL Dothaneel
@@ -144,7 +138,7 @@ func ldtF(mode)
       :?mode = "meleeDmgIce"
         equipL Bifrost
     :
-      ?mode = "meleePoison"
+      ?mode = "meleeDmgPoison"
         c.doMoondial(Mamba Negra, a.swordPoisonDmg, moondialMode)
       :?mode = "meleeDmgVigor"
         c.doMoondial(Dothaneel, a.swordVigorDmg, moondialMode)
@@ -247,7 +241,7 @@ func fight(mode)
 
       : // deal max damage
         ?mode = "melee"
-          ldtF("meleeDmg")
+          ldtF("meleeDmgFire")
         :?mode = "rangedAOE"
           ldtF("rangedAOEDmg")
   
@@ -259,10 +253,17 @@ func fight(mode)
       ?hp ! maxhp
         ldtF("meleeHeal")
 
+      :?c.canDebuffAny() & foe.buffs.string ! "buff_protection"
+        ldtF("meleeDebuff")
+
       :?foe = "poison"
         ldtF("meleeDmgIce")
       :?foe = "vigor"
-        ldtF("meleeDmgPoison")
+        ?foe.buffs.string = "buff_protection" & // against debuffs
+        ^c.canUseWandHidden("reset")
+          c.useWandHidden(a.wandVigorHidden, "reset", "l")
+        :
+          ldtF("meleeDmgPoison")
       :?foe = "aether"
         ldtF("meleeDmgVigor")
       :?foe = "fire"
@@ -283,8 +284,9 @@ func fight(mode)
         c.useCinderwisp()
 
       ?((foe.state = 115 & foe.time < 70) |
-      ^(foe.state = 32 & foe.damage = 1))
-      ^& foe.time >= 42 // putting up shield
+      ^(foe.state = 32 & foe.damage = 1)) &
+      ^foe.time >= 42 // putting up shield
+        >c0,0,SHIELD
         canDash = true
 
         ?c.canUseMindstone()
@@ -299,13 +301,14 @@ func fight(mode)
           fight("melee")
 
       :
+        >c0,0,NOT SHIELD
         canDash = false
 
         ?hp ! maxhp
           ldtF("meleeHeal")
 
         :?c.canUseHeavyHammer() & foe.armor
-          c.useHeavyHammer(a.myHeavyHammer)
+          c.useHeavyHammer(Mjölnir)
         :
           ?foe.buffs.string ! "defense_fire"
             ?c.burstingTimer < 10 & !keepCultistMask
@@ -329,6 +332,8 @@ func fight(mode)
 // /////////////////////////////////////////// //
 
 // PROCEDURE
+
+>c0,-1,#magenta,foe.damage = @foe.damage@
 
 disable npcDialog
 
@@ -404,11 +409,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     equipL triskelion
     equipR mask
 
-?c.canUsePotionDmg() & keepCultistMask
-  activate potion
-:?c.canUseStaffHidden("infernal") // speed up
-  c.useStaffHidden(a.staffFireHidden, "infernal")
-
 
 /*?c.canUseBFG_DS(smiteScreen)
   c.useBFG_DS()*/
@@ -422,16 +422,19 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :
     equipL triskelion
     c.useAetherTalisman("r")
-:?foe = "boss" &
-^c.canUseFireTalisman()
+:?c.canUseFireTalisman()
   ?keepCultistMask
     c.useFireTalisman("l")
   :
     equipL triskelion
     c.useFireTalisman("r")
 
-  equipL triskelion
-  c.useFireTalisman("r")
+
+:?c.canUsePotionDmg() & keepCultistMask
+  activate potion
+:?c.canUseStaffHidden("infernal") // speed up
+  c.useStaffHidden(a.staffFireHidden, "infernal")
+
 
 :?choice & harvest.distance < 5
   ldtF("harvest")
@@ -444,14 +447,25 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useQuarterstaff(a.myQuarterstaff)
 
 :?ai.paused |
-^(ai.idle & foe.distance > 11) | // if we're waiting
+^(ai.idle & foe.distance > c.getRange("sword")) | // if we're waiting
 ^foe.state = -1 | foe.state = 4 | // foe death states
 ^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
-^(foe.state = 107 & foe.damage = 3) | // dsangelos' flying animation
+^(foe.state = 107 & foe.damage = 1) | // dsangelos' flying animation
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
-^foe.distance > 15 // or we can't engage in a fight
-  ?armor > 29 |
+^foe.distance > u.dash_range_max // or we can't engage in a fight
+  ?!ai.walking & foe = "dysangelos" &
+  ^(c.canUseHeavyHammer() |
+  ^c.canUseBardiche() |
+  ^c.canUseStaffHidden("grasping"))
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :?c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :?c.canUseStaffHidden("grasping")
+      c.useStaffHidden(a.staffAetherHidden, "grasping")
+
+  :?armor > 29 |
   ^(foe ! "phase" & foe.distance < 40)
     ldtF("engage")
   :?14 <= armor & armor <= 29
@@ -495,15 +509,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 
 :
-  ?foe = "dysangelos" & foe.state = 108
-  ^& dysanToPhase3Timer = -1 & !keepCultistMask
-    dysanToPhase3Timer = 0
-
-  ?dysanToPhase3Timer ! -1 & dysanToPhase3Timer < 90
-    dysanToPhase3Timer++
-
-
-  :?foe = "dysangelos" & foe.state = 127 & !restBursting & !keepCultistMask // "reloading" bursting strat
+  ?foe = "dysangelos" & foe.state = 127 & !restBursting & !keepCultistMask // "reloading" bursting strat
     ?c.burstingTimer >= 10
       c.burstingTimer = 0
     : // c.burstingTimer < 10
@@ -517,35 +523,17 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         restBursting = true
 
 
-    // Dysan's phase3 transformation cutscene strat
-    ?dysanToPhase3Timer >= 0 & !dysanToPhase3Done
-      ?c.canUseBashingShield()
-        ldtF("bash")
-      :?c.canUseDashingShield()
-        ldtF("dash")
-
-      :?c.canUseBardiche()
-        c.useBardiche("Kubikiribocho")
-      :?c.canUseHeavyHammer()
-        c.useHeavyHammer(a.myHeavyHammer)
-      :
-        dysanToPhase3Done = true
-
-
   : // fighting range
     ?foe = "acronian_scout"
-      >c0,0,ACRONIAN
       ?c.canUseBashingShield()
         ldtF("bash")
       :?c.canUseDashingShield()
         ldtF("dash")
 
       :?foe.state = 32 & foe.time > 40 // about to attack
-        >c0,1,#red,ABOUT TO ATTACK
-
         ?!keepCultistMask
-          ldtF("weakenActive")
-        :?c.canUseStaffHidden("eternity")
+          ldtF("empowerActive")
+        :?loc.stars > 15 & c.canUseStaffHidden("eternity")
           c.useStaffHidden(a.staffIceHidden, "eternity")
         :
           fight("melee")
@@ -593,7 +581,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
           ?armor < trueDmg
             ldtF("aidActive")
           :
-            ldtF("weakenActive")
+            ldtF("empowerActive")
 
 
       :

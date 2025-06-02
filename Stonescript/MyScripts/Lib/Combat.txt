@@ -72,9 +72,15 @@ func getRange(weaponName)
     result += u.staff_range
 
   :?weaponName = "bardiche"
-    result += u.bardiche_ability_range
+    ?weaponName = "ability"
+      result += u.bardiche_ability_range
+    :
+      result += u.bardiche_range
   :?weaponName = "heavy hammer"
-    result += u.heavyHammer_range
+    ?weaponName = "ability"
+      result += u.heavyHammer_ability_range
+    :
+      result += u.heavyHammer_range
 
 
   ?buffs.string = "buff_range"
@@ -292,7 +298,7 @@ func canUseBashingShield()
 func canUseHeavyHammer()
   return item.GetCooldown("heavy_hammer") <= 0 &
   ^item.CanActivate() &
-  ^foe.distance <= u.heavyHammer_ability_range |
+  ^foe.distance <= getRange("heavy hammer ability") |
   ^(item.right = "heavy hammer" &
   ^item.right.state = 2)
 func useHeavyHammer(weaponName)
@@ -304,7 +310,7 @@ func useHeavyHammer(weaponName)
 func canUseBardiche()
   return item.GetCooldown("bardiche") <= 0 &
   ^item.CanActivate() &
-  ^foe.distance <= u.bardiche_ability_range |
+  ^foe.distance <= getRange("bardiche ability") |
   ^(item.right = "bardiche" &
   ^item.right.state = 2)
 func useBardiche(weaponName)

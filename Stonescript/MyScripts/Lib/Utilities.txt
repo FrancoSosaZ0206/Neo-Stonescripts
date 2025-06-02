@@ -34,12 +34,15 @@ var uimkr = new MyScripts/Lib/UI_Maker
 
 // VARIABLES
 
+
 // Units
 
 var sec = 30 // frames
 var scr = 69 // 1 screen = 69 units
 
+
 // Weapon Ranges
+
 var bardiche_range = 9
 var bardiche_ability_range = 7
 var heavyHammer_range = 7 // CHECK
