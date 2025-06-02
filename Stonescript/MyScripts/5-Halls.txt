@@ -123,10 +123,9 @@ func ldtF(mode)
       c.doMoondial(a.swordAetherDebuff, Dothaneel, moondialMode)*/
 
   :?mode = "rangedDmgAOE"
-    ?keepCultistMask
-      equipL theVwand
-    :
-      equip @a.staffVigorBuff@ // @a.bowVigorDmg@
+    equipL theVwand
+    ?!keepCultistMask
+      equipR @a.wandVigorDmg@ // the 2nd one
   :?mode = "rangedDebuffAOE"
     ?keepCultistMask
       ?c.canDebuffChill()
@@ -229,12 +228,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 ^foe.state = 32 & foe.time > 63
   >c0,0,#magenta,*** ABOUT TO ATTACK! ***
 
-  ?c.canUseMindstone()  // dash back
-    ldtF("escape")
-  :?c.canUseStaffHidden("acrobatic")
-    c.useStaffHidden(a.staffStoneHidden, "acrobatic")
-
-  :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
+  ?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
   ^foe.distance <= c.getRange("sword")
     c.useStaffHidden(a.staffIceHidden, "eternity")
 
@@ -255,7 +249,8 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 :?foe ! "skeleton_boss" & (ai.paused  |
 ^(ai.idle & foe.distance > 11) | // if we're waiting
 ^foe.state = -1 | foe.state = 4 | // foe death states
-^foe.distance > 15) // or we can't engage in a fight
+^(encounter.isElite & foe.distance > 20) |
+^(!encounter.isElite & foe.distance > 15)) // or we can't engage in a fight
   ?armor > 29 |
   ^(foe ! "phase1" & foe.distance < 40)
     ldtF("engage")
@@ -306,9 +301,9 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
         :
           ldtF("rangedDmgAOE")
 
-  :?c.canUseBashingShield()
+  :?c.canUseBashingShield() & !encounter.isElite
     ldtF("bash")
-  :?c.canUseDashingShield()
+  :?c.canUseDashingShield() & !encounter.isElite
     ldtF("dash")
 
   :?foe.name = "R.I.Pieces"

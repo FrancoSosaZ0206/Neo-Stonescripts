@@ -146,7 +146,7 @@ import MyScripts/MyCosmetics
   var smPanel = sm.mkUI(0, 1,
   ^u.colorToHex("red"), true, false)
   ?sm.Update(false)
-    >c0,-1,#magenta,UPDATING SM
+    //>c0,-1,#magenta,UPDATING SM
 
     smPanel.Recycle()
     smPanel = null
@@ -154,8 +154,8 @@ import MyScripts/MyCosmetics
     smPanel = sm.mkUI(0, 1,
     ^u.colorToHex("red"), true, false)
 
-  :
-    >c0,1,#green,NOT UPDATING SM
+  /*:
+    >c0,1,#green,NOT UPDATING SM*/
 
   /***********************************************/
 
