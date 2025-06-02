@@ -1,4 +1,4 @@
-﻿// *******************************************************
+// *******************************************************
 //                       5-Halls.txt                      
 // *******************************************************
 
@@ -146,7 +146,9 @@ func ldtF(mode)
     ?keepCultistMask
       equipL @a.wandVigorBuff@
     :
-      equip @a.staffVigorBuff@ // @a.bowVigorBuff@
+      equipL moon
+      equipR @a.wandVigorBuff@
+      // equip @a.staffVigorBuff@ // @a.bowVigorBuff@
 
   :
     >c-10,0,#red,
@@ -154,8 +156,7 @@ func ldtF(mode)
 
   return
 
-func fight1v1()
-
+func fightMelee()
   ?c.canDebuffAny() & // foe can be debuffed
   ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
     ldtF("meleeDebuff")
@@ -166,6 +167,20 @@ func fight1v1()
 
     : // deal max damage
       ldtF("meleeDmg")
+
+  return
+
+func fightRangedAOE()
+  ?c.canDebuffAny() & // foe can be debuffed
+  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+    ldtF("rangedDebuffAOE")
+
+  : // all possible debuffs applied
+    ?hp ! maxhp // heal up
+      ldtF("rangedHealAOE")
+
+    : // deal max damage
+      ldtF("rangedDmgAOE")
 
   return
 
@@ -235,10 +250,8 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
   :?foe.distance <= c.getRange("sword")  // couldn't dash, try to unmake to prevent attack
     ldtF("unmake1v1")
 
-  :?c.canDebuffAny() // could dash, fight ranged
-    ldtF("rangedDebuffAOE")
-  :
-    ldtF("rangedDmgAOE")
+  : // could dash, fight ranged
+    fightRangedAOE()
 
 
 :?ai.walking &
@@ -260,105 +273,22 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     ldtF("armorRegen")
 
 
-:?foe ! "phase"
-
-  ?encounter.eliteMod = "monarch"
-    ?foe.count > 1 // eliminate the other foes
-      ?c.canUseBFG()
-        c.useBFG()
-      :?c.canUseWandHidden("explosive")
-        c.useWandHidden(a.wandFireHidden, "explosive", "l")
-
-      :?foe.distance < 7 & // if too close, try to escape
-      ^(c.canUseMindstone() |
-      ^c.canUseStaffHidden("acrobatic"))
-        ?c.canUseMindstone()
-          ldtF("escape")
-        :
-          c.useStaffHidden(a.staffStoneHidden, "acrobatic")
-
-      :?c.canUseHeavyHammer() // if close, use hammer
-        c.useHeavyHammer(Mjölnir)
-      :?c.canDebuffAny()
-        ldtF("rangedDebuffAOE")
-      :
-        ldtF("rangedDmgAOE")
-
-    :?c.canUseBashingShield()
-      ldtF("bash")
-    :?c.canUseDashingShield()
-      ldtF("dash")
-
-    : // 1v1 with the monarch
-      ?foe.hp + foe.armor >= a.bardicheRDmg &
-      ^c.canUseBardiche()
-        c.useBardiche(Kubikiribocho)
-      :?foe ! "immune_to_physical"
-        fight1v1()
-      :
-        ?c.canDebuffAny()
-          ldtF("rangedDebuffAOE")
-        :
-          ldtF("rangedDmgAOE")
-
-  :?c.canUseBashingShield() & !encounter.isElite
-    ldtF("bash")
-  :?c.canUseDashingShield() & !encounter.isElite
-    ldtF("dash")
-
-  :?foe.name = "R.I.Pieces"
-    fight1v1()
-
-  :?foe.count > 1 // AOE strategy
-    ?!(screen.i = smiteScreen |
-    ^screen.i = smiteScreen + 1)
-      ?c.canUseVoidweaver() & !encounter.isElite
-        c.useVoidweaver()
-
-      :?encounter.eliteMod ! "tenacious" &
-      ^c.canUseWandHidden("gravity")
-        c.useWandHidden(a.wandStoneHidden, "gravity", "l")
-
-
-    // Hinder regen
-    ?encounter.eliteMod = "regen" &
-    ^c.canUseWandHidden("explosive")
-      c.useWandHidden(a.wandFireHidden, "explosive", "l")
-
-    // Remove armor
-    :?encounter.eliteMod = "plated" &
-    ^c.canUseHeavyHammer()
-      c.useHeavyHammer(Mjölnir)
-
-    :?c.canDebuffAny() &
-    ^encounter.eliteMod ! "tenacious"
-      ldtF("rangedDebuffAOE")
-    :
-      ldtF("rangedDmgAOE")
-
-  : // 1v1 strategy
-    ?foe ! "immune_to_physical"
-      ?foe.hp + foe.armor >= a.bardicheRDmg &
-      ^c.canUseBardiche()
-        c.useBardiche(Kubikiribocho)
-      :
-        fight1v1()
-    :
-      ?c.canDebuffAny()
-        ldtF("rangedDebuffAOE")
-      :
-        ldtF("rangedDmgAOE")
-
-
-: // Pallas (skeleton_boss) (note: sword can be unmade in phase1)
+:?foe = "skeleton_boss" // Pallas (note: sword can be unmade in phase1)
   ?c.canUseCinderwisp() &
   ^foe.debuffs.string = a.maxIgnitions_Default
     c.useCinderwisp()
-
   ?c.canUsePotionDmg()
     activate potion
 
-  ?c.canUseBashingShield()
+  ?foe = "phase2" & foe.count > 1
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :?c.canUseWandHidden("explosive")
+      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+    :
+      fightRangedAOE()
+
+  :?c.canUseBashingShield()
     ldtF("bash")
   :?c.canUseDashingShield()
     ldtF("dash")
@@ -367,20 +297,91 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     c.useWandHidden(a.wandPoisonHidden, "plague", "l")
   :?c.canUseStaffHidden("berserker") // increase our damage
     c.useStaffHidden(a.staffPoisonHidden, "berserker")
-
   :?c.canUseCultistMask()
     c.useCultistMask()
-
   :?c.canUseWandHidden("frost")
     c.useWandHidden(a.wandIceHidden, "frost", "l")
+ 
+  :
+    fightMelee()
 
-  :?foe.state = 1 & ai.paused
-    ?c.canUseHeavyHammer()
+
+// normal foes
+:?encounter.eliteMod = "monarch"
+  ?foe.count > 1 // eliminate the other foes
+    ?c.canUseBFG()
+      c.useBFG()
+    :?c.canUseWandHidden("explosive")
+      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+
+    :?foe.distance < 7 & // if too close, try to escape
+    ^(c.canUseMindstone() |
+    ^c.canUseStaffHidden("acrobatic"))
+      ?c.canUseMindstone()
+        ldtF("escape")
+      :
+        c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+    :?c.canUseHeavyHammer() // if close, use hammer
       c.useHeavyHammer(Mjölnir)
     :
-      fight1v1()
+      fightRangedAOE()
+
+  :?c.canUseBashingShield()
+    ldtF("bash")
+  :?c.canUseDashingShield()
+    ldtF("dash")
+
+  : // 1v1 with the monarch
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :?foe ! "immune_to_physical"
+      fightMelee()
+    :
+      fightRangedAOE()
+
+:?c.canUseBashingShield() & !encounter.isElite
+  ldtF("bash")
+:?c.canUseDashingShield() & !encounter.isElite
+  ldtF("dash")
+
+:?foe.name = "R.I.Pieces"
+  fightMelee()
+
+:?foe.count > 1 // AOE strategy
+  ?!(screen.i = smiteScreen |
+  ^screen.i = smiteScreen + 1)
+    ?c.canUseVoidweaver() & !encounter.isElite
+      c.useVoidweaver()
+
+    :?encounter.eliteMod ! "tenacious" &
+    ^c.canUseWandHidden("gravity")
+      c.useWandHidden(a.wandStoneHidden, "gravity", "l")
+
+
+  // Hinder regen
+  ?encounter.eliteMod = "regen" &
+  ^c.canUseWandHidden("explosive")
+    c.useWandHidden(a.wandFireHidden, "explosive", "l")
+
+  // Remove armor
+  :?encounter.eliteMod = "plated" &
+  ^c.canUseHeavyHammer()
+    c.useHeavyHammer(Mjölnir)
+
   :
-    fight1v1()
+    fightRangedAOE()
+
+: // 1v1 strategy
+  ?foe ! "immune_to_physical"
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fightMelee()
+  :
+    fightRangedAOE()
 
 
 
