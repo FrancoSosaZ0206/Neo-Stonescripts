@@ -394,30 +394,17 @@ weaponName: the special name or the element of
 **********************************************
 Examples: "gravity", "fire". */
 func useWandHidden(weapon, weaponName, hand)
-  var internalName
-  var isOk = true // only set to false if weaponName is incorrect
-
-  ?weaponName = "gravity" | weaponName = "stone"
-    internalName = "wand_stone"
-  :?weaponName = "plague" | weaponName = "poison"
-    internalName = "wand_poison"
-  :?weaponName = "reset" | weaponName = "vigor"
-    internalName = "wand_vigor"
-  :?weaponName = "calamity" | weaponName = "aether"
-    internalName = "wand_aether"
-  :?weaponName = "explosive" | weaponName = "fire"
-    internalName = "wand_fire"
-  :?weaponName = "frost" | weaponName = "ice"
-    internalName = "wand_ice"
-  :
-    isOk = false
-
-  ?isOk
+  ?weaponName = "gravity" | weaponName = "stone" |
+  ^weaponName = "plague" | weaponName = "poison" |
+  ^weaponName = "reset" | weaponName = "vigor" |
+  ^weaponName = "calamity" | weaponName = "aether" |
+  ^weaponName = "explosive" | weaponName = "fire" |
+  ^weaponName = "frost" | weaponName = "ice"
     ?hand = "l" | hand = "left"
-      equipL @weaponName@
+      equipL @weapon@
       activate L
     :?hand = "r" | hand = "right"
-      equipR @weaponName@
+      equipR @weapon@
       activate R
 
   :

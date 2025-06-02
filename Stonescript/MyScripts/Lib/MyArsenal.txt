@@ -62,9 +62,9 @@ var bowPoisonDmg = "bow poison *max -dP"
 var bowPoisonDebuff = "bow poison *max dP"
 var wandPoisonDmg = "wand poison *max -dP -hidden"
 var wandPoisonDebuff = "wand poison *max dP -hidden"
-var wandPoisonHidden = "wand_hidden_poison *max" // aka Plague Wand
+var wandPoisonHidden = "wand poison hidden *max" // aka Plague Wand
 var staffPoisonDebuff = "staff poison *max dP -hidden"
-var staffPoisonHidden = "staff_hidden_poison *max" // aka Berserker Staff
+var staffPoisonHidden = "staff poison hidden *max" // aka Berserker Staff
 
 //vigor:
 var swordVigorDmg = "sword vigor *max -dL Spring24"
@@ -75,9 +75,9 @@ var bowVigorBuff = "bow vigor *max dL"
 var bowVigorDmg = "bow vigor *max -dL"
 var wandVigorBuff = "wand vigor *max dL -hidden"
 var wandVigorDmg = "wand vigor *max -dL -hidden" // 2nd one
-var wandVigorHidden = "wand_hidden_vigor *max" // aka Reset Wand
+var wandVigorHidden = "wand vigor hidden *max" // aka Reset Wand
 var staffVigorBuff = "staff vigor *max dL -hidden"
-var staffVigorHidden = "staff_hidden_vigor *max" // aka Prevention Staff
+var staffVigorHidden = "staff vigor hidden *max" // aka Prevention Staff
 
 //aether:
 var swordAetherDmg = "sword aether -dU *max"
@@ -87,9 +87,9 @@ var shieldAetherDefense = "shield aether *max -au"
 var shieldAetherDebuff = "shield aether *max au"
 var bowAetherDmg = "crossbow aether *max D"
 var wandAetherDebuff = "wand aether *max dU -hidden"
-var wandAetherHidden = "wand_hidden_aether *max" // aka Calamity Wand
+var wandAetherHidden = "wand aether hidden *max" // aka Calamity Wand
 var staffAetherDebuff = "staff aether *max dU -hidden"
-var staffAetherHidden = "staff_hidden_aether *max" // aka Grasping Staff
+var staffAetherHidden = "staff aether hidden *max" // aka Grasping Staff
 
 //fire:
 var swordFireDebuff = "sword fire *max dF"
@@ -100,9 +100,9 @@ var bowFireDmg = "crossbow fire *max -dF"
 var bowFireDebuff = "crossbow fire *max dF"
 var wandFireDmg = "wand fire *max -dF -hidden"
 var wandFireDebuff = "wand fire *max dF -hidden"
-var wandFireHidden = "wand_hidden_fire *max" // aka Explosive Wand
+var wandFireHidden = "wand fire hidden *max" // aka Explosive Wand
 var staffFireDebuff = "staff fire *max dF -hidden"
-var staffFireHidden = "staff_hidden_fire *max" // aka Infernal Staff
+var staffFireHidden = "staff fire hidden *max" // aka Infernal Staff
 
 //ice:
 var swordIceDebuff = "sword ice *max dI"
@@ -113,16 +113,16 @@ var hammerIceDefense = "hammer ice *max aI"
 var bowIceDmg = "crossbow ice *max D"
 var wandIceDmg = "wand ice *max -dI -hidden"
 var wandIceDebuff = "wand ice *max dI +15 -hidden"
-var wandIceHidden = "wand_hidden_ice *max" // aka Frost Wand
+var wandIceHidden = "wand ice hidden *max" // aka Frost Wand
 var staffIceDebuff = "staff ice *max dI -hidden"
-var staffIceHidden = "staff_hidden_ice *max" // aka Eternity Staff
+var staffIceHidden = "staff ice hidden *max" // aka Eternity Staff
 
 //stone:
 var bowStone = "crossbow stone *max"
 var swordStone1 = "sword stone *max +4"
 var swordStone2 = "sword stone *max +3"
-var wandStoneHidden = "wand_hidden_stone *max" // aka Gravity Wand
-var staffStoneHidden = "staff_hidden_stone *max" //aka Acrobatic Staff
+var wandStoneHidden = "wand stone hidden *max" // aka Gravity Wand
+var staffStoneHidden = "staff stone hidden *max" //aka Acrobatic Staff
 
 //alternate:
 var bowAlternate = "crossbow *max golden"

@@ -128,8 +128,8 @@ func Update(isSpeedrun)
   ttSpeedrun = u.formatSpeedrun(totaltime)
 
   ?loc.loop
-    pb = u.myFormatDigital(loc.bestTime)
-    avg = u.myFormatDigital(loc.averageTime)
+    pb = u.myFormatDigital(loc.bestTime) // update pb
+    avg = u.myFormatDigital(loc.averageTime) // update avg
 
     pbSpeedrun = u.formatSpeedrun(loc.bestTime)
     avgSpeedrun = u.formatSpeedrun(loc.averageTime)

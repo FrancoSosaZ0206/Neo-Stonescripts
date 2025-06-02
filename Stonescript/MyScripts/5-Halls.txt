@@ -27,11 +27,16 @@ var som = new MyScripts/Lib/Speed_O_Meter
 var somPanel = som.mkUI(0, 1,
 ^u.colorToHex("red"), true, false)
 ?som.Update(false)
+  >c0,-1,#magenta,UPDATING SOM
+
   somPanel.Recycle()
   somPanel = null
 
   somPanel = som.mkUI(0, 1,
   ^u.colorToHex("red"), true, false)
+
+:
+  >c0,1,#green,NOT UPDATING SOM
 
 /***********************************************/
 
@@ -259,15 +264,14 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 :?pickup.distance < 15
   ldtF("magnet")
 
-// ABOUT TO ATTACK -- ADAPT TO THIS LOCATION
-/* :?foe.distance < 11 & foe = "skeleton" &
-^((foe.state =  & foe.time > ) | foe.state = 2)
-  >c0,0,#red,*** ABOUT TO ATTACK! ***
+// ABOUT TO ATTACK
+:?foe = "skeleton" & // & foe = "boss"
+^foe.state = 32 & foe.time > 63
+  >c0,0,#magenta,*** ABOUT TO ATTACK! ***
 
   ?c.canUseMindstone()  // dash back
     ldtF("escape")
-  :?c.canUseStaffHidden("acrobatic") &
-  ^foe.distance <= c.getRange("sword")
+  :?c.canUseStaffHidden("acrobatic")
     c.useStaffHidden(a.staffStoneHidden, "acrobatic")
 
   :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
@@ -281,7 +285,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     ldtF("rangedDebuffAOE")
   :
     ldtF("rangedDmgAOE")
-*/
+
 
 :?ai.walking &
 ^(foe.distance < 11 | foe.distance > 15) &
@@ -393,6 +397,8 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 
 
 : // Pallas (note: sword can be unmade in phase1)
+  u.showBigStr(1,15,40, "pallas=" + foe, "cyan", false)
+
   ?c.canUseCinderwisp() &
   ^foe.debuffs.string = a.maxIgnitions_Default
     c.useCinderwisp()
@@ -406,7 +412,6 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     ldtF("dash")
 
   :?c.canUseWandHidden("plague") // reduce their damage
-    >c0,0,#magenta,USING PLAGUE WAND
     c.useWandHidden(a.wandPoisonHidden, "plague", "l")
   :?c.canUseStaffHidden("berserker") // increase our damage
     c.useStaffHidden(a.staffPoisonHidden, "berserker")
@@ -415,11 +420,9 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     c.useCultistMask()
 
   :?c.canUseWandHidden("frost")
+    >c0,0,#cyan,USING FROST WAND
     c.useWandHidden(a.wandIceHidden, "frost", "l")
 
-  :?c.canUseBardiche() & keepCultistMask
-    c.useBardiche(Kubikiribocho)
-  
   :
     fight1v1()
 
