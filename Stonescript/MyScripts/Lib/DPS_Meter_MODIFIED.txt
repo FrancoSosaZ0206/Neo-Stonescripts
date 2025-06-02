@@ -96,12 +96,8 @@ v2.0.0:
 Have fun! */
 
 
-// IMPORTS
 
-var p
-p = import MyScripts/Lib/Performance
-
-
+// /////////////////////////////////////////// //
 
 // GLOBAL VARIABLES
 
@@ -109,6 +105,8 @@ var ENABLED = false
 var refreshRate = 1 // meter's refresh rate (in frames) (1 = always refresh)
 
 
+
+// /////////////////////////////////////////// //
 
 // PRIVATE VARIABLES
 
@@ -130,8 +128,7 @@ var DPS = "N/A" // damage per second
 
 
 
-// PROCEDURE
-
+// /////////////////////////////////////////// //
 
 // PUBLIC FUNCTIONS
 

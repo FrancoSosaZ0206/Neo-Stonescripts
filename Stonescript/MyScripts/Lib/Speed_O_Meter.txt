@@ -99,12 +99,16 @@ Enjoy! */
 
 
 
+// /////////////////////////////////////////// //
+
 // IMPORTS:
 
 var uimkr = new MyScripts/Lib/UI_Maker
 var u = new MyScripts/Lib/Utilities
 
 
+
+// /////////////////////////////////////////// //
 
 // VARIABLES:
 
@@ -118,6 +122,9 @@ var ttSpeedrun = u.formatSpeedrun(totaltime)
 var pbSpeedrun = u.formatSpeedrun(loc.bestTime)
 var avgSpeedrun = u.formatSpeedrun(loc.averageTime)
 
+
+
+// /////////////////////////////////////////// //
 
 // PUBLIC FUNCTIONS
 

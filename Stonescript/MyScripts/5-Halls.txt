@@ -10,50 +10,10 @@
 
 // IMPORTS
 
-var uimkr = new MyScripts/Lib/UI_Maker
 var u = new MyScripts/Lib/Utilities
 var a = new MyScripts/Lib/MyArsenal
 var i = new MyScripts/Lib/MyBetterInfo
 var c = new MyScripts/Lib/Combat
-
-/***********************************************/
-
-import UI/FoeStateTracker
-
-/***********************************************/
-
-var som = new MyScripts/Lib/Speed_O_Meter
-
-var somPanel = som.mkUI(0, 1,
-^u.colorToHex("red"), true, false)
-?som.Update(false)
-  >c0,-1,#magenta,UPDATING SOM
-
-  somPanel.Recycle()
-  somPanel = null
-
-  somPanel = som.mkUI(0, 1,
-  ^u.colorToHex("red"), true, false)
-
-:
-  >c0,1,#green,NOT UPDATING SOM
-
-/***********************************************/
-
-var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
-
-dpsm.ENABLED = true
-dpsm.refreshRate = 30
-
-var dpsPanel
-?dpsm.Update()
-  ?dpsPanel
-    dpsPanel.Recycle()
-    dpsPanel = null
-
-  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
-
-/***********************************************/
 
 
 
@@ -265,7 +225,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
   ldtF("magnet")
 
 // ABOUT TO ATTACK
-:?foe = "skeleton" & // & foe = "boss"
+:?foe = "skeleton_boss" & // & foe = "boss"
 ^foe.state = 32 & foe.time > 63
   >c0,0,#magenta,*** ABOUT TO ATTACK! ***
 
@@ -292,10 +252,10 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 
-:?ai.paused |
+:?foe ! "skeleton_boss" & (ai.paused  |
 ^(ai.idle & foe.distance > 11) | // if we're waiting
 ^foe.state = -1 | foe.state = 4 | // foe death states
-^foe.distance > 15 // or we can't engage in a fight
+^foe.distance > 15) // or we can't engage in a fight
   ?armor > 29 |
   ^(foe ! "phase1" & foe.distance < 40)
     ldtF("engage")
@@ -355,21 +315,20 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     fight1v1()
 
   :?foe.count > 1 // AOE strategy
-    ?c.canUseVoidweaver() & 
-    ^!encounter.isElite & !(
-    ^screen.i = smiteScreen |
+    ?!(screen.i = smiteScreen |
     ^screen.i = smiteScreen + 1)
-      c.useVoidweaver()
+      ?c.canUseVoidweaver() & !encounter.isElite
+        c.useVoidweaver()
 
-    ?encounter.isElite &
-    ^encounter.eliteMod ! "tenacious" &
-    ^c.canUseWandGravity()
-      c.useWandGravity(a.wandStoneHidden, "l")
+      :?encounter.eliteMod ! "tenacious" &
+      ^c.canUseWandHidden("gravity")
+        c.useWandHidden(a.wandStoneHidden, "gravity", "l")
+
 
     // Hinder regen
     ?encounter.eliteMod = "regen" &
-    ^c.canUseWandExplosive()
-      c.useWandExplosive(a.wandFireHidden, "l")
+    ^c.canUseWandHidden("explosive")
+      c.useWandHidden(a.wandFireHidden, "explosive", "l")
 
     // Remove armor
     :?encounter.eliteMod = "plated" &
@@ -396,9 +355,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
         ldtF("rangedDmgAOE")
 
 
-: // Pallas (note: sword can be unmade in phase1)
-  u.showBigStr(1,15,40, "pallas=" + foe, "cyan", false)
-
+: // Pallas (skeleton_boss) (note: sword can be unmade in phase1)
   ?c.canUseCinderwisp() &
   ^foe.debuffs.string = a.maxIgnitions_Default
     c.useCinderwisp()
@@ -420,9 +377,13 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     c.useCultistMask()
 
   :?c.canUseWandHidden("frost")
-    >c0,0,#cyan,USING FROST WAND
     c.useWandHidden(a.wandIceHidden, "frost", "l")
 
+  :?foe.state = 1 & ai.paused
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :
+      fight1v1()
   :
     fight1v1()
 

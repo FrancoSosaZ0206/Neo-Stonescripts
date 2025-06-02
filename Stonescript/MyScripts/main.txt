@@ -134,25 +134,63 @@ import MyScripts/MyCosmetics
 :?loc = "undead_crypt_intro" // Haunted Gate
   import MyScripts/Gate
 
-:?loc.stars >= 15 & loc = "rocky_plateau"
-    import MyScripts/Green/1-Rocky
 :
-  ?loc = "rocky_plateau"
-    import MyScripts/1-Rocky
-  :?loc = "deadwood_valley"
-    import MyScripts/2-Deadwood
-  :?loc = "caustic_caves"
-    import MyScripts/3-Caves
-  :?loc = "fungus_forest"
-    import MyScripts/4-Mushroom
-  :?loc = "undead_crypt"
-    import MyScripts/5-Halls
-  :?loc = "bronze_mine"
-    import MyScripts/6-Mine
-  :?loc = "icy_ridge"
-    import MyScripts/7-Ridge
-  :?loc = "temple"
-    import MyScripts/8-Temple
+  import UI/FoeStateTracker
+  var uimkr = new MyScripts/Lib/UI_Maker
+  var u = new MyScripts/Lib/Utilities
+  var sm = new MyScripts/Lib/Speed_O_Meter
+  var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
+
+  /***********************************************/
+
+  var smPanel = sm.mkUI(0, 1,
+  ^u.colorToHex("red"), true, false)
+  ?sm.Update(false)
+    >c0,-1,#magenta,UPDATING SM
+
+    smPanel.Recycle()
+    smPanel = null
+
+    smPanel = sm.mkUI(0, 1,
+    ^u.colorToHex("red"), true, false)
+
+  :
+    >c0,1,#green,NOT UPDATING SM
+
+  /***********************************************/
+
+  dpsm.ENABLED = true
+  dpsm.refreshRate = 7
+
+  var dpsPanel
+  ?dpsm.Update()
+    ?dpsPanel
+      dpsPanel.Recycle()
+      dpsPanel = null
+
+    dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+
+  /***********************************************/
+
+  ?loc.stars >= 15 & loc = "rocky_plateau"
+    import MyScripts/Green/1-Rocky
+  :
+    ?loc = "rocky_plateau"
+      import MyScripts/1-Rocky
+    :?loc = "deadwood_valley"
+      import MyScripts/2-Deadwood
+    :?loc = "caustic_caves"
+      import MyScripts/3-Caves
+    :?loc = "fungus_forest"
+      import MyScripts/4-Mushroom
+    :?loc = "undead_crypt"
+      import MyScripts/5-Halls
+    :?loc = "bronze_mine"
+      import MyScripts/6-Mine
+    :?loc = "icy_ridge"
+      import MyScripts/7-Ridge
+    :?loc = "temple"
+      import MyScripts/8-Temple
 
 
 

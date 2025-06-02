@@ -437,7 +437,7 @@ func canUseStaffHidden(weaponName)
     requiredArmor = u.staffVigorArmor
   :?weaponName = "grasping" | weaponName = "aether"
     internalName = "staff_aether"
-    requiredArmor = u.staffArmor
+    requiredArmor = u.staffAetherArmor
   :?weaponName = "infernal" | weaponName = "fire"
     internalName = "staff_fire"
     requiredArmor = u.staffFireArmor
