@@ -202,12 +202,6 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     equipL triskelion
     equipR mask
 
-?c.canUsePotionDmg() & keepCultistMask
-  activate potion
-
-:?c.canUseStaffHidden("infernal")
-  c.useStaffHidden(a.staffFireHidden, "infernal")
-
 
 ?c.canUseBFG_DS(smiteScreen)
   c.useBFG_DS()
@@ -229,6 +223,10 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     equipL triskelion
     c.useFireTalisman("r")
 
+:?c.canUsePotionDmg() & keepCultistMask
+  activate potion
+:?c.canUseStaffHidden("infernal")
+  c.useStaffHidden(a.staffFireHidden, "infernal")
 
 :?pickup.distance < 15
   ldtF("magnet")

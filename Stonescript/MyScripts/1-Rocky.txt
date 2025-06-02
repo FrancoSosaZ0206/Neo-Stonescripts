@@ -306,6 +306,8 @@ func fight(mode)
 
         ?hp ! maxhp
           ldtF("meleeHeal")
+        :?c.canDebuffAny()
+          ldtF("meleeDebuff")
 
         :?c.canUseHeavyHammer() & foe.armor
           c.useHeavyHammer(Mjölnir)
@@ -333,7 +335,8 @@ func fight(mode)
 
 // PROCEDURE
 
->c0,-1,#magenta,foe.damage = @foe.damage@
+>c0,-1,#magenta,foe damage = @foe.damage@\n
+^foe distance = @foe.distance@\n
 
 disable npcDialog
 
@@ -422,7 +425,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :
     equipL triskelion
     c.useAetherTalisman("r")
-:?c.canUseFireTalisman()
+:?(foe = "boss" & loc.stars <= 15) |
+^c.canUseFireTalisman()
   ?keepCultistMask
     c.useFireTalisman("l")
   :
@@ -450,20 +454,21 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(ai.idle & foe.distance > c.getRange("sword")) | // if we're waiting
 ^foe.state = -1 | foe.state = 4 | // foe death states
 ^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
-^(foe.state = 107 & foe.damage = 1) | // dsangelos' flying animation
+//^(foe.state = 107 & foe.damage = 1) | // dsangelos' flying animation
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > u.dash_range_max // or we can't engage in a fight
   ?!ai.walking & foe = "dysangelos" &
-  ^(c.canUseHeavyHammer() |
-  ^c.canUseBardiche() |
-  ^c.canUseStaffHidden("grasping"))
+  ^(c.canUseHeavyHammer() | c.canUseBardiche() |
+  ^(foe.distance <= u.bardiche_ability_range + u.grasping_buff
+  ^& c.canUseStaffHidden("grasping")))
     ?c.canUseHeavyHammer()
       c.useHeavyHammer(Mjölnir)
-    :?c.canUseBardiche()
-      c.useBardiche(Kubikiribocho)
+    
     :?c.canUseStaffHidden("grasping")
       c.useStaffHidden(a.staffAetherHidden, "grasping")
+    :?c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
 
   :?armor > 29 |
   ^(foe ! "phase" & foe.distance < 40)
