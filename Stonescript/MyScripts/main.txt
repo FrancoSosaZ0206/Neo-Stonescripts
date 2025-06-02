@@ -148,8 +148,8 @@ import MyScripts/MyCosmetics
   ?sm.Update(false)
     //>c0,-1,#magenta,UPDATING SM
 
-    smPanel.Recycle()
-    smPanel = null
+    // smPanel.Recycle()
+    // smPanel = null
 
     smPanel = sm.mkUI(0, 1,
     ^u.colorToHex("red"), true, false)
@@ -164,9 +164,9 @@ import MyScripts/MyCosmetics
 
   var dpsPanel
   ?dpsm.Update()
-    ?dpsPanel
+    /*?dpsPanel
       dpsPanel.Recycle()
-      dpsPanel = null
+      dpsPanel = null*/
 
     dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
 
