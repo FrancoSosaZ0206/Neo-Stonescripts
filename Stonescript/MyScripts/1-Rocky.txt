@@ -10,6 +10,7 @@
 
 // IMPORTS
 
+var uimkr = new MyScripts/Lib/UI_Maker
 var u = new MyScripts/Lib/Utilities
 var a = new MyScripts/Lib/MyArsenal
 var i = new MyScripts/Lib/MyBetterInfo
@@ -274,9 +275,8 @@ func fight(mode)
         activate potion
       :?c.canUseCultistMask()
         c.useCultistMask()
-      :?c.canUseStaffBerserker()
-        equip @a.staffPoisonHidden@
-        activate R
+      :?c.canUseStaffHidden("berserker")
+        c.useStaffHidden(a.staffPoisonHidden, "berserker")
 
       ?c.canUseCinderwisp() &
       ^foe.debuffs.string = a.maxIgnitions_Default
@@ -389,6 +389,10 @@ var dontShowAgain = false
 
 c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
+// Auto Brewing
+?c.canBrewPotion("lucky")
+  c.brewPotion("lucky")
+
 ?loc.begin // initial equipment
   equipL triskelion
   equipR @a.shieldCompound1@
@@ -402,8 +406,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 ?c.canUsePotionDmg() & keepCultistMask
   activate potion
-:?c.canUseStaffHidden("infernal") & // speed up
-^screen.i ! 4 & foe.state ! -1
+:?c.canUseStaffHidden("infernal") // speed up
   c.useStaffHidden(a.staffFireHidden, "infernal")
 
 
@@ -503,7 +506,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?foe = "dysangelos" & foe.state = 127 & !restBursting & !keepCultistMask // "reloading" bursting strat
     ?c.burstingTimer >= 10
       c.burstingTimer = 0
-
     : // c.burstingTimer < 10
       c.doBursting("Vantum Phoenix"  , a.swordFireDmg,
       ^            "Bifrost"         , a.swordIceDmg,
@@ -514,37 +516,37 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ?c.burstingTimer = 9
         restBursting = true
 
-  
-    ?dysanToPhase3Timer >= 0 & !dysanToPhase3Done // Dysan's phase3 transformation cutscene strat
 
-    ?c.canUseQuarterstaff()
-      c.useQuarterstaff(a.myQuarterstaff)
+    // Dysan's phase3 transformation cutscene strat
+    ?dysanToPhase3Timer >= 0 & !dysanToPhase3Done
+      ?c.canUseBashingShield()
+        ldtF("bash")
+      :?c.canUseDashingShield()
+        ldtF("dash")
 
-    :?c.canUseBashingShield()
-      c.useBashingShield(a.swordVigorBuff)
-    :?c.canUseDashingShield()
-      c.useDashingShield(a.swordVigorBuff, a.shieldDashing)
-
-    :?c.canUseBardiche()
-      c.useBardiche("Kubikiribocho")
-    :?c.canUseHeavyHammer()
-      c.useHeavyHammer(a.myHeavyHammer)
-    :
-      dysanToPhase3Done = true
+      :?c.canUseBardiche()
+        c.useBardiche("Kubikiribocho")
+      :?c.canUseHeavyHammer()
+        c.useHeavyHammer(a.myHeavyHammer)
+      :
+        dysanToPhase3Done = true
 
 
   : // fighting range
     ?foe = "acronian_scout"
+      >c0,0,ACRONIAN
       ?c.canUseBashingShield()
-        c.useBashingShield("Vantum Phoenix")
-      ?c.canUseDashingShield()
-        c.useDashingShield("Vantum Phoenix", a.shieldDashing)
+        ldtF("bash")
+      :?c.canUseDashingShield()
+        ldtF("dash")
 
-      :?foe.state = 32 & foe.time > 40
+      :?foe.state = 32 & foe.time > 40 // about to attack
+        >c0,1,#red,ABOUT TO ATTACK
+
         ?!keepCultistMask
           ldtF("weakenActive")
         :?c.canUseStaffHidden("eternity")
-          c.useStaffHidden("eternity")
+          c.useStaffHidden(a.staffIceHidden, "eternity")
         :
           fight("melee")
 
@@ -557,8 +559,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
       :
         fight("melee")
-
-
 
     :?foe = "dysangelos"
 
@@ -577,10 +577,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         resetBurstingTimer = false
 
       ?c.canUseBashingShield() & !canDash
-        c.useBashingShield("Vantum Phoenix")
+        ldtF("bash")
       :?c.canUseDashingShield() & !canDash
-        c.useDashingShield("Vantum Phoenix", a.shieldDashing)
-
+        ldtF("dash")
 
       :?foe.state = 32 & (
       ^(foe = "phase1" &
