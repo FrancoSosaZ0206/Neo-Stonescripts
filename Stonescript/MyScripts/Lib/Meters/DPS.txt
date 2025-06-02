@@ -108,7 +108,7 @@ Have fun! */
 
 func main(x, y, colorHex, refreshRate, isSlim, mode)
   ?mode = "ui"
-    ?Update(isSpeedrun)
+    ?Update(refreshRate)
       var panel
       panel = mkUI(x,y,colorHex,isSlim)
 
