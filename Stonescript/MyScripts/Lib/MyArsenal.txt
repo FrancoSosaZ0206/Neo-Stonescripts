@@ -85,7 +85,7 @@ var swordAetherDebuff = "sword aether dU *max -big golden"
 var bigSwordAetherDebuff = "big sword aether *max dU golden"
 var shieldAetherDefense = "shield aether *max -au"
 var shieldAetherDebuff = "shield aether *max au"
-var bowAetherDmg = "crossbow aether *max D"
+var bowAetherDmg = "bow aether *max D"
 var wandAetherDebuff = "wand aether *max dU -hidden"
 var wandAetherHidden = "wand aether hidden *max" // aka Calamity Wand
 var staffAetherDebuff = "staff aether *max dU -hidden"
@@ -96,8 +96,8 @@ var swordFireDebuff = "sword fire *max dF"
 var swordFireDmg = "sword fire *max -dF"
 var shieldFireDefense = "shield fire *max A"
 var hammerFireDefense = "shield fire *max aF"
-var bowFireDmg = "crossbow fire *max -dF"
-var bowFireDebuff = "crossbow fire *max dF"
+var bowFireDmg = "bow fire *max -dF"
+var bowFireDebuff = "bow fire *max dF"
 var wandFireDmg = "wand fire *max -dF -hidden"
 var wandFireDebuff = "wand fire *max dF -hidden"
 var wandFireHidden = "wand fire hidden *max" // aka Explosive Wand
@@ -110,7 +110,7 @@ var swordIceDmg = "sword ice *max -dI"
 var shieldIceDefense = "shield ice *max -ai"
 var shieldIceDebuff = "shield ice *max ai"
 var hammerIceDefense = "hammer ice *max aI"
-var bowIceDmg = "crossbow ice *max D"
+var bowIceDmg = "bow ice *max D"
 var wandIceDmg = "wand ice *max -dI -hidden"
 var wandIceDebuff = "wand ice *max dI +15 -hidden"
 var wandIceHidden = "wand ice hidden *max" // aka Frost Wand
@@ -118,20 +118,20 @@ var staffIceDebuff = "staff ice *max dI -hidden"
 var staffIceHidden = "staff ice hidden *max" // aka Eternity Staff
 
 //stone:
-var bowStone = "crossbow stone *max"
+var bowStone = "bow stone *max"
 var swordStone1 = "sword stone *max +4"
 var swordStone2 = "sword stone *max +3"
 var wandStoneHidden = "wand stone hidden *max" // aka Gravity Wand
 var staffStoneHidden = "staff stone hidden *max" //aka Acrobatic Staff
 
 //alternate:
-var bowAlternate = "crossbow *max golden"
+var bowAlternate = "bow *max golden"
 
 //special weapons:
 var shieldDashing = "shield dashing *max HoH24"
 var myQuarterstaff = "quarterstaff *max glitched"
 var fastBardiche = "bardiche *max" // enchanted: speed
-var bowRepeating = "crossbow repeating *max golden"
+var bowRepeating = "bow repeating *max golden"
 var shieldCompound1 = "shield compound *max shiny"
 var shieldCompound2 = "shield compound *max -shiny"
 var shieldTowering = "shield towering *max golden"

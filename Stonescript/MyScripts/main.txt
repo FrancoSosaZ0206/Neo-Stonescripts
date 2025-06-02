@@ -151,7 +151,7 @@ import MyScripts/MyCosmetics
 
   /***********************************************/
 
-  ?loc.stars >= 15 & loc = "rocky_plateau"
+  ?loc.stars > 15 & loc = "rocky_plateau"
     import MyScripts/Green/1-Rocky
   :
     ?loc = "rocky_plateau"

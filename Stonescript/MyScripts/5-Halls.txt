@@ -236,13 +236,12 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 // ABOUT TO ATTACK
 :?foe = "skeleton_boss" & // & foe = "boss"
 ^foe.state = 32 & foe.time > 63
-  >c0,0,#magenta,*** ABOUT TO ATTACK! ***
-
   ?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
   ^foe.distance <= c.getRange("sword")
     c.useStaffHidden(a.staffIceHidden, "eternity")
 
   :?foe.distance <= c.getRange("sword") & // couldn't dash, try to unmake to prevent attack
+  ^foe ! "phase2" &
   ^!(loc.stars > 15 & keepCultistMask)
     ldtF("meleeUnmake")
 
@@ -261,7 +260,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 ^(encounter.isElite & foe.distance > 20) |
 ^(!encounter.isElite & foe.distance > 15)) // or we can't engage in a fight
   ?armor > 29 |
-  ^(foe ! "phase1" & foe.distance < 40)
+  ^(foe ! "phase" & foe.distance < 40)
     ldtF("engage")
   :?14 <= armor & armor <= 29
     ldtF("default")
