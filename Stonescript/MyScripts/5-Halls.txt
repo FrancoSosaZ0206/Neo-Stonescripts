@@ -1,4 +1,4 @@
-// *******************************************************
+﻿// *******************************************************
 //                       5-Halls.txt                      
 // *******************************************************
 
@@ -109,12 +109,12 @@ func ldtF(mode)
     :
       c.doMoondial(Dothaneel, Soulfetcher, moondialMode)
 
-  :?mode = "unmakeAOE"
+  :?mode = "rangedAOEUnmake"
     equip @a.staffAetherDebuff@
     /* ?keepCultistMask
       equipL @a.bigSwordAetherDebuff@
     : */
-  :?mode = "unmake1v1"
+  :?mode = "meleeUnmake"
     equip @a.staffAetherDebuff@
     /* ?keepCultistMask
       equipL @a.swordAetherDebuff@
@@ -122,11 +122,11 @@ func ldtF(mode)
       // put a 2nd dU sword when we have it
       c.doMoondial(a.swordAetherDebuff, Dothaneel, moondialMode)*/
 
-  :?mode = "rangedDmgAOE"
+  :?mode = "rangedAOEDmg"
     equipL theVwand
     ?!keepCultistMask
       equipR @a.wandVigorDmg@ // the 2nd one
-  :?mode = "rangedDebuffAOE"
+  :?mode = "rangedAOEDebuff"
     ?keepCultistMask
       ?c.canDebuffChill()
         equipL @a.wandIceDebuff@
@@ -142,7 +142,7 @@ func ldtF(mode)
         equip @a.staffPoisonDebuff@
       :?c.canDebuffBurn()
         equip @a.staffFireDebuff@
-  :?mode = "rangedHealAOE"
+  :?mode = "rangedAOEHeal"
     ?keepCultistMask
       equipL @a.wandVigorBuff@
     :
@@ -156,31 +156,26 @@ func ldtF(mode)
 
   return
 
-func fightMelee()
+func fight(mode)
   ?c.canDebuffAny() & // foe can be debuffed
   ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
-    ldtF("meleeDebuff")
+    ?mode = "melee"
+      ldtF("meleeDebuff")
+    :?mode = "rangedAOE"
+      ldtF("rangedAOEDebuff")
 
   : // all possible debuffs applied
     ?hp ! maxhp // heal up
-      ldtF("meleeHeal")
+      ?mode = "melee"
+        ldtF("meleeHeal")
+      :?mode = "rangedAOE"
+        ldtF("rangedAOEHeal")
 
     : // deal max damage
-      ldtF("meleeDmg")
-
-  return
-
-func fightRangedAOE()
-  ?c.canDebuffAny() & // foe can be debuffed
-  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
-    ldtF("rangedDebuffAOE")
-
-  : // all possible debuffs applied
-    ?hp ! maxhp // heal up
-      ldtF("rangedHealAOE")
-
-    : // deal max damage
-      ldtF("rangedDmgAOE")
+      ?mode = "melee"
+        ldtF("meleeDmg")
+      :?mode = "rangedAOE"
+        ldtF("rangedAOEDmg")
 
   return
 
@@ -247,11 +242,12 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
   ^foe.distance <= c.getRange("sword")
     c.useStaffHidden(a.staffIceHidden, "eternity")
 
-  :?foe.distance <= c.getRange("sword")  // couldn't dash, try to unmake to prevent attack
-    ldtF("unmake1v1")
+  :?foe.distance <= c.getRange("sword") & // couldn't dash, try to unmake to prevent attack
+  ^!(loc.stars > 15 & keepCultistMask)
+    ldtF("meleeUnmake")
 
   : // could dash, fight ranged
-    fightRangedAOE()
+    fight("rangedAOE")
 
 
 :?ai.walking &
@@ -286,7 +282,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     :?c.canUseWandHidden("explosive")
       c.useWandHidden(a.wandFireHidden, "explosive", "l")
     :
-      fightRangedAOE()
+      fight("rangedAOE")
 
   :?c.canUseBashingShield()
     ldtF("bash")
@@ -303,7 +299,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     c.useWandHidden(a.wandIceHidden, "frost", "l")
  
   :
-    fightMelee()
+    fight("melee")
 
 
 // normal foes
@@ -325,7 +321,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     :?c.canUseHeavyHammer() // if close, use hammer
       c.useHeavyHammer(Mjölnir)
     :
-      fightRangedAOE()
+      fight("rangedAOE")
 
   :?c.canUseBashingShield()
     ldtF("bash")
@@ -337,9 +333,9 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     ^c.canUseBardiche()
       c.useBardiche(Kubikiribocho)
     :?foe ! "immune_to_physical"
-      fightMelee()
+      fight("melee")
     :
-      fightRangedAOE()
+      fight("rangedAOE")
 
 :?c.canUseBashingShield() & !encounter.isElite
   ldtF("bash")
@@ -347,7 +343,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
   ldtF("dash")
 
 :?foe.name = "R.I.Pieces"
-  fightMelee()
+  fight("melee")
 
 :?foe.count > 1 // AOE strategy
   ?!(screen.i = smiteScreen |
@@ -371,7 +367,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     c.useHeavyHammer(Mjölnir)
 
   :
-    fightRangedAOE()
+    fight("rangedAOE")
 
 : // 1v1 strategy
   ?foe ! "immune_to_physical"
@@ -379,9 +375,9 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     ^c.canUseBardiche()
       c.useBardiche(Kubikiribocho)
     :
-      fightMelee()
+      fight("melee")
   :
-    fightRangedAOE()
+    fight("rangedAOE")
 
 
 

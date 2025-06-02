@@ -1,90 +1,98 @@
 ﻿// *******************************************************
-//                START OF "Speed_O_Meter"                
+//                    START OF "Times"
 // *******************************************************
 
 
 
-/* FILE INFO
+/* ················· FILE INFO ·······················
   Time Display Utility
   Made by MetalEagle26 (Tom Crow)
 
-  current version: 1.9
-
-
-DESCRIPTION
-  This library provides functions to display your times on
-    your runs!
-  Includes some speedrunning versions to submit your times
-    in frames ;)
-
-
-HOW TO IMPORT
-  PC:
-    Put this file in C:/.../Stonescript/UI or your
-    folder of preference
-    and in your mindstone/ main script, do this:
-
-    var som
-    som = import UI/Speed_O_Meter
-
-  Mobile:
-    Copy-Paste this into your mindstone/script.
-
-
-HOW TO USE
-  Example for PC:
-    ?som.Update()
-      som.showSom(x,y,col)
-
-  Example for Mobile (Recommended):
-    var SOMPanel
-    ?Update()
-      SOMPanel = mkUI(x,y,col)
+  current version: 2.0
 
 ······················································
 
-CHANGELOG:
-  v1.2:
+  DESCRIPTION
+
+  This library displays your runs' times!
+  Includes a speedrunning version to track frames.
+
+······················································
+
+  HOW TO IMPORT
+
+  - Desktop:
+    Put this file in Stonescript/UI or your
+    directory of preference (inside Stonescript),
+    then do this:
+
+    var sm = import <YourDirectory>/Speed_O_Meter
+
+  - Mobile:
+    Copy-Paste this where you need it.
+
+······················································
+
+  HOW TO USE
+
+  - Template
+    sm.main(x, y, colorHex, isSlim, isSpeedrun, mode)
+
+  - Use case (creates an UI panel in the slim,
+  non-speedrun version):
+    sm.main(0, 1, "#red", true, false, ui)
+
+······················································
+
+  CHANGELOG
+
+  - v1.2:
     - Now you can choose a slim version
       of the meter in all functions.
-  v1.3:
+  - v1.3:
     - showSpeedOmeterUI() renamed to "speedOmeterUI".
     - added import: UI_Maker.txt
     - speedOmeterUI now uses functions from
       the import "UI_Maker.txt".
-  v1.4:
+  - v1.4:
     - Fixed bug that prevented displaying
       the meter before the first
       second of each run.
-  v1.5:
+  - v1.5:
     - Now all functions that show the meter
       depend on speedOmeterToStr().
-  v1.6:
+  - v1.6:
     - formatSpeedrun(): now 1 digit frames
       are prefixed with a zero ('0').
     - myFormatDigital() and formatSpeedrun()
       moved to Utilities.
     - fixed ttSpeedrun update frequency. Now
       it updates every frame as it should.
-  v1.7:
+  - v1.7:
     - renamed all functions and variables
       containing "speedOmeter" to "som".
-    - asciiPrint now belongs to Print() as
+    - isAscii now belongs to Print() as
       one of two modes of a new parameter: isAscii.
     - uiSom() -> mkUI().
     - mkUI(): if isSlim, the panel will now be borderless.
     - ToString(): '#' replaced back with ' '.
       Now not all functions replace it again, but those who do
       delegate that task to Utilities -> replaceInStr().
-  v1.8:
+  - v1.8:
     - Renamed functions: removed "Som" from them
       to make them more concise and cohesive with
       object-oriented programming and the "new" keyword.
     - Added Import: Performance, to centralize dependencies
       and upgrade performance.
-  v1.9:
+  - v1.9:
     - Variable updates are now done in function Update().
-
+  - v2.0:
+    - Fixed bug that messed with ui panel updates
+    - Changed mode of use: now you only need to
+      import and use the function "main".
+    - Updates and ui components are now handled
+      internally.
+    - Renamed to "Times"
 
 ······················································
 
@@ -108,9 +116,27 @@ var u = new MyScripts/Lib/Utilities
 
 
 
-// /////////////////////////////////////////// //
+// ///////////////////// PUBLIC ///////////////////// //
 
-// VARIABLES:
+func main(x, y, colorHex, isSlim, isSpeedrun, mode)
+  ?mode = "ui"
+    ?Update(isSpeedrun)
+      var panel
+      panel = mkUI(x,y,colorHex,isSlim,isSpeedrun)
+
+  :?mode = "print"
+    ?mode = "printAscii"
+      Print(x,y,colorHex,isSlim,isSpeedrun,true)
+    :
+      Print(x,y,colorHex,isSlim,isSpeedrun,false)
+
+  return
+
+
+
+// //////////////////// PRIVATE ///////////////////// //
+
+// VARIABLES
 
 // Times in seconds
 var ttDigital = u.myFormatDigital(totaltime)
@@ -124,9 +150,9 @@ var avgSpeedrun = u.formatSpeedrun(loc.averageTime)
 
 
 
-// /////////////////////////////////////////// //
+// ·················································· //
 
-// PUBLIC FUNCTIONS
+// FUNCTIONS
 
 func Update(isSpeedrun)
   // Variable updating frequency:
@@ -145,7 +171,7 @@ func Update(isSpeedrun)
   ?isSpeedrun
     return true
   :
-    return loc.begin | loc.loop | (totaltime % u.sec = 0)
+    return totaltime = 1 | (totaltime % u.sec = 0)
 
 func ToString(isSlim, isSpeedrun)
 
@@ -185,19 +211,17 @@ func ToString(isSlim, isSpeedrun)
           with transparent characters.
     false: prints normally. Whitespaces
            will block the background. */
-func Print(x, y, col, isSlim, isSpeedrun, isAscii)
-  ?asciiPrint
-
-    >`@x@,@y@,@col@,ascii
+func Print(x, y, colorHex, isSlim, isSpeedrun, isAscii)
+  ?isAscii
+    >`@x@,@y@,@colorHex@,ascii
 @ToString(isSlim, isSpeedrun)@
 asciiend
-
   :
-    >`@x@,@y@,@col@,@ToString(isSlim, isSpeedrun)@
+    >`@x@,@y@,@colorHex@,@ToString(isSlim, isSpeedrun)@
 
   return
 
-func mkUI(x, y, col, isSlim, isSpeedrun)
+func mkUI(x, y, colorHex, isSlim, isSpeedrun)
 
   var txt
   var panel
@@ -220,12 +244,12 @@ func mkUI(x, y, col, isSlim, isSpeedrun)
   ^1, 1, null, null, // x, y, w, h,
   ^top_left, top_left, // pnlAnchor, dock,
   ^ToString(isSlim, isSpeedrun), // txt
-  ^null, col) // align, col
+  ^null, colorHex) // align, colorHex
 
   panel = uimkr.mkPanel(
     ^x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
     ^pnlAnchor, pnlDock, // anchor, dock,
-    ^col, style, txt) // col, style, child
+    ^colorHex, style, txt) // colorHex, style, child
 
   return panel
 
@@ -233,5 +257,5 @@ func mkUI(x, y, col, isSlim, isSpeedrun)
 
 
 // *******************************************************
-//                 END OF "Speed_O_Meter"                 
+//                     END OF "Times"
 // *******************************************************

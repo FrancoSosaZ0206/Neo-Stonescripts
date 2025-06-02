@@ -138,37 +138,16 @@ import MyScripts/MyCosmetics
   import UI/FoeStateTracker
   var uimkr = new MyScripts/Lib/UI_Maker
   var u = new MyScripts/Lib/Utilities
-  var sm = new MyScripts/Lib/Speed_O_Meter
-  var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
 
   /***********************************************/
 
-  var smPanel = sm.mkUI(0, 1,
-  ^u.colorToHex("red"), true, false)
-  ?sm.Update(false)
-    //>c0,-1,#magenta,UPDATING SM
-
-    // smPanel.Recycle()
-    // smPanel = null
-
-    smPanel = sm.mkUI(0, 1,
-    ^u.colorToHex("red"), true, false)
-
-  /*:
-    >c0,1,#green,NOT UPDATING SM*/
+  var t = import MyScripts/Lib/Meters/Times
+  t.main(0,1,u.colorToHex("red"),true,false,"ui")
 
   /***********************************************/
 
-  dpsm.ENABLED = true
-  dpsm.refreshRate = 7
-
-  var dpsPanel
-  ?dpsm.Update()
-    ?dpsPanel
-      dpsPanel.Recycle()
-      dpsPanel = null
-
-    dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+  var dps = import MyScripts/Lib/Meters/DPS
+  dps.main(0,3,u.colorToHex("yellow"), 7,true,"ui")
 
   /***********************************************/
 
