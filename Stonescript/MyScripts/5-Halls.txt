@@ -277,11 +277,18 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
   ?c.canUseCinderwisp() &
   ^foe.debuffs.string = a.maxIgnitions_Default
     c.useCinderwisp()
-
   ?c.canUsePotionDmg()
     activate potion
 
-  ?c.canUseBashingShield()
+  ?foe = "phase2" & foe.count > 1
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :?c.canUseWandHidden("explosive")
+      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+    :
+      fightRangedAOE()
+
+  :?c.canUseBashingShield()
     ldtF("bash")
   :?c.canUseDashingShield()
     ldtF("dash")
@@ -290,20 +297,11 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     c.useWandHidden(a.wandPoisonHidden, "plague", "l")
   :?c.canUseStaffHidden("berserker") // increase our damage
     c.useStaffHidden(a.staffPoisonHidden, "berserker")
-
   :?c.canUseCultistMask()
     c.useCultistMask()
-
   :?c.canUseWandHidden("frost")
     c.useWandHidden(a.wandIceHidden, "frost", "l")
-
-  :?foe = "phase2" & foe.count > 1
-    ?c.canUseHeavyHammer()
-      c.useHeavyHammer(Mjölnir)
-    :?c.canUseWandHidden("explosive")
-      c.useWandHidden(a.wandFireHidden, "explosive", "l")
-    :
-      fightRangedAOE()
+ 
   :
     fightMelee()
 
