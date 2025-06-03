@@ -80,7 +80,9 @@ func ldtF(mode)
       equipL triskelion
 
     ?!keepCultistMask
-      ?c.canApplyChill() & encounter.eliteMod ! "tenacious"
+      ?foe ! "immune_to_debuff_chill" &
+      ^foe.debuffs.string ! "chill" &
+      ^encounter.eliteMod ! "tenacious"
         equipR @a.shieldIceDebuff@
       :
         equipR @a.shieldFireDefense@
@@ -194,7 +196,6 @@ func ldtF(mode)
         equipL @a.wandPoisonDebuff@
       :?c.canApplyBurn()
         equipL @a.wandFireDebuff@
-
     :
       ?c.canApplyChill()
         equip @a.staffIceDebuff@
@@ -249,7 +250,7 @@ func fight(mode)
 >`1,15,#magenta,
 ^baseDmg = @foe.damage@\n
 ^trueDmg = @trueDmg@\n
-^dist    = @foe.distance@\n
+^dist    = @foe.distance@
 
 disable npcDialog
 
@@ -345,12 +346,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     equipL triskelion
     c.useFireTalisman("r")
 
-
 :?c.canUsePotionDmg() & keepCultistMask
   activate potion
 :?c.canUseStaffHidden("infernal") // speed up
   c.useStaffHidden(a.staffFireHidden, "infernal")
-
 
 :?choice & harvest.distance < 5
   ldtF("harvest")
@@ -414,7 +413,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^& c.canUseStaffHidden("grasping")))
     ?c.canUseHeavyHammer()
       c.useHeavyHammer(Mjölnir)
-    
+
     :?c.canUseStaffHidden("grasping")
       c.useStaffHidden(a.staffAetherHidden, "grasping")
     :?c.canUseBardiche()
