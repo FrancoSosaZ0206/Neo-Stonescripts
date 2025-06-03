@@ -51,7 +51,7 @@ func harvestFunc(button)
 func fight(mode)
   ?mode = "evade"
     ?c.canUseMindstone() & foe ! "ranged"
-      a.ldtF("escape")
+      a.ldtF("escape", c.permapotSetup)
     :?c.canUseStaffHidden("acrobatic") & foe ! "ranged"
     ^& foe.distance < u.dash_range_min
       c.useStaffHidden(a.staffStoneHidden, "acrobatic")
@@ -65,30 +65,30 @@ func fight(mode)
     :?foe ! "boss" &
     ^encounter.eliteMod ! "tenacious" &
     ^encounter.eliteMod ! "monarch" // can unmake
-      a.ldtF("defense unmake")
+      a.ldtF("defense unmake", c.permapotSetup)
     :
-      a.ldtF("defense")
+      a.ldtF("defense", c.permapotSetup)
 
   : // debuff, if possible
     ?c.canDebuffAny() & // foe can be debuffed
     ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
       ?mode = "melee"
-        a.ldtF("melee 1v1 debuff")
+        a.ldtF("melee 1v1 debuff", c.permapotSetup)
       :?mode = "rangedAOE"
-        a.ldtF("ranged splash debuff")
+        a.ldtF("ranged splash debuff", c.permapotSetup)
 
     : // all possible debuffs applied
       ?hp ! maxhp // heal up
         ?mode = "melee"
-          a.ldtF("melee 1v1 heal")
+          a.ldtF("melee 1v1 heal", c.permapotSetup)
         :?mode = "rangedAOE"
-          a.ldtF("ranged splash heal")
+          a.ldtF("ranged splash heal", c.permapotSetup)
 
       : // deal max damage
         ?mode = "melee"
-          a.ldtF("melee 1v1")
+          a.ldtF("melee 1v1", c.permapotSetup)
         :?mode = "rangedAOE"
-          a.ldtF("ranged splash")
+          a.ldtF("ranged splash", c.permapotSetup)
 
   return
 
@@ -160,7 +160,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.brewPotion("lucky")
 
 ?loc.begin // initial equipment
-  a.ldtF("default")
+  a.ldtF("default", c.permapotSetup)
 :?c.permapotSetup
   ?item.right ! "bardiche" &
   ^item.right ! "quarterstaff" &
@@ -195,9 +195,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useStaffHidden(a.staffFireHidden, "infernal")
 
 :?choice & harvest.distance < 5
-  a.ldtF("harvest")
+  a.ldtF("harvest", c.permapotSetup)
 :?pickup.distance < 15
-  a.ldtF("magnet")
+  a.ldtF("magnet", c.permapotSetup)
 
 
 // About to attack
@@ -226,13 +226,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       c.useStaffHidden(a.staffIceHidden, "eternity")
 
     :?foe ! "phase2" // heal to reduce it even more
-      a.ldtF("defense heal")
+      a.ldtF("defense heal", c.permapotSetup)
     : // normal phase2 behaviour
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseWandHidden("reset")
         c.useWandHidden(a.wandVigorHidden, "reset", "l")
       :
-        a.ldtF("defense")
+        a.ldtF("defense", c.permapotSetup)
 
   : // armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
     ?buffs.string ! "buff_damage" & foe ! "phase2"
@@ -244,10 +244,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ^c.canUseWandHidden("reset")
         c.useWandHidden(a.wandVigorHidden, "reset", "l")
       :?foe = "fire" // unmake Dysangelos's fire arm
-        a.ldtF("defense unmake")
+        a.ldtF("defense unmake", c.permapotSetup)
 
       :
-        a.ldtF("defense")
+        a.ldtF("defense", c.permapotSetup)
 
 
 :?ai.walking &
@@ -278,12 +278,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   :?armor > a.compoundMaxArmor_boosted |
   ^(foe ! "boss" & foe.distance < u.shield_rune_range)
-    a.ldtF("engage")
+    a.ldtF("engage", c.permapotSetup)
   :?a.compoundMaxArmor_default <= armor &
   ^armor <= a.compoundMaxArmor_boosted
-    a.ldtF("default")
+    a.ldtF("default", c.permapotSetup)
   :
-    a.ldtF("armorRegen")
+    a.ldtF("armorRegen", c.permapotSetup)
 
 
 :?encounter.eliteMod = "monarch"
@@ -299,9 +299,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("evade")
 
   :?c.canUseBashingShield()
-    a.ldtF("bash")
+    a.ldtF("bash", c.permapotSetup)
   :?c.canUseDashingShield()
-    a.ldtF("dash")
+    a.ldtF("dash", c.permapotSetup)
 
   : // 1v1 with the monarch
     ?foe.hp + foe.armor >= a.bardicheRDmg &
@@ -312,9 +312,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 : // fighting range
   ?c.canUseBashingShield()
-    a.ldtF("bash")
+    a.ldtF("bash", c.permapotSetup)
   :?c.canUseDashingShield()
-    a.ldtF("dash")
+    a.ldtF("dash", c.permapotSetup)
 
   :?c.canUseVoidweaver()
     c.useVoidweaver()
@@ -332,7 +332,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         c.useWandHidden(a.wandVigorHidden, "reset", "l")
       
       :
-        a.ldtF("melee 1v1")
+        a.ldtF("melee 1v1", c.permapotSetup)
 
     : // ?foe = phase3
       ?c.canUsePotionDmg()
@@ -352,9 +352,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
           c.useHeavyHammer("Guardian's Bane")
 
         :?hp ! maxhp
-          a.ldtF("melee 1v1 heal")
+          a.ldtF("melee 1v1 heal", c.permapotSetup)
         :?c.canDebuffAny()
-          a.ldtF("melee 1v1 debuff")
+          a.ldtF("melee 1v1 debuff", c.permapotSetup)
 
         :?foe.buffs.string ! "defense_fire" // equip fire weapons
           ?c.permapotSetup

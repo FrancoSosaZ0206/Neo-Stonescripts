@@ -59,7 +59,7 @@ func Init()
     moondialMode = 0
 
   ?loc.begin
-    smiteScreen = 1
+    smiteScreen_Target = 1
   :?loc.loop
     permapotSetup = false
 
