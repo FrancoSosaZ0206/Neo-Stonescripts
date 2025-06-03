@@ -60,7 +60,9 @@ func ldtF(mode)
       equipL triskelion
 
     ?!keepCultistMask
-      ?c.canApplyChill() & encounter.eliteMod ! "tenacious"
+      ?foe ! "immune_to_debuff_chill" &
+      ^foe.debuffs.string ! "chill" &
+      ^encounter.eliteMod ! "tenacious"
         equipR @a.shieldIceDebuff@
       :
         equipR @a.shieldVigorDefense@
@@ -80,6 +82,13 @@ func ldtF(mode)
     equipL star
     ?!keepCultistMask
       equipR triskelion
+
+  :?mode = "defenseHeal" // heal when hit
+    equipL @a.hammerVigorBuff@
+    equipR @a.shieldVigorBuff@
+  :?mode = "defenseUnmake" // unmake when hit
+    equipL @a.swordAetherDebuff@
+    equipR @a.shieldAetherDebuff@
 
   :?mode = "meleeDmg"
     ?keepCultistMask
@@ -137,7 +146,6 @@ func ldtF(mode)
         equipL @a.wandPoisonDebuff@
       :?c.canApplyBurn()
         equipL @a.wandFireDebuff@
-
     :
       ?c.canApplyChill()
         equip @a.staffIceDebuff@
@@ -236,26 +244,52 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 // ABOUT TO ATTACK
 :?foe = "skeleton_boss" & // & foe = "boss"
 ^foe.state = 32 & foe.time > 63
-  ?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
-  ^foe.distance <= c.getRange("sword")
+  ?c.canUseStaffHidden("prevention") &
+  ^foe = "phase2"
+    c.useStaffHidden(a.staffVigorHidden, "prevention")
+
+  :?c.canUseStaffHidden("eternity") &
+  ^buffs.string ! "buff_staff_protection"
     c.useStaffHidden(a.staffIceHidden, "eternity")
 
   :?foe.distance <= c.getRange("sword") & // couldn't dash, try to unmake to prevent attack
   ^foe ! "phase2" &
   ^!(loc.stars > 15 & keepCultistMask)
-    ldtF("meleeUnmake")
+    ldtF("defenseUnmake")
 
-  : // could dash, fight ranged
-    fight("rangedAOE")
+  :?armor < trueDmg
+    ?c.canUseMindstone()
+      ldtF("escape")
+    :?c.canUseStaffHidden("acrobatic") & foe.distance <= c.getRange("sword")
+      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+    :?foe.distance > c.getRange("sword")
+      fight("rangedAOE")
+    : // heal to reduce it even more
+      ldtF("defenseHeal")
+
+  :?armor >= trueDmg
+    ?buffs.string ! "buff_damage" & foe ! "phase2"
+      equipR @a.shieldPoisonBuff@
+
+    : // could dash, fight ranged
+      fight("rangedAOE")
 
 
 :?ai.walking &
 ^(foe.distance < u.dash_range_min |
 ^foe.distance > u.dash_range_max) &
+^!(encounter.isElite &
+^foe.distance <= c.getRange("wand") &
+^(item.left = "wand" | item.right = "wand")) &
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 
-:?foe ! "skeleton_boss" & (ai.paused |
+:?foe ! "skeleton_boss" &
+^!(encounter.isElite &
+^foe.distance <= c.getRange("wand") &
+^(item.left = "wand" | item.right = "wand")) &
+^(ai.paused |
 ^(ai.idle & foe.distance > c.getRange("sword")) | // if we're waiting
 ^c.isDead() |
 ^(encounter.isElite & foe.distance > c.getRange("wand")) |
@@ -298,7 +332,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
     c.useCultistMask()
   :?c.canUseWandHidden("frost")
     c.useWandHidden(a.wandIceHidden, "frost", "l")
- 
+
   :
     fight("melee")
 
