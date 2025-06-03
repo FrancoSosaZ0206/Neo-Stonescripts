@@ -384,8 +384,24 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
     :?foe.distance > c.getRange("sword")
       fight("rangedAOE")
-    : // heal to reduce it even more
+    :?foe ! "phase2" // heal to reduce it even more
       ldtF("defenseHeal")
+    : // normal phase2 behaviour
+      ?foe = "poison"
+        ldtF("meleeDmgIce")
+      :?foe = "vigor"
+        ?foe.buffs.string = "buff_protection" & // against debuffs
+        ^c.canUseWandHidden("reset")
+          c.useWandHidden(a.wandVigorHidden, "reset", "l")
+        :
+          ldtF("meleeDmgPoison")
+      :?foe = "aether"
+        ldtF("meleeDmgVigor")
+      :?foe = "fire"
+        ldtF("meleeDmgAether")
+      :?foe = "ice"
+        ldtF("meleeDmgFire")
+
 
   :?armor >= trueDmg
     ?buffs.string ! "buff_damage" & foe ! "phase2"
@@ -413,7 +429,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^(foe.distance <= u.bardiche_ability_range + u.grasping_buff
   ^& c.canUseStaffHidden("grasping")))
     ?c.canUseHeavyHammer()
-      c.useHeavyHammer(Mjölnir)
+      c.useHeavyHammer("heavy hammer *max -shiny +6") // fast speed hammer
     
     :?c.canUseStaffHidden("grasping")
       c.useStaffHidden(a.staffAetherHidden, "grasping")
@@ -514,15 +530,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         :?c.canDebuffAny()
           ldtF("meleeDebuff")
 
-        :?c.canUseHeavyHammer() & foe.armor
+        :?c.canUseHeavyHammer() & foe.armor > 0
           c.useHeavyHammer("Guardian's Bane")
 
         :?foe.buffs.string ! "defense_fire"
           ldtF("meleeDmgFire")
         :
           ldtF("meleeDmgIce")
-
-
 
 
 

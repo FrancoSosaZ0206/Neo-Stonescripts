@@ -44,7 +44,7 @@ Soulfetcher = sword vigor *max dL +21/
 Speedy Hammer = hammer stone *max
 Kubikiribocho = bardiche *max (enchanted: crit)
 Mjölnir = heavy hammer *max (enchanted: damage)
-Guardian's Wrath = heavy hammer *max (enchanted: armor fatigue)
+Guardian's Wrath = heavy hammer *max shiny (enchanted: armor fatigue)
 
 theVwand = wand vigor *max D golden
 Frosty Crust = wand ice *max dI
