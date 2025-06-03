@@ -23,12 +23,11 @@ c.Init()
 
 // VARIABLES
 
-var canDash
-var trueDmg
+var trueDmg = foe.damage
 
 var keepCultistMask = true
 var moondialMode = -1
-var smiteScreen = null
+var smiteScreen = 1
 
 ?loc.loop
   keepCultistMask = false
@@ -218,8 +217,21 @@ func ldtF(mode)
   return
 
 func fight(mode)
+  ?mode = "evade"
+    ?c.canUseMindstone()
+      ldtF("escape")
+    :?c.canUseStaffHidden("acrobatic") & foe.distance <= c.getRange("sword")
+      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+    
+    :?c.canUseStaffHidden("eternity") & foe.distance <= c.getRange("sword")
+      c.useStaffHidden(a.staffIceHidden, "eternity")
+    
+    :?foe.distance > c.getRange("sword")
+      fight("rangedAOE")
+    ://?foe ! "immune_to_unmake"
+      fight("melee")
 
-  ?c.canDebuffAny() & // foe can be debuffed
+  :?c.canDebuffAny() & // foe can be debuffed
   ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
     ?mode = "melee"
       ldtF("meleeDebuff")
@@ -251,6 +263,14 @@ func fight(mode)
 ^baseDmg = @foe.damage@\n
 ^trueDmg = @trueDmg@\n
 ^dist    = @foe.distance@
+
+?foe = "phase3"
+  ?foe.damage = 1
+    >c0,5,#cyan,*** SHIELD ***
+  :?foe.state = 155
+    >c0,5,#red,*** BEAM ***
+  :
+    >c0,5,*** PHASE 3 NORMAL ***
 
 disable npcDialog
 
@@ -358,28 +378,48 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 
 // About to attack
-:?/*(*/foe.state = 32 & (
-^(foe = "acronian_scout" & foe.time > 50) |
-^(foe = "phase1" & foe.time > 60) |
-^(foe = "phase2" & foe.time > 95) |
-^(foe = "phase3" &
-^   ((foe.time > 85 & foe.damage ! 1) |
-^    (foe.time > 25 & foe.damage = 1))))/* |
-^(foe = "phase3" & foe.state = 155 & foe.time > )*/
-  >c0,4,#red,ABOUT TO ATTACK
+:?(foe.state = 32 & (
+^ (foe = "acronian_scout" & foe.time > 50) |
+^ (foe = "phase1" & foe.time > 60) |
+^ (foe = "phase2" & foe.time > 95) |
+^ (foe = "phase3" & (
+^   (foe.time > 85 & foe.damage ! 1) |
+^   (foe.time > 65 & foe.damage = 1)) )  )   ) |
+^(foe = "phase3" & foe.state = 155 & foe.time > 70)
+  // >c0,4,#red,ABOUT TO ATTACK
 
-  ?armor < trueDmg
-    ?foe = "phase3" // & foe.time > 85 // Dysangelos's massive beam
+  ?foe = "phase3" & // Dysangelos:
+  ^(foe.state = 155 | // massive beam
+  ^foe.damage = 1) // putting shield up
+    ?foe.damage = 1 & // prevent the stun
+    ^c.canUseStaffHidden("prevention")
+      c.useStaffHidden("prevention")
+
+    fight("evade")
+
+  :?armor < trueDmg
+    ?foe = "phase3" &
+    ^(foe.state = 155 | // Dysangelos's massive beam
+    ^foe.damage = 1) // Dysangelos putting shield up
+      ?foe.damage = 1 & // prevent the stun
+      ^c.canUseStaffHidden("prevention")
+        c.useStaffHidden("prevention")
+
       ?c.canUseMindstone()
         ldtF("escape")
       :?c.canUseStaffHidden("acrobatic") & foe.distance <= c.getRange("sword")
         c.useStaffHidden(a.staffStoneHidden, "acrobatic")
-    :?c.canUseStaffHidden("eternity")
+      
+      :?c.canUseStaffHidden("eternity") & foe.distance <= c.getRange("sword")
         c.useStaffHidden(a.staffIceHidden, "eternity")
+      
+      :?foe.distance > c.getRange("sword")
+        fight("rangedAOE")
+      :
+        fight("melee")
 
-    /*:?foe = "phase3" & foe.state = 107 & foe.time >  & // prevent the stun
-    ^c.canUseStaffHidden("prevention")
-      c.useStaffHidden("prevention")*/
+    :?c.canUseStaffHidden("eternity")
+      c.useStaffHidden(a.staffIceHidden, "eternity")
 
     :?foe.distance > c.getRange("sword")
       fight("rangedAOE")
@@ -387,6 +427,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ldtF("defenseHeal")
     : // normal phase2 behaviour
       ?foe = "poison"
+        loc.Pause()
         ldtF("meleeDmgIce")
       :?foe = "vigor"
         ?foe.buffs.string = "buff_protection" & // against debuffs
@@ -416,10 +457,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useQuarterstaff(a.myQuarterstaff)
 
 :?ai.paused |
-^(ai.idle & foe.distance > c.getRange("sword")) | // if we're waiting
+^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
 ^c.isDead() |
 ^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
-^(foe.state = 107 & foe.damage = 3) | // dsangelos' flying animation
+^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > u.dash_range_max // or we can't engage in a fight
@@ -436,7 +477,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       c.useBardiche(Kubikiribocho)
 
   :?armor > a.compoundMaxArmor_boosted |
-  ^(foe ! "phase" & foe.distance < u.shield_rune_range)
+  ^(foe ! "boss" & foe.distance < u.shield_rune_range)
     ldtF("engage")
   :?a.compoundMaxArmor_default <= armor &
   ^armor <= a.compoundMaxArmor_boosted
@@ -478,9 +519,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("melee")
 
 : // fighting range
-  ?c.canUseBashingShield() & !canDash
+  ?c.canUseBashingShield()
     ldtF("bash")
-  :?c.canUseDashingShield() & !canDash
+  :?c.canUseDashingShield()
     ldtF("dash")
 
   :?foe = "acronian_scout"
@@ -524,13 +565,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         c.useCinderwisp()
 
       :
-        ?hp ! maxhp
+        ?c.canUseHeavyHammer() & foe.armor > 0
+          c.useHeavyHammer("Guardian's Bane")
+
+        :?hp ! maxhp
           ldtF("meleeHeal")
         :?c.canDebuffAny()
           ldtF("meleeDebuff")
-
-        :?c.canUseHeavyHammer() & foe.armor > 0
-          c.useHeavyHammer("Guardian's Bane")
 
         :?foe.buffs.string ! "defense_fire"
           ldtF("meleeDmgFire")

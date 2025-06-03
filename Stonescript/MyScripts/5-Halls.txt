@@ -290,7 +290,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 ^foe.distance <= c.getRange("wand") &
 ^(item.left = "wand" | item.right = "wand")) &
 ^(ai.paused |
-^(ai.idle & foe.distance > c.getRange("sword")) | // if we're waiting
+^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
 ^c.isDead() |
 ^(encounter.isElite & foe.distance > c.getRange("wand")) |
 ^(!encounter.isElite & foe.distance > u.dash_range_max)) // or we can't engage in a fight
