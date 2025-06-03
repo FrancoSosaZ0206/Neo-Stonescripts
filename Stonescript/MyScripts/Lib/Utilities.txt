@@ -6,19 +6,32 @@
 
 /* FILE INFO
   Library of utilities
-  Made by MetalEagle26 (Tom Crow)
+  Made by IronHawk (Tom Crow)
 
-DESCRIPTION
-This library provides a pack of useful
+. ...................................... .
+
+  Description
+
+  This library provides a pack of useful
   general purpose variables and
   functions to make your script-making
   tasks easier!
 
-HOW TO IMPORT
+. ...................................... .
+
+  Importing
+
   var u = new Lib/Utilities
 
-HOW TO USE
-  ?u.sec // example */
+. ...................................... .
+
+  Usage
+  
+  ?u.sec // example
+
+. ...................................... .
+    
+Enjoy! */
 
 
 

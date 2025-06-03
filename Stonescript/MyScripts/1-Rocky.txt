@@ -10,11 +10,11 @@
 
 // IMPORTS
 
-var uimkr = new MyScripts/Lib/UI_Maker
-var u = new MyScripts/Lib/Utilities
-var a = new MyScripts/Lib/MyArsenal
-var i = new MyScripts/Lib/MyBetterInfo
-var c = new MyScripts/Lib/Combat
+var uimkr = import MyScripts/Lib/UI_Maker
+var u = import MyScripts/Lib/Utilities
+var c = import MyScripts/Lib/Combat
+var a = import MyScripts/Lib/MyArsenal
+
 c.Init()
 
 
@@ -23,233 +23,72 @@ c.Init()
 
 // VARIABLES
 
-var trueDmg = foe.damage
+var weakenType = a.weaken_default
 
-var keepCultistMask = true
-var moondialMode = -1
-var smiteScreen = 1
+var choice = false
+var buttonPressed = false
 
-?loc.loop
-  keepCultistMask = false
+var yesBtn
+var noBtn
 
-  ?totaltime = 1 & smiteScreen ! 4
-    smiteScreen++
+var dontShowAgain = false
 
-?buffs.string = "berserk"
-  moondialMode = 2
-:
-  moondialMode = 0
-
-// Calculate the amount of damage the foe will deal
-?loc.stars <= 15
-  trueDmg = c.getFoeDamage(a.weaken_default, a.mask_feebleCount)
-:
-  trueDmg = c.getFoeDamage(a.weaken_boosted, a.mask_feebleCount)
 
 
 // /////////////////////////////////////////// //
 
 // FUNCTIONS
 
-func harvFunc(btn)
-  btnPressed = true
-  ?btn = yesBtn
+func harvestFunc(button)
+  buttonPressed = true
+  ?button = yesBtn
     choice = true
-  : // btn = noBtn
+  : // button = noBtn
     choice = false
-
-  return
-
-
-func ldtF(mode)
-
-  ?mode = "default"
-    equipL triskelion
-    ?!keepCultistMask
-      equipR @a.shieldCompound1@
-  :?mode = "armorRegen"
-    equipL triskelion
-    ?!keepCultistMask
-      equipR @a.shieldCompound2@
-  :?mode = "engage"
-    ?buffs.string ! "buff_inf_speed" & // infernal staff
-    ^totaltime % 2 = 0 // every even frame
-      equipL @a.hammerFireDefense@
-    :
-      equipL triskelion
-
-    ?!keepCultistMask
-      ?foe ! "immune_to_debuff_chill" &
-      ^foe.debuffs.string ! "chill" &
-      ^encounter.eliteMod ! "tenacious"
-        equipR @a.shieldIceDebuff@
-      :
-        equipR @a.shieldFireDefense@
-
-  :?mode = "bash"
-    equipL Vantum Phoenix
-    equipR bashing shield
-  :?mode = "dash"
-    equipL Vantum Phoenix
-    equipR @a.shieldDashing@
-
-  :?mode = "escape"
-    equipL mind
-    ?!keepCultistMask
-      equipR @a.shieldFireDefense@
-  :?mode = "magnet"
-    equipL star
-    ?!keepCultistMask
-      equipR triskelion
-  :?mode = "harvest"
-    equip shovel
-
-  :?mode = "defenseHeal" // heal when hit
-    equipL @a.hammerVigorBuff@
-    equipR @a.shieldVigorBuff@
-  :?mode = "defenseUnmake" // unmake when hit
-    equipL @a.swordAetherDebuff@
-    equipR @a.shieldAetherDebuff@
-
-  :?mode = "meleeDmg"
-    ?keepCultistMask
-      ?mode = "meleeDmgPoison"
-        equipL Mamba Negra
-      :?mode = "meleeDmgVigor"
-        equipL Dothaneel
-      :?mode = "meleeDmgAether"
-        equipL Void Slayer
-      :?mode = "meleeDmgFire"
-        equipL Vantum Phoenix
-      :?mode = "meleeDmgIce"
-        equipL Bifrost
-    :
-      ?mode = "meleeDmgPoison"
-        c.doMoondial(Mamba Negra, a.swordPoisonDmg, moondialMode)
-      :?mode = "meleeDmgVigor"
-        c.doMoondial(Dothaneel, a.swordVigorDmg, moondialMode)
-      :?mode = "meleeDmgAether"
-        c.doMoondial(Void Slayer, a.swordAetherDmg, moondialMode)
-      :?mode = "meleeDmgFire"
-        c.doMoondial(Vantum Phoenix, a.swordFireDmg, moondialMode)
-      :?mode = "meleeDmgIce"
-        c.doMoondial(Bifrost, a.swordIceDmg, moondialMode)
-  :?mode = "meleeDebuff"
-    ?keepCultistMask
-      ?c.canApplyChill()
-        equipL @a.swordIceDebuff@
-      :?c.canApplyWeaken()
-        ?loc.stars <= 15 | foe = "phase3"
-          equipL @a.swordPoisonDebuff@
-        :
-          equipL Death's Kiss
-
-      :?c.canApplyBurn()
-        equipL @a.swordFireDebuff@
-    :
-      //Left hand:
-      ?c.canApplyWeaken()
-        ?loc.stars <= 15 | foe = "phase3"
-          equipL @a.swordPoisonDebuff@
-        :
-          equipL Death's Kiss
-      :?c.canApplyBurn()
-        equipL @a.swordFireDebuff@
-      :?c.canApplyChill()
-        equipL @a.wandIceDebuff@
-
-      //Right hand:
-      ?c.canApplyChill()
-        equipR @a.swordIceDebuff@
-  :?mode = "meleeHeal"
-    ?keepCultistMask
-      equipL Soulfetcher
-    :
-      c.doMoondial(Vantum Phoenix, Soulfetcher, moondialMode)
-
-  :?mode = "rangedAOEUnmake"
-    equip @a.staffAetherDebuff@
-    /* ?keepCultistMask
-      equipL @a.bigSwordAetherDebuff@
-    : */
-  :?mode = "meleeUnmake"
-    equip @a.staffAetherDebuff@
-    /* ?keepCultistMask
-      equipL @a.swordAetherDebuff@
-    :
-      // put a 2nd dU sword when we have it
-      c.doMoondial(a.swordAetherDebuff, Vantum Phoenix, moondialMode)*/
-
-  :?mode = "rangedAOEDmg"
-    equipL @a.wandFireDmg@
-    ?!keepCultistMask
-      ?foe = "dysangelos"
-        equipR @a.bowAetherDmg@
-      :
-        equipR @a.staffFireDebuff@ // @a.bowFireDmg@
-  :?mode = "rangedAOEDebuff"
-    ?keepCultistMask
-      ?c.canApplyChill()
-        equipL @a.wandIceDebuff@
-      :?c.canApplyWeaken()
-        equipL @a.wandPoisonDebuff@
-      :?c.canApplyBurn()
-        equipL @a.wandFireDebuff@
-    :
-      ?c.canApplyChill()
-        equip @a.staffIceDebuff@
-      :?c.canApplyWeaken()
-        equip @a.staffPoisonDebuff@
-      :?c.canApplyBurn()
-        equip @a.staffFireDebuff@
-  :?mode = "rangedAOEHeal"
-    ?keepCultistMask
-      equipL @a.wandVigorBuff@
-    :
-      equipL moon
-      equipR @a.wandVigorBuff@
-      // equip @a.staffVigorBuff@ // @a.bowVigorBuff@
-
-  :
-    >c-10,0,#red,
-    ^ERROR: ldtF() recieved incorrect mode: @mode@
 
   return
 
 func fight(mode)
   ?mode = "evade"
-    ?c.canUseMindstone()
-      ldtF("escape")
-    :?c.canUseStaffHidden("acrobatic") & foe.distance <= c.getRange("sword")
+    ?c.canUseMindstone() & foe ! "ranged"
+      a.ldtF("escape")
+    :?c.canUseStaffHidden("acrobatic") & foe ! "ranged"
+    ^& foe.distance < u.dash_range_min
       c.useStaffHidden(a.staffStoneHidden, "acrobatic")
     
-    :?c.canUseStaffHidden("eternity") & foe.distance <= c.getRange("sword")
+    :?c.canUseStaffHidden("eternity") & foe.distance < u.dash_range_min
       c.useStaffHidden(a.staffIceHidden, "eternity")
     
     :?foe.distance > c.getRange("sword")
-      fight("rangedAOE")
-    ://?foe ! "immune_to_unmake"
-      fight("melee")
+      fight("ranged splash")
 
-  :?c.canDebuffAny() & // foe can be debuffed
-  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
-    ?mode = "melee"
-      ldtF("meleeDebuff")
-    :?mode = "rangedAOE"
-      ldtF("rangedAOEDebuff")
+    :?foe ! "boss" &
+    ^encounter.eliteMod ! "tenacious" &
+    ^encounter.eliteMod ! "monarch" // can unmake
+      a.ldtF("defense unmake")
+    :
+      a.ldtF("defense")
 
-  : // all possible debuffs applied
-    ?hp ! maxhp // heal up
+  : // debuff, if possible
+    ?c.canDebuffAny() & // foe can be debuffed
+    ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
       ?mode = "melee"
-        ldtF("meleeHeal")
+        a.ldtF("melee 1v1 debuff")
       :?mode = "rangedAOE"
-        ldtF("rangedAOEHeal")
+        a.ldtF("ranged splash debuff")
 
-    : // deal max damage
-      ?mode = "melee"
-        ldtF("meleeDmgFire")
-      :?mode = "rangedAOE"
-        ldtF("rangedAOEDmg")
+    : // all possible debuffs applied
+      ?hp ! maxhp // heal up
+        ?mode = "melee"
+          a.ldtF("melee 1v1 heal")
+        :?mode = "rangedAOE"
+          a.ldtF("ranged splash heal")
+
+      : // deal max damage
+        ?mode = "melee"
+          a.ldtF("melee 1v1")
+        :?mode = "rangedAOE"
+          a.ldtF("ranged splash")
 
   return
 
@@ -259,37 +98,16 @@ func fight(mode)
 
 // PROCEDURE
 
->`1,15,#magenta,
-^baseDmg = @foe.damage@\n
-^trueDmg = @trueDmg@\n
-^dist    = @foe.distance@
-
-?foe = "phase3"
-  ?foe.damage = 1
-    >c0,5,#cyan,*** SHIELD ***
-  :?foe.state = 155
-    >c0,5,#red,*** BEAM ***
-  :
-    >c0,5,*** PHASE 3 NORMAL ***
-
 disable npcDialog
 
-var choice = false
-var btnPressed = false
-
-var yesBtn
-var noBtn
-
-var dontShowAgain = false
-
-
-?!btnPressed
+// Auto-harvesting logic
+?!buttonPressed
   ?!yesBtn
     yesBtn = uimkr.mkBtn(
     ^-5,9,null,2,null,null, // x, y, w, h, anchor, dock,
     ^"Yes","#green", // txt, col,
     ^null,null,null, // tcol, bcol, hcol,
-    ^-5,harvFunc, // style, pressed,
+    ^-5,harvestFunc, // style, pressed,
     ^null,null,null) // down, up, sound
 
   ?!noBtn
@@ -297,7 +115,7 @@ var dontShowAgain = false
     ^5,9,8,2,null,null, // x, y, w, h, anchor, dock,
     ^"No","red", // txt, col,
     ^null,null,null, // tcol, bcol, hcol,
-    ^-5,harvFunc, // style, pressed,
+    ^-5,harvestFunc, // style, pressed,
     ^null,null,null) // down, up, sound
 
 
@@ -329,6 +147,12 @@ var dontShowAgain = false
         dontShowAgain = true
 
 
+// Calculate the amount of damage the foe will deal
+?loc.stars > 15
+  weakenType = a.weaken_boosted
+
+c.smiteScreen_Max = 4
+c.screen_DS_Change("bfg")
 c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // Auto Brewing
@@ -336,9 +160,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.brewPotion("lucky")
 
 ?loc.begin // initial equipment
-  equipL triskelion
-  equipR @a.shieldCompound1@
-:?keepCultistMask
+  a.ldtF("default")
+:?c.permapotSetup
   ?item.right ! "bardiche" &
   ^item.right ! "quarterstaff" &
   ^item.right ! "heavy hammer" &
@@ -347,107 +170,84 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     equipR mask
 
 
-?c.canUseBFG_DS(smiteScreen) & loc.stars > 15
+?c.canUseBFG_DS() & loc.stars > 15
   c.useBFG_DS()
 
 
 ?foe ! "boss" & !c.isDead() &
 ^c.canUseAetherTalisman()
-  ?keepCultistMask
+  ?c.permapotSetup
     c.useAetherTalisman("l")
   :
     equipL triskelion
     c.useAetherTalisman("r")
 :?(foe = "boss" | loc.stars <= 15) &
 ^c.canUseFireTalisman()
-  ?keepCultistMask
+  ?c.permapotSetup
     c.useFireTalisman("l")
   :
     equipL triskelion
     c.useFireTalisman("r")
 
-:?c.canUsePotionDmg() & keepCultistMask
+:?c.canUsePotionDmg() & c.permapotSetup
   activate potion
 :?c.canUseStaffHidden("infernal") // speed up
   c.useStaffHidden(a.staffFireHidden, "infernal")
 
 :?choice & harvest.distance < 5
-  ldtF("harvest")
+  a.ldtF("harvest")
 :?pickup.distance < 15
-  ldtF("magnet")
+  a.ldtF("magnet")
 
 
 // About to attack
 :?(foe.state = 32 & (
-^ (foe = "acronian_scout" & foe.time > 50) |
+^ (foe = "scout" & foe.time > 50) |
 ^ (foe = "phase1" & foe.time > 60) |
 ^ (foe = "phase2" & foe.time > 95) |
 ^ (foe = "phase3" & (
-^   (foe.time > 85 & foe.damage ! 1) |
-^   (foe.time > 65 & foe.damage = 1)) )  )   ) |
-^(foe = "phase3" & foe.state = 155 & foe.time > 70)
-  // >c0,4,#red,ABOUT TO ATTACK
+^   (foe.time > 85 & foe.damage ! 1) | // normal phase3 attacks
+^   (foe.time > 65 & foe.damage = 1)) )  )   ) | // putting shield up
+^(foe = "phase3" & foe.state = 155 & foe.time > 70) | // Dysangelos's massive beam
+^(foe.state = 33 & foe.time < 5 & // a bit into the attack state
+^ (foe = "phase2" | foe = "phase3"))
 
-  ?foe = "phase3" & // Dysangelos:
-  ^(foe.state = 155 | // massive beam
-  ^foe.damage = 1) // putting shield up
+  ?foe = "phase3" &
+  ^(foe.state = 155 | foe.damage = 1)
     ?foe.damage = 1 & // prevent the stun
     ^c.canUseStaffHidden("prevention")
       c.useStaffHidden("prevention")
+    :
+      fight("evade")
 
-    fight("evade")
-
-  :?armor < trueDmg
-    ?foe = "phase3" &
-    ^(foe.state = 155 | // Dysangelos's massive beam
-    ^foe.damage = 1) // Dysangelos putting shield up
-      ?foe.damage = 1 & // prevent the stun
-      ^c.canUseStaffHidden("prevention")
-        c.useStaffHidden("prevention")
-
-      ?c.canUseMindstone()
-        ldtF("escape")
-      :?c.canUseStaffHidden("acrobatic") & foe.distance <= c.getRange("sword")
-        c.useStaffHidden(a.staffStoneHidden, "acrobatic")
-      
-      :?c.canUseStaffHidden("eternity") & foe.distance <= c.getRange("sword")
-        c.useStaffHidden(a.staffIceHidden, "eternity")
-      
-      :?foe.distance > c.getRange("sword")
-        fight("rangedAOE")
-      :
-        fight("melee")
-
-    :?c.canUseStaffHidden("eternity")
+  :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
+    ?foe = "phase3" & foe.damage ! 1 &
+    ^c.canUseStaffHidden("eternity")
       c.useStaffHidden(a.staffIceHidden, "eternity")
 
-    :?foe.distance > c.getRange("sword")
-      fight("rangedAOE")
     :?foe ! "phase2" // heal to reduce it even more
-      ldtF("defenseHeal")
+      a.ldtF("defense heal")
     : // normal phase2 behaviour
-      ?foe = "poison"
-        loc.Pause()
-        ldtF("meleeDmgIce")
-      :?foe = "vigor"
-        ?foe.buffs.string = "buff_protection" & // against debuffs
-        ^c.canUseWandHidden("reset")
-          c.useWandHidden(a.wandVigorHidden, "reset", "l")
-        :
-          ldtF("meleeDmgPoison")
-      :?foe = "aether"
-        ldtF("meleeDmgVigor")
-      :?foe = "fire"
-        ldtF("meleeDmgAether")
-      :?foe = "ice"
-        ldtF("meleeDmgFire")
+      ?foe.buffs.string = "buff_protection" & // against debuffs
+      ^c.canUseWandHidden("reset")
+        c.useWandHidden(a.wandVigorHidden, "reset", "l")
+      :
+        a.ldtF("defense")
 
-
-  :?armor >= trueDmg
+  : // armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
     ?buffs.string ! "buff_damage" & foe ! "phase2"
       equipR @a.shieldPoisonBuff@
-    :?foe = "phase2" & foe = "fire" & foe.time > 95
-      ldtF("defenseUnmake") // unmake Dysangelos's fire arm
+
+    :?foe = "phase2"
+
+      ?foe.buffs.string = "buff_protection" & // against debuffs
+      ^c.canUseWandHidden("reset")
+        c.useWandHidden(a.wandVigorHidden, "reset", "l")
+      :?foe = "fire" // unmake Dysangelos's fire arm
+        a.ldtF("defense unmake")
+
+      :
+        a.ldtF("defense")
 
 
 :?ai.walking &
@@ -478,12 +278,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   :?armor > a.compoundMaxArmor_boosted |
   ^(foe ! "boss" & foe.distance < u.shield_rune_range)
-    ldtF("engage")
+    a.ldtF("engage")
   :?a.compoundMaxArmor_default <= armor &
   ^armor <= a.compoundMaxArmor_boosted
-    ldtF("default")
+    a.ldtF("default")
   :
-    ldtF("armorRegen")
+    a.ldtF("armorRegen")
 
 
 :?encounter.eliteMod = "monarch"
@@ -493,23 +293,15 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :?c.canUseWandHidden("explosive")
       c.useWandHidden(a.wandFireHidden, "explosive", "l")
 
-    :?foe.distance < 7 & // if too close, try to escape
-    ^(c.canUseMindstone() |
-    ^c.canUseStaffHidden("acrobatic"))
-      ?c.canUseMindstone()
-        ldtF("escape")
-      :
-        c.useStaffHidden(a.staffStoneHidden, "acrobatic")
-
     :?c.canUseHeavyHammer() // if close, use hammer
       c.useHeavyHammer(Mjölnir)
     :
-      fight("rangedAOE")
+      fight("evade")
 
   :?c.canUseBashingShield()
-    ldtF("bash")
+    a.ldtF("bash")
   :?c.canUseDashingShield()
-    ldtF("dash")
+    a.ldtF("dash")
 
   : // 1v1 with the monarch
     ?foe.hp + foe.armor >= a.bardicheRDmg &
@@ -520,11 +312,14 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 : // fighting range
   ?c.canUseBashingShield()
-    ldtF("bash")
+    a.ldtF("bash")
   :?c.canUseDashingShield()
-    ldtF("dash")
+    a.ldtF("dash")
 
-  :?foe = "acronian_scout"
+  :?c.canUseVoidweaver()
+    c.useVoidweaver()
+
+  :?foe = "scout"
     fight("melee")
 
   : // Dysangelos
@@ -532,25 +327,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("melee")
 
     :?foe = "phase2"
-      ?hp ! maxhp
-        ldtF("meleeHeal")
-      :?c.canDebuffAny() & foe.buffs.string ! "buff_protection"
-        ldtF("meleeDebuff")
-
-      :?foe = "poison"
-        ldtF("meleeDmgIce")
-      :?foe = "vigor"
-        ?foe.buffs.string = "buff_protection" & // against debuffs
-        ^c.canUseWandHidden("reset")
-          c.useWandHidden(a.wandVigorHidden, "reset", "l")
-        :
-          ldtF("meleeDmgPoison")
-      :?foe = "aether"
-        ldtF("meleeDmgVigor")
-      :?foe = "fire"
-        ldtF("meleeDmgAether")
-      :?foe = "ice"
-        ldtF("meleeDmgFire")
+      ?foe.buffs.string = "buff_protection" & // against debuffs
+      ^c.canUseWandHidden("reset")
+        c.useWandHidden(a.wandVigorHidden, "reset", "l")
+      
+      :
+        a.ldtF("melee 1v1")
 
     : // ?foe = phase3
       ?c.canUsePotionDmg()
@@ -565,18 +347,26 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         c.useCinderwisp()
 
       :
-        ?c.canUseHeavyHammer() & foe.armor > 0
+        ?c.canUseHeavyHammer() & foe.armor > 0 & // reduce armor
+        ^debuffs.string ! "stun" // safety measure
           c.useHeavyHammer("Guardian's Bane")
 
         :?hp ! maxhp
-          ldtF("meleeHeal")
+          a.ldtF("melee 1v1 heal")
         :?c.canDebuffAny()
-          ldtF("meleeDebuff")
+          a.ldtF("melee 1v1 debuff")
 
-        :?foe.buffs.string ! "defense_fire"
-          ldtF("meleeDmgFire")
-        :
-          ldtF("meleeDmgIce")
+        :?foe.buffs.string ! "defense_fire" // equip fire weapons
+          ?c.permapotSetup
+            equipL Vantum Phoenix
+          :
+            c.doMoondial(Vantum Phoenix, a.swordFireDmg, c.moondialMode)
+
+        : // equip ice weapons (or any that aren't fire)
+          ?c.permapotSetup
+            equipL Bifrost
+          :
+            c.doMoondial(Bifrost, a.swordIceDmg, c.moondialMode)
 
 
 

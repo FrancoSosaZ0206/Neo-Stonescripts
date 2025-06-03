@@ -37,7 +37,14 @@ var midhp
 var lowhp
 var hihp
 
+// Others
 
+var moondialMode = -1
+var permapotSetup = true
+var smiteScreen_Target = -1
+var smiteScreen_Max = -1
+var maskScreen_Target = -1
+var maskScreen_Max = -1
 
 // FUNCTIONS
 
@@ -46,7 +53,16 @@ func Init()
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
 
-  ?loc.loop
+  ?buffs.string = "berserk"
+    moondialMode = 2
+  :
+    moondialMode = 0
+
+  ?loc.begin
+    smiteScreen = 1
+  :?loc.loop
+    permapotSetup = false
+
     burstingTimer = 0
 
   return
@@ -64,12 +80,43 @@ func useBFG()
 
   return
 
+func isScreen_DS_Target(weaponName)
+  ?weaponName = "smite" | weaponName = "bfg" | weaponName = "blade"
+    return screen.i = smiteScreen_Target
+  :?weaponName = "mask" | weaponName = "feeble"
+    return screen.i = maskScreen_Target
+  :
+    >c-10,0,#red,ERROR: isScreen_DS_Target()
+    ^recieved incorrect weaponName: @weaponName@
+    return false
+func isScreen_DS_Max(weaponName)
+  ?weaponName = "smite" | weaponName = "bfg" | weaponName = "blade"
+    return smiteScreen_Target = smiteScreen_Max
+  :?weaponName = "mask" | weaponName = "feeble"
+    return maskScreen_Target = maskScreen_Max
+  :
+    >c-10,0,#red,ERROR: isScreen_DS_Max()
+    ^recieved incorrect weaponName: @weaponName@
+    return false
+
+func screen_DS_Change(weaponName)
+  ?loc.loop & totaltime = 1 & !isScreen_Max(weaponName)
+    ?weaponName = "smite" | weaponName = "bfg" |
+    ^weaponName = "blade"
+      smiteScreen_Target++
+    :?weaponName = "mask" | weaponName = "feeble"
+      maskScreen_Target++
+    :
+      >c-10,0,#red,ERROR: screen_DS_Change()
+      ^recieved incorrect weaponName: @weaponName@
+
+  return
+
 /* Checks if Blade of the Fallen God
 can be used in 2 screens of distance,
 according to a certain screen index. */
-func canUseBFG_DS(nScreen)
-  return canUseBFG()
-  ^& screen.i = nScreen
+func canUseBFG_DS()
+  return canUseBFG() & isScreen_DS_Target("bfg")
 /* counter to give
 screen.Next()
 time to slide */
@@ -109,9 +156,9 @@ func useCultistMask()
 
   return
 
-func canUseCultistMask_DS(nScreen)
-  return canUseCultistMask()
-  ^& screen.i = nScreen
+func canUseCultistMask_DS()
+  return canUseCultistMask() &
+  ^isScreen_DS_Target("mask")
 func useCultistMask_DS()
   ?slideCount = 0
     screen.Next()
@@ -143,9 +190,7 @@ func useFireTalisman(hand)
 
   return
 
-/* Same as canUseFireTalisman,
-But now we check if it
-is summoned.*/
+/* Same as canUseFireTalisman, But now we check if it is summoned.*/
 func canHideFireTalisman()
   return
   ^item.GetCooldown("fire_talisman") &
@@ -166,20 +211,19 @@ func useCinderwisp()
   activate cinderwisp
   return
 
-/* Checks if the cinderwisp's
-"devour" ability damage will
-kill the foe.
-  - foeTotalHP: sum of the foe's current hp and armor
-  - nIgnitions: amount of ignition debuffs currently
-                applied to the foe.
-  - cindDmg: damage dealt by cinderwisp for each ignition.
-  - margin: number representing a health margin to add
-            to the remaining foe's health. This is
-            necessary because the ability has a cast time
-            that will alter the estimations done here.
-            Send 0 if you don't want to use a margin. */
-func canKillCinderwisp(foeTotalHP, nIgnitions, cindDmg, margin)
-  return foeTotalHP <= (nIgnitions * cindDmg) + margin
+/* Checks if the cinderwisp's "devour" ability
+damage will kill the foe.
+
+nIgnitions: amount of ignition debuffs currently
+              applied to the foe.
+cindDmg: damage dealt by cinderwisp for each ignition.
+margin: number representing a health margin to add
+          to the remaining foe's health. This is
+          necessary because the ability has a cast time
+          that will alter the estimations done here.
+          Send 0 if you don't want to use a margin. */
+func canKillCinderwisp(nIgnitions, cindDmg, margin)
+  return foe.hp + foe.armor <= (nIgnitions * cindDmg) + margin
 
 
 func canUseAetherTalisman()
@@ -211,39 +255,21 @@ func canHideAetherTalisman()
   ^(item.right = "aether_talisman" & item.right.state = 2)
 
 
-/* Checks if the
-voidweaver's "devour"
-ability can be used. */
+/* Checks if the voidweaver's "devour" ability can be used. */
 func canUseVoidweaver()
   return
   ^item.GetCooldown("voidweaver") <= 0 &
   ^item.CanActivate() &
-  ^summon.GetId() = "voidweaver"
+  ^summon.GetId() = "voidweaver" &
+  ^foe ! "boss" & // bosses are immune to unmake
+  ^encounter.eliteMod ! "tenacious" & // tenacious can't be debuffed
+  ^encounter.eliteMod ! "monarch" // monarch foes can't be unmade
 func useVoidweaver()
   activate voidweaver
   return
 
-func canUseVoidweaver_DS(nScreen)
-  return canUseVoidweaver()
-  ^& screen.i = nScreen
-func useVoidweaver_DS()
-  ?slideCount = 0
-    screen.Next()
-    slideCount = 20
 
-  :?slideCount > 0
-    slideCount--
-  
-    ?slideCount = 0
-      useVoidweaver()
-      screen.ResetOffset()
-
-      return
-
-
-/* Checks if the
-bashing shield's
-ability can be used. */
+/* Checks if the bashing shield's ability can be used. */
 func canUseBashingShield()
   return
   ^item.GetCooldown("bash") <= 0 &
@@ -251,6 +277,7 @@ func canUseBashingShield()
   ^u.dash_range_min <= foe.distance &
   ^foe.distance <= u.dash_range_max &
   ^!ai.idle
+
 
 // Special Weapons
 
