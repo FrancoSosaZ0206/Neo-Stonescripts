@@ -279,10 +279,17 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 :?ai.walking &
 ^(foe.distance < u.dash_range_min |
 ^foe.distance > u.dash_range_max) &
+^!(encounter.isElite &
+^foe.distance <= c.getRange("wand") &
+^(item.left = "wand" | item.right = "wand")) &
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 
-:?foe ! "skeleton_boss" & (ai.paused |
+:?foe ! "skeleton_boss" &
+^!(encounter.isElite &
+^foe.distance <= c.getRange("wand") &
+^(item.left = "wand" | item.right = "wand")) &
+^(ai.paused |
 ^(ai.idle & foe.distance > c.getRange("sword")) | // if we're waiting
 ^c.isDead() |
 ^(encounter.isElite & foe.distance > c.getRange("wand")) |
