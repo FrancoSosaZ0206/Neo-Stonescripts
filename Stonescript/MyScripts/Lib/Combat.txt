@@ -51,47 +51,6 @@ func Init()
 
   return
 
-func getRange(weaponName)
-  var result = 0
-
-  ?weaponName = "sword"
-    result += u.sword_range
-  :?weaponName = "sword big"
-    result += u.sword_big_range
-  :?weaponName = "hammer" & weaponName ! "heavy"
-    result += u.hammer_range
-
-  :?weaponName = "wand"
-    result += u.wand_range
-  :?weaponName = "crossbow"
-    result += u.crossbow_range
-
-  :?weaponName = "quarterstaff"
-    result += u.staff_range
-  :?weaponName = "staff"
-    result += u.staff_range
-
-  :?weaponName = "bardiche"
-    ?weaponName = "ability"
-      result += u.bardiche_ability_range
-    :
-      result += u.bardiche_range
-  :?weaponName = "heavy hammer"
-    ?weaponName = "ability"
-      result += u.heavyHammer_ability_range
-    :
-      result += u.heavyHammer_range
-
-
-  ?buffs.string = "buff_range"
-    result += u.grasping_buff
-
-  ?result ! 0
-    ?result > u.grasping_cap
-      return u.grasping_cap
-    : 
-      return result
-
 
 // Lost items
 
@@ -653,24 +612,110 @@ func brewPotion(potionName)
 
 // Status effects
 
+/* Returns each weapon's range.
+Accounts for the Grasping Staff's
+buff and Pallas's debuff.
+************************************
+DOESN'T ACCEPT WEAPONS, BUT SPECIFIC
+KEYWORDS THAT REPRESENT THEM.
+************************************ */
+func getRange(weaponName)
+  var result = null
+  var isApplied = false
+  var isApplied2 = false
+
+  ?weaponName = "sword" & result = null
+    result = u.sword_range
+  :?weaponName = "sword big" & result = null
+    result = u.sword_big_range
+  :?weaponName = "hammer" & weaponName ! "heavy" & result = null
+    result = u.hammer_range
+
+  :?weaponName = "wand" & result = null
+    result = u.wand_range
+  :?weaponName = "crossbow" & result = null
+    result = u.crossbow_range
+
+  :?weaponName = "quarterstaff" & result = null
+    result = u.staff_range
+  :?weaponName = "staff" & result = null
+    result = u.staff_range
+
+  :?weaponName = "bardiche" & result = null
+    ?weaponName = "ability"
+      result = u.bardiche_ability_range
+    :
+      result = u.bardiche_range
+  :?weaponName = "heavy hammer" & result = null
+    ?weaponName = "ability"
+      result = u.heavyHammer_ability_range
+    :
+      result = u.heavyHammer_range
+
+
+  ?buffs.string = "buff_range" & !isApplied
+    result += u.grasping_buff
+    isApplied = true
+
+  ?debuffs.string = "pallas_phase2_debuff"
+    result--
+    isApplied2 = true
+
+  ?result ! null
+    ?result >= u.grasping_cap
+      return u.grasping_cap
+    : 
+      return result
+
+/* Returns foe's damage, accounting for
+any damage-reduction debuffs applied.
+
+weakenAmount = if applied, amount of damage
+               deducted to the foe by the
+               weapon you used for it.
+feebleCount = if applied, amount of Feeble
+              debuffs your Cultist Mask can
+              apply.
+***************** WARNING *****************
+  Since these are variable, they can't be
+  calculated, so they have to be provided
+         for this function to work.
+******************************************* */
+func getFoeDamage(weakenAmount, feebleCount)
+  var result = foe.damage
+  var isApplied = false
+  var isApplied2 = false
+
+  ?foe.debuffs.string = "feeble" & !isApplied
+    result -= (2 * feebleCount)
+    isApplied = true
+  ?foe.debuffs.string = "debuff_damage" & !isApplied2
+    result -= weakenAmount
+    isApplied2 = true
+
+  ?result < 0
+    result = 0
+
+  return result
+
 /* Returns true if the foe is
 vulnerable to Chill and if the
 debuff isn't applied yet. */
-func canDebuffChill()
+func canApplyChill()
   return
   ^foe.debuffs.string ! "chill:6" &
   ^foe ! "immune_to_debuff_chill"
 /* Returns true if the foe is
 vulnerable to Weaken and if the
 debuff isn't applied yet. */
-func canDebuffWeaken()
+func canApplyWeaken()
   return
   ^foe.debuffs.string ! "damage" &
   ^foe ! "immune_to_debuff_damage"
 /* Returns true if the foe is
 vulnerable to Burn and if the
 debuff isn't applied yet. */
-func canDebuffBurn()
+func canApplyBurn()
   return
   ^foe.debuffs.string ! "dot" &
   ^foe ! "immune_to_debuff_dot"
@@ -683,9 +728,9 @@ typical debuffs:
 - Burn (damage over time) */
 func canDebuffAny()
   return
-  ^canDebuffChill() |
-  ^canDebuffWeaken() |
-  ^canDebuffBurn()
+  ^canApplyChill() |
+  ^canApplyWeaken() |
+  ^canApplyBurn()
 /* checks if the foe is vulnerable
 to ALL of the following
 typical debuffs:
@@ -700,7 +745,7 @@ func canDebuffAll()
 
 
 
-// Others
+// Damage min-maxing
 
 var moonTimer = 0
 var moonFrame
@@ -809,6 +854,12 @@ func doAAC(itemLeft, itemRight)
     equip @item.right@ // equip works for two-handed items as well
 
   // return
+
+
+// Others
+
+func isDead()
+  return foe.state = 4 | foe.state = -1 // foe death states
 
 
 

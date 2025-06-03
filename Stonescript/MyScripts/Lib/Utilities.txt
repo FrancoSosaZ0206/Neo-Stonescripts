@@ -64,6 +64,7 @@ var wand_rune_range = 20
 var staff_range = 20
 var crossbow_range = 22
 var crossbow_rune_range = 23
+var shield_rune_range = 40
 
 
 // Special stats

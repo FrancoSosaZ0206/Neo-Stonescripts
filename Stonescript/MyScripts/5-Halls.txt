@@ -60,7 +60,10 @@ func ldtF(mode)
       equipL triskelion
 
     ?!keepCultistMask
-      equipR @a.shieldVigorDefense@
+      ?c.canApplyChill() & encounter.eliteMod ! "tenacious"
+        equipR @a.shieldIceDebuff@
+      :
+        equipR @a.shieldVigorDefense@
 
   :?mode = "bash"
     equipL Dothaneel
@@ -85,23 +88,23 @@ func ldtF(mode)
       c.doMoondial(Dothaneel, a.swordVigorDmg, moondialMode)
   :?mode = "meleeDebuff"
     ?keepCultistMask
-      ?c.canDebuffChill()
+      ?c.canApplyChill()
         equipL @a.swordIceDebuff@
-      :?c.canDebuffWeaken()
+      :?c.canApplyWeaken()
         equipL @a.swordPoisonDebuff@
-      :?c.canDebuffBurn()
+      :?c.canApplyBurn()
         equipL @a.swordFireDebuff@
     :
       //Left hand:
-      ?c.canDebuffWeaken()
+      ?c.canApplyWeaken()
         equipL @a.swordPoisonDebuff@
-      :?c.canDebuffBurn()
+      :?c.canApplyBurn()
         equipL @a.swordFireDebuff@
-      :?c.canDebuffChill()
+      :?c.canApplyChill()
         equipL @a.wandIceDebuff@
 
       //Right hand:
-      ?c.canDebuffChill()
+      ?c.canApplyChill()
         equipR @a.swordIceDebuff@
   :?mode = "meleeHeal"
     ?keepCultistMask
@@ -128,19 +131,19 @@ func ldtF(mode)
       equipR @a.wandVigorDmg@ // the 2nd one
   :?mode = "rangedAOEDebuff"
     ?keepCultistMask
-      ?c.canDebuffChill()
+      ?c.canApplyChill()
         equipL @a.wandIceDebuff@
-      :?c.canDebuffWeaken()
+      :?c.canApplyWeaken()
         equipL @a.wandPoisonDebuff@
-      :?c.canDebuffBurn()
+      :?c.canApplyBurn()
         equipL @a.wandFireDebuff@
 
     :
-      ?c.canDebuffChill()
+      ?c.canApplyChill()
         equip @a.staffIceDebuff@
-      :?c.canDebuffWeaken()
+      :?c.canApplyWeaken()
         equip @a.staffPoisonDebuff@
-      :?c.canDebuffBurn()
+      :?c.canApplyBurn()
         equip @a.staffFireDebuff@
   :?mode = "rangedAOEHeal"
     ?keepCultistMask
@@ -207,8 +210,7 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
   c.useBFG_DS()
 
 
-?foe ! "boss" &
-^foe.state ! 4 & foe.state ! -1 &
+?foe ! "boss" & !c.isDead() &
 ^c.canUseAetherTalisman()
   ?keepCultistMask
     c.useAetherTalisman("l")
@@ -248,19 +250,21 @@ c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
 
 
 :?ai.walking &
-^(foe.distance < 11 | foe.distance > 15) &
+^(foe.distance < u.dash_range_min |
+^foe.distance > u.dash_range_max) &
 ^c.canUseQuarterstaff()
   c.useQuarterstaff(a.myQuarterstaff)
 
-:?foe ! "skeleton_boss" & (ai.paused  |
-^(ai.idle & foe.distance > 11) | // if we're waiting
-^foe.state = -1 | foe.state = 4 | // foe death states
-^(encounter.isElite & foe.distance > 20) |
-^(!encounter.isElite & foe.distance > 15)) // or we can't engage in a fight
-  ?armor > 29 |
-  ^(foe ! "phase" & foe.distance < 40)
+:?foe ! "skeleton_boss" & (ai.paused |
+^(ai.idle & foe.distance > c.getRange("sword")) | // if we're waiting
+^c.isDead() |
+^(encounter.isElite & foe.distance > c.getRange("wand")) |
+^(!encounter.isElite & foe.distance > u.dash_range_max)) // or we can't engage in a fight
+  ?armor > a.compoundMaxArmor_boosted |
+  ^(foe ! "phase" & foe.distance < u.shield_rune_range)
     ldtF("engage")
-  :?14 <= armor & armor <= 29
+  :?a.compoundMaxArmor_default <= armor &
+  ^armor <= a.compoundMaxArmor_boosted
     ldtF("default")
   :
     ldtF("armorRegen")
