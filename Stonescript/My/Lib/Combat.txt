@@ -333,7 +333,7 @@ func useAbility_HS(weaponName)
 
 Valid weaponName values:
 - wand + <name>, wand + <element> >> Hidden wands */
-func useAbility_HW(weaponName)
+func useAbility_HW(weaponName, hand)
   ?weaponName = "wand" & (
   ^weaponName = "gravity"     | weaponName = "stone"  |
   ^weaponName = "plague"      | weaponName = "poison" |
