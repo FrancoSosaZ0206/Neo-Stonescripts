@@ -1,0 +1,436 @@
+// *******************************************************
+//                       7-Ridge.txt                      
+// *******************************************************
+
+// Script for Icy Ridge
+
+
+
+// /////////////////////////////////////////// //
+
+// IMPORTS
+
+var uimkr = new MyScripts/Lib/UI_Maker
+var u = new MyScripts/Lib/Utilities
+var a = new MyScripts/Lib/MyArsenal
+var i = new MyScripts/Lib/MyBetterInfo
+var c = new MyScripts/Lib/Combat
+
+/***********************************************/
+
+import UI/FoeStateTracker
+
+/***********************************************
+
+var som = new MyScripts/Lib/Speed_O_Meter
+
+var somPanel = som.mkUI(0, 1,
+^u.colorToHex("red"), true, false)
+?som.Update(false)
+  somPanel.Recycle()
+  somPanel = null
+
+  somPanel = som.mkUI(0, 1,
+  ^u.colorToHex("red"), true, false)
+
+/***********************************************
+
+var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
+
+dpsm.ENABLED = true
+dpsm.refreshRate = 30
+
+var dpsPanel
+?dpsm.Update()
+  ?dpsPanel
+    dpsPanel.Recycle()
+    dpsPanel = null
+
+  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+
+/***********************************************/
+
+
+
+// /////////////////////////////////////////// //
+
+// VARIABLES
+
+var blowing
+
+var keepCultistMask = true
+var voidweaverScreen = 3
+var smiteScreen = 1
+
+var moondialMode = -1
+
+
+?loc.loop
+  keepCultistMask = false
+
+  ?loc.stars > 10
+    smiteScreen = 2
+
+?buffs.string = "berserk" &
+^debuffs.string ! "chill"
+  moondialMode = 2
+:
+  moondialMode = 0
+
+
+
+// /////////////////////////////////////////// //
+
+// FUNCTIONS
+
+func ldtF(mode)
+
+  ?mode = "default"
+    equipL triskelion
+    ?!keepCultistMask
+      equipR @a.shieldCompound1@
+  :?mode = "armorRegen"
+    equipL triskelion
+    ?!keepCultistMask
+      equipR @a.shieldCompound2@
+  :?mode = "engage"
+    ?buffs.string ! "buff_inf_speed" & // infernal staff
+    ^totaltime % 2 = 0 // every even frame
+      equipL @a.hammerFireDefense@
+    :
+      equipL triskelion
+
+    ?!keepCultistMask
+      equipR @a.shieldFireDefense@
+
+  :?mode = "escape"
+    equipL mind
+    ?!keepCultistMask
+      equipR @a.shieldFireDefense@
+  :?mode = "magnet"
+    equipL star
+    ?!keepCultistMask
+      equipR triskelion
+
+  :?mode = "meleeDmg"
+    ?keepCultistMask
+      equipL Vantum Phoenix
+    :
+      c.doMoondial(Vantum Phoenix, a.swordFireDmg, moondialMode)
+  :?mode = "meleeDebuff"
+    ?keepCultistMask
+      ?c.canDebuffChill()
+        equipL @a.swordIceDebuff@
+      :?c.canDebuffWeaken()
+        equipL @a.swordPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.swordFireDebuff@
+    :
+      //Left hand:
+      ?c.canDebuffWeaken()
+        equipL @a.swordPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.swordFireDebuff@
+      :?c.canDebuffChill()
+        equipL @a.wandIceDebuff@
+
+      //Right hand:
+      ?c.canDebuffChill()
+        equipR @a.swordIceDebuff@
+  :?mode = "meleeHeal"
+    ?keepCultistMask
+      equipL Soulfetcher
+    :
+      c.doMoondial(Vantum Phoenix, Soulfetcher, moondialMode)
+
+  :?mode = "unmakeAOE"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.bigSwordAetherDebuff@
+    : */
+  :?mode = "unmake1v1"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.swordAetherDebuff@
+    :
+      // put a 2nd dU sword when we have it
+      c.doMoondial(a.swordAetherDebuff, Vantum Phoenix, moondialMode)*/
+
+  :?mode = "rangedDmgAOE"
+    ?keepCultistMask
+      equipL @a.wandFireDmg@
+    :
+      equip @a.staffFireDebuff@ // @a.bowFireDmg@
+  :?mode = "rangedDebuffAOE"
+    ?keepCultistMask
+      ?c.canDebuffChill()
+        equipL @a.wandIceDebuff@
+      :?c.canDebuffWeaken()
+        equipL @a.wandPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.wandFireDebuff@
+
+    :
+      ?c.canDebuffChill()
+        equip @a.staffIceDebuff@
+      :?c.canDebuffWeaken()
+        equip @a.staffPoisonDebuff@
+      :?c.canDebuffBurn()
+        equip @a.staffFireDebuff@
+  :?mode = "rangedHealAOE"
+    ?keepCultistMask
+      equipL @a.wandVigorBuff@
+    :
+      equip @a.staffVigorBuff@ // @a.bowVigorBuff@
+
+  :
+    >c-10,0,#red,
+    ^ERROR: ldtF() recieved incorrect mode: @mode@
+
+  return
+
+func fight1v1()
+
+  ?c.canDebuffAny() & // foe can be debuffed
+  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+    ldtF("meleeDebuff")
+
+  : // all possible debuffs applied
+    ?hp ! maxhp // heal up
+      ldtF("meleeHeal")
+
+    : // deal max damage
+      ldtF("meleeDmg")
+
+  return
+
+
+
+// /////////////////////////////////////////// //
+
+// PROCEDURE:
+
+?buffs.string ! "buff_inf_speed" & // infernal staff
+^totaltime % 2 = 0 & // every even frame
+^item.left = "triskelion"
+  equipL @a.hammerFireDefense@ // gain extra armor without slowing down
+
+c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
+
+// Auto Brewing
+?c.canBrewPotion("berserk")
+  c.brewPotion("berserk")
+:?c.canBrewPotion("lucky")
+  c.brewPotion("lucky")
+
+?loc.begin // initial equipment
+  equipL triskelion
+  equipR @a.shieldCompound1@
+:?keepCultistMask
+  ?item.right ! "bardiche" &
+  ^item.right ! "quarterstaff" &
+  ^item.right ! "heavy hammer" &
+  ^item.right ! "quarterstaff"
+    equipL triskelion
+    equipR mask
+
+
+?c.canUsePotionDmg() & keepCultistMask
+  activate potion
+
+
+?c.canUseBFG_DS(smiteScreen)
+  c.useBFG_DS()
+
+?foe ! "boss" &
+^foe.state ! 4 & foe.state ! -1 &
+^c.canUseAetherTalisman()
+  ?keepCultistMask
+    c.useAetherTalisman("l")
+  :
+    equipL triskelion
+    c.useAetherTalisman("r")
+:?foe = "boss" &
+^c.canUseFireTalisman()
+  ?keepCultistMask
+    c.useFireTalisman("l")
+  :
+    equipL triskelion
+    c.useFireTalisman("r")
+
+
+:?pickup.distance < 15
+  ldtF("magnet")
+
+
+:?foe.state ! 133 & // Hrímnir's blowing state
+^ai.walking &
+^(foe.distance < 11 | foe.distance > 15) &
+^c.canUseQuarterstaff()
+  c.useQuarterstaff(a.myQuarterstaff)
+
+:?foe.state ! 133 & // Hrímnir's blowing state
+^(ai.paused |
+^(ai.idle & foe.distance > 11) | // if we're waiting
+^foe.state = -1 | foe.state = 4 | // foe death states
+^foe.distance > 15) // or we can't engage in a fight
+  ?armor > 29 |
+  ^(foe ! "phase1" & foe.distance < 40)
+    ldtF("engage")
+  :?14 <= armor & armor <= 29
+    ldtF("default")
+  :
+    ldtF("armorRegen")
+
+// Boss fight (Hrímnir)
+:?foe = "yeti"
+  ?c.canUseCinderwisp() &
+  ^foe.debuffs.string = a.maxIgnitions_Default
+    c.useCinderwisp()
+  
+  ?foe.state > 1 // states 0 and 1 are when he has the ice shield
+    ?c.canUsePotionDmg()
+      activate potion
+
+    :?c.canUseStaffBerserker()
+      c.useStaffHidden(a.staffPoisonHidden)
+    :?loc.stars <= 15 & keepCultistMask &
+    ^c.canUseWandFrost()
+      // stun and finish him off
+      c.useWandFrost(a.wandIceHidden, "l")
+
+  
+  ?foe.state = 132 & foe.time >= 68
+    // about to blow air and apply chill
+    ?c.canUseWandFrost()
+      c.useWandFrost(a.wandIceHidden, "l")
+    :?c.canUseStaffPrevention() // try to prevent the debuff
+      c.useStaffHidden(a.staffVigorHidden)
+    :
+      fight1v1()
+
+  :?foe.state = 133 // blowing air
+    ?c.canDebuffAny()
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  : // dash and fight melee
+    ?c.canUseBashingShield()
+      c.useBashingShield(a.swordIceDebuff)
+    :?c.canUseDashingShield()
+      c.useDashingShield(a.swordIceDebuff, a.shieldDashing)
+
+    :
+      fight1v1()
+
+:?encounter.eliteMod = "monarch"
+  ?foe.count > 1 // eliminate the other foes
+    ?c.canUseBFG()
+      c.useBFG()
+    :?c.canUseWandExplosive()
+      c.useWandExplosive(a.wandFireHidden, "l")
+
+    :?foe.distance < c.getRange(sword) & // if too close, try to escape
+    ^(c.canUseMindstone() | c.canUseStaffAcrobatic())
+      ?c.canUseMindstone()
+        ldtF("escape")
+      :
+        c.useStaffHidden(a.staffStoneHidden)
+
+    :?c.canUseHeavyHammer() // if close, use hammer
+      c.useHeavyHammer(Mjölnir)
+    :?c.canDebuffAny()
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  :?c.canUseBashingShield()
+    c.useBashingShield(Vantum Phoenix)
+  :?c.canUseDashingShield()
+    c.useDashingShield(Vantum Phoenix, a.shieldDashing)
+
+  : // 1v1 with the monarch
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight1v1()
+
+:?c.canUseBashingShield()
+  c.useBashingShield(Mamba Negra)
+:?c.canUseDashingShield()
+  c.useDashingShield(Mamba Negra, a.shieldDashing)
+
+:?foe.name = "Giant Ice Elemental" // the miniboss
+  ?c.canUseCultistMask()
+    c.useCultistMask()
+
+  :?loc.stars > 15 & c.canUseWandFrost()
+    c.useWandFrost(a.wandIceHidden, "l")
+
+  :?loc.stars > 15 & c.canUseStaffBerserker()
+    c.useStaffHidden(a.staffPoisonHidden)
+
+  :?keepCultistMask & c.canUseBardiche()
+    c.useBardiche(Kubikiribocho)
+
+  :
+    fight1v1()
+
+:?foe.count > 1
+  ?c.canUseBFG_DS(screen.i) &
+  ^screen.i ! smiteScreen
+    c.useBFG_DS()
+
+  ?!encounter.isElite &
+  ^screen.i ! smiteScreen &
+  ^c.canUseVoidweaver()
+    c.useVoidweaver()
+
+  ?encounter.isElite &
+  ^encounter.eliteMod ! "tenacious" &
+  ^c.canUseWandGravity()
+    c.useWandGravity(a.wandStoneHidden, "l")
+
+  // Hinder regen
+  ?encounter.eliteMod = "regen" &
+  ^c.canUseWandExplosive()
+    c.useWandExplosive(a.wandFireHidden, "l")
+
+  // Remove armor
+  :?c.canUseHeavyHammer()
+    c.useHeavyHammer(Mjölnir)
+
+
+  :?foe.hp + foe.armor > 1000 & // tanky normal foe
+  ^foe.GetCount(c.getRange(sword)) = 1 // at melee range
+    ?c.canUseBardiche() &
+    ^foe.hp + foe.armor >= a.bardicheRDmg
+      c.useBardiche(Kubikiribocho)
+    :?encounter.eliteMod ! "tenacious"
+      ldtF("unmake1v1")
+    :
+      fight1v1()
+
+
+  :?c.canDebuffAny() &
+  ^encounter.eliteMod ! "tenacious"
+    ldtF("rangedDebuffAOE")
+  
+  :?encounter.eliteMod = "mundane" &
+  ^!keepCultistMask
+    equip @a.bowAetherDmg@
+  :
+    ldtF("rangedDmgAOE")
+
+: // 1 normal foe
+  ?c.canUseBardiche() &
+  ^foe.hp + foe.armor >= a.bardicheRDmg
+    c.useBardiche(Kubikiribocho)
+  :
+    fight1v1()
+
+// *******************************************************
+//                  END OF "7-Ridge.txt"                  
+// *******************************************************

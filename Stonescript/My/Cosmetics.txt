@@ -1,0 +1,14 @@
+?loc = "caustic_caves"
+  import Hats/Helmet
+  import Cosmetics/WavyScarf
+  import Pets/Spider
+:
+  // Default player cosmetics
+  import Cosmetics/StarCloak // WavyScarf
+  import Hats/MushroomHat
+  import Pets/Skully
+  import Hats/LanternTalisman
+
+  // Foe cosmetics
+  import Foes/PallasCrown
+  import Foes/SurferGuardian

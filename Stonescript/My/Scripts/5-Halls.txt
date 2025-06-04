@@ -1,0 +1,308 @@
+﻿// *******************************************************
+//                       5-Halls.txt                      
+// *******************************************************
+
+// Script for Haunted Halls
+
+
+
+// /////////////////////////////////////////// //
+
+// IMPORTS
+
+var u = import My/Lib/Utilities
+var c = import My/Lib/Combat
+var a = import My/Lib/Arsenal
+var i = import My/Lib/BetterInfo
+
+c.Init()
+
+
+
+// /////////////////////////////////////////// //
+
+// VARIABLES
+
+var weakenType = a.weaken_default
+
+
+
+// /////////////////////////////////////////// //
+
+// FUNCTIONS
+
+func fight(mode)
+  ?mode = "evade"
+    ?c.canUseMindstone() & foe ! "ranged"
+      a.ldtF("escape", c.permapotSetup)
+    :?c.canUseStaffHidden("acrobatic") & foe ! "ranged"
+    ^& foe.distance < u.dash_range_min
+      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+    
+    :?c.canUseStaffHidden("eternity") & foe.distance < u.dash_range_min
+      c.useStaffHidden(a.staffIceHidden, "eternity")
+    
+    :?foe.distance > c.getRange("sword")
+      ?foe.count > 1
+        fight("ranged splash")
+      :
+        fight("ranged pierce")
+
+    :?foe ! "boss" &
+    ^encounter.eliteMod ! "tenacious" &
+    ^encounter.eliteMod ! "monarch" // can unmake
+      a.ldtF("defense unmake", c.permapotSetup)
+    :
+      a.ldtF("defense", c.permapotSetup)
+
+  : // debuff, if possible
+    ?c.canDebuffAny() & // foe can be debuffed
+    ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+      ?mode = "melee"
+        a.ldtF("melee 1v1 debuff", c.permapotSetup)
+      :?mode = "ranged splash"
+        a.ldtF("ranged splash debuff", c.permapotSetup)
+      :?mode = "ranged pierce"
+        a.ldtF("ranged pierce debuff", c.permapotSetup)
+
+    : // all possible debuffs applied
+      ?hp ! maxhp // heal up
+        ?mode = "melee"
+          a.ldtF("melee 1v1 heal", c.permapotSetup)
+        :?mode = "ranged splash"
+          a.ldtF("ranged splash heal", c.permapotSetup)
+        :?mode = "ranged pierce"
+          a.ldtF("ranged pierce heal", c.permapotSetup)
+
+      : // deal max damage
+        ?mode = "melee"
+          a.ldtF("melee 1v1", c.permapotSetup)
+        :?mode = "ranged splash"
+          a.ldtF("ranged splash", c.permapotSetup)
+        :?mode = "ranged pierce"
+          a.ldtF("ranged pierce", c.permapotSetup)
+
+  return
+
+
+
+// /////////////////////////////////////////// //
+
+// PROCEDURE
+
+// Calculate the amount of damage the foe will deal
+?loc.stars > 15
+  weakenType = a.weaken_boosted
+
+c.smiteScreen_Max = 4
+c.screen_DS_Change("bfg")
+c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
+
+// Auto Brewing
+?c.canBrewPotion("berserk")
+  c.brewPotion("berserk")
+
+?loc.begin // initial equipment
+  a.ldtF("default", c.permapotSetup)
+:?c.permapotSetup
+  ?item.right ! "bardiche" &
+  ^item.right ! "quarterstaff" &
+  ^item.right ! "heavy hammer" &
+  ^item.right ! "quarterstaff"
+    a.ldtF("extend", c.permapotSetup)
+
+
+?c.canUseBFG_DS() & loc.stars > 15
+  c.useBFG_DS()
+
+
+?foe ! "boss" & !c.isDead() &
+^c.canUseAetherTalisman()
+  ?c.permapotSetup
+    c.useAetherTalisman("l")
+  :
+    equipL triskelion
+    c.useAetherTalisman("r")
+:?foe = "boss" &
+^c.canUseFireTalisman()
+  ?c.permapotSetup
+    c.useFireTalisman("l")
+  :
+    equipL triskelion
+    c.useFireTalisman("r")
+
+:?c.canUsePotionDmg() & c.permapotSetup
+  activate potion
+:?c.canUseStaffHidden("infernal")
+  c.useStaffHidden(a.staffFireHidden, "infernal")
+
+:?pickup.distance < 15
+  a.ldtF("magnet", c.permapotSetup)
+
+// ABOUT TO ATTACK
+:?foe = "skeleton_boss" & // & foe = "boss"
+^foe.state = 32 & foe.time > 63
+  ?c.canUseStaffHidden("prevention") &
+  ^foe = "phase2"
+    c.useStaffHidden(a.staffVigorHidden, "prevention")
+
+  :?c.canUseStaffHidden("eternity") &
+  ^buffs.string ! "buff_staff_protection"
+    c.useStaffHidden(a.staffIceHidden, "eternity")
+
+  :?foe.distance <= c.getRange("sword") & // couldn't dash, try to unmake to prevent attack
+  ^foe ! "phase2" &
+  ^!(loc.stars > 15 & c.permapotSetup)
+    a.ldtF("defense unmake", c.permapotSetup)
+
+  :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
+    fight("evade")
+
+  :?armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
+    ?buffs.string ! "buff_damage" & foe ! "phase2"
+      a.ldtF("defense buff empower", c.permapotSetup)
+    :
+      fight("melee")
+
+
+:?c.isQuarterstaffRange() &
+^!(encounter.isElite &
+^foe.distance <= c.getRange("wand") &
+^(item.left = "wand" | item.right = "wand")) &
+^c.canUseQuarterstaff()
+  c.useQuarterstaff(a.myQuarterstaff)
+
+:?foe ! "skeleton_boss" &
+^!(encounter.isElite &
+^foe.distance <= c.getRange("wand") &
+^(item.left = "wand" | item.right = "wand")) &
+^(ai.paused |
+^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
+^c.isDead() |
+^(encounter.isElite & foe.distance > c.getRange("wand")) |
+^(!encounter.isElite & foe.distance > u.dash_range_max)) // or we can't engage in a fight
+  ?armor > a.compoundMaxArmor_boosted |
+  ^(foe ! "phase" & foe.distance < u.shield_rune_range)
+    ldtF("engage")
+  :?a.compoundMaxArmor_default <= armor &
+  ^armor <= a.compoundMaxArmor_boosted
+    ldtF("default")
+  :
+    ldtF("armorRegen")
+
+
+:?foe = "skeleton_boss" // Pallas (note: sword can be unmade in phase1)
+  ?c.canUseCinderwisp() &
+  ^foe.debuffs.string = a.maxIgnitions_Default
+    c.useCinderwisp()
+  ?c.canUsePotionDmg()
+    activate potion
+
+  ?foe = "phase2" & foe.count > 1
+    ?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :?c.canUseWandHidden("explosive")
+      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+    :
+      fight("rangedAOE")
+
+  :?c.canUseBashingShield()
+    ldtF("bash")
+  :?c.canUseDashingShield()
+    ldtF("dash")
+
+  :?c.canUseWandHidden("plague") // reduce their damage
+    c.useWandHidden(a.wandPoisonHidden, "plague", "l")
+  :?c.canUseStaffHidden("berserker") // increase our damage
+    c.useStaffHidden(a.staffPoisonHidden, "berserker")
+  :?c.canUseCultistMask()
+    c.useCultistMask()
+  :?c.canUseWandHidden("frost")
+    c.useWandHidden(a.wandIceHidden, "frost", "l")
+
+  :
+    fight("melee")
+
+
+// normal foes
+:?encounter.eliteMod = "monarch"
+  ?foe.count > 1 // eliminate the other foes
+    ?c.canUseBFG()
+      c.useBFG()
+    :?c.canUseWandHidden("explosive")
+      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+
+    :?foe.distance < 7 & // if too close, try to escape
+    ^(c.canUseMindstone() |
+    ^c.canUseStaffHidden("acrobatic"))
+      ?c.canUseMindstone()
+        ldtF("escape")
+      :
+        c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+    :?c.canUseHeavyHammer() // if close, use hammer
+      c.useHeavyHammer(Mjölnir)
+    :
+      fight("rangedAOE")
+
+  :?c.canUseBashingShield()
+    ldtF("bash")
+  :?c.canUseDashingShield()
+    ldtF("dash")
+
+  : // 1v1 with the monarch
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :?foe ! "immune_to_physical"
+      fight("melee")
+    :
+      fight("rangedAOE")
+
+:?c.canUseBashingShield() & !encounter.isElite
+  ldtF("bash")
+:?c.canUseDashingShield() & !encounter.isElite
+  ldtF("dash")
+
+:?foe.name = "R.I.Pieces"
+  fight("melee")
+
+:?foe.count > 1 // AOE strategy
+  ?!(screen.i = smiteScreen |
+  ^screen.i = smiteScreen + 1)
+    ?c.canUseVoidweaver() & !encounter.isElite
+      c.useVoidweaver()
+
+    :?encounter.eliteMod ! "tenacious" &
+    ^c.canUseWandHidden("gravity")
+      c.useWandHidden(a.wandStoneHidden, "gravity", "l")
+
+
+  // Hinder regen
+  ?encounter.eliteMod = "regen" &
+  ^c.canUseWandHidden("explosive")
+    c.useWandHidden(a.wandFireHidden, "explosive", "l")
+
+  // Remove armor
+  :?encounter.eliteMod = "plated" &
+  ^c.canUseHeavyHammer()
+    c.useHeavyHammer(Mjölnir)
+
+  :
+    fight("rangedAOE")
+
+: // 1v1 strategy
+  ?foe ! "immune_to_physical"
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight("melee")
+  :
+    fight("rangedAOE")
+
+
+
+// *******************************************************
+//                  END OF "5-Halls.txt"                  
+// *******************************************************

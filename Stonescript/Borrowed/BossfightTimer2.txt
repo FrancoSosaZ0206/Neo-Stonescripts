@@ -1,0 +1,74 @@
+/* BOSS FIGHT TIMER V2
+  Made by: Tomato Bulb
+  Modified by: MetalEagle26 (Tom Crow) */
+
+
+
+// IMPORTS
+
+var u = new MyScripts/Lib/Utilities
+var i = new MyScripts/Lib/MyBetterInfo
+
+
+
+// GLOBAL VARIABLES
+// editing these probably won't break stuff
+var bftColor    = "#339999"
+var bftXpos     = "default"
+var bftYpos     = "default"
+var bftBlink    = true
+var bftKillText = ""
+
+
+
+// PRIVATE VARIABLES
+// editing these probably will break stuff
+var prebos = 0
+var endbos = 0
+var thebos = foe.name
+var fip    = false
+var pebb   = "#ea#sports"
+
+var t = time
+t = time
+bftKillText = thebos + "#killed#in#" +
+^             u.formatSpeedrun(endbos - prebos) +
+^             "!"
+
+// PROCEDURE:
+
+?(totaltime - prebos) % 21 <= 7
+  pebb = "."
+
+:?(totaltime - prebos) % 21 <= 14
+  pebb = ".."
+:
+  pebb = "..."
+
+?foe = "boss" & thebos ! foe.name
+  prebos  = totaltime
+  thebos  = foe.name
+
+  ?item.right.state = 2 | item.left.state = 2 | t = 1
+    fip     = true
+
+?foe = "boss" & foe.hp < 1 & foe.state ! 125 & foe.state ! 108 &
+^(totaltime - endbos ! 1 & foe.time = 1 | foe.time = 0) | t = 1
+  endbos  = totaltime
+  fip     = false
+
+?(totaltime - endbos) % 10 >= 5 | key = primary | !bftBlink
+
+  ?endbos - prebos > 0 & totaltime - 120 <= endbos
+
+    ?bftXpos ! "default" & bftYpos ! "default"
+      >`@bftXpos@,@bftYpos@,@bftColor@,@bftKillText@
+    :
+      u.showStrCtr(8, 30, bftKillText, bftColor, false)
+
+  :?fip = true
+    u.showStrCtr(8, 30, "fight#in#progress#" + pebb, bftColor, false)
+  
+
+
+/* *************************** */

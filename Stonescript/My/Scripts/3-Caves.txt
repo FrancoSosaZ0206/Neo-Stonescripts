@@ -1,0 +1,434 @@
+﻿// *******************************************************
+//                      3-Caves.txt                       
+// *******************************************************
+
+// Script for Caves of Fear
+
+
+
+// /////////////////////////////////////////// //
+
+// IMPORTS
+
+var uimkr = new MyScripts/Lib/UI_Maker
+var u = new MyScripts/Lib/Utilities
+var a = new MyScripts/Lib/MyArsenal
+var i = new MyScripts/Lib/MyBetterInfo
+var c = new MyScripts/Lib/Combat
+
+/***********************************************/
+
+import UI/FoeStateTracker
+
+/***********************************************/
+
+var som = new MyScripts/Lib/Speed_O_Meter
+
+var somPanel = som.mkUI(0, 1,
+^u.colorToHex("red"), true, false)
+?som.Update(false)
+  somPanel.Recycle()
+  somPanel = null
+
+  somPanel = som.mkUI(0, 1,
+  ^u.colorToHex("red"), true, false)
+
+/***********************************************/
+
+var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
+
+dpsm.ENABLED = true
+dpsm.refreshRate = 30
+
+var dpsPanel
+?dpsm.Update()
+  ?dpsPanel
+    dpsPanel.Recycle()
+    dpsPanel = null
+
+  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+
+/***********************************************/
+
+
+
+// /////////////////////////////////////////// //
+
+// VARIABLES
+
+var keepCultistMask = true
+var smiteScreen = 2
+var moondialMode = -1
+
+?loc.loop
+  keepCultistMask = false
+
+  ?totaltime = 1 & smiteScreen ! 4
+    smiteScreen++
+
+?buffs.string = "berserk"
+  moondialMode = 2
+:
+  moondialMode = 0
+
+
+// /////////////////////////////////////////// //
+
+// FUNCTIONS
+
+func ldtF(mode)
+
+  ?mode = "default"
+    equipL triskelion
+    ?!keepCultistMask
+      equipR @a.shieldCompound1@
+  :?mode = "armorRegen"
+    equipL triskelion
+    ?!keepCultistMask
+      equipR @a.shieldCompound2@
+  :?mode = "engage"
+    ?buffs.string ! "buff_inf_speed" & // infernal staff
+    ^totaltime % 2 = 0 // every even frame
+      equipL @a.hammerIceDefense@
+    :
+      equipL triskelion
+
+    ?!keepCultistMask
+      equipR @a.shieldIceDefense@
+
+  :?mode = "escape"
+    equipL mind
+    ?!keepCultistMask
+      equipR @a.shieldIceDefense@
+  :?mode = "magnet"
+    equipL star
+    ?!keepCultistMask
+      equipR triskelion
+
+  :?mode = "meleeDmg"
+    ?keepCultistMask
+      equipL Bifrost
+    :
+      c.doMoondial(Bifrost, a.swordIceDmg, moondialMode)
+  :?mode = "meleeDebuff"
+    ?keepCultistMask
+      ?c.canDebuffChill()
+        equipL @a.swordIceDebuff@
+      :?c.canDebuffWeaken()
+        equipL @a.swordPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.swordFireDebuff@
+    :
+      //Left hand:
+      ?c.canDebuffWeaken()
+        equipL @a.swordPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.swordFireDebuff@
+      :?c.canDebuffChill()
+        equipL @a.wandIceDebuff@
+
+      //Right hand:
+      ?c.canDebuffChill()
+        equipR @a.swordIceDebuff@
+  :?mode = "meleeHeal"
+    ?keepCultistMask
+      equipL Soulfetcher
+    :
+      c.doMoondial(Bifrost, Soulfetcher, moondialMode)
+
+  :?mode = "unmakeAOE"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.bigSwordAetherDebuff@
+    : */
+  :?mode = "unmake1v1"
+    equip @a.staffAetherDebuff@
+    /* ?keepCultistMask
+      equipL @a.swordAetherDebuff@
+    :
+      // put a 2nd dU sword when we have it
+      c.doMoondial(a.swordAetherDebuff, Bifrost, moondialMode)*/
+
+  :?mode = "rangedDmgAOE"
+    ?keepCultistMask
+      equipL @a.wandIceDmg@
+    :
+      equip @a.staffIceDebuff@ // @a.bowIceDmg@
+  :?mode = "rangedDebuffAOE"
+    ?keepCultistMask
+      ?c.canDebuffChill()
+        equipL @a.wandIceDebuff@
+      :?c.canDebuffWeaken()
+        equipL @a.wandPoisonDebuff@
+      :?c.canDebuffBurn()
+        equipL @a.wandFireDebuff@
+
+    :
+      ?c.canDebuffChill()
+        equip @a.staffIceDebuff@
+      :?c.canDebuffWeaken()
+        equip @a.staffPoisonDebuff@
+      :?c.canDebuffBurn()
+        equip @a.staffFireDebuff@
+  :?mode = "rangedHealAOE"
+    ?keepCultistMask
+      equipL @a.wandVigorBuff@
+    :
+      equip @a.staffVigorBuff@ // @a.bowVigorBuff@
+
+  :
+    >c-10,0,#red,
+    ^ERROR: ldtF() recieved incorrect mode: @mode@
+
+  return
+
+func fight1v1()
+
+  ?c.canDebuffAny() & // foe can be debuffed
+  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+    ldtF("meleeDebuff")
+
+  : // all possible debuffs applied
+    ?hp ! maxhp // heal up
+      ldtF("meleeHeal")
+
+    : // deal max damage
+      ldtF("meleeDmg")
+
+  return
+
+
+
+// /////////////////////////////////////////// //
+
+// PROCEDURE
+
+c.doAAC(a.hammerIceDefense, a.shieldIceDefense)
+
+// Auto Brewing
+?c.canBrewPotion("berserk")
+  c.brewPotion("berserk")
+:?c.canBrewPotion("lucky")
+  c.brewPotion("lucky")
+
+?loc.begin // initial equipment
+  equipL triskelion
+  equipR @a.shieldCompound1@
+:?keepCultistMask
+  ?item.right ! "bardiche" &
+  ^item.right ! "quarterstaff" &
+  ^item.right ! "heavy hammer" &
+  ^item.right ! "quarterstaff"
+    equipL triskelion
+    equipR mask
+
+
+?c.canUsePotionDmg() & keepCultistMask
+  activate potion
+
+:?c.canUseStaffHidden("infernal")
+  c.useStaffHidden(a.staffFireHidden, "infernal")
+
+
+?c.canUseBFG_DS(smiteScreen)
+  c.useBFG_DS()
+
+
+?foe ! "boss" &
+^foe.state ! 4 & foe.state ! -1 &
+^c.canUseAetherTalisman()
+  ?keepCultistMask
+    c.useAetherTalisman("l")
+  :
+    equipL triskelion
+    c.useAetherTalisman("r")
+:?foe = "boss" &
+^c.canUseFireTalisman()
+  ?keepCultistMask
+    c.useFireTalisman("l")
+  :
+    equipL triskelion
+    c.useFireTalisman("r")
+
+
+:?pickup.distance < 15
+  ldtF("magnet")
+
+
+:?foe.distance < 11 & (
+^(foe = "cool_bat" &
+^((foe.state = 33 & foe.time > 12) | foe.state = 2)) |
+^(foe = "spider_boss_harder" &
+^foe.state = 142 & foe.time > 57))
+  >c0,0,#red,*** ABOUT TO ATTACK! ***
+
+  ?c.canUseStaffHidden("prevention") // prevent Weaken
+    c.useStaffHidden(a.staffVigorHidden, "prevention")
+
+  :?buffs.string ! "buff_staff_protection" // couldn't use protection staff
+    ?c.canUseMindstone()  // dash back
+      ldtF("escape")
+    :?c.canUseStaffHidden("acrobatic") &
+    ^foe.distance <= c.getRange("sword")
+      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+    :?c.canUseStaffHidden("eternity") & // try to block attack (not sure if it prevents debuffs too)
+    ^foe.distance <= c.getRange("sword")
+      c.useStaffHidden(a.staffIceHidden, "eternity")
+
+    :?foe.distance <= c.getRange("sword")  // couldn't dash, fight melee
+      fight1v1()
+
+    :?c.canDebuffAny() // could dash, fight ranged
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  :
+    fight1v1()
+
+
+:?ai.walking &
+^(foe.distance < 11 | foe.distance > 15) &
+^c.canUseQuarterstaff()
+  c.useQuarterstaff(a.myQuarterstaff)
+
+:?ai.paused |
+^(ai.idle & foe.distance > 11) | // if we're waiting
+^foe.state = -1 | foe.state = 4 | // foe death states
+^foe.distance > 15 // or we can't engage in a fight
+  ?armor > 29 |
+  ^(foe ! "phase1" & foe.distance < 40)
+    ldtF("engage")
+  :?14 <= armor & armor <= 29
+    ldtF("default")
+  :
+    ldtF("armorRegen")
+
+
+:?foe ! "phase" // not the boss
+
+  ?encounter.eliteMod = "monarch"
+    ?foe.count > 1 // eliminate the other foes
+      ?c.canUseBFG()
+        c.useBFG()
+      :?c.canUseWandHidden("explosive")
+        c.useWandHidden(a.wandFireHidden, "explosive", "l")
+
+      :?foe.distance < 7 & // if too close, try to escape
+      ^(c.canUseMindstone() |
+      ^c.canUseStaffHidden("acrobatic"))
+        ?c.canUseMindstone()
+          ldtF("escape")
+        :
+          c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+
+      :?c.canUseHeavyHammer() // if close, use hammer
+        c.useHeavyHammer(Mjölnir)
+      :?c.canDebuffAny()
+        ldtF("rangedDebuffAOE")
+      :
+        ldtF("rangedDmgAOE")
+
+    :?c.canUseBashingShield()
+      c.useBashingShield(Mamba Negra)
+    :?c.canUseDashingShield()
+      c.useDashingShield(Mamba Negra, a.shieldDashing)
+
+    : // 1v1 with the monarch
+      ?foe.hp + foe.armor >= a.bardicheRDmg &
+      ^c.canUseBardiche()
+        c.useBardiche(Kubikiribocho)
+      :
+        fight1v1()
+
+  :?c.canUseBashingShield()
+    c.useBashingShield(Mamba Negra)
+  :?c.canUseDashingShield()
+    c.useDashingShield(Mamba Negra, a.shieldDashing)
+
+  :?foe = "cool_bat" // The miniboss
+    >c0,0,#green,*** FIGHTING BIG BAT! ***
+
+    ?c.canUseWandHidden("frost")
+      c.useWandHidden(a.wandIceHidden, "frost", "l")
+
+    :?c.canDebuffAny()
+      ldtF("meleeDebuff")
+
+    :?c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+    :?c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      ldtF("meleeDmg")
+
+  :?foe.count > 1 // AOE strategy
+    ?!encounter.isElite &
+    ^screen.i ! smiteScreen &
+    ^c.canUseVoidweaver()
+      c.useVoidweaver()
+
+    ?encounter.isElite &
+    ^encounter.eliteMod ! "tenacious" &
+    ^c.canUseWand("gravity")
+      c.useWandHidden(a.wandStoneHidden, "gravity", "l")
+
+    // Hinder regen
+    ?encounter.eliteMod = "regen" &
+    ^c.canUseWandHidden("explosive")
+      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+
+    // Remove armor
+    :?encounter.eliteMod = "plated" &
+    ^c.canUseHeavyHammer()
+      c.useHeavyHammer(Mjölnir)
+
+    :?c.canDebuffAny() &
+    ^encounter.eliteMod ! "tenacious"
+      ldtF("rangedDebuffAOE")
+    :
+      ldtF("rangedDmgAOE")
+
+  : // 1v1 strategy
+    ?foe.hp + foe.armor > a.bardicheRDmg &
+    ^c.canUseBardiche()
+      c.useBardiche(Kubikiribocho)
+    :
+      fight1v1()
+
+
+:?foe = "spider_boss_harder" // Bolesh, the Cunning
+  ?c.canUseCinderwisp() &
+  ^foe.debuffs.string = a.maxIgnitions_Default
+    c.useCinderwisp()
+
+  ?c.canUsePotionDmg()
+    activate potion
+
+  ?c.canUseBashingShield()
+    c.useBashingShield(Mamba Negra)
+  :?c.canUseDashingShield()
+    c.useDashingShield(Mamba Negra, a.shieldDashing)
+
+  :?c.canUseWandHidden("plague") // reduce their damage
+    c.useWandHidden(a.wandPoisonHidden, "plague", "l")
+  :?c.canUseStaffHidden("berserker") // increase our damage
+    c.useStaffHidden(a.staffPoisonHidden, "berserker")
+
+  :?c.canUseCultistMask()
+    c.useCultistMask()
+
+  :?c.canUseWandHidden("frost")
+    c.useWandHidden(a.wandIceHidden, "frost", "l")
+
+  :?c.canUseBardiche() & keepCultistMask
+    c.useBardiche(Kubikiribocho)
+  :
+    fight1v1()
+
+
+
+// *******************************************************
+//                  END OF "3-Caves.txt"                  
+// *******************************************************

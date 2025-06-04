@@ -1,5 +1,5 @@
 // *******************************************************
-//                     MyArsenal.txt                      
+//                       Arsenal.txt
 // *******************************************************
 
 
@@ -47,7 +47,7 @@
 
 // VARIABLES:
 
-var c = import MyScripts/Lib/Combat
+var c = import My/Lib/Combat
 
 
 
@@ -153,9 +153,10 @@ Death's Kiss = sword poison shiny dP (enchanted: P) */
 
 // ................ STONE ............... //
 
+  var shieldStone = "shield stone *max" // enchanted: dodge chance
   var bowStone = "bow stone *max"
   var wandStoneHidden = "wand stone hidden *max" // aka Gravity Wand
-  var staffStoneHidden = "staff stone hidden *max" //aka Acrobatic Staff
+  var staffStoneHidden = "staff stone hidden *max" // aka Acrobatic Staff
 
 // ............. ALTERNATE .............. //
 
@@ -406,11 +407,13 @@ func ldtF(mode, permapotSetup)
           equipL Vantum Phoenix
 
       // Right hand
-      ?foe = "stone"
+      :?mode = "tank"
         equipR @shieldTowering@
 
       :?mode = "evade"
-        ?foe = "poison"
+        ?foe = "stone"
+          equipR @shieldStone@
+        :?foe = "poison"
           equipR @shieldIceDefense@
         :?foe = "vigor"
           equipR @shieldPoisonDefense@
@@ -422,16 +425,16 @@ func ldtF(mode, permapotSetup)
           equipR @shieldFireDefense@
 
       :?mode = "buff" | mode = "debuff"
-        ?foe = "poison" // chill
-          equipR @shieldIceDebuff@
-        :?foe = "vigor" // empower
+        ?mode = "poison" | mode = "empower"
           equipR @shieldPoisonBuff@
-        :?foe = "aether" // heal
+        :?mode = "vigor" | mode = "heal"
           equipR @shieldVigorBuff@
-        :?foe = "fire" // unmake
+        :?mode = "aether" | mode = "unmake"
           equipR @shieldAetherDebuff@
-        :?foe = "ice" // burn
+        :?mode = "fire" | mode = "burn"
           equipR @shieldFireDebuff@
+        :?mode = "ice" | mode = "chill"
+          equipR @shieldIceDebuff@
 
   :?mode = "melee"
     ?mode = "aoe" | mode = "splash" // TO DO: big swords
@@ -726,5 +729,5 @@ func ldtF(mode, permapotSetup)
 
 
 // *******************************************************
-//                 END OF "MyArsenal.txt"                 
+//                  END OF "Arsenal.txt"
 // *******************************************************

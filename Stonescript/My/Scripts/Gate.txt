@@ -1,0 +1,42 @@
+﻿// *******************************************************
+//                     START OF "Gate"                    
+// *******************************************************
+
+
+
+// IMPORTS
+
+var c = import My/Lib/Combat
+var a = import My/Lib/Arsenal
+var u = import My/Lib/Utilities
+
+var set = import Borrowed/scottyEyeTracker
+
+
+
+// PROCEDURE:
+
+set.scottyEyeTracker("#rainbow")
+
+?loc.begin
+  equipL triskelion
+  equipR @a.shieldCompound1@
+
+:?pickup.distance < 12
+  a.ldtF("magnet", false)
+
+:?ai.walking
+  ?c.canUseStaffHidden("infernal")
+    c.useStaffHidden(a.staffFireHidden, "infernal")
+  :?c.canUseQuarterstaff()
+    c.useQuarterstaff(a.myQuarterstaff)
+
+:
+  equipL triskelion
+  equipR @a.shieldCompound2@
+
+
+
+// *******************************************************
+//                       END OF "Gate"                    
+// *******************************************************

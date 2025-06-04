@@ -1,0 +1,895 @@
+﻿// *******************************************************
+//                       Combat.txt                       
+// *******************************************************
+
+
+/* FILE INFO
+
+Combat functions library
+Made by MetalEagle26 (Tom Crow)
+
+This library provides some game-related
+functions to make the task of doing a
+farming script easier.
+
+- How to use:
+  var c = new Combat
+
+- Tip: If you want to use the variables here,
+  put c.Init() at the top of your script.
+
+- Use the functions that you need like this:
+  ?c.useBFG() // example */
+
+
+// IMPORTS
+
+var u = import My/Lib/Utilities
+
+
+
+
+// VARIABLES
+
+// Status
+
+var midhp
+var lowhp
+var hihp
+
+// Others
+
+var moondialMode = -1
+var permapotSetup = true
+var smiteScreen_Target = -1
+var smiteScreen_Max = -1
+var maskScreen_Target = -1
+var maskScreen_Max = -1
+
+// FUNCTIONS
+
+func Init()
+  midhp = maxhp / 2
+  lowhp = maxhp / 3
+  hihp = (4 * maxhp) / 5
+
+  ?buffs.string = "berserk"
+    moondialMode = 2
+  :
+    moondialMode = 0
+
+  ?loc.begin
+    smiteScreen_Target = 1
+  :?loc.loop
+    permapotSetup = false
+
+    burstingTimer = 0
+
+  return
+
+/* Returns true if a weapon's special ability
+can be activated.
+Valid weaponName values:
+- bfg, blade >> Blade of the Fallen God
+- mask, cultist >> Cultist Mask
+- arm, skeleton >> Skeleton Arm
+- bash >> Bashing Shield
+- dash >> Dashing Shield
+- bardiche
+- heavy, hammer >> Heavy Hammer
+- quarterstaff
+- mind >> Mindstone
+- hatchet
+- voidweaver >> Aether Talisman's summon
+- cinderwisp >> Fire Talisman's summon
+- staff + <name>, staff + <element> >> Hidden staves
+- wand + <name>, wand + <element> >> Hidden wands
+- <element>_talisman >> Talismans  */
+func canUseAbility(weaponName)
+  var result = item.CanActivate()
+
+  ?weaponName = "bfg" | weaponName = "blade"
+    result += item.GetCooldown("blade") <= 0
+  :?weaponName = "mask" | weaponName = "cultist"
+    result += item.GetCooldown("mask") <= 0
+  :?weaponName = "arm" | weaponName = "skeleton"
+    result += item.GetCooldown("skeleton_arm") <= 0 &
+    ^3 < foe.distance & foe.distance < 9
+
+  :?weaponName = "bash" | weaponName = "dash"
+    result += !ai.idle & isDashingRange()
+
+    ?weaponName = "bash"
+      result += item.GetCooldown("bash") <= 0
+    : // weaponName = "dash"
+      result += item.GetCooldown("dash") <= 0
+
+  :?weaponName = "bardiche"
+    result += item.GetCooldown("heavy_hammer") <= 0 &
+    ^foe.distance <= getRange("heavy hammer ability") |
+    ^isCasting("heavy hammer")
+  :?weaponName = "heavy" | weaponName = "hammer"
+    result += item.GetCooldown("bardiche") <= 0 &
+    ^foe.distance <= getRange("bardiche ability") |
+    ^isCasting("bardiche")
+  :?weaponName = "quarterstaff"
+    result += item.GetCooldown("quarterstaff") <= 0 &
+    isQuarterstaffRange() |
+    ^isCasting("quarterstaff")
+  
+  :?weaponName = "mind"
+    result += item.GetCooldown("mind") <= 0
+
+  :?weaponName = "hatchet"
+    result += item.GetCooldown("hatchet") <= 0 &
+    ^harvest.distance < u.hatchet_range |
+    ^isCasting("hatchet")
+
+  /*:?weaponName = ""
+    result += item.GetCooldown("") <= 0 &
+    ^summon.GetId() = ""*/
+  /*:?weaponName = ""
+    result += item.GetCooldown("") <= 0 &
+    ^summon.GetId() = ""*/
+  /*:?weaponName = ""
+    result += item.GetCooldown("") <= 0 &
+    ^summon.GetId() = ""*/
+  :?weaponName = "voidweaver"
+    result += item.GetCooldown("voidweaver") <= 0 &
+    ^summon.GetId() = "voidweaver" & foe ! "boss" & // bosses are immune to unmake
+    ^encounter.eliteMod ! "tenacious" & // tenacious can't be debuffed
+    ^!(encounter.eliteMod = "monarch" & foe.count = 1) // monarch foes can't be unmade
+  :?weaponName = "cinderwisp"
+    result += item.GetCooldown("cinderwisp") <= 0 &
+    ^summon.GetId() = "cinderwisp"
+  /*:?weaponName = ""
+    result += item.GetCooldown("") <= 0 &
+    ^summon.GetId() = ""*/
+
+  :?weaponName = "wand" | weaponName = "staff"
+    var internalName
+    var requiredArmor
+    var isOk = true // only set to false if weaponName is incorrect
+
+    // Wands
+    ?weaponName = "gravity" | weaponName = "stone"
+      internalName = "wand_stone"
+      requiredArmor = u.wandStoneArmor
+    :?weaponName = "plague" | weaponName = "poison"
+      internalName = "wand_poison"
+      requiredArmor = u.wandPoisonArmor
+    :?weaponName = "reset" | weaponName = "vigor"
+      internalName = "wand_vigor"
+      requiredArmor = u.wandVigorArmor
+    :?weaponName = "calamity" | weaponName = "aether"
+      internalName = "wand_aether"
+      requiredArmor = u.wandArmor
+    :?weaponName = "explosive" | weaponName = "fire"
+      internalName = "wand_fire"
+      requiredArmor = u.wandFireArmor
+    :?weaponName = "frost" | weaponName = "ice"
+      internalName = "wand_ice"
+      requiredArmor = u.wandIceArmor
+
+    // Staves
+    :?weaponName = "acrobatic" | weaponName = "stone"
+      internalName = "staff_stone"
+      requiredArmor = u.staffStoneArmor
+    :?weaponName = "berserker" | weaponName = "poison"
+      internalName = "staff_poison"
+      requiredArmor = u.staffPoisonArmor
+    :?weaponName = "prevention" | weaponName = "vigor"
+      internalName = "staff_vigor"
+      requiredArmor = u.staffVigorArmor
+    :?weaponName = "grasping" | weaponName = "aether"
+      internalName = "staff_aether"
+      requiredArmor = u.staffAetherArmor
+    :?weaponName = "infernal" | weaponName = "fire"
+      internalName = "staff_fire"
+      requiredArmor = u.staffFireArmor
+    :?weaponName = "eternity" | weaponName = "ice"
+      internalName = "staff_ice"
+      requiredArmor = u.staffIceArmor
+  
+    :
+      isOk = false
+    
+    ?isOk
+      result += item.GetCooldown(internalName) <= 0 &
+      ^armor >= requiredArmor
+
+    :
+      result = false
+      >c-10,0,#red,ERROR: function canUseAbility()
+      ^received incorrect <weaponName> value: @weaponName@
+
+  :
+    >c-10,0,#red,ERROR: function canUseAbility()
+    ^received incorrect <weaponName> value: @weaponName@
+
+  return result
+/* Activates a weapon's special ability
+<weapon> and <hand> will only be evalued when needed.
+
+Valid weaponName values:
+- bfg, blade >> Blade of the Fallen God
+- mask, cultist >> Cultist Mask
+- arm, skeleton >> Skeleton Arm
+- bardiche
+- heavy, hammer >> Heavy Hammer
+- quarterstaff
+- hatchet
+- voidweaver
+- cinderwisp
+- staff + <name>, staff + <element> >> Hidden staves
+- wand + <name>, wand + <element> >> Hidden wands
+- <element>_talisman >> Talismans  */
+func useAbility(weapon, weaponName, hand)
+  ?weaponName = "bfg" | weaponName = "blade"
+    equip blade
+    activate R
+  :?weaponName = "mask" | weaponName = "cultist"
+    equipR mask
+    activate R
+  :?weaponName = "arm" | weaponName = "skeleton"
+    equip arm
+    activate R
+
+  :?weaponName = "bardiche"        |
+  ^weaponName = "heavy"            | weaponName = "hammer" |
+  ^weaponName = "quarterstaff"     |
+  ^(weaponName = "staff" &
+  ^   weaponName = "acrobatic"     | weaponName = "stone"  |
+  ^   weaponName = "berserker"     | weaponName = "poison" |
+  ^   weaponName = "prevention"    | weaponName = "vigor"  |
+  ^   weaponName = "grasping"      | weaponName = "aether" |
+  ^   weaponName = "infernal"      | weaponName = "fire"   |
+  ^   weaponName = "eternity"      | weaponName = "ice")
+    equip @weapon@
+    activate R
+
+  :?weaponName = "hatchet" |
+  /*^weaponName = "" |*/
+  /*^weaponName = "" |*/
+  /*^weaponName = "" |*/
+  ^weaponName = "voidweaver" |
+  ^weaponName = "cinderwisp"/* |
+  ^weaponName = "" */
+    activate R
+
+
+  :?weaponName = "wand" | weaponName = "talisman"
+    // Wands
+    ?weaponName = "wand" & (
+    ^weaponName = "gravity"     | weaponName = "stone"  |
+    ^weaponName = "plague"      | weaponName = "poison" |
+    ^weaponName = "reset"       | weaponName = "vigor"  |
+    ^weaponName = "calamity"    | weaponName = "aether" |
+    ^weaponName = "explosive"   | weaponName = "fire"   |
+    ^weaponName = "frost"       | weaponName = "ice"     )
+      ?hand = "l" | hand = "left"
+        equipL @weapon@
+        activate L
+      :?hand = "r" | hand = "right"
+        equipR @weapon@
+        activate R
+      :
+        >c-10,0,#red,ERROR: function useAbility()
+        ^received incorrect <hand> value: @hand@
+
+    // Talismans
+    :?hand = "l" | hand = "left"
+      /*?weaponName = "stone_talisman"
+        equipL stone_talisman*/
+      /*:?weaponName = "poison_talisman"
+        equipL poison_talisman*/
+      /*:?weaponName = "vigor_talisman"
+        equipL vigor_talisman*/
+      ?weaponName = "aether_talisman"
+        equipL aether_talisman
+      :?weaponName = "fire_talisman"
+        equipL fire_talisman
+      /*:?weaponName = "ice_talisman"
+        equipL ice_talisman*/
+
+      activate L
+    :?hand = "r" | hand = "right"
+      /*?weaponName = "stone_talisman"
+        equipR stone_talisman*/
+      /*:?weaponName = "poison_talisman"
+        equipR poison_talisman*/
+      /*:?weaponName = "vigor_talisman"
+        equipR vigor_talisman*/
+      ?weaponName = "aether_talisman"
+        equipR aether_talisman
+      :?weaponName = "fire_talisman"
+        equipR fire_talisman
+      /*:?weaponName = "ice_talisman"
+        equipR ice_talisman*/
+
+      activate R
+    :
+      >c-10,0,#red,ERROR: function useAbility()
+      ^received incorrect <hand> value: @hand@
+
+  :
+    >c-10,0,#red,ERROR: function useAbility()
+    ^received incorrect <weaponName> value: @weaponName@
+
+  return
+
+
+// Double Screen (DS)
+
+func isScreen_DS_Target(weaponName)
+  ?weaponName = "smite" | weaponName = "bfg" | weaponName = "blade"
+    return screen.i = smiteScreen_Target
+  :?weaponName = "mask" | weaponName = "feeble"
+    return screen.i = maskScreen_Target
+  :
+    >c-10,0,#red,ERROR: function isScreen_DS_Target()
+    ^received incorrect <weaponName> value: @weaponName@
+    return false
+func isScreen_DS_Max(weaponName)
+  ?weaponName = "smite" | weaponName = "bfg" | weaponName = "blade"
+    return smiteScreen_Target = smiteScreen_Max
+  :?weaponName = "mask" | weaponName = "feeble"
+    return maskScreen_Target = maskScreen_Max
+  :
+    >c-10,0,#red,ERROR: function isScreen_DS_Max()
+    ^received incorrect <weaponName> value: @weaponName@
+    return false
+
+func screen_DS_Change(weaponName)
+  ?loc.loop & totaltime = 1 & !isScreen_Max(weaponName)
+    ?weaponName = "smite" | weaponName = "bfg" |
+    ^weaponName = "blade"
+      smiteScreen_Target++
+    :?weaponName = "mask" | weaponName = "feeble"
+      maskScreen_Target++
+    :
+      >c-10,0,#red,ERROR: function screen_DS_Change()
+      ^received incorrect <weaponName> value: @weaponName@
+
+  return
+
+/* Checks if Blade of the Fallen God
+can be used in 2 screens of distance,
+according to a certain screen index. */
+func canUseBFG_DS()
+  return canUseAbility("bfg") & isScreen_DS_Target("bfg")
+/* counter to give
+screen.Next()
+time to slide */
+var slideCount = 0
+func useBFG_DS()
+  ?slideCount = 0
+    screen.Next()
+    slideCount = 20
+  
+  :?slideCount > 0
+    slideCount--
+  
+    ?slideCount = 0
+      useAbility("bfg")
+      screen.ResetOffset()
+      return
+
+
+func canUseCultistMask_DS()
+  return canUseAbility("mask") &
+  ^isScreen_DS_Target("mask")
+func useCultistMask_DS()
+  ?slideCount = 0
+    screen.Next()
+    slideCount = 20
+  
+  :?slideCount > 0
+    slideCount--
+  
+    ?slideCount = 0
+      useAbility("mask")
+      screen.ResetOffset()
+      return
+
+
+// Talismans / Summons
+
+func canSummon(element)
+  var result = item.CanActivate()
+
+  ?element = "stone"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("stone_talisman") <= 0 &
+    ^summon.GetId() ! "" | isCasting("stone_talisman")*/
+  :?element = "poison"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("poison_talisman") <= 0 &
+    ^summon.GetId() ! "" | isCasting("poison_talisman")*/
+  :?element = "vigor"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("vigor_talisman") <= 0 &
+    ^summon.GetId() ! "" | isCasting("vigor_talisman")*/
+  :?element = "aether"
+    result += item.GetCooldown("aether_talisman") <= 0 &
+    ^summon.GetId() ! "voidweaver" | isCasting("aether_talisman")
+  :?element = "fire"
+    result += item.GetCooldown("fire_talisman") <= 0 &
+    ^summon.GetId() ! "cinderwisp" | isCasting("fire_talisman")
+  :?element = "ice"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("ice_talisman") <= 0 &
+    ^summon.GetId() ! "" | isCasting("ice_talisman")*/
+  :
+    result = false
+    >c-10,0,#red,ERROR: function canSummon()
+    ^received incorrect <element> value: @element@
+
+  return result
+func canHide(element)
+  var result = item.CanActivate()
+
+  ?element = "stone"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("stone_talisman") <= 0 &
+    ^summon.GetId() = "" | isCasting("stone_talisman")*/
+  :?element = "poison"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("poison_talisman") <= 0 &
+    ^summon.GetId() = "" | isCasting("poison_talisman")*/
+  :?element = "vigor"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("vigor_talisman") <= 0 &
+    ^summon.GetId() = "" | isCasting("vigor_talisman")*/
+  :?element = "aether"
+    result += item.GetCooldown("aether_talisman") <= 0 &
+    ^summon.GetId() = "voidweaver" | isCasting("aether_talisman")
+  :?element = "fire"
+    result += item.GetCooldown("fire_talisman") <= 0 &
+    ^summon.GetId() = "cinderwisp" | isCasting("fire_talisman")
+  :?element = "ice"
+    result = false // TO DO: uncomment logic when this talisman is added.
+    /*result += item.GetCooldown("ice_talisman") <= 0 &
+    ^summon.GetId() = "" | isCasting("ice_talisman")*/
+  :
+    result = false
+    >c-10,0,#red,ERROR: function canHide()
+    ^received incorrect <element> value: @element@
+
+  return result
+
+/* Checks if the cinderwisp's "devour" ability
+damage will kill the foe.
+
+nIgnitions: amount of ignition debuffs currently
+              applied to the foe.
+cindDmg: damage dealt by cinderwisp for each ignition.
+margin: number representing a health margin to add
+          to the remaining foe's health. This is
+          necessary because the ability has a cast time
+          that will alter the estimations done here.
+          Send 0 if you don't want to use a margin. */
+func canKillCinderwisp(nIgnitions, cindDmg, margin)
+  return foe.hp + foe.armor <= (nIgnitions * cindDmg) + margin
+
+
+// Special Weapons
+
+func isQuarterstaffRange()
+  return ai.walking & !isDashingRange()
+
+
+// Potions
+
+func canUsePotion()
+  return item.CanActivate() &
+  ^item.potion ! "empty"
+
+/* Checks if a healing type potion
+can be used.
+These potions are considered as healing:
+  - healing
+  - defensive
+  - vampiric */
+func canUsePotionHeal()
+  ?canUsePotion()
+    ?item.potion = "healing"
+      return hp + armor <= foe.damage
+
+    :?item.potion = "vampiric"
+      return hp < lowhp
+
+    :?item.potion = "defensive"
+      return hp <= midhp
+    
+    :
+      return false
+  :
+    return false
+/* Determines if a damage buff potion
+is brewed. Generally used for bosses.
+These potions are considered as damaging:
+  - berserk
+  - lucky */
+func canUsePotionDmg()
+  ?canUsePotion()
+    return
+    ^item.potion = "berserk" |
+    ^item.potion = "lucky"
+  :
+    return false
+/* Determines if a special potion
+can be activated, given a special
+condition that's different for each potion type.
+Valid potion types and conditions:
+  - cleansing | min. no. of debuffs to cleanse
+  - strength | min. amount of foe's armor
+  - lightning, | ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  - experience | min. no. of foes to activate
+  - invisibility | NONE (will activate if foe = boss)
+    + (send true as condition for this type) */
+func canUsePotionSpecial(type,cond)
+  ?canUsePotion()
+
+    ?item.potion = type
+      ?item.potion = "cleansing"
+        return hp < midhp &
+        ^debuffs.count >= cond
+        // ^^^ = no. of debuffs to cleanse
+    
+      :?item.potion = "strength"
+        return foe.armor & foe.armor > cond
+
+      :?item.potion = "lightning"
+      ^|item.potion = "experience"
+        return foe.count >= cond
+
+      :?item.potion = "invisibility"
+        return foe = boss
+
+      :
+        >c-10,0,#red,
+        ^func canUsePotionSpecial() - Potion recieved\n
+        ^does not belong to this function: "@type@"
+        return false
+
+    :
+      >c-10,0,#red,
+      ^func canUsePotionSpecial() - Potion recieved\n
+      ^is not valid or equipped: "@type@"
+      return false
+
+  : // potion hasn't been brewed, it's been used,
+    return false //or just can't be activated atm
+
+/* Checks if a certain potion can be brewed.
+**********************************************
+REQUISITE: POTION NAMES MUST BE ALL LOWERCASE.
+********************************************** */
+func canBrewPotion(potionName)
+  var result = loc.begin & item.potion ! potionName
+
+  ?potionName = "strength"
+    result = result & res.stone >= 20
+  :?potionName = "experience"
+    result = result & res.wood >= 20
+  :?potionName = "healing"
+    result = result & res.tar >= 20
+  :?potionName = "lightning"
+    result = result & res.bronze >= 20
+  :?potionName = "vampiric"
+    result = result & res.tar >= 10 & res.bronze >= 10
+  :?potionName = "lucky"
+    result = result & res.stone >= 10 & res.bronze >= 10
+  :?potionName = "berserk"
+    result = result & res.wood >= 10 & res.bronze >= 10
+  :?potionName = "cleansing"
+    result = result & res.wood >= 10 & res.tar >= 10
+  :?potionName = "defensive"
+    result = result & res.stone >= 10 & res.tar >= 10
+  :?potionName = "invisibility"
+    result = result & res.wood >= 10 & res.stone >= 10
+
+  :
+    result = false
+
+  return result
+/* Brews a certain potion.
+**********************************************
+REQUISITE: POTION NAMES MUST BE ALL LOWERCASE.
+********************************************** */
+func brewPotion(potionName)
+  ?potionName = "strength"
+    brew stone
+  :?potionName = "experience"
+    brew wood
+  :?potionName = "healing"
+    brew tar
+  :?potionName = "lightning"
+    brew bronze
+  :?potionName = "vampiric"
+    brew tar + bronze
+  :?potionName = "lucky"
+    brew stone + bronze
+  :?potionName = "berserk"
+    brew wood + bronze
+  :?potionName = "cleansing"
+    brew wood + tar
+  :?potionName = "defensive"
+    brew stone + tar
+  :?potionName = "invisibility"
+    brew wood + stone
+  :
+    >c-10,0,#red,ERROR: function brewPotion()
+    ^received incorrect potionName> value: @potionName@
+
+  return
+
+
+// Status effects
+
+/* Returns each weapon's range.
+Accounts for the Grasping Staff's
+buff and Pallas's debuff.
+************************************
+DOESN'T ACCEPT WEAPONS, BUT SPECIFIC
+KEYWORDS THAT REPRESENT THEM.
+************************************ */
+func getRange(weaponName)
+  var result = null
+  var isApplied = false
+  var isApplied2 = false
+
+  ?weaponName = "sword" & result = null
+    result = u.sword_range
+  :?weaponName = "sword big" & result = null
+    result = u.sword_big_range
+  :?weaponName = "hammer" & weaponName ! "heavy" & result = null
+    result = u.hammer_range
+
+  :?weaponName = "wand" & result = null
+    result = u.wand_range
+  :?weaponName = "crossbow" & result = null
+    result = u.crossbow_range
+
+  :?weaponName = "quarterstaff" & result = null
+    result = u.staff_range
+  :?weaponName = "staff" & result = null
+    result = u.staff_range
+
+  :?weaponName = "bardiche" & result = null
+    ?weaponName = "ability"
+      result = u.bardiche_ability_range
+    :
+      result = u.bardiche_range
+  :?weaponName = "heavy hammer" & result = null
+    ?weaponName = "ability"
+      result = u.heavyHammer_ability_range
+    :
+      result = u.heavyHammer_range
+
+
+  ?buffs.string = "buff_range" & !isApplied
+    result += u.grasping_buff
+    isApplied = true
+
+  ?debuffs.string = "pallas_phase2_debuff"
+    result--
+    isApplied2 = true
+
+  ?result ! null
+    ?result >= u.grasping_cap
+      return u.grasping_cap
+    : 
+      return result
+
+/* Returns foe's damage, accounting for
+any damage-reduction debuffs applied.
+
+weakenAmount = if applied, amount of damage
+               deducted to the foe by the
+               weapon you used for it.
+feebleCount = if applied, amount of Feeble
+              debuffs your Cultist Mask can
+              apply.
+***************** WARNING *****************
+  Since these are variable, they can't be
+  calculated, so they have to be provided
+         for this function to work.
+******************************************* */
+func getFoeDamage(weakenAmount, feebleCount)
+  var result = foe.damage
+  var isApplied = false
+  var isApplied2 = false
+
+  ?foe.debuffs.string = "feeble" & !isApplied
+    result -= (2 * feebleCount)
+    isApplied = true
+  ?foe.debuffs.string = "debuff_damage" & !isApplied2
+    result -= weakenAmount
+    isApplied2 = true
+
+  ?result < 0
+    result = 0
+
+  return result
+
+/* Returns true if the foe is
+vulnerable to Chill and if the
+debuff isn't applied yet. */
+func canApplyChill()
+  return
+  ^foe.debuffs.string ! "chill:6" &
+  ^foe ! "immune_to_debuff_chill"
+/* Returns true if the foe is
+vulnerable to Weaken and if the
+debuff isn't applied yet. */
+func canApplyWeaken()
+  return
+  ^foe.debuffs.string ! "damage" &
+  ^foe ! "immune_to_debuff_damage"
+/* Returns true if the foe is
+vulnerable to Burn and if the
+debuff isn't applied yet. */
+func canApplyBurn()
+  return
+  ^foe.debuffs.string ! "dot" &
+  ^foe ! "immune_to_debuff_dot"
+
+/* checks if the foe is vulnerable
+to at least one of the following
+typical debuffs:
+- Chill (attack and movement speed reduction)
+- Weaken (damage reduction)
+- Burn (damage over time) */
+func canDebuffAny()
+  return
+  ^canApplyChill() |
+  ^canApplyWeaken() |
+  ^canApplyBurn()
+/* checks if the foe is vulnerable
+to ALL of the following
+typical debuffs:
+- Chill (attack and movement speed reduction)
+- Weaken (damage reduction)
+- Burn (damage over time) */
+func canDebuffAll()
+  return
+  ^foe ! "immune_to_debuff_chill" &
+  ^foe ! "immune_to_debuff_damage" &
+  ^foe ! "immune_to_debuff_dot"
+
+
+
+// Damage min-maxing
+
+var moonTimer = 0
+var moonFrame
+func doMoondial(weapon1, weapon2, mode)
+
+  ?mode = 0 // Normal moondialing
+    moonTimer++
+    moonFrame = moonTimer % 3
+
+    ?moonFrame = 1
+      equipL moon
+      equipR @weapon1@
+    :?moonFrame = 2
+      equipL moon
+      equipR @weapon2@
+    :
+      equipL @weapon1@
+      equipR @weapon2@
+
+  :?mode = 1
+    /* Berserk Moondialing (For non-speed enchanted *max
+    swords) */
+    moonTimer++
+    moonFrame = moonTimer % 4
+
+    ?moonFrame = 1
+      equipL @weapon2@ // on cooldown
+      equipR @weapon1@
+    :?moonFrame = 2
+      equipL moon
+      equipR @weapon1@
+    :?moonFrame = 3
+      equipL @weapon1@ // on cooldown
+      equipR @weapon2@
+    :?moonFrame = 4
+      equipL moon
+      equipR @weapon2@
+  
+  :?mode = 2
+    /* Not moondialing, but useful to have here (speed
+    enchant *max swords) */
+    equipL @weapon2@
+    equipR @weapon1@
+
+  :?mode = 3
+    /* For when you have just 1 +21 sword (weapon2 can be
+    anything, it will not be used) */
+    ?foe.distance <= 5
+      equipL moon
+    :
+      equipL @weapon2@
+    equipR @weapon1@
+
+  return
+
+/* Faster moondialing variant, aka Bursting.
+************************************************
+REQUISITE: HAVING 10 *21 SPEED ENCHANTED SWORDS.
+************************************************ */
+var burstingTimer = 0
+func doBursting(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
+  burstingTimer++
+
+  equipL moon
+  ?burstingTimer = 0
+    equipR @s1@
+
+  :?burstingTimer = 1
+    equipR @s2@
+
+  :?burstingTimer = 2
+    equipR @s3@
+
+  :?burstingTimer = 3
+    equipR @s4@
+
+  :?burstingTimer = 4
+    equipR @s5@
+
+  :?burstingTimer = 5
+    equipR @s6@
+
+  :?burstingTimer = 6
+    equipR @s7@
+
+  :?burstingTimer = 7
+    equipR @s8@
+
+  :?burstingTimer = 8
+    equipR @s9@
+
+  :?burstingTimer = 9
+    equipR @s10@
+  :
+    return
+
+/* AAC = Attack Animation Cancelling
+Widely used trick to enable a
+massive attack speed boost*/
+func doAAC(itemLeft, itemRight)
+  ?item.left.state = 3
+    equipL @itemLeft@
+    equipL @item.left@
+  ?item.right.state = 3
+    equipR @itemRight@
+    equip @item.right@ // equip works for two-handed items as well
+
+  // return
+
+
+// Others
+
+func isEquipped(weaponName)
+  return item.left = weaponName | item.right = weaponName
+
+func isCasting(weaponName)
+  return (item.left = weaponName & item.left.state = 2) |
+  ^(item.right = weaponName & item.right.state = 2)
+
+func isDashingRange()
+  return u.dash_range_min <= foe.distance &
+  ^      foe.distance <= u.dash_range_max
+
+func isDead()
+  return foe.state = 4 | foe.state = -1 // foe death states
+
+
+
+// *******************************************************
+//                  END OF "Combat.txt"                   
+// *******************************************************
