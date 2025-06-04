@@ -1,35 +1,54 @@
-﻿// *******************************************************
-//                       Combat.txt                       
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "Combat" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
 /* FILE INFO
 
 Combat functions library
-Made by MetalEagle26 (Tom Crow)
+Made by IronHawk (Tom Crow)
 
-This library provides some game-related
-functions to make the task of doing a
-farming script easier.
+. ...................................... .
 
-- How to use:
+  Description
+
+  This library provides some game-related
+  functions to make the task of doing a
+  farming script easier.
+
+. ...................................... .
+
+  Importing
+
   var c = new Combat
 
-- Tip: If you want to use the variables here,
+. ...................................... .
+
+  Tip
+
+  If you want to use the variables here,
   put c.Init() at the top of your script.
 
-- Use the functions that you need like this:
-  ?c.useBFG() // example */
+. ...................................... .
+
+  Usage
+
+  ?c.canUseAbility("bfg")
+    c.useAbility_LI("bfg")
+
+. ...................................... .
+
+Enjoy! */
 
 
 
-// IMPORTS
+// ///////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities
 
 
 
-// VARIABLES
+// //////////////// VARIABLES //////////////// //
 
 // Status
 
@@ -38,18 +57,30 @@ var lowhp
 var hihp
 
 
-// Others
+// Function-related
 
 var moondialMode = -1
-var permapotSetup = true
 var smiteScreen_Target = -1
 var smiteScreen_Max = -1
 var maskScreen_Target = -1
 var maskScreen_Max = -1
 
+var slideCount = 0 // counter to give screen.Next() time to slide in _DS functions.
 
 
-// FUNCTIONS
+// Others
+
+var permapotSetup = true
+
+
+
+// //////////////// FUNCTIONS //////////////// //
+
+// ............... GLOBAL ............... //
+
+
+// 
+
 
 func Init()
   midhp = maxhp / 2
@@ -69,7 +100,6 @@ func Init()
     burstingTimer = 0
 
   return
-
 
 /* Returns true if a weapon's special ability
 can be activated.
@@ -213,12 +243,18 @@ func canUseAbility(weaponName)
 
   return result
 
+
+// Tools
+
 /* Activates the Hatchet's ability. */
 func useAbility_H()
   equipR hatchet
   activate R
 
   return
+
+
+// Lost items and special weapons
 
 /* Activates a Lost Item's ability.
 
@@ -261,6 +297,9 @@ func useAbility_SW(weaponName)
     ^received incorrect <weaponName> value: @weapon@
 
   return
+
+
+// Talismans and summons
 
 /* Activates a summon's "Devour" ability.
 
@@ -309,6 +348,9 @@ func useAbility_T(weaponName, hand)
 
   return
 
+
+// Hidden enchant weapons
+
 /* Activates a hidden staff's special ability.
 
 Valid weaponName values:
@@ -328,7 +370,6 @@ func useAbility_HS(weaponName)
     >c-10,0,#red,ERROR: function useAbility_HS()
     ^received incorrect <weaponName> value: @weaponName@
     
-
 /* Activates a hidden wand's special ability.
 
 Valid weaponName values:
@@ -394,29 +435,46 @@ func screen_DS_Change(weaponName)
 
   return
 
-/* Checks if Blade of the Fallen God
+/* Checks if a weapon ability
 can be used in 2 screens of distance,
 according to a certain screen index. */
-func canUseBFG_DS()
-  return canUseAbility("bfg") & isScreen_DS_Target("bfg")
-/* counter to give
-screen.Next()
-time to slide */
-var slideCount = 0
-func useBFG_DS()
-  ?slideCount = 0
-    screen.Next()
-    slideCount = 20
-  
-  :?slideCount > 0
-    slideCount--
-  
+func canUseAbility_DS(weaponName)
+  var result = false
+
+  ?weaponName = "bfg" | weaponName = "blade" | weaponName = "of the fallen god" |
+  ^weaponName = "mask" | weaponName = "cultist"
+    result = result & canUseAbility(weaponName)
+  :
+    >c-10,0,#red,ERROR: function canUseAbility_DS()
+    ^received incorrect <weaponName> value: @weaponName@
+
+  ?result
+    result = result & isScreen_DS_Target(weaponName)
+
+  return result
+func useAbility_DS(weaponName)
+  ?weaponName = "bfg" | weaponName = "blade" | weaponName = "of the fallen god" |
+  ^weaponName = "mask" | weaponName = "cultist"
     ?slideCount = 0
-      useAbility_LI("bfg")
-      screen.ResetOffset()
-      return
+      screen.Next()
+      slideCount = 20
+    
+    :?slideCount > 0
+      slideCount--
+    
+      ?slideCount = 0
+        useAbility_LI(weaponName)
+        screen.ResetOffset()
+        return
+  :
+    >c-10,0,#red,ERROR: function useAbility_DS()
+    ^received incorrect <weaponName> value: @weaponName@
 
+    return
 
+/* Checks if Cultist Mask
+can be used in 2 screens of distance,
+according to a certain screen index. */
 func canUseCultistMask_DS()
   return canUseAbility("mask") &
   ^isScreen_DS_Target("mask")
@@ -435,6 +493,29 @@ func useCultistMask_DS()
 
 
 // Talismans / Summons
+
+func canUseTalisman(element)
+  var result = item.CanActivate()
+
+  ?element = "stone"
+    result = false // TO DO: uncomment logic when this talisman is added.
+  :?element = "poison"
+    result = false // TO DO: uncomment logic when this talisman is added.
+  :?element = "vigor"
+    result = false // TO DO: uncomment logic when this talisman is added.
+  :?element = "aether"
+    result = result & (item.GetCooldown("aether_talisman") <= 0 | isCasting("aether_talisman"))
+  :?element = "fire"
+    result = result & (item.GetCooldown("fire_talisman") <= 0 &
+    ^summon.GetId() ! "cinderwisp") | isCasting("fire_talisman")
+  :?element = "ice"
+    result = false // TO DO: uncomment logic when this talisman is added.
+  :
+    result = false
+    >c-10,0,#red,ERROR: function canSummon()
+    ^received incorrect <element> value: @element@
+
+  return result
 
 func canSummon(element)
   var result = item.CanActivate()
@@ -681,34 +762,35 @@ func getRange(weaponName)
   var isApplied = false
   var isApplied2 = false
 
-  ?weaponName = "sword" & result = null
+  ?weaponName = "sword" & !result
     result = u.sword_range
-  :?weaponName = "sword big" & result = null
+  :?weaponName = "sword big" & !result
     result = u.sword_big_range
-  :?weaponName = "hammer" & weaponName ! "heavy" & result = null
+  :?weaponName = "hammer" & weaponName ! "heavy" & !result
     result = u.hammer_range
 
-  :?weaponName = "wand" & result = null
+  :?weaponName = "wand" & !result
     result = u.wand_range
-  :?weaponName = "crossbow" & result = null
+  :?weaponName = "crossbow" & !result
     result = u.crossbow_range
 
-  :?weaponName = "quarterstaff" & result = null
+  :?weaponName = "quarterstaff" & !result
     result = u.staff_range
-  :?weaponName = "staff" & result = null
+  :?weaponName = "staff" & !result
     result = u.staff_range
 
-  :?weaponName = "bardiche" & result = null
+  :?weaponName = "bardiche" & !result
     ?weaponName = "ability"
       result = u.bardiche_ability_range
     :
       result = u.bardiche_range
-  :?weaponName = "heavy hammer" & result = null
+  :?weaponName = "heavy hammer" & !result
     ?weaponName = "ability"
       result = u.heavyHammer_ability_range
     :
       result = u.heavyHammer_range
 
+  :?(weaponName = "grappling" | weaponName = "hook") & !result
 
   ?buffs.string = "buff_range" & !isApplied
     result = result & u.grasping_buff
@@ -718,11 +800,15 @@ func getRange(weaponName)
     result--
     isApplied2 = true
 
-  ?result ! null
+  ?result
     ?result >= u.grasping_cap
       return u.grasping_cap
     : 
       return result
+  
+  :
+
+    return -1
 
 /* Returns foe's damage, accounting for
 any damage-reduction debuffs applied.
@@ -931,6 +1017,6 @@ func isDead()
 
 
 
-// *******************************************************
-//                  END OF "Combat.txt"                   
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Combat" ▀▄▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //

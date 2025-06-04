@@ -1,14 +1,12 @@
-﻿// *******************************************************
-//                   START OF "1-Rocky"                   
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 // Script for Rocky Plateau
 
 
 
-// /////////////////////////////////////////// //
-
-// IMPORTS
+// ///////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
 var u = import My/Lib/Utilities
@@ -19,11 +17,9 @@ c.Init()
 
 
 
-// /////////////////////////////////////////// //
+// //////////////// VARIABLES //////////////// //
 
-// VARIABLES
-
-var weakenType = a.weaken_default
+var weakenType = a.weaken_defaulta
 
 var choice = false
 var buttonPressed = false
@@ -35,9 +31,7 @@ var dontShowAgain = false
 
 
 
-// /////////////////////////////////////////// //
-
-// FUNCTIONS
+// //////////////// FUNCTIONS //////////////// //
 
 func harvestFunc(button)
   buttonPressed = true
@@ -103,9 +97,7 @@ func fight(mode)
 
 
 
-// /////////////////////////////////////////// //
-
-// PROCEDURE
+// //////////////// PROCEDURE //////////////// //
 
 disable npcDialog
 
@@ -198,6 +190,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?c.canUsePotionDmg() & c.permapotSetup
   activate potion
 :?c.canUseAbility("infernal staff") // speed up
+  >c0,0,#magenta,USING INFERNAL STAFF
   c.useAbility_HS(a.staffFireHidden)
 
 :?choice & harvest.distance < 5
@@ -373,6 +366,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 
 
-// *******************************************************
-//                    END OF "1-Rocky"                    
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
