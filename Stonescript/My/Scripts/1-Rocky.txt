@@ -272,7 +272,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^(foe.distance <= u.bardiche_ability_range + u.grasping_buff
   ^& c.canUseAbility("grasping staff")))
     ?c.canUseAbility("heavy hammer")
-      c.useAbility_SW("heavy hammer *max -shiny +6", "heavy hammer", null) // fast speed hammer
+      c.useAbility_SW("heavy hammer *max -shiny +6") // fast speed hammer
     
     :?c.canUseAbility("grasping staff")
       c.useAbility_HS(a.staffAetherHidden)
