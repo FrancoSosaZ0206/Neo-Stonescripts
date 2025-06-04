@@ -184,16 +184,16 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 ?foe ! "boss" & !c.isDead() & c.canSummon("aether")
   ?c.permapotSetup
-    c.useAbility_Devour("aether_talisman", "l")
+    c.useAbility_T("aether_talisman", "l")
   :
     equipL triskelion
-    c.useAbility_Devour("aether_talisman", "r")
+    c.useAbility_T("aether_talisman", "r")
 :?(foe = "boss" | loc.stars <= 15) & c.canSummon("fire")
   ?c.permapotSetup
-    c.useAbility_Devour("fire_talisman", "l")
+    c.useAbility_T("fire_talisman", "l")
   :
     equipL triskelion
-    c.useAbility_Devour("fire_talisman", "r")
+    c.useAbility_T("fire_talisman", "r")
 
 :?c.canUsePotionDmg() & c.permapotSetup
   activate potion
