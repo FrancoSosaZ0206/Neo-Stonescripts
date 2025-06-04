@@ -10,10 +10,10 @@
 
 // IMPORTS
 
-var uimkr = import MyScripts/Lib/UI_Maker
-var u = import MyScripts/Lib/Utilities
-var c = import MyScripts/Lib/Combat
-var a = import MyScripts/Lib/MyArsenal
+var uimkr = import My/Lib/UI_Maker
+var u = import My/Lib/Utilities
+var c = import My/Lib/Combat
+var a = import My/Lib/Arsenal
 
 c.Init()
 

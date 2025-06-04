@@ -137,7 +137,7 @@ import My/Cosmetics
 :
   import UI/FoeStateTracker
   var uimkr = import My/Lib/UI_Maker
-  var u = import My/Scripts/Lib/Utilities
+  var u = import My/Lib/Utilities
 
   /***********************************************/
 
