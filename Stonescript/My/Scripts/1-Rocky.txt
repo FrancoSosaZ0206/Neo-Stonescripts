@@ -54,10 +54,10 @@ func fight(mode)
       a.ldtF("escape", c.permapotSetup)
     :?c.canUseAbility("acrobatic staff") & foe ! "ranged"
     ^& foe.distance < u.dash_range_min
-      c.useAbility(a.staffStoneHidden, "acrobatic staff", null)
+      c.useAbility_HS(a.staffStoneHidden)
     
     :?c.canUseAbility("eternity staff") & foe.distance < u.dash_range_min
-      c.useAbility(a.staffIceHidden, "eternity staff", null)
+      c.useAbility_HS(a.staffIceHidden)
     
     :?foe.distance > c.getRange("sword")
       ?foe.count > 1
@@ -184,21 +184,21 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 ?foe ! "boss" & !c.isDead() & c.canSummon("aether")
   ?c.permapotSetup
-    c.useAbility(null, "aether_talisman", "l")
+    c.useAbility_Devour("aether_talisman", "l")
   :
     equipL triskelion
-    c.useAbility(null, "aether_talisman", "r")
+    c.useAbility_Devour("aether_talisman", "r")
 :?(foe = "boss" | loc.stars <= 15) & c.canSummon("fire")
   ?c.permapotSetup
-    c.useAbility(null, "fire_talisman", "l")
+    c.useAbility_Devour("fire_talisman", "l")
   :
     equipL triskelion
-    c.useAbility(null, "fire_talisman", "r")
+    c.useAbility_Devour("fire_talisman", "r")
 
 :?c.canUsePotionDmg() & c.permapotSetup
   activate potion
 :?c.canUseAbility("infernal staff") // speed up
-  c.useAbility(a.staffFireHidden, "infernal staff", null)
+  c.useAbility_HS(a.staffFireHidden)
 
 :?choice & harvest.distance < 5
   a.ldtF("harvest", c.permapotSetup)
@@ -222,21 +222,21 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^(foe.state = 155 | foe.damage = 1)
     ?foe.damage = 1 & // prevent the stun
     ^c.canUseAbility("prevention staff")
-      c.useAbility(a.staffVigorHidden, "prevention staff", null)
+      c.useAbility_HS(a.staffVigorHidden)
     :
       fight("evade")
 
   :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
     ?foe = "phase3" & foe.damage ! 1 &
     ^c.canUseAbility("eternity staff")
-      c.useAbility(a.staffIceHidden, "eternity staff", null)
+      c.useAbility_HS(a.staffIceHidden)
 
     :?foe ! "phase2" // heal to reduce it even more
       a.ldtF("defense heal", c.permapotSetup)
     : // normal phase2 behaviour
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseAbility("reset wand")
-        c.useAbility(a.wandVigorHidden, "reset wand", "l")
+        c.useAbility_HW(a.wandVigorHidden, "l")
       :
         a.ldtF("defense", c.permapotSetup)
 
@@ -248,7 +248,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseAbility("reset wand")
-        c.useAbility(a.wandVigorHidden, "reset wand", "l")
+        c.useAbility_HW(a.wandVigorHidden, "l")
       :?foe = "fire" // unmake Dysangelos's fire arm
         a.ldtF("defense unmake", c.permapotSetup)
 
@@ -257,7 +257,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 
 :?c.isQuarterstaffRange() & c.canUseAbility("quarterstaff")
-  c.useAbility(a.myQuarterstaff, "quarterstaff", null)
+  c.useAbility_SW(a.myQuarterstaff)
 
 :?ai.paused |
 ^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
@@ -272,12 +272,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^(foe.distance <= u.bardiche_ability_range + u.grasping_buff
   ^& c.canUseAbility("grasping staff")))
     ?c.canUseAbility("heavy hammer")
-      c.useAbility("heavy hammer *max -shiny +6", "heavy hammer", null) // fast speed hammer
+      c.useAbility_SW("heavy hammer *max -shiny +6", "heavy hammer", null) // fast speed hammer
     
     :?c.canUseAbility("grasping staff")
-      c.useAbility(a.staffAetherHidden, "grasping staff", null)
+      c.useAbility_HS(a.staffAetherHidden)
     :?c.canUseAbility("bardiche")
-      c.useAbility(Kubikiribocho, "bardiche", null)
+      c.useAbility_SW(Kubikiribocho)
 
   :?armor > a.compoundMaxArmor_boosted |
   ^(foe ! "boss" & foe.distance < u.shield_rune_range)
@@ -292,12 +292,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?encounter.eliteMod = "monarch"
   ?foe.count > 1 // eliminate the other foes
     ?c.canUseAbility("bfg")
-      c.useAbility(null, "bfg", null)
+      c.useAbility_LW("bfg")
     :?c.canUseAbility("explosive staff")
-      c.useAbility(a.wandFireHidden, "explosive wand", "l")
+      c.useAbility_HW(a.wandFireHidden, "l")
 
     :?c.canUseAbility("heavy hammer") // if close, use hammer
-      c.useAbility(Mjölnir, "heavy hammer", null)
+      c.useAbility_SW(Mjölnir)
     :
       fight("evade")
 
@@ -309,7 +309,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   : // 1v1 with the monarch
     ?foe.hp + foe.armor >= a.bardicheRDmg &
     ^c.canUseAbility("bardiche")
-      c.useAbility(Kubikiribocho, "bardiche", null)
+      c.useAbility_SW(Kubikiribocho)
     :
       fight("melee")
 
@@ -320,7 +320,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     a.ldtF("dash", c.permapotSetup)
 
   :?c.canUseAbility("voidweaver")
-    c.useAbility(null, "voidweaver", null)
+    c.useAbility_Devour("voidweaver")
 
   :?foe = "scout"
     fight("melee")
@@ -332,7 +332,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :?foe = "phase2"
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseAbility("reset wand")
-        c.useAbility(a.wandVigorHidden, "reset wand", "l")
+        c.useAbility_HW(a.wandVigorHidden, "l")
       
       :
         a.ldtF("melee 1v1", c.permapotSetup)
@@ -341,18 +341,18 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ?c.canUsePotionDmg()
         activate potion
       :?c.canUseAbility("mask")
-        c.useAbility("mask")
+        c.useAbility_LI("mask")
       :?c.canUseAbility("berserker staff")
-        c.useAbility(a.staffPoisonHidden, "berserker staff", null)
+        c.useAbility_HS(a.staffPoisonHidden)
 
       ?c.canUseAbility("cinderwisp") &
       ^foe.debuffs.string = a.maxIgnitions_Default
-        c.useAbility(null, "cinderwisp", null)
+        c.useAbility_Devour("cinderwisp")
 
       :
         ?c.canUseAbility("heavy hammer") & foe.armor > 0 & // reduce armor
         ^debuffs.string ! "stun" // safety measure
-          c.useAbility("heavy hammer *max shiny +10" /*Guardian's Bane*/, "heavy hammer", null) //'
+          c.useAbility_SW("heavy hammer *max shiny +10" /*Guardian's Bane*/) //'
 
         :?hp ! maxhp
           a.ldtF("melee 1v1 heal", c.permapotSetup)
