@@ -352,7 +352,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :
         ?c.canUseAbility("heavy hammer") & foe.armor > 0 & // reduce armor
         ^debuffs.string ! "stun" // safety measure
-          c.useAbility(Guardian's Bane, "heavy hammer", null) //'
+          c.useAbility("heavy hammer *max shiny +10" /*Guardian's Bane*/, "heavy hammer", null) //'
 
         :?hp ! maxhp
           a.ldtF("melee 1v1 heal", c.permapotSetup)

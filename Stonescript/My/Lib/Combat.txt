@@ -89,62 +89,59 @@ func canUseAbility(weaponName)
   var result = item.CanActivate()
 
   ?weaponName = "bfg" | weaponName = "blade"
-    result += item.GetCooldown("blade") <= 0
+    result = result & item.GetCooldown("blade") <= 0
   :?weaponName = "mask" | weaponName = "cultist"
-    result += item.GetCooldown("mask") <= 0
+    result = result & item.GetCooldown("mask") <= 0
   :?weaponName = "arm" | weaponName = "skeleton"
-    result += item.GetCooldown("skeleton_arm") <= 0 &
+    result = result & item.GetCooldown("skeleton_arm") <= 0 &
     ^3 < foe.distance & foe.distance < 9
 
   :?weaponName = "bash" | weaponName = "dash"
-    result += !ai.idle & isDashingRange()
+    result = result & !ai.idle & isDashingRange()
 
     ?weaponName = "bash"
-      result += item.GetCooldown("bash") <= 0
+      result = result & item.GetCooldown("bash") <= 0
     : // weaponName = "dash"
-      result += item.GetCooldown("dash") <= 0
+      result = result & item.GetCooldown("dash") <= 0
 
   :?weaponName = "bardiche"
-    result += item.GetCooldown("heavy_hammer") <= 0 &
+    result = result & item.GetCooldown("heavy_hammer") <= 0 &
     ^foe.distance <= getRange("heavy hammer ability") |
     ^isCasting("heavy hammer")
   :?weaponName = "heavy" | weaponName = "hammer"
-    result += item.GetCooldown("bardiche") <= 0 &
+    result = result & item.GetCooldown("bardiche") <= 0 &
     ^foe.distance <= getRange("bardiche ability") |
     ^isCasting("bardiche")
   :?weaponName = "quarterstaff"
-    result += item.GetCooldown("quarterstaff") <= 0 &
-    isQuarterstaffRange() |
+    result = result & item.GetCooldown("quarterstaff") <= 0 &
+    ^isQuarterstaffRange() |
     ^isCasting("quarterstaff")
   
   :?weaponName = "mind"
-    result += item.GetCooldown("mind") <= 0
+    result = result & item.GetCooldown("mind") <= 0
 
   :?weaponName = "hatchet"
-    result += item.GetCooldown("hatchet") <= 0 &
+    result = result & item.GetCooldown("hatchet") <= 0 &
     ^harvest.distance < u.hatchet_range |
     ^isCasting("hatchet")
 
   /*:?weaponName = ""
-    result += item.GetCooldown("") <= 0 &
+    result = result & item.GetCooldown("") <= 0 &
     ^summon.GetId() = ""*/
   /*:?weaponName = ""
-    result += item.GetCooldown("") <= 0 &
+    result = result & item.GetCooldown("") <= 0 &
     ^summon.GetId() = ""*/
   /*:?weaponName = ""
-    result += item.GetCooldown("") <= 0 &
+    result = result & item.GetCooldown("") <= 0 &
     ^summon.GetId() = ""*/
   :?weaponName = "voidweaver"
-    result += item.GetCooldown("voidweaver") <= 0 &
+    result = result & item.GetCooldown("voidweaver") <= 0 &
     ^summon.GetId() = "voidweaver" & foe ! "boss" & // bosses are immune to unmake
     ^encounter.eliteMod ! "tenacious" & // tenacious can't be debuffed
     ^!(encounter.eliteMod = "monarch" & foe.count = 1) // monarch foes can't be unmade
   :?weaponName = "cinderwisp"
-    result += item.GetCooldown("cinderwisp") <= 0 &
+    result = result & item.GetCooldown("cinderwisp") <= 0 &
     ^summon.GetId() = "cinderwisp"
-  /*:?weaponName = ""
-    result += item.GetCooldown("") <= 0 &
-    ^summon.GetId() = ""*/
 
   :?weaponName = "wand" | weaponName = "staff"
     var internalName
@@ -195,7 +192,7 @@ func canUseAbility(weaponName)
       isOk = false
     
     ?isOk
-      result += item.GetCooldown(internalName) <= 0 &
+      result = result & item.GetCooldown(internalName) <= 0 &
       ^armor >= requiredArmor
 
     :
@@ -225,14 +222,19 @@ Valid weaponName values:
 - wand + <name>, wand + <element> >> Hidden wands
 - <element>_talisman >> Talismans  */
 func useAbility(weapon, weaponName, hand)
+  >c0,0,#red,@weapon@, @weaponName@, @hand@
+
   ?weaponName = "bfg" | weaponName = "blade"
-    equip blade
+    ?weapon ! null
+      equip blade
     activate R
   :?weaponName = "mask" | weaponName = "cultist"
-    equipR mask
+    ?weapon ! null
+      equipR mask
     activate R
   :?weaponName = "arm" | weaponName = "skeleton"
-    equip arm
+    ?weapon ! null
+      equip arm
     activate R
 
   :?weaponName = "bardiche"        |
@@ -245,16 +247,13 @@ func useAbility(weapon, weaponName, hand)
   ^   weaponName = "grasping"      | weaponName = "aether" |
   ^   weaponName = "infernal"      | weaponName = "fire"   |
   ^   weaponName = "eternity"      | weaponName = "ice")
-    equip @weapon@
+    ?weapon ! null
+      equip @weapon@
     activate R
 
   :?weaponName = "hatchet" |
-  /*^weaponName = "" |*/
-  /*^weaponName = "" |*/
-  /*^weaponName = "" |*/
   ^weaponName = "voidweaver" |
-  ^weaponName = "cinderwisp"/* |
-  ^weaponName = "" */
+  ^weaponName = "cinderwisp"
     activate R
 
 
@@ -268,10 +267,12 @@ func useAbility(weapon, weaponName, hand)
     ^weaponName = "explosive"   | weaponName = "fire"   |
     ^weaponName = "frost"       | weaponName = "ice"     )
       ?hand = "l" | hand = "left"
-        equipL @weapon@
+        ?weapon ! null
+          equipL @weapon@
         activate L
       :?hand = "r" | hand = "right"
-        equipR @weapon@
+        ?weapon ! null
+          equipR @weapon@
         activate R
       :
         >c-10,0,#red,ERROR: function useAbility()
@@ -279,33 +280,17 @@ func useAbility(weapon, weaponName, hand)
 
     // Talismans
     :?hand = "l" | hand = "left"
-      /*?weaponName = "stone_talisman"
-        equipL stone_talisman*/
-      /*:?weaponName = "poison_talisman"
-        equipL poison_talisman*/
-      /*:?weaponName = "vigor_talisman"
-        equipL vigor_talisman*/
       ?weaponName = "aether_talisman"
         equipL aether_talisman
       :?weaponName = "fire_talisman"
         equipL fire_talisman
-      /*:?weaponName = "ice_talisman"
-        equipL ice_talisman*/
 
       activate L
     :?hand = "r" | hand = "right"
-      /*?weaponName = "stone_talisman"
-        equipR stone_talisman*/
-      /*:?weaponName = "poison_talisman"
-        equipR poison_talisman*/
-      /*:?weaponName = "vigor_talisman"
-        equipR vigor_talisman*/
       ?weaponName = "aether_talisman"
         equipR aether_talisman
       :?weaponName = "fire_talisman"
         equipR fire_talisman
-      /*:?weaponName = "ice_talisman"
-        equipR ice_talisman*/
 
       activate R
     :
@@ -400,25 +385,25 @@ func canSummon(element)
 
   ?element = "stone"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("stone_talisman") <= 0 &
+    /*result = result & item.GetCooldown("stone_talisman") <= 0 &
     ^summon.GetId() ! "" | isCasting("stone_talisman")*/
   :?element = "poison"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("poison_talisman") <= 0 &
+    /*result = result & item.GetCooldown("poison_talisman") <= 0 &
     ^summon.GetId() ! "" | isCasting("poison_talisman")*/
   :?element = "vigor"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("vigor_talisman") <= 0 &
+    /*result = result & item.GetCooldown("vigor_talisman") <= 0 &
     ^summon.GetId() ! "" | isCasting("vigor_talisman")*/
   :?element = "aether"
-    result += item.GetCooldown("aether_talisman") <= 0 &
-    ^summon.GetId() ! "voidweaver" | isCasting("aether_talisman")
+    result = result & (item.GetCooldown("aether_talisman") <= 0 &
+    ^summon.GetId() ! "voidweaver") | isCasting("aether_talisman")
   :?element = "fire"
-    result += item.GetCooldown("fire_talisman") <= 0 &
-    ^summon.GetId() ! "cinderwisp" | isCasting("fire_talisman")
+    result = result & (item.GetCooldown("fire_talisman") <= 0 &
+    ^summon.GetId() ! "cinderwisp") | isCasting("fire_talisman")
   :?element = "ice"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("ice_talisman") <= 0 &
+    /*result = result & item.GetCooldown("ice_talisman") <= 0 &
     ^summon.GetId() ! "" | isCasting("ice_talisman")*/
   :
     result = false
@@ -431,25 +416,25 @@ func canHide(element)
 
   ?element = "stone"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("stone_talisman") <= 0 &
+    /*result = result & item.GetCooldown("stone_talisman") <= 0 &
     ^summon.GetId() = "" | isCasting("stone_talisman")*/
   :?element = "poison"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("poison_talisman") <= 0 &
+    /*result = result & item.GetCooldown("poison_talisman") <= 0 &
     ^summon.GetId() = "" | isCasting("poison_talisman")*/
   :?element = "vigor"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("vigor_talisman") <= 0 &
+    /*result = result & item.GetCooldown("vigor_talisman") <= 0 &
     ^summon.GetId() = "" | isCasting("vigor_talisman")*/
   :?element = "aether"
-    result += item.GetCooldown("aether_talisman") <= 0 &
+    result = result & item.GetCooldown("aether_talisman") <= 0 &
     ^summon.GetId() = "voidweaver" | isCasting("aether_talisman")
   :?element = "fire"
-    result += item.GetCooldown("fire_talisman") <= 0 &
+    result = result & item.GetCooldown("fire_talisman") <= 0 &
     ^summon.GetId() = "cinderwisp" | isCasting("fire_talisman")
   :?element = "ice"
     result = false // TO DO: uncomment logic when this talisman is added.
-    /*result += item.GetCooldown("ice_talisman") <= 0 &
+    /*result = result & item.GetCooldown("ice_talisman") <= 0 &
     ^summon.GetId() = "" | isCasting("ice_talisman")*/
   :
     result = false
@@ -670,7 +655,7 @@ func getRange(weaponName)
 
 
   ?buffs.string = "buff_range" & !isApplied
-    result += u.grasping_buff
+    result = result & u.grasping_buff
     isApplied = true
 
   ?debuffs.string = "pallas_phase2_debuff"

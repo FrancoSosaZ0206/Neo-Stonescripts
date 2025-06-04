@@ -407,7 +407,7 @@ func ldtF(mode, permapotSetup)
           equipL Vantum Phoenix
 
       // Right hand
-      :?mode = "tank"
+      ?mode = "tank"
         equipR @shieldTowering@
 
       :?mode = "evade"
