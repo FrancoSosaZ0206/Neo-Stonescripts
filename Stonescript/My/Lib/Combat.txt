@@ -22,10 +22,10 @@ farming script easier.
   ?c.useBFG() // example */
 
 
+
 // IMPORTS
 
 var u = import My/Lib/Utilities
-
 
 
 
@@ -37,6 +37,7 @@ var midhp
 var lowhp
 var hihp
 
+
 // Others
 
 var moondialMode = -1
@@ -45,6 +46,8 @@ var smiteScreen_Target = -1
 var smiteScreen_Max = -1
 var maskScreen_Target = -1
 var maskScreen_Max = -1
+
+
 
 // FUNCTIONS
 
@@ -66,6 +69,7 @@ func Init()
     burstingTimer = 0
 
   return
+
 
 /* Returns true if a weapon's special ability
 can be activated.
@@ -142,6 +146,9 @@ func canUseAbility(weaponName)
   :?weaponName = "cinderwisp"
     result = result & item.GetCooldown("cinderwisp") <= 0 &
     ^summon.GetId() = "cinderwisp"
+  /*:?weaponName = ""
+    result = result & item.GetCooldown("") <= 0 &
+    ^summon.GetId() = ""*/
 
   :?weaponName = "wand" | weaponName = "staff"
     var internalName
@@ -205,81 +212,79 @@ func canUseAbility(weaponName)
     ^received incorrect <weaponName> value: @weaponName@
 
   return result
-/* Activates a weapon's special ability
-<weapon> and <hand> will only be evalued when needed.
+
+/* Activates the Hatchet's ability. */
+func useAbility_H()
+  equipR hatchet
+  activate R
+
+  return
+
+/* Activates a Lost Item's ability.
 
 Valid weaponName values:
 - bfg, blade >> Blade of the Fallen God
 - mask, cultist >> Cultist Mask
-- arm, skeleton >> Skeleton Arm
-- bardiche
-- heavy, hammer >> Heavy Hammer
-- quarterstaff
-- hatchet
-- voidweaver
-- cinderwisp
-- staff + <name>, staff + <element> >> Hidden staves
-- wand + <name>, wand + <element> >> Hidden wands
-- <element>_talisman >> Talismans  */
-func useAbility(weapon, weaponName, hand)
-  >c0,0,#red,@weapon@, @weaponName@, @hand@
-
-  ?weaponName = "bfg" | weaponName = "blade"
-    ?weapon ! null
-      equip blade
+- arm, skeleton >> Skeleton Arm */
+func useAbility_LI(weaponName)
+  ?weaponName = "bfg" | weaponName = "blade" | weaponName = "of the fallen god"
+    equip blade
     activate R
   :?weaponName = "mask" | weaponName = "cultist"
-    ?weapon ! null
-      equipR mask
+    equipR mask
     activate R
   :?weaponName = "arm" | weaponName = "skeleton"
-    ?weapon ! null
-      equip arm
+    equip arm
     activate R
 
-  :?weaponName = "bardiche"        |
+  :
+    >c-10,0,#red,ERROR: function useAbility_LI()
+    ^received incorrect <weaponName> value: @weaponName@
+
+  return
+
+/* Activates a special weapon's ability.
+
+Valid weaponName values:
+- bardiche
+- heavy, hammer >> Heavy Hammer
+- quarterstaff */
+func useAbility_SW(weaponName)
+  ?weaponName = "bardiche"        |
   ^weaponName = "heavy"            | weaponName = "hammer" |
-  ^weaponName = "quarterstaff"     |
-  ^(weaponName = "staff" &
-  ^   weaponName = "acrobatic"     | weaponName = "stone"  |
-  ^   weaponName = "berserker"     | weaponName = "poison" |
-  ^   weaponName = "prevention"    | weaponName = "vigor"  |
-  ^   weaponName = "grasping"      | weaponName = "aether" |
-  ^   weaponName = "infernal"      | weaponName = "fire"   |
-  ^   weaponName = "eternity"      | weaponName = "ice")
-    ?weapon ! null
-      equip @weapon@
+  ^weaponName = "quarterstaff"
+    equip @weaponName@
     activate R
 
-  :?weaponName = "hatchet" |
-  ^weaponName = "voidweaver" |
+  :
+    >c-10,0,#red,ERROR: function useAbility_SW()
+    ^received incorrect <weaponName> value: @weapon@
+
+  return
+
+/* Activates a summon's "Devour" ability.
+
+Valid weaponName values:
+- voidweaver
+- cinderwisp */
+func useAbility_Devour(weaponName)
+  ?weaponName = "voidweaver" |
   ^weaponName = "cinderwisp"
     activate R
 
+  :
+    >c-10,0,#red,ERROR: function useAbility_Devour()
+    ^received incorrect <weaponName> value: @weapon@
 
-  :?weaponName = "wand" | weaponName = "talisman"
-    // Wands
-    ?weaponName = "wand" & (
-    ^weaponName = "gravity"     | weaponName = "stone"  |
-    ^weaponName = "plague"      | weaponName = "poison" |
-    ^weaponName = "reset"       | weaponName = "vigor"  |
-    ^weaponName = "calamity"    | weaponName = "aether" |
-    ^weaponName = "explosive"   | weaponName = "fire"   |
-    ^weaponName = "frost"       | weaponName = "ice"     )
-      ?hand = "l" | hand = "left"
-        ?weapon ! null
-          equipL @weapon@
-        activate L
-      :?hand = "r" | hand = "right"
-        ?weapon ! null
-          equipR @weapon@
-        activate R
-      :
-        >c-10,0,#red,ERROR: function useAbility()
-        ^received incorrect <hand> value: @hand@
+  return
 
-    // Talismans
-    :?hand = "l" | hand = "left"
+/* Activates a talisman's summoning ability.
+
+Valid weaponName values:
+- <element> + talisman >> Talismans */
+func useAbility_T(weaponName, hand)
+  ?weaponName = "talisman"
+    ?hand = "l" | hand = "left"
       ?weaponName = "aether_talisman"
         equipL aether_talisman
       :?weaponName = "fire_talisman"
@@ -293,12 +298,63 @@ func useAbility(weapon, weaponName, hand)
         equipR fire_talisman
 
       activate R
+
     :
-      >c-10,0,#red,ERROR: function useAbility()
+      >c-10,0,#red,ERROR: function useAbility_T()
       ^received incorrect <hand> value: @hand@
 
   :
-    >c-10,0,#red,ERROR: function useAbility()
+    >c-10,0,#red,ERROR: function useAbility_T()
+    ^received incorrect <weaponName> value: @weaponName@
+
+  return
+
+/* Activates a hidden staff's special ability.
+
+Valid weaponName values:
+- staff + <name>, staff + <element> >> Hidden staves */
+func useAbility_HS(weaponName)
+  ?weaponName = "staff" & (
+  ^   weaponName = "acrobatic"     | weaponName = "stone"  |
+  ^   weaponName = "berserker"     | weaponName = "poison" |
+  ^   weaponName = "prevention"    | weaponName = "vigor"  |
+  ^   weaponName = "grasping"      | weaponName = "aether" |
+  ^   weaponName = "infernal"      | weaponName = "fire"   |
+  ^   weaponName = "eternity"      | weaponName = "ice")
+    equip @weaponName@
+    activate R
+
+  :
+    >c-10,0,#red,ERROR: function useAbility_HS()
+    ^received incorrect <weaponName> value: @weaponName@
+    
+
+/* Activates a hidden wand's special ability.
+
+Valid weaponName values:
+- wand + <name>, wand + <element> >> Hidden wands */
+func useAbility_HW(weaponName)
+  ?weaponName = "wand" & (
+  ^weaponName = "gravity"     | weaponName = "stone"  |
+  ^weaponName = "plague"      | weaponName = "poison" |
+  ^weaponName = "reset"       | weaponName = "vigor"  |
+  ^weaponName = "calamity"    | weaponName = "aether" |
+  ^weaponName = "explosive"   | weaponName = "fire"   |
+  ^weaponName = "frost"       | weaponName = "ice"     )
+    ?hand = "l" | hand = "left"
+      ?weapon ! null
+        equipL @weapon@
+      activate L
+    :?hand = "r" | hand = "right"
+      ?weapon ! null
+        equipR @weapon@
+      activate R
+    :
+      >c-10,0,#red,ERROR: function useAbility_HW()
+      ^received incorrect <hand> value: @hand@
+
+  :
+    >c-10,0,#red,ERROR: function useAbility_HW()
     ^received incorrect <weaponName> value: @weaponName@
 
   return
@@ -356,7 +412,7 @@ func useBFG_DS()
     slideCount--
   
     ?slideCount = 0
-      useAbility("bfg")
+      useAbility_LI("bfg")
       screen.ResetOffset()
       return
 
@@ -373,7 +429,7 @@ func useCultistMask_DS()
     slideCount--
   
     ?slideCount = 0
-      useAbility("mask")
+      useAbility_LI("mask")
       screen.ResetOffset()
       return
 
