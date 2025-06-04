@@ -123,7 +123,7 @@ import My/Scripts/main
 ?sys.isMobile
   import UI/MindstoneButton
 
-import My/Scripts/Cosmetics
+import My/Cosmetics
 
 ?!loc.isQuest & (
 ^loc = "Waterfall" |
