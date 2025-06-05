@@ -195,12 +195,10 @@ Enjoy! */
         :?itemName = "staff_ice"
           result = result & armor >= u.staff_ice_armor
 
-        ?itemName = "bardiche" | itemName = "heavy_hammer" | itemName = "hatchet" // interruptible
+        ?itemName = "bardiche" | itemName = "heavy_hammer" | itemName = "hatchet" | itemName = "quarterstaff" // interruptible
           result = result | isCasting(itemName) // make sure not to change it while casting the ability
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: canUseAbility\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: canUseAbility\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
       return result
 
@@ -237,9 +235,7 @@ Enjoy! */
         activate @itemName@
 
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: useAbility_TH\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
       return
     /* Activates a one-handed item's ability.
@@ -263,13 +259,9 @@ Enjoy! */
           equipR @itemName@
           activate @itemName@
         :
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: useAbility_OH\n
-          ^CAUSE: unknown <hand>:\n\n" + hand, false)
+          u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: useAbility_T\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_T\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
       return
 
@@ -293,9 +285,7 @@ Enjoy! */
       :?itemName = "mask" | itemName = "feeble"
         return screen.i = maskScreen_Target
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: isScreen_DS_Target\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: isScreen_DS_Target\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
         return false
     func isScreen_DS_Max(itemName)
@@ -304,9 +294,7 @@ Enjoy! */
       :?itemName = "mask" | itemName = "feeble"
         return maskScreen_Target = maskScreen_Max
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: isScreen_DS_Max\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: isScreen_DS_Max\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
         return false
 
@@ -318,9 +306,7 @@ Enjoy! */
         :?itemName = "mask" | itemName = "feeble"
           maskScreen_Target++
         :
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: screen_DS_Change\n
-          ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
+          u.showStrCtr(0,30,#red,"ERROR\nAT: screen_DS_Change\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
       return
 
@@ -332,9 +318,7 @@ Enjoy! */
       ^itemName = "mask"
         result = canUseAbility(itemName)
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: canUseAbility_DS\n
-        ^CAUSE: unknown <itemName>: " + itemName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: canUseAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
 
       ?result
         result = result & isScreen_DS_Target(itemName)
@@ -355,9 +339,7 @@ Enjoy! */
             screen.ResetOffset()
             return
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: useAbility_DS\n
-        ^CAUSE: unknown <itemName>: " + itemName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
 
         return
 
@@ -388,9 +370,7 @@ Enjoy! */
           result = false // TO DO: uncomment logic when this talisman is added.
           /* result = result & isSummoned("") */
         :
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: canSummon\n
-          ^CAUSE: unknown <summonName>: " + summonName, false)
+          u.showStrCtr(0,30,#red,"ERROR\nAT: canSummon\nCAUSE: unknown <summonName>: " + summonName, false)
 
           result = false
 
@@ -417,9 +397,7 @@ Enjoy! */
           result = false // TO DO: uncomment logic when this talisman is added.
           /* result = result & summon.GetId() = "" */
         :
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: canHide\n
-          ^CAUSE: unknown <summonName>: " + summonName, false)
+          u.showStrCtr(0,30,#red,"ERROR\nAT: canHide\nCAUSE: unknown <summonName>: " + summonName, false)
 
           result = false
 
@@ -436,13 +414,9 @@ Enjoy! */
         ?isSummoned(summonName)
           activate @summonName@
         :
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: devour\n
-          ^CAUSE: <summonName> isn't summoned", false)
+          u.showStrCtr(0,30,#red,"ERROR\nAT: devour\nCAUSE: <summonName> isn't summoned", false)
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: devour\n
-        ^CAUSE: unknown <summonName>:\n\n" + summonName, false)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
       return
 
@@ -543,9 +517,7 @@ Enjoy! */
       :?potionName = "invisibility"
         brew wood + stone
       :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: brewPotion\n
-        ^CAUSE: unknown <potionName>: " + potionName)
+        u.showStrCtr(0,30,#red,"ERROR\nAT: brewPotion\nCAUSE: unknown <potionName>: " + potionName)
 
       return
     func canUsePotion(potionName)
@@ -741,8 +713,8 @@ Enjoy! */
   // ............... Others ............... //
 
     func isDashingRange()
-    return u.dash_range_min <= foe.distance &
-    ^      foe.distance <= u.dash_range_max
+      return u.dash_range_min <= foe.distance &
+      ^      foe.distance <= u.dash_range_max
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

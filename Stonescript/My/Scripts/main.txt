@@ -137,18 +137,16 @@ import My/Scripts/main
 
     :
       import UI/FoeStateTracker
-      var uimkr = import My/Lib/UI_Maker
-      var u = import My/Lib/Utilities
 
       // ---------------- times lib ---------------- //
 
         var t = import My/Lib/Meters/Times
-        t.main(0,1,u.colorToHex("red"),true,false,"ui")
+        t.main(0,1,"#red",true,false,"ui")
 
       // ----------------- dps lib ----------------- //
 
         var dps = import My/Lib/Meters/DPS
-        dps.main(0,3,u.colorToHex("yellow"), 7,true,"ui")
+        dps.main(0,3,"#yellow", 7,true,"ui")
 
 
       ?loc.stars > 15 & loc = "rocky_plateau"

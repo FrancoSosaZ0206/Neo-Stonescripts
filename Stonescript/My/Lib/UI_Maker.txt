@@ -1,243 +1,284 @@
-// *******************************************************
-//                      UI_Maker.txt                      
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ START OF "UI_Maker" ▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-/* FILE INFO
-  UI component maker functions library
-  Made by MetalEagle26 (Tom Crow)
+/* // ///////////// FILE INFO //////////////// //
 
-This library offers a new, simple way to create
-UI components.
+UI functions library
+Made by IronHawk (Tom Crow)
 
-It is recommended to know read and understand
-what the functions do in order to make a good
-usage of them.
+. ................ Description ................ .
 
-- How to use:
+  This library offers a simple way to help make
+  UI component creation more concise and
+  straightforward.
+
+  All functions are one-liners!
+
+. .................. WARNING .................. .
+
+  It is recommended to know read and understand
+  what the functions do in order to make a good
+  usage of them.
+
+. ................. Importing ................. .
+
   var uimkr = new UI_Maker
 
-- Use the functions that you need like this:
-  var btn = uimkr.mkBtn([...parameters...]) // example */
+. ................... Usage ................... .
 
+  Example - returns a button with these properties:
+  - location = 1, 10 (x, y),
+  - width, height = 12, 5,
+  - anchor = top_center,
+  - dock = top_left,
+  - text = "Phrases!",
+  - color = red,
+  - text color = yellow,
+  - border color = magenta,
+  - highlight color (when pressing) = rainbow,
+  - border style = 2,
+  - while pressed = call function "iLike"
+  - before pressed = call function "greetings"
+  - after pressed = call function "goodbye"
+  - sound played when pressed = buy
 
+  func greeting()
+    >c0,-1,#red,Hello world!
+  func iLike()
+    >c0,0,#yellow,I like trees .-.
+  func goodbye()
+    >c0,1,#green,Goodbye world!
 
-// FUNCTIONS
-
-/* Common properties/parameters:
-  *** some of these may be optional ***
-
-  x = horizontal position (relative to dock)
-  y = vertical position (relative to dock)
-  w = width
-  h = height
-  anchor = position relative to the screen
-  dock = position relative to parent UI component
-  col = color in hex format
-  style = frame style ID (number from -8 to 8) */
-
-/* Optional properties/parameters:
-  send 0 if you don't want to use them.
-  The default value will be used instead. */
-
-
-/* Makes a panel component.
-PARAMETERS:
-  Common:
-    - x
-    - y
-    - anchor
-    - dock
-
-  Optional:
-    - w
-    - h
-    - col = color of the panel.
-    - style
-    - child = initial child component to add. */
-func mkPanel(x,y,w,h, anchor,dock, col,style, child)
-
-  var panel
-
-  panel = ui.AddPanel()
-
-  panel.x = x
-  panel.y = y
-
-  ?w
-    panel.w = w
-  ?h
-    panel.h = h
-
-  panel.anchor = anchor
-  panel.dock = dock
-
-  ?col
-    panel.color = col
-  ?style
-    panel.style = style
-
-  ?child
-    panel.Add(child)
-
-  return panel
-
-/* Makes a textbox component.
-PARAMETERS:
-  Common:
-    - x
-    - y
-    - anchor
-    - dock
+  var button = uimkr.mkButton(1,10,12,5,
+  ^            top_center,top_left,
+  ^            "Phrases!",
+  ^            #red,#yellow,#magenta,#rainbow,
+  ^            2,
+  ^            iLike,greetings,goodbye,
+  ^            buy)
   
-  Special:
-    - txt = textbox contents.
-    - align = text justification/alignment inside the textbox.
-              Default: "left"
-  
-  Optional:
-    - w
-    - h
-    - col = textbox color */
-func mkTxtbox(x,y,w,h, anchor,dock, txt, align, col)
+. ............................................. .
 
-  //declarations:
-  var txtbox
+Enjoy! */
 
-  //assignations:
-  txtbox = ui.AddText(txt)
 
-  //adding alignment
-  txtbox.anchor = anchor
-  txtbox.dock = dock
+// //////////////// FUNCTIONS //////////////// //
 
-  ?align
-    txtbox.align = align
+  /* Glossary:
+    *** some of these may be optional ***
 
-  //adding color
-  ?col
-    txtbox.color = col
+    x = horizontal position (relative to dock)
+    y = vertical position (relative to dock)
+    w = width
+    h = height
+    anchor = position relative to the screen
+    dock = position relative to parent UI component
+    col = color in hex format
+    style = numeric ID used for drawing rectangular Components such as Panels and Buttons (number from -8 to 8) */
 
-  //adding position
-  txtbox.x = x
-  txtbox.y = y
+  /* Optional properties/parameters:
+    send 0 if you don't want to use them.
+    The default value will be used instead. */
 
-  //adding width and height
-  ?w
-    txtbox.w = w
-  :
-    var largestStr
+
+  /* Makes a panel component.
+  PARAMETERS:
+    Common:
+      - x
+      - y
+      - anchor
+      - dock
+
+    Optional:
+      - w
+      - h
+      - col = color of the panel.
+      - style
+      - child = initial child component to add. */
+  func mkPanel(x,y,w,h, anchor,dock, col, style, child)
+
+    var panel
+
+    panel = ui.AddPanel()
+
+    panel.x = x
+    panel.y = y
+
+    ?w
+      panel.w = w
+    ?h
+      panel.h = h
+
+    panel.anchor = anchor
+    panel.dock = dock
+
+    ?col
+      panel.color = col
+    ?style
+      panel.style = style
+
+    ?child
+      panel.Add(child)
+
+    return panel
+
+  /* Makes a textbox component.
+  PARAMETERS:
+    Common:
+      - x
+      - y
+      - anchor
+      - dock
     
-    // **************************************
-    // borrowed from MyScripts/Lib/Utilities:
-    var arrStr = string.Split(txt, "\n")
-
-    ?arrStr.Count() > 0
-      var maxStr = arrStr[0]
-      var maxInd = -1
-
-      for str : arrStr
-        ?string.Size(str) > string.Size(maxStr)
-          maxStr = str
-
-      largestStr = maxStr
+    Special:
+      - txt = textbox contents.
+      - align = text justification/alignment inside the textbox.
+                Default: "left"
     
+    Optional:
+      - w
+      - h
+      - col = textbox color */
+  func mkTextbox(x,y,w,h, anchor,dock, txt, align, col)
+
+    //declarations:
+    var textbox
+
+    //assignations:
+    textbox = ui.AddText(txt)
+
+    //adding alignment
+    textbox.anchor = anchor
+    textbox.dock = dock
+
+    ?align
+      textbox.align = align
+
+    //adding color
+    ?col
+      textbox.color = col
+
+    //adding position
+    textbox.x = x
+    textbox.y = y
+
+    //adding width and height
+    ?w
+      textbox.w = w
     :
-      largestStr = null
-    // **************************************
+      var largestStr
+      
+      // **************************************
+      // borrowed from MyScripts/Lib/Utilities:
+      var arrStr = string.Split(txt, "\n")
 
-    txtbox.w = string.Size(largestStr)
+      ?arrStr.Count() > 0
+        var maxStr = arrStr[0]
+        var maxInd = -1
+
+        for str : arrStr
+          ?string.Size(str) > string.Size(maxStr)
+            maxStr = str
+
+        largestStr = maxStr
+      
+      :
+        largestStr = null
+      // **************************************
+
+      textbox.w = string.Size(largestStr)
+      
+    ?h
+      textbox.h = h
+    :
+      textbox.h = string.Split(txt, "\n").Count()
+
+
+    return textbox
+
+  /* Makes a button component.
+  PARAMETERS
+    Common:
+      - x
+      - y
+      - anchor
+      - dock
+
+    Special:
+      - txt = button text
+      - col = general color of the button (colors below override it)
+      - pressed = function that the button will perform when pressed
+
+    Optionals:
+      - w
+      - h
+      - tcol   = text color
+      - bcol   = border color
+      - hcol   = highlight color (when pressed)
+      - down   = function that the button will perform when press begins
+      - up     = function that the button will perform when press ends
+      - sound  = sound effect when pressed */
+  func mkButton(x,y,w,h, anchor,dock, txt, col,tcol,bcol,hcol, style, pressed,down,up, sound)
     
-  ?h
-    txtbox.h = h
-  :
-    txtbox.h = string.Split(txt, "\n").Count()
+    var button
+    button = ui.AddButton()
+
+    button.x = x
+    button.y = y
+
+    button.text = txt
+
+    ?w
+      button.w = w
+    :
+      var txtSize = string.Size(txt)
+      var parity = txtSize % 2
+      ?parity = 0 // even
+        button.w = (txtSize * 2) + 2 // *2 = always even, 2 for even margin
+      : // odd
+        button.w = (txtSize * 2) + 3 // *2 + 1 = always odd, 3 for odd margin
+
+    ?h
+      button.h = 3 + h
+    :
+      button.h = 3
 
 
-  return txtbox
+    ?anchor
+      button.anchor = anchor
+    ?dock
+      button.dock = dock
 
-/* Makes a button component.
-PARAMETERS
-  Common:
-    - x
-    - y
-    - anchor
-    - dock
+    ?style
+      button.style = style
 
-  Special:
-    - txt = button text
-    - col = general color of the button (colors below override it)
-    - pressed = function that the button will perform when pressed
+    ?tcol
+      button.tcolor = tcol
+    :
+      button.tcolor = col
+    ?bcol
+      button.bcolor = bcol
+    :
+      button.bcolor = col
+    ?hcol
+      button.hcolor = hcol
+    :
+      button.hcolor = col
 
-  Optionals:
-    - w
-    - h
-    - tcol   = text color
-    - bcol   = border color
-    - hcol   = highlight color (when pressed)
-    - down   = function that the button will perform when press begins
-    - up     = function that the button will perform when press ends
-    - sound  = sound effect when pressed */
-func mkBtn(x,y,w,h, anchor,dock, txt, col,tcol,bcol,hcol, style, pressed,down,up, sound)
-  
-  var btn
-  btn = ui.AddButton()
+    button.SetPressed(pressed)
+    ?down
+      button.SetDown(down)
+    ?up
+      button.SetUp(up)
 
-  btn.x = x
-  btn.y = y
+    ?sound
+      button.sound = sound
 
-  btn.text = txt
-
-  ?w
-    btn.w = w
-  :
-    var txtSize = string.Size(txt)
-    var parity = txtSize % 2
-    ?parity = 0 // even
-      btn.w = (txtSize * 2) + 2 // *2 = always even, 2 for even margin
-    : // odd
-      btn.w = (txtSize * 2) + 3 // *2 + 1 = always odd, 3 for odd margin
-
-  ?h
-    btn.h = 3 + h
-  :
-    btn.h = 3
+    return button
 
 
-  ?anchor
-    btn.anchor = anchor
-  ?dock
-    btn.dock = dock
-
-  ?style
-    btn.style = style
-
-  ?tcol
-    btn.tcolor = tcol
-  :
-    btn.tcolor = col
-  ?bcol
-    btn.bcolor = bcol
-  :
-    btn.bcolor = col
-  ?hcol
-    btn.hcolor = hcol
-  :
-    btn.hcolor = col
-
-  btn.SetPressed(pressed)
-  ?down
-    btn.SetDown(down)
-  ?up
-    btn.SetUp(up)
-
-  ?sound
-    button.sound = sound
-
-  return btn
-
-
-
-// *******************************************************
-//                  END OF "UI_Maker.txt"                 
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "UI_Maker" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //

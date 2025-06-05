@@ -20,8 +20,8 @@
   var choice = false
   var buttonPressed = false
 
-  var yesBtn
-  var noBtn
+  var yesButton
+  var noButton
 
   var dontShowAgain = false
 
@@ -30,9 +30,9 @@
 
   func harvestFunc(button)
     buttonPressed = true
-    ?button = yesBtn
+    ?button = yesButton
       choice = true
-    : // button = noBtn
+    : // button = noButton
       choice = false
 
     return
@@ -48,7 +48,7 @@
       :?c.canUseAbility("staff_ice") & foe.distance < u.dash_range_min
         c.useAbility_TH(a.staffIceHidden)
       
-      :?foe.distance > c.getRange("sword")
+      :?foe.distance > u.getRange("sword")
         ?foe.count > 1
           fight("ranged splash")
         :
@@ -97,16 +97,16 @@
 
   // Auto-harvesting logic
   ?!buttonPressed
-    ?!yesBtn
-      yesBtn = uimkr.mkBtn(
+    ?!yesButton
+      yesButton = uimkr.mkButton(
       ^-5,9,null,2,null,null, // x, y, w, h, anchor, dock,
       ^"Yes","#green", // txt, col,
       ^null,null,null, // tcol, bcol, hcol,
       ^-5,harvestFunc, // style, pressed,
       ^null,null,null) // down, up, sound
 
-    ?!noBtn
-      noBtn = uimkr.mkBtn(
+    ?!noButton
+      noButton = uimkr.mkButton(
       ^5,9,8,2,null,null, // x, y, w, h, anchor, dock,
       ^"No","red", // txt, col,
       ^null,null,null, // tcol, bcol, hcol,
@@ -115,27 +115,27 @@
 
 
     u.showStrCtr(6,30,
-    ^"Harvest boulders?","#yellow",
+    ^"Harvest boulders?",#yellow,
     ^false)
   :
-    ?yesBtn
-      yesBtn.Recycle()
-      yesBtn = null
-    ?noBtn
-      noBtn.Recycle()
-      noBtn = null
+    ?yesButton
+      yesButton.Recycle()
+      yesButton = null
+    ?noButton
+      noButton.Recycle()
+      noButton = null
 
 
     ?!dontShowAgain
       var aux = totaltime + 3*u.sec
       ?totaltime < aux
         ?choice
-          u.showStrCtr(6, 30,
-          ^"Harvest boulders is enabled","#green",
+          u.showStrCtr(6, 30,#green,
+          ^"Harvest boulders is enabled",
           ^false)
         :
-          u.showStrCtr(6, 30,
-          ^"Harvest boulders is disabled","#red",
+          u.showStrCtr(6, 30,#red,
+          ^"Harvest boulders is disabled",
           ^false)
       :
         ?!dontShowAgain
@@ -164,7 +164,7 @@
     c.useAbility_DS("blade")
 
 
-  ?foe ! "boss" & !c.isDead() & c.canSummon("aether_talisman")
+  ?!(foe = "boss" | c.isDead()) & c.canSummon("aether_talisman")
     ?c.permapotSetup
       c.useAbility_OH("aether_talisman", "l")
     :
@@ -334,7 +334,7 @@
         :
           ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
           ^debuffs.string ! "stun" // safety measure
-            c.useAbility_TH(Guardian's Bane) //'
+            c.useAbility_TH("Guardian's Bane") //'
 
           :?hp ! maxhp
             a.ldtF("melee 1v1 heal", c.permapotSetup)
