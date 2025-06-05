@@ -34,7 +34,7 @@ Made by IronHawk (Tom Crow)
   Usage
 
   ?c.canUseAbility("blade")
-    c.useAbility_LI("bfg")
+    c.useAbility_LI("blade")
 
 . ...................................... .
 
@@ -104,7 +104,7 @@ Enjoy! */
     Valid itemName values:
     - blade >> Blade of the Fallen God
     - mask >> Cultist Mask
-    - skeleton_arm (REQUIRES GAINING AT LEAST 1 PICK-POCKET BUFF)
+    - arm >> Skeleton Arm (REQUIRES GAINING AT LEAST 1 PICK-POCKET BUFF)
     - bash >> Bashing Shield
     - dash >> Dashing Shield
     - bardiche
@@ -121,7 +121,7 @@ Enjoy! */
       var result = false
 
       ?itemName = "blade" | itemName = "mask" |
-      ^itemName = "skeleton_arm"              |
+      ^itemName = "arm"              |
 
       ^itemName = "bash"  | itemName = "dash" |
 
@@ -153,15 +153,14 @@ Enjoy! */
       ^itemName = "staff_fire"                |
       ^itemName = "staff_ice"
         result = item.CanActivate(itemName) &
-        ^item.GetCooldown(itemName) <= 0 &
-        ^isCasting("heavy_hammer")
+        ^item.GetCooldown(itemName) <= 0
 
         ?itemName = "bash" | itemName = "dash"
           result = result & !ai.idle & isDashingRange()
-        :?itemName = "skeleton_arm"
+        :?itemName = "arm"
           result = result & buffs.string = "pick_pocket"
         :?itemName = "hatchet"
-          result = result & loc = "deadwood_valley"
+          result = (result & loc = "deadwood_valley") | isCasting(itemName)
         :?itemName = "voidweaver"
           result = result & !(
           ^ foe = "boss" | // bosses are immune to unmake
@@ -196,6 +195,8 @@ Enjoy! */
         :?itemName = "staff_ice"
           result = result & armor >= u.staff_ice_armor
 
+        ?itemName = "bardiche" | itemName = "heavy_hammer" | itemName = "hatchet" // interruptible
+          result = result | isCasting(itemName) // make sure not to change it while casting the ability
       :
         u.showStrCtr(0,30,"#red","ERROR\n
         ^AT: canUseAbility\n
@@ -206,25 +207,21 @@ Enjoy! */
     /* Activates the Hatchet's ability. */
     func useAbility_H()
       equipR hatchet
-      activate R
+      activate hatchet
 
       return
     /* Activates a Lost Item's ability.
 
     Valid itemName values:
-    - bfg, blade >> Blade of the Fallen God
-    - mask, cultist >> Cultist Mask
-    - arm, skeleton >> Skeleton Arm */
+    - blade >> Blade of the Fallen God
+    - mask >> Cultist Mask
+    - arm >> Skeleton Arm */
     func useAbility_LI(itemName)
-      ?itemName = "bfg" | itemName = "blade" | itemName = "of the fallen god"
-        equip blade
-        activate R
-      :?itemName = "mask" | itemName = "cultist"
-        equipR mask
-        activate R
-      :?itemName = "arm" | itemName = "skeleton"
-        equip arm
-        activate R
+      ?itemName = "blade" |
+      ^itemName = "mask" |
+      ^itemName = "arm"
+        equip @itemName@
+        activate @itemName@
 
       :
         u.showStrCtr(0,30,"#red","ERROR\n
@@ -250,7 +247,7 @@ Enjoy! */
       ^itemName = "staff_fire"    |
       ^itemName = "staff_ice"
         equip @itemName@
-        activate R
+        activate @itemName@
 
       :
         u.showStrCtr(0,30,"#red","ERROR\n
@@ -274,10 +271,10 @@ Enjoy! */
       ^itemName = "wand_ice"
         ?hand = "l" | hand = "left"
           equipL @itemName@
-          activate L
+          activate @itemName@
         :?hand = "r" | hand = "right"
           equipR @itemName@
-          activate R
+          activate @itemName@
         :
           u.showStrCtr(0,30,"#red","ERROR\n
           ^AT: useAbility_OH\n
@@ -344,9 +341,9 @@ Enjoy! */
     func canUseAbility_DS(itemName)
       var result = false
 
-      ?itemName = "bfg" | itemName = "blade" | itemName = "of the fallen god" |
-      ^itemName = "mask" | itemName = "cultist"
-        result = result & canUseAbility(itemName)
+      ?itemName = "blade" |
+      ^itemName = "mask"
+        result = canUseAbility(itemName)
       :
         u.showStrCtr(0,30,"#red","ERROR\n
         ^AT: canUseAbility_DS\n
@@ -357,15 +354,15 @@ Enjoy! */
 
       return result
     func useAbility_DS(itemName)
-      ?itemName = "bfg" | itemName = "blade" | itemName = "of the fallen god" |
-      ^itemName = "mask" | itemName = "cultist"
+      ?itemName = "blade" |
+      ^itemName = "mask"
         ?slideCount = 0
           screen.Next()
           slideCount = 20
-        
+
         :?slideCount > 0
           slideCount--
-        
+
           ?slideCount = 0
             useAbility_LI(itemName)
             screen.ResetOffset()
@@ -450,7 +447,7 @@ Enjoy! */
       ?(summonName = "voidweaver" |
       ^summonName = "cinderwisp")
         ?isSummoned(summonName)
-          activate R
+          activate @summonName@
         :
           u.showStrCtr(0,30,"#red","ERROR\n
           ^AT: devour\n
@@ -683,7 +680,7 @@ Enjoy! */
         :?moonFrame = 4
           equipL moon
           equipR @weapon2@
-      
+
       :?mode = 2
         /* Not moondialing, but useful to have here (speed
         enchant *max swords) */
