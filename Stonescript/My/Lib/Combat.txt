@@ -34,7 +34,7 @@ Made by IronHawk (Tom Crow)
   Usage
 
   ?c.canUseAbility("blade")
-    c.useAbility_LI("blade")
+    c.useAbility_TH("blade")
 
 . ...................................... .
 
@@ -160,7 +160,7 @@ Enjoy! */
         :?itemName = "arm"
           result = result & buffs.string = "pick_pocket"
         :?itemName = "hatchet"
-          result = (result & loc = "deadwood_valley") | isCasting(itemName)
+          result = result & loc = "deadwood_valley"
         :?itemName = "voidweaver"
           result = result & !(
           ^ foe = "boss" | // bosses are immune to unmake
@@ -210,34 +210,21 @@ Enjoy! */
       activate hatchet
 
       return
-    /* Activates a Lost Item's ability.
+    /* Activates a two-handed item's ability.
 
     Valid itemName values:
     - blade >> Blade of the Fallen God
     - mask >> Cultist Mask
-    - arm >> Skeleton Arm */
-    func useAbility_LI(itemName)
-      ?itemName = "blade" |
-      ^itemName = "mask" |
-      ^itemName = "arm"
-        equip @itemName@
-        activate @itemName@
-
-      :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: useAbility_LI\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
-
-      return
-    /* Activates a two-handed item's ability.
-
-    Valid itemName values:
+    - arm >> Skeleton Arm
     - bardiche
     - heavy_hammer
     - quarterstaff
     - staff_<element> >> Hidden staves */
     func useAbility_TH(itemName)
-      ?itemName = "bardiche"      |
+      ?itemName = "blade"         |
+      ^itemName = "mask"          |
+      ^itemName = "arm"           |
+      ^itemName = "bardiche"      |
       ^itemName = "heavy_hammer"  |
       ^itemName = "quarterstaff"  |
       ^itemName = "staff_stone"   |
@@ -364,7 +351,7 @@ Enjoy! */
           slideCount--
 
           ?slideCount = 0
-            useAbility_LI(itemName)
+            useAbility_TH(itemName)
             screen.ResetOffset()
             return
       :
