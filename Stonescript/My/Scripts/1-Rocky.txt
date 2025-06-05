@@ -5,353 +5,354 @@
 
 // ///////////////// IMPORTS ///////////////// //
 
-  var uimkr = import My/Lib/UI_Maker
-  var u = import My/Lib/Utilities
-  var c = import My/Lib/Combat
-  var a = import My/Lib/Arsenal
+var uimkr = import My/Lib/UI_Maker
+var u = import My/Lib/Utilities
+var c = import My/Lib/Combat
+var a = import My/Lib/Arsenal
 
-  c.Init()
+c.Init()
 
 
 // //////////////// VARIABLES //////////////// //
 
-  var weakenType = a.weaken_defaulta
+var weakenType = a.weaken_default
 
-  var choice = false
-  var buttonPressed = false
+var choice = false
+var buttonPressed = false
 
-  var yesButton
-  var noButton
+var yesButton
+var noButton
 
-  var dontShowAgain = false
+var dontShowAgain = false
+
+var hand = null
 
 
 // //////////////// FUNCTIONS //////////////// //
 
-  func harvestFunc(button)
-    buttonPressed = true
-    ?button = yesButton
-      choice = true
-    : // button = noButton
-      choice = false
+func harvestFunc(button)
+  buttonPressed = true
+  ?button = yesButton
+    choice = true
+  : // button = noButton
+    choice = false
 
-    return
+  return
 
-  func fight(mode)
-    ?mode = "evade"
-      ?c.canUseAbility("mind") & foe ! "ranged"
-        a.ldtF("mind", c.permapotSetup)
-      :?c.canUseAbility("staff_stone") & foe ! "ranged"
-      ^& foe.distance < u.dash_range_min
-        c.useAbility_TH(a.staffStoneHidden)
-      
-      :?c.canUseAbility("staff_ice") & foe.distance < u.dash_range_min
-        c.useAbility_TH(a.staffIceHidden)
-      
-      :?foe.distance > u.getRange("sword")
-        ?foe.count > 1
-          fight("ranged splash")
-        :
-          fight("ranged pierce")
-
-      :?foe ! "boss" &
-      ^encounter.eliteMod ! "tenacious" &
-      ^encounter.eliteMod ! "monarch" // can unmake
-        a.ldtF("defense unmake", c.permapotSetup)
+func fight(mode)
+  ?mode = "evade"
+    ?c.canUseAbility("mind") & foe ! "ranged"
+      a.ldtF("mind")
+    :?c.canUseAbility("staff_stone") & foe ! "ranged"
+    ^& foe.distance < u.dash_range_min
+      c.useAbility_TH(a.staffStoneHidden)
+    
+    :?c.canUseAbility("staff_ice") & foe.distance < u.dash_range_min
+      c.useAbility_TH(a.staffIceHidden)
+    
+    :?foe.distance > u.getRange("sword")
+      ?foe.count > 1
+        fight("magic")
       :
-        a.ldtF("defense", c.permapotSetup)
+        fight("ranged")
 
-    : // debuff, if possible
-      ?c.canDebuffAny() & // foe can be debuffed
-      ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+    :?foe ! "boss" &
+    ^encounter.eliteMod ! "tenacious" &
+    ^encounter.eliteMod ! "monarch" // can unmake
+      a.ldtF("defense unmake")
+    :
+      a.ldtF("defense")
+
+  :
+    // 1. debuff, if possible
+    ?c.canDebuffAny() & // foe can be debuffed
+    ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+      ?mode = "melee"
+        a.ldtF("melee 1v1 debuff")
+      :?mode = "magic"
+        a.ldtF("magic debuff")
+      :?mode = "ranged"
+        a.ldtF("ranged debuff")
+
+    : // 2. Heal if needed
+      ?hp ! maxhp // heal up
         ?mode = "melee"
-          a.ldtF("melee 1v1 debuff", c.permapotSetup)
-        :?mode = "ranged splash"
-          a.ldtF("ranged splash debuff", c.permapotSetup)
-        :?mode = "ranged pierce"
-          a.ldtF("ranged pierce debuff", c.permapotSetup)
+          a.ldtF("melee 1v1 heal")
+        :?mode = "magic"
+          a.ldtF("magic heal")
+        :?mode = "ranged"
+          a.ldtF("ranged heal")
 
-      : // all possible debuffs applied
-        ?hp ! maxhp // heal up
-          ?mode = "melee"
-            a.ldtF("melee 1v1 heal", c.permapotSetup)
-          :?mode = "ranged splash"
-            a.ldtF("ranged splash heal", c.permapotSetup)
-          :?mode = "ranged pierce"
-            a.ldtF("ranged pierce heal", c.permapotSetup)
+      : // 3. Deal max damage
+        ?mode = "melee"
+          a.ldtF("melee 1v1 dmg")
+        :?mode = "magic"
+          a.ldtF("magic dmg")
+        :?mode = "ranged"
+          a.ldtF("ranged dmg")
 
-        : // deal max damage
-          ?mode = "melee"
-            a.ldtF("melee 1v1", c.permapotSetup)
-          :?mode = "ranged splash"
-            a.ldtF("ranged splash", c.permapotSetup)
-          :?mode = "ranged pierce"
-            a.ldtF("ranged pierce", c.permapotSetup)
-
-    return
+  return
 
 
 // //////////////// PROCEDURE //////////////// //
 
-  disable npcDialog
+disable npcDialog
 
-  // Auto-harvesting logic
-  ?!buttonPressed
-    ?!yesButton
-      yesButton = uimkr.mkButton(
-      ^-5,9,null,2,null,null, // x, y, w, h, anchor, dock,
-      ^"Yes","#green", // txt, col,
-      ^null,null,null, // tcol, bcol, hcol,
-      ^-5,harvestFunc, // style, pressed,
-      ^null,null,null) // down, up, sound
+// Auto-harvesting logic
+?!buttonPressed
+  ?!yesButton
+    yesButton = uimkr.mkButton(
+    ^-5,9,null,2,null,null, // x, y, w, h, anchor, dock,
+    ^"Yes","#green", // txt, col,
+    ^null,null,null, // tcol, bcol, hcol,
+    ^-5,harvestFunc, // style, pressed,
+    ^null,null,null) // down, up, sound
 
-    ?!noButton
-      noButton = uimkr.mkButton(
-      ^5,9,8,2,null,null, // x, y, w, h, anchor, dock,
-      ^"No","red", // txt, col,
-      ^null,null,null, // tcol, bcol, hcol,
-      ^-5,harvestFunc, // style, pressed,
-      ^null,null,null) // down, up, sound
+  ?!noButton
+    noButton = uimkr.mkButton(
+    ^5,9,8,2,null,null, // x, y, w, h, anchor, dock,
+    ^"No","red", // txt, col,
+    ^null,null,null, // tcol, bcol, hcol,
+    ^-5,harvestFunc, // style, pressed,
+    ^null,null,null) // down, up, sound
 
 
-    u.showStrCtr(6,30,
-    ^"Harvest boulders?",#yellow,
-    ^false)
+  u.showStrCtr(6,30,#yellow,
+  ^"Harvest boulders?",
+  ^false)
+:
+  ?yesButton
+    yesButton.Recycle()
+    yesButton = null
+  ?noButton
+    noButton.Recycle()
+    noButton = null
+
+
+  ?!dontShowAgain
+    var aux = totaltime + 3*u.sec
+    ?totaltime < aux
+      ?choice
+        u.showStrCtr(6, 30,#green,
+        ^"Harvest boulders is enabled",
+        ^false)
+      :
+        u.showStrCtr(6, 30,#red,
+        ^"Harvest boulders is disabled",
+        ^false)
+    :
+      ?!dontShowAgain
+        dontShowAgain = true
+
+
+// Calculate the amount of damage the foe will deal
+?loc.stars > 15
+  weakenType = a.weaken_boosted
+// Decide hand for one-handed items
+?c.isPermapotSetup
+  hand = "left"
+:
+  hand = "right"
+
+c.smiteScreen_Max = 4
+c.screen_DS_Change("blade")
+c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
+
+// Auto Brewing
+?c.canBrewPotion("lucky")
+  c.brewPotion("lucky")
+
+?loc.begin // initial equipment
+  a.ldtF("default")
+:?c.isPermapotSetup
+  a.ldtF("permapot")
+
+
+?c.canUseAbility_DS("blade") & loc.stars > 15
+  c.useAbility_DS("blade")
+
+
+?!(foe = "boss" | c.isDead()) & c.canSummon("aether_talisman")
+  c.useAbility_OH("aether_talisman", hand)
+:?(foe = "boss" | loc.stars <= 15) & c.canSummon("fire_talisman")
+  c.useAbility_OH("fire_talisman", hand)
+
+
+:?c.canUsePotion("lucky") & c.isPermapotSetup
+  activate potion
+:?c.canUseAbility("staff_fire") // speed up
+  c.useAbility_TH(a.staffFireHidden)
+
+:?choice & harvest.distance < 5
+  a.ldtF("harvest")
+:?pickup.distance < 15
+  a.ldtF("magnet")
+
+
+// ABOUT TO ATTACK
+:?(foe.state = 32 & (
+^ (foe = "scout" & foe.time > 50) |
+^ (foe = "phase1" & foe.time > 60) |
+^ (foe = "phase2" & foe.time > 95) |
+^ (foe = "phase3" & (
+^   (foe.time > 85 & foe.damage ! 1) | // normal phase3 attacks
+^   (foe.time > 65 & foe.damage = 1)) )  )   ) | // putting shield up
+^(foe = "phase3" & foe.state = 155 & foe.time > 70) | // Dysangelos's massive beam
+^(foe.state = 33 & foe.time < 5 & // a bit into the attack state
+^ (foe = "phase2" | foe = "phase3"))
+
+  ?foe = "phase3" &
+  ^(foe.state = 155 | foe.damage = 1)
+    ?foe.damage = 1 & // prevent the stun
+    ^c.canUseAbility("staff_vigor")
+      c.useAbility_TH(a.staffVigorHidden)
+    :
+      fight("evade")
+
+  :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
+    ?foe = "phase3" & foe.damage ! 1 &
+    ^c.canUseAbility("staff_ice")
+      c.useAbility_TH(a.staffIceHidden)
+
+    :?foe ! "phase2" // heal to reduce it even more
+      a.ldtF("defense heal")
+    : // normal phase2 behaviour
+      ?foe.buffs.string = "buff_protection" & // against debuffs
+      ^c.canUseAbility("wand_vigor")
+        c.useAbility_OH(a.wandVigorHidden, hand)
+      :
+        a.ldtF("defense")
+
+  : // armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
+    ?buffs.string ! "buff_damage" & foe ! "phase2"
+      a.ldtF("defense buff empower")
+
+    :?foe = "phase2"
+
+      ?foe.buffs.string = "buff_protection" & // against debuffs
+      ^c.canUseAbility("wand_vigor")
+        c.useAbility_OH(a.wandVigorHidden, hand)
+      :?foe = "fire" // unmake Dysangelos's fire arm
+        a.ldtF("defense unmake")
+
+      :
+        a.ldtF("defense")
+
+
+:?c.canUseAbility("quarterstaff") &
+^!c.isDashingRange() & ai.walking
+  c.useAbility_TH(a.myQuarterstaff)
+
+:?ai.paused |
+^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
+^c.isDead() |
+^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
+^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
+^foe.state = 108 | // dysangelos phase 2 to 3 states
+^foe.state = 116 | // dysangelos phase 3 death animation state
+^foe.distance > u.dash_range_max // or we can't engage in a fight
+  ?!ai.walking & foe = "dysangelos" &
+  ^(c.canUseAbility("heavy_hammer") | c.canUseAbility("bardiche") |
+  ^(foe.distance <= u.bardiche_ability_range + u.grasping_buff &
+  ^c.canUseAbility("staff_aether")))
+    ?c.canUseAbility("heavy_hammer")
+      c.useAbility_TH("heavy hammer *max -shiny +6") // fast speed hammer
+    :?c.canUseAbility("staff_aether")
+      c.useAbility_TH(a.staffAetherHidden)
+    :?c.canUseAbility("bardiche")
+      c.useAbility_TH(Kubikiribocho)
+
+  :?armor > a.compoundMaxArmor_boosted |
+  ^(foe ! "boss" & foe.distance < u.shield_rune_range)
+    a.ldtF("engage")
+  :?a.compoundMaxArmor_default <= armor &
+  ^armor <= a.compoundMaxArmor_boosted
+    a.ldtF("defense regen max")
   :
-    ?yesButton
-      yesButton.Recycle()
-      yesButton = null
-    ?noButton
-      noButton.Recycle()
-      noButton = null
+    a.ldtF("defense regen fast")
 
 
-    ?!dontShowAgain
-      var aux = totaltime + 3*u.sec
-      ?totaltime < aux
-        ?choice
-          u.showStrCtr(6, 30,#green,
-          ^"Harvest boulders is enabled",
-          ^false)
-        :
-          u.showStrCtr(6, 30,#red,
-          ^"Harvest boulders is disabled",
-          ^false)
-      :
-        ?!dontShowAgain
-          dontShowAgain = true
+:?encounter.eliteMod = "monarch"
+  ?foe.count > 1 // eliminate the other foes
+    ?c.canUseAbility("blade")
+      c.useAbility_LI("blade")
+    :?c.canUseAbility("wand_fire")
+      c.useAbility_OH(a.wandFireHidden, hand)
 
-
-  // Calculate the amount of damage the foe will deal
-  ?loc.stars > 15
-    weakenType = a.weaken_boosted
-
-  c.smiteScreen_Max = 4
-  c.screen_DS_Change("bfg")
-  c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
-
-  // Auto Brewing
-  ?c.canBrewPotion("lucky")
-    c.brewPotion("lucky")
-
-  ?loc.begin // initial equipment
-    a.ldtF("default", c.permapotSetup)
-  :?c.permapotSetup
-    a.ldtF("permapot", c.permapotSetup)
-
-
-  ?c.canUseAbility_DS("blade") & loc.stars > 15
-    c.useAbility_DS("blade")
-
-
-  ?!(foe = "boss" | c.isDead()) & c.canSummon("aether_talisman")
-    ?c.permapotSetup
-      c.useAbility_OH("aether_talisman", "l")
+    :?c.canUseAbility("heavy_hammer") // if close, use hammer
+      c.useAbility_TH(Mjölnir)
     :
-      equipL triskelion
-      c.useAbility_OH("aether_talisman", "r")
-  :?(foe = "boss" | loc.stars <= 15) & c.canSummon("fire_talisman")
-    ?c.permapotSetup
-      c.useAbility_OH("fire_talisman", "l")
+      fight("evade")
+
+  :?c.canUseAbility("bash")
+    a.ldtF("bash")
+  :?c.canUseAbility("dash")
+    a.ldtF("dash")
+
+  : // 1v1 with the monarch
+    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ^c.canUseAbility("bardiche")
+      c.useAbility_TH(Kubikiribocho)
     :
-      equipL triskelion
-      c.useAbility_OH("fire_talisman", "r")
-
-  :?c.canUsePotion("lucky") & c.permapotSetup
-    activate potion
-  :?c.canUseAbility("staff_fire") // speed up
-    c.useAbility_TH(a.staffFireHidden)
-
-  :?choice & harvest.distance < 5
-    a.ldtF("harvest", c.permapotSetup)
-  :?pickup.distance < 15
-    a.ldtF("magnet", c.permapotSetup)
-
-
-  // ABOUT TO ATTACK
-  :?(foe.state = 32 & (
-  ^ (foe = "scout" & foe.time > 50) |
-  ^ (foe = "phase1" & foe.time > 60) |
-  ^ (foe = "phase2" & foe.time > 95) |
-  ^ (foe = "phase3" & (
-  ^   (foe.time > 85 & foe.damage ! 1) | // normal phase3 attacks
-  ^   (foe.time > 65 & foe.damage = 1)) )  )   ) | // putting shield up
-  ^(foe = "phase3" & foe.state = 155 & foe.time > 70) | // Dysangelos's massive beam
-  ^(foe.state = 33 & foe.time < 5 & // a bit into the attack state
-  ^ (foe = "phase2" | foe = "phase3"))
-
-    ?foe = "phase3" &
-    ^(foe.state = 155 | foe.damage = 1)
-      ?foe.damage = 1 & // prevent the stun
-      ^c.canUseAbility("staff_vigor")
-        c.useAbility_TH(a.staffVigorHidden)
-      :
-        fight("evade")
-
-    :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
-      ?foe = "phase3" & foe.damage ! 1 &
-      ^c.canUseAbility("staff_ice")
-        c.useAbility_TH(a.staffIceHidden)
-
-      :?foe ! "phase2" // heal to reduce it even more
-        a.ldtF("defense heal", c.permapotSetup)
-      : // normal phase2 behaviour
-        ?foe.buffs.string = "buff_protection" & // against debuffs
-        ^c.canUseAbility("wand_vigor")
-          c.useAbility_OH(a.wandVigorHidden, "l")
-        :
-          a.ldtF("defense", c.permapotSetup)
-
-    : // armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
-      ?buffs.string ! "buff_damage" & foe ! "phase2"
-        a.ldtF("defense buff empower", c.permapotSetup)
-
-      :?foe = "phase2"
-
-        ?foe.buffs.string = "buff_protection" & // against debuffs
-        ^c.canUseAbility("wand_vigor")
-          c.useAbility_OH(a.wandVigorHidden, "l")
-        :?foe = "fire" // unmake Dysangelos's fire arm
-          a.ldtF("defense unmake", c.permapotSetup)
-
-        :
-          a.ldtF("defense", c.permapotSetup)
-
-
-  :?c.isQuarterstaffRange() & c.canUseAbility("quarterstaff")
-    c.useAbility_TH(a.myQuarterstaff)
-
-  :?ai.paused |
-  ^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
-  ^c.isDead() |
-  ^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
-  ^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
-  ^foe.state = 108 | // dysangelos phase 2 to 3 states
-  ^foe.state = 116 | // dysangelos phase 3 death animation state
-  ^foe.distance > u.dash_range_max // or we can't engage in a fight
-    ?!ai.walking & foe = "dysangelos" &
-    ^(c.canUseAbility("heavy_hammer") | c.canUseAbility("bardiche") |
-    ^(foe.distance <= u.bardiche_ability_range + u.grasping_buff
-    ^& c.canUseAbility("staff_aether")))
-      ?c.canUseAbility("heavy_hammer")
-        c.useAbility_TH("heavy hammer *max -shiny +6") // fast speed hammer
-      
-      :?c.canUseAbility("staff_aether")
-        c.useAbility_TH(a.staffAetherHidden)
-      :?c.canUseAbility("bardiche")
-        c.useAbility_TH(Kubikiribocho)
-
-    :?armor > a.compoundMaxArmor_boosted |
-    ^(foe ! "boss" & foe.distance < u.shield_rune_range)
-      a.ldtF("engage", c.permapotSetup)
-    :?a.compoundMaxArmor_default <= armor &
-    ^armor <= a.compoundMaxArmor_boosted
-      a.ldtF("default", c.permapotSetup)
-    :
-      a.ldtF("armorRegen", c.permapotSetup)
-
-
-  :?encounter.eliteMod = "monarch"
-    ?foe.count > 1 // eliminate the other foes
-      ?c.canUseAbility("blade")
-        c.useAbility_LI("blade")
-      :?c.canUseAbility("wand_fire")
-        c.useAbility_OH(a.wandFireHidden, "l")
-
-      :?c.canUseAbility("heavy_hammer") // if close, use hammer
-        c.useAbility_TH(Mjölnir)
-      :
-        fight("evade")
-
-    :?c.canUseAbility("bash")
-      a.ldtF("bash", c.permapotSetup)
-    :?c.canUseAbility("dash")
-      a.ldtF("dash", c.permapotSetup)
-
-    : // 1v1 with the monarch
-      ?foe.hp + foe.armor >= a.bardicheRDmg &
-      ^c.canUseAbility("bardiche")
-        c.useAbility_TH(Kubikiribocho)
-      :
-        fight("melee")
-
-  : // fighting range
-    ?c.canUseAbility("bash")
-      a.ldtF("bash", c.permapotSetup)
-    :?c.canUseAbility("dash")
-      a.ldtF("dash", c.permapotSetup)
-
-    :?c.canUseAbility("voidweaver") & c.canUnmakeVoidweaver()
-      c.devour("voidweaver")
-
-    :?foe = "scout"
       fight("melee")
 
-    : // Dysangelos
-      ?foe = "phase1"
-        fight("melee")
+: // fighting range
+  ?c.canUseAbility("bash")
+    a.ldtF("bash")
+  :?c.canUseAbility("dash")
+    a.ldtF("dash")
 
-      :?foe = "phase2"
-        ?foe.buffs.string = "buff_protection" & // against debuffs
-        ^c.canUseAbility("wand_vigor")
-          c.useAbility_OH(a.wandVigorHidden, "l")
-        
-        :
-          a.ldtF("melee 1v1", c.permapotSetup)
+  :?c.canUseAbility("voidweaver") & c.canUnmakeVoidweaver()
+    c.devour("voidweaver")
 
-      : // ?foe = phase3
-        ?c.canUsePotion("lucky")
-          activate potion
-        :?c.canUseAbility("mask")
-          c.useAbility_LI("mask")
-        :?c.canUseAbility("staff_poison")
-          c.useAbility_TH(a.staffPoisonHidden)
+  :?foe = "scout"
+    fight("melee")
 
-        ?c.canUseAbility("cinderwisp") & c.isSummoned("cinderwisp") &
-        ^foe.debuffs.string = a.maxIgnitions_Default
-          c.devour("cinderwisp")
+  : // Dysangelos
+    ?foe = "phase1"
+      fight("melee")
 
-        :
-          ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
-          ^debuffs.string ! "stun" // safety measure
-            c.useAbility_TH("Guardian's Bane") //'
+    :?foe = "phase2"
+      ?foe.buffs.string = "buff_protection" & // against debuffs
+      ^c.canUseAbility("wand_vigor")
+        c.useAbility_OH(a.wandVigorHidden, hand)
+      
+      :
+        a.ldtF("melee 1v1 dmg")
 
-          :?hp ! maxhp
-            a.ldtF("melee 1v1 heal", c.permapotSetup)
-          :?c.canDebuffAny()
-            a.ldtF("melee 1v1 debuff", c.permapotSetup)
+    : // ?foe = phase3
+      ?c.canUsePotion("lucky")
+        activate potion
+      :?c.canUseAbility("mask")
+        c.useAbility_LI("mask")
+      :?c.canUseAbility("staff_poison")
+        c.useAbility_TH(a.staffPoisonHidden)
 
-          :?foe.buffs.string ! "defense_fire" // equip fire weapons
-            ?c.permapotSetup
-              equipL Vantum Phoenix
-            :
-              c.doMoondial(Vantum Phoenix, a.swordFireDmg, c.moondialMode)
+      ?c.canUseAbility("cinderwisp") & c.isSummoned("cinderwisp") &
+      ^foe.debuffs.string = a.maxIgnitions_Default
+        c.devour("cinderwisp")
 
-          : // equip ice weapons (or any that aren't fire)
-            ?c.permapotSetup
-              equipL Bifrost
-            :
-              c.doMoondial(Bifrost, a.swordIceDmg, c.moondialMode)
+      :
+        ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
+        ^debuffs.string ! "stun" // safety measure
+          c.useAbility_TH("Guardian's Bane") //'
+
+        :?hp ! maxhp
+          a.ldtF("melee 1v1 heal")
+        :?c.canDebuffAny()
+          a.ldtF("melee 1v1 debuff")
+
+        :?foe.buffs.string ! "defense_fire" // equip fire weapons
+          ?c.isPermapotSetup
+            equipL Vantum Phoenix
+          :
+            c.doMoondial(Vantum Phoenix, a.swordFireDmg)
+
+        : // equip ice weapons (or any that aren't fire)
+          ?c.isPermapotSetup
+            equipL Bifrost
+          :
+            c.doMoondial(Bifrost, a.swordIceDmg)
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

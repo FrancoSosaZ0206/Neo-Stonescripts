@@ -116,58 +116,58 @@ import My/Scripts/main
 
 // ////////////////////// PC /////////////////////// //
 
-  // ··············· IMPORTS ··············· //
+// ··············· IMPORTS ··············· //
 
-    ?sys.isMobile
-      import UI/MindstoneButton
+?sys.isMobile
+  import UI/MindstoneButton
 
-    import My/Cosmetics
-
-
-  // ·············· PROCEDURE ·············· //
-
-    ?!loc.isQuest & (
-    ^loc = "Waterfall" |
-    ^loc = "cross_deadwood_river" |
-    ^loc = "cross_bridge")
-      loc.Leave()
-
-    :?loc = "undead_crypt_intro" // Haunted Gate
-      import My/Scripts/Gate
-
-    :
-      import UI/FoeStateTracker
-
-      // ---------------- times lib ---------------- //
-
-        var t = import My/Lib/Meters/Times
-        t.main(0,1,"#red",true,false,"ui")
-
-      // ----------------- dps lib ----------------- //
-
-        var dps = import My/Lib/Meters/DPS
-        dps.main(0,3,"#yellow", 7,true,"ui")
+import My/Cosmetics
 
 
-      ?loc.stars > 15 & loc = "rocky_plateau"
-        import My/Scripts/Green/1-Rocky
-      :
-        ?loc = "rocky_plateau"
-          import My/Scripts/1-Rocky
-        :?loc = "deadwood_valley"
-          import My/Scripts/2-Deadwood
-        :?loc = "caustic_caves"
-          import My/Scripts/3-Caves
-        :?loc = "fungus_forest"
-          import My/Scripts/4-Mushroom
-        :?loc = "undead_crypt"
-          import My/Scripts/5-Halls
-        :?loc = "bronze_mine"
-          import My/Scripts/6-Mine
-        :?loc = "icy_ridge"
-          import My/Scripts/7-Ridge
-        :?loc = "temple"
-          import My/Scripts/8-Temple
+// ·············· PROCEDURE ·············· //
+
+?!loc.isQuest & (
+^loc = "Waterfall" |
+^loc = "cross_deadwood_river" |
+^loc = "cross_bridge")
+  loc.Leave()
+
+:?loc = "undead_crypt_intro" // Haunted Gate
+  import My/Scripts/Gate
+
+:
+  import UI/FoeStateTracker
+
+  // ---------------- times lib ---------------- //
+
+  var t = import My/Lib/Meters/Times
+  t.main(0,1,"#red",true,false,"ui")
+
+  // ----------------- dps lib ----------------- //
+
+  var dps = import My/Lib/Meters/DPS
+  dps.main(0,3,"#yellow", 7,true,"ui")
+
+
+  ?loc.stars > 15 & loc = "rocky_plateau"
+    import My/Scripts/Green/1-Rocky
+  :
+    ?loc = "rocky_plateau"
+      import My/Scripts/1-Rocky
+    :?loc = "deadwood_valley"
+      import My/Scripts/2-Deadwood
+    :?loc = "caustic_caves"
+      import My/Scripts/3-Caves
+    :?loc = "fungus_forest"
+      import My/Scripts/4-Mushroom
+    :?loc = "undead_crypt"
+      import My/Scripts/5-Halls
+    :?loc = "bronze_mine"
+      import My/Scripts/6-Mine
+    :?loc = "icy_ridge"
+      import My/Scripts/7-Ridge
+    :?loc = "temple"
+      import My/Scripts/8-Temple
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
