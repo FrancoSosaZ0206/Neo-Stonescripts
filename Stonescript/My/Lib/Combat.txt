@@ -3,7 +3,6 @@
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-
 /* // ///////////// FILE INFO //////////////// //
 
 Combat functions library
@@ -42,11 +41,9 @@ Made by IronHawk (Tom Crow)
 Enjoy! */
 
 
-
 // ///////////////// IMPORTS ///////////////// //
 
   var u = import My/Lib/Utilities
-
 
 
 // //////////////// VARIABLES //////////////// //
@@ -79,29 +76,28 @@ Enjoy! */
   var permapotSetup = true
 
 
-
 // //////////////// FUNCTIONS //////////////// //
 
+  func Init()
+    midhp = maxhp / 2
+    lowhp = maxhp / 3
+    hihp = (4 * maxhp) / 5
+
+    ?buffs.string = "berserk"
+      moondialMode = 2
+    :
+      moondialMode = 0
+
+    ?loc.begin
+      smiteScreen_Target = 1
+    :?loc.loop
+      permapotSetup = false
+
+      burstingTimer = 0
+
+    return
+
   // ............... GLOBAL ............... //
-
-    func Init()
-      midhp = maxhp / 2
-      lowhp = maxhp / 3
-      hihp = (4 * maxhp) / 5
-
-      ?buffs.string = "berserk"
-        moondialMode = 2
-      :
-        moondialMode = 0
-
-      ?loc.begin
-        smiteScreen_Target = 1
-      :?loc.loop
-        permapotSetup = false
-
-        burstingTimer = 0
-
-      return
 
     /* Returns true if a given weapon's special ability can be activated.
 
@@ -125,12 +121,37 @@ Enjoy! */
       var result = false
 
       ?itemName = "blade" | itemName = "mask" |
+      ^itemName = "skeleton_arm"              |
+
       ^itemName = "bash"  | itemName = "dash" |
-      ^itemName = "skeleton_arm" |
-      ^itemName = "heavy_hammer" |
-      ^itemName = "bardiche"     |
-      ^itemName = "quarterstaff" |
-      ^
+
+      ^itemName = "heavy_hammer"              |
+      ^itemName = "bardiche"                  |
+      ^itemName = "quarterstaff"              |
+
+      ^itemName = "stone_talisman"            |
+      ^itemName = "poison_talisman"           |
+      ^itemName = "vigor_talisman"            |
+      ^itemName = "aether_talisman"           |
+      ^itemName = "fire_talisman"             |
+      ^itemName = "ice_talisman"              |
+
+      ^itemName = "voidweaver"                |
+      ^itemName = "cinderwisp"                |
+
+      ^itemName = "wand_stone"                |
+      ^itemName = "wand_poison"               |
+      ^itemName = "wand_vigor"                |
+      ^itemName = "wand_aether"               |
+      ^itemName = "wand_fire"                 |
+      ^itemName = "wand_ice"                  |
+
+      ^itemName = "staff_stone"               |
+      ^itemName = "staff_poison"              |
+      ^itemName = "staff_vigor"               |
+      ^itemName = "staff_aether"              |
+      ^itemName = "staff_fire"                |
+      ^itemName = "staff_ice"
         result = item.CanActivate(itemName) &
         ^item.GetCooldown(itemName) <= 0 &
         ^isCasting("heavy_hammer")
@@ -141,93 +162,39 @@ Enjoy! */
           result = result & buffs.string = "pick_pocket"
         :?itemName = "hatchet"
           result = result & loc = "deadwood_valley"
+        :?itemName = "voidweaver"
+          result = result & !(
+          ^ foe = "boss" | // bosses are immune to unmake
+          ^ encounter.eliteMod = "tenacious" | ( // tenacious can't be debuffed
+          ^   encounter.eliteMod = "monarch" &
+          ^   foe.count = 1) // monarch foes can't be unmade
+          ^)
 
-      :?itemName = "stone_talisman"  |
-      ^itemName = "poison_talisman" |
-      ^itemName = "vigor_talisman"  |
-      ^itemName = "aether_talisman" |
-      ^itemName = "fire_talisman"   |
-      ^itemName = "ice_talisman"
-        result = result & item.GetCooldown(itemName) <= 0
+        :?itemName = "wand_stone"
+          result = result & armor >= u.wand_stone_armor
+        :?itemName = "wand_poison"
+          result = result & armor >= u.wand_poison_armor
+        :?itemName = "wand_vigor"
+          result = result & armor >= u.wand_vigor_armor
+        :?itemName = "wand_aether"
+          result = result & armor >= u.wand_aether_armor
+        :?itemName = "wand_fire"
+          result = result & armor >= u.wand_fire_armor
+        :?itemName = "wand_ice"
+          result = result & armor >= u.wand_ice_armor
 
-      /*:?itemName = ""
-        result = result & item.GetCooldown("") <= 0 &
-        ^summon.GetId() = ""*/
-      /*:?itemName = ""
-        result = result & item.GetCooldown("") <= 0 &
-        ^summon.GetId() = ""*/
-      /*:?itemName = ""
-        result = result & item.GetCooldown("") <= 0 &
-        ^summon.GetId() = ""*/
-      :?itemName = "voidweaver"
-        result = result & item.GetCooldown("voidweaver") <= 0 &
-        ^summon.GetId() = "voidweaver" & foe ! "boss" & // bosses are immune to unmake
-        ^encounter.eliteMod ! "tenacious" & // tenacious can't be debuffed
-        ^!(encounter.eliteMod = "monarch" & foe.count = 1) // monarch foes can't be unmade
-      :?itemName = "cinderwisp"
-        result = result & item.GetCooldown("cinderwisp") <= 0 &
-        ^summon.GetId() = "cinderwisp"
-      /*:?itemName = ""
-        result = result & item.GetCooldown("") <= 0 &
-        ^summon.GetId() = ""*/
-
-      :?itemName = "wand" | itemName = "staff"
-        var internalName
-        var requiredArmor
-        var isOk = true // only set to false if itemName is unknown
-
-        // Wands
-        ?itemName = "gravity" | itemName = "stone"
-          internalName = "wand_stone"
-          requiredArmor = u.wandStoneArmor
-        :?itemName = "plague" | itemName = "poison"
-          internalName = "wand_poison"
-          requiredArmor = u.wandPoisonArmor
-        :?itemName = "reset" | itemName = "vigor"
-          internalName = "wand_vigor"
-          requiredArmor = u.wandVigorArmor
-        :?itemName = "calamity" | itemName = "aether"
-          internalName = "wand_aether"
-          requiredArmor = u.wandArmor
-        :?itemName = "explosive" | itemName = "fire"
-          internalName = "wand_fire"
-          requiredArmor = u.wandFireArmor
-        :?itemName = "frost" | itemName = "ice"
-          internalName = "wand_ice"
-          requiredArmor = u.wandIceArmor
-
-        // Staves
-        :?itemName = "acrobatic" | itemName = "stone"
-          internalName = "staff_stone"
-          requiredArmor = u.staffStoneArmor
-        :?itemName = "berserker" | itemName = "poison"
-          internalName = "staff_poison"
-          requiredArmor = u.staffPoisonArmor
-        :?itemName = "prevention" | itemName = "vigor"
-          internalName = "staff_vigor"
-          requiredArmor = u.staffVigorArmor
-        :?itemName = "grasping" | itemName = "aether"
-          internalName = "staff_aether"
-          requiredArmor = u.staffAetherArmor
-        :?itemName = "infernal" | itemName = "fire"
-          internalName = "staff_fire"
-          requiredArmor = u.staffFireArmor
-        :?itemName = "eternity" | itemName = "ice"
-          internalName = "staff_ice"
-          requiredArmor = u.staffIceArmor
-      
-        :
-          isOk = false
-        
-        ?isOk
-          result = result & item.GetCooldown(internalName) <= 0 &
-          ^armor >= requiredArmor
-
-        :
-          result = false
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: canUseAbility\n
-          ^CAUSE: unknown wand or staff:\n\n" + itemName, false)
+        :?itemName = "staff_stone"
+          result = result & armor >= u.staff_stone_armor
+        :?itemName = "staff_poison"
+          result = result & armor >= u.staff_poison_armor
+        :?itemName = "staff_vigor"
+          result = result & armor >= u.staff_vigor_armor
+        :?itemName = "staff_aether"
+          result = result & armor >= u.staff_aether_armor
+        :?itemName = "staff_fire"
+          result = result & armor >= u.staff_fire_armor
+        :?itemName = "staff_ice"
+          result = result & armor >= u.staff_ice_armor
 
       :
         u.showStrCtr(0,30,"#red","ERROR\n
@@ -236,14 +203,12 @@ Enjoy! */
 
       return result
 
-
     /* Activates the Hatchet's ability. */
     func useAbility_H()
       equipR hatchet
       activate R
 
       return
-
     /* Activates a Lost Item's ability.
 
     Valid itemName values:
@@ -267,18 +232,23 @@ Enjoy! */
         ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
 
       return
-
     /* Activates a two-handed item's ability.
 
     Valid itemName values:
     - bardiche
     - heavy_hammer
     - quarterstaff
-    */
+    - staff_<element> >> Hidden staves */
     func useAbility_TH(itemName)
       ?itemName = "bardiche"      |
       ^itemName = "heavy_hammer"  |
-      ^itemName = "quarterstaff"
+      ^itemName = "quarterstaff"  |
+      ^itemName = "staff_stone"   |
+      ^itemName = "staff_poison"  |
+      ^itemName = "staff_vigor"   |
+      ^itemName = "staff_aether"  |
+      ^itemName = "staff_fire"    |
+      ^itemName = "staff_ice"
         equip @itemName@
         activate R
 
@@ -288,114 +258,50 @@ Enjoy! */
         ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
 
       return
-
     /* Activates a one-handed item's ability.
 
     Valid itemName values:
-    - <element> + talisman >> Talismans
-    - , >> */
+    - <element>_talisman >> Talismans
+    - wand_<element> >> Hidden wands */
     func useAbility_OH(itemName, hand)
-      ?hand = "l" | hand = "left"
-        ?itemName = "aether_talisman" |
-        ^itemName = "fire_talisman"
+      ?itemName = "aether_talisman" |
+      ^itemName = "fire_talisman"   |
+      ^itemName = "wand_stone"      |
+      ^itemName = "wand_poison"     |
+      ^itemName = "wand_vigor"      |
+      ^itemName = "wand_aether"     |
+      ^itemName = "wand_fire"       |
+      ^itemName = "wand_ice"
+        ?hand = "l" | hand = "left"
           equipL @itemName@
           activate L
-        :
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: useAbility_T\n
-          ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
-
-      :?hand = "r" | hand = "right"
-        ?itemName = "aether_talisman" |
-        ^itemName = "fire_talisman"
+        :?hand = "r" | hand = "right"
           equipR @itemName@
           activate R
         :
           u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: useAbility_T\n
-          ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
-
+          ^AT: useAbility_OH\n
+          ^CAUSE: unknown <hand>:\n\n" + hand, false)
       :
         u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: useAbility_OH\n
-        ^CAUSE: unknown <hand>:\n\n" + hand, false)
-
+        ^AT: useAbility_T\n
+        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
 
       return
-
 
     /* Returns true if a given item is equipped. */
     func isEquipped(itemName)
       return item.left = itemName | item.right = itemName
-
     /* Returns true if an attack is being casted. */ 
     func isCasting(itemName)
       return
       ^(item.left = itemName & item.left.state = 2) |
       ^(item.right = itemName & item.right.state = 2)
-
     /* Returns true if a foe has been defeated. */
     func isDead()
       return foe.state = 4 | foe.state = -1 // foe death states
 
-
-
-  // Hidden enchant weapons
-
-    /* Activates a hidden staff's special ability.
-
-    Valid itemName values:
-    - staff + <name>, staff + <element> >> Hidden staves */
-    func useAbility_HS(itemName)
-      ?itemName = "staff" & (
-      ^   itemName = "acrobatic"     | itemName = "stone"  |
-      ^   itemName = "berserker"     | itemName = "poison" |
-      ^   itemName = "prevention"    | itemName = "vigor"  |
-      ^   itemName = "grasping"      | itemName = "aether" |
-      ^   itemName = "infernal"      | itemName = "fire"   |
-      ^   itemName = "eternity"      | itemName = "ice")
-        equip @itemName@
-        activate R
-
-      :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: useAbility_HS\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
-        
-    /* Activates a hidden wand's special ability.
-
-    Valid itemName values:
-    - wand + <name>, wand + <element> >> Hidden wands */
-    func useAbility_HW(itemName, hand)
-      ?itemName = "wand" & (
-      ^itemName = "gravity"     | itemName = "stone"  |
-      ^itemName = "plague"      | itemName = "poison" |
-      ^itemName = "reset"       | itemName = "vigor"  |
-      ^itemName = "calamity"    | itemName = "aether" |
-      ^itemName = "explosive"   | itemName = "fire"   |
-      ^itemName = "frost"       | itemName = "ice"     )
-        ?hand = "l" | hand = "left"
-          ?weapon ! null
-            equipL @weapon@
-          activate L
-        :?hand = "r" | hand = "right"
-          ?weapon ! null
-            equipR @weapon@
-          activate R
-        :
-          u.showStrCtr(0,30,"#red","ERROR\n
-          ^AT: useAbility_HW\n
-          ^CAUSE: unknown <hand>:\n\n" + hand, false)
-
-      :
-        u.showStrCtr(0,30,"#red","ERROR\n
-        ^AT: useAbility_HW\n
-        ^CAUSE: unknown <itemName>:\n\n" + itemName, false)
-
-      return
-
-
-  // Double Screen (DS)
+  // ......... Double Screen (DS) ......... //
 
     func isScreen_DS_Target(itemName)
       ?itemName = "smite" | itemName = "bfg" | itemName = "blade"
@@ -471,8 +377,7 @@ Enjoy! */
 
         return
 
-
-  // Talisman / Summon specific
+  // ..... Talisman / Summon specific ..... //
 
     func isSummoned(summonName)
       return summon.GetId() = summonName
@@ -594,8 +499,7 @@ Enjoy! */
 
       return result
 
-
-  // Potions
+  // ............... Potions .............. //
 
     /* Checks if a certain potion can be brewed.
     **********************************************
@@ -665,8 +569,7 @@ Enjoy! */
       ^item.potion ! "empty" &
       ^item.potion = potionName
 
-
-  // Status effects
+  // ........... Status effects ........... //
 
     /* Returns foe's damage, accounting for
     any damage-reduction debuffs applied.
@@ -744,9 +647,7 @@ Enjoy! */
       ^foe ! "immune_to_debuff_damage" &
       ^foe ! "immune_to_debuff_dot"
 
-
-
-  // Damage min-maxing
+  // ......... Damage min-maxing .......... //
 
     func doMoondial(weapon1, weapon2, mode)
 
@@ -853,14 +754,11 @@ Enjoy! */
 
       // return
 
-
-  // Others
+  // ............... Others ............... //
 
     func isDashingRange()
     return u.dash_range_min <= foe.distance &
     ^      foe.distance <= u.dash_range_max
-
-
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

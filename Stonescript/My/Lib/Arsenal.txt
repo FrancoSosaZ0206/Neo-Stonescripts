@@ -3,7 +3,6 @@
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-
 /* // ///////////// FILE INFO //////////////// //
 
 Library with my personal weapons,
@@ -44,11 +43,9 @@ Made by IronHawk (Tom Crow)
 */
 
 
-
 // ///////////////// IMPORTS ///////////////// //
 
   var c = import My/Lib/Combat
-
 
 
 // //////////////// VARIABLES //////////////// //
@@ -235,7 +232,6 @@ Made by IronHawk (Tom Crow)
       var bardicheCrit = 13.5
       var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
       /* ************************************* */
-
 
 
 // //////////////// FUNCTIONS //////////////// //
@@ -702,7 +698,6 @@ Made by IronHawk (Tom Crow)
       ^ERROR: ldtF() recieved incorrect mode: @mode@
 
     return
-
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

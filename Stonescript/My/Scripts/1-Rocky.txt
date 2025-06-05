@@ -3,7 +3,6 @@
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-
 // ///////////////// IMPORTS ///////////////// //
 
   var uimkr = import My/Lib/UI_Maker
@@ -12,7 +11,6 @@
   var a = import My/Lib/Arsenal
 
   c.Init()
-
 
 
 // //////////////// VARIABLES //////////////// //
@@ -26,7 +24,6 @@
   var noBtn
 
   var dontShowAgain = false
-
 
 
 // //////////////// FUNCTIONS //////////////// //
@@ -92,7 +89,6 @@
             a.ldtF("ranged pierce", c.permapotSetup)
 
     return
-
 
 
 // //////////////// PROCEDURE //////////////// //
@@ -361,7 +357,6 @@
               equipL Bifrost
             :
               c.doMoondial(Bifrost, a.swordIceDmg, c.moondialMode)
-
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

@@ -3,7 +3,6 @@
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-
 /* // ///////////// FILE INFO //////////////// //
 
 Utilities library
@@ -35,78 +34,73 @@ Made by IronHawk (Tom Crow)
 Enjoy! */
 
 
-
 // ///////////////// IMPORTS ///////////////// //
 
   var uimkr = new My/Lib/UI_Maker
-
 
 
 // //////////////// VARIABLES //////////////// //
 
   // Units
 
-  var sec = 30 // frames
-  var scr = 69 // 1 screen = 69 units
-
+    var sec = 30 // frames
+    var scr = 69 // 1 screen = 69 units
 
   // Weapon Ranges
 
-  var skeletonArm_range = 7
+    var skeletonArm_range = 7
 
-  var bardiche_range = 9
-  var bardiche_ability_range = 7
-  var heavyHammer_range = 7 // CHECK
-  var heavyHammer_ability_range = 21 // CHECK
+    var bardiche_range = 9
+    var bardiche_ability_range = 7
+    var heavyHammer_range = 7 // CHECK
+    var heavyHammer_ability_range = 21 // CHECK
 
-  // These count both for dashing and bashing shields:
-  var dash_range_min = 11
-  var dash_range_max = 15
+    // These count both for dashing and bashing shields:
+    var dash_range_min = 11
+    var dash_range_max = 15
 
-  var hatchet_range = 5
-  var grapplingHook_range = 13
+    var hatchet_range = 5
+    var grapplingHook_range = 13
 
-  // soul stones (the mindstone can be used no matter the range)
-  var stone_star_range = 12
-  var stone_ki_range = 18
-  var stone_experience_range = 18
-  var stone_triskelion_range = 10
-  var stone_moondial_range = 18
+    // soul stones (the mindstone can be used no matter the range)
+    var stone_star_range = 12
+    var stone_ki_range = 18
+    var stone_experience_range = 18
+    var stone_triskelion_range = 10
+    var stone_moondial_range = 18
 
-  var sword_range = 5
-  var hammer_range = 5
-  var quarterstaff_range = 5
-  var sword_big_range = 6
-  var wand_rune_range = 20
-  var staff_range = 20
-  var crossbow_range = 22
-  var crossbow_rune_range = 23
-  var shield_rune_range = 40
-
+    var sword_range = 5
+    var hammer_range = 5
+    var quarterstaff_range = 5
+    var sword_big_range = 6
+    var wand_rune_range = 20
+    var staff_range = 20
+    var crossbow_range = 22
+    var crossbow_rune_range = 23
+    var shield_rune_range = 40
 
   // Special stats
 
-  // Hidden wands
-  var wand_stone_armor = 0      // gravity
-  var wand_poison_armor = 6     // plague
-  var wand_vigor_armor = 1      // reset
-  var wand_aether_armor = 14    // calamity
-  var wand_fire_armor = 4       // explosive
-  var wand_ice_armor = 3        // frost
+    // Hidden wands
+    var wand_stone_armor = 0      // gravity
+    var wand_poison_armor = 6     // plague
+    var wand_vigor_armor = 1      // reset
+    var wand_aether_armor = 14    // calamity
+    var wand_fire_armor = 4       // explosive
+    var wand_ice_armor = 3        // frost
 
-  // Hidden staves
-  var staff_stone_armor = 3     // acrobatic
-  var staff_poison_armor = 8    // berserker
-  var staff_vigor_armor = 4     // prevention
-  var staff_aether_armor = 2    // grasping
-  var staff_fire_armor = 6      // infernal
-  var staff_ice_armor = 1       // eternity
+    // Hidden staves
+    var staff_stone_armor = 3     // acrobatic
+    var staff_poison_armor = 8    // berserker
+    var staff_vigor_armor = 4     // prevention
+    var staff_aether_armor = 2    // grasping
+    var staff_fire_armor = 6      // infernal
+    var staff_ice_armor = 1       // eternity
 
-  /* the added range that the
-  Grasping Staff's ability adds: */
-  var grasping_buff = 10
-  var grasping_cap = 22
-
+    /* the added range that the
+    Grasping Staff's ability adds: */
+    var grasping_buff = 10
+    var grasping_cap = 22
 
 
 // //////////////// FUNCTIONS //////////////// //
@@ -410,7 +404,6 @@ Enjoy! */
       return #rainbow
     :
       >c-20,0,#red,ERROR: colorToHex() got unexisting color: @colorName@
-
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
