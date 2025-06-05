@@ -288,8 +288,12 @@ Made by IronHawk (Tom Crow)
             equipL @shieldCompound1@
 
     :?mode = "extend" | mode = "permapot"
-      equipL triskelion
-      equipR mask
+      ?item.right ! "bardiche" &
+      ^item.right ! "quarterstaff" &
+      ^item.right ! "heavy hammer" &
+      ^item.right ! "quarterstaff"
+        equipL triskelion
+        equipR mask
 
     :?mode = "bash" | mode = "dash"
       ?foe = "poison"
