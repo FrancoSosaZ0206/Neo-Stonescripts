@@ -4,9 +4,11 @@
 
 
 
-/* FILE INFO
-  Library with my current arsenal
-  Made by IronHawk (Tom Crow)
+/* // ///////////// FILE INFO //////////////// //
+
+Library with my personal weapons,
+special stats and loadouts
+Made by IronHawk (Tom Crow)
 
 . ...................................... .
 
@@ -45,256 +47,277 @@
 
 // ///////////////// IMPORTS ///////////////// //
 
-var c = import My/Lib/Combat
+  var c = import My/Lib/Combat
 
 
 
 // //////////////// VARIABLES //////////////// //
 
-/* Renamed:
+  // ************ ITEM ALIASES ************* //
 
-Unbroken Faith = sword stone *max (enchanted: speed)
-Broken Faith = sword stone *max (enchanted: speed)
-Mamba Negra = sword poison D *max (enchanted: speed)
-Dothaneel = sword vigor D *max (enchanted: speed)
-Void Slayer = sword aether D *max (enchanted: speed)
-Vantum Phoenix = sword fire D *max (enchanted: speed)
-Bifrost = sword ice D *max (enchanted: speed)
+    /* .............. RENAMED ..............
 
-Soulfetcher = sword vigor *max dL +21/ (enchanted: speed and heal chance)
+    Unbroken Faith = sword stone *max (enchanted: speed)
+    Broken Faith = sword stone *max (enchanted: speed)
+    Mamba Negra = sword poison D *max (enchanted: speed)
+    Dothaneel = sword vigor D *max (enchanted: speed)
+    Void Slayer = sword aether D *max (enchanted: speed)
+    Vantum Phoenix = sword fire D *max (enchanted: speed)
+    Bifrost = sword ice D *max (enchanted: speed)
 
-Speedy Hammer = hammer stone *max
-Kubikiribocho = bardiche *max (enchanted: crit)
-Mjölnir = heavy hammer *max (enchanted: damage)
-Guardian's Wrath = heavy hammer *max shiny (enchanted: armor fatigue)
+    Soulfetcher = sword vigor *max dL +21/ (enchanted: speed and heal chance)
 
-theVwand = wand vigor *max D golden
-Frosty Crust = wand ice *max dI
+    Speedy Hammer = hammer stone *max
+    Kubikiribocho = bardiche *max (enchanted: crit)
+    Mjölnir = heavy hammer *max (enchanted: damage)
+    Guardian's Wrath = heavy hammer *max shiny (enchanted: armor fatigue)
 
-Death's Kiss = sword poison shiny dP (enchanted: P) */
+    theVwand = wand vigor *max D golden
+    Frosty Crust = wand ice *max dI
 
+    Death's Kiss = sword poison shiny dP (enchanted: P) */
 
-// ............... POISON ............... //
+    // Elemental
 
-  var swordPoisonDebuff = "sword poison *max dP" // enchanted: speed
-  var swordPoisonDmg = "sword poison -dP *max"
-  var shieldPoisonDefense = "shield poison *max -ap"
-  var shieldPoisonBuff = "shield poison *max ap"
-  var hammerPoisonDefense = "hammer poison *max aP"
-  var bowPoisonDmg = "bow poison *max -dP"
-  var bowPoisonDebuff = "bow poison *max dP"
-  var wandPoisonDmg = "wand poison *max -dP -hidden"
-  var wandPoisonDebuff = "wand poison *max dP -hidden"
-  var wandPoisonHidden = "wand poison hidden *max" // aka Plague Wand
-  var staffPoisonDebuff = "staff poison *max dP -hidden"
-  var staffPoisonHidden = "staff poison hidden *max" // aka Berserker Staff
+      // ............... POISON ............... //
 
-// ............... VIGOR ................ //
+        var swordPoisonDebuff = "sword poison *max dP" // enchanted: speed
+        var swordPoisonDmg = "sword poison -dP *max"
+        var shieldPoisonDefense = "shield poison *max -ap"
+        var shieldPoisonBuff = "shield poison *max ap"
+        var hammerPoisonDefense = "hammer poison *max aP"
+        var bowPoisonDmg = "bow poison *max -dP"
+        var bowPoisonDebuff = "bow poison *max dP"
+        var wandPoisonDmg = "wand poison *max -dP -hidden"
+        var wandPoisonDebuff = "wand poison *max dP -hidden"
+        var wandPoisonHidden = "wand poison hidden *max" // aka Plague Wand
+        var staffPoisonDebuff = "staff poison *max dP -hidden"
+        var staffPoisonHidden = "staff poison hidden *max" // aka Berserker Staff
 
-  var swordVigorDmg = "sword vigor *max -dL Spring24"
-  var swordVigorBuff = "sword vigor *max dL -gold"
-  var shieldVigorDefense = "shield vigor *max -ah"
-  var shieldVigorBuff = "shield vigor *max ah"
-  var hammerVigorBuff = "hammer vigor *max ah"
-  var bowVigorBuff = "bow vigor *max dL"
-  var bowVigorDmg = "bow vigor *max -dL"
-  var wandVigorBuff = "wand vigor *max dL -hidden"
-  var wandVigorDmg = "wand vigor *max -dL -hidden" // 2nd one
-  var wandVigorHidden = "wand vigor hidden *max" // aka Reset Wand
-  var staffVigorBuff = "staff vigor *max dL -hidden"
-  var staffVigorHidden = "staff vigor hidden *max" // aka Prevention Staff
+      // ............... VIGOR ................ //
 
-// ............... AETHER ............... //
+        var swordVigorDmg = "sword vigor *max -dL Spring24"
+        var swordVigorBuff = "sword vigor *max dL -gold"
+        var shieldVigorDefense = "shield vigor *max -ah"
+        var shieldVigorBuff = "shield vigor *max ah"
+        var hammerVigorBuff = "hammer vigor *max ah"
+        var bowVigorBuff = "bow vigor *max dL"
+        var bowVigorDmg = "bow vigor *max -dL"
+        var wandVigorBuff = "wand vigor *max dL -hidden"
+        var wandVigorDmg = "wand vigor *max -dL -hidden" // 2nd one
+        var wandVigorHidden = "wand vigor hidden *max" // aka Reset Wand
+        var staffVigorBuff = "staff vigor *max dL -hidden"
+        var staffVigorHidden = "staff vigor hidden *max" // aka Prevention Staff
 
-  var swordAetherDmg = "sword aether -dU *max"
-  var swordAetherDebuff1 = "sword aether dU *max -big golden"
-  var swordAetherDebuff2 = "sword aether dU *max -big -golden"
-  var shieldAetherDefense = "shield aether *max -au"
-  var shieldAetherDebuff = "shield aether *max au"
-  var bowAetherDmg = "bow aether *max D"
-  var wandAetherDebuff = "wand aether *max dU -hidden"
-  var wandAetherHidden = "wand aether hidden *max" // aka Calamity Wand
-  var staffAetherDebuff = "staff aether *max dU -hidden"
-  var staffAetherHidden = "staff aether hidden *max" // aka Grasping Staff
+      // ............... AETHER ............... //
 
-// ................ FIRE ................ //
+        var swordAetherDmg = "sword aether -dU *max"
+        var swordAetherDebuff1 = "sword aether dU *max -big golden"
+        var swordAetherDebuff2 = "sword aether dU *max -big -golden"
+        var shieldAetherDefense = "shield aether *max -au"
+        var shieldAetherDebuff = "shield aether *max au"
+        var bowAetherDmg = "bow aether *max D"
+        var wandAetherDebuff = "wand aether *max dU -hidden"
+        var wandAetherHidden = "wand aether hidden *max" // aka Calamity Wand
+        var staffAetherDebuff = "staff aether *max dU -hidden"
+        var staffAetherHidden = "staff aether hidden *max" // aka Grasping Staff
 
-  var swordFireDebuff = "sword fire *max dF"
-  var swordFireDmg = "sword fire *max -dF"
-  var shieldFireDefense = "shield fire *max -af"
-  var shieldFireDebuff = "shield fire *max af"
-  var hammerFireDefense = "shield fire *max aF"
-  var bowFireDmg = "bow fire *max -dF"
-  var bowFireDebuff = "bow fire *max dF"
-  var wandFireDmg = "wand fire *max -dF -hidden"
-  var wandFireDebuff = "wand fire *max dF -hidden"
-  var wandFireHidden = "wand fire hidden *max" // aka Explosive Wand
-  var staffFireDebuff = "staff fire *max dF -hidden"
-  var staffFireHidden = "staff fire hidden *max" // aka Infernal Staff
+      // ................ FIRE ................ //
 
-// ................ ICE ................. //
+        var swordFireDebuff = "sword fire *max dF"
+        var swordFireDmg = "sword fire *max -dF"
+        var shieldFireDefense = "shield fire *max -af"
+        var shieldFireDebuff = "shield fire *max af"
+        var hammerFireDefense = "shield fire *max aF"
+        var bowFireDmg = "bow fire *max -dF"
+        var bowFireDebuff = "bow fire *max dF"
+        var wandFireDmg = "wand fire *max -dF -hidden"
+        var wandFireDebuff = "wand fire *max dF -hidden"
+        var wandFireHidden = "wand fire hidden *max" // aka Explosive Wand
+        var staffFireDebuff = "staff fire *max dF -hidden"
+        var staffFireHidden = "staff fire hidden *max" // aka Infernal Staff
 
-  var swordIceDebuff1 = "sword ice *max dI shiny"
-  var swordIceDebuff2 = "sword ice *max dI -shiny"
-  var swordIceDmg = "sword ice *max -dI"
-  var shieldIceDefense = "shield ice *max -ai"
-  var shieldIceDebuff = "shield ice *max ai"
-  var hammerIceDefense = "hammer ice *max aI"
-  var bowIceDmg = "bow ice *max D"
-  var wandIceDmg = "wand ice *max -dI -hidden"
-  var wandIceDebuff = "wand ice *max dI +15 -hidden"
-  var wandIceHidden = "wand ice hidden *max" // aka Frost Wand
-  var staffIceDebuff = "staff ice *max dI -hidden"
-  var staffIceHidden = "staff ice hidden *max" // aka Eternity Staff
+      // ................ ICE ................. //
 
-// ................ STONE ............... //
+        var swordIceDebuff1 = "sword ice *max dI shiny"
+        var swordIceDebuff2 = "sword ice *max dI -shiny"
+        var swordIceDmg = "sword ice *max -dI"
+        var shieldIceDefense = "shield ice *max -ai"
+        var shieldIceDebuff = "shield ice *max ai"
+        var hammerIceDefense = "hammer ice *max aI"
+        var bowIceDmg = "bow ice *max D"
+        var wandIceDmg = "wand ice *max -dI -hidden"
+        var wandIceDebuff = "wand ice *max dI +15 -hidden"
+        var wandIceHidden = "wand ice hidden *max" // aka Frost Wand
+        var staffIceDebuff = "staff ice *max dI -hidden"
+        var staffIceHidden = "staff ice hidden *max" // aka Eternity Staff
 
-  var shieldStone = "shield stone *max" // enchanted: dodge chance
-  var bowStone = "bow stone *max"
-  var wandStoneHidden = "wand stone hidden *max" // aka Gravity Wand
-  var staffStoneHidden = "staff stone hidden *max" // aka Acrobatic Staff
+      // ................ STONE ............... //
 
-// ............. ALTERNATE .............. //
+        var shieldStone = "shield stone *max" // enchanted: dodge chance
+        var bowStone = "bow stone *max"
+        var wandStoneHidden = "wand stone hidden *max" // aka Gravity Wand
+        var staffStoneHidden = "staff stone hidden *max" // aka Acrobatic Staff
 
-  var bowAlternate = "bow *max golden"
+    // ............. ALTERNATE .............. //
 
-// .......... SPECIAL WEAPONS ........... //
+      var bowAlternate = "bow *max golden"
 
-  var shieldDashing = "shield dashing *max HoH24"
-  var myQuarterstaff = "quarterstaff *max glitched"
-  var fastBardiche = "bardiche *max" // enchanted: speed
-  var bowRepeating = "bow repeating *max golden"
-  var shieldCompound1 = "shield compound *max shiny"
-  var shieldCompound2 = "shield compound *max -shiny"
-  var shieldTowering = "shield towering *max golden"
+    // .......... SPECIAL WEAPONS ........... //
 
+      var shieldDashing = "shield dashing *max HoH24"
+      var myQuarterstaff = "quarterstaff *max glitched"
+      var fastBardiche = "bardiche *max" // enchanted: speed
+      var bowRepeating = "bow repeating *max golden"
+      var shieldCompound1 = "shield compound *max shiny"
+      var shieldCompound2 = "shield compound *max -shiny"
+      var shieldTowering = "shield towering *max golden"
 
+  // ************ SPECIAL STATS ************ //
 
-// ************************************** //
+    // ........... BUFFS/DEBUFFS ............ //
 
-// Weapons Damage and Stats
+      // amount of damage reduced by dP affix weapons
+      var weaken_default = 4
+      var weaken_boosted = 9 // Death's Kiss
 
+      // amount of health healed when using an ah affix weapon
+      var ah_heal = 2
 
-// ...................................... //
+    // .......... COMPOUND SHIELD ........... //
 
-  // amount of damage reduced by dP affix weapons
-  var weaken_default = 4
-  var weaken_boosted = 9 // Death's Kiss
+      var compoundMaxArmor_default = 14
+      var compoundMaxArmor_boosted = 35
 
-  // amount of health healed when using an ah affix weapon
-  var ah_heal = 2
+    // ............ CULTIST MASK ............ //
 
+      var mask_feebleCount = 5 // amount of feeble debuffs the Mask applies
+      var mask_feebleDmg = 9 // amount of damage each debuff deals to the foe
+      var mask_feebleReduction = 2 // amount of damage each debuff deducts from the foe
 
-// ...................................... //
+    // ...... BLADE OF THE FALLEN GOD ....... //
 
-// Compound Shield
-var compoundMaxArmor_default = 14
-var compoundMaxArmor_boosted = 35
+      var bfg_Dmg = 310
+      var bfg_RDmg = 170
+      var smiteDmg = 40 // smite flat bonus damage
 
+    // ............ SKELETON ARM ............ //
 
-// ...................................... //
+      var armDmg = 56
+      var armRDmg = armDmg / 2
+      var maxPickPockets = "pick_pocket:4"
 
-// Cultist Mask
-var mask_feebleCount = 5 // amount of feeble debuffs the Mask applies
-var mask_feebleDmg = 9 // amount of damage each debuff deals to the foe
-var mask_feebleReduction = 2 // amount of damage each debuff deducts from the foe
+    // ............. CINDERWISP ............. //
 
+      // multiplied by the amount of Ignition buffs:
+      var cinderwispDmg_Default = 36
+      var cinderwispDmg_Boosted = 96
+      var maxIgnitions_Default = "ignition:10"
+      var maxIgnitions_Boosted = "ignition:17"
 
-// ...................................... //
+    // ............. VOIDWEAVER ............. //
 
-// Blade of the Fallen God
-var bfg_Dmg = 310
-var bfg_RDmg = 170
-var smiteDmg = 40 // smite flat bonus damage
+      var voidweaverDmg = 1
+      var voidweaverUnmakeChance = 0.14 // %
+      var voidweaverArmor = 1.35
 
+    // ............ HEAVY HAMMER ............ //
 
-// ...................................... //
+      var heavyHammerDmg = 145
 
-// Skeleton Arm
-var armDmg = 56
-var armRDmg = armDmg / 2
-var maxArmBuffs = 4
+    // .............. BARDICHE .............. //
 
+      /* ************************************* */
+      /*  WARNING: These stats only apply for  */
+      /*           [Kubikiribocho]!            */
 
-// ...................................... //
-
-// Cinderwisp
-// multiplied by the amount of Ignition buffs:
-var cinderwispDmg_Default = 36
-var cinderwispDmg_Boosted = 96
-var maxIgnitions_Default = "ignition:10"
-var maxIgnitions_Boosted = "ignition:17"
-
-
-// ...................................... //
-
-// Voidweaver
-var voidweaverDmg = 1
-var voidweaverUnmakeChance = 0.14 // %
-var voidweaverArmor = 1.35
-
-
-// ...................................... //
-
-// Heavy Hammer
-var heavyHammerDmg = 145
-
-
-// ...................................... //
-
-// Bardiche
-
-/* ************************************* */
-/*  WARNING: These stats only apply for  */
-/*           [Kubikiribocho]!            */
-
-var bardicheDmg = 52
-var bardicheCrit = 13.5
-var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
-/* ************************************* */
+      var bardicheDmg = 52
+      var bardicheCrit = 13.5
+      var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
+      /* ************************************* */
 
 
 
 // //////////////// FUNCTIONS //////////////// //
 
-/* Loadout function.
-- Acts as a custom loadout that works with my arsenal.
-- Handles most (if not all) situations.
-- Accounts for the permapot strategy. */
-func ldtF(mode, permapotSetup)
+  /* Loadout function.
+  - Acts as a custom loadout that works with my arsenal.
+  - Handles most (if not all) situations.
+  - Accounts for the permapot strategy. */
+  func ldtF(mode, permapotSetup)
 
-  ?mode = "default"
-    equipL triskelion
-    ?!permapotSetup
-      equipR @shieldCompound1@
-  :?mode = "armorRegen"
-    equipL triskelion
-    ?!permapotSetup
-      equipR @shieldCompound2@
-  :?mode = "engage"
-    ?buffs.string ! "buff_inf_speed" & // infernal staff
-    ^totaltime % 2 = 0 // every even frame
-      ?foe = "poison"
-        equipL @hammerIceDefense@
-      :?foe = "vigor"
-        equipL @hammerPoisonDefense@
-      :?foe = "aether"
-        equipL @hammerVigorDefense@
-      :?foe = "fire"
-        equipL @hammerAetherDefense@
-      :?foe = "ice"
-        equipL @hammerFireDefense@
-      :
-        equipL Speedy Hammer
-    :
+    ?mode = "default"
       equipL triskelion
-
-    ?!permapotSetup
-      ?foe ! "immune_to_debuff_chill" &
-      ^foe.debuffs.string ! "chill" &
-      ^encounter.eliteMod ! "tenacious"
-        equipR @shieldIceDebuff@
+      ?!permapotSetup
+        equipR @shieldCompound1@
+    :?mode = "armorRegen"
+      equipL triskelion
+      ?!permapotSetup
+        equipR @shieldCompound2@
+    :?mode = "engage"
+      ?buffs.string ! "buff_inf_speed" & // infernal staff
+      ^totaltime % 2 = 0 // every even frame
+        ?foe = "poison"
+          equipL @hammerIceDefense@
+        :?foe = "vigor"
+          equipL @hammerPoisonDefense@
+        :?foe = "aether"
+          equipL @hammerVigorDefense@
+        :?foe = "fire"
+          equipL @hammerAetherDefense@
+        :?foe = "ice"
+          equipL @hammerFireDefense@
+        :
+          equipL Speedy Hammer
       :
+        equipL triskelion
+
+      ?!permapotSetup
+        ?foe ! "immune_to_debuff_chill" &
+        ^foe.debuffs.string ! "chill" &
+        ^encounter.eliteMod ! "tenacious"
+          equipR @shieldIceDebuff@
+        :
+          ?foe = "poison"
+            equipL @shieldIceDefense@
+          :?foe = "vigor"
+            equipL @shieldPoisonDefense@
+          :?foe = "aether"
+            equipL @shieldVigorDefense@
+          :?foe = "fire"
+            equipL @shieldAetherDefense@
+          :?foe = "ice"
+            equipL @shieldFireDefense@
+          :
+            equipL @shieldCompound1@
+
+    :?mode = "extend" | mode = "permapot"
+      equipL triskelion
+      equipR mask
+
+    :?mode = "bash" | mode = "dash"
+      ?foe = "poison"
+        equipL Bifrost
+      :?foe = "vigor"
+        equipL Mamba Negra
+      :?foe = "aether"
+        equipL Dothaneel
+      :?foe = "fire"
+        equipL Void Slayer
+      :?foe = "ice"
+        equipL Vantum Phoenix
+      :
+        equipL Unbroken Faith
+
+      ?mode = "bash"
+        equipR bashing shield
+      :?mode = "dash"
+        equipR @shieldDashing@
+
+    :?mode = "escape" | mode = "mind" | mode = "mindstone"
+      equipL mind
+
+      ?!permapotSetup
         ?foe = "poison"
           equipL @shieldIceDefense@
         :?foe = "vigor"
@@ -306,355 +329,37 @@ func ldtF(mode, permapotSetup)
         :?foe = "ice"
           equipL @shieldFireDefense@
         :
-          equipL @shieldCompound1@
-
-  :?mode = "extend" | mode = "permapot"
-    equipL triskelion
-    equipR mask
-
-  :?mode = "bash" | mode = "dash"
-    ?foe = "poison"
-      equipL Bifrost
-    :?foe = "vigor"
-      equipL Mamba Negra
-    :?foe = "aether"
-      equipL Dothaneel
-    :?foe = "fire"
-      equipL Void Slayer
-    :?foe = "ice"
-      equipL Vantum Phoenix
-    :
-      equipL Unbroken Faith
-
-    ?mode = "bash"
-      equipR bashing shield
-    :?mode = "dash"
-      equipR @shieldDashing@
-
-  :?mode = "escape" | mode = "mind" | mode = "mindstone"
-    equipL mind
-
-    ?!permapotSetup
-      ?foe = "poison"
-        equipL @shieldIceDefense@
-      :?foe = "vigor"
-        equipL @shieldPoisonDefense@
-      :?foe = "aether"
-        equipL @shieldVigorDefense@
-      :?foe = "fire"
-        equipL @shieldAetherDefense@
-      :?foe = "ice"
-        equipL @shieldFireDefense@
-      :
-        equipL @shieldTowering@
-  :?mode = "magnet" | mode = "star" | mode = "star stone"
-    equipL star
-    ?!permapotSetup
-      equipR triskelion
-  :?mode = "harvest"
-    ?loc = "rocky_plateau"
-      equip shovel
-    :?loc = "deadwood_valley"
-      equipL moon
-      equipR hatchet
+          equipL @shieldTowering@
+    :?mode = "magnet" | mode = "star" | mode = "star stone"
+      equipL star
+      ?!permapotSetup
+        equipR triskelion
+    :?mode = "harvest"
+      ?loc = "rocky_plateau"
+        equip shovel
+      :?loc = "deadwood_valley"
+        equipL moon
+        equipR hatchet
 
 
-  :?mode = "defense" // evade/buff/debuff when hit
-    // Special cases (both left and right are dedicated to the loadout's goal)
-    ?mode = "heal"
-      equipL @hammerVigorBuff@
-      equipR @shieldVigorBuff@
-    :?mode = "unmake" // unmake when hit
-      ?foe.count > 1
-        equipL @wandAetherDebuff@
-      :
-        equipL @swordAetherDebuff1@
-      equipR @shieldAetherDebuff@
-
-    :
-      // Left hand
-      ?foe.count > 1
-        ?foe = "stone"
-          equipL @wandStoneHidden@
-        :?foe = "poison"
-          equipL @wandIceDmg@
-        :?foe = "vigor"
-          equipL @wandPoisonDmg@
-        :?foe = "aether"
-          equipL @wandVigorDmg@
-        :?foe = "fire"
-          equipL @wandAetherDmg@
-        :?foe = "ice"
-          equipL @wandFireDmg@
-      :
-        ?foe = "stone"
-          equipL Unbroken Faith
-        :?foe = "poison"
-          equipL Bifrost
-        :?foe = "vigor"
-          equipL Mamba Negra
-        :?foe = "aether"
-          equipL Dothaneel
-        :?foe = "fire"
-          equipL Void Slayer
-        :?foe = "ice"
-          equipL Vantum Phoenix
-
-      // Right hand
-      ?mode = "tank"
-        equipR @shieldTowering@
-
-      :?mode = "evade"
-        ?foe = "stone"
-          equipR @shieldStone@
-        :?foe = "poison"
-          equipR @shieldIceDefense@
-        :?foe = "vigor"
-          equipR @shieldPoisonDefense@
-        :?foe = "aether"
-          equipR @shieldVigorDefense@
-        :?foe = "fire"
-          equipR @shieldAetherDefense@
-        :?foe = "ice"
-          equipR @shieldFireDefense@
-
-      :?mode = "buff" | mode = "debuff"
-        ?mode = "poison" | mode = "empower"
-          equipR @shieldPoisonBuff@
-        :?mode = "vigor" | mode = "heal"
-          equipR @shieldVigorBuff@
-        :?mode = "aether" | mode = "unmake"
-          equipR @shieldAetherDebuff@
-        :?mode = "fire" | mode = "burn"
-          equipR @shieldFireDebuff@
-        :?mode = "ice" | mode = "chill"
-          equipR @shieldIceDebuff@
-
-  :?mode = "melee"
-    ?mode = "aoe" | mode = "splash" // TO DO: big swords
-      // Special cases:
+    :?mode = "defense" // evade/buff/debuff when hit
+      // Special cases (both left and right are dedicated to the loadout's goal)
       ?mode = "heal"
-        ?permapotSetup
-          equipL sword big *max dL
-        :
-          ?foe = "stone"
-            c.doMoondial("sword big stone *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
-          :?foe = "poison"
-            c.doMoondial("sword big ice *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
-          :?foe = "vigor"
-            c.doMoondial("sword big poison *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
-          :?foe = "aether"
-            c.doMoondial("sword big vigor *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
-          :?foe = "fire"
-            c.doMoondial("sword big aether *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
-          :?foe = "ice"
-            c.doMoondial("sword big fire *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
-      :?mode = "unmake"
-        equip @staffAetherDebuff@
-        /* ?permapotSetup
-          equipL @swordAetherDebuff1@
-        :
-          // put a 2nd dU sword when we have it
-          ?foe = "stone"
-            c.doMoondial(swordAetherDebuff1, Broken Faith, c.moondialMode) // swordAetherDebuff2
-          :?foe = "poison"
-            c.doMoondial(swordAetherDebuff1, Bifrost, c.moondialMode) // swordAetherDebuff2
-          :?foe = "vigor"
-            c.doMoondial(swordAetherDebuff1, Mamba Negra, c.moondialMode) // swordAetherDebuff2
-          :?foe = "aether"
-            c.doMoondial(swordAetherDebuff1, Dothaneel, c.moondialMode) // swordAetherDebuff2
-          :?foe = "fire"
-            c.doMoondial(swordAetherDebuff1, Void Slayer, c.moondialMode) // swordAetherDebuff2
-          :?foe = "ice"
-            c.doMoondial(swordAetherDebuff1, Vantum Phoenix, c.moondialMode)*/ // swordAetherDebuff2
-      :?mode = "debuff"
-        ?permapotSetup // all left hand
-          ?c.canApplyChill()
-            equipL @swordIceDebuff1@
-          :?c.canApplyWeaken()
-            equipL Death's Kiss
-            //'
-          :?c.canApplyBurn()
-            equipL @swordFireDebuff@
-
-        : // !permapotSetup
-
-          // Left hand:
-          ?c.canApplyWeaken()
-            equipL Death's Kiss
-            //'
-          :?c.canApplyBurn()
-            equipL @swordFireDebuff@
-          :?c.canApplyChill()
-            equipL @wandIceDebuff@ // @swordIceDebuff2@
-
-          // Right hand:
-          ?c.canApplyChill()
-            equipR @swordIceDebuff1@
-
-      :?foe = "stone"
-        ?permapotSetup
-          equipL Unbroken Faith
-        :
-          c.doMoondial(Unbroken Faith, Broken Faith, c.moondialMode)
-
-      :?mode = "dmg"
-        ?permapotSetup // all left hand
-          ?foe = "poison"
-            equipL Mamba Negra
-          :?foe = "vigor"
-            equipL Dothaneel
-          :?foe = "aether"
-            equipL Void Slayer
-          :?foe = "fire"
-            equipL Vantum Phoenix
-          :?foe = "ice"
-            equipL Bifrost
-
-        : // !permapotSetup
-          ?foe = "poison"
-            c.doMoondial(Mamba Negra, swordPoisonDmg, c.moondialMode)
-          :?foe = "vigor"
-            c.doMoondial(Dothaneel, swordVigorDmg, c.moondialMode)
-          :?foe = "aether"
-            c.doMoondial(Void Slayer, swordAetherDmg, c.moondialMode)
-          :?foe = "fire"
-            c.doMoondial(Vantum Phoenix, swordFireDmg, c.moondialMode)
-          :?foe = "ice"
-            c.doMoondial(Bifrost, swordIceDmg, c.moondialMode)
-
-    :?mode = "1v1"
-      // Special cases:
-      ?mode = "heal"
-        ?permapotSetup
-          equipL Soulfetcher
-        :
-          ?foe = "stone"
-            c.doMoondial(Broken Faith /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
-          :?foe = "poison"
-            c.doMoondial(Bifrost /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
-          :?foe = "vigor"
-            c.doMoondial(Mamba Negra /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
-          :?foe = "aether"
-            c.doMoondial(Dothaneel /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
-          :?foe = "fire"
-            c.doMoondial(Void Slayer /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
-          :?foe = "ice"
-            c.doMoondial(Vantum Phoenix /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
-      :?mode = "unmake"
-        equip @staffAetherDebuff@
-        /* ?permapotSetup
-          equipL @swordAetherDebuff1@
-        :
-          // put a 2nd dU sword when we have it
-          ?foe = "stone"
-            c.doMoondial(swordAetherDebuff1, Broken Faith, c.moondialMode) // swordAetherDebuff2
-          :?foe = "poison"
-            c.doMoondial(swordAetherDebuff1, Bifrost, c.moondialMode) // swordAetherDebuff2
-          :?foe = "vigor"
-            c.doMoondial(swordAetherDebuff1, Mamba Negra, c.moondialMode) // swordAetherDebuff2
-          :?foe = "aether"
-            c.doMoondial(swordAetherDebuff1, Dothaneel, c.moondialMode) // swordAetherDebuff2
-          :?foe = "fire"
-            c.doMoondial(swordAetherDebuff1, Void Slayer, c.moondialMode) // swordAetherDebuff2
-          :?foe = "ice"
-            c.doMoondial(swordAetherDebuff1, Vantum Phoenix, c.moondialMode)*/ // swordAetherDebuff2
-      :?mode = "debuff"
-        ?permapotSetup // all left hand
-          ?c.canApplyChill()
-            equipL @swordIceDebuff1@
-          :?c.canApplyWeaken()
-            equipL Death's Kiss
-            //'
-          :?c.canApplyBurn()
-            equipL @swordFireDebuff@
-
-        : // !permapotSetup
-
-          // Left hand:
-          ?c.canApplyWeaken()
-            equipL Death's Kiss
-            //'
-          :?c.canApplyBurn()
-            equipL @swordFireDebuff@
-          :?c.canApplyChill()
-            equipL @wandIceDebuff@ // @swordIceDebuff2@
-
-          // Right hand:
-          ?c.canApplyChill()
-            equipR @swordIceDebuff1@
-
-      :?foe = "stone"
-        ?permapotSetup
-          equipL Vantum Phoenix // Unbroken Faith
-        :
-          c.doMoondial(Vantum Phoenix /*Unbroken Faith*/,
-          ^@swordFireDmg@ /*Broken Faith*/, c.moondialMode)
-
-      :?mode = "dmg"
-        ?permapotSetup // all left hand
-          ?foe = "poison"
-            equipL Mamba Negra
-          :?foe = "vigor"
-            equipL Dothaneel
-          :?foe = "aether"
-            equipL Void Slayer
-          :?foe = "fire"
-            equipL Vantum Phoenix
-          :?foe = "ice"
-            equipL Bifrost
-
-        : // !permapotSetup
-          ?foe = "poison"
-            c.doMoondial(Mamba Negra, swordPoisonDmg, c.moondialMode)
-          :?foe = "vigor"
-            c.doMoondial(Dothaneel, swordVigorDmg, c.moondialMode)
-          :?foe = "aether"
-            c.doMoondial(Void Slayer, swordAetherDmg, c.moondialMode)
-          :?foe = "fire"
-            c.doMoondial(Vantum Phoenix, swordFireDmg, c.moondialMode)
-          :?foe = "ice"
-            c.doMoondial(Bifrost, swordIceDmg, c.moondialMode)
-
-  :?mode = "ranged"
-    ?mode = "aoe" | mode = "splash" // wands and staves
-      ?mode = "heal"
-        ?permapotSetup
-          equipL @wandVigorBuff@
-        :
-          // equip @staffVigorBuff@
-          equipL moon
-          equipR @wandVigorBuff@
-      :?mode = "unmake"
-        ?permapotSetup
+        equipL @hammerVigorBuff@
+        equipR @shieldVigorBuff@
+      :?mode = "unmake" // unmake when hit
+        ?foe.count > 1
           equipL @wandAetherDebuff@
         :
-          equip @staffAetherDebuff@
-      :?mode = "debuff"
-        ?permapotSetup
-          ?c.canApplyChill()
-            equipL @wandIceDebuff@
-          :?c.canApplyWeaken()
-            equipL @wandPoisonDebuff@
-          :?c.canApplyBurn()
-            equipL @wandFireDebuff@
-        :
-          ?c.canApplyChill()
-            equip @staffIceDebuff@
-          :?c.canApplyWeaken()
-            equip @staffPoisonDebuff@
-          :?c.canApplyBurn()
-            equip @staffFireDebuff@
+          equipL @swordAetherDebuff1@
+        equipR @shieldAetherDebuff@
 
-      :?foe = "stone"
-        ?permapotSetup
-          equipL @wandIceDebuff@ // @wandStoneDmg@
-        :
-          equip @staffIceDebuff@ // @staffStoneDmg@
-
-      :?mode = "dmg"
-        ?permapotSetup // all left hand
-          ?foe = "poison"
+      :
+        // Left hand
+        ?foe.count > 1
+          ?foe = "stone"
+            equipL @wandStoneHidden@
+          :?foe = "poison"
             equipL @wandIceDmg@
           :?foe = "vigor"
             equipL @wandPoisonDmg@
@@ -664,61 +369,339 @@ func ldtF(mode, permapotSetup)
             equipL @wandAetherDmg@
           :?foe = "ice"
             equipL @wandFireDmg@
-
-        : // !permapotSetup
-          equip @bowAetherDmg@
-
-          /*?foe = "poison"
-            equip @staffIceDmg@
+        :
+          ?foe = "stone"
+            equipL Unbroken Faith
+          :?foe = "poison"
+            equipL Bifrost
           :?foe = "vigor"
-            equip @staffPoisonDmg@
+            equipL Mamba Negra
           :?foe = "aether"
-            equip @staffVigorDmg@
+            equipL Dothaneel
           :?foe = "fire"
-            equip @staffAetherDmg@
+            equipL Void Slayer
           :?foe = "ice"
-            equip @staffFireDmg@*/
+            equipL Vantum Phoenix
 
-    :?(mode = "pierce" | mode = "1v1") // crossbows
-      ?permapotSetup
-        equipL @bowAlternate@
+        // Right hand
+        ?mode = "tank"
+          equipR @shieldTowering@
 
-      : // !permapotSetup
+        :?mode = "evade"
+          ?foe = "stone"
+            equipR @shieldStone@
+          :?foe = "poison"
+            equipR @shieldIceDefense@
+          :?foe = "vigor"
+            equipR @shieldPoisonDefense@
+          :?foe = "aether"
+            equipR @shieldVigorDefense@
+          :?foe = "fire"
+            equipR @shieldAetherDefense@
+          :?foe = "ice"
+            equipR @shieldFireDefense@
+
+        :?mode = "buff" | mode = "debuff"
+          ?mode = "poison" | mode = "empower"
+            equipR @shieldPoisonBuff@
+          :?mode = "vigor" | mode = "heal"
+            equipR @shieldVigorBuff@
+          :?mode = "aether" | mode = "unmake"
+            equipR @shieldAetherDebuff@
+          :?mode = "fire" | mode = "burn"
+            equipR @shieldFireDebuff@
+          :?mode = "ice" | mode = "chill"
+            equipR @shieldIceDebuff@
+
+    :?mode = "melee"
+      ?mode = "aoe" | mode = "splash" // TO DO: big swords
+        // Special cases:
         ?mode = "heal"
-          equip @bowVigorBuff@
+          ?permapotSetup
+            equipL sword big *max dL
+          :
+            ?foe = "stone"
+              c.doMoondial("sword big stone *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
+            :?foe = "poison"
+              c.doMoondial("sword big ice *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
+            :?foe = "vigor"
+              c.doMoondial("sword big poison *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
+            :?foe = "aether"
+              c.doMoondial("sword big vigor *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
+            :?foe = "fire"
+              c.doMoondial("sword big aether *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
+            :?foe = "ice"
+              c.doMoondial("sword big fire *max D" /*"sword big vigor *max dL"*/, "sword big *max dL", c.moondialMode)
         :?mode = "unmake"
-          equip @bowAetherDebuff@
+          equip @staffAetherDebuff@
+          /* ?permapotSetup
+            equipL @swordAetherDebuff1@
+          :
+            // put a 2nd dU sword when we have it
+            ?foe = "stone"
+              c.doMoondial(swordAetherDebuff1, Broken Faith, c.moondialMode) // swordAetherDebuff2
+            :?foe = "poison"
+              c.doMoondial(swordAetherDebuff1, Bifrost, c.moondialMode) // swordAetherDebuff2
+            :?foe = "vigor"
+              c.doMoondial(swordAetherDebuff1, Mamba Negra, c.moondialMode) // swordAetherDebuff2
+            :?foe = "aether"
+              c.doMoondial(swordAetherDebuff1, Dothaneel, c.moondialMode) // swordAetherDebuff2
+            :?foe = "fire"
+              c.doMoondial(swordAetherDebuff1, Void Slayer, c.moondialMode) // swordAetherDebuff2
+            :?foe = "ice"
+              c.doMoondial(swordAetherDebuff1, Vantum Phoenix, c.moondialMode)*/ // swordAetherDebuff2
         :?mode = "debuff"
-          ?c.canApplyChill()
-            equip @bowIceDebuff@
-          :?c.canApplyWeaken()
-            equip @bowPoisonDebuff@
-          :?c.canApplyBurn()
-            equip @bowFireDebuff@
+          ?permapotSetup // all left hand
+            ?c.canApplyChill()
+              equipL @swordIceDebuff1@
+            :?c.canApplyWeaken()
+              equipL Death's Kiss
+              //'
+            :?c.canApplyBurn()
+              equipL @swordFireDebuff@
+
+          : // !permapotSetup
+
+            // Left hand:
+            ?c.canApplyWeaken()
+              equipL Death's Kiss
+              //'
+            :?c.canApplyBurn()
+              equipL @swordFireDebuff@
+            :?c.canApplyChill()
+              equipL @wandIceDebuff@ // @swordIceDebuff2@
+
+            // Right hand:
+            ?c.canApplyChill()
+              equipR @swordIceDebuff1@
 
         :?foe = "stone"
-          equip @bowStone@
+          ?permapotSetup
+            equipL Unbroken Faith
+          :
+            c.doMoondial(Unbroken Faith, Broken Faith, c.moondialMode)
 
         :?mode = "dmg"
+          ?permapotSetup // all left hand
+            ?foe = "poison"
+              equipL Mamba Negra
+            :?foe = "vigor"
+              equipL Dothaneel
+            :?foe = "aether"
+              equipL Void Slayer
+            :?foe = "fire"
+              equipL Vantum Phoenix
+            :?foe = "ice"
+              equipL Bifrost
+
+          : // !permapotSetup
+            ?foe = "poison"
+              c.doMoondial(Mamba Negra, swordPoisonDmg, c.moondialMode)
+            :?foe = "vigor"
+              c.doMoondial(Dothaneel, swordVigorDmg, c.moondialMode)
+            :?foe = "aether"
+              c.doMoondial(Void Slayer, swordAetherDmg, c.moondialMode)
+            :?foe = "fire"
+              c.doMoondial(Vantum Phoenix, swordFireDmg, c.moondialMode)
+            :?foe = "ice"
+              c.doMoondial(Bifrost, swordIceDmg, c.moondialMode)
+
+      :?mode = "1v1"
+        // Special cases:
+        ?mode = "heal"
+          ?permapotSetup
+            equipL Soulfetcher
+          :
+            ?foe = "stone"
+              c.doMoondial(Broken Faith /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
+            :?foe = "poison"
+              c.doMoondial(Bifrost /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
+            :?foe = "vigor"
+              c.doMoondial(Mamba Negra /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
+            :?foe = "aether"
+              c.doMoondial(Dothaneel /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
+            :?foe = "fire"
+              c.doMoondial(Void Slayer /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
+            :?foe = "ice"
+              c.doMoondial(Vantum Phoenix /*swordVigorBuff*/, Soulfetcher, c.moondialMode)
+        :?mode = "unmake"
+          equip @staffAetherDebuff@
+          /* ?permapotSetup
+            equipL @swordAetherDebuff1@
+          :
+            // put a 2nd dU sword when we have it
+            ?foe = "stone"
+              c.doMoondial(swordAetherDebuff1, Broken Faith, c.moondialMode) // swordAetherDebuff2
+            :?foe = "poison"
+              c.doMoondial(swordAetherDebuff1, Bifrost, c.moondialMode) // swordAetherDebuff2
+            :?foe = "vigor"
+              c.doMoondial(swordAetherDebuff1, Mamba Negra, c.moondialMode) // swordAetherDebuff2
+            :?foe = "aether"
+              c.doMoondial(swordAetherDebuff1, Dothaneel, c.moondialMode) // swordAetherDebuff2
+            :?foe = "fire"
+              c.doMoondial(swordAetherDebuff1, Void Slayer, c.moondialMode) // swordAetherDebuff2
+            :?foe = "ice"
+              c.doMoondial(swordAetherDebuff1, Vantum Phoenix, c.moondialMode)*/ // swordAetherDebuff2
+        :?mode = "debuff"
+          ?permapotSetup // all left hand
+            ?c.canApplyChill()
+              equipL @swordIceDebuff1@
+            :?c.canApplyWeaken()
+              equipL Death's Kiss
+              //'
+            :?c.canApplyBurn()
+              equipL @swordFireDebuff@
+
+          : // !permapotSetup
+
+            // Left hand:
+            ?c.canApplyWeaken()
+              equipL Death's Kiss
+              //'
+            :?c.canApplyBurn()
+              equipL @swordFireDebuff@
+            :?c.canApplyChill()
+              equipL @wandIceDebuff@ // @swordIceDebuff2@
+
+            // Right hand:
+            ?c.canApplyChill()
+              equipR @swordIceDebuff1@
+
+        :?foe = "stone"
+          ?permapotSetup
+            equipL Vantum Phoenix // Unbroken Faith
+          :
+            c.doMoondial(Vantum Phoenix /*Unbroken Faith*/,
+            ^@swordFireDmg@ /*Broken Faith*/, c.moondialMode)
+
+        :?mode = "dmg"
+          ?permapotSetup // all left hand
+            ?foe = "poison"
+              equipL Mamba Negra
+            :?foe = "vigor"
+              equipL Dothaneel
+            :?foe = "aether"
+              equipL Void Slayer
+            :?foe = "fire"
+              equipL Vantum Phoenix
+            :?foe = "ice"
+              equipL Bifrost
+
+          : // !permapotSetup
+            ?foe = "poison"
+              c.doMoondial(Mamba Negra, swordPoisonDmg, c.moondialMode)
+            :?foe = "vigor"
+              c.doMoondial(Dothaneel, swordVigorDmg, c.moondialMode)
+            :?foe = "aether"
+              c.doMoondial(Void Slayer, swordAetherDmg, c.moondialMode)
+            :?foe = "fire"
+              c.doMoondial(Vantum Phoenix, swordFireDmg, c.moondialMode)
+            :?foe = "ice"
+              c.doMoondial(Bifrost, swordIceDmg, c.moondialMode)
+
+    :?mode = "ranged"
+      ?mode = "aoe" | mode = "splash" // wands and staves
+        ?mode = "heal"
+          ?permapotSetup
+            equipL @wandVigorBuff@
+          :
+            // equip @staffVigorBuff@
+            equipL moon
+            equipR @wandVigorBuff@
+        :?mode = "unmake"
+          ?permapotSetup
+            equipL @wandAetherDebuff@
+          :
+            equip @staffAetherDebuff@
+        :?mode = "debuff"
+          ?permapotSetup
+            ?c.canApplyChill()
+              equipL @wandIceDebuff@
+            :?c.canApplyWeaken()
+              equipL @wandPoisonDebuff@
+            :?c.canApplyBurn()
+              equipL @wandFireDebuff@
+          :
+            ?c.canApplyChill()
+              equip @staffIceDebuff@
+            :?c.canApplyWeaken()
+              equip @staffPoisonDebuff@
+            :?c.canApplyBurn()
+              equip @staffFireDebuff@
+
+        :?foe = "stone"
+          ?permapotSetup
+            equipL @wandIceDebuff@ // @wandStoneDmg@
+          :
+            equip @staffIceDebuff@ // @staffStoneDmg@
+
+        :?mode = "dmg"
+          ?permapotSetup // all left hand
+            ?foe = "poison"
+              equipL @wandIceDmg@
+            :?foe = "vigor"
+              equipL @wandPoisonDmg@
+            :?foe = "aether"
+              equipL @wandVigorDmg@
+            :?foe = "fire"
+              equipL @wandAetherDmg@
+            :?foe = "ice"
+              equipL @wandFireDmg@
+
+          : // !permapotSetup
             equip @bowAetherDmg@
 
             /*?foe = "poison"
-              equip @bowIceDmg@
+              equip @staffIceDmg@
             :?foe = "vigor"
-              equip @bowPoisonDmg@
+              equip @staffPoisonDmg@
             :?foe = "aether"
-              equip @bowVigorDmg@
+              equip @staffVigorDmg@
             :?foe = "fire"
-              equip @bowFireDmg@
+              equip @staffAetherDmg@
             :?foe = "ice"
-              equip @bowIceDmg@*/
+              equip @staffFireDmg@*/
+
+      :?(mode = "pierce" | mode = "1v1") // crossbows
+        ?permapotSetup
+          equipL @bowAlternate@
+
+        : // !permapotSetup
+          ?mode = "heal"
+            equip @bowVigorBuff@
+          :?mode = "unmake"
+            equip @bowAetherDebuff@
+          :?mode = "debuff"
+            ?c.canApplyChill()
+              equip @bowIceDebuff@
+            :?c.canApplyWeaken()
+              equip @bowPoisonDebuff@
+            :?c.canApplyBurn()
+              equip @bowFireDebuff@
+
+          :?foe = "stone"
+            equip @bowStone@
+
+          :?mode = "dmg"
+              equip @bowAetherDmg@
+
+              /*?foe = "poison"
+                equip @bowIceDmg@
+              :?foe = "vigor"
+                equip @bowPoisonDmg@
+              :?foe = "aether"
+                equip @bowVigorDmg@
+              :?foe = "fire"
+                equip @bowFireDmg@
+              :?foe = "ice"
+                equip @bowIceDmg@*/
 
 
-  :
-    >c-10,0,#red,
-    ^ERROR: ldtF() recieved incorrect mode: @mode@
+    :
+      >c-10,0,#red,
+      ^ERROR: ldtF() recieved incorrect mode: @mode@
 
-  return
+    return
 
 
 

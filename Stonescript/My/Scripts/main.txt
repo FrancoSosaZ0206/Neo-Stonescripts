@@ -2,53 +2,54 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ START OF "main" ▄▀▄▀▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-/* Multi-location, general script
+/* // //////////////// FILE INFO /////////////////// //
 
+Multi-location, general script
 Written by IronHawk (Tom Crow)
 
-. ............................................................. .
+. ................... Description ................... .
 
-  Description:
+  I have several farming scripts and libraries for
+  this game. Some time after I started scripting, I
+  noticed the increased baggage I needed to carry
+  everywhere, everytime I had to look or change
+  something. That was really tedious, so I decided to
+  write a main script to unify all. That way, I don't
+  need to worry about what location I'm in, and what
+  its corresponding script is. I just have to put this
+  script in the Mindstone, enter the location I want,
+  and voilà!
 
-    I have several farming scripts and libraries for this game.
-    Some time after I started scripting I noticed the increased
-    baggage I needed to carry everywhere, everytime I had to
-    look or change something.
+. .................... Importing .................... .
 
-    That was really tedious, so I decided to write a main script
-    to unify all. That way, I don't need to worry about what
-    location I'm in, and what its corresponding script is. I just
-    have to put this script in the Mindstone, enter the location
-    I want, and voilà!
+  If you're on PC, just save this file into the
+  Stonescripts folder and import it using the correct
+  path to the file.
 
-. ............................................................. .
-
-  Q: How to use?
-
-  A: If you're on PC, just save this file into the Stonescripts
-  folder and import it using the correct path to the file.
-
-  Example: if the file is saved in the Stonescript folder,
+  Example: if the file is saved in the Stonescript
+  folder,
     import main
 
-  If you're on mobile, go to the MOBILE section and copy-paste
-  that into the Mindstone. Then, upload this script and any
-  others you are using to the web, and replace the URL template
-  with the link to this file.
+  If you're on mobile, go to the MOBILE section and
+  copy-paste that into the Mindstone. Then, upload
+  this script and any others you are using to the web,
+  and replace the URL template with the link to this
+  file.
 
   URL example template (GitHub repo):
-    "https://raw.githubusercontent.com/
-    ^<USER_NAME>/<REPO_NAME>/main/.../<FILE_NAME>"
+    "https://raw.githubusercontent.com/<USER_NAME>/
+    ^<REPO_NAME>/main/<FILE_DIRECTORY>/<FILE_NAME>"
 
   Replace each <> with their respective values.
-  Tip: break your link into several, shorter lines like shown.
-       Otherwise, the Mindstone could butcher the line and break
-       the script.
 
-. ............................................................. .
+  Tip: break your link into several, shorter lines
+  like shown. Otherwise, the Mindstone could butcher
+  the line and break the script.
 
-  Q: I'm on mobile, and after some changes to my scripts,
-     it won't work anymore! What happened!?
+. ........... How to do changes in mobile ........... .
+
+  Q: I'm on mobile, and after some changes to my
+  scripts, it won't work anymore! What happened!?
 
   R: This is due to the intricacies of how the process of
      importing works on mobile. To put it simply, the Mindstone
@@ -59,8 +60,6 @@ Written by IronHawk (Tom Crow)
      Furthermore, any errors in the scripts used also prevent
      updates. As you can see, it's quite a finicky process.
      
-. ............................................................. .
-
   Q: Alright, so what do I do?
 
   R: To work around it, follow these steps:
@@ -89,13 +88,13 @@ Written by IronHawk (Tom Crow)
     is ideal for when your scripts are already done, in my
     opinion.
 
-. ............................................................. .
+. ................................................... .
 
 Enjoy! ;) */
 
 
 
-/* //////////////////////// MOBILE ///////////////////////// //
+/* //////////////////// MOBILE ///////////////////// //
 // ↓↓↓ COPY FROM HERE ↓↓↓
 
 // Paste your url here ↓↓↓
@@ -116,63 +115,62 @@ import My/Scripts/main
 
 
 
-// ////////////////////////// PC /////////////////////////// //
+// ////////////////////// PC /////////////////////// //
 
-// ··············· IMPORTS ··············· //
+  // ··············· IMPORTS ··············· //
 
-?sys.isMobile
-  import UI/MindstoneButton
+    ?sys.isMobile
+      import UI/MindstoneButton
 
-import My/Cosmetics
+    import My/Cosmetics
 
 
-// ·············· PROCEDURE ·············· //
+  // ·············· PROCEDURE ·············· //
 
-?!loc.isQuest & (
-^loc = "Waterfall" |
-^loc = "cross_deadwood_river" |
-^loc = "cross_bridge")
-  loc.Leave()
+    ?!loc.isQuest & (
+    ^loc = "Waterfall" |
+    ^loc = "cross_deadwood_river" |
+    ^loc = "cross_bridge")
+      loc.Leave()
 
-:?loc = "undead_crypt_intro" // Haunted Gate
-  import My/Scripts/Gate
+    :?loc = "undead_crypt_intro" // Haunted Gate
+      import My/Scripts/Gate
 
-:
-  import UI/FoeStateTracker
-  var uimkr = import My/Lib/UI_Maker
-  var u = import My/Lib/Utilities
+    :
+      import UI/FoeStateTracker
+      var uimkr = import My/Lib/UI_Maker
+      var u = import My/Lib/Utilities
 
-  /***********************************************/
+      // ---------------- times lib ---------------- //
 
-  var t = import My/Lib/Meters/Times
-  t.main(0,1,u.colorToHex("red"),true,false,"ui")
+        var t = import My/Lib/Meters/Times
+        t.main(0,1,u.colorToHex("red"),true,false,"ui")
 
-  /***********************************************/
+      // ----------------- dps lib ----------------- //
 
-  var dps = import My/Lib/Meters/DPS
-  dps.main(0,3,u.colorToHex("yellow"), 7,true,"ui")
+        var dps = import My/Lib/Meters/DPS
+        dps.main(0,3,u.colorToHex("yellow"), 7,true,"ui")
 
-  /***********************************************/
 
-  ?loc.stars > 15 & loc = "rocky_plateau"
-    import My/Scripts/Green/1-Rocky
-  :
-    ?loc = "rocky_plateau"
-      import My/Scripts/1-Rocky
-    :?loc = "deadwood_valley"
-      import My/Scripts/2-Deadwood
-    :?loc = "caustic_caves"
-      import My/Scripts/3-Caves
-    :?loc = "fungus_forest"
-      import My/Scripts/4-Mushroom
-    :?loc = "undead_crypt"
-      import My/Scripts/5-Halls
-    :?loc = "bronze_mine"
-      import My/Scripts/6-Mine
-    :?loc = "icy_ridge"
-      import My/Scripts/7-Ridge
-    :?loc = "temple"
-      import My/Scripts/8-Temple
+      ?loc.stars > 15 & loc = "rocky_plateau"
+        import My/Scripts/Green/1-Rocky
+      :
+        ?loc = "rocky_plateau"
+          import My/Scripts/1-Rocky
+        :?loc = "deadwood_valley"
+          import My/Scripts/2-Deadwood
+        :?loc = "caustic_caves"
+          import My/Scripts/3-Caves
+        :?loc = "fungus_forest"
+          import My/Scripts/4-Mushroom
+        :?loc = "undead_crypt"
+          import My/Scripts/5-Halls
+        :?loc = "bronze_mine"
+          import My/Scripts/6-Mine
+        :?loc = "icy_ridge"
+          import My/Scripts/7-Ridge
+        :?loc = "temple"
+          import My/Scripts/8-Temple
 
 
 
