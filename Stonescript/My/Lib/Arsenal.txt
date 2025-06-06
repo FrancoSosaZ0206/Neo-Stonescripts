@@ -194,8 +194,8 @@ var mask_feebleReduction = 2 // amount of damage each debuff deducts from the fo
 
 // ...... BLADE OF THE FALLEN GOD ....... //
 
-var bfg_Dmg = 310
-var bfg_RDmg = 170
+var blade_Dmg = 310
+var blade_RDmg = 170
 var smiteDmg = 40 // smite flat bonus damage
 
 // ............ SKELETON ARM ............ //
@@ -546,7 +546,7 @@ func ldtF(mode)
           ?c.canApplyChill()
             equipL @swordIceDebuff1@
           :?c.canApplyWeaken()
-            equipL Death's Kiss
+            equipL @swordPoisonDebuff@ // Death's Kiss
             //'
           :?c.canApplyBurn()
             equipL @swordFireDebuff@
@@ -555,7 +555,7 @@ func ldtF(mode)
 
           // Left hand:
           ?c.canApplyWeaken()
-            equipL Death's Kiss
+            equipL @swordPoisonDebuff@ // Death's Kiss
             //'
           :?c.canApplyBurn()
             equipL @swordFireDebuff@

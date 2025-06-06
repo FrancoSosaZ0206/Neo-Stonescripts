@@ -145,9 +145,9 @@ disable npcDialog
         dontShowAgain = true
 
 
-// Calculate the amount of damage the foe will deal
-?loc.stars > 15
-  weakenType = a.weaken_boosted
+// Decide how much to weaken the foe
+/*?loc.stars > 15
+  weakenType = a.weaken_boosted*/
 // Decide hand for one-handed items
 ?c.isPermapotSetup
   hand = "left"
@@ -243,6 +243,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!c.isDashingRange() & ai.walking
   c.useAbility_TH(a.myQuarterstaff)
 
+// TO DO: Figure out transformation states and 
+
 :?ai.paused |
 ^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
 ^c.isDead() |
@@ -251,18 +253,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > u.dash_range_max // or we can't engage in a fight
-  ?!ai.walking & foe = "dysangelos" &
-  ^(c.canUseAbility("heavy_hammer") | c.canUseAbility("bardiche") |
-  ^(foe.distance <= u.bardiche_ability_range + u.grasping_buff &
-  ^c.canUseAbility("staff_aether")))
-    ?c.canUseAbility("heavy_hammer")
-      c.useAbility_TH("heavy hammer *max -shiny +6") // fast speed hammer
-    :?c.canUseAbility("staff_aether")
-      c.useAbility_TH(a.staffAetherHidden)
-    :?c.canUseAbility("bardiche")
-      c.useAbility_TH(Kubikiribocho)
-
-  :?armor > a.compoundMaxArmor_boosted |
+  ?armor > a.compoundMaxArmor_boosted |
   ^(foe ! "boss" & foe.distance < u.shield_rune_range)
     a.ldtF("engage")
   :?a.compoundMaxArmor_default <= armor &
@@ -309,18 +300,15 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     fight("melee")
 
   : // Dysangelos
-    ?foe = "phase1"
-      fight("melee")
-
-    :?foe = "phase2"
+    ?foe ! "phase3"
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseAbility("wand_vigor")
         c.useAbility_OH(a.wandVigorHidden, hand)
-      
-      :
-        a.ldtF("melee 1v1 dmg")
 
-    : // ?foe = phase3
+      :
+        fight("melee")
+
+    : // foe = phase3
       ?c.canUsePotion("lucky")
         activate potion
       :?c.canUseAbility("mask")

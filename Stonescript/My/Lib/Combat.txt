@@ -108,7 +108,7 @@ Valid abilityId values:
 - cinderwisp >> Fire Talisman's summon
 - staff + <name>, staff + <element> >> Hidden staves
 - wand + <name>, wand + <element> >> Hidden wands
-- <element>_talisman >> Talismans (DOES NOT CHECK IF THE SUMMON IS ALREADY PRESENT).  */
+- <element>_talisman >> Talismans */
 func canUseAbility(abilityId)
   var result = false
 
@@ -121,12 +121,12 @@ func canUseAbility(abilityId)
   ^abilityId = "bardiche"                  |
   ^abilityId = "quarterstaff"              |
 
-  //^abilityId = "stone_talisman"            |
-  //^abilityId = "poison_talisman"           |
-  //^abilityId = "vigor_talisman"            |
+  // ^abilityId = "stone_talisman"            |
+  // ^abilityId = "poison_talisman"           |
+  // ^abilityId = "vigor_talisman"            |
   ^abilityId = "aether_talisman"           |
   ^abilityId = "fire_talisman"             |
-  //^abilityId = "ice_talisman"              |
+  // ^abilityId = "ice_talisman"              |
 
   ^abilityId = "voidweaver"                |
   ^abilityId = "cinderwisp"                |
@@ -148,9 +148,11 @@ func canUseAbility(abilityId)
     ^item.GetCooldown(abilityId) <= 0
 
     ?abilityId = "bash" | abilityId = "dash"
-      result = result & !ai.idle & isDashingRange()
+      result = result & isDashingRange() & !ai.idle
     :?abilityId = "arm"
-      result = result & item.CanActivate("arm") & buffs.string = "pick_pocket"
+      result = result & item.CanActivate("arm") &
+      ^foe.distance <= u.getRange("arm") &
+      ^buffs.string = "pick_pocket"
     :?abilityId = "hatchet"
       result = result & loc = "deadwood_valley"
     :?abilityId = "voidweaver"
@@ -160,6 +162,25 @@ func canUseAbility(abilityId)
       ^   encounter.eliteMod = "monarch" &
       ^   foe.count = 1) // monarch foes can't be unmade
       ^)
+
+    :?abilityId = "hatchet"
+      result = (result & // and it's in range
+      ^foe.distance <= u.getRange(abilityId)) |
+      ^isCasting(abilityId) // won't get interrupted
+
+    :?abilityId = "bardiche" |
+    ^abilityId = "heavy_hammer"
+      result = (result & // and it's in range
+      ^foe.distance <= u.getRange(abilityId + " ability")) |
+      ^isCasting(abilityId) // won't get interrupted
+
+    :?abilityId = "quarterstaff" | abilityId = "talisman" // interruptible abilities
+      result = result | isCasting(abilityId) // make sure not to change it while casting the ability
+
+    :?abilityId = "voidweaver" |
+    ^ abilityId = "cinderwisp"
+      result = result & isSummoned(abilityId) &
+      ^foe 
 
     :?abilityId = "wand_stone"
       result = result & armor >= u.wand_stone_armor
@@ -187,8 +208,6 @@ func canUseAbility(abilityId)
     :?abilityId = "staff_ice"
       result = result & armor >= u.staff_ice_armor
 
-    ?abilityId = "bardiche" | abilityId = "heavy_hammer" | abilityId = "hatchet" | abilityId = "quarterstaff" | abilityId = "talisman" // interruptible
-      result = result | isCasting(abilityId) // make sure not to change it while casting the ability
   :
     u.showStrCtr(0,30,#red,"ERROR\nAT: canUseAbility\nCAUSE: unknown <abilityId>:\n\n" + abilityId, false)
 
@@ -418,13 +437,16 @@ func devour(summonName)
   return
 
 
-/* Returns true if the voidweaver's ability is effective against the current foes the player is facing. */
+/* Returns true if the voidweaver's ability is
+effective against the current foes the player is
+facing. */
 func canUnmakeVoidweaver()
   return foe ! "boss" &
   ^!(encounter.eliteMod = "tenacious" |
   ^encounter.eliteMod = "monarch")
 
-/* Checks if the cinderwisp's "devour" ability damage will kill the foe.
+/* Checks if the cinderwisp's "devour" ability damage
+will kill the foe.
 
 cinderwispDmg: damage dealt by cinderwisp for each
               ignition.
@@ -435,12 +457,12 @@ margin: number representing a health margin to add
         Send 0 if you don't want to use a margin. */
 func canKillCinderwisp(cinderwispDmg, margin)
   var result = false
-
   var debuffsArr = null // array with all debuffs
   var debuffStatsArr = null // array with singular debuff (name, count, time) array
   var debuffCount = null // amount of debuffs stacked
 
-  ?foe.debuffs.string = "ignition"
+  ?canUseAbility("cinderwisp") &
+  ^foe.debuffs.string = "ignition"
     debuffsArr = string.Split(foe.debuffs.string, " ") // get each debuff separately (in case the foe has more than 1 debuff)
 
     for debuff = 0 .. a.Count(debuffsArr) - 1
@@ -449,8 +471,8 @@ func canKillCinderwisp(cinderwispDmg, margin)
 
         debuffCount = debuffStatsArr[2] // get the current debuff count
 
-  ?debuffCount ! null
-    result = foe.hp + foe.armor <= (debuffCount * cinderwispDmg) + margin
+    ?debuffCount ! null
+      result = foe.hp + foe.armor <= (debuffCount * cinderwispDmg) + margin
 
   return result
 

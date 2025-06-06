@@ -17,7 +17,6 @@ Made by IronHawk (Tom Crow)
 
 . ................. Importing ................. .
 
-
   var u = new Lib/Utilities
 
 . ................... Usage ................... .
@@ -363,8 +362,11 @@ func getRange(itemName)
     :?itemName = "staff"
       result = staff_range
 
-    :?itemName = "skeleton_arm"
+    :?itemName = "arm"
       result = arm_range
+
+    :?itemName = "hatchet"
+      result = hatchet_range
 
     :?itemName = "bardiche"
       ?itemName = "ability"
@@ -402,6 +404,158 @@ func getRange(itemName)
 
 
   return result
+
+/* Returns a stat of an effect,
+or null if there was an error.
+
+Valid <source> values: "foe", "player"
+Valid <effectType> values: "buff", "debuff"
+Valid <effectId> values: same as in game.
+  for more info, consult the Wiki: https://stonestoryrpg.miraheze.org/wiki/Status_Effects
+Valid <statType> values:
+  - "1", "symbol"
+  - "2", "name", "id"
+  - "3", "count", "stack"
+  - "4", "time", "duration" */
+func getEffectStat(source, effectType, effectId, statType)
+  // Entry sanitization:
+  source = string.ToLower(source)
+  effectType = string.ToLower(effectType)
+  effectId = string.ToLower(effectId)
+  statType = string.ToLower(statType)
+
+  var stat = null // the effect stat to return
+  var fxStr = null // the full effects string
+
+  ?source = "foe" & effectType = "buff"
+    fxStr = foe.buffs.string
+  :?source = "foe" & effectType = "debuff"
+    fxStr = foe.debuffs.string
+
+  :?source = "player" & effectType = "buff"
+    fxStr = buffs.string
+  :?source = "player" & effectType = "debuff"
+    fxStr = debuffs.string
+
+  :
+    showStrCtr(0,30,#red,"ERROR\nAT: getEffectStat\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
+
+
+  ?fxStr // there are active effects
+    // all effects are separated by a "," char
+    var fxArr = string.Split(fxStr, ",")
+
+    for i = 0 .. a.Count(fxArr) - 1
+      ?fxArr[i] = effectId // target effect is active
+        var effectStats = string.Split(fxArr[i], ":")
+
+        ?statType = "1" | statType = "symbol"
+          stat = effectStats[0]
+        :?statType = "2" | statType = "name" | statType = "id"
+          stat = effectStats[1]
+        :?statType = "3" | statType = "count" | statType = "stack"
+          stat = effectStats[2]
+        :?statType = "4" | statType = "time" | statType = "duration"
+          stat = effectStats[3]
+
+  return stat
+
+/* Returns a string formatted like a table with
+a given target's active effects and their stats.
+Has a full and a slim version.
+
+- Full version example: "
+Foe debuffs table:
+
+Symbol | Name | Count | Time
+ |  |  | 
+ |  |  | 
+ |  |  | 
+"
+
+- Slim version example: "
+Player buffs table:
+
+<sym> x<n>, <mm:ss f>
+ x, : f
+ x, : f
+"
+
+Valid <source> values: "foe", "player"
+Valid <effectType> values: "buff", "debuff" */
+func getEffectsTable(source, effectType, isSlim)
+  // Entry sanitization:
+  source = string.ToLower(source)
+  effectType = string.ToLower(effectType)
+
+  var fxPanel = null
+  var fxStr = null
+  var fxTable = null
+
+  ?source = "foe" & effectType = "buff"
+    fxStr = foe.buffs.string
+    fxTable = "Foe buffs"
+  :?source = "foe" & effectType = "debuff"
+    fxStr = foe.debuffs.string
+    fxTable = "Foe debuffs"
+
+  :?source = "player" & effectType = "buff"
+    fxStr = buffs.string
+    fxTable = "Player buffs"
+  :?source = "player" & effectType = "debuff"
+    fxStr = debuffs.string
+    fxTable = "Player debuffs"
+
+  :
+    showStrCtr(0,30,#red,"ERROR\nAT: showEffects\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
+
+
+  ?fxStr // there are active effects
+    /* Overview:
+    1. split effects
+    2. for each effect, split into an array with all its stats, and
+      a. add it to the matrix, or
+      b. for the slim version, add all except index 2 (the name).
+
+    - Effects are separated by a "," char
+    - Stats are separated by a ":" char */
+    
+    var fxArr = []
+    fxTable += "table:\n\n"
+
+    ?!isSlim
+      fxTable += "Symbol | Name | Count | Time\n"
+    :
+      fxTable += "<sym> x<n>, <mm:ss f>"
+
+    var fxArr = string.Split(fxStr, ",")
+    for i = 0 .. a.Count(fxArr) - 1
+      var effectStats = string.Split(fxArr[i], ":")
+      var statsFormatted = null
+
+      ?!isSlim
+        statsFormatted = string.Join(" | ", fxArr)
+      :
+        statsFormatted = fxArr[0] + " x" + // <sym>
+        ^fxArr[2] + ", " + // <n>
+        ^u.myFormatSpeedrun(fxArr[3]) // <t>
+
+      fxArr = a.Add(statsFormatted)
+
+    fxTable += string.Join("\n", fxArr)
+
+  return fxTable
+
+
+func getTotalHP(source)
+  ?source = "foe"
+    return foe.hp + foe.armor
+  :?source = "player"
+    return hp + armor
+  :
+    showStrCtr(0,30,#red,"ERROR\nAT: getTotalHP\nCAUSE: unknown <source>: " + source, false)
+
+    return null
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
