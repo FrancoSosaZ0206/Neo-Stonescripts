@@ -59,6 +59,7 @@ var slideCount = 0 // counter to give screen.Next() time to slide in _DS functio
 var moondialMode = -1
 var moondialTimer = 0
 var burstingTimer = 0
+var burstingCdTimer = 0
 
 // Others
 
@@ -81,8 +82,6 @@ func Init()
     smiteScreen_Target = 1
   :?loc.loop
     isPermapotSetup = false
-
-  return
 
 // ............... GLOBAL ............... //
 
@@ -217,7 +216,6 @@ func useAbility_H()
   equipR hatchet
   activate hatchet
 
-  return
 /* Activates a two-handed item's ability.
 ACCEPTS RENAMED WEAPONS!
 
@@ -252,7 +250,6 @@ func useAbility_TH(itemName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
-  return
 /* Activates a one-handed item's ability.
 
 Valid itemName values:
@@ -278,8 +275,6 @@ func useAbility_OH(itemName, hand)
       u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
   :
     u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_T\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
-
-  return
 
 /* Returns true if a given item is equipped. */
 func isEquipped(itemName)
@@ -324,8 +319,6 @@ func screen_DS_Change(itemName)
     :
       u.showStrCtr(0,30,#red,"ERROR\nAT: screen_DS_Change\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
-  return
-
 /* Checks if a weapon ability can be used in 2 screens of distance, according to a certain screen index. */
 func canUseAbility_DS(itemName)
   var result = false
@@ -353,11 +346,8 @@ func useAbility_DS(itemName)
       ?slideCount = 0
         useAbility_TH(itemName)
         screen.ResetOffset()
-        return
   :
     u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
-
-    return
 
 // ..... Talisman / Summon specific ..... //
 
@@ -432,8 +422,6 @@ func devour(summonName)
       u.showStrCtr(0,30,#red,"ERROR\nAT: devour\nCAUSE: <summonName> isn't summoned", false)
   :
     u.showStrCtr(0,30,#red,"ERROR\nAT: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
-
-  return
 
 
 /* Returns true if the voidweaver's ability is
@@ -525,7 +513,6 @@ func brewPotion(potionName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nAT: brewPotion\nCAUSE: unknown <potionName>: " + potionName)
 
-  return
 func canUsePotion(potionName)
   return item.CanActivate() &
   ^item.potion ! "empty" &
@@ -659,42 +646,39 @@ func doMoondial(weapon1, weapon2)
     equipL moon
     equipR @weapon1@
 
-  return
-
-/* Faster moondialing variant, aka Bursting.
+/* Moondialing variant, aka Bursting.
 Requires a minimum of 2 swords to cycle through.
+Works with an unlimited number of swords
+
 weaponsArr: array with all the swords to use. Every sword must have a +21 enchanted boosting its stat attack speed.
 
 Usage example:
-  doBursting([sword fire,
-              sword ice,
-              swodd poison,
-              sword vigor,
-              sword aether]) */
-// var burstingTimer = 0
+  doBursting([sword fire *max +21,
+              sword ice *max +21,
+              sword poison *max +21,
+              sword vigor *max +21,
+              sword aether *max +21]) */
 func doBursting(weaponsArr)
   var n = weaponsArr.Count()
 
   ?n >= 2
-    >`1,7,left=@item.left@\nright=@item.right@\n\n(@burstingTimer@ / @n@)
-  
-    ?burstingTimer = n - 1 // cooldown frame
-      equipL @weaponsArr[n - 1]@
-      equipR @weaponsArr[n - 2]@
-      burstingTimer = 0 // reset timer
+    ?burstingTimer >= n - 1 // cooldown frame
+      // cycle trough every weapon:
+      equipL @weaponsArr[burstingCdTimer]@
+      equipR @weaponsArr[burstingCdTimer + 1]@
+      burstingCdTimer+= 2 // increment burstingCdTimer twice each loop
 
-      >c0,0,#red,COOLDOWN
+      ?burstingCdTimer >= n - 2
+        burstingTimer = 0 // reset timer
+        burstingCdTimer = 0
 
     : // bursting frame (different weapon every frame)
       equipL moon
       equipR @weaponsArr[burstingTimer]@
       burstingTimer++
-      
-      >c0,0,#green,CAST
-  :
-    >c-10,-3,#red,ERROR:\nAT: doBursting\nCAUSE: <weaponsArr> was too small (had @n@ weapons)
 
-  return
+  :
+    u.showStrCtr(0,30,#red,"ERROR:\nAT: doBursting\nCAUSE: <weaponsArr> was too small (had " + n + " weapons", false)
 
 /* AAC = Attack Animation Cancelling
 Widely used trick to enable a
@@ -703,11 +687,10 @@ func doAAC(itemLeft, itemRight)
   ?item.left.state = 3
     equipL @itemLeft@
     equipL @item.left@
+
   ?item.right.state = 3
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
-
-  // return
 
 // ............... Others ............... //
 
