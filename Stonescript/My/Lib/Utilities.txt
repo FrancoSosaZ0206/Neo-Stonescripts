@@ -322,12 +322,14 @@ func colorToHex(colorName)
     return #000000
   :?colorName = "brown"
     return #7B3F00
-  :?colorName = "turquoise" | colorName = "turquesa"
+  :?colorName = "turquoise" |
+  ^colorName = "turquesa"
     return #40E0D0
-  :?colorName = "rainbow" | colorName = "rgb"
+  :?colorName = "rainbow" |
+  ^colorName = "rgb"
     return #rainbow
   :
-    >c-20,0,#red,ERROR: colorToHex() got unexisting color: @colorName@
+    showStrCtr(0,30,#red,"ERROR\nAT: colorToHex\nCAUSE: unknown <colorName>: " + colorName, false)
 
 /* Returns each weapon's range.
 Accounts for the Grasping Staff's
@@ -468,17 +470,17 @@ Has a full and a slim version.
 Foe debuffs table:
 
 Symbol | Name | Count | Time
- |  |  | 
- |  |  | 
- |  |  | 
+❄ | chill | 4 | 352
+o | stun | 1 | 100
+* | unstable | 1 | 12
 "
 
 - Slim version example: "
 Player buffs table:
 
 <sym> x<n>, <mm:ss f>
- x, : f
- x, : f
+i x12, 00:05 24f
+∞ x4, 00:07 12f
 "
 
 Valid <source> values: "foe", "player"
@@ -546,7 +548,8 @@ func getEffectsTable(source, effectType, isSlim)
 
   return fxTable
 
-
+/* Returns the sum of a given target's current hp and
+armor. */
 func getTotalHP(source)
   ?source = "foe"
     return foe.hp + foe.armor

@@ -179,8 +179,12 @@ func canUseAbility(abilityId)
 
     :?abilityId = "voidweaver" |
     ^ abilityId = "cinderwisp"
-      result = result & isSummoned(abilityId) &
-      ^foe 
+      result = result & isSummoned(abilityId)
+
+      ?abilityId = "voidweaver"
+        result = result & canUnmakeVoidweaver()
+      :?abilityId = "cinderwisp"
+        result = result & foe.debuffs.string = "ignition"
 
     :?abilityId = "wand_stone"
       result = result & armor >= u.wand_stone_armor
@@ -457,22 +461,10 @@ margin: number representing a health margin to add
         Send 0 if you don't want to use a margin. */
 func canKillCinderwisp(cinderwispDmg, margin)
   var result = false
-  var debuffsArr = null // array with all debuffs
-  var debuffStatsArr = null // array with singular debuff (name, count, time) array
-  var debuffCount = null // amount of debuffs stacked
+  var debuffCount = u.getEffectStat("foe","debuff","ignition","count") // amount of debuffs stacked
 
-  ?canUseAbility("cinderwisp") &
-  ^foe.debuffs.string = "ignition"
-    debuffsArr = string.Split(foe.debuffs.string, " ") // get each debuff separately (in case the foe has more than 1 debuff)
-
-    for debuff = 0 .. a.Count(debuffsArr) - 1
-      ?debuff = "ignition" // look for this debuff
-        debuffStatsArr = string.Split(debuff, ":") // separate the stats of the debuff
-
-        debuffCount = debuffStatsArr[2] // get the current debuff count
-
-    ?debuffCount ! null
-      result = foe.hp + foe.armor <= (debuffCount * cinderwispDmg) + margin
+  ?canUseAbility("cinderwisp") & debuffCount
+    result = foe.hp + foe.armor <= (debuffCount * cinderwispDmg) + margin
 
   return result
 
