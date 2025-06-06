@@ -308,7 +308,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :
         fight("melee")
 
-    : // foe = phase3
+    // foe = phase3
+    :?debuffs.string ! "stun" // safety measure
       ?c.canUsePotion("lucky")
         activate potion
       :?c.canUseAbility("mask")
@@ -316,30 +317,22 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :?c.canUseAbility("staff_poison")
         c.useAbility_TH(a.staffPoisonHidden)
 
-      ?foe.debuffs.string = a.maxIgnitions_Default /* |
+      ?foe.debuffs.string = a.maxIgnitions_Default &
+      ^c.canUseAbility("cinderwisp") /* |
       ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
         c.devour("cinderwisp")
 
       ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
-      ^debuffs.string ! "stun" // safety measure
+      ^!c.isPermapotSetup
         c.useAbility_TH("Guardian's Bane") //'
 
-      :?hp ! maxhp
-        a.ldtF("melee 1v1 heal")
-      :?c.canDebuffAny()
-        a.ldtF("melee 1v1 debuff")
-
-      :?foe.buffs.string ! "defense_fire" // equip fire weapons
-        ?c.isPermapotSetup
-          equipL Vantum Phoenix
-        :
-          c.doMoondial(Vantum Phoenix, a.swordFireDmg)
-
-      : // equip ice weapons (or any that aren't fire)
+      :?foe.buffs.string = "defense" // equip ice weapons
         ?c.isPermapotSetup
           equipL Bifrost
         :
           c.doMoondial(Bifrost, a.swordIceDmg)
+      :
+        fight("melee")
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
