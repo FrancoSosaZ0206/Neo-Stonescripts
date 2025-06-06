@@ -58,10 +58,7 @@ var slideCount = 0 // counter to give screen.Next() time to slide in _DS functio
 
 var moondialMode = -1
 var moondialTimer = 0
-var moondialFrame
-
 var burstingTimer = 0
-
 
 // Others
 
@@ -84,8 +81,6 @@ func Init()
     smiteScreen_Target = 1
   :?loc.loop
     isPermapotSetup = false
-
-    burstingTimer = 0
 
   return
 
@@ -617,7 +612,8 @@ func canDebuffAll()
 // ......... Damage min-maxing .......... //
 
 func doMoondial(weapon1, weapon2)
-
+  var moondialFrame = null
+  
   ?moondialMode = 0 // Normal moondialing
     moondialTimer++
     moondialFrame = moondialTimer % 3
@@ -660,53 +656,45 @@ func doMoondial(weapon1, weapon2)
   :?moondialMode = 3
     /* For when you have just 1 +21 sword (weapon2 can be
     anything, it will not be used) */
-    ?foe.distance <= 5
-      equipL moon
-    :
-      equipL @weapon2@
+    equipL moon
     equipR @weapon1@
 
   return
 
 /* Faster moondialing variant, aka Bursting.
-************************************************
-REQUISITE: HAVING 10 *21 SPEED ENCHANTED SWORDS.
-************************************************ */
-func doBursting(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
-  burstingTimer++
+Requires a minimum of 2 swords to cycle through.
+weaponsArr: array with all the swords to use. Every sword must have a +21 enchanted boosting its stat attack speed.
 
-  equipL moon
-  ?burstingTimer = 0
-    equipR @s1@
+Usage example:
+  doBursting([sword fire,
+              sword ice,
+              swodd poison,
+              sword vigor,
+              sword aether]) */
+// var burstingTimer = 0
+func doBursting(weaponsArr)
+  var n = weaponsArr.Count()
 
-  :?burstingTimer = 1
-    equipR @s2@
+  ?n >= 2
+    >`1,7,left=@item.left@\nright=@item.right@\n\n(@burstingTimer@ / @n@)
+  
+    ?burstingTimer = n - 1 // cooldown frame
+      equipL @weaponsArr[n - 1]@
+      equipR @weaponsArr[n - 2]@
+      burstingTimer = 0 // reset timer
 
-  :?burstingTimer = 2
-    equipR @s3@
+      >c0,0,#red,COOLDOWN
 
-  :?burstingTimer = 3
-    equipR @s4@
-
-  :?burstingTimer = 4
-    equipR @s5@
-
-  :?burstingTimer = 5
-    equipR @s6@
-
-  :?burstingTimer = 6
-    equipR @s7@
-
-  :?burstingTimer = 7
-    equipR @s8@
-
-  :?burstingTimer = 8
-    equipR @s9@
-
-  :?burstingTimer = 9
-    equipR @s10@
+    : // bursting frame (different weapon every frame)
+      equipL moon
+      equipR @weaponsArr[burstingTimer]@
+      burstingTimer++
+      
+      >c0,0,#green,CAST
   :
-    return
+    >c-10,-3,#red,ERROR:\nAT: doBursting\nCAUSE: <weaponsArr> was too small (had @n@ weapons)
+
+  return
 
 /* AAC = Attack Animation Cancelling
 Widely used trick to enable a
