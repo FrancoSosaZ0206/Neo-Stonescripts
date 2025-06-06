@@ -316,8 +316,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :?c.canUseAbility("staff_poison")
         c.useAbility_TH(a.staffPoisonHidden)
 
-      ?foe.debuffs.string = a.maxIgnitions_Default |
-      ^c.canKillCinderwisp(a.cinderwispDmg_Default, 500)
+      ?foe.debuffs.string = a.maxIgnitions_Default /* |
+      ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
         c.devour("cinderwisp")
 
       :
