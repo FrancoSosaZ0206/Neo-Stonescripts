@@ -56,7 +56,7 @@ func fight(mode)
       :
         fight("ranged")
 
-    :?foe ! "boss" & !c.isPermapotSetup
+    :?foe ! "boss" & !c.isPermapotSetup &
     ^encounter.eliteMod ! "tenacious" &
     ^encounter.eliteMod ! "monarch" // can unmake
       a.ldtF("defense unmake")
