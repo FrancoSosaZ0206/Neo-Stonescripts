@@ -224,7 +224,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         a.ldtF("defense")
 
   : // armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
-    ?buffs.string ! "buff_damage" & foe ! "phase2"
+    ?buffs.string ! "buff_damage" & foe ! "phase2" & !c.isPermapotSetup
       a.ldtF("defense buff empower")
 
     :?foe = "phase2"

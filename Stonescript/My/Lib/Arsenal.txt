@@ -340,7 +340,8 @@ func ldtF(mode)
     // Special cases (both left and right are dedicated to the loadout's goal)
     ?mode = "heal"
       equipL @hammerVigorBuff@
-      equipR @shieldVigorBuff@
+      ?!c.isPermapotSetup
+        equipR @shieldVigorBuff@
     :?mode = "unmake" // unmake when hit
       ?foe.count > 1
         equipL @wandAetherDebuff@
