@@ -17,7 +17,16 @@ Made by IronHawk (Tom Crow)
 
 . ................. Importing ................. .
 
-  var u = new Lib/Utilities
+  Desktop:
+    Put this file in Stonescript/UI or your
+    directory of preference (inside Stonescript),
+    then do this:
+
+    var u = import <YourDirectory>/Utilities
+
+  Mobile:
+    Copy-paste this script and any dependencies
+    into your Mindstone.
 
 . ................... Usage ................... .
 
@@ -44,66 +53,10 @@ var uimkr = import My/Lib/UI_Maker
 var sec = 30 // frames
 var scr = 69 // 1 screen = 69 units
 
-// Weapon Ranges
-
-var skeletonArm_range = 7
-
-var bardiche_range = 9
-var bardiche_ability_range = 7
-var heavyHammer_range = 7 // CHECK
-var heavyHammer_ability_range = 21 // CHECK
-
-// These count both for dashing and bashing shields:
-var dash_range_min = 11
-var dash_range_max = 15
-
-var hatchet_range = 5
-var grapplingHook_range = 13
-
-// soul stones (the mindstone can be used no matter the range)
-var stone_star_range = 12
-var stone_ki_range = 18
-var stone_experience_range = 18
-var stone_triskelion_range = 10
-var stone_moondial_range = 18
-
-var sword_range = 5
-var hammer_range = 5
-var quarterstaff_range = 5
-var sword_big_range = 6
-var wand_rune_range = 20
-var staff_range = 20
-var crossbow_range = 22
-var crossbow_rune_range = 23
-var shield_rune_range = 40
-
-// Special stats
-
-// Hidden wands
-var wand_stone_armor = 0      // gravity
-var wand_poison_armor = 6     // plague
-var wand_vigor_armor = 1      // reset
-var wand_aether_armor = 14    // calamity
-var wand_fire_armor = 4       // explosive
-var wand_ice_armor = 3        // frost
-
-// Hidden staves
-var staff_stone_armor = 3     // acrobatic
-var staff_poison_armor = 8    // berserker
-var staff_vigor_armor = 4     // prevention
-var staff_aether_armor = 2    // grasping
-var staff_fire_armor = 6      // infernal
-var staff_ice_armor = 1       // eternity
-
-/* the added range that the
-Grasping Staff's ability adds: */
-var grasping_buff = 10
-var grasping_cap = 22
-
 
 // //////////////// FUNCTIONS //////////////// //
 
-// .................. Math ................. //
+// ................... Math .................. //
 
 /* Returns the biggest between two numbers. */
 func max(n1,n2)
@@ -112,7 +65,7 @@ func max(n1,n2)
   :
     return n2
 
-// .................. Time ................. //
+// ................... Time .................. //
 
 func myFormatDigital(frames)
   ?frames <= 0
@@ -144,29 +97,25 @@ func myFormatDigital(frames)
 /* returns time in a similar format to time.FormatDigital,
   but with frame presition. */
 func formatSpeedrun(frames)
-
   var timeStr = "00:00 00f"
 
   ?frames > 0
+    var frms    = null
+    var secs    = null
+    var mins    = null
+    var frmStr  = null
+    var secStr  = null
+    var minStr  = null
 
-    var frms
-    var secs
-    var mins
-    var frmStr
-    var secStr
-    var minStr
-
-    frms = frames % 30 // the rest of the division is the added frames between each second
-    secs = frames/30
-    mins = (frames/30)/60
-
-    secs -= mins*60
+    frms =   frames % sec // the remaining frames between each second
+    secs =   frames / sec
+    mins =  (frames / sec) / 60
+    secs -= (mins * 2*sec)
 
     ?frms < 10
       frmStr = "0" + frms
     :
       frmStr = frms
-
     frmStr += "f"
 
     ?secs < 10
@@ -183,7 +132,7 @@ func formatSpeedrun(frames)
     
   return timeStr
 
-// ................ Strings ................ //
+// ................. Strings ................. //
 
 /* Finds the largest string in an array of strings. */
 func getLargestStr(arrStr)
@@ -285,11 +234,14 @@ func showStrCtr(y, maxW, colorName, str, isUI)
 
     return
 
-// ........... Helper functions ............ //
+// ............. Helper functions ............ //
 
 /* Converts widely used color names into
 their respective hexadecimal representation. */
 func colorToHex(colorName)
+  // Entry sanitization
+  colorName = string.ToLower(colorName)
+
   ?colorName = "red"
     return #FF0000
   :?colorName = "orange"
@@ -330,235 +282,6 @@ func colorToHex(colorName)
     return #rainbow
   :
     showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: colorToHex\nCAUSE: unknown <colorName>: " + colorName, false)
-
-/* Returns each weapon's range.
-Accounts for the Grasping Staff's
-buff and Pallas's debuff, or -1
-if there was an error.
-************************************
-DOESN'T ACCEPT WEAPONS, BUT SPECIFIC
-KEYWORDS THAT REPRESENT THEM.
-************************************ */
-// TO DO: ADD THE REMAINING WEAPONS' RANGES.
-func getRange(itemName)
-  var result = null
-  var isIncreased = false
-  var canIncrease = true
-  var isReduced = false
-
-  ?!result
-    ?itemName = "sword"
-      result = sword_range
-    :?itemName = "sword big"
-      result = sword_big_range
-    :?itemName = "hammer" & itemName ! "heavy"
-      result = hammer_range
-
-    :?itemName = "wand" & !result
-      result = wand_range
-    :?itemName = "crossbow" & !result
-      result = crossbow_range
-
-    :?itemName = "quarterstaff"
-      result = staff_range
-    :?itemName = "staff"
-      result = staff_range
-
-    :?itemName = "arm"
-      result = arm_range
-
-    :?itemName = "hatchet"
-      result = hatchet_range
-
-    :?itemName = "bardiche"
-      ?itemName = "ability"
-        result = bardiche_ability_range
-      :
-        result = bardiche_range
-    :?itemName = "heavy_hammer"
-      ?itemName = "ability"
-        result = heavyHammer_ability_range
-      :
-        result = heavyHammer_range
-
-    :?itemName = "grappling_hook"
-      result = grapplingHook_range
-
-    :
-      showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: getRange\nCAUSE: unknown <itemName>: " + itemName, false)
-
-  ?buffs.string = "buff_range" &
-  ^!isIncreased & canIncrease
-    result = result & grasping_buff
-    isIncreased = true
-
-  ?debuffs.string = "pallas_phase2_debuff" & !isReduced
-    result--
-    isReduced = true
-
-  ?result
-    ?result >= grasping_cap
-      ?isIncreased
-      :
-        result = grasping_cap
-  :
-    result = -1
-
-
-  return result
-
-/* Returns a stat of an effect,
-or null if there was an error.
-
-Valid <source> values: "foe", "player"
-Valid <effectType> values: "buff", "debuff"
-Valid <effectId> values: same as in game.
-  for more info, consult the Wiki: https://stonestoryrpg.miraheze.org/wiki/Status_Effects
-Valid <statType> values:
-  - "1", "symbol"
-  - "2", "name", "id"
-  - "3", "count", "stack"
-  - "4", "time", "duration" */
-func getEffectStat(source, effectType, effectId, statType)
-  // Entry sanitization:
-  source = string.ToLower(source)
-  effectType = string.ToLower(effectType)
-  effectId = string.ToLower(effectId)
-  statType = string.ToLower(statType)
-
-  var stat = null // the effect stat to return
-  var fxStr = null // the full effects string
-
-  ?source = "foe" & effectType = "buff"
-    fxStr = foe.buffs.string
-  :?source = "foe" & effectType = "debuff"
-    fxStr = foe.debuffs.string
-
-  :?source = "player" & effectType = "buff"
-    fxStr = buffs.string
-  :?source = "player" & effectType = "debuff"
-    fxStr = debuffs.string
-
-  :
-    showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: getEffectStat\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
-
-
-  ?fxStr // there are active effects
-    // all effects are separated by a "," char
-    var fxArr = string.Split(fxStr, ",")
-
-    for i = 0 .. a.Count(fxArr) - 1
-      ?fxArr[i] = effectId // target effect is active
-        var effectStats = string.Split(fxArr[i], ":")
-
-        ?statType = "1" | statType = "symbol"
-          stat = effectStats[0]
-        :?statType = "2" | statType = "name" | statType = "id"
-          stat = effectStats[1]
-        :?statType = "3" | statType = "count" | statType = "stack"
-          stat = effectStats[2]
-        :?statType = "4" | statType = "time" | statType = "duration"
-          stat = effectStats[3]
-
-  return stat
-
-/* Returns a string formatted like a table with
-a given target's active effects and their stats.
-Has a full and a slim version.
-
-- Full version example: "
-Foe debuffs table:
-
-Symbol | Name | Count | Time
-❄ | chill | 4 | 352
-o | stun | 1 | 100
-* | unstable | 1 | 12
-"
-
-- Slim version example: "
-Player buffs table:
-
-<sym> x<n>, <mm:ss f>
-i x12, 00:05 24f
-∞ x4, 00:07 12f
-"
-
-Valid <source> values: "foe", "player"
-Valid <effectType> values: "buff", "debuff" */
-func getEffectsTable(source, effectType, isSlim)
-  // Entry sanitization:
-  source = string.ToLower(source)
-  effectType = string.ToLower(effectType)
-
-  var fxPanel = null
-  var fxStr = null
-  var fxTable = null
-
-  ?source = "foe" & effectType = "buff"
-    fxStr = foe.buffs.string
-    fxTable = "Foe buffs"
-  :?source = "foe" & effectType = "debuff"
-    fxStr = foe.debuffs.string
-    fxTable = "Foe debuffs"
-
-  :?source = "player" & effectType = "buff"
-    fxStr = buffs.string
-    fxTable = "Player buffs"
-  :?source = "player" & effectType = "debuff"
-    fxStr = debuffs.string
-    fxTable = "Player debuffs"
-
-  :
-    showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: showEffects\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
-
-
-  ?fxStr // there are active effects
-    /* Overview:
-    1. split effects
-    2. for each effect, split into an array with all its stats, and
-      a. add it to the matrix, or
-      b. for the slim version, add all except index 2 (the name).
-
-    - Effects are separated by a "," char
-    - Stats are separated by a ":" char */
-    
-    var fxArr = []
-    fxTable += "table:\n\n"
-
-    ?!isSlim
-      fxTable += "Symbol | Name | Count | Time\n"
-    :
-      fxTable += "<sym> x<n>, <mm:ss f>"
-
-    var fxArr = string.Split(fxStr, ",")
-    for i = 0 .. a.Count(fxArr) - 1
-      var effectStats = string.Split(fxArr[i], ":")
-      var statsFormatted = null
-
-      ?!isSlim
-        statsFormatted = string.Join(" | ", fxArr)
-      :
-        statsFormatted = fxArr[0] + " x" + // <sym>
-        ^fxArr[2] + ", " + // <n>
-        ^u.myFormatSpeedrun(fxArr[3]) // <t>
-
-      fxArr = a.Add(statsFormatted)
-
-    fxTable += string.Join("\n", fxArr)
-
-  return fxTable
-
-/* Returns the sum of a given target's current hp and
-armor. */
-func getTotalHP(source)
-  ?source = "foe"
-    return foe.hp + foe.armor
-  :?source = "player"
-    return hp + armor
-  :
-    showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: getTotalHP\nCAUSE: unknown <source>: " + source, false)
-
-    return null
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

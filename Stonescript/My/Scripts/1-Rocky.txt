@@ -6,35 +6,22 @@
 // ///////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
-var u = import My/Lib/Utilities
-var c = import My/Lib/Combat
-var a = import My/Lib/Arsenal
-
-c.Init()
-
-import UI/FoeStateTracker
-
-/*var t = import My/Lib/Meters/Times
-t.main(0,1,#red, true,false, "ui")*/
-
-var dps = import My/Lib/Meters/DPS
-dps.Main(0,3,#yellow,7,"slim ui")
-
+var u     = import My/Lib/Utilities
+var c     = import My/Lib/Combat
+var s     = import My/Lib/Stats
+var a     = import My/Lib/Arsenal
 
 
 // //////////////// VARIABLES //////////////// //
 
-var weakenType = a.weaken_default
-
-var choice = false
+var yesButton     = null
+var noButton      = null
+var choice        = false
 var buttonPressed = false
-
-var yesButton
-var noButton
-
 var dontShowAgain = false
 
-var hand = null
+var weakenType = a.weaken_default
+var hand       = null
 
 
 // //////////////// FUNCTIONS //////////////// //
@@ -46,20 +33,18 @@ func harvestFunc(button)
   : // button = noButton
     choice = false
 
-  return
-
 func fight(mode)
   ?mode = "evade"
     ?c.canUseAbility("mind") & foe ! "ranged"
       a.ldtF("mind")
     :?c.canUseAbility("staff_stone") & foe ! "ranged"
-    ^& foe.distance < u.dash_range_min
+    ^& foe.distance < s.dash_range_min
       c.useAbility_TH(a.staffStoneHidden)
     
-    :?c.canUseAbility("staff_ice") & foe.distance < u.dash_range_min
+    :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
       c.useAbility_TH(a.staffIceHidden)
     
-    :?foe.distance > u.getRange("sword")
+    :?foe.distance > s.getRange("sword")
       ?foe.count > 1
         fight("magic")
       :
@@ -100,11 +85,10 @@ func fight(mode)
         :?mode = "ranged"
           a.ldtF("ranged dmg")
 
-  return
-
 
 // //////////////// PROCEDURE //////////////// //
 
+c.Init()
 disable npcDialog
 
 // Auto-harvesting logic
@@ -126,9 +110,7 @@ disable npcDialog
     ^null,null,null) // down, up, sound
 
 
-  u.showStrCtr(6,30,#yellow,
-  ^"Harvest boulders?",
-  ^false)
+  u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
 :
   ?yesButton
     yesButton.Recycle()
@@ -143,12 +125,10 @@ disable npcDialog
     ?totaltime < aux
       ?choice
         u.showStrCtr(6, 30,#green,
-        ^"Harvest boulders is enabled",
-        ^false)
+        ^"Harvest boulders is enabled",false)
       :
         u.showStrCtr(6, 30,#red,
-        ^"Harvest boulders is disabled",
-        ^false)
+        ^"Harvest boulders is disabled",false)
     :
       ?!dontShowAgain
         dontShowAgain = true
@@ -255,15 +235,15 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // TO DO: Figure out transformation states and 
 
 :?ai.paused |
-^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
+^(ai.idle & foe.distance > s.dash_range_min) | // if we're waiting
 ^c.isDead() |
 ^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
 ^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
-^foe.distance > u.dash_range_max // or we can't engage in a fight
+^foe.distance > s.dash_range_max // or we can't engage in a fight
   ?armor > a.compoundMaxArmor_boosted |
-  ^(foe ! "boss" & foe.distance < u.shield_rune_range)
+  ^(foe ! "boss" & foe.distance < s.shield_rune_range)
     a.ldtF("engage")
   :?a.compoundMaxArmor_default <= armor &
   ^armor <= a.compoundMaxArmor_boosted

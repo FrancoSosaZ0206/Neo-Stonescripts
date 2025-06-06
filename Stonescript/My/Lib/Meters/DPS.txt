@@ -158,14 +158,9 @@ func Main(x, y, colorHex, frameRate, mode)
         panel = mkUI(x,y,colorHex,mode)
 
     :?mode = "print"
-      ?mode = "ascii"
-        Print(x,y,colorHex,mode,true)
-      :
-        Print(x,y,colorHex,mode,false)
-    
+      Print(x,y,colorHex,mode,false)
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: Main\nCAUSE: invalid <mode>:\n\n" + mode, false)
-
 
 
 // ///////////////// PRIVATE ///////////////// //
@@ -199,7 +194,6 @@ func canUpdate(frameRate)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: canUpdate\nCAUSE: invalid <frameRate>:\n\n" + frameRate, false)
 
     return false
-
 func Update(frameRate)
   currhp  = foe.hp + foe.armor
   nethp   = foe.maxhp + foe.maxarmor
@@ -248,16 +242,15 @@ func ToString(size)
   :?size = "normal" | size = "default"
     return
     ^"###DPS#METER###"   + "\n" +
-    ^        "···············"   + "\n" +
-    ^        "#hits#####" + hits + "\n" +
-    ^        "#hits/s###" + HPS  + "\n" +
-    ^        "#dmg#/hit#" + dmg  + "\n" +
-    ^        "#dmg#/f###" + DPF  + "\n" +
-    ^        "#dmg#/s###" + DPS  + "\n" +
-    ^        "···············"
+    ^"#·##·##·##·##·#"   + "\n" +
+    ^"#No.#Hits#" + hits + "\n" +
+    ^"#Hits/Sec#" + HPS  + "\n" +
+    ^"#Dmg#/Hit#" + dmg  + "\n" +
+    ^"#Dmg#/Frm#" + DPF  + "\n" +
+    ^"#Dmg#/Sec#" + DPS  + "\n" +
+    ^"#·##·##·##·##·#"
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
-
 func Print(x, y, colorHex, mode)
   ?mode = "ascii"
     >`@x@,@y@,@colorHex@,ascii
@@ -265,8 +258,7 @@ func Print(x, y, colorHex, mode)
 asciiend
   :
     >`@x@,@y@,@colorHex@,@ToString(mode)@
-
-/* Returns ui panel containing the DPS Meter. */
+/* Returns ui panel containing the Meter. */
 func mkUI(x, y, colorHex, size)
   var panel = null
   var txt = null
@@ -278,7 +270,7 @@ func mkUI(x, y, colorHex, size)
   var txtH = null
   var panelAnchor = null
   var panelDock = null
-  var panelStyle = -null
+  var panelStyle = null
 
   ?size = "normal" | size = "default"
     txtW = 15
@@ -293,23 +285,21 @@ func mkUI(x, y, colorHex, size)
     panelAnchor = top_center
     panelDock = top_center
     panelStyle = -1
-
   :
     isValidSize = false
     u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
 
-
   ?isValidSize
-    txt = uimkr.mkTextbox(x,y,txtW,txtH,
-    ^     top_left,top_left,
-    ^     dpsStr,
-    ^     null,
-    ^     colorHex)
+    txt = uimkr.mkTextbox(
+    ^ x,y,txtW,txtH, // x, y, w, h,
+    ^ top_left,top_left, // panelAnchor, dock,
+    ^ dpsStr, // txt
+    ^ null, colorHex) // align, colorHex
 
-    panel = uimkr.mkPanel(x,y,txt.w + 2,txt.h + 2,
-    ^       panelAnchor,panelDock,
-    ^       colorHex,
-    ^       panelStyle, txt)
+    panel = uimkr.mkPanel(
+    ^ x,y,txt.w + 2,txt.h + 2, // x, y, w, h,
+    ^ panelAnchor,panelDock, // anchor, dock,
+    ^ colorHex, panelStyle, txt) // colorHex, style, child
 
   return panel
 

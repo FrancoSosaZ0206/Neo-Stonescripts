@@ -34,7 +34,7 @@ Current version: 2.1
   in red, in the slim, non-speedrun version, and
   in the "ui" mode:
 
-  t.Main(0, 1, "#red", true, false, ui)
+  t.Main(0, 1, "#red", true, "ui")
 
 · ···················· Tip ···················· ·
 
@@ -67,7 +67,7 @@ Current version: 2.1
       are prefixed with a zero ('0').
     - myFormatDigital() and formatSpeedrun()
       moved to Utilities.
-    - fixed ttSpeedrun update frequency. Now
+    - fixed tt update frequency. Now
       it updates every frame as it should.
   - v1.7:
     - renamed all functions and variables
@@ -94,6 +94,18 @@ Current version: 2.1
     - Updates and ui components are now handled
       internally.
     - Renamed to "Times"
+  - v2.1:
+    - Added dependency: UI_Maker
+    - Added canUpdate().
+    - Now Update() only modifies the data when called is true.
+    - Update() should now only be called if canUpdate() returns true.
+    - Merged isSlim and isSpeedrun with mode
+    - Added error handling
+    - main >> Main
+    - Added entry sanitization for mode
+    - Upgraded Main() description
+    - Merged speedrun and normal (or "Digital") times into one of each.
+    - u.myFormatDigital() calls replaced by time.FormatDigital()
 
 . ............................................. .
 
@@ -102,144 +114,147 @@ Enjoy! */
 
 // ///////////////// IMPORTS ///////////////// //
 
-var uimkr = new MyScripts/Lib/UI_Maker
-var u = new MyScripts/Lib/Utilities
+var uimkr = import My/Lib/UI_Maker
+var u = import My/Lib/Utilities
 
 
 // ///////////////// PUBLIC ////////////////// //
 
+/* Initializes and manages the times meter.
+
+Valid <mode> values:
+
+Primary (should go first)
+"normal", "default" = returns the full version
+                      of the Meter.
+"slim", "small" = returns a smaller version of
+                  it, containing less
+                  information.
+
+Secondary
+"speedrun" = displays times with frame
+             presition
+
+Tertiary (Should go at the end)
+"ui" = makes an UI panel containing the meter.
+"print" = prints the meter normally.
+"print ascii" = prints the meter in ascii mode. */
 var panel = null
-func main(x, y, colorHex, isSlim, isSpeedrun, mode)
-  ?mode = "ui"
-    ?Update(isSpeedrun)
+func main(x, y, colorHex, mode)
+  // sanitize mode entries
+  mode = string.ToLower(mode)
+
+  ?canUpdate(mode)
+    Update()
+
+    ?mode = "ui"
       ?panel
         panel.Recycle()
         panel = null
 
-      panel = mkUI(x,y,colorHex,isSlim,isSpeedrun)
+      panel = mkUI(x,y,colorHex,mode)
 
-  :?mode = "print"
-    ?mode = "printAscii"
-      Print(x,y,colorHex,isSlim,isSpeedrun,true)
+    :?mode = "print"
+      Print(x,y,colorHex,mode,true)
     :
-      Print(x,y,colorHex,isSlim,isSpeedrun,false)
-
-  return
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: Main\nCAUSE: invalid <mode>:\n\n" + mode, false)
 
 
 // ///////////////// PRIVATE ///////////////// //
 
 // ................ Variables ................ //
 
-// Times in seconds
-var ttDigital = u.myFormatDigital(totaltime)
-var pb = u.myFormatDigital(loc.bestTime)
-var avg = u.myFormatDigital(loc.averageTime)
-
-// Times in seconds and frames
-var ttSpeedrun = u.formatSpeedrun(totaltime)
-var pbSpeedrun = u.formatSpeedrun(loc.bestTime)
-var avgSpeedrun = u.formatSpeedrun(loc.averageTime)
-
+var tt  = null
+var pb  = null
+var avg = null
 
 // ................ Functions ................ //
 
-func Update(isSpeedrun)
-  // Variable updating frequency:
-  ?totaltime % u.sec = 0
-    ttDigital = u.myFormatDigital(totaltime)
-  ttSpeedrun = u.formatSpeedrun(totaltime)
-
-  ?loc.loop
-    pb = u.myFormatDigital(loc.bestTime) // update pb
-    avg = u.myFormatDigital(loc.averageTime) // update avg
-
-    pbSpeedrun = u.formatSpeedrun(loc.bestTime)
-    avgSpeedrun = u.formatSpeedrun(loc.averageTime)
-
-
-  ?isSpeedrun
+func canUpdate(mode)
+  ?mode = "speedrun"
     return true
   :
     return totaltime = 1 | (totaltime % u.sec = 0)
+func Update(mode)
+  ?mode = "speedrun" // update times every frame
+    tt    = u.formatSpeedrun(totaltime)
 
-func ToString(isSlim, isSpeedrun)
+    ?loc.loop
+      pb  = u.formatSpeedrun(loc.bestTime)
+      avg = u.formatSpeedrun(loc.averageTime)
 
-  ?isSlim
-    ?isSpeedrun
-      return
-      ^"☆#" + pbSpeedrun +     // ☆ = PB
-      ^"#|#≈#" + avgSpeedrun + // ≈ = AVG
-      ^"#|#▶#" + ttSpeedrun    // ▶ = CURR
+  : // update times every second (30 frames)
+    ?loc.begin | totaltime % u.sec = 0
+      tt  = time.formatDigital(totaltime)
 
-    :
-      return
-      ^"☆#" + pb +         // ☆ = PB
-      ^"#|#≈#" + avg +      // ≈ = AVG
-      ^"#|#▶#" + ttDigital // ▶ = CURR
+    ?loc.loop
+      pb  = time.formatDigital(loc.bestTime)
+      avg = time.formatDigital(loc.averageTime)
 
+func ToString(size)
+  ?size = "slim" | size = "small"
+    return
+    ^"☆#" + pb +     // ☆ = PB
+    ^"#|#≈#" + avg + // ≈ = AVG
+    ^"#|#▶#" + tt    // ▶ = CURR
+
+  :?size = "normal" | size = "default"
+    return
+    ^"####SPEED-O-METER####" + "\n" +
+    ^"#·##·##·##·##·##·##·#" + "\n" +
+    ^"#PB##" + pb + "\n" +
+    ^"#AVG#" + avg + "\n" +
+    ^"#CUR#" + tt
   :
-    ?isSpeedrun
-      return
-      ^"####SPEED-O-METER" + "\n" +
-      ^"·····················" + "\n" +
-      ^"#PB##" + pbSpeedrun + "#(" + loc.bestTime + "f)" + "\n" +
-      ^"#AVG#" + avgSpeedrun + "#(" + loc.averageTime + "f)" + "\n" +
-      ^"#CUR#" + ttSpeedrun + "#(" + totaltime + "f)"
-
-    :
-      return
-      ^"SPEED-O-METER" + "\n" +
-      ^"·············" + "\n" +
-      ^"##PB##" + pb + "\n" +
-      ^"##AVG#" + avg + "\n" +
-      ^"##CUR#" + ttDigital
-
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
 /* isAscii:
     true: prints the text in ascii format,
           replacing the whitespace characters
           with transparent characters.
     false: prints normally. Whitespaces
            will block the background. */
-func Print(x, y, colorHex, isSlim, isSpeedrun, isAscii)
-  ?isAscii
+func Print(x, y, colorHex, mode)
+  ?mode = "ascii"
     >`@x@,@y@,@colorHex@,ascii
-@ToString(isSlim, isSpeedrun)@
+@ToString(mode)@
 asciiend
   :
-    >`@x@,@y@,@colorHex@,@ToString(isSlim, isSpeedrun)@
-
-  return
-
-func mkUI(x, y, colorHex, isSlim, isSpeedrun)
-
-  var txt
-  var panel
+    >`@x@,@y@,@colorHex@,@ToString(mode)@
+/* Returns ui panel containing the meter. */
+func mkUI(x, y, colorHex, mode)
+  var panel = null
+  var txt = null
+  var isValidSize = true
 
   // For the panel:
-  var pnlAnchor
-  var pnlDock
-  var style
+  var panelAnchor = null
+  var panelDock = null
+  var panelStyle = null
   
-  ?isSlim
-    pnlAnchor = top_center
-    pnlDock = top_center
-    style = -1
+  ?size = "normal" | size = "default"
+    panelAnchor = top_left
+    panelDock = top_left
+    panelStyle = -2
+
+  :?size = "slim" | size = "small"
+    panelAnchor = top_center
+    panelDock = top_center
+    panelStyle = -1
   :
-    pnlAnchor = top_left
-    pnlDock = top_left
-    style = -2
+    isValidSize = false
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
 
-  txt = uimkr.mkTxtbox(
-  ^1, 1, null, null, // x, y, w, h,
-  ^top_left, top_left, // pnlAnchor, dock,
-  ^ToString(isSlim, isSpeedrun), // txt
-  ^null, colorHex) // align, colorHex
+  ?isValidSize
+    txt = uimkr.mkTextbox(
+    ^ 1, 1, null, null, // x, y, w, h,
+    ^ top_left, top_left, // panelAnchor, dock,
+    ^ ToString(size), // txt
+    ^ null, colorHex) // align, colorHex
 
-  panel = uimkr.mkPanel(
-    ^x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
-    ^pnlAnchor, pnlDock, // anchor, dock,
-    ^colorHex, style, txt) // colorHex, style, child
+    panel = uimkr.mkPanel(
+    ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
+    ^ panelAnchor, panelDock, // anchor, dock,
+    ^ colorHex, panelStyle, txt) // colorHex, panelStyle, child
 
   return panel
 

@@ -145,7 +145,7 @@ func canUseAbility(abilityId)
       result = result & isDashingRange() & !ai.idle
     :?abilityId = "arm"
       result = result & item.CanActivate("arm") &
-      ^foe.distance <= u.getRange("arm") &
+      ^foe.distance <= s.getRange("arm") &
       ^buffs.string = "pick_pocket"
     :?abilityId = "hatchet"
       result = result & loc = "deadwood_valley"
@@ -159,13 +159,13 @@ func canUseAbility(abilityId)
 
     :?abilityId = "hatchet"
       result = (result & // and it's in range
-      ^foe.distance <= u.getRange(abilityId)) |
+      ^foe.distance <= s.getRange(abilityId)) |
       ^isCasting(abilityId) // won't get interrupted
 
     :?abilityId = "bardiche" |
     ^abilityId = "heavy_hammer"
       result = (result & // and it's in range
-      ^foe.distance <= u.getRange(abilityId + " ability")) |
+      ^foe.distance <= s.getRange(abilityId + " ability")) |
       ^isCasting(abilityId) // won't get interrupted
 
     :?abilityId = "quarterstaff" | abilityId = "talisman" // interruptible abilities
@@ -181,30 +181,30 @@ func canUseAbility(abilityId)
         result = result & foe.debuffs.string = "ignition"
 
     :?abilityId = "wand_stone"
-      result = result & armor >= u.wand_stone_armor
+      result = result & armor >= s.wand_stone_armor
     :?abilityId = "wand_poison"
-      result = result & armor >= u.wand_poison_armor
+      result = result & armor >= s.wand_poison_armor
     :?abilityId = "wand_vigor"
-      result = result & armor >= u.wand_vigor_armor
+      result = result & armor >= s.wand_vigor_armor
     :?abilityId = "wand_aether"
-      result = result & armor >= u.wand_aether_armor
+      result = result & armor >= s.wand_aether_armor
     :?abilityId = "wand_fire"
-      result = result & armor >= u.wand_fire_armor
+      result = result & armor >= s.wand_fire_armor
     :?abilityId = "wand_ice"
-      result = result & armor >= u.wand_ice_armor
+      result = result & armor >= s.wand_ice_armor
 
     :?abilityId = "staff_stone"
-      result = result & armor >= u.staff_stone_armor
+      result = result & armor >= s.staff_stone_armor
     :?abilityId = "staff_poison"
-      result = result & armor >= u.staff_poison_armor
+      result = result & armor >= s.staff_poison_armor
     :?abilityId = "staff_vigor"
-      result = result & armor >= u.staff_vigor_armor
+      result = result & armor >= s.staff_vigor_armor
     :?abilityId = "staff_aether"
-      result = result & armor >= u.staff_aether_armor
+      result = result & armor >= s.staff_aether_armor
     :?abilityId = "staff_fire"
-      result = result & armor >= u.staff_fire_armor
+      result = result & armor >= s.staff_fire_armor
     :?abilityId = "staff_ice"
-      result = result & armor >= u.staff_ice_armor
+      result = result & armor >= s.staff_ice_armor
 
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityId>:\n\n" + abilityId, false)
@@ -444,7 +444,7 @@ margin: number representing a health margin to add
         Send 0 if you don't want to use a margin. */
 func canKillCinderwisp(cinderwispDmg, margin)
   var result = false
-  var debuffCount = u.getEffectStat("foe","debuff","ignition","count") // amount of debuffs stacked
+  var debuffCount = s.getEffectStat("foe","debuff","ignition","count") // amount of debuffs stacked
 
   ?canUseAbility("cinderwisp") & debuffCount
     result = foe.hp + foe.armor <= (debuffCount * cinderwispDmg) + margin
@@ -695,8 +695,8 @@ func doAAC(itemLeft, itemRight)
 // ............... Others ............... //
 
 func isDashingRange()
-  return u.dash_range_min <= foe.distance &
-  ^      foe.distance <= u.dash_range_max
+  return s.dash_range_min <= foe.distance &
+  ^      foe.distance <= s.dash_range_max
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
