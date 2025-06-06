@@ -20,20 +20,24 @@ Current version: v2.2
 
 . ................. Importing ................. .
 
-  PC:
-    var dps_meter = import DPS
+  Desktop:
+    Put this file in Stonescript/UI or your
+    directory of preference (inside Stonescript),
+    then do this:
+
+    var dps_meter = import <YourDirectory>/DPS
 
   Mobile:
     Copy-paste this script and any dependencies
-    into your mindstone.
+    into your Mindstone.
 
 . ................... Usage ................... .
 
-  Example: initialize the meter in 0,3 (x,y),
+  Example - initialize the meter in 0,3 (x,y),
   in yellow, refreshing every 7 frames, in the
-  slim version, and in the "ui" mode.
+  slim, ui mode:
 
-  dps_meter.main(0,3,"#yellow", 7,true, "ui")
+  dps_meter.main(0,3,"#yellow", 7, "slim ui")
 
 . ................. CHANGELOG ................. .
 
@@ -102,8 +106,13 @@ Current version: v2.2
     - Added dependency: UI_Maker
     - Added canUpdate().
     - Now Update() only modifies the data when called is true.
-    - Update() should now only be called if canUpdate() returns
-      true.
+    - Update() should now only be called if canUpdate() returns true.
+    - refreshRate >> frameRate
+    - Merged isSlim with mode
+    - Added error handling
+    - main >> Main
+    - added entry sanitization for mode
+    - upgraded Main() description
 
 . ............................................. .
 
@@ -119,20 +128,26 @@ var u = import My/Lib/Utilities
 // ///////////////// PUBLIC ////////////////// //
 
 /* Initializes and manages the dps meter.
-Valid <isSlim> values:
-  false = returns the full version of the Meter.
-  true = returns a smaller version of it, containing
-         less information.
+
 Valid <mode> values:
-  "ui" = makes an UI panel containing the meter.
-  "print" = prints the meter normally.
-  "print ascii" = prints the meter in ascii mode. */
+
+Primary (should go first)
+"normal", "default" = returns the full version
+                      of the Meter.
+"slim", "small" = returns a smaller version of
+                  it, containing less
+                  information.
+
+Secondary (should go after primary)
+"ui" = makes an UI panel containing the meter.
+"print" = prints the meter normally.
+"print ascii" = prints the meter in ascii mode. */
 var panel = null
-func Main(x, y, colorHex, refreshRate, isSlim, mode)
+func Main(x, y, colorHex, frameRate, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
-  ?canUpdate(refreshRate)
+  ?canUpdate(frameRate)
     Update()
 
     ?mode = "ui"
@@ -140,16 +155,16 @@ func Main(x, y, colorHex, refreshRate, isSlim, mode)
         panel.Recycle()
         panel = null
       :
-        panel = mkUI(x,y,colorHex,isSlim)
+        panel = mkUI(x,y,colorHex,mode)
 
     :?mode = "print"
       ?mode = "ascii"
-        Print(x,y,colorHex,isSlim,true)
+        Print(x,y,colorHex,mode,true)
       :
-        Print(x,y,colorHex,isSlim,false)
+        Print(x,y,colorHex,mode,false)
     
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: Main\nCAUSE: invalid <mode>:\n\n" + refreshRate, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: Main\nCAUSE: invalid <mode>:\n\n" + mode, false)
 
 
 
@@ -176,16 +191,16 @@ var DPS = "N/A" // damage per second
 
 // ................ Functions ................ //
 
-func canUpdate(refreshRate)
-  ?refreshRate > 0
+func canUpdate(frameRate)
+  ?frameRate > 0
     // only works when there's a boss
-    return foe = "boss" & totaltime % refreshRate = 0
+    return foe = "boss" & totaltime % frameRate = 0
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: canUpdate\nCAUSE: invalid <refreshRate>:\n\n" + refreshRate, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: canUpdate\nCAUSE: invalid <frameRate>:\n\n" + frameRate, false)
 
     return false
 
-func Update(refreshRate)
+func Update(frameRate)
   currhp  = foe.hp + foe.armor
   nethp   = foe.maxhp + foe.maxarmor
 
@@ -226,10 +241,11 @@ func Update(refreshRate)
 
   auxhp = currhp
 
-func ToString(isSlim)
-  ?isSlim
+func ToString(size)
+  ?size = "slim" | size = "small"
     return "DPS#|#" + DPS
-  :
+
+  :?size = "normal" | size = "default"
     return
     ^"###DPS#METER###"   + "\n" +
     ^        "···············"   + "\n" +
@@ -239,47 +255,61 @@ func ToString(isSlim)
     ^        "#dmg#/f###" + DPF  + "\n" +
     ^        "#dmg#/s###" + DPS  + "\n" +
     ^        "···············"
+  :
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
 
-func Print(x, y, colorHex, isSlim, isAscii)
-  ?isAscii
+func Print(x, y, colorHex, mode)
+  ?mode = "ascii"
     >`@x@,@y@,@colorHex@,ascii
-@ToString(isSlim)@
+@ToString(mode)@
 asciiend
   :
-    >`@x@,@y@,@colorHex@,@ToString(isSlim)@
+    >`@x@,@y@,@colorHex@,@ToString(mode)@
 
 /* Returns ui panel containing the DPS Meter. */
-func mkUI(x, y, colorHex, isSlim)
-  var panel
-  var txt
+func mkUI(x, y, colorHex, size)
+  var panel = null
+  var txt = null
+  var isValidSize = true
 
-  var dpsStr = ToString(isSlim)
+  var dpsStr = ToString(size)
 
-  // default values >> !isSlim
+  var txtW = null
+  var txtH = null
+  var panelAnchor = null
+  var panelDock = null
+  var panelStyle = -null
 
-  var txtW = 15
-  var txtH = 8
-  var panelAnchor = top_left
-  var panelDock = top_left
-  var panelStyle = -3
+  ?size = "normal" | size = "default"
+    txtW = 15
+    txtH = 8
+    panelAnchor = top_left
+    panelDock = top_left
+    panelStyle = -3
 
-  ?isSlim
+  :?size = "slim" | size = "small"
     txtW = string.Size(dpsStr)
     txtH = 1
     panelAnchor = top_center
     panelDock = top_center
     panelStyle = -1
 
-  txt = uimkr.mkTextbox(x,y,txtW,txtH,
-  ^     top_left,top_left,
-  ^     dpsStr,
-  ^     null,
-  ^     colorHex)
+  :
+    isValidSize = false
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
 
-  panel = uimkr.mkPanel(x,y,txt.w + 2,txt.h + 2,
-  ^       panelAnchor,panelDock,
-  ^       colorHex,
-  ^       panelStyle, txt)
+
+  ?isValidSize
+    txt = uimkr.mkTextbox(x,y,txtW,txtH,
+    ^     top_left,top_left,
+    ^     dpsStr,
+    ^     null,
+    ^     colorHex)
+
+    panel = uimkr.mkPanel(x,y,txt.w + 2,txt.h + 2,
+    ^       panelAnchor,panelDock,
+    ^       colorHex,
+    ^       panelStyle, txt)
 
   return panel
 

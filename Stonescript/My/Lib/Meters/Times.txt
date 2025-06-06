@@ -1,50 +1,51 @@
-﻿// *******************************************************
-//                    START OF "Times"
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "Times" ▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
+/* // ///////////// FILE INFO //////////////// //
 
-/* ················· FILE INFO ·······················
-  Time Display Utility
-  Made by MetalEagle26 (Tom Crow)
+Time Display Utility
+Made by MetalEagle26 (Tom Crow)
 
-  current version: 2.0
+Current version: 2.1
 
-······················································
+. ................ Description ................ .
 
-  DESCRIPTION
-
-  This library displays your runs' times!
+  This library displays your runs's times!
   Includes a speedrunning version to track frames.
 
-······················································
+. ................. Importing ................. .
 
-  HOW TO IMPORT
-
-  - Desktop:
+  Desktop:
     Put this file in Stonescript/UI or your
     directory of preference (inside Stonescript),
     then do this:
 
-    var sm = import <YourDirectory>/Speed_O_Meter
+    var t = import <YourDirectory>/Times
 
-  - Mobile:
-    Copy-Paste this where you need it.
+  Mobile:
+    Copy-Paste this script and any dependencies
+    into your Mindstone.
 
-······················································
+. ................... Usage ................... .
 
-  HOW TO USE
+  Example - initialize the meter in 0,3 (x,y),
+  in red, in the slim, non-speedrun version, and
+  in the "ui" mode:
 
-  - Template
-    sm.main(x, y, colorHex, isSlim, isSpeedrun, mode)
+  t.Main(0, 1, "#red", true, false, ui)
 
-  - Use case (creates an UI panel in the slim,
-  non-speedrun version):
-    sm.main(0, 1, "#red", true, false, ui)
+· ···················· Tip ···················· ·
 
-······················································
+  Keep in mind that speedrunning functions need to
+  update constantly to show the frames, which may cause
+  some lag.
+  
+  Also, remember to use ".Recycle()" function and assign
+  to "null" after using UI functions!
 
-  CHANGELOG
+. ................. CHANGELOG ................. .
 
   - v1.2:
     - Now you can choose a slim version
@@ -94,29 +95,18 @@
       internally.
     - Renamed to "Times"
 
-······················································
-
-Tip: keep in mind that speedrunning functions need to
-  update constantly to show the frames, which may cause
-  some lag.
-  Also, remember to use ".Recycle()" function and assign
-  to "null" after using UI functions!
-
+. ............................................. .
 
 Enjoy! */
 
 
-
-// /////////////////////////////////////////// //
-
-// IMPORTS:
+// ///////////////// IMPORTS ///////////////// //
 
 var uimkr = new MyScripts/Lib/UI_Maker
 var u = new MyScripts/Lib/Utilities
 
 
-
-// ///////////////////// PUBLIC ///////////////////// //
+// ///////////////// PUBLIC ////////////////// //
 
 var panel = null
 func main(x, y, colorHex, isSlim, isSpeedrun, mode)
@@ -137,10 +127,9 @@ func main(x, y, colorHex, isSlim, isSpeedrun, mode)
   return
 
 
+// ///////////////// PRIVATE ///////////////// //
 
-// //////////////////// PRIVATE ///////////////////// //
-
-// VARIABLES
+// ................ Variables ................ //
 
 // Times in seconds
 var ttDigital = u.myFormatDigital(totaltime)
@@ -153,10 +142,7 @@ var pbSpeedrun = u.formatSpeedrun(loc.bestTime)
 var avgSpeedrun = u.formatSpeedrun(loc.averageTime)
 
 
-
-// ·················································· //
-
-// FUNCTIONS
+// ................ Functions ................ //
 
 func Update(isSpeedrun)
   // Variable updating frequency:
@@ -258,8 +244,6 @@ func mkUI(x, y, colorHex, isSlim, isSpeedrun)
   return panel
 
 
-
-
-// *******************************************************
-//                     END OF "Times"
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Times" ▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //

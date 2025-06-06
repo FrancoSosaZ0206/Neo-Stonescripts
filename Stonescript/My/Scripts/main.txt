@@ -146,7 +146,7 @@ import My/Cosmetics
   // ----------------- dps lib ----------------- //
 
   var dps = import My/Lib/Meters/DPS
-  dps.Main(0,3,#yellow, 7,true, "ui")
+  dps.Main(0,3,#yellow,7,"slim ui")
 
 
   ?loc.stars > 15 & loc = "rocky_plateau"
