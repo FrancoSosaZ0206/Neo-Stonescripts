@@ -568,29 +568,29 @@ func ldtF(mode)
       :?mode = "dmg"
         ?c.isPermapotSetup // all left hand
           ?foe = "poison"
-            equipL Mamba Negra
-          :?foe = "vigor"
-            equipL Dothaneel
-          :?foe = "aether"
-            equipL Void Slayer
-          :?foe = "fire"
-            equipL Vantum Phoenix
-          :?foe = "ice"
             equipL Bifrost
+          :?foe = "vigor"
+            equipL Mamba Negra
+          :?foe = "aether"
+            equipL Dothaneel
+          :?foe = "fire"
+            equipL Void Slayer
+          :?foe = "ice"
+            equipL Vantum Phoenix
           : // foe = "stone"
             equipL Vantum Phoenix // Unbroken Faith
 
         : // !c.isPermapotSetup
           ?foe = "poison"
-            c.doMoondial(Mamba Negra, swordPoisonDmg)
-          :?foe = "vigor"
-            c.doMoondial(Dothaneel, swordVigorDmg)
-          :?foe = "aether"
-            c.doMoondial(Void Slayer, swordAetherDmg)
-          :?foe = "fire"
-            c.doMoondial(Vantum Phoenix, swordFireDmg)
-          :?foe = "ice"
             c.doMoondial(Bifrost, swordIceDmg)
+          :?foe = "vigor"
+            c.doMoondial(Mamba Negra, swordPoisonDmg)
+          :?foe = "aether"
+            c.doMoondial(Dothaneel, swordVigorDmg)
+          :?foe = "fire"
+            c.doMoondial(Void Slayer, swordAetherDmg)
+          :?foe = "ice"
+            c.doMoondial(Vantum Phoenix, swordFireDmg)
           : // foe = "stone"
             c.doMoondial(Vantum Phoenix /*Unbroken Faith*/, @swordFireDmg@ /*Broken Faith*/)
 

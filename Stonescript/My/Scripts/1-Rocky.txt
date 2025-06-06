@@ -266,7 +266,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?encounter.eliteMod = "monarch"
   ?foe.count > 1 // eliminate the other foes
     ?c.canUseAbility("blade")
-      c.useAbility_LI("blade")
+      c.useAbility_TH("blade")
     :?c.canUseAbility("wand_fire")
       c.useAbility_OH(a.wandFireHidden, hand)
 
@@ -312,7 +312,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ?c.canUsePotion("lucky")
         activate potion
       :?c.canUseAbility("mask")
-        c.useAbility_LI("mask")
+        c.useAbility_TH("mask")
       :?c.canUseAbility("staff_poison")
         c.useAbility_TH(a.staffPoisonHidden)
 
