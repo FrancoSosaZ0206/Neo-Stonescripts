@@ -12,6 +12,15 @@ var a = import My/Lib/Arsenal
 
 c.Init()
 
+import UI/FoeStateTracker
+
+var t = import My/Lib/Meters/Times
+t.main(0,1,#red, true,false, "ui")
+
+var dps = import My/Lib/Meters/DPS
+dps.Main(0,3,#yellow, 7,true, "ui")
+
+
 
 // //////////////// VARIABLES //////////////// //
 
@@ -306,6 +315,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         c.useAbility_OH(a.wandVigorHidden, hand)
 
       :
+        ?foe = "phase2"
+          >c0,0,#red,PHASE2 FIGHT
         fight("melee")
 
     // foe = phase3

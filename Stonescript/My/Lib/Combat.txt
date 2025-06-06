@@ -207,7 +207,7 @@ func canUseAbility(abilityId)
       result = result & armor >= u.staff_ice_armor
 
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: canUseAbility\nCAUSE: unknown <abilityId>:\n\n" + abilityId, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityId>:\n\n" + abilityId, false)
 
   return result
 
@@ -248,7 +248,7 @@ func useAbility_TH(itemName)
     activate R
 
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
 /* Activates a one-handed item's ability.
 
@@ -272,9 +272,9 @@ func useAbility_OH(itemName, hand)
       equipR @itemName@
       activate R
     :
-      u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_T\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_T\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
 /* Returns true if a given item is equipped. */
 func isEquipped(itemName)
@@ -296,7 +296,7 @@ func isScreen_DS_Target(itemName)
   :?itemName = "mask" | itemName = "feeble"
     return screen.i = maskScreen_Target
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: isScreen_DS_Target\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreen_DS_Target\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
     return false
 func isScreen_DS_Max(itemName)
@@ -305,7 +305,7 @@ func isScreen_DS_Max(itemName)
   :?itemName = "mask" | itemName = "feeble"
     return maskScreen_Target = maskScreen_Max
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: isScreen_DS_Max\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreen_DS_Max\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
     return false
 
@@ -317,7 +317,7 @@ func screen_DS_Change(itemName)
     :?itemName = "mask" | itemName = "feeble"
       maskScreen_Target++
     :
-      u.showStrCtr(0,30,#red,"ERROR\nAT: screen_DS_Change\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screen_DS_Change\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
 /* Checks if a weapon ability can be used in 2 screens of distance, according to a certain screen index. */
 func canUseAbility_DS(itemName)
@@ -327,7 +327,7 @@ func canUseAbility_DS(itemName)
   ^itemName = "mask"
     result = canUseAbility(itemName)
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: canUseAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
 
   ?result
     result = result & isScreen_DS_Target(itemName)
@@ -347,7 +347,7 @@ func useAbility_DS(itemName)
         useAbility_TH(itemName)
         screen.ResetOffset()
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: useAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
 
 // ..... Talisman / Summon specific ..... //
 
@@ -375,7 +375,7 @@ func canSummon(summonName)
       result = false // TO DO: uncomment logic when this talisman is added.
       /* result = result & !isSummoned("") */
     :
-      u.showStrCtr(0,30,#red,"ERROR\nAT: canSummon\nCAUSE: unknown <summonName>: " + summonName, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canSummon\nCAUSE: unknown <summonName>: " + summonName, false)
 
       result = false
 
@@ -402,7 +402,7 @@ func canHide(summonName)
       result = false // TO DO: uncomment logic when this talisman is added.
       /* result = result & isSummoned("") */
     :
-      u.showStrCtr(0,30,#red,"ERROR\nAT: canHide\nCAUSE: unknown <summonName>: " + summonName, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canHide\nCAUSE: unknown <summonName>: " + summonName, false)
 
       result = false
 
@@ -419,9 +419,9 @@ func devour(summonName)
     ?isSummoned(summonName)
       activate @summonName@
     :
-      u.showStrCtr(0,30,#red,"ERROR\nAT: devour\nCAUSE: <summonName> isn't summoned", false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: <summonName> isn't summoned", false)
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
 
 /* Returns true if the voidweaver's ability is
@@ -511,7 +511,7 @@ func brewPotion(potionName)
   :?potionName = "invisibility"
     brew wood + stone
   :
-    u.showStrCtr(0,30,#red,"ERROR\nAT: brewPotion\nCAUSE: unknown <potionName>: " + potionName)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: brewPotion\nCAUSE: unknown <potionName>: " + potionName)
 
 func canUsePotion(potionName)
   return item.CanActivate() &
@@ -678,7 +678,7 @@ func doBursting(weaponsArr)
       burstingTimer++
 
   :
-    u.showStrCtr(0,30,#red,"ERROR:\nAT: doBursting\nCAUSE: <weaponsArr> was too small (had " + n + " weapons", false)
+    u.showStrCtr(0,30,#red,"ERROR:\nFILE: Combat\nFUNCTION: doBursting\nCAUSE: <weaponsArr> was too small (had " + n + " weapons", false)
 
 /* AAC = Attack Animation Cancelling
 Widely used trick to enable a

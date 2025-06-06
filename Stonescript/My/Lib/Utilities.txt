@@ -34,7 +34,7 @@ Enjoy! */
 
 // ///////////////// IMPORTS ///////////////// //
 
-var uimkr = new My/Lib/UI_Maker
+var uimkr = import My/Lib/UI_Maker
 
 
 // //////////////// VARIABLES //////////////// //
@@ -329,7 +329,7 @@ func colorToHex(colorName)
   ^colorName = "rgb"
     return #rainbow
   :
-    showStrCtr(0,30,#red,"ERROR\nAT: colorToHex\nCAUSE: unknown <colorName>: " + colorName, false)
+    showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: colorToHex\nCAUSE: unknown <colorName>: " + colorName, false)
 
 /* Returns each weapon's range.
 Accounts for the Grasping Staff's
@@ -385,7 +385,7 @@ func getRange(itemName)
       result = grapplingHook_range
 
     :
-      showStrCtr(0,30,#red,"ERROR\nAT: getRange\nCAUSE: unknown <itemName>: " + itemName, false)
+      showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: getRange\nCAUSE: unknown <itemName>: " + itemName, false)
 
   ?buffs.string = "buff_range" &
   ^!isIncreased & canIncrease
@@ -440,7 +440,7 @@ func getEffectStat(source, effectType, effectId, statType)
     fxStr = debuffs.string
 
   :
-    showStrCtr(0,30,#red,"ERROR\nAT: getEffectStat\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
+    showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: getEffectStat\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
 
 
   ?fxStr // there are active effects
@@ -509,7 +509,7 @@ func getEffectsTable(source, effectType, isSlim)
     fxTable = "Player debuffs"
 
   :
-    showStrCtr(0,30,#red,"ERROR\nAT: showEffects\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
+    showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: showEffects\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
 
 
   ?fxStr // there are active effects
@@ -556,7 +556,7 @@ func getTotalHP(source)
   :?source = "player"
     return hp + armor
   :
-    showStrCtr(0,30,#red,"ERROR\nAT: getTotalHP\nCAUSE: unknown <source>: " + source, false)
+    showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: getTotalHP\nCAUSE: unknown <source>: " + source, false)
 
     return null
 

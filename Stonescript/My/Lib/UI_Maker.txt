@@ -66,217 +66,223 @@ Enjoy! */
 
 // //////////////// FUNCTIONS //////////////// //
 
-  /* Glossary:
-    *** some of these may be optional ***
+/* **************** GLOSSARY ***************** **
 
-    x = horizontal position (relative to dock)
-    y = vertical position (relative to dock)
-    w = width
-    h = height
-    anchor = position relative to the screen
-    dock = position relative to parent UI component
-    col = color in hex format
-    style = numeric ID used for drawing rectangular Components such as Panels and Buttons (number from -8 to 8) */
+  x = horizontal position (relative to dock)
+  y = vertical position (relative to dock)
 
-  /* Optional properties/parameters:
-    send 0 if you don't want to use them.
-    The default value will be used instead. */
+  w = width
+  h = height
+
+  anchor = position relative to the screen
+  dock = position relative to parent UI component
+  
+  colorHex = color in hexadecimal (hex) format
+  style = numeric ID used for drawing rectangular
+          Components such as Panels and Buttons (range
+          from -8 to 8)
 
 
-  /* Makes a panel component.
-  PARAMETERS:
-    Common:
-      - x
-      - y
-      - anchor
-      - dock
+  Optional properties/parameters:
 
-    Optional:
-      - w
-      - h
-      - col = color of the panel.
-      - style
-      - child = initial child component to add. */
-  func mkPanel(x,y,w,h, anchor,dock, col, style, child)
+  send 0 if you don't want to use them.
+  The default value will be used instead. */
 
-    var panel
 
-    panel = ui.AddPanel()
+/* Makes a panel component.
+PARAMETERS:
+  Common:
+    - x
+    - y
+    - anchor
+    - dock
 
-    panel.x = x
-    panel.y = y
+  Optional:
+    - w
+    - h
+    - colorHex = color of the panel.
+    - style
+    - child = initial child component to add. */
+func mkPanel(x,y,w,h, anchor,dock, colorHex, style, child)
 
-    ?w
-      panel.w = w
-    ?h
-      panel.h = h
+  var panel
 
-    panel.anchor = anchor
-    panel.dock = dock
+  panel = ui.AddPanel()
 
-    ?col
-      panel.color = col
-    ?style
-      panel.style = style
+  panel.x = x
+  panel.y = y
 
-    ?child
-      panel.Add(child)
+  ?w
+    panel.w = w
+  ?h
+    panel.h = h
 
-    return panel
+  panel.anchor = anchor
+  panel.dock = dock
 
-  /* Makes a textbox component.
-  PARAMETERS:
-    Common:
-      - x
-      - y
-      - anchor
-      - dock
+  ?colorHex
+    panel.color = colorHex
+  ?style
+    panel.style = style
+
+  ?child
+    panel.Add(child)
+
+  return panel
+
+/* Makes a textbox component.
+PARAMETERS:
+  Common:
+    - x
+    - y
+    - anchor
+    - dock
+  
+  Special:
+    - txt = textbox contents.
+    - align = text justification/alignment inside the textbox.
+              Default: "left"
+  
+  Optional:
+    - w
+    - h
+    - colorHex = textbox color */
+func mkTextbox(x,y,w,h, anchor,dock, txt, align, colorHex)
+
+  //declarations:
+  var textbox
+
+  //assignations:
+  textbox = ui.AddText(txt)
+
+  //adding alignment
+  textbox.anchor = anchor
+  textbox.dock = dock
+
+  ?align
+    textbox.align = align
+
+  //adding color
+  ?colorHex
+    textbox.color = colorHex
+
+  //adding position
+  textbox.x = x
+  textbox.y = y
+
+  //adding width and height
+  ?w
+    textbox.w = w
+  :
+    var largestStr
     
-    Special:
-      - txt = textbox contents.
-      - align = text justification/alignment inside the textbox.
-                Default: "left"
+    // **************************************
+    // borrowed from MyScripts/Lib/Utilities:
+    var arrStr = string.Split(txt, "\n")
+
+    ?arrStr.Count() > 0
+      var maxStr = arrStr[0]
+      var maxInd = -1
+
+      for str : arrStr
+        ?string.Size(str) > string.Size(maxStr)
+          maxStr = str
+
+      largestStr = maxStr
     
-    Optional:
-      - w
-      - h
-      - col = textbox color */
-  func mkTextbox(x,y,w,h, anchor,dock, txt, align, col)
-
-    //declarations:
-    var textbox
-
-    //assignations:
-    textbox = ui.AddText(txt)
-
-    //adding alignment
-    textbox.anchor = anchor
-    textbox.dock = dock
-
-    ?align
-      textbox.align = align
-
-    //adding color
-    ?col
-      textbox.color = col
-
-    //adding position
-    textbox.x = x
-    textbox.y = y
-
-    //adding width and height
-    ?w
-      textbox.w = w
     :
-      var largestStr
-      
-      // **************************************
-      // borrowed from MyScripts/Lib/Utilities:
-      var arrStr = string.Split(txt, "\n")
+      largestStr = null
+    // **************************************
 
-      ?arrStr.Count() > 0
-        var maxStr = arrStr[0]
-        var maxInd = -1
-
-        for str : arrStr
-          ?string.Size(str) > string.Size(maxStr)
-            maxStr = str
-
-        largestStr = maxStr
-      
-      :
-        largestStr = null
-      // **************************************
-
-      textbox.w = string.Size(largestStr)
-      
-    ?h
-      textbox.h = h
-    :
-      textbox.h = string.Split(txt, "\n").Count()
-
-
-    return textbox
-
-  /* Makes a button component.
-  PARAMETERS
-    Common:
-      - x
-      - y
-      - anchor
-      - dock
-
-    Special:
-      - txt = button text
-      - col = general color of the button (colors below override it)
-      - pressed = function that the button will perform when pressed
-
-    Optionals:
-      - w
-      - h
-      - tcol   = text color
-      - bcol   = border color
-      - hcol   = highlight color (when pressed)
-      - down   = function that the button will perform when press begins
-      - up     = function that the button will perform when press ends
-      - sound  = sound effect when pressed */
-  func mkButton(x,y,w,h, anchor,dock, txt, col,tcol,bcol,hcol, style, pressed,down,up, sound)
+    textbox.w = string.Size(largestStr)
     
-    var button
-    button = ui.AddButton()
-
-    button.x = x
-    button.y = y
-
-    button.text = txt
-
-    ?w
-      button.w = w
-    :
-      var txtSize = string.Size(txt)
-      var parity = txtSize % 2
-      ?parity = 0 // even
-        button.w = (txtSize * 2) + 2 // *2 = always even, 2 for even margin
-      : // odd
-        button.w = (txtSize * 2) + 3 // *2 + 1 = always odd, 3 for odd margin
-
-    ?h
-      button.h = 3 + h
-    :
-      button.h = 3
+  ?h
+    textbox.h = h
+  :
+    textbox.h = string.Split(txt, "\n").Count()
 
 
-    ?anchor
-      button.anchor = anchor
-    ?dock
-      button.dock = dock
+  return textbox
 
-    ?style
-      button.style = style
+/* Makes a button component.
+PARAMETERS
+  Common:
+    - x
+    - y
+    - anchor
+    - dock
 
-    ?tcol
-      button.tcolor = tcol
-    :
-      button.tcolor = col
-    ?bcol
-      button.bcolor = bcol
-    :
-      button.bcolor = col
-    ?hcol
-      button.hcolor = hcol
-    :
-      button.hcolor = col
+  Special:
+    - txt = button text
+    - colorHex = general color of the button (colors below override it)
+    - pressedFunc = function that the button will perform when pressedFunc
 
-    button.SetPressed(pressed)
-    ?down
-      button.SetDown(down)
-    ?up
-      button.SetUp(up)
+  Optionals:
+    - w
+    - h
+    - colorT   = text color
+    - colorB   = border color
+    - colorH   = highlight color (when pressedFunc)
+    - downFunc   = function that the button will perform when press begins
+    - upFunc     = function that the button will perform when press ends
+    - soundFx  = sound effect when pressedFunc */
+func mkButton(x,y,w,h, anchor,dock, txt, colorHex,colorT,colorB,colorH, style, pressedFunc,downFunc,upFunc, soundFx)
+  
+  var button
+  button = ui.AddButton()
 
-    ?sound
-      button.sound = sound
+  button.x = x
+  button.y = y
 
-    return button
+  button.text = txt
+
+  ?w
+    button.w = w
+  :
+    var txtSize = string.Size(txt)
+    var parity = txtSize % 2
+    ?parity = 0 // even
+      button.w = (txtSize * 2) + 2 // *2 = always even, 2 for even margin
+    : // odd
+      button.w = (txtSize * 2) + 3 // *2 + 1 = always odd, 3 for odd margin
+
+  ?h
+    button.h = 3 + h
+  :
+    button.h = 3
+
+
+  ?anchor
+    button.anchor = anchor
+  ?dock
+    button.dock = dock
+
+  ?style
+    button.style = style
+
+  ?colorT
+    button.tcolor = colorT
+  :
+    button.tcolor = colorHex
+  ?colorB
+    button.bcolor = colorB
+  :
+    button.bcolor = colorHex
+  ?colorH
+    button.hcolor = colorH
+  :
+    button.hcolor = colorHex
+
+  button.SetPressed(pressedFunc)
+  ?downFunc
+    button.SetDown(downFunc)
+  ?upFunc
+    button.SetUp(upFunc)
+
+  ?soundFx
+    button.sound = soundFx
+
+  return button
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

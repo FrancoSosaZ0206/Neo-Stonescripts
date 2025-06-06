@@ -45,6 +45,7 @@ Made by IronHawk (Tom Crow)
 
 // ///////////////// IMPORTS ///////////////// //
 
+var u = import My/Lib/Utilities
 var c = import My/Lib/Combat
 
 
@@ -241,6 +242,8 @@ var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
 - Handles most (if not all) situations.
 - Accounts for the permapot strategy. */
 func ldtF(mode)
+  // sanitize entry
+  mode = string.ToLower(mode)
 
   ?mode = "start" | mode = "begin" | mode = "default"
     equipL triskelion
@@ -687,10 +690,8 @@ func ldtF(mode)
           : // foe = "stone"
             equip @bowStone@ */
 
-
   :
-    >c-10,0,#red,
-    ^ERROR: ldtF() recieved incorrect mode: @mode@
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Arsenal\nFUNCTION: ldtF\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
   return
 

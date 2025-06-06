@@ -1,17 +1,16 @@
-﻿// *******************************************************
-//                     START OF "DPS"
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀▄ START OF "DPS" ▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-/* ··········· FILE INFO ·················
-  Made by: Pikarizard Charikachu xD
-  Modified by: IronHawk (Tom Crow)
-  
-  Current version: v2.1
+/* // ///////////// FILE INFO //////////////// //
 
-··········································
+Made by: Pikarizard Charikachu xD
+Modified by: IronHawk (Tom Crow)
 
-  DESCRIPTION
+Current version: v2.2
+
+. ................ Description ................ .
 
   Displays various stats to help you in 
   min-maxing your damage output. Only 
@@ -19,22 +18,24 @@
   only records stats the moment you 
   damage bosses. Neat right?
 
-··········································
+. ................. Importing ................. .
 
-  INSTRUCTIONS
+  PC:
+    var dps_meter = import DPS
 
-  - On PC:
-    var dpsMeter = new DPS_Meter
+  Mobile:
+    Copy-paste this script and any dependencies
+    into your mindstone.
 
-  - On mobile:
-    Copy-paste this script into your mindstone.
+. ................... Usage ................... .
 
-  - To execute it:
-    dpsMeter.main(x, y, colorHex, isSlim)
+  Example: initialize the meter in 0,3 (x,y),
+  in yellow, refreshing every 7 frames, in the
+  slim version, and in the "ui" mode.
 
-··········································
+  dps_meter.main(0,3,"#yellow", 7,true, "ui")
 
-  CHANGELOG
+. ................. CHANGELOG ................. .
 
   - v1.1:
     - Removed unnecessary information
@@ -97,38 +98,64 @@
     - Rearranged script layout -- now there's 2 sections:
       public and private.
     - Renamed file to "DPS".
+  - v2.2:
+    - Added dependency: UI_Maker
+    - Added canUpdate().
+    - Now Update() only modifies the data when called is true.
+    - Update() should now only be called if canUpdate() returns
+      true.
 
-******************************************
+. ............................................. .
 
-Have fun! */
+Enjoy! */
 
 
+// ///////////////// IMPORTS ///////////////// //
 
-// ///////////////////// PUBLIC ///////////////////// //
+var uimkr = import My/Lib/UI_Maker
+var u = import My/Lib/Utilities
 
+
+// ///////////////// PUBLIC ////////////////// //
+
+/* Initializes and manages the dps meter.
+Valid <isSlim> values:
+  false = returns the full version of the Meter.
+  true = returns a smaller version of it, containing
+         less information.
+Valid <mode> values:
+  "ui" = makes an UI panel containing the meter.
+  "print" = prints the meter normally.
+  "print ascii" = prints the meter in ascii mode. */
 var panel = null
-func main(x, y, colorHex, refreshRate, isSlim, mode)
-  ?mode = "ui"
-    ?Update(refreshRate)
+func Main(x, y, colorHex, refreshRate, isSlim, mode)
+  // sanitize mode entries
+  mode = string.ToLower(mode)
+
+  ?canUpdate(refreshRate)
+    Update()
+
+    ?mode = "ui"
       ?panel
         panel.Recycle()
         panel = null
+      :
+        panel = mkUI(x,y,colorHex,isSlim)
 
-      panel = mkUI(x,y,colorHex,isSlim)
-
-  :?mode = "print"
-    ?mode = "printAscii"
-      Print(x,y,colorHex,isSlim,true)
+    :?mode = "print"
+      ?mode = "ascii"
+        Print(x,y,colorHex,isSlim,true)
+      :
+        Print(x,y,colorHex,isSlim,false)
+    
     :
-      Print(x,y,colorHex,isSlim,false)
-
-  return
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: Main\nCAUSE: invalid <mode>:\n\n" + refreshRate, false)
 
 
 
-// //////////////////// PRIVATE ///////////////////// //
+// ///////////////// PRIVATE ///////////////// //
 
-// VARIABLES
+// ................ Variables ................ //
 
 var sec = 30      // No need to import the whole Utilities script just for this variable.
 var currhp = 0    // foe's current hitpoints (with armor)
@@ -147,59 +174,57 @@ var DPF = "N/A" // damage per frame
 var DPS = "N/A" // damage per second
 
 
+// ................ Functions ................ //
 
-// ·················································· //
+func canUpdate(refreshRate)
+  ?refreshRate > 0
+    // only works when there's a boss
+    return foe = "boss" & totaltime % refreshRate = 0
+  :
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: canUpdate\nCAUSE: invalid <refreshRate>:\n\n" + refreshRate, false)
 
-// FUNCTIONS
+    return false
 
 func Update(refreshRate)
-  // Calculate only when desired:
-  ?foe = "boss" // only works when there's a boss
+  currhp  = foe.hp + foe.armor
+  nethp   = foe.maxhp + foe.maxarmor
 
-    currhp  = foe.hp + foe.armor
-    nethp   = foe.maxhp + foe.maxarmor
+  ?0 < currhp & currhp < nethp // boss lost hp/armor, but isn't dead
 
-    ?0 < currhp & currhp < nethp // boss lost hp/armor, but isn't dead
+    ?auxhp > currhp // if current hp updates
+      hits += 1 // we count a hit
+      dmg       = auxhp - currhp // we get the damage dealt from the difference
+      totalDmg  = totalDmg + dmg // and we accumulate it in this variable
 
-      ?auxhp > currhp // if current hp updates
-        hits += 1 // we count a hit
-        dmg       = auxhp - currhp // we get the damage dealt from the difference
-        totalDmg  = totalDmg + dmg // and we accumulate it in this variable
-
-    : // else, reset temporal variables
-      startTime = totaltime
-      hits      = 0
-      dmg       = 0
-      totalDmg  = 0
+  : // else, reset temporal variables
+    startTime = totaltime
+    hits      = 0
+    dmg       = 0
+    totalDmg  = 0
 
 
-    FRM = totaltime - startTime // total time minus the time the first hit was dealt
-    ?hits > 1
-      FPH = FRM      / (hits /*- 1*/) // -1 is there to avoid stat flicking
-    :
-      FPH = "N/A"
-
-    ?FPH ! "N/A"
-      HPS = sec      / FPH
-    :
-      HPS = "N/A"
-      
-    ?FRM > 0
-      DPF = totalDmg / FRM // damage accumulated - no. frames elapsed
-    :
-      DPF = "N/A"
-
-    ?DPF ! "N/A"
-      DPS = DPF  * sec
-    :
-      DPS = "N/A"
-
-    auxhp = currhp
-
-
-    return totaltime % refreshRate = 0
+  FRM = totaltime - startTime // total time minus the time the first hit was dealt
+  ?hits > 1
+    FPH = FRM      / (hits /*- 1*/) // -1 is there to avoid stat flicking
   :
-    return false
+    FPH = "N/A"
+
+  ?FPH ! "N/A"
+    HPS = sec      / FPH
+  :
+    HPS = "N/A"
+    
+  ?FRM > 0
+    DPF = totalDmg / FRM // damage accumulated - no. frames elapsed
+  :
+    DPF = "N/A"
+
+  ?DPF ! "N/A"
+    DPS = DPF  * sec
+  :
+    DPS = "N/A"
+
+  auxhp = currhp
 
 func ToString(isSlim)
   ?isSlim
@@ -223,63 +248,42 @@ asciiend
   :
     >`@x@,@y@,@colorHex@,@ToString(isSlim)@
 
-/* Returns ui panel containing the DPS Meter.
-mode:
-  1 = returns the full version of the Meter.
-
-  2 = returns a smaller version of it,
-      containing less information. */
+/* Returns ui panel containing the DPS Meter. */
 func mkUI(x, y, colorHex, isSlim)
   var panel
   var txt
-  
-  panel = ui.AddPanel()
 
   var dpsStr = ToString(isSlim)
 
-  txt = ui.AddText(dpsStr)
-  panel.Add(txt)
-  
-  ?!isSlim
-    panel.anchor = top_left
-    panel.dock = top_left
-    txt.anchor = top_left
-    txt.dock = top_left
+  // default values >> !isSlim
 
-    panel.style = -3
+  var txtW = 15
+  var txtH = 8
+  var panelAnchor = top_left
+  var panelDock = top_left
+  var panelStyle = -3
 
-    txt.w = 15
-    txt.h = 8
+  ?isSlim
+    txtW = string.Size(dpsStr)
+    txtH = 1
+    panelAnchor = top_center
+    panelDock = top_center
+    panelStyle = -1
 
-  : // isSlim
-    panel.anchor = top_center
-    panel.dock = top_center
-    txt.anchor = top_left
-    txt.dock = top_left
+  txt = uimkr.mkTextbox(x,y,txtW,txtH,
+  ^     top_left,top_left,
+  ^     dpsStr,
+  ^     null,
+  ^     colorHex)
 
-    panel.style = -1
-    
-    txt.w = string.Size(dpsStr)
-    txt.h = 1
-  
-
-  panel.color = colorHex
-  txt.color = colorHex
-
-  panel.x = x
-  panel.y = y
-  
-  txt.x = 1
-  txt.y = 1
-  
-  panel.w = txt.w + 2
-  panel.h = txt.h + 2
-
+  panel = uimkr.mkPanel(x,y,txt.w + 2,txt.h + 2,
+  ^       panelAnchor,panelDock,
+  ^       colorHex,
+  ^       panelStyle, txt)
 
   return panel
 
 
-
-// *******************************************************
-//                      END OF "DPS"
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀▄▀ END OF "DPS" ▀▄▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
