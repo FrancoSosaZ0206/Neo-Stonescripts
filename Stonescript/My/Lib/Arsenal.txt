@@ -683,16 +683,21 @@ func ldtF(mode)
 
     : // !c.isPermapotSetup
       ?mode = "heal"
-        equip @bowVigorBuff@
+        equipL @wandVigorBuff@
+        equipR @wandIceDebuff@
+        // @bowVigorBuff@
       :?mode = "unmake"
         equip @bowAetherDebuff@
       :?mode = "debuff"
         ?c.canApplyChill()
-          equip @bowIceDebuff@
+          equip @staffIceDebuff@
+          // @bowIceDebuff@
         :?c.canApplyWeaken()
-          equip @bowPoisonDebuff@
+          equip @staffPoisonDebuff@
+          // @bowPoisonDebuff@
         :?c.canApplyBurn()
-          equip @bowFireDebuff@
+          equip @staffFireDebuff@
+          // @bowFireDebuff@
 
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
           equip @bowAetherDebuff@
