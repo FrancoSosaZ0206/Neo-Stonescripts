@@ -80,7 +80,7 @@ func fight(mode)
 
       : // 3. Deal max damage
         ?mode = "melee"
-          ?foe = "phase3" & !c.isPermapotSetup
+          ?!c.isPermapotSetup & foe ! "phase2")
             c.doBursting(a.burstingSwords)
           :
             a.ldtF("melee 1v1 dmg")
@@ -292,7 +292,15 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     fight("melee")
 
   : // Dysangelos
-    ?foe ! "phase3"
+    ?foe.debuffs.string = a.maxIgnitions_Default /* &
+    ^c.canUseAbility("cinderwisp") |
+    ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
+      activate cinderwisp
+    
+    ?c.canUseAbility("staff_poison")
+      c.useAbility_TH(a.staffPoisonHidden)
+
+    :?foe ! "phase3"
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseAbility("wand_vigor")
         c.useAbility_OH(a.wandVigorHidden, hand)
@@ -304,15 +312,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         activate potion
       :?c.canUseAbility("mask")
         c.useAbility_OH("mask", "r")
-      :?c.canUseAbility("staff_poison")
-        c.useAbility_TH(a.staffPoisonHidden)
-
-      ?foe.debuffs.string = a.maxIgnitions_Default /* &
-      ^c.canUseAbility("cinderwisp") |
-      ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
-        activate cinderwisp
-
-      ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
+      :?c.canUseAbility("wand_poison")
+        c.useAbility_OH(a.wandPoisonHidden, "l")
+      :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
       ^!c.isPermapotSetup
         c.useAbility_TH("Guardian's Bane") //'
       :
