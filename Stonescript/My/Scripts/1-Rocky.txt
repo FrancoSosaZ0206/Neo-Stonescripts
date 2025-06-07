@@ -253,7 +253,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?c.canUseAbility("bash")
     a.ldtF("bash")
   :?c.canUseAbility("bardiche")
-    c.useAbility_TH(Kubirikibocho)
+    c.useAbility_TH(Kubikiribocho)
 
 
 :?ai.paused |
