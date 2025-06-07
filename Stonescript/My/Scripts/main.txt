@@ -144,25 +144,22 @@ import My/Cosmetics
   dps.Main_DPS(0,3,#yellow,1,"slim ui")
 
 
-  ?loc.stars > 15 & loc = "rocky_plateau"
-    import My/Scripts/Green/1-Rocky
-  :
-    ?loc = "rocky_plateau"
-      import My/Scripts/1-Rocky
-    :?loc = "deadwood_valley"
-      import My/Scripts/2-Deadwood
-    :?loc = "caustic_caves"
-      import My/Scripts/3-Caves
-    :?loc = "fungus_forest"
-      import My/Scripts/4-Mushroom
-    :?loc = "undead_crypt"
-      import My/Scripts/5-Halls
-    :?loc = "bronze_mine"
-      import My/Scripts/6-Mine
-    :?loc = "icy_ridge"
-      import My/Scripts/7-Ridge
-    :?loc = "temple"
-      import My/Scripts/8-Temple
+  ?loc = "rocky_plateau"
+    import My/Scripts/1-Rocky
+  :?loc = "deadwood_valley"
+    import My/Scripts/2-Deadwood
+  :?loc = "caustic_caves"
+    import My/Scripts/3-Caves
+  :?loc = "fungus_forest"
+    import My/Scripts/4-Mushroom
+  :?loc = "undead_crypt"
+    import My/Scripts/5-Halls
+  :?loc = "bronze_mine"
+    import My/Scripts/6-Mine
+  :?loc = "icy_ridge"
+    import My/Scripts/7-Ridge
+  :?loc = "temple"
+    import My/Scripts/8-Temple
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
