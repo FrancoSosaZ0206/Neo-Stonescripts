@@ -83,7 +83,7 @@ func fight(mode)
           /*?!c.isPermapotSetup & foe ! "phase2" & foe ! "phase3"
             c.doBursting(a.burstingSwords)
           :*/
-          a.ldtF("melee 1v1 dmg")
+            a.ldtF("melee 1v1 dmg")
         :?mode = "magic"
           a.ldtF("magic dmg")
         :?mode = "ranged"
@@ -173,8 +173,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 :?c.canUsePotion("lucky") & c.isPermapotSetup
   activate potion
-:?c.canUseAbility("staff_fire") & // speed up
-^buffs.string ! "buff_inf_speed"
+:?c.canUseAbility("staff_fire") &
+^buffs.string ! "buff_inf_speed" &
+^ai.enabled & !ai.paused
+  // speed up
   c.useAbility_TH(a.staffFireHidden)
 
 :?choice & harvest.distance < 5
