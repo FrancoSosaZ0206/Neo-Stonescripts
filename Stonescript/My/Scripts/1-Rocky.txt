@@ -35,9 +35,11 @@ func harvestFunc(button)
 
 func fight(mode)
   ?mode = "evade"
-    ?c.canUseAbility("mind") & foe ! "ranged"
+    ?c.canUseAbility("mind") & (foe ! "ranged" | foe = "phase")
+      >`1,15,#cyan,DODGED WITH MINDSTONE
+      loc.Pause()
       a.ldtF("mind")
-    :?c.canUseAbility("staff_stone") & foe ! "ranged"
+    :?c.canUseAbility("staff_stone") & (foe ! "ranged" | foe = "phase")
     ^& foe.distance < s.dash_range_min
       c.useAbility_TH(a.staffStoneHidden)
     
