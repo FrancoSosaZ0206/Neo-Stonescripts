@@ -240,7 +240,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^c.canUseAbility("bardiche") |
 ^c.canUseAbility("bash") |
 ^c.canUseAbility("dash")) &
-^(foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
+^(foe.state = 101 | foe.state = 102 |
+^foe.state = 126 | foe.state = 127 |
+^116 <= foe.state | foe.state <= 118 |
+^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
 ^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
 ^foe.state = 108)) // dysangelos phase 2 to 3 states
   ?c.canUseAbility("heavy_hammer")
