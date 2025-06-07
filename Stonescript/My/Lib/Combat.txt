@@ -108,7 +108,8 @@ func canUseAbility(abilityId)
   var result = false
 
   ?abilityId = "blade" | abilityId = "mask" |
-  ^abilityId = "arm"              |
+  ^abilityId = "arm"                        |
+  ^abilityId = "mind"                       |
 
   ^abilityId = "bash"  | abilityId = "dash" |
 

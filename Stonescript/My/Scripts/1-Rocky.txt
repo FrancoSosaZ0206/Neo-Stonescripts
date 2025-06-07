@@ -185,6 +185,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   a.ldtF("magnet")
 
 
+:?foe = "phase3" & foe.damage = 1
+  >c0,0,#red,SHIELD ATTACK
+  fight("evade")
+
 // ABOUT TO ATTACK
 :?(foe.state = 32 & (
 ^ (foe = "scout" & foe.time > 50) |
@@ -194,7 +198,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^   (foe.time > 85 & foe.damage ! 1) | // normal phase3 attacks
 ^   (foe.time > 65 & foe.damage = 1)) )  )   ) | // putting shield up
 ^(foe = "phase3" & foe.state = 155 & foe.time > 70) | // Dysangelos's massive beam
-^(foe.state = 33 & foe.time < 10 & // a bit into the attack state
+^(foe.state = 33 & foe.time = 0 & // a bit into the attack state
 ^ (foe = "phase2" | foe = "phase3"))
 
   ?foe = "phase3" &
