@@ -114,7 +114,8 @@ var swordAetherDebuff1 = "sword aether dU *max -big golden"
 var swordAetherDebuff2 = "sword aether dU *max -big -golden"
 var shieldAetherDefense = "shield aether *max -au"
 var shieldAetherDebuff = "shield aether *max au"
-var bowAetherDmg = "bow aether *max D"
+var bowAetherDmg = "bow aether *max -dU"
+var bowAetherDebuff = "bow aether *max dU"
 var wandAetherDebuff = "wand aether *max dU -hidden"
 var wandAetherHidden = "wand aether hidden *max" // aka Calamity Wand
 var staffAetherDebuff = "staff aether *max dU -hidden"
@@ -143,7 +144,8 @@ var swordIceDmg = "sword ice *max -dI"
 var shieldIceDefense = "shield ice *max -ai"
 var shieldIceDebuff = "shield ice *max ai"
 var hammerIceDefense = "hammer ice *max aI"
-var bowIceDmg = "bow ice *max D"
+var bowIceDmg = "bow ice *max -dI"
+var bowIceDebuff = "bow ice *max dI"
 var wandIceDmg = "wand ice *max -dI -hidden"
 var wandIceDebuff = "wand ice *max dI +15 -hidden"
 var wandIceHidden = "wand ice hidden *max" // aka Frost Wand
@@ -693,7 +695,7 @@ func ldtF(mode)
           equip @bowFireDebuff@
 
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
-          equip @bowAetherDmg@
+          equip @bowAetherDebuff@
 
           /*?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             equip @bowIceDmg@
