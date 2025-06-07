@@ -224,21 +224,22 @@ Valid itemName values:
 - quarterstaff
 - staff + <element> + hidden >> Hidden staves */
 func useAbility_TH(itemName)
-  ?itemName = "blade"        |
-  ^itemName = "arm"          |
-  ^itemName = "bardiche"     |
-  ^(itemName = "heavy" &
-  ^ itemName = "hammer")     |
-  ^itemName = "quarterstaff" |
-  ^(itemName = "staff"  &
-  ^ itemName = "hidden" &
-  ^  (itemName = "stone"     |
-  ^   itemName = "poison"    |
-  ^   itemName = "vigor"     |
-  ^   itemName = "aether"    |
-  ^   itemName = "fire"      |
-  ^   itemName = "ice"))
-    equip @itemName@
+  equip @itemName@
+
+  ?itemName = "blade" | item.right = "blade"        |
+  ^itemName = "arm" | item.right = "arm"          |
+  ^itemName = "bardiche" | item.right = "bardiche"     |
+  ^((itemName = "heavy" | item.right = "heavy") &
+  ^ (itemName = "hammer" | item.right = "hammer"))     |
+  ^itemName = "quarterstaff" | item.right = "quarterstaff" |
+  ^((itemName = "staff" | item.right = "staff")  &
+  ^ (itemName = "hidden" | item.right = "hidden") &
+  ^  (itemName = "stone" | item.right = "stone"     |
+  ^   itemName = "poison" | item.right = "poison"    |
+  ^   itemName = "vigor" | item.right = "vigor"     |
+  ^   itemName = "aether" | item.right = "aether"    |
+  ^   itemName = "fire" | item.right = "fire"      |
+  ^   itemName = "ice" | item.right = "ice"))
     activate R
 
   :
