@@ -317,10 +317,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         c.useAbility_TH("Guardian's Bane") //'
 
       :?foe.buffs.string = "defense" // equip ice weapons
-        ?c.isPermapotSetup
-          equipL Vantum Phoenix
+        ?c.canDebuffAny()
+          a.ldtF("melee 1v1 debuff")
+        :?hp ! maxhp
+          a.ldtF("melee 1v1 heal")
         :
-          c.doMoondial(Vantum Phoenix, a.swordFireDmg)
+          ldtF("melee 1v1 dmg fire")
       :
         fight("melee")
 

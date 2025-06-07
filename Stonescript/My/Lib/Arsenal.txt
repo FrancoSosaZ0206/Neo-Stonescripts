@@ -263,15 +263,15 @@ func ldtF(mode)
   :?mode = "engage"
     ?buffs.string ! "buff_inf_speed" & // infernal staff
     ^totaltime % 2 = 0 // every even frame
-      ?foe = "poison"
+      ?foe = "poison" | mode = "ice"
         equipL @hammerIceDefense@
-      :?foe = "vigor"
+      :?foe = "vigor" | mode = "poison"
         equipL @hammerPoisonDefense@
-      :?foe = "aether"
+      :?foe = "aether" | mode = "vigor"
         equipL @hammerVigorDefense@
-      :?foe = "fire"
+      :?foe = "fire" | mode = "aether"
         equipL @hammerAetherDefense@
-      :?foe = "ice"
+      :?foe = "ice" | mode = "fire"
         equipL @hammerFireDefense@
       :
         equipL Speedy Hammer
@@ -284,15 +284,15 @@ func ldtF(mode)
       ^encounter.eliteMod ! "tenacious"
         equipR @shieldIceDebuff@
       :
-        ?foe = "poison"
+        ?foe = "poison" | mode = "ice"
           equipL @shieldIceDefense@
-        :?foe = "vigor"
+        :?foe = "vigor" | mode = "poison"
           equipL @shieldPoisonDefense@
-        :?foe = "aether"
+        :?foe = "aether" | mode = "vigor"
           equipL @shieldVigorDefense@
-        :?foe = "fire"
+        :?foe = "fire" | mode = "aether"
           equipL @shieldAetherDefense@
-        :?foe = "ice"
+        :?foe = "ice" | mode = "fire"
           equipL @shieldFireDefense@
         :
           equipL @shieldCompound1@
@@ -304,15 +304,15 @@ func ldtF(mode)
       equipL triskelion
       equipR mask
   :?mode = "bash" | mode = "dash"
-    ?foe = "poison"
+    ?foe = "poison" | mode = "ice"
       equipL Bifrost
-    :?foe = "vigor"
+    :?foe = "vigor" | mode = "poison"
       equipL Mamba Negra
-    :?foe = "aether"
+    :?foe = "aether" | mode = "vigor"
       equipL Dothaneel
-    :?foe = "fire"
+    :?foe = "fire" | mode = "aether"
       equipL Void Slayer
-    :?foe = "ice"
+    :?foe = "ice" | mode = "fire"
       equipL Vantum Phoenix
     :
       equipL Unbroken Faith
@@ -326,15 +326,15 @@ func ldtF(mode)
     equipL mind
 
     ?!c.isPermapotSetup
-      ?foe = "poison"
+      ?foe = "poison" | mode = "ice"
         equipL @shieldIceDefense@
-      :?foe = "vigor"
+      :?foe = "vigor" | mode = "poison"
         equipL @shieldPoisonDefense@
-      :?foe = "aether"
+      :?foe = "aether" | mode = "vigor"
         equipL @shieldVigorDefense@
-      :?foe = "fire"
+      :?foe = "fire" | mode = "aether"
         equipL @shieldAetherDefense@
-      :?foe = "ice"
+      :?foe = "ice" | mode = "fire"
         equipL @shieldFireDefense@
       :
         equipL @shieldTowering@
@@ -375,28 +375,28 @@ func ldtF(mode)
     :
       // Left hand
       ?foe.count > 1
-        ?foe = "poison"
+        ?foe = "poison" | mode = "ice"
           equipL @wandIceDmg@
-        :?foe = "vigor"
+        :?foe = "vigor" | mode = "poison"
           equipL @wandPoisonDmg@
-        :?foe = "aether"
+        :?foe = "aether" | mode = "vigor"
           equipL @wandVigorDmg@
-        :?foe = "fire"
+        :?foe = "fire" | mode = "aether"
           equipL @wandAetherDmg@
-        :?foe = "ice"
+        :?foe = "ice" | mode = "fire"
           equipL @wandFireDmg@
         : // foe = "stone"
           equipL @wandStoneHidden@
       :
-        ?foe = "poison"
+        ?foe = "poison" | mode = "ice"
           equipL Bifrost
-        :?foe = "vigor"
+        :?foe = "vigor" | mode = "poison"
           equipL Mamba Negra
-        :?foe = "aether"
+        :?foe = "aether" | mode = "vigor"
           equipL Dothaneel
-        :?foe = "fire"
+        :?foe = "fire" | mode = "aether"
           equipL Void Slayer
-        :?foe = "ice"
+        :?foe = "ice" | mode = "fire"
           equipL Vantum Phoenix
         : // foe = "stone"
           equipL Vantum Phoenix // Unbroken Faith
@@ -408,15 +408,15 @@ func ldtF(mode)
         equipR @shieldCompound1@
 
       :?mode = "evade"
-        ?foe = "poison"
+        ?foe = "poison" | mode = "ice"
           equipR @shieldIceDefense@
-        :?foe = "vigor"
+        :?foe = "vigor" | mode = "poison"
           equipR @shieldPoisonDefense@
-        :?foe = "aether"
+        :?foe = "aether" | mode = "vigor"
           equipR @shieldVigorDefense@
-        :?foe = "fire"
+        :?foe = "fire" | mode = "aether"
           equipR @shieldAetherDefense@
-        :?foe = "ice"
+        :?foe = "ice" | mode = "fire"
           equipR @shieldFireDefense@
         : // foe = "stone"
           equipR @shieldStone@
@@ -440,15 +440,15 @@ func ldtF(mode)
         ?c.isPermapotSetup
           // equipL 
         :
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             // c.doMoondial(,)
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             // c.doMoondial(,)
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             // c.doMoondial(,)
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             // c.doMoondial(,)
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             // c.doMoondial(,)
           : // foe = "stone"
             // c.doMoondial(,)
@@ -456,15 +456,15 @@ func ldtF(mode)
         ?c.isPermapotSetup
           // equipL 
         :
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             // c.doMoondial(,)
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             // c.doMoondial(,)
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             // c.doMoondial(,)
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             // c.doMoondial(,)
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             // c.doMoondial(,)
           : // foe = "stone"
             // c.doMoondial(,)
@@ -493,29 +493,29 @@ func ldtF(mode)
             // equipR 
       :?mode = "dmg"
         ?c.isPermapotSetup // all left hand
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             // equipL 
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             // equipL 
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             // equipL 
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             // equipL 
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             // equipL 
           : // foe = "stone"
             // equipL 
 
         : // !c.isPermapotSetup
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             // c.doMoondial(,)
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             // c.doMoondial(,)
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             // c.doMoondial(,)
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             // c.doMoondial(,)
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             // c.doMoondial(,)
           : // foe = "stone"
             // c.doMoondial(,)
@@ -526,15 +526,15 @@ func ldtF(mode)
         ?c.isPermapotSetup
           equipL Soulfetcher
         :
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             c.doMoondial(Bifrost /*swordVigorBuff*/, Soulfetcher)
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             c.doMoondial(Mamba Negra /*swordVigorBuff*/, Soulfetcher)
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             c.doMoondial(Dothaneel /*swordVigorBuff*/, Soulfetcher)
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             c.doMoondial(Void Slayer /*swordVigorBuff*/, Soulfetcher)
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             c.doMoondial(Vantum Phoenix /*swordVigorBuff*/, Soulfetcher)
           : // foe = "stone
             c.doMoondial(Vantum Phoenix /*Broken Faith*/ /*swordVigorBuff*/, Soulfetcher)
@@ -544,15 +544,15 @@ func ldtF(mode)
           equipL @swordAetherDebuff1@
         :
           // put a 2nd dU sword when we have it
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             c.doMoondial(swordAetherDebuff1, Bifrost) // swordAetherDebuff2
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             c.doMoondial(swordAetherDebuff1, Mamba Negra) // swordAetherDebuff2
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             c.doMoondial(swordAetherDebuff1, Dothaneel) // swordAetherDebuff2
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             c.doMoondial(swordAetherDebuff1, Void Slayer) // swordAetherDebuff2
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             c.doMoondial(swordAetherDebuff1, Vantum Phoenix) // swordAetherDebuff2
           : // foe = "stone
             c.doMoondial(swordAetherDebuff1, Broken Faith)*/ // swordAetherDebuff2
@@ -582,29 +582,29 @@ func ldtF(mode)
             equipR @swordIceDebuff1@
       :?mode = "dmg"
         ?c.isPermapotSetup // all left hand
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             equipL Bifrost
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             equipL Mamba Negra
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             equipL Dothaneel
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             equipL Void Slayer
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             equipL Vantum Phoenix
           : // foe = "stone"
             equipL Vantum Phoenix // Unbroken Faith
 
         : // !c.isPermapotSetup
-          ?foe = "poison"
+          ?foe = "poison" | mode = "ice"
             c.doMoondial(Bifrost, swordIceDmg)
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             c.doMoondial(Mamba Negra, swordPoisonDmg)
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             c.doMoondial(Dothaneel, swordVigorDmg)
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             c.doMoondial(Void Slayer, swordAetherDmg)
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             c.doMoondial(Vantum Phoenix, swordFireDmg)
           : // foe = "stone"
             c.doMoondial(Vantum Phoenix /*Unbroken Faith*/, @swordFireDmg@ /*Broken Faith*/)
@@ -640,30 +640,30 @@ func ldtF(mode)
 
     :?mode = "dmg"
       ?c.isPermapotSetup // all left hand
-        ?foe = "poison"
+        ?foe = "poison" | mode = "ice"
           equipL @wandIceDmg@
-        :?foe = "vigor"
+        :?foe = "vigor" | mode = "poison"
           equipL @wandPoisonDmg@
-        :?foe = "aether"
+        :?foe = "aether" | mode = "vigor"
           equipL @wandVigorDmg@
-        :?foe = "fire"
+        :?foe = "fire" | mode = "aether"
           equipL @wandAetherDmg@
-        :?foe = "ice"
+        :?foe = "ice" | mode = "fire"
           equipL @wandFireDmg@
         : // foe = "stone"
           equipL @wandIceDebuff@ // @wandStoneDmg@
       : // !c.isPermapotSetup
         equip @bowAetherDmg@
 
-        /* ?foe = "poison"
+        /* ?foe = "poison" | mode = "ice"
           equip @staffIceDmg@
-        :?foe = "vigor"
+        :?foe = "vigor" | mode = "poison"
           equip @staffPoisonDmg@
-        :?foe = "aether"
+        :?foe = "aether" | mode = "vigor"
           equip @staffVigorDmg@
-        :?foe = "fire"
+        :?foe = "fire" | mode = "aether"
           equip @staffAetherDmg@
-        :?foe = "ice"
+        :?foe = "ice" | mode = "fire"
           equip @staffFireDmg@
         : // foe = "stone"
           equip @staffIceDebuff@ // @staffStoneDmg@ */
@@ -688,15 +688,15 @@ func ldtF(mode)
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
           equip @bowAetherDmg@
 
-          /*?foe = "poison"
+          /*?foe = "poison" | mode = "ice"
             equip @bowIceDmg@
-          :?foe = "vigor"
+          :?foe = "vigor" | mode = "poison"
             equip @bowPoisonDmg@
-          :?foe = "aether"
+          :?foe = "aether" | mode = "vigor"
             equip @bowVigorDmg@
-          :?foe = "fire"
+          :?foe = "fire" | mode = "aether"
             equip @bowFireDmg@
-          :?foe = "ice"
+          :?foe = "ice" | mode = "fire"
             equip @bowIceDmg@
           : // foe = "stone"
             equip @bowStone@ */
