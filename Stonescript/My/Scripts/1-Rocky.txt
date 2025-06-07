@@ -213,7 +213,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         a.ldtF("defense")
 
   : // armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
-    ?buffs.string ! "buff_damage" & foe ! "phase2" & !c.isPermapotSetup
+    ?buffs.string ! "buff_damage" & !c.isPermapotSetup
       a.ldtF("defense buff empower")
 
     :?foe = "phase2"
@@ -319,9 +319,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
       :?foe.buffs.string = "defense" // equip ice weapons
         ?c.isPermapotSetup
-          equipL Bifrost
+          equipL Vantum Phoenix
         :
-          c.doMoondial(Bifrost, a.swordIceDmg)
+          c.doMoondial(Vantum Phoenix, a.swordFireDmg)
       :
         fight("melee")
 
