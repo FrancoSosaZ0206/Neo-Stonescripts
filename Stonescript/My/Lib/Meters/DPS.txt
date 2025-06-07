@@ -236,20 +236,24 @@ func Update()
   auxhp = currhp
 
 func ToString(size)
+  var str = null
+
   ?size = "slim" | size = "small"
-    return "DPS#|#" + DPS
+    str = "DPS#|#" + DPS
 
   :?size = "normal" | size = "default"
-    return "###DPS#METER###"   + "\n" +
-    ^      "#·##·##·##·##·#"   + "\n" +
-    ^      "#No.#Hits#" + hits + "\n" +
-    ^      "#Hits/Sec#" + HPS  + "\n" +
-    ^      "#Dmg#/Hit#" + dmg  + "\n" +
-    ^      "#Dmg#/Frm#" + DPF  + "\n" +
-    ^      "#Dmg#/Sec#" + DPS  + "\n" +
-    ^      "#·##·##·##·##·#"
+    str = "###DPS#METER###"   + "\n" +
+    ^     "#·##·##·##·##·#"   + "\n" +
+    ^     "#No.#Hits#" + hits + "\n" +
+    ^     "#Hits/Sec#" + HPS  + "\n" +
+    ^     "#Dmg#/Hit#" + dmg  + "\n" +
+    ^     "#Dmg#/Frm#" + DPF  + "\n" +
+    ^     "#Dmg#/Sec#" + DPS  + "\n" +
+    ^     "#·##·##·##·##·#"
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
+
+  return str
 func Print(x, y, colorHex, mode)
   ?mode = "ascii"
     >`@x@,@y@,@colorHex@,ascii
@@ -263,24 +267,16 @@ func mkUI(x, y, colorHex, size)
   var txt = null
   var isValidSize = true
 
-  var dpsStr = ToString(size)
-
-  var txtW = null
-  var txtH = null
   var panelAnchor = null
   var panelDock = null
   var panelStyle = null
 
   ?size = "normal" | size = "default"
-    txtW = 15
-    txtH = 8
     panelAnchor = top_left
     panelDock = top_left
     panelStyle = -3
 
   :?size = "slim" | size = "small"
-    txtW = string.Size(dpsStr)
-    txtH = 1
     panelAnchor = top_center
     panelDock = top_center
     panelStyle = -1
@@ -292,7 +288,7 @@ func mkUI(x, y, colorHex, size)
     txt = uimkr.mkTextbox(
     ^ x, y, null, null, // x, y, w, h,
     ^ top_left, top_left, // panelAnchor, dock,
-    ^ dpsStr, // txt
+    ^ ToString(size), // txt
     ^ null, colorHex) // align, colorHex
 
     panel = uimkr.mkPanel(

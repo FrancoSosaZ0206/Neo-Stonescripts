@@ -212,52 +212,51 @@ func canUseAbility(abilityId)
 
   return result
 
-/* Activates the Hatchet's ability. */
-func useAbility_H()
-  equipR hatchet
-  activate hatchet
-
 /* Activates a two-handed item's ability.
 ACCEPTS RENAMED WEAPONS!
 
 Valid itemName values:
 - blade >> Blade of the Fallen God
-- mask >> Cultist Mask
 - arm >> Skeleton Arm
 - bardiche
 - heavy + hammer >> Heavy Hammer
 - quarterstaff
 - staff + <element> + hidden >> Hidden staves */
 func useAbility_TH(itemName)
-  equip @itemName@
-
-  ?item.right = "blade"        |
-  ^item.right = "mask"         |
-  ^item.right = "arm"          |
-  ^item.right = "bardiche"     |
-  ^(item.right = "heavy" &
-  ^ item.right = "hammer")     |
-  ^item.right = "quarterstaff" |
-  ^(item.right = "staff" &
-  ^ item.right = "hidden" & (
-  ^   item.right = "stone"     |
-  ^   item.right = "poison"    |
-  ^   item.right = "vigor"     |
-  ^   item.right = "aether"    |
-  ^   item.right = "fire"      |
-  ^   item.right = "ice"))
+  ?itemName = "blade"        |
+  ^itemName = "arm"          |
+  ^itemName = "bardiche"     |
+  ^(itemName = "heavy" &
+  ^ itemName = "hammer")     |
+  ^itemName = "quarterstaff" |
+  ^(itemName = "staff"  &
+  ^ itemName = "hidden" &
+  ^  (itemName = "stone"     |
+  ^   itemName = "poison"    |
+  ^   itemName = "vigor"     |
+  ^   itemName = "aether"    |
+  ^   itemName = "fire"      |
+  ^   itemName = "ice"))
+    equip @itemName@
     activate R
 
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
+    >`1,10,#magenta,item.left = @item.left@\nitem.right = @item.right@
+    loc.Pause()
+
 /* Activates a one-handed item's ability.
 
 Valid itemName values:
+- hatchet
+- mask >> Cultist Mask
 - <element> + talisman >> Talismans
 - wand <element> + hidden >> Hidden wands */
 func useAbility_OH(itemName, hand)
-  ?((itemName = "talisman"    |
+  ?itemName = "mask"        |
+  ^itemName = "hatchet"     |
+  ^((itemName = "talisman"    |
   ^ (itemName = "wand"        &
   ^  itemName = "hidden"))      &
   ^   (itemName = "stone"       |
@@ -266,7 +265,11 @@ func useAbility_OH(itemName, hand)
   ^    itemName = "aether"      |
   ^    itemName = "fire"        |
   ^    itemName = "ice")          )
-    ?hand = "l" | hand = "left"
+    ?itemName = "hatchet" | itemName = "mask"
+      equipR @itemName@
+      activate R
+    
+    :?hand = "l" | hand = "left"
       equipL @itemName@
       activate L
     :?hand = "r" | hand = "right"
@@ -274,8 +277,10 @@ func useAbility_OH(itemName, hand)
       activate R
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
+      loc.Pause()
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_T\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    loc.Pause()
 
 /* Returns true if a given item is equipped. */
 func isEquipped(itemName)

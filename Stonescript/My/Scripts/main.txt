@@ -141,7 +141,7 @@ import My/Cosmetics
   var dps = import My/Lib/Meters/DPS
 
   tm.Main_Times(0,1,#red,"slim ui speedrun")
-  dps.Main_DPS(0,3,#yellow,7,"slim ui")
+  dps.Main_DPS(0,3,#yellow,1,"slim ui")
 
 
   ?loc.stars > 15 & loc = "rocky_plateau"

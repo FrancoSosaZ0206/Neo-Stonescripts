@@ -230,7 +230,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 :?c.canUseAbility("quarterstaff") &
 ^!c.isDashingRange() & ai.walking
-  c.useAbility_TH(a.myQuarterstaff)
+  c.useAbility_TH("quarterstaff") // a.myQuarterstaff)
 
 // TO DO: Figure out transformation states and 
 
@@ -304,7 +304,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ?c.canUsePotion("lucky")
         activate potion
       :?c.canUseAbility("mask")
-        c.useAbility_TH("mask")
+        c.useAbility_OH("mask", "r")
       :?c.canUseAbility("staff_poison")
         c.useAbility_TH(a.staffPoisonHidden)
 
