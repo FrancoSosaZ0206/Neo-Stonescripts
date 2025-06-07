@@ -88,9 +88,6 @@ func fight(mode)
 
 // //////////////// PROCEDURE //////////////// //
 
-?foe.damage = 1
-  u.showBigStr(1,7,40,#cyan,"buffs = " + foe.buffs.string, false)
-
 c.Init()
 disable npcDialog
 
@@ -315,10 +312,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseAbility("wand_vigor")
         c.useAbility_OH(a.wandVigorHidden, hand)
-
       :
-        ?foe = "phase2"
-          >c0,0,#red,PHASE2 FIGHT
         fight("melee")
 
     : // foe = phase3
