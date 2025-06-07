@@ -322,7 +322,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         :?hp ! maxhp
           a.ldtF("melee 1v1 heal")
         :
-          ldtF("melee 1v1 dmg fire")
+          a.ldtF("melee 1v1 dmg fire")
       :
         fight("melee")
 
