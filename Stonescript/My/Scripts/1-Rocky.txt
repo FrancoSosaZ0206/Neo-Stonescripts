@@ -196,7 +196,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // ABOUT TO ATTACK
 :?(foe.state = 32 & (
-^ (foe ! "boss" & foe.time > 50)
+^ (foe ! "boss" & foe.time > 50) |
 ^ (foe = "scout" & foe.time > 50) |
 ^ (foe = "phase1" & foe.time > 60) |
 ^ (foe = "phase2" & foe.time > 95) |
