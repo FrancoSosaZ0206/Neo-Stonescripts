@@ -74,7 +74,7 @@ func Init()
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
 
-  ?buffs.string = "berserk"
+  ?buffs.string = "⊙" // berserk
     moondialMode = 2
   :
     moondialMode = 0
