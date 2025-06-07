@@ -585,7 +585,7 @@ func ldtF(mode)
             c.doMoondial(swordDmg, swordIceDebuff1)
           :?c.canApplyWeaken() | c.canApplyBurn()
             equipL @swordPoisonDebuff@
-            equipR @swordPoisonDebuff@ // Death's Kiss
+            equipR @swordFireDebuff@ // Death's Kiss
             //'
       :?mode = "dmg"
         ?c.isPermapotSetup // all left hand
