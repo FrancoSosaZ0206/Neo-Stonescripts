@@ -67,27 +67,36 @@ func fight(mode)
       :?mode = "magic"
         a.ldtF("magic debuff")
       :?mode = "ranged"
-        a.ldtF("ranged debuff")
+        a.ldtF("magic debuff") // ranged
 
-    : // 2. Heal if needed
-      ?hp ! maxhp // heal up
-        ?mode = "melee"
-          a.ldtF("melee 1v1 heal")
-        :?mode = "magic"
-          a.ldtF("magic heal")
-        :?mode = "ranged"
-          a.ldtF("ranged heal")
+    :?hp ! maxhp // 2. Heal if needed
+      ?mode = "melee"
+        a.ldtF("melee 1v1 heal")
+      :?mode = "magic"
+        a.ldtF("magic heal")
+      :?mode = "ranged"
+        a.ldtF("magic heal") // ranged
 
-      : // 3. Deal max damage
-        ?mode = "melee"
-          /*?!c.isPermapotSetup & foe ! "phase2" & foe ! "phase3"
-            c.doBursting(a.burstingSwords)
-          :*/
+    :?foe ! "boss" & // 3. Unmake
+    ^encounter.eliteMod ! "tenacious" &
+    ^encounter.eliteMod ! "monarch"
+      ?mode = "melee"
+        a.ldtF("melee 1v1 unmake")
+      :?mode = "magic"
+        a.ldtF("magic unmake")
+      :?mode = "ranged"
+        a.ldtF("ranged unmake") // ranged
+
+    : // 4. Deal max damage
+      ?mode = "melee"
+        /*?!c.isPermapotSetup & foe ! "phase2" & foe ! "phase3"
+          c.doBursting(a.burstingSwords)
+        :*/
           a.ldtF("melee 1v1 dmg")
-        :?mode = "magic"
-          a.ldtF("magic dmg")
-        :?mode = "ranged"
-          a.ldtF("ranged dmg")
+      :?mode = "magic"
+        a.ldtF("magic dmg")
+      :?mode = "ranged"
+        a.ldtF("ranged dmg")
 
 
 // //////////////// PROCEDURE //////////////// //
@@ -288,13 +297,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?c.canUseAbility("dash")
     a.ldtF("dash")
 
-  :?c.canUseAbility("voidweaver") & c.canUnmakeVoidweaver()
-    c.devour("voidweaver")
-
   :?foe = "scout"
     fight("melee")
 
-  : // Dysangelos
+  :?foe = "phase" // Dysangelos
     ?foe.debuffs.string = a.maxIgnitions_Default /* &
     ^c.canUseAbility("cinderwisp") |
     ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
@@ -322,6 +328,43 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         c.useAbility_TH("Guardian's Bane") //'
       :
         fight("melee")
+
+  // normal foes
+  :?foe.count > 1 // AOE strategy
+    ?c.canUseAbility("voidweaver") &
+    ^c.canUnmakeVoidweaver() &
+    ^!c.canUseAbility_DS("blade")
+      c.devour("voidweaver")
+
+    :?encounter.eliteMod ! "tenacious" &
+    ^c.canUseAbility("wand_stone")
+      c.useAbility_OH(a.wandStoneHidden, "l")
+
+    :?encounter.eliteMod ! "tenacious" &
+    ^c.canUseAbility("wand_aether")
+      c.useAbility_OH(a.wandAetherHidden, "l")
+
+    // Hinder regen
+    ?encounter.eliteMod = "regen" &
+    ^c.canUseAbility("wand_fire")
+      c.useAbility_OH(a.wandFireHidden, "l")
+  
+    :?foe.armor > 0 & // Remove armor
+    ^c.canUseAbility("heavy_hammer")
+      c.useAbility_TH("Guardian's Bane")
+
+    :?c.isPermapotSetup
+      fight("magic")
+    :
+      fight("ranged")
+  
+  : // 1v1 strategy
+    ?s.getTotalHP("foe") >= a.bardicheRDmg &
+    ^c.canUseBardiche() &
+    ^!c.isPermapotSetup
+      c.useBardiche(Kubikiribocho)
+    :
+      fight("melee")
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
