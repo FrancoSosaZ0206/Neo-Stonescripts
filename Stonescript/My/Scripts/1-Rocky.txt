@@ -232,26 +232,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!c.isDashingRange() & ai.walking
   c.useAbility_TH("quarterstaff") // a.myQuarterstaff)
 
-:?!c.isPermapotSetup & foe = "dysangelos" &
-^((c.canUseAbility("heavy_hammer") |
-^c.canUseAbility("bardiche") |
-^c.canUseAbility("bash") |
-^c.canUseAbility("dash")) &
-^(foe.state = 101 | foe.state = 102 |
-^foe.state = 126 | foe.state = 127 |
-^116 <= foe.state | foe.state <= 118 |
-^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
-^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
-^foe.state = 108)) // dysangelos phase 2 to 3 states
-  ?c.canUseAbility("heavy_hammer")
-    c.useAbility_TH(Mjölnir)
-  :?c.canUseAbility("dash")
-    a.ldtF("dash")
-  :?c.canUseAbility("bash")
-    a.ldtF("bash")
-  :?c.canUseAbility("bardiche")
-    c.useAbility_TH(Kubikiribocho)
-
 
 :?ai.paused |
 ^(ai.idle & foe.distance > s.dash_range_min) | // if we're waiting
