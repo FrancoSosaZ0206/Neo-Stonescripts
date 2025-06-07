@@ -171,6 +171,17 @@ var shieldCompound1 = "shield compound *max shiny"
 var shieldCompound2 = "shield compound *max -shiny"
 var shieldTowering = "shield towering *max golden"
 
+// ............... OTHERS ............... //
+
+var burstingSwords = [
+^     Soulfetcher     , swordIceDebuff1,
+^     Mamba Negra     , swordPoisonDmg,
+^     Dothaneel       , swordVigorDmg,
+^     Void Slayer     , swordAetherDmg,
+^     Vantum Phoenix  , swordFireDmg,
+^     Bifrost         , swordIceDmg
+^]
+
 // ************ SPECIAL STATS ************ //
 
 // ........... BUFFS/DEBUFFS ............ //

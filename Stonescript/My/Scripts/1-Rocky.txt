@@ -88,6 +88,13 @@ func fight(mode)
 
 // //////////////// PROCEDURE //////////////// //
 
+?debuffs.string = "stun"
+  >`1,7,#magenta,state=@foe.state@\n
+  ^time=@foe.time@\n
+  ^dmg=@foe.damage@
+
+  loc.Pause()
+
 c.Init()
 disable npcDialog
 
@@ -187,7 +194,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^   (foe.time > 85 & foe.damage ! 1) | // normal phase3 attacks
 ^   (foe.time > 65 & foe.damage = 1)) )  )   ) | // putting shield up
 ^(foe = "phase3" & foe.state = 155 & foe.time > 70) | // Dysangelos's massive beam
-^(foe.state = 33 & foe.time < 5 & // a bit into the attack state
+^(foe.state = 33 & foe.time < 10 & // a bit into the attack state
 ^ (foe = "phase2" | foe = "phase3"))
 
   ?foe = "phase3" &
@@ -299,8 +306,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
           >c0,0,#red,PHASE2 FIGHT
         fight("melee")
 
-    // foe = phase3
-    :?debuffs.string ! "stun" // safety measure
+    : // foe = phase3
       ?c.canUsePotion("lucky")
         activate potion
       :?c.canUseAbility("mask")
@@ -308,8 +314,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :?c.canUseAbility("staff_poison")
         c.useAbility_TH(a.staffPoisonHidden)
 
-      ?foe.debuffs.string = a.maxIgnitions_Default &
-      ^c.canUseAbility("cinderwisp") /* |
+      ?foe.debuffs.string = a.maxIgnitions_Default /* &
+      ^c.canUseAbility("cinderwisp") |
       ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
         c.devour("cinderwisp")
 

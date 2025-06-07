@@ -180,7 +180,6 @@ func canUseAbility(abilityId)
         result = result & canUnmakeVoidweaver()
       :?abilityId = "cinderwisp"
         result = result & foe.debuffs.string = "ignition"
-        >`1,7,#magenta,fds = @foe.debuffs.string@
 
     :?abilityId = "wand_stone"
       result = result & armor >= s.wand_stone_armor
