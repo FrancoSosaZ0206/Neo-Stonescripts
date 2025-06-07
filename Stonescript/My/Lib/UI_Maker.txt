@@ -148,13 +148,10 @@ PARAMETERS:
     - h
     - colorHex = textbox color */
 func mkTextbox(x,y,w,h, anchor,dock, text, align, colorHex)
-  >`1,7,#magenta,text=@text@
-  loc.Pause()
   // declarations:
   var textbox = null
-  var arrStr  = null
+  var arrStr  = string.Split(text, "\n")
   
-  // string.Split(text, "\n")
   textbox = ui.AddText(text)
   
   // position

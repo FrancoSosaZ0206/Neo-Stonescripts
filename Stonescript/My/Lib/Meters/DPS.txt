@@ -154,8 +154,8 @@ func Main_DPS(x, y, colorHex, frameRate, mode)
       ?panel
         panel.Recycle()
         panel = null
-      :
-        panel = mkUI(x,y,colorHex,mode)
+
+      panel = mkUI(x,y,colorHex,mode)
 
     :?mode = "print"
       Print(x,y,colorHex,mode,false)
@@ -194,7 +194,7 @@ func canUpdate(frameRate)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: canUpdate\nCAUSE: invalid <frameRate>:\n\n" + frameRate, false)
 
     return false
-func Update(frameRate)
+func Update()
   currhp  = foe.hp + foe.armor
   nethp   = foe.maxhp + foe.maxarmor
 
@@ -290,14 +290,14 @@ func mkUI(x, y, colorHex, size)
 
   ?isValidSize
     txt = uimkr.mkTextbox(
-    ^ x,y,txtW,txtH, // x, y, w, h,
-    ^ top_left,top_left, // panelAnchor, dock,
+    ^ x, y, null, null, // x, y, w, h,
+    ^ top_left, top_left, // panelAnchor, dock,
     ^ dpsStr, // txt
     ^ null, colorHex) // align, colorHex
 
     panel = uimkr.mkPanel(
-    ^ x,y,txt.w + 2,txt.h + 2, // x, y, w, h,
-    ^ panelAnchor,panelDock, // anchor, dock,
+    ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
+    ^ panelAnchor, panelDock, // anchor, dock,
     ^ colorHex, panelStyle, txt) // colorHex, style, child
 
   return panel
