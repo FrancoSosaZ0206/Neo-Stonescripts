@@ -607,7 +607,7 @@ func ldtF(mode)
           :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
             c.doMoondial(Vantum Phoenix, swordFireDmg)
           : // foe = "stone"
-            c.doMoondial(Vantum Phoenix /*Unbroken Faith*/, @swordFireDmg@ /*Broken Faith*/)
+            c.doMoondial(Vantum Phoenix /*Unbroken Faith*/, swordFireDmg /*Broken Faith*/)
 
   :?mode = "magic" // wands and staves
     ?mode = "heal"
