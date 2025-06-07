@@ -203,7 +203,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^ (foe = "phase3" & (
 ^   (foe.time > 85 & foe.damage ! 1) | // normal phase3 attacks
 ^   (foe.time > 65 & foe.damage = 1)) )  )   ) | // putting shield up
-^(foe = "phase3" & foe.state = 155 & foe.time > 70) | // Dysangelos's massive beam
+^(foe = "phase3" & foe.state = 115 & foe.time > 70) | // Dysangelos's massive beam
 ^(foe.state = 33 & foe.time = 0 & // a bit into the attack state
 ^ (foe = "phase2" | foe = "phase3"))
 
@@ -221,7 +221,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       
 
   :?foe = "phase3" &
-  ^(foe.state = 155 | foe.damage = 1)
+  ^(foe.state = 115 | foe.damage = 1)
     ?foe.damage = 1 & // prevent the stun
     ^c.canUseAbility("staff_vigor")
       c.useAbility_TH(a.staffVigorHidden)
