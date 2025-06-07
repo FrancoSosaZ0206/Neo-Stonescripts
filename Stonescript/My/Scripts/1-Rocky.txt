@@ -210,7 +210,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ?foe ! "boss"
     ?!(encounter.eliteMod = "tenacious" |
       ^(encounter.eliteMod = "monarch" &
-      ^foe.count = 1)
+      ^foe.count = 1))
         a.ldtF("defense unmake")
     :?armor <= c.getFoeDamage(weakenType, a.mask_feebleCount)
       a.ldtF("defense")

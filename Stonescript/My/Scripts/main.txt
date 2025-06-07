@@ -1,14 +1,14 @@
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀▄ START OF "main" ▄▀▄▀▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ START OF "main" ▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-/* // //////////////// FILE INFO /////////////////// //
+/* // //////////// FILE INFO //////////////// //
 
 Multi-location, general script
 Written by IronHawk (Tom Crow)
 
-. ................... Description ................... .
+. ................ Description ............... .
 
   I have several farming scripts and libraries for
   this game. Some time after I started scripting, I
@@ -21,7 +21,7 @@ Written by IronHawk (Tom Crow)
   script in the Mindstone, enter the location I want,
   and voilà!
 
-. .................... Importing .................... .
+. ................. Importing ................ .
 
   If you're on PC, just save this file into the
   Stonescripts folder and import it using the correct
@@ -47,7 +47,7 @@ Written by IronHawk (Tom Crow)
   like shown. Otherwise, the Mindstone could butcher
   the line and break the script.
 
-. ........... How to do changes in mobile ........... .
+. ........ How to do changes in mobil......... .
 
   Q: I'm on mobile, and after some changes to my
   scripts, it won't work anymore! What happened!?
@@ -89,12 +89,12 @@ Written by IronHawk (Tom Crow)
     is ideal for when your scripts are already done, in my
     opinion.
 
-. ................................................... .
+. ............................................ .
 
 Enjoy! ;) */
 
 
-/* //////////////////// MOBILE ///////////////////// //
+/* //////////////// MOBILE ////////////////// //
 // ↓↓↓ COPY FROM HERE ↓↓↓
 
 // Paste your url here ↓↓↓
@@ -103,28 +103,24 @@ var mobileUrl =
 ^FrancoSosaZ0206/Neo-Stonescripts/
 ^main/Stonescript/"
 
-
 sys.SetFileUrl(mobileUrl)
 
+import UI/MindstoneButton
 // ↓↓↓ COMMENT OUT HERE ↓↓↓
 import My/Scripts/main
 // ↑↑↑ COMMENT OUT HERE ↑↑↑
 
 // ↑↑↑ COPY UNTIL HERE ↑↑↑
-// ///////////////////////////////////////////////////////// */
+// ////////////////////////////////////////// */
 
 
-// ////////////////////// PC /////////////////////// //
+// /////////////////// PC /////////////////// //
 
-// ··············· IMPORTS ··············· //
-
-?sys.isMobile
-  import UI/MindstoneButton
+// ················ IMPORTS ················· //
 
 import My/Cosmetics
 
-
-// ·············· PROCEDURE ·············· //
+// ··············· PROCEDURE ················ //
 
 ?!loc.isQuest & (
 ^loc = "Waterfall" |
@@ -132,6 +128,8 @@ import My/Cosmetics
 ^loc = "cross_bridge")
   loc.Leave()
 
+:?loc = "uulaa_shop" // Hotspring Shop
+  import My/Scripts/Hotspring_Shop
 :?loc = "undead_crypt_intro" // Haunted Gate
   import My/Scripts/Gate
 
@@ -161,6 +159,6 @@ import My/Cosmetics
     import My/Scripts/8-Temple
 
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀▄▀ END OF "main" ▄▀▄▀▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "main" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
