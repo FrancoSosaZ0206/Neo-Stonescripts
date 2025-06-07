@@ -60,7 +60,8 @@ func fight(mode)
   :
     // 1. debuff, if possible
     ?c.canDebuffAny() & // foe can be debuffed
-    ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
+    ^encounter.eliteMod ! "tenacious" & // foe isn't immune to debuffs
+    ^foe.buffs.string ! "buff_protection"
       ?mode = "melee"
         a.ldtF("melee 1v1 debuff")
       :?mode = "magic"
@@ -79,7 +80,10 @@ func fight(mode)
 
       : // 3. Deal max damage
         ?mode = "melee"
-          a.ldtF("melee 1v1 dmg")
+          ?foe = "phase3"
+            c.doBursting(a.burstingSwords)
+          :
+            a.ldtF("melee 1v1 dmg")
         :?mode = "magic"
           a.ldtF("magic dmg")
         :?mode = "ranged"
@@ -306,7 +310,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ?foe.debuffs.string = a.maxIgnitions_Default /* &
       ^c.canUseAbility("cinderwisp") |
       ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
-        c.devour("cinderwisp")
+        activate cinderwisp
 
       ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
       ^!c.isPermapotSetup
