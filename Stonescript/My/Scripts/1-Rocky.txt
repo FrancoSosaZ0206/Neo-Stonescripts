@@ -88,8 +88,8 @@ func fight(mode)
 
 // //////////////// PROCEDURE //////////////// //
 
-?foe.damage = 1 // | foe = "phase3"
-  u.showBigStr(1,7,40,#cyan,"buffs = " + foe.buffs.string + "\n\ndebuffs = " + foe.debuffs.string, false)
+?foe.damage = 1
+  u.showBigStr(1,7,40,#cyan,"buffs = " + foe.buffs.string, false)
 
 c.Init()
 disable npcDialog
@@ -235,7 +235,23 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!c.isDashingRange() & ai.walking
   c.useAbility_TH("quarterstaff") // a.myQuarterstaff)
 
-// TO DO: Figure out transformation states and 
+:?!c.isPermapotSetup &
+^((c.canUseAbility("heavy_hammer") |
+^c.canUseAbility("bardiche") |
+^c.canUseAbility("bash") |
+^c.canUseAbility("dash")) &
+^(foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
+^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
+^foe.state = 108)) // dysangelos phase 2 to 3 states
+  ?c.canUseAbility("heavy_hammer")
+    c.useAbility_TH(Mjölnir)
+  :?c.canUseAbility("dash")
+    a.ldtF("dash")
+  :?c.canUseAbility("bash")
+    a.ldtF("bash")
+  :?c.canUseAbility("bardiche")
+    c.useAbility_TH(Kubirikibocho)
+
 
 :?ai.paused |
 ^(ai.idle & foe.distance > s.dash_range_min) | // if we're waiting
@@ -319,6 +335,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ^!c.isPermapotSetup
         c.useAbility_TH("Guardian's Bane") //'
       :
+        ?
         fight("melee")
 
 
