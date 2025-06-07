@@ -226,7 +226,7 @@ Valid itemName values:
 func useAbility_TH(itemName)
   equip @itemName@
 
-  /*?itemName = "blade" | item.right = "blade"        |
+  ?itemName = "blade" | item.right = "blade"        |
   ^itemName = "arm" | item.right = "arm"          |
   ^itemName = "bardiche" | item.right = "bardiche"     |
   ^((itemName = "heavy" | item.right = "heavy") &
@@ -239,11 +239,10 @@ func useAbility_TH(itemName)
   ^   itemName = "vigor" | item.right = "vigor"     |
   ^   itemName = "aether" | item.right = "aether"    |
   ^   itemName = "fire" | item.right = "fire"      |
-  ^   itemName = "ice" | item.right = "ice"))*/
-  activate R
-
-  /*:
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)*/
+  ^   itemName = "ice" | item.right = "ice"))
+    activate R
+  :
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
 /* Activates a one-handed item's ability.
 
