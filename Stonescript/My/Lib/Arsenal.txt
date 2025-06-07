@@ -575,7 +575,7 @@ func ldtF(mode)
           :?c.canApplyBurn()
             equipL @swordFireDebuff@
           :?c.canApplyChill()
-            equipL @wandIceDebuff@ // @swordIceDebuff2@
+            equipL moon // @swordIceDebuff2@
 
           // Right hand:
           ?c.canApplyChill()
