@@ -335,7 +335,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ^!c.isPermapotSetup
         c.useAbility_TH("Guardian's Bane") //'
       :
-        ?
         fight("melee")
 
 
