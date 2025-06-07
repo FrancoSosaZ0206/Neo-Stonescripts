@@ -139,7 +139,7 @@ PARAMETERS:
     - dock
   
   Special:
-    - txt = textbox contents.
+    - text = textbox contents.
     - align = text justification/alignment inside the textbox.
               Default: "left"
   
@@ -147,59 +147,58 @@ PARAMETERS:
     - w
     - h
     - colorHex = textbox color */
-func mkTextbox(x,y,w,h, anchor,dock, txt, align, colorHex)
-
-  //declarations:
-  var textbox
-
-  //assignations:
-  textbox = ui.AddText(txt)
-
-  //adding alignment
-  textbox.anchor = anchor
-  textbox.dock = dock
-
-  ?align
-    textbox.align = align
-
-  //adding color
-  ?colorHex
-    textbox.color = colorHex
-
-  //adding position
+func mkTextbox(x,y,w,h, anchor,dock, text, align, colorHex)
+  >`1,7,#magenta,text=@text@
+  loc.Pause()
+  // declarations:
+  var textbox = null
+  var arrStr  = null
+  
+  // string.Split(text, "\n")
+  textbox = ui.AddText(text)
+  
+  // position
   textbox.x = x
   textbox.y = y
 
-  //adding width and height
+  // width and height
   ?w
     textbox.w = w
-  :
-    var largestStr
+  : // auto-calculate width (largest string in the text)
+    var largestStr = ""
     
     // **************************************
-    // borrowed from MyScripts/Lib/Utilities:
-    var arrStr = string.Split(txt, "\n")
+    // borrowed from MyScripts/Lib/Utilities
+    // getLargestStr()
 
     ?arrStr.Count() > 0
-      var maxStr = arrStr[0]
-      var maxInd = -1
+      var largestStr = arrStr[0]
 
       for str : arrStr
-        ?string.Size(str) > string.Size(maxStr)
-          maxStr = str
+        ?string.Size(str) > string.Size(largestStr)
+          largestStr = str
 
-      largestStr = maxStr
-    
-    :
-      largestStr = null
     // **************************************
 
     textbox.w = string.Size(largestStr)
     
   ?h
     textbox.h = h
-  :
-    textbox.h = string.Split(txt, "\n").Count()
+  : // auto-calculate height (no. of text lines)
+    textbox.h = arrStr.Count()
+
+
+  // anchor and dock
+  textbox.anchor = anchor
+  textbox.dock = dock
+
+  // alignment
+  ?align
+    textbox.align = align
+
+  // color
+  ?colorHex
+    textbox.color = colorHex
 
 
   return textbox
@@ -213,7 +212,7 @@ PARAMETERS
     - dock
 
   Special:
-    - txt = button text
+    - text = button text
     - colorHex = general color of the button (colors below override it)
     - pressedFunc = function that the button will perform when pressedFunc
 
@@ -226,7 +225,7 @@ PARAMETERS
     - downFunc   = function that the button will perform when press begins
     - upFunc     = function that the button will perform when press ends
     - soundFx  = sound effect when pressedFunc */
-func mkButton(x,y,w,h, anchor,dock, txt, colorHex,colorT,colorB,colorH, style, pressedFunc,downFunc,upFunc, soundFx)
+func mkButton(x,y,w,h, anchor,dock, text, colorHex,colorT,colorB,colorH, style, pressedFunc,downFunc,upFunc, soundFx)
   
   var button
   button = ui.AddButton()
@@ -234,17 +233,17 @@ func mkButton(x,y,w,h, anchor,dock, txt, colorHex,colorT,colorB,colorH, style, p
   button.x = x
   button.y = y
 
-  button.text = txt
+  button.text = text
 
   ?w
     button.w = w
   :
-    var txtSize = string.Size(txt)
-    var parity = txtSize % 2
+    var textSize = string.Size(text)
+    var parity = textSize % 2
     ?parity = 0 // even
-      button.w = (txtSize * 2) + 2 // *2 = always even, 2 for even margin
+      button.w = (textSize * 2) + 2 // *2 = always even, 2 for even margin
     : // odd
-      button.w = (txtSize * 2) + 3 // *2 + 1 = always odd, 3 for odd margin
+      button.w = (textSize * 2) + 3 // *2 + 1 = always odd, 3 for odd margin
 
   ?h
     button.h = 3 + h

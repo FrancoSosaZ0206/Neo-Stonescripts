@@ -34,7 +34,7 @@ Current version: 2.1
   in red, in the slim, non-speedrun version, and
   in the "ui" mode:
 
-  t.Main(0, 1, "#red", true, "ui")
+  t.Main_Times(0, 1, "#red", "normal ui")
 
 · ···················· Tip ···················· ·
 
@@ -101,9 +101,9 @@ Current version: 2.1
     - Update() should now only be called if canUpdate() returns true.
     - Merged isSlim and isSpeedrun with mode
     - Added error handling
-    - main >> Main
+    - main >> Main_Times
     - Added entry sanitization for mode
-    - Upgraded Main() description
+    - Upgraded Main_Times() description
     - Merged speedrun and normal (or "Digital") times into one of each.
     - u.myFormatDigital() calls replaced by time.FormatDigital()
 
@@ -140,12 +140,12 @@ Tertiary (Should go at the end)
 "print" = prints the meter normally.
 "print ascii" = prints the meter in ascii mode. */
 var panel = null
-func main(x, y, colorHex, mode)
+func Main_Times(x, y, colorHex, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
   ?canUpdate(mode)
-    Update()
+    Update(mode)
 
     ?mode = "ui"
       ?panel
@@ -157,7 +157,7 @@ func main(x, y, colorHex, mode)
     :?mode = "print"
       Print(x,y,colorHex,mode,true)
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: Main\nCAUSE: invalid <mode>:\n\n" + mode, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: Main_Times\nCAUSE: invalid <mode>:\n\n" + mode, false)
 
 
 // ///////////////// PRIVATE ///////////////// //
@@ -174,12 +174,12 @@ func canUpdate(mode)
   ?mode = "speedrun"
     return true
   :
-    return totaltime = 1 | (totaltime % u.sec = 0)
+    return loc.begin | (totaltime % u.sec = 0)
 func Update(mode)
   ?mode = "speedrun" // update times every frame
     tt    = u.formatSpeedrun(totaltime)
 
-    ?loc.loop
+    ?loc.begin | loc.loop
       pb  = u.formatSpeedrun(loc.bestTime)
       avg = u.formatSpeedrun(loc.averageTime)
 
@@ -187,26 +187,28 @@ func Update(mode)
     ?loc.begin | totaltime % u.sec = 0
       tt  = time.formatDigital(totaltime)
 
-    ?loc.loop
+    ?loc.begin | loc.loop
       pb  = time.formatDigital(loc.bestTime)
       avg = time.formatDigital(loc.averageTime)
 
 func ToString(size)
+  var str = null
+
   ?size = "slim" | size = "small"
-    return
-    ^"☆#" + pb +     // ☆ = PB
-    ^"#|#≈#" + avg + // ≈ = AVG
-    ^"#|#▶#" + tt    // ▶ = CURR
+    str = "☆#" + pb +
+    ^     "#|#≈#" + avg +
+    ^     "#|#▶#" + tt
 
   :?size = "normal" | size = "default"
-    return
-    ^"####SPEED-O-METER####" + "\n" +
-    ^"#·##·##·##·##·##·##·#" + "\n" +
-    ^"#PB##" + pb + "\n" +
-    ^"#AVG#" + avg + "\n" +
-    ^"#CUR#" + tt
+    str = "####SPEED-O-METER####" + "\n" +
+    ^     "#·##·##·##·##·##·##·#" + "\n" +
+    ^     "#PB##" + pb + "\n" +
+    ^     "#AVG#" + avg + "\n" +
+    ^     "#CUR#" + tt
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
+
+  return str
 /* isAscii:
     true: prints the text in ascii format,
           replacing the whitespace characters
@@ -221,7 +223,7 @@ asciiend
   :
     >`@x@,@y@,@colorHex@,@ToString(mode)@
 /* Returns ui panel containing the meter. */
-func mkUI(x, y, colorHex, mode)
+func mkUI(x, y, colorHex, size)
   var panel = null
   var txt = null
   var isValidSize = true

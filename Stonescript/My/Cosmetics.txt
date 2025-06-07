@@ -4,10 +4,10 @@
   import Pets/Spider
 :
   // Default player cosmetics
-  import Hats/StarCloak // Cosmetics/WavyScarf
+  import Hats/StarCloak
   import Hats/MushroomHat
   import Pets/Skully
-  import Hats/LanternTalisman
+  import Weapons/LanternTalisman
 
   // Foe cosmetics
   import Foes/PallasCrown

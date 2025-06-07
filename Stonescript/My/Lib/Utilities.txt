@@ -136,18 +136,15 @@ func formatSpeedrun(frames)
 
 /* Finds the largest string in an array of strings. */
 func getLargestStr(arrStr)
+  var largestStr = null
   ?arrStr.Count() > 0
-    var maxStr = arrStr[0]
-    var maxInd = -1
+    largestStr = arrStr[0]
 
     for str : arrStr
-      ?string.Size(str) > string.Size(maxStr)
-        maxStr = str
+      ?string.Size(str) > string.Size(largestStr)
+        largestStr = str
 
-    return maxStr
-  
-  :
-    return null
+  return null
 
 /* shows a big string, broken down into several lines.
 PARAMETERS:

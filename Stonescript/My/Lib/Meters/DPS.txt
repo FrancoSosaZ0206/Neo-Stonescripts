@@ -37,7 +37,7 @@ Current version: v2.2
   in yellow, refreshing every 7 frames, in the
   slim, ui mode:
 
-  dps_meter.main(0,3,"#yellow", 7, "slim ui")
+  dps_meter.Main_DPS(0,3,"#yellow", 7, "slim ui")
 
 . ................. CHANGELOG ................. .
 
@@ -110,9 +110,9 @@ Current version: v2.2
     - refreshRate >> frameRate
     - Merged isSlim with mode
     - Added error handling
-    - main >> Main
+    - main >> Main_DPS
     - added entry sanitization for mode
-    - upgraded Main() description
+    - upgraded Main_DPS() description
 
 . ............................................. .
 
@@ -143,7 +143,7 @@ Secondary (should go after primary)
 "print" = prints the meter normally.
 "print ascii" = prints the meter in ascii mode. */
 var panel = null
-func Main(x, y, colorHex, frameRate, mode)
+func Main_DPS(x, y, colorHex, frameRate, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
@@ -160,7 +160,7 @@ func Main(x, y, colorHex, frameRate, mode)
     :?mode = "print"
       Print(x,y,colorHex,mode,false)
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: Main\nCAUSE: invalid <mode>:\n\n" + mode, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: Main_DPS\nCAUSE: invalid <mode>:\n\n" + mode, false)
 
 
 // ///////////////// PRIVATE ///////////////// //
@@ -240,15 +240,14 @@ func ToString(size)
     return "DPS#|#" + DPS
 
   :?size = "normal" | size = "default"
-    return
-    ^"###DPS#METER###"   + "\n" +
-    ^"#·##·##·##·##·#"   + "\n" +
-    ^"#No.#Hits#" + hits + "\n" +
-    ^"#Hits/Sec#" + HPS  + "\n" +
-    ^"#Dmg#/Hit#" + dmg  + "\n" +
-    ^"#Dmg#/Frm#" + DPF  + "\n" +
-    ^"#Dmg#/Sec#" + DPS  + "\n" +
-    ^"#·##·##·##·##·#"
+    return "###DPS#METER###"   + "\n" +
+    ^      "#·##·##·##·##·#"   + "\n" +
+    ^      "#No.#Hits#" + hits + "\n" +
+    ^      "#Hits/Sec#" + HPS  + "\n" +
+    ^      "#Dmg#/Hit#" + dmg  + "\n" +
+    ^      "#Dmg#/Frm#" + DPF  + "\n" +
+    ^      "#Dmg#/Sec#" + DPS  + "\n" +
+    ^      "#·##·##·##·##·#"
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
 func Print(x, y, colorHex, mode)

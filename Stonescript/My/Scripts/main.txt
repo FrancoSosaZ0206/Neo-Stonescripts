@@ -137,16 +137,11 @@ import My/Cosmetics
 
 :
   import UI/FoeStateTracker
-
-  // ---------------- times lib ---------------- //
-
-  var t = import My/Lib/Meters/Times
-  t.Main(0,1,#red,"slim ui speedrun")
-
-  // ----------------- dps lib ----------------- //
-
+  var tm = import My/Lib/Meters/Times
   var dps = import My/Lib/Meters/DPS
-  dps.Main(0,3,#yellow,7,"slim ui")
+
+  tm.Main_Times(0,1,#red,"slim ui speedrun")
+  dps.Main_DPS(0,3,#yellow,7,"slim ui")
 
 
   ?loc.stars > 15 & loc = "rocky_plateau"
