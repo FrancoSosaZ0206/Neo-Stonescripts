@@ -173,7 +173,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 :?c.canUsePotion("lucky") & c.isPermapotSetup
   activate potion
-:?c.canUseAbility("staff_fire") // speed up
+:?c.canUseAbility("staff_fire") & // speed up
+^buffs.string ! "buff_inf_speed"
   c.useAbility_TH(a.staffFireHidden)
 
 :?choice & harvest.distance < 5
