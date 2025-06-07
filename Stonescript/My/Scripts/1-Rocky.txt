@@ -232,7 +232,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!c.isDashingRange() & ai.walking
   c.useAbility_TH("quarterstaff") // a.myQuarterstaff)
 
-:?!c.isPermapotSetup &
+:?!c.isPermapotSetup & foe = "dysangelos" &
 ^((c.canUseAbility("heavy_hammer") |
 ^c.canUseAbility("bardiche") |
 ^c.canUseAbility("bash") |
