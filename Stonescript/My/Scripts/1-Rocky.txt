@@ -80,7 +80,7 @@ func fight(mode)
 
       : // 3. Deal max damage
         ?mode = "melee"
-          ?foe = "phase3"
+          ?foe = "phase3" & !c.isPermapotSetup
             c.doBursting(a.burstingSwords)
           :
             a.ldtF("melee 1v1 dmg")
