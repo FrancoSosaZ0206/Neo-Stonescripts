@@ -316,13 +316,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       ^!c.isPermapotSetup
         c.useAbility_TH("Guardian's Bane") //'
 
-      :?foe.buffs.string = "defense" // equip ice weapons
-        ?c.canDebuffAny()
-          a.ldtF("melee 1v1 debuff")
-        :?hp ! maxhp
-          a.ldtF("melee 1v1 heal")
-        :
-          a.ldtF("melee 1v1 dmg fire")
       :
         fight("melee")
 
