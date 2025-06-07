@@ -36,8 +36,6 @@ func harvestFunc(button)
 func fight(mode)
   ?mode = "evade"
     ?c.canUseAbility("mind") & (foe ! "ranged" | foe = "phase")
-      >`1,15,#cyan,DODGED WITH MINDSTONE
-      loc.Pause()
       a.ldtF("mind")
     :?c.canUseAbility("staff_stone") & (foe ! "ranged" | foe = "phase")
     ^& foe.distance < s.dash_range_min
@@ -89,13 +87,6 @@ func fight(mode)
 
 
 // //////////////// PROCEDURE //////////////// //
-
-?debuffs.string = "stun"
-  >`1,7,#magenta,state=@foe.state@\n
-  ^time=@foe.time@\n
-  ^dmg=@foe.damage@
-
-  loc.Pause()
 
 c.Init()
 disable npcDialog
@@ -186,10 +177,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?pickup.distance < 15
   a.ldtF("magnet")
 
-
-:?foe = "phase3" & foe.damage = 1
-  >c0,0,#red,SHIELD ATTACK
-  fight("evade")
 
 // ABOUT TO ATTACK
 :?(foe.state = 32 & (
