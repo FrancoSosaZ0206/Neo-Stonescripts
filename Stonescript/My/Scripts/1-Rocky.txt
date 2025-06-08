@@ -102,10 +102,15 @@ func fight(mode)
           c.doBursting(a.burstingSwords)
         :*/
           a.ldtF("melee 1v1 dmg")
-      :?mode = "magic"
+      :?!c.isPermapotSetup
+        a.ldtF("magic dmg")
+      :
+        a.ldtF("ranged dmg")
+      
+      /*:?mode = "magic"
         a.ldtF("magic dmg")
       :?mode = "ranged"
-        a.ldtF("ranged dmg")
+        a.ldtF("ranged dmg")*/
 
 
 // //////////////// PROCEDURE //////////////// //
@@ -189,7 +194,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-?c.canSummon("aether_talisman") & foe ! "boss" & foe.distance ! 9999
+?c.canSummon("aether_talisman") &
+^((foe ! "boss" & foe.distance ! 9999) |
+^screen.i = 0)
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") & (foe = "boss" | loc.stars < 15)
   c.useAbility_OH("fire_talisman", hand)
@@ -279,8 +286,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 
 // AOE strategy
-:?foe.GetCount(foe.distance + margin) > 1 &
-^foe.distance <= s.getRange("wand") & foe ! "warcaster"
+:?(c.isPermapotSetup &
+^(foe.GetCount(foe.distance + margin) > 1 &
+^foe.distance <= s.getRange("wand") & foe ! "warcaster")) |
+^(!c.isPermapotSetup &
+^foe.count > 1 & foe.distance <= s.getRange("crossbow rune"))
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
 
@@ -318,7 +328,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       equipL grappling
     equipR mask
   :
-    fight("ranged")
+    fight("magic")
 
 
 :?ai.paused |

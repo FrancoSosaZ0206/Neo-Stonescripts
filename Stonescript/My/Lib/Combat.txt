@@ -224,8 +224,7 @@ func useAbility_TH(itemName)
   ?itemName = "blade" | item.right = "blade"        |
   ^itemName = "arm" | item.right = "arm"          |
   ^itemName = "bardiche" | item.right = "bardiche"     |
-  ^((itemName = "heavy" | item.right = "heavy") &
-  ^ (itemName = "hammer" | item.right = "hammer"))     |
+  ^itemName = "heavy_hammer" | item.right = "heavy_hammer"     |
   ^itemName = "quarterstaff" | item.right = "quarterstaff" |
   ^((itemName = "staff" | item.right = "staff")  &
   ^ (itemName = "hidden" | item.right = "hidden") &
@@ -238,6 +237,7 @@ func useAbility_TH(itemName)
     activate R
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    loc.Pause()
 
 /* Activates a one-handed item's ability.
 
@@ -272,6 +272,7 @@ func useAbility_OH(itemName, hand)
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_T\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    loc.Pause()
 
 /* Returns true if a given item is equipped. */
 func isEquipped(itemName)
