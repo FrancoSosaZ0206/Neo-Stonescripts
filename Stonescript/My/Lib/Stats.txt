@@ -41,6 +41,70 @@ Made by IronHawk (Tom Crow)
 
 Enjoy! */
 
+/* HITBOXES AND SPLASH RADIUS
+
+Ranges + Hitboxes table
+
+Link: https://discord.com/channels/423242655498240000/609453573113249924/1283482516287918153
+
+"So here are the main hitboxes, with slashes
+showing splash area to the right vs odd-width foe.
+
+All hitbox widths are odd unless it says even,
+which means splash rounds down while main hit
+rounds up.
+
+01234567890123
+..bbbbbBbbbbb////. bardiche, bfg
+...sssSsss/....... skeleton arm (has 1 aoeX)
+..ccCcc////....... basic crossbow left
+...ccCcc////...... basic crossbow right
+....ccCcc////..... heavy crossbows, heavy hammer
+..ssSss///........ sword left, staff melee, hammer left (even)
+...ssSss///....... sword right, big sword left, hammer right  (even)
+....ssSss///...... big sword right (even)
+..wWw////......... wand left, torch left, harmonic
+...rRr////........ runestone left, runestone right
+....wWw////....... wand right, staff magic, torch right
+G////............. grappling
+tTt////........... stone throw left
+.tTt////.......... stone throw right
+..pPp////......... punch, kick
+.hhhHhhh////...... hatchet (even) (has 5 aoeX)
+.ssSss///......... shovel (even)
+....ffffffffffffff fissure left (up to 63) (even)
+......ffffffffffff fissure right (up to 65) (even)"
+
+******************************************************
+How splash and the table works:
+
+Link: https://discord.com/channels/423242655498240000/609453573113249924/1378196531706073178
+
+"The top row of the table is distance to the enemy
+and the letters are where that hitbox will hit.
+For example, bardiche will hit an enemy at
+distance 12, but not 13.
+
+Enemies have their own collisionwidth extending to
+the right, which is why you don't miss when
+swinging at dist 1.
+
+When a projectile hits the first enemy, it
+splashes and hits the rest, using a different
+calculation.
+
+For most projectiles, it grows the projectile
+hitbox by 4 units on both sides, 2 units vertically
+(to the area shown with slashes), but there is a
+bug that will shift the enemy hitbox left by half
+their collisionwidth with the splash collision
+detection, so actually you get +1 range on top of
+this if the enemy is 3-wide, +2 if its 5-wide, etc.
+
+I don't recall how even enemy widths round, it might
+depend if the projectile hitbox is even or odd, [...]."
+*/
+
 // //////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities

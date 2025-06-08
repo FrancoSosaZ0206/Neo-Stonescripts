@@ -134,7 +134,7 @@ import My/Cosmetics
   import My/Scripts/Gate
 
 :
-  import UI/FoeStateTracker
+  // import UI/FoeStateTracker
   var tm = import My/Lib/Meters/Times
   var dps = import My/Lib/Meters/DPS
 

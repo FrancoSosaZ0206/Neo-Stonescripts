@@ -24,7 +24,7 @@ var weakenType = a.weaken_default
 var potionType = "lucky"
 var hand       = null
 
-var showTxt = true
+var margin = 10
 
 
 // //////////////// FUNCTIONS //////////////// //
@@ -108,6 +108,13 @@ func fight(mode)
 
 
 // //////////////// PROCEDURE //////////////// //
+
+?foe.distance ! 9999
+  >`1,15,#magenta,dist#=#@foe.distance@\n
+  ^dist#+#margin#=#@foe.distance + margin@\n
+  ^count#=#@foe.count@\n
+  ^count#in#dist#=#@foe.GetCount(foe.distance)@\n
+  ^count#in#dist#+#margin#=#@foe.GetCount(foe.distance + margin)@\n
 
 c.Init()
 disable npcDialog
@@ -271,7 +278,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 
 // AOE strategy
-:?foe.GetCount(foe.distance + 5) > 1 & foe.distance ! 9999
+:?foe.GetCount(foe.distance + margin) > 1 &
+^foe.distance ! 9999
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
 
