@@ -344,7 +344,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > s.dash_range_max // or we can't engage in a fight
   ?armor > a.compoundMaxArmor_boosted |
-  ^(foe ! "boss" & foe.distance < s.shield_rune_range)
+  ^(encounter.eliteMod = "metamorph" &
+  ^foe.distance < s.shield_rune_range)
     a.ldtF("engage")
   :?a.compoundMaxArmor_default <= armor &
   ^armor <= a.compoundMaxArmor_boosted

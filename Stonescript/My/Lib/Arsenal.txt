@@ -650,6 +650,8 @@ func ldtF(mode)
         :?c.canApplyBurn()
           equip @staffFireDebuff@
 
+      >c0,0,#cyan,@mode@
+
     :?mode = "dmg"
       ?c.isPermapotSetup // all left hand
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -691,6 +693,8 @@ func ldtF(mode)
         // @bowVigorBuff@
       :?mode = "unmake"
         equip @bowAetherDebuff@
+        >c0,0,#cyan,@mode@
+
       :?mode = "debuff"
         ?c.canApplyChill()
           equip @staffIceDebuff@
