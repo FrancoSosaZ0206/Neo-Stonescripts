@@ -24,7 +24,8 @@ var weakenType = a.weaken_default
 var potionType = "lucky"
 var hand       = null
 
-var canDash    = true
+var showTxt = true
+
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -218,13 +219,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(foe.state = 33 & foe.time = 0 &
 ^ (foe = "phase2" | foe = "phase3"))
 
-  ?foe ! "boss" | (foe = "scout" & foe.count > 1)
+  ?foe ! "boss"
     ?!(encounter.eliteMod = "tenacious" |
-    ^(encounter.eliteMod = "monarch" &
-    ^foe.count = 1))
+    ^(encounter.eliteMod = "monarch" & foe.count = 1))
       a.ldtF("defense unmake")
     :?armor <= c.getFoeDamage(weakenType, a.mask_feebleCount)
-      a.ldtF("defense")
+      a.ldtF("defense heal")
     :
       fight("evade")
 
@@ -270,6 +270,44 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useAbility_TH("quarterstaff") // a.myQuarterstaff)
 
 
+// AOE strategy
+:?foe.GetCount(s.getRange("wand")) > 1
+  ?c.canUseAbility("voidweaver")
+    // c.devour("voidweaver")
+    ?totaltime % 15 = 0
+      showTxt = true
+    :?totaltime % 31 = 0
+      showTxt = false
+
+    ?showTxt
+      >`1,7,@u.colorToHex("orange")@,USE VOIDWEAVER!
+
+  // Hinder regen
+  ?encounter.eliteMod = "regen" &
+  ^c.canUseAbility("wand_fire")
+    c.useAbility_OH(a.wandFireHidden, "l")
+
+  :?c.canUseAbility("heavy_hammer")
+    c.useAbility_TH(Mjölnir)
+
+  :?encounter.eliteMod ! "tenacious" &
+  ^c.canUseAbility("wand_stone") // align foes
+    c.useAbility_OH(a.wandStoneHidden, "l")
+    >c0,-3,#cyan,USING GRAVITY WAND
+  :?encounter.eliteMod ! "tenacious" &
+  ^c.canUseAbility("wand_aether") // Calamity - reduce hp
+    c.useAbility_OH(a.wandAetherHidden, "l")
+
+  :?foe.distance < s.dash_range_min
+    fight("evade")
+
+  :?c.isPermapotSetup
+    equipL grappling hook
+    equipR mask
+  :
+    fight("ranged")
+
+
 :?ai.paused |
 ^(ai.idle & foe.distance > s.dash_range_min) | // if we're waiting
 ^c.isDead() |
@@ -288,137 +326,45 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     a.ldtF("defense regen fast")
 
 
-:?encounter.eliteMod = "monarch"
-  ?foe.count > 1 // eliminate the other foes
-    ?c.canUseAbility("blade")
-      c.useAbility_TH("blade")
-    :?c.canUseAbility("wand_fire")
-      c.useAbility_OH(a.wandFireHidden, hand)
-
-    :?c.canUseAbility("heavy_hammer") // if close, use hammer
-      c.useAbility_TH(Mjölnir)
-    :
-      fight("evade")
-
-  :?c.canUseAbility("bash")
+// fighting range
+:?foe = "phase" // Dysangelos fight logic
+  ?c.canUseAbility("bash")
     a.ldtF("bash")
   :?c.canUseAbility("dash")
     a.ldtF("dash")
 
-  : // 1v1 with the monarch
-    ?s.getTotalHP("foe") >= a.bardicheRDmg &
-    ^c.canUseAbility("bardiche")
-      c.useAbility_TH(Kubikiribocho)
+  :?foe.debuffs.string = a.maxIgnitions_Default
+    activate cinderwisp
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH(a.staffPoisonHidden)
+
+  :?foe ! "phase3"
+    ?foe.buffs.string = "buff_protection" & // against debuffs
+    ^c.canUseAbility("wand_vigor")
+      c.useAbility_OH(a.wandVigorHidden, hand)
     :
       fight("melee")
 
-: // fighting range
-  ?c.canUseAbility("bash") & canDash
+  : // foe = phase3
+    ?c.canUsePotion("lucky")
+      activate potion
+    :?c.canUseAbility("mask")
+      c.useAbility_OH("mask", "r")
+    :?c.canUseAbility("wand_poison")
+      c.useAbility_OH(a.wandPoisonHidden, "l")
+    :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
+    ^!c.isPermapotSetup
+      c.useAbility_TH("Guardian's Bane") //'
+    :
+      fight("melee")
+
+: // 1v1
+  ?c.canUseAbility("bash")
     a.ldtF("bash")
-  :?c.canUseAbility("dash") & canDash
+  :?c.canUseAbility("dash")
     a.ldtF("dash")
-
-  ?foe = "scout"
-    ?foe.GetCount(s.getRange("crossbow")) > 1
-      // Defeat other enemies, so they don't clump up behind him
-
-      ?c.canUseAbility_DS("blade")
-        c.useAbility_DS("blade")
-      :?c.canUseAbility("wand_vigor")
-        c.useAbility_OH(a.wandVigorHidden, "l")
-      :?c.canUseAbility("voidweaver") &
-      ^c.canUnmakeVoidweaver()
-        c.devour("voidweaver")
-
-        >c0,0,#yellow,VOIDWEAVER DEVOUR SCOUT
-
-      :?c.canUseAbility("heavy_hammer")
-        c.useAbility_TH(Mjölnir)
-
-      :?foe.GetCount(s.dash_range_min) > 1
-        canDash = false
-        fight("evade")
-      :
-        ?c.isPermapotSetup & foe.GetCount(s.getRange("sword")) > 1
-          a.ldtF("magic unmake")
-        :?c.isPermapotSetup
-          a.ldtF("ranged unmake")
-    :
-      canDash = true
-      fight("melee")
-
-  :?foe = "phase" // Dysangelos
-    canDash = true
-
-    ?foe.debuffs.string = a.maxIgnitions_Default /* &
-    ^c.canUseAbility("cinderwisp") |
-    ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */
-      activate cinderwisp
-    
-    ?c.canUseAbility("staff_poison")
-      c.useAbility_TH(a.staffPoisonHidden)
-
-    :?foe ! "phase3"
-      ?foe.buffs.string = "buff_protection" & // against debuffs
-      ^c.canUseAbility("wand_vigor")
-        c.useAbility_OH(a.wandVigorHidden, hand)
-      :
-        fight("melee")
-
-    : // foe = phase3
-      ?c.canUsePotion("lucky")
-        activate potion
-      :?c.canUseAbility("mask")
-        c.useAbility_OH("mask", "r")
-      :?c.canUseAbility("wand_poison")
-        c.useAbility_OH(a.wandPoisonHidden, "l")
-      :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
-      ^!c.isPermapotSetup
-        c.useAbility_TH("Guardian's Bane") //'
-      :
-        fight("melee")
-
-  // normal foes
-  :?foe.GetCount(s.getRange("wand")) > 1 // AOE strategy
-    canDash = false
-    /*?!c.canUseAbility_DS("blade") &
-    ^c.canUseAbility("voidweaver") &
-    ^c.canUnmakeVoidweaver()
-      c.devour("voidweaver")
-
-      >c0,0,#magenta,VOIDWEAVER DEVOUR NORMAL*/
-
-    ?encounter.eliteMod ! "tenacious" &
-    ^c.canUseAbility("wand_stone")
-      c.useAbility_OH(a.wandStoneHidden, "l")
-
-    :?encounter.eliteMod ! "tenacious" &
-    ^c.canUseAbility("wand_aether")
-      c.useAbility_OH(a.wandAetherHidden, "l")
-
-    // Hinder regen
-    ?encounter.eliteMod = "regen" &
-    ^c.canUseAbility("wand_fire")
-      c.useAbility_OH(a.wandFireHidden, "l")
-  
-    :?foe.armor > 0 & // Remove armor
-    ^c.canUseAbility("heavy_hammer")
-      c.useAbility_TH(Mjölnir)
-
-    :?c.isPermapotSetup
-      fight("magic")
-    :
-      fight("ranged")
-
-  : // 1v1 strategy
-    canDash = true
-
-    ?s.getTotalHP("foe") >= a.bardicheRDmg &
-    ^!c.isPermapotSetup &
-    ^c.canUseAbility("bardiche")
-      c.useAbility_TH(Kubikiribocho)
-    :
-      fight("melee")
+  :
+    fight("melee")
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

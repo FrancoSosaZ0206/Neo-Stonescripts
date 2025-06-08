@@ -151,13 +151,6 @@ func canUseAbility(abilityId)
       ^buffs.string = "pick_pocket"
     :?abilityId = "hatchet"
       result = result & loc = "deadwood_valley"
-    :?abilityId = "voidweaver"
-      result = result & !(
-      ^ foe = "boss" | // bosses are immune to unmake
-      ^ encounter.eliteMod = "tenacious" | ( // tenacious can't be debuffed
-      ^   encounter.eliteMod = "monarch" &
-      ^   foe.count = 1) // monarch foes can't be unmade
-      ^)
 
     :?abilityId = "hatchet"
       result = (result & // and it's in range
@@ -184,6 +177,14 @@ func canUseAbility(abilityId)
 
     :?abilityId = "wand_stone"
       result = result & armor >= s.wand_stone_armor
+
+      >c-10,-1,#yellow,canact = @item.CanActivate()@\n
+      ^canact gravity = @item.CanActivate("wand_stone")@\n
+      ^gravity cd = @item.GetCooldown(abilityId)@\n
+      ^armor | req armor >>> @armor@ | @s.wand_stone_armor@
+
+      ?totaltime % 16 = 0
+        loc.Pause()
     :?abilityId = "wand_poison"
       result = result & armor >= s.wand_poison_armor
     :?abilityId = "wand_vigor"
@@ -430,9 +431,12 @@ func devour(summonName)
 effective against the current foes the player is
 facing. */
 func canUnmakeVoidweaver()
-  return foe ! "boss" &
-  ^!(encounter.eliteMod = "tenacious" |
-  ^encounter.eliteMod = "monarch")
+  return !(
+  ^ foe = "boss" | // bosses are immune to unmake
+  ^ encounter.eliteMod = "tenacious" | ( // tenacious can't be debuffed
+  ^   encounter.eliteMod = "monarch" &
+  ^   foe.count = 1) // monarch foes can't be unmade
+  ^)
 
 /* Checks if the cinderwisp's "devour" ability damage
 will kill the foe.
