@@ -401,7 +401,7 @@ func ldtF(mode)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
           equipL Vantum Phoenix
         : // foe = "stone"
-          equipL Vantum Phoenix // Unbroken Faith
+          equipL Bifrost // Unbroken Faith
 
       // Right hand
       ?mode = "tank"
@@ -582,7 +582,7 @@ func ldtF(mode)
           :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
             swordDmg = Vantum Phoenix
           : // foe = "stone"
-            swordDmg = Vantum Phoenix // Unbroken Faith
+            swordDmg = Bifrost // Unbroken Faith
 
           ?c.canApplyChill()
             c.doMoondial(swordDmg, swordIceDebuff1)
@@ -603,7 +603,7 @@ func ldtF(mode)
           :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
             equipL Vantum Phoenix
           : // foe = "stone"
-            equipL Vantum Phoenix // Unbroken Faith
+            equipL Bifrost // Unbroken Faith
 
         : // !c.isPermapotSetup
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -617,7 +617,7 @@ func ldtF(mode)
           :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
             c.doMoondial(Vantum Phoenix, swordFireDmg)
           : // foe = "stone"
-            c.doMoondial(Vantum Phoenix /*Unbroken Faith*/, swordFireDmg /*Broken Faith*/)
+            c.doMoondial(Bifrost /*Unbroken Faith*/, swordFireDmg /*Broken Faith*/)
 
   :?mode = "magic" // wands and staves
     ?mode = "heal"
@@ -667,7 +667,7 @@ func ldtF(mode)
         : // foe = "stone"
           equipL @wandIceDebuff@ // @wandStoneDmg@
       : // !c.isPermapotSetup
-        equip @bowAetherDmg@
+        equip @bowAetherDebuff@
 
         /* ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
           equip @staffIceDmg@
