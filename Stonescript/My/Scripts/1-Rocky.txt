@@ -84,10 +84,15 @@ func fight(mode)
     ^encounter.eliteMod ! "monarch"
       ?mode = "melee"
         a.ldtF("melee 1v1 unmake")
-      :?mode = "magic"
-        a.ldtF("ranged unmake") // magic
+      :?c.isPermapotSetup
+        a.ldtF("magic unmake")
+      :
+        a.ldtF("ranged unmake")
+
+      /*:?mode = "magic"
+        a.ldtF("magic unmake")
       :?mode = "ranged"
-        a.ldtF("ranged unmake") // ranged
+        a.ldtF("ranged unmake")*/
 
     : // 4. Deal max damage
       ?mode = "melee"
@@ -215,9 +220,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   ?foe ! "boss" | (foe = "scout" & foe.count > 1)
     ?!(encounter.eliteMod = "tenacious" |
-      ^(encounter.eliteMod = "monarch" &
-      ^foe.count = 1))
-        a.ldtF("defense unmake")
+    ^(encounter.eliteMod = "monarch" &
+    ^foe.count = 1))
+      a.ldtF("defense unmake")
     :?armor <= c.getFoeDamage(weakenType, a.mask_feebleCount)
       a.ldtF("defense")
     :?foe ! "ranged"
@@ -253,7 +258,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       a.ldtF("defense buff empower")
 
     :?foe = "phase2"
-
       ?foe.buffs.string = "buff_protection" & // against debuffs
       ^c.canUseAbility("wand_vigor")
         c.useAbility_OH(a.wandVigorHidden, hand)
@@ -331,13 +335,14 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :?c.canUseAbility("heavy_hammer")
         c.useAbility_TH(Mjölnir)
 
-      :?c.isPermapotSetup
-        equip @a.bowAetherDebuff@
       :?foe.GetCount(s.dash_range_min) > 1
         >c0,0,#magenta,EVADING SCOUT AND FOES
         fight("evade")
       :
-        fight("ranged")
+        ?c.isPermapotSetup
+          a.ldtF("magic unmake")
+        :?c.isPermapotSetup
+          a.ldtF("ranged unmake")
     :
       canDash = true
       fight("melee")
