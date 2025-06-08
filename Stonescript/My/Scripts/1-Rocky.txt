@@ -75,9 +75,9 @@ func fight(mode)
       ?mode = "melee"
         a.ldtF("melee 1v1 heal")
       :?mode = "magic"
-        a.ldtF("magic heal")
+        a.ldtF("melee heal") // magic
       :?mode = "ranged"
-        a.ldtF("magic heal") // ranged
+        a.ldtF("melee heal") // ranged
 
     :?foe ! "boss" & // 3. Unmake
     ^encounter.eliteMod ! "tenacious" &
@@ -201,7 +201,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // ABOUT TO ATTACK
 :?(foe.state = 32 & (
-^ (foe ! "boss" & foe.time > 15) |
+^ (foe ! "boss" & foe.time > 50) |
 ^ (foe = "scout" & (
 ^   (foe.damage <= 5 & foe.time > 50)   |
 ^   (foe.damage >= 8 & foe.time > 155))) |
@@ -225,11 +225,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       a.ldtF("defense unmake")
     :?armor <= c.getFoeDamage(weakenType, a.mask_feebleCount)
       a.ldtF("defense")
-    :?foe ! "ranged"
-      fight("evade")
     :
-      fight("ranged")
-      
+      fight("evade")
 
   :?foe = "phase3" &
   ^(foe.state = 115 | foe.damage = 1)
@@ -325,21 +322,24 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ?foe.GetCount(s.getRange("crossbow")) > 1
       // Defeat other enemies, so they don't clump up behind him
 
-      canDash = false
-      
       ?c.canUseAbility_DS("blade")
         c.useAbility_DS("blade")
+      :?c.canUseAbility("wand_vigor")
+        c.useAbility_OH(a.wandVigorHidden, "l")
       :?c.canUseAbility("voidweaver") &
       ^c.canUnmakeVoidweaver()
         c.devour("voidweaver")
+
+        >c0,0,#yellow,VOIDWEAVER DEVOUR SCOUT
+
       :?c.canUseAbility("heavy_hammer")
         c.useAbility_TH(Mjölnir)
 
       :?foe.GetCount(s.dash_range_min) > 1
-        >c0,0,#magenta,EVADING SCOUT AND FOES
+        canDash = false
         fight("evade")
       :
-        ?c.isPermapotSetup
+        ?c.isPermapotSetup & foe.GetCount(s.getRange("sword")) > 1
           a.ldtF("magic unmake")
         :?c.isPermapotSetup
           a.ldtF("ranged unmake")
@@ -381,12 +381,14 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   // normal foes
   :?foe.GetCount(s.getRange("wand")) > 1 // AOE strategy
     canDash = false
-    ?!c.canUseAbility_DS("blade") &
+    /*?!c.canUseAbility_DS("blade") &
     ^c.canUseAbility("voidweaver") &
     ^c.canUnmakeVoidweaver()
       c.devour("voidweaver")
 
-    :?encounter.eliteMod ! "tenacious" &
+      >c0,0,#magenta,VOIDWEAVER DEVOUR NORMAL*/
+
+    ?encounter.eliteMod ! "tenacious" &
     ^c.canUseAbility("wand_stone")
       c.useAbility_OH(a.wandStoneHidden, "l")
 
