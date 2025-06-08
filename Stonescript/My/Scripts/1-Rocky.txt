@@ -188,9 +188,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-?c.canSummon("aether_talisman")
+?c.canSummon("aether_talisman") & foe ! "boss"
   c.useAbility_OH("aether_talisman", hand)
-:?c.canSummon("fire_talisman") & (foe = "phase" | loc.stars < 15)
+:?c.canSummon("fire_talisman") & (foe = "boss" | loc.stars < 15)
   c.useAbility_OH("fire_talisman", hand)
 
 
@@ -296,7 +296,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^encounter.isElite &
   ^c.canUseAbility("wand_vigor") // reset buffs
     c.useAbility_OH(a.wandVigorHidden, "l")
-  :?encounter.eliteMod ! "tenacious" &
+  :?!encounter.isElite &
   ^foe.distance <= s.getRange("wand") &
   ^c.canUseAbility("wand_stone") // align foes
     c.useAbility_OH(a.wandStoneHidden, "l")
