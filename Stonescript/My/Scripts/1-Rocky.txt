@@ -85,7 +85,7 @@ func fight(mode)
       ?mode = "melee"
         a.ldtF("melee 1v1 unmake")
       :?mode = "magic"
-        a.ldtF("magic unmake")
+        a.ldtF("ranged unmake") // magic
       :?mode = "ranged"
         a.ldtF("ranged unmake") // ranged
 
@@ -343,6 +343,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("melee")
 
   :?foe = "phase" // Dysangelos
+    canDash = true
+
     ?foe.debuffs.string = a.maxIgnitions_Default /* &
     ^c.canUseAbility("cinderwisp") |
     ^c.canKillCinderwisp(a.cinderwispDmg_Default, 0) */

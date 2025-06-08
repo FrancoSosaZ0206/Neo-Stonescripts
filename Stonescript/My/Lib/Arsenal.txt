@@ -114,6 +114,7 @@ var swordAetherDebuff1 = "sword aether dU *max -big golden"
 var swordAetherDebuff2 = "sword aether dU *max -big -golden"
 var shieldAetherDefense = "shield aether *max -au"
 var shieldAetherDebuff = "shield aether *max au"
+var hammerAetherDefense = "hammer aether *max aU"
 var bowAetherDmg = "bow aether *max -dU"
 var bowAetherDebuff = "bow aether *max dU"
 var wandAetherDebuff = "wand aether *max dU -hidden"
@@ -270,13 +271,13 @@ func ldtF(mode)
       :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
         equipL @hammerPoisonDefense@
       :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-        equipL @hammerVigorDefense@
+        equipL @hammerVigorBuff@
       :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
         equipL @hammerAetherDefense@
       :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
         equipL @hammerFireDefense@
       :
-        equipL Speedy Hammer
+        equipL triskelion
     :
       equipL triskelion
 
