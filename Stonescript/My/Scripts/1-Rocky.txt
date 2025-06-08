@@ -267,11 +267,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 :?c.canUseAbility("quarterstaff") &
 ^!c.isDashingRange() & ai.walking
-  c.useAbility_TH("quarterstaff") // a.myQuarterstaff)
+  c.useAbility_TH(a.myQuarterstaff)
 
 
 // AOE strategy
-:?foe.GetCount(s.getRange("wand")) > 1
+:?foe.count > 1 // GetCount(s.getRange("wand")) > 1
   ?c.canUseAbility("voidweaver")
     // c.devour("voidweaver")
     ?totaltime % 15 = 0
@@ -296,18 +296,25 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?encounter.eliteMod ! "tenacious" &
   ^c.canUseAbility("wand_stone") // align foes
     c.useAbility_OH(a.wandStoneHidden, "l")
-    >c0,-3,#cyan,USING GRAVITY WAND
   :?encounter.eliteMod ! "tenacious" &
   ^c.canUseAbility("wand_aether") // Calamity - reduce hp
     c.useAbility_OH(a.wandAetherHidden, "l")
 
-  :?foe.distance < s.dash_range_min
-    fight("evade")
+  :?foe.distance < s.dash_range_min &
+  ^c.canUseAbility("mind")
+    a.ldtF("mind")
+    >c0,0,#yellow,MIND
+  :?foe.distance < s.dash_range_min &
+  ^c.canUseAbility("staff_stone")
+    a.ldtF("staff_stone")
+    >c0,0,#yellow,STAFF STONE
 
   :?c.isPermapotSetup
-    equipL grappling hook
+    >c0,0,#yellow,GRAPPLING
+    equipL grappling
     equipR mask
   :
+    >c0,0,#yellow,RANGED
     fight("ranged")
 
 

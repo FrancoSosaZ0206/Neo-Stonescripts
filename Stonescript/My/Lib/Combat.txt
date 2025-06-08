@@ -178,7 +178,7 @@ func canUseAbility(abilityId)
     :?abilityId = "wand_stone"
       result = result & armor >= s.wand_stone_armor
 
-      >`1,9,#yellow,
+      >`1,9,#cyan,
       ^canact######=#@item.CanActivate()@\n
       ^canact#item#=#@item.CanActivate(abilityId)@\n
       ^gravity#cd##=#@item.GetCooldown(abilityId)@\n
@@ -186,6 +186,7 @@ func canUseAbility(abilityId)
       ^result#=#@result@
 
       ?result
+        >c0,-3,#cyan,USING GRAVITY WAND
         loc.Pause()
     :?abilityId = "wand_poison"
       result = result & armor >= s.wand_poison_armor
