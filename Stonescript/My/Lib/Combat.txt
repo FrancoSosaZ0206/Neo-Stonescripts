@@ -64,7 +64,7 @@ var burstingCdTimer = 0
 
 // Others
 
-var isPermapotSetup = true
+var isPermapotSetup = false // true
 
 
 // //////////////// FUNCTIONS //////////////// //

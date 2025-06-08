@@ -63,27 +63,36 @@ func fight(mode)
 
   :
     // 1. debuff, if possible
-    ?c.canDebuffAny() & // foe can be debuffed
-    ^encounter.eliteMod ! "tenacious" & // foe isn't immune to debuffs
-    ^foe.buffs.string ! "buff_protection"
+    ?c.canDebuffAny() & !(
+    ^encounter.eliteMod = "tenacious" |
+    ^foe.buffs.string = "buff_protection")
       ?mode = "melee"
         a.ldtF("melee 1v1 debuff")
-      :?mode = "magic"
+      :?c.isPermapotSetup
+        a.ldtF("magic debuff")
+      :
+        a.ldtF("ranged debuff")
+      
+      /*:?mode = "magic"
         a.ldtF("magic debuff")
       :?mode = "ranged"
-        a.ldtF("magic debuff") // ranged
+        a.ldtF("magic debuff") // ranged*/
 
-    :?hp ! maxhp // 2. Heal if needed
-      ?mode = "melee"
+    // 2. Heal if needed
+    :?hp ! maxhp
+      a.ldtF("melee 1v1 heal")
+      
+      /*?mode = "melee"
         a.ldtF("melee 1v1 heal")
       :?mode = "magic"
-        a.ldtF("melee heal") // magic
+        a.ldtF("magic heal")
       :?mode = "ranged"
-        a.ldtF("melee heal") // ranged
+        a.ldtF("ranged heal")*/
 
-    :?foe ! "boss" & // 3. Unmake
-    ^encounter.eliteMod ! "tenacious" &
-    ^encounter.eliteMod ! "monarch"
+    // 3. Unmake
+    :?foe ! "boss" & !(
+    ^encounter.eliteMod = "tenacious" |
+    ^(encounter.eliteMod = "monarch" & foe.count = 1))
       ?mode = "melee"
         a.ldtF("melee 1v1 unmake")
       :?c.isPermapotSetup
@@ -106,7 +115,7 @@ func fight(mode)
         a.ldtF("magic dmg")
       :
         a.ldtF("ranged dmg")
-      
+
       /*:?mode = "magic"
         a.ldtF("magic dmg")
       :?mode = "ranged"
@@ -332,7 +341,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       equipL @a.wandAetherDebuff@
     equipR mask
   :
-    fight("magic")
+    fight("ranged")
 
 
 :?ai.paused |

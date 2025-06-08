@@ -105,10 +105,11 @@ var mobileUrl =
 
 sys.SetFileUrl(mobileUrl)
 
-import UI/MindstoneButton
 // ↓↓↓ COMMENT OUT HERE ↓↓↓
 import My/Scripts/main
 // ↑↑↑ COMMENT OUT HERE ↑↑↑
+
+import UI/MindstoneButton
 
 // ↑↑↑ COPY UNTIL HERE ↑↑↑
 // ////////////////////////////////////////// */
@@ -134,7 +135,7 @@ import My/Cosmetics
   import My/Scripts/Gate
 
 :
-  // import UI/FoeStateTracker
+  import UI/FoeStateTracker
   var tm = import My/Lib/Meters/Times
   var dps = import My/Lib/Meters/DPS
 
