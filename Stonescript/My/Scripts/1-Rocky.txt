@@ -109,12 +109,12 @@ func fight(mode)
 
 // //////////////// PROCEDURE //////////////// //
 
-?foe.distance ! 9999
+/*?foe.distance ! 9999
   >`1,15,#magenta,dist#=#@foe.distance@\n
   ^dist#+#margin#=#@foe.distance + margin@\n
   ^count#=#@foe.count@\n
   ^count#in#dist#=#@foe.GetCount(foe.distance)@\n
-  ^count#in#dist#+#margin#=#@foe.GetCount(foe.distance + margin)@\n
+  ^count#in#dist#+#margin#=#@foe.GetCount(foe.distance + margin)@\n*/
 
 c.Init()
 c.smiteScreen_Target = 2
@@ -162,9 +162,9 @@ disable npcDialog
       ?!dontShowAgain
         dontShowAgain = true
 
-/*?loc.stars > 15
-  // potionType = "berserk"
-  // weakenType = a.weaken_boosted*/
+?loc.stars > 15
+  potionType = "berserk"
+  // weakenType = a.weaken_boosted
 
 // Decide hand for one-handed items
 ?c.isPermapotSetup
@@ -194,8 +194,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useAbility_OH("fire_talisman", hand)
 
 
-:?c.canUsePotion("lucky") &
-^c.isPermapotSetup
+:?c.canUsePotion(potionType) & c.isPermapotSetup
   activate potion
 :?c.canUseAbility("staff_fire") &
 ^buffs.string ! "buff_inf_speed" &
@@ -308,18 +307,17 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?foe.distance < s.dash_range_min &
   ^c.canUseAbility("mind")
     a.ldtF("mind")
-    >c0,0,#yellow,MIND
   :?foe.distance < s.dash_range_min &
   ^c.canUseAbility("staff_stone")
     a.ldtF("staff_stone")
-    >c0,0,#yellow,STAFF STONE
 
   :?c.isPermapotSetup
-    >c0,0,#yellow,GRAPPLING
-    equipL grappling
+    ?foe.debuffs.string = "stun"
+      equipL @a.wandAetherDebuff@
+    :
+      equipL grappling
     equipR mask
   :
-    >c0,0,#yellow,RANGED
     fight("ranged")
 
 
