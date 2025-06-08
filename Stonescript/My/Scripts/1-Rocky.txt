@@ -225,7 +225,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // ABOUT TO ATTACK
 :?(foe.state = 32 & (
-^ (foe ! "boss" & foe.time > 50) |
 ^ (foe = "scout" & (
 ^   (foe.damage <= 5 & foe.time > 50)   |
 ^   (foe.damage >= 8 & foe.time > 155))) |
@@ -241,17 +240,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   // a bit into the attack state
 ^(foe.state = 33 & foe.time = 0 &
 ^ (foe = "phase2" | foe = "phase3"))
-
-  ?foe ! "boss"
-    ?!(encounter.eliteMod = "tenacious" |
-    ^(encounter.eliteMod = "monarch" & foe.count = 1))
-      a.ldtF("defense unmake")
-    :?armor <= c.getFoeDamage(weakenType, a.mask_feebleCount)
-      a.ldtF("defense heal")
-    :
-      fight("evade")
-
-  :?foe = "phase3" &
+  ?foe = "phase3" &
   ^(foe.state = 115 | foe.damage = 1)
     ?foe.damage = 1 & // prevent the stun
     ^c.canUseAbility("staff_vigor")
@@ -302,46 +291,69 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.count > 1 & foe.distance <= s.getRange("crossbow rune"))
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
+    >c0,3,#red,DEVOUR VOIDWEAVER
 
-  // Hinder regen
-  ?encounter.eliteMod = "regen" &
-  ^c.canUseAbility("wand_fire")
-    c.useAbility_OH(a.wandFireHidden, "l")
-
-  :?c.canUseAbility("heavy_hammer")
+  ?c.canUseAbility("heavy_hammer")
     ?encounter.eliteMod = "plated"
       c.useAbility_TH("Guardian's Bane")
     :
       c.useAbility_TH(Mjölnir)
 
+  // Calamity - reduce hp
   :?encounter.eliteMod ! "tenacious" &
-  ^encounter.isElite &
-  ^c.canUseAbility("wand_vigor") // reset buffs
-    c.useAbility_OH(a.wandVigorHidden, "l")
-  :?!encounter.isElite &
-  ^foe.distance <= s.getRange("wand") &
-  ^c.canUseAbility("wand_stone") // align foes
-    c.useAbility_OH(a.wandStoneHidden, "l")
-  :?encounter.eliteMod ! "tenacious" &
-  ^c.canUseAbility("wand_aether") // Calamity - reduce hp
+  ^c.canUseAbility("wand_aether")
     c.useAbility_OH(a.wandAetherHidden, "l")
 
-  :?foe.distance < s.dash_range_min &
-  ^c.canUseAbility("mind")
-    a.ldtF("mind")
-  :?foe.distance < s.dash_range_min &
-  ^c.canUseAbility("staff_stone")
-    c.useAbility_TH(a.staffStoneHidden)
+  :?!encounter.isElite
+    ?c.canUseAbility("bash")
+      a.ldtF("bash")
+    :?c.canUseAbility("dash")
+      a.ldtF("dash")
 
-  :?c.isPermapotSetup
-    ?encounter.eliteMod ! "tenacious" &
-    ^foe.debuffs.string ! "stun" 
-      equipL grappling
+    :?c.isPermapotSetup
+      ?foe.debuffs.string ! "stun" 
+        equipL grappling
+      :
+        equipL @a.wandAetherDebuff@
+      equipR mask
     :
-      equipL @a.wandAetherDebuff@
-    equipR mask
-  :
-    fight("ranged")
+      fight("ranged")
+      >c0,1,#yellow,FIGHTING RANGED | AOE STRAT
+
+
+  : // enconuter.isElite
+
+    // reset buffs
+    ?encounter.eliteMod ! "tenacious" &
+    ^c.canUseAbility("wand_vigor")
+      c.useAbility_OH(a.wandVigorHidden, "l")
+
+    // Hinder regen
+    :?encounter.eliteMod = "regen" &
+    ^c.canUseAbility("wand_fire")
+      c.useAbility_OH(a.wandFireHidden, "l")
+
+    :?foe.distance <= s.getRange("wand") &
+    ^c.canUseAbility("wand_stone") // align foes
+      c.useAbility_OH(a.wandStoneHidden, "l")
+
+    :?foe.distance < s.dash_range_min &
+    ^c.canUseAbility("mind")
+      a.ldtF("mind")
+    :?foe.distance < s.dash_range_min &
+    ^c.canUseAbility("staff_stone")
+      c.useAbility_TH(a.staffStoneHidden)
+
+    :?c.isPermapotSetup
+      ?encounter.eliteMod ! "tenacious" &
+      ^foe.debuffs.string ! "stun" 
+        equipL grappling
+      :
+        equipL @a.wandAetherDebuff@
+      equipR mask
+    :
+      fight("ranged")
+      >c0,1,#yellow,FIGHTING RANGED | AOE STRAT
 
 
 :?ai.paused |
