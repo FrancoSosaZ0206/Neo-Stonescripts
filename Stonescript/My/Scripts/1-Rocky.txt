@@ -163,7 +163,7 @@ disable npcDialog
         dontShowAgain = true
 
 ?loc.stars > 15
-  potionType = "berserk"
+  potionType = "lucky" // "berserk"
   // weakenType = a.weaken_boosted
 
 // Decide hand for one-handed items
@@ -359,7 +359,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("melee")
 
   : // foe = phase3
-    ?c.canUsePotion("lucky")
+    ?c.canUsePotion(potionType)
       activate potion
     :?c.canUseAbility("mask")
       c.useAbility_OH("mask", "r")
