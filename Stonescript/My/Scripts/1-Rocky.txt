@@ -339,6 +339,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :
         fight("ranged")
     :
+      canDash = true
       fight("melee")
 
   :?foe = "phase" // Dysangelos
@@ -371,7 +372,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
         fight("melee")
 
   // normal foes
-  :?foe.count > 1 // AOE strategy
+  :?foe.GetCount(s.getRange("wand")) > 1 // AOE strategy
+    canDash = false
     ?!c.canUseAbility_DS("blade") &
     ^c.canUseAbility("voidweaver") &
     ^c.canUnmakeVoidweaver()
@@ -400,6 +402,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("ranged")
 
   : // 1v1 strategy
+    canDash = true
+
     ?s.getTotalHP("foe") >= a.bardicheRDmg &
     ^!c.isPermapotSetup &
     ^c.canUseAbility("bardiche")
