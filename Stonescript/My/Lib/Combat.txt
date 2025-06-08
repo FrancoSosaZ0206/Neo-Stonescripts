@@ -204,6 +204,7 @@ func canUseAbility(abilityId)
 
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityId>:\n\n" + abilityId, false)
+    loc.Pause()
 
   return result
 

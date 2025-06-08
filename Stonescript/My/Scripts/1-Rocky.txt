@@ -189,25 +189,23 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-?c.canSummon("aether_talisman") & foe ! "boss"
+?c.canSummon("aether_talisman") & foe ! "boss" & foe.distance ! 9999
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") & (foe = "boss" | loc.stars < 15)
   c.useAbility_OH("fire_talisman", hand)
 
-
 :?c.canUsePotion(potionType) & c.isPermapotSetup
   activate potion
-:?c.canUseAbility("staff_fire") &
-^buffs.string ! "buff_inf_speed" &
-^ai.enabled & !ai.paused
-  // speed up
-  c.useAbility_TH(a.staffFireHidden)
-
 :?choice & harvest.distance < 5
   a.ldtF("harvest")
 :?pickup.distance < 15
   a.ldtF("magnet")
 
+:?c.canUseAbility("staff_fire") &
+^buffs.string ! "buff_inf_speed" &
+^ai.enabled & !ai.paused
+  // speed up
+  c.useAbility_TH(a.staffFireHidden)
 
 // ABOUT TO ATTACK
 :?(foe.state = 32 & (
@@ -311,7 +309,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     a.ldtF("mind")
   :?foe.distance < s.dash_range_min &
   ^c.canUseAbility("staff_stone")
-    a.ldtF("staff_stone")
+    c.useAbility_TH(a.staffStoneHidden)
 
   :?c.isPermapotSetup
     ?foe.debuffs.string = "stun"
