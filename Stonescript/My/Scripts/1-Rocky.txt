@@ -21,8 +21,10 @@ var buttonPressed = false
 var dontShowAgain = false
 
 var weakenType = a.weaken_default
+var potionType = "lucky"
 var hand       = null
 
+var canDash    = true
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -132,7 +134,6 @@ disable npcDialog
     noButton.Recycle()
     noButton = null
 
-
   ?!dontShowAgain
     var aux = totaltime + 3*u.sec
     ?totaltime < aux
@@ -146,10 +147,10 @@ disable npcDialog
       ?!dontShowAgain
         dontShowAgain = true
 
-
-// Decide how much to weaken the foe
 /*?loc.stars > 15
-  weakenType = a.weaken_boosted*/
+  // potionType = "berserk"
+  // weakenType = a.weaken_boosted*/
+
 // Decide hand for one-handed items
 ?c.isPermapotSetup
   hand = "left"
@@ -161,26 +162,25 @@ c.screen_DS_Change("blade")
 c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // Auto Brewing
-?c.canBrewPotion("lucky")
-  c.brewPotion("lucky")
+?c.canBrewPotion(potionType)
+  c.brewPotion(potionType)
 
 ?loc.begin // initial equipment
   a.ldtF("default")
 :?c.isPermapotSetup
   a.ldtF("permapot")
 
-
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-
-?!(foe = "boss" | c.isDead()) & c.canSummon("aether_talisman")
+?c.canSummon("aether_talisman") & foe.count > 1
   c.useAbility_OH("aether_talisman", hand)
-:?(foe = "boss" | loc.stars <= 15) & c.canSummon("fire_talisman")
+:?c.canSummon("fire_talisman") & foe.count = 1
   c.useAbility_OH("fire_talisman", hand)
 
 
-:?c.canUsePotion("lucky") & c.isPermapotSetup
+:?c.canUsePotion("lucky") &
+^c.isPermapotSetup
   activate potion
 :?c.canUseAbility("staff_fire") &
 ^buffs.string ! "buff_inf_speed" &
@@ -196,18 +196,24 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // ABOUT TO ATTACK
 :?(foe.state = 32 & (
-^ (foe ! "boss" & foe.time > 50) |
-^ (foe = "scout" & foe.time > 50) |
+^ (foe ! "boss" & foe.time > 15) |
+^ (foe = "scout" & (
+^   (foe.damage <= 5 & foe.time > 50)   |
+^   (foe.damage >= 8 & foe.time > 155))) |
 ^ (foe = "phase1" & foe.time > 60) |
 ^ (foe = "phase2" & foe.time > 95) |
 ^ (foe = "phase3" & (
-^   (foe.time > 85 & foe.damage ! 1) | // normal phase3 attacks
-^   (foe.time > 65 & foe.damage = 1)) )  )   ) | // putting shield up
-^(foe = "phase3" & foe.state = 115 & foe.time > 70) | // Dysangelos's massive beam
-^(foe.state = 33 & foe.time = 0 & // a bit into the attack state
+    // normal phase3 attacks
+^   (foe.time > 85 & foe.damage ! 1) |
+    // putting shield up
+^   (foe.time > 65 & foe.damage = 1)) )  )   ) |
+    // Dysangelos's massive beam
+^(foe = "phase3" & foe.state = 115 & foe.time > 70) |
+  // a bit into the attack state
+^(foe.state = 33 & foe.time = 0 &
 ^ (foe = "phase2" | foe = "phase3"))
 
-  ?foe ! "boss"
+  ?foe ! "boss" | (foe = "scout" & foe.count > 1)
     ?!(encounter.eliteMod = "tenacious" |
       ^(encounter.eliteMod = "monarch" &
       ^foe.count = 1))
@@ -299,20 +305,41 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     a.ldtF("dash")
 
   : // 1v1 with the monarch
-    ?foe.hp + foe.armor >= a.bardicheRDmg &
+    ?s.getTotalHP("foe") >= a.bardicheRDmg &
     ^c.canUseAbility("bardiche")
       c.useAbility_TH(Kubikiribocho)
     :
       fight("melee")
 
 : // fighting range
-  ?c.canUseAbility("bash")
+  ?c.canUseAbility("bash") & canDash
     a.ldtF("bash")
-  :?c.canUseAbility("dash")
+  :?c.canUseAbility("dash") & canDash
     a.ldtF("dash")
 
-  :?foe = "scout"
-    fight("melee")
+  ?foe = "scout"
+    ?foe.GetCount(s.getRange("crossbow")) > 1
+      // Defeat other enemies, so they don't clump up behind him
+
+      canDash = false
+      
+      ?c.canUseAbility_DS("blade")
+        c.useAbility_DS("blade")
+      :?c.canUseAbility("voidweaver") &
+      ^c.canUnmakeVoidweaver()
+        c.devour("voidweaver")
+      :?c.canUseAbility("heavy_hammer")
+        c.useAbility_TH(Mjölnir)
+
+      :?c.isPermapotSetup
+        equip @a.bowAetherDebuff@
+      :?foe.GetCount(s.dash_range_min) > 1
+        >c0,0,#magenta,EVADING SCOUT AND FOES
+        fight("evade")
+      :
+        fight("ranged")
+    :
+      fight("melee")
 
   :?foe = "phase" // Dysangelos
     ?foe.debuffs.string = a.maxIgnitions_Default /* &
@@ -345,9 +372,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   // normal foes
   :?foe.count > 1 // AOE strategy
-    ?c.canUseAbility("voidweaver") &
-    ^c.canUnmakeVoidweaver() &
-    ^!c.canUseAbility_DS("blade")
+    ?!c.canUseAbility_DS("blade") &
+    ^c.canUseAbility("voidweaver") &
+    ^c.canUnmakeVoidweaver()
       c.devour("voidweaver")
 
     :?encounter.eliteMod ! "tenacious" &
@@ -365,18 +392,18 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   
     :?foe.armor > 0 & // Remove armor
     ^c.canUseAbility("heavy_hammer")
-      c.useAbility_TH("Guardian's Bane")
+      c.useAbility_TH(Mjölnir)
 
     :?c.isPermapotSetup
       fight("magic")
     :
       fight("ranged")
-  
+
   : // 1v1 strategy
     ?s.getTotalHP("foe") >= a.bardicheRDmg &
-    ^c.canUseBardiche() &
-    ^!c.isPermapotSetup
-      c.useBardiche(Kubikiribocho)
+    ^!c.isPermapotSetup &
+    ^c.canUseAbility("bardiche")
+      c.useAbility_TH(Kubikiribocho)
     :
       fight("melee")
 

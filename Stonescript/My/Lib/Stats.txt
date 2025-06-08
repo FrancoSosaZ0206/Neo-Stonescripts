@@ -133,7 +133,10 @@ func getRange(itemName)
     :?itemName = "wand" & !result
       result = wand_range
     :?itemName = "crossbow" & !result
-      result = crossbow_range
+      ?itemName = "rune"
+        result = crossbow_rune_range
+      :
+        result = crossbow_range
 
     :?itemName = "quarterstaff"
       result = staff_range
