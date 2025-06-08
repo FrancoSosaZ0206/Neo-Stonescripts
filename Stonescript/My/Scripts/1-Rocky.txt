@@ -271,7 +271,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 
 // AOE strategy
-:?foe.count > 1
+:?foe.GetCount(foe.distance + 5) > 1 & foe.distance ! 9999
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
 
@@ -288,6 +288,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^c.canUseAbility("wand_vigor") // reset buffs
     c.useAbility_OH(a.wandVigorHidden, "l")
   :?encounter.eliteMod ! "tenacious" &
+  ^foe.distance <= s.getRange("wand") &
   ^c.canUseAbility("wand_stone") // align foes
     c.useAbility_OH(a.wandStoneHidden, "l")
   :?encounter.eliteMod ! "tenacious" &

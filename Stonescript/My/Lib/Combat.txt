@@ -143,7 +143,7 @@ func canUseAbility(abilityId)
     >`1,9,#cyan,
     ^canact######=#@item.CanActivate()@\n
     ^canact#item#=#@item.CanActivate(abilityId)@\n
-    ^gravity#cd##=#@item.GetCooldown(abilityId)@\n
+    ^item#cd#####=#@item.GetCooldown(abilityId)@\n
     ^armor#|#req#=#@armor@#|#@s.wand_stone_armor@\n
     ^result#=#@result@
   
@@ -183,7 +183,8 @@ func canUseAbility(abilityId)
         result = result & foe.debuffs.string = "ignition"
 
     :?abilityId = "wand_stone"
-      result = result & armor >= s.wand_stone_armor
+      result = result & armor >= s.wand_stone_armor &
+      ^foe.count > 1
 
       ?result
         >c0,-3,#cyan,USING GRAVITY WAND
@@ -425,7 +426,6 @@ func devour(summonName)
     ?isSummoned(summonName)
       activate @summonName@
       >c0,0,#red,ACTIVATING @summonName@
-      loc.Pause()
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: <summonName> isn't summoned", false)
   :
@@ -437,7 +437,7 @@ effective against the current foes the player is
 facing. */
 func canUnmakeVoidweaver()
   return !(
-  ^ foe = "boss" | // bosses are immune to unmake
+  // ^ foe = "boss" | // bosses are immune to unmake
   ^ encounter.eliteMod = "tenacious" | ( // tenacious can't be debuffed
   ^   encounter.eliteMod = "monarch" &
   ^   foe.count = 1) // monarch foes can't be unmade
