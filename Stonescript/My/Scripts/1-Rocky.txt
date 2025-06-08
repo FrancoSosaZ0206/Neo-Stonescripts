@@ -300,7 +300,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     c.useAbility_OH(a.wandFireHidden, "l")
 
   :?c.canUseAbility("heavy_hammer")
-    c.useAbility_TH(Mjölnir)
+    ?encounter.eliteMod = "plated"
+      c.useAbility_TH("Guardian's Bane")
+    :
+      c.useAbility_TH(Mjölnir)
 
   :?encounter.eliteMod ! "tenacious" &
   ^encounter.isElite &

@@ -236,12 +236,11 @@ func useAbility_TH(itemName)
   ^   itemName = "ice"        | item.right = "ice"))
     activate R
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: <itemName> unknown or failed to equip:\n\n" + itemName, false)
 
     >`1,7,#magenta,
     ^itemName#=#@itemName@\n
     ^R#=#@item.right@
-    loc.Pause()
 
 /* Activates a one-handed item's ability.
 
