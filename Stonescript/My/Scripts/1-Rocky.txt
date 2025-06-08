@@ -283,13 +283,16 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       >`1,7,@u.colorToHex("orange")@,USE VOIDWEAVER!
 
   // Hinder regen
-  ?encounter.eliteMod = "regen" &
+  :?encounter.eliteMod = "regen" &
   ^c.canUseAbility("wand_fire")
     c.useAbility_OH(a.wandFireHidden, "l")
 
   :?c.canUseAbility("heavy_hammer")
     c.useAbility_TH(Mjölnir)
 
+  :?encounter.eliteMod ! "tenacious" &
+  ^c.canUseAbility("wand_vigor") // reset buffs
+    c.useAbility_OH(a.wandVigorHidden, "l")
   :?encounter.eliteMod ! "tenacious" &
   ^c.canUseAbility("wand_stone") // align foes
     c.useAbility_OH(a.wandStoneHidden, "l")
