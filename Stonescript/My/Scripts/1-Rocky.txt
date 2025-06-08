@@ -280,7 +280,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // AOE strategy
 :?foe.GetCount(foe.distance + margin) > 1 &
-^foe.distance <= s.getRange("wand")
+^foe.distance <= s.getRange("wand") & foe ! "warcaster"
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
 
