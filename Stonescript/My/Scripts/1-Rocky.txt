@@ -24,7 +24,7 @@ var weakenType = a.weaken_default
 var potionType = "lucky"
 var hand       = null
 
-var margin = 10
+var margin = 8 // wand left hitbox + splash range
 
 
 // //////////////// FUNCTIONS //////////////// //
@@ -117,6 +117,8 @@ func fight(mode)
   ^count#in#dist#+#margin#=#@foe.GetCount(foe.distance + margin)@\n
 
 c.Init()
+c.smiteScreen_Target = 2
+
 disable npcDialog
 
 // Auto-harvesting logic
@@ -279,7 +281,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // AOE strategy
 :?foe.GetCount(foe.distance + margin) > 1 &
-^foe.distance ! 9999
+^foe.distance <= s.getRange("wand")
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
 

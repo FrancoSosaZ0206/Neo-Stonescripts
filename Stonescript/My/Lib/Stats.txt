@@ -41,7 +41,7 @@ Made by IronHawk (Tom Crow)
 
 Enjoy! */
 
-/* HITBOXES AND SPLASH RADIUS
+/* HITBOXES AND SPLASH RANGES
 
 Ranges + Hitboxes table
 
@@ -54,7 +54,8 @@ All hitbox widths are odd unless it says even,
 which means splash rounds down while main hit
 rounds up.
 
-01234567890123
+          11111111
+012345678901234567
 ..bbbbbBbbbbb////. bardiche, bfg
 ...sssSsss/....... skeleton arm (has 1 aoeX)
 ..ccCcc////....... basic crossbow left
@@ -85,19 +86,19 @@ and the letters are where that hitbox will hit.
 For example, bardiche will hit an enemy at
 distance 12, but not 13.
 
-Enemies have their own collisionwidth extending to
+Enemies have their own collision width extending to
 the right, which is why you don't miss when
 swinging at dist 1.
 
 When a projectile hits the first enemy, it
 splashes and hits the rest, using a different
-calculation.
+calculation:
 
 For most projectiles, it grows the projectile
 hitbox by 4 units on both sides, 2 units vertically
 (to the area shown with slashes), but there is a
 bug that will shift the enemy hitbox left by half
-their collisionwidth with the splash collision
+their collision width with the splash collision
 detection, so actually you get +1 range on top of
 this if the enemy is 3-wide, +2 if its 5-wide, etc.
 

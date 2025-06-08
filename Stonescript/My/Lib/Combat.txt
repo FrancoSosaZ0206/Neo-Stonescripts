@@ -188,7 +188,6 @@ func canUseAbility(abilityId)
 
       ?result
         >c0,-3,#cyan,USING GRAVITY WAND
-        loc.Pause()
     :?abilityId = "wand_poison"
       result = result & armor >= s.wand_poison_armor
     :?abilityId = "wand_vigor"
