@@ -44,7 +44,8 @@ func fight(mode)
     ^& foe.distance < s.dash_range_min
       c.useAbility_TH(a.staffStoneHidden)
     
-    :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
+    :?c.canUseAbility("staff_ice") &
+    ^foe.distance < s.dash_range_min
       c.useAbility_TH(a.staffIceHidden)
     
     :?foe.distance > s.getRange("sword")
@@ -246,6 +247,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
     ?foe = "phase3" & foe.damage ! 1 &
+    ^foe.debuffs.string ! "feeble" &
     ^c.canUseAbility("staff_ice")
       c.useAbility_TH(a.staffIceHidden)
 
