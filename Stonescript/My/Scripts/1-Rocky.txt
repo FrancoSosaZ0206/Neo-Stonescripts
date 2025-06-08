@@ -274,8 +274,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?foe.count > 1
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
-    u.showStrCtr(0, 30, u.colorToHex("orange"), "USE VOIDWEAVER!", false)
-    loc.Pause()
 
   // Hinder regen
   ?encounter.eliteMod = "regen" &

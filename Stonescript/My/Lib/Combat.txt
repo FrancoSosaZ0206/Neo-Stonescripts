@@ -140,6 +140,13 @@ func canUseAbility(abilityId)
   ^abilityId = "staff_aether"              |
   ^abilityId = "staff_fire"                |
   ^abilityId = "staff_ice"
+    >`1,9,#cyan,
+    ^canact######=#@item.CanActivate()@\n
+    ^canact#item#=#@item.CanActivate(abilityId)@\n
+    ^gravity#cd##=#@item.GetCooldown(abilityId)@\n
+    ^armor#|#req#=#@armor@#|#@s.wand_stone_armor@\n
+    ^result#=#@result@
+  
     result = item.CanActivate() &
     ^item.GetCooldown(abilityId) <= 0
 
@@ -177,13 +184,6 @@ func canUseAbility(abilityId)
 
     :?abilityId = "wand_stone"
       result = result & armor >= s.wand_stone_armor
-
-      >`1,9,#cyan,
-      ^canact######=#@item.CanActivate()@\n
-      ^canact#item#=#@item.CanActivate(abilityId)@\n
-      ^gravity#cd##=#@item.GetCooldown(abilityId)@\n
-      ^armor#|#req#=#@armor@#|#@s.wand_stone_armor@\n
-      ^result#=#@result@
 
       ?result
         >c0,-3,#cyan,USING GRAVITY WAND
@@ -420,10 +420,12 @@ Valid summonName values:
 - voidweaver
 - cinderwisp */
 func devour(summonName)
-  ?(summonName = "voidweaver" |
-  ^summonName = "cinderwisp")
+  ?summonName = "voidweaver" |
+  ^summonName = "cinderwisp"
     ?isSummoned(summonName)
       activate @summonName@
+      >c0,0,#red,ACTIVATING @summonName@
+      loc.Pause()
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: <summonName> isn't summoned", false)
   :
