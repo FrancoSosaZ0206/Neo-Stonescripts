@@ -283,7 +283,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       >`1,7,@u.colorToHex("orange")@,USE VOIDWEAVER!
 
   // Hinder regen
-  :?encounter.eliteMod = "regen" &
+  ?encounter.eliteMod = "regen" &
   ^c.canUseAbility("wand_fire")
     c.useAbility_OH(a.wandFireHidden, "l")
 
