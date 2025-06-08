@@ -322,10 +322,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     c.useAbility_TH(a.staffStoneHidden)
 
   :?c.isPermapotSetup
-    ?foe.debuffs.string = "stun"
-      equipL @a.wandAetherDebuff@
-    :
+    ?encounter.eliteMod ! "tenacious" &
+    ^foe.debuffs.string ! "stun" 
       equipL grappling
+    :
+      equipL @a.wandAetherDebuff@
     equipR mask
   :
     fight("magic")
@@ -356,7 +357,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?c.canUseAbility("dash")
     a.ldtF("dash")
 
-  :?foe.debuffs.string = a.maxIgnitions_Default
+  :?foe.debuffs.string = a.maxIgnitions_Boosted
     activate cinderwisp
   ?c.canUseAbility("staff_poison")
     c.useAbility_TH(a.staffPoisonHidden)

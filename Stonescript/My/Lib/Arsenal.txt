@@ -67,8 +67,8 @@ Soulfetcher = sword vigor *max dL +21/ (enchanted: speed and heal chance)
 
 Speedy Hammer = hammer stone *max
 Kubikiribocho = bardiche *max (enchanted: crit)
-Mjölnir = heavy hammer *max (enchanted: damage)
-Guardian's Wrath = heavy hammer *max shiny (enchanted: armor fatigue)
+Mjölnir = heavy_hammer *max (enchanted: damage)
+Guardian's Wrath = heavy_hammer *max shiny (enchanted: armor fatigue)
 
 theVwand = wand vigor *max D golden
 Frosty Crust = wand ice *max dI
@@ -302,8 +302,7 @@ func ldtF(mode)
   :?mode = "extend" | mode = "permapot"
     ?item.right ! "bardiche" &
     ^item.right ! "quarterstaff" &
-    ^item.right ! "heavy hammer" &
-    ^item.right ! "quarterstaff"
+    ^item.right ! "heavy_hammer"
       equipL triskelion
       equipR mask
   :?mode = "bash" | mode = "dash"
@@ -546,7 +545,7 @@ func ldtF(mode)
           equipL @swordAetherDebuff1@
         :
           equipL moon
-          equipR @wandAetherDebuff@
+          equipR @swordAetherDebuff1@
           // put a 2nd dU sword when we have it
           /*?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             c.doMoondial(swordAetherDebuff1, Bifrost) // swordAetherDebuff2
