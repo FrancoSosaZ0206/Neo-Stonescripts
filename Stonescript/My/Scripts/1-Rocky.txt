@@ -263,10 +263,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :?buffs.string ! "buff_damage"
       a.ldtF("defense buff empower")
     // af shields deal more DoT than any other fire debuff weapon.
-    :?c.canApplyBurn()
+    :?c.canApplyBurn() & encounter.eliteMod ! "tenacious"
       a.ldtF("defense debuff burn")
     // ai shields' chill duration is longer than any other ice weapon.
-    :?foe.debuffs.string ! "chill"
+    :?!(foe.debuffs.string = "chill" |
+    ^foe = "immune_to_debuff_chill" |
+    ^encounter.eliteMod = "tenacious")
       a.ldtF("defense debuff chill")
     :
       a.ldtF("defense")
@@ -369,7 +371,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > s.dash_range_max // or we can't engage in a fight
   // ai shields' chill duration is longer than any other ice weapon.
-  ?!(foe.debuffs.string = "chill" | foe = "immune_to_debuff_chill")
+  ?!(foe.debuffs.string = "chill" |
+  ^foe = "immune_to_debuff_chill" |
+  ^encounter.eliteMod = "tenacious")
     a.ldtF("defense debuff chill")
 
   :?armor > a.compoundMaxArmor_boosted |
