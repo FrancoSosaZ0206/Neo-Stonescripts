@@ -261,6 +261,11 @@ func useAbility_OH(itemName, hand)
   ^    itemName = "aether"      |
   ^    itemName = "fire"        |
   ^    itemName = "ice")          )
+    ?itemName = "talisman" & ai.walking
+    ^foe.distance > s.getRange("triskelion") &
+    ^(hand = "r" | hand = "right")
+      equipL triskelion
+
     ?itemName = "hatchet" | itemName = "mask"
       equipR @itemName@
       activate R

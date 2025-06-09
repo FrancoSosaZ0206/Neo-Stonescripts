@@ -198,11 +198,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useAbility_DS("blade")
 
 // speed up
-:?c.canUseAbility("staff_fire") & (
-^  (buffs.string ! "buff_inf_speed" &
-^   ai.walking & !c.isDashingRange() &
-^   ai.enabled & !ai.paused) |
-^ screen.i = 0 | !(foe = "phase" & foe.distance < 9999))
+:?c.canUseAbility("staff_fire") &
+^ai.enabled & !ai.paused & ai.walking &
+^!c.isDashingRange() &
+^ (buffs.string ! "buff_inf_speed" |
+^  screen.i = 0 |
+^ (foe = "phase" & foe.distance = 9999))
   c.useAbility_TH(a.staffFireHidden)
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
@@ -234,6 +235,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?foe = "phase3" &
 ^((foe.state = 115 & foe.time > 73) |
 ^ (foe.state = 32 & foe.time > 65 & foe.damage = 1))
+  >c0,0,#magenta,DEFENSIVE BEAM/SHIELD
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH(a.staffVigorHidden)
@@ -242,6 +244,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
+  >`1,7,#magenta,DEFENSIVE SCOUT WIND & CRIT
   fight("ranged") // fight ranged to avoid hit
 
 // Normal attacks
@@ -407,8 +410,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ?foe.buffs.string = "buff_protection" & // against debuffs
     ^c.canUseAbility("wand_vigor")
       c.useAbility_OH(a.wandVigorHidden, hand)
-    :?foe = "fire"
-      a.ldtF("melee 1v1 unmake")
+    /*:?foe = "fire"
+      a.ldtF("melee 1v1 unmake")*/
     :
       fight("melee")
 
