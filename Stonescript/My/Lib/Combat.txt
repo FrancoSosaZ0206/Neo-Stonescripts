@@ -195,7 +195,8 @@ func canUseAbility(abilityId)
     :?abilityId = "staff_aether"
       result = result & armor >= s.staff_aether_armor
     :?abilityId = "staff_fire"
-      result = result & armor >= s.staff_fire_armor
+      result = result & armor >= s.staff_fire_armor &
+      ^item.CanActivate("staff_fire")
     :?abilityId = "staff_ice"
       result = result & armor >= s.staff_ice_armor
 
