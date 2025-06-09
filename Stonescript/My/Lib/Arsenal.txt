@@ -636,7 +636,7 @@ func ldtF(mode)
     :?mode = "debuff"
       ?c.isPermapotSetup
         ?c.canApplyChill()
-          equipL @wandIceDebuff@
+          equipL Frosty Crust
         :?c.canApplyWeaken()
           equipL @wandPoisonDebuff@
         :?c.canApplyBurn()
@@ -664,7 +664,7 @@ func ldtF(mode)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
           equipL @wandFireDmg@
         : // foe = "stone"
-          equipL @wandIceDebuff@ // @wandStoneDmg@
+          equipL Frosty Crust // @wandStoneDmg@
       : // !c.isPermapotSetup
         equip @bowAetherDebuff@
 
@@ -688,7 +688,7 @@ func ldtF(mode)
     : // !c.isPermapotSetup
       ?mode = "heal"
         equipL @wandVigorBuff@
-        equipR @wandIceDebuff@
+        equipR Frosty Crust
         // @bowVigorBuff@
       :?mode = "unmake"
         equip @bowAetherDebuff@

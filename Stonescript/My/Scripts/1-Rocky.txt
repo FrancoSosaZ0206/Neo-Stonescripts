@@ -206,12 +206,15 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useAbility_OH("fire_talisman", hand)
 
 // speed up
-:?c.canUseAbility("staff_fire") &
-^buffs.string ! "buff_inf_speed" &
+:?c.canUseAbility("staff_fire") & (
+^  (buffs.string ! "buff_inf_speed" &
+^   ai.walking & !c.isDashingRange() &
+^   ai.enabled & !ai.paused) |
+^ screen.i = 0)
+  c.useAbility_TH(a.staffFireHidden)
+:?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
 ^ai.enabled & !ai.paused
-  c.useAbility_TH(a.staffFireHidden)
-:?c.canUseAbility("quarterstaff") & ai.walking
   c.useAbility_TH(a.myQuarterstaff)
 
 :?choice & harvest.distance < 5
@@ -229,8 +232,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // Dysangelos's massive beam or putting shield up
 :?foe = "phase3" &
-^(foe.state = 115 & foe.time > 73) |
-^(foe.state = 32 & foe.time > 65 & foe.damage = 1)
+^((foe.state = 115 & foe.time > 73) |
+^ (foe.state = 32 & foe.time > 65 & foe.damage = 1))
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH(a.staffVigorHidden)
@@ -243,16 +246,18 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // Normal attacks
 :?foe.state = 32 &
-^(foe = "scout" & foe.time > 53)
-^((foe = "phase1" & foe.time > 63) |
-^ (foe = "phase3" & foe.time > 87 & foe.damage > 1)) |
-^(foe ! "boss" & foe.time > 53)
+^(foe = "scout" & foe.time > 50) &
+^((foe = "phase1" & foe.time > 60) |
+^ (foe = "phase3" & foe.time > 85 & foe.damage > 1)) |
+^(foe ! "boss" & foe.time > 50)
+  >`1,7,#magenta,DEFENSIVE#-#NORMAL#ATTACKS
+
   // Avoid or reduce damage
   ?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
     ?c.canUseAbility("wand_poison")
       c.useAbility_OH(a.wandPoisonHidden, "l")
     // Avoid hit entirely
-    :?foe = "phase3" & foe.damage > 1
+    :?foe = "phase3" & foe.damage > 1 &
     ^foe.debuffs.string ! "feeble" &
     ^c.canUseAbility("staff_ice")
       c.useAbility_TH(a.staffIceHidden)
@@ -367,7 +372,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^foe.debuffs.string = "chill" | // already debuffed
   ^foe = "immune_to_debuff_chill" |
   ^encounter.eliteMod = "tenacious" |
-  ^foe.distance > 17 | !ai.walking |
+  ^foe.distance > 17 | /*!ai.walking |*/
+  ^!ai.enabled | ai.paused |
   ^c.isPermapotSetup)
     a.ldtF("defense debuff chill")
 
