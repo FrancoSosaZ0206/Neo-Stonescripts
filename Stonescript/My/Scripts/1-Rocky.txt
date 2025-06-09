@@ -198,15 +198,15 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-?c.canSummon("aether_talisman") & loc.stars > 15 &
+?c.canSummon("aether_talisman") & loc.stars > 15 & (
 ^((foe ! "boss" & foe.distance ! 9999) |
-^screen.i = 0)
+^screen.i = 0))
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^(foe = "boss" | loc.stars <= 15)
   c.useAbility_OH("fire_talisman", hand)
 
-?choice & harvest.distance < 5
+:?choice & harvest.distance < 5
   a.ldtF("harvest")
 :?pickup.distance < 15
   a.ldtF("magnet")

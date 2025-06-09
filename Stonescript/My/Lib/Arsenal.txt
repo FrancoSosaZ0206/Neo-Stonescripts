@@ -544,10 +544,8 @@ func ldtF(mode)
         ?c.isPermapotSetup
           equipL @swordAetherDebuff1@
         :
-          equipL moon
-          equipR @swordAetherDebuff1@
           // put a 2nd dU sword when we have it
-          /*?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             c.doMoondial(swordAetherDebuff1, Bifrost) // swordAetherDebuff2
           :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
             c.doMoondial(swordAetherDebuff1, Mamba Negra) // swordAetherDebuff2
@@ -558,7 +556,7 @@ func ldtF(mode)
           :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
             c.doMoondial(swordAetherDebuff1, Vantum Phoenix) // swordAetherDebuff2
           : // foe = "stone
-            c.doMoondial(swordAetherDebuff1, Broken Faith) // swordAetherDebuff2*/
+            c.doMoondial(swordAetherDebuff1, Broken Faith) // swordAetherDebuff2
       :?mode = "debuff"
         ?c.isPermapotSetup // all left hand
           ?c.canApplyChill()
