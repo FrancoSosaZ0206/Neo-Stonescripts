@@ -224,7 +224,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // Summons
 :?c.canSummon("aether_talisman") &
-^loc.stars > 15 & !(foe = "boss" & foe.count = 1)
+^loc.stars > 15 &
+^!((foe = "boss" | encounter.eliteMod = "monarch") &
+^   foe.count = 1) &
+^!(foe = "phase" & foe.state = -1)
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^foe = "boss" & foe.count = 1

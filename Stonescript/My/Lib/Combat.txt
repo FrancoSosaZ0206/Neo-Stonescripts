@@ -170,8 +170,7 @@ func canUseAbility(abilityId)
       result = result & isSummoned(abilityId) &
       ^canUnmakeVoidweaver()
     :?abilityId = "cinderwisp"
-      result = result & isSummoned(abilityId) &
-      ^foe.debuffs.string = "ignition"
+      result = result & isSummoned(abilityId)
 
     :?abilityId = "wand_stone"
       result = result & armor >= s.wand_stone_armor &
