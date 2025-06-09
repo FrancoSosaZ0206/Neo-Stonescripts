@@ -192,6 +192,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?c.isPermapotSetup
   a.ldtF("permapot")
 
+?c.canUsePotion(potionType) & c.isPermapotSetup
+  activate potion
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
@@ -203,21 +205,19 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(foe = "boss" | loc.stars <= 15)
   c.useAbility_OH("fire_talisman", hand)
 
+// speed up
+:?c.canUseAbility("staff_fire") &
+^buffs.string ! "buff_inf_speed" &
+^ai.walking & !c.isDashingRange() &
+^ai.enabled & !ai.paused
+  c.useAbility_TH(a.staffFireHidden)
+:?c.canUseAbility("quarterstaff") & ai.walking
+  c.useAbility_TH(a.myQuarterstaff)
+
 :?choice & harvest.distance < 5
   a.ldtF("harvest")
 :?pickup.distance < 15
   a.ldtF("magnet")
-
-:?c.canUsePotion(potionType) & c.isPermapotSetup
-  activate potion
-// speed up
-:?c.canUseAbility("staff_fire") &
-^buffs.string ! "buff_inf_speed" &
-^ai.walking & !c.isDashingRange()
-/*^ai.enabled & !ai.paused*/
-  c.useAbility_TH(a.staffFireHidden)
-:?c.canUseAbility("quarterstaff") & ai.walking
-  c.useAbility_TH(a.myQuarterstaff)
 
 // ............. DEFENSIVE LOGIC ............ //
 
@@ -254,7 +254,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     c.useAbility_OH(a.wandVigorHidden, hand)
 
   // Buff/debuff
-  :?!c.isPermapotSetup & (loc.stars <= 15 |
+  :?!c.isPermapotSetup & (foe.count > 1 |
   ^armor >= c.getFoeDamage(weakenType, a.mask_feebleCount))
     // unmake Dysangelos's fire arm
     ?foe = "fire" & foe = "phase2"
@@ -371,7 +371,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > s.dash_range_max // or we can't engage in a fight
   // ai shields' chill duration is longer than any other ice weapon.
-  ?!(foe.debuffs.string = "chill" |
+  ?!(// foe.count = 1 | // boss or 1 remaining foe (1v1 situation)
+  ^foe.debuffs.string = "chill" | // already debuffed
   ^foe = "immune_to_debuff_chill" |
   ^encounter.eliteMod = "tenacious" |
   ^foe.distance > 17 | !ai.walking |
