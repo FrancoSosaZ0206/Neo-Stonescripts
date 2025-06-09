@@ -206,25 +206,26 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(foe = "boss" | loc.stars <= 15)
   c.useAbility_OH("fire_talisman", hand)
 
-:?c.canUsePotion(potionType) & c.isPermapotSetup
-  activate potion
-:?ai.walking & !c.isDashingRange()
-  // speed up
-  ?c.canUseAbility("staff_fire") &
-  ^buffs.string ! "buff_inf_speed" /*&
-  ^ai.enabled & !ai.paused*/
-    c.useAbility_TH(a.staffFireHidden)
-
-  :?c.canUseAbility("quarterstaff")
-    c.useAbility_TH(a.myQuarterstaff)
-
 ?choice & harvest.distance < 5
   a.ldtF("harvest")
 :?pickup.distance < 15
   a.ldtF("magnet")
 
+:?c.canUsePotion(potionType) & c.isPermapotSetup
+  activate potion
+// speed up
+:?c.canUseAbility("staff_fire") &
+^buffs.string ! "buff_inf_speed" &
+^ai.walking & !c.isDashingRange()
+/*^ai.enabled & !ai.paused*/
+  c.useAbility_TH(a.staffFireHidden)
+:?c.canUseAbility("quarterstaff") &
+^ai.walking & !c.isDashingRange()
+  c.useAbility_TH(a.myQuarterstaff)
+
 // ............. DEFENSIVE LOGIC ............ //
 
+// About to attack
 :?(foe.state = 32 & (
 ^ (foe = "scout" & (
 ^   (foe.damage <= 5 & foe.time > 50)   |
@@ -241,7 +242,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   // a bit into the attack state
 ^(foe.state = 33 & foe.time = 0 &
 ^ (foe = "phase2" | foe = "phase3"))
-  // About to attack
 
   ?foe = "phase3" &
   ^(foe.state = 115 | foe.damage = 1)
@@ -354,7 +354,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("ranged")
       >c0,1,#yellow,FIGHTING RANGED | AOE STRAT
 
-// ........... ENGAGE/WALK LOGIC ............ //
+// .......... ENGAGE/WALKING LOGIC .......... //
 
 :?ai.paused |
 ^(ai.idle & foe.distance > s.dash_range_min) | // if we're waiting

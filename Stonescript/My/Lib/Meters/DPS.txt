@@ -286,8 +286,8 @@ func mkUI(x, y, colorHex, size)
 
   ?isValidSize
     txt = uimkr.mkTextbox(
-    ^ x, y, null, null, // x, y, w, h,
-    ^ top_left, top_left, // panelAnchor, dock,
+    ^ 1, 1, null, null, // x, y, w, h,
+    ^ top_left, top_left, // anchor, dock,
     ^ ToString(size), // txt
     ^ null, colorHex) // align, colorHex
 
