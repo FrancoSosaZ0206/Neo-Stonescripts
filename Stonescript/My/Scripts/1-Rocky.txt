@@ -214,9 +214,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^ai.enabled & !ai.paused
   c.useAbility_TH(a.myQuarterstaff)
 
-:?c.canSummon("aether_talisman") & loc.stars > 15 & (
-^((foe ! "boss" & foe.distance = 9999) |
-^screen.i = 0))
+:?c.canSummon("aether_talisman") &
+^loc.stars > 15 & (
+^ (foe ! "boss" | screen.i = 0))
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^(foe = "boss" | loc.stars <= 15)
