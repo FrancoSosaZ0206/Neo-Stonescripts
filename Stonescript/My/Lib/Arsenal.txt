@@ -541,7 +541,7 @@ func ldtF(mode)
           :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
             c.doMoondial(Vantum Phoenix /*swordVigorBuff*/, Soulfetcher)
           : // foe = "stone
-            c.doMoondial(Vantum Phoenix /*Broken Faith*/ /*swordVigorBuff*/, Soulfetcher)
+            c.doMoondial(Bifrost /*Broken Faith*/ /*swordVigorBuff*/, Soulfetcher)
       :?mode = "unmake"
         ?c.isPermapotSetup
           equipL @swordAetherDebuff1@

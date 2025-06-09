@@ -340,7 +340,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       equipR mask
     :
       fight("ranged")
-      >c0,1,#yellow,FIGHTING RANGED | AOE STRAT
 
 
   : // enconuter.isElite
