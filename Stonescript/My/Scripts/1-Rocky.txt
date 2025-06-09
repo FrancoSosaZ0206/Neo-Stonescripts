@@ -203,8 +203,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!(foe = "phase3" & (foe.state = 4 | foe.state = -1)) &
 ^!c.isDashingRange() &
 ^ (buffs.string ! "buff_inf_speed" |
-^  screen.i = 0 |
-^ (foe = "phase" & !c.isDashingRange()))
+^  screen.i = 0)
   c.useAbility_TH(a.staffFireHidden)
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
@@ -212,7 +211,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useAbility_TH(a.myQuarterstaff)
 
 :?c.canSummon("aether_talisman") & loc.stars > 15 & (
-^((foe ! "boss" & foe.distance ! 9999) |
+^((foe ! "boss" & foe.distance = 9999) |
 ^screen.i = 0))
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
