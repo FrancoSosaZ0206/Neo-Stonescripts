@@ -208,15 +208,14 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 :?c.canUsePotion(potionType) & c.isPermapotSetup
   activate potion
-:?ai.walking
+:?ai.walking & !c.isDashingRange()
   // speed up
   ?c.canUseAbility("staff_fire") &
-  ^buffs.string ! "buff_inf_speed" &
-  ^ai.enabled & !ai.paused & ai.walking
+  ^buffs.string ! "buff_inf_speed" /*&
+  ^ai.enabled & !ai.paused*/
     c.useAbility_TH(a.staffFireHidden)
 
-  :?c.canUseAbility("quarterstaff") &
-  ^!c.isDashingRange() & ai.walking
+  :?c.canUseAbility("quarterstaff")
     c.useAbility_TH(a.myQuarterstaff)
 
 ?choice & harvest.distance < 5
@@ -283,11 +282,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // ............ AOE/RANGED LOGIC ............ //
 
-:?(c.isPermapotSetup &
+:?loc.stars > 15 & (
+^(c.isPermapotSetup &
 ^(foe.GetCount(foe.distance + margin) > 1 &
 ^foe.distance <= s.getRange("wand") & foe ! "warcaster")) |
 ^(!c.isPermapotSetup &
-^foe.count > 1 & foe.distance <= s.getRange("crossbow rune"))
+^foe.count > 1 & foe.distance <= s.getRange("crossbow rune")))
   ?c.canUseAbility("voidweaver")
     c.devour("voidweaver")
     >c0,3,#red,DEVOUR VOIDWEAVER
