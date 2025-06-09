@@ -239,7 +239,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!dysan_cutscenes.Contains(foe.state) // not a cutscene
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
-^foe = "boss" & foe.count = 1
+^(loc.stars <= 15 |
+^ (foe = "boss" & foe.count = 1))
   c.useAbility_OH("fire_talisman", hand)
 
 // ............. DEFENSIVE LOGIC ............ //
@@ -379,8 +380,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?ai.paused |
 ^(ai.idle & foe.distance > s.dash_range_min) | // waiting for animation to complete
 ^c.isDead() |
-^dysan_cutscenes.Contains(foe.state) | // is a cutscene
-^(foe = "phase3" & foe.damage > 1) | // dysan state 107 fight (flying)
+^ (dysan_cutscenes.Contains(foe.state) & // is a cutscene
+^ foe.damage > 1) | // dysan state 107 fight (flying)
 ^foe.distance > s.dash_range_max | // too far to dash
 ^foe.state = -1 // engaging state
   ?armor > a.compoundMaxArmor_boosted |
