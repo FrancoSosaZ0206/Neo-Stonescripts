@@ -373,7 +373,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   // ai shields' chill duration is longer than any other ice weapon.
   ?!(foe.debuffs.string = "chill" |
   ^foe = "immune_to_debuff_chill" |
-  ^encounter.eliteMod = "tenacious")
+  ^encounter.eliteMod = "tenacious" |
+  ^foe.distance = 9999)
     a.ldtF("defense debuff chill")
 
   :?armor > a.compoundMaxArmor_boosted |
