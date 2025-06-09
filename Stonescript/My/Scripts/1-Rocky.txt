@@ -259,12 +259,14 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   // reduce damage amap
   ?foe = "phase3" &
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
-    c.useAbility_OH("mask", "r")
-    c.useAbility_OH(a.wandPoisonHidden, "l")
+    ?c.canUseAbility("mask")
+      c.useAbility_OH("mask", "r")
+    :
+      c.useAbility_OH(a.wandPoisonHidden, "l")
 
 
   // foe will break through armor
-  ?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
+  :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
     // Avoid hit entirely
     ?foe = "phase3" & foe.damage > 1 &
     ^foe.debuffs.string ! "feeble" &
