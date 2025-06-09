@@ -74,8 +74,8 @@ func Init()
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
 
-  ?buffs.string = "⊙" | // berserk potion
-  ^buffs.string = "buff_inf_speed" // infernal staff
+  ?buffs.string = "⊙" /*| // berserk potion
+  ^buffs.string = "buff_inf_speed" // infernal staff*/
     moondialMode = 2
   :
     moondialMode = 0

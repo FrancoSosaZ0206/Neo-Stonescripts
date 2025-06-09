@@ -261,7 +261,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
     ?c.canUseAbility("mask")
       c.useAbility_OH("mask", "r")
-    :
+    :?c.canUseAbility("wand_poison")
       c.useAbility_OH(a.wandPoisonHidden, "l")
 
 
