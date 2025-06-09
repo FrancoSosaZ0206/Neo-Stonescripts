@@ -73,13 +73,12 @@ Guardian's Wrath = heavy_hammer *max shiny (enchanted: armor fatigue)
 theVwand = wand vigor *max D golden
 Frosty Crust = wand ice *max dI
 
-Death's Kiss = sword poison shiny dP (enchanted: P) */
+Death's Kiss = sword poison *max dP shiny (enchanted: speed) */
 
 // Elemental
 
 // ............... POISON ............... //
 
-var swordPoisonDebuff = "sword poison *max dP" // enchanted: speed
 var swordPoisonDmg = "sword poison -dP *max"
 var shieldPoisonDefense = "shield poison *max -ap"
 var shieldPoisonBuff = "shield poison *max ap"
@@ -562,7 +561,7 @@ func ldtF(mode)
           ?c.canApplyChill()
             equipL @swordIceDebuff1@
           :?c.canApplyWeaken()
-            equipL @swordPoisonDebuff@ // Death's Kiss
+            equipL Death's Kiss
             //'
           :?c.canApplyBurn()
             equipL @swordFireDebuff@
@@ -585,9 +584,9 @@ func ldtF(mode)
           ?c.canApplyChill()
             c.doMoondial(swordDmg, swordIceDebuff1)
           :?c.canApplyWeaken() | c.canApplyBurn()
-            equipL @swordPoisonDebuff@
-            equipR @swordFireDebuff@ // Death's Kiss
+            equipL Death's Kiss
             //'
+            equipR @swordFireDebuff@
       :?mode = "dmg"
         ?c.isPermapotSetup // all left hand
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"

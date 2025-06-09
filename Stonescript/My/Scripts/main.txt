@@ -109,8 +109,6 @@ sys.SetFileUrl(mobileUrl)
 import My/Scripts/main
 // ↑↑↑ COMMENT OUT HERE ↑↑↑
 
-import UI/MindstoneButton
-
 // ↑↑↑ COPY UNTIL HERE ↑↑↑
 // ////////////////////////////////////////// */
 
@@ -120,6 +118,8 @@ import UI/MindstoneButton
 // ················ IMPORTS ················· //
 
 import My/Cosmetics
+?sys.isMobile
+  import UI/MindstoneButton
 
 // ··············· PROCEDURE ················ //
 

@@ -171,9 +171,6 @@ disable npcDialog
       ?!dontShowAgain
         dontShowAgain = true
 
-?loc.stars > 15
-  potionType = "lucky" // "berserk"
-  // weakenType = a.weaken_boosted
 
 // Decide hand for one-handed items
 ?c.isPermapotSetup
@@ -219,8 +216,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^ai.walking & !c.isDashingRange()
 /*^ai.enabled & !ai.paused*/
   c.useAbility_TH(a.staffFireHidden)
-:?c.canUseAbility("quarterstaff") &
-^ai.walking & !c.isDashingRange()
+:?c.canUseAbility("quarterstaff") & ai.walking
   c.useAbility_TH(a.myQuarterstaff)
 
 // ............. DEFENSIVE LOGIC ............ //
@@ -243,6 +239,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(foe.state = 33 & foe.time = 0 &
 ^ (foe = "phase2" | foe = "phase3"))
 
+  // Dysangelos's shield and beam
   ?foe = "phase3" &
   ^(foe.state = 115 | foe.damage = 1)
     ?foe.damage = 1 & // prevent the stun
@@ -251,34 +248,41 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :
       fight("evade")
 
+  // Remove Dysangelos' phase2 debuff immunity
+  :?foe.buffs.string = "buff_protection" &
+  ^c.canUseAbility("wand_vigor")
+    c.useAbility_OH(a.wandVigorHidden, hand)
+
+  // Buff/debuff
+  :?!c.isPermapotSetup & (loc.stars <= 15 |
+  ^armor >= c.getFoeDamage(weakenType, a.mask_feebleCount))
+    // unmake Dysangelos's fire arm
+    ?foe = "fire" & foe = "phase2"
+      a.ldtF("defense unmake")
+    // get additional damage
+    :?buffs.string ! "buff_damage"
+      a.ldtF("defense buff empower")
+    // af shields deal more DoT than any other fire debuff weapon.
+    :?c.canApplyBurn()
+      a.ldtF("defense debuff burn")
+    // ai shields' chill duration is longer than any other ice weapon.
+    :?foe.debuffs.string ! "chill"
+      a.ldtF("defense debuff chill")
+    :
+      a.ldtF("defense")
+
   :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
+    // Avoid hit entirely
     ?foe = "phase3" & foe.damage ! 1 &
     ^foe.debuffs.string ! "feeble" &
     ^c.canUseAbility("staff_ice")
       c.useAbility_TH(a.staffIceHidden)
 
-    :?foe ! "phase2" // heal to reduce it even more
+    // Heal to reduce damage
+    :?loc.stars > 15 & c.isPermapotSetup & foe ! "phase2"
       a.ldtF("defense heal")
-    : // normal phase2 behaviour
-      ?foe.buffs.string = "buff_protection" & // against debuffs
-      ^c.canUseAbility("wand_vigor")
-        c.useAbility_OH(a.wandVigorHidden, hand)
-      :
-        a.ldtF("defense")
-
-  : // armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
-    ?buffs.string ! "buff_damage" & !c.isPermapotSetup
-      a.ldtF("defense buff empower")
-
     :?foe = "phase2"
-      ?foe.buffs.string = "buff_protection" & // against debuffs
-      ^c.canUseAbility("wand_vigor")
-        c.useAbility_OH(a.wandVigorHidden, hand)
-      :?foe = "fire" & !c.isPermapotSetup // unmake Dysangelos's fire arm
-        a.ldtF("defense unmake")
-
-      :
-        a.ldtF("defense")
+      a.ldtF("defense")
 
 // ............ AOE/RANGED LOGIC ............ //
 
@@ -364,7 +368,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > s.dash_range_max // or we can't engage in a fight
-  ?armor > a.compoundMaxArmor_boosted |
+  // ai shields' chill duration is longer than any other ice weapon.
+  ?!(foe.debuffs.string = "chill" | foe = "immune_to_debuff_chill")
+    a.ldtF("defense debuff chill")
+
+  :?armor > a.compoundMaxArmor_boosted |
   ^(encounter.eliteMod = "metamorph" &
   ^foe.distance < s.shield_rune_range)
     a.ldtF("engage")
