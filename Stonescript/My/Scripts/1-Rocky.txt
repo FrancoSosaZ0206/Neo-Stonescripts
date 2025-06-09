@@ -200,6 +200,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // speed up
 :?c.canUseAbility("staff_fire") &
 ^ai.enabled & !ai.paused & ai.walking &
+^!(foe = "phase3" & (foe.state = 4 | foe.state = -1)) &
 ^!c.isDashingRange() &
 ^ (buffs.string ! "buff_inf_speed" |
 ^  screen.i = 0 |
@@ -255,14 +256,17 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(foe ! "boss" & foe.time > 50)
   >`1,7,#magenta,DEFENSIVE#-#NORMAL#ATTACKS
 
-  // Avoid or reduce damage
+  // reduce damage amap
+  ?foe = "phase3" &
+  ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
+    c.useAbility_OH("mask", "r")
+    c.useAbility_OH(a.wandPoisonHidden, "l")
+
+
+  // foe will break through armor
   ?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
-    ?c.canUseAbility("mask")
-      c.useAbility_OH("mask", "r")
-    :?c.canUseAbility("wand_poison")
-      c.useAbility_OH(a.wandPoisonHidden, "l")
     // Avoid hit entirely
-    :?foe = "phase3" & foe.damage > 1 &
+    ?foe = "phase3" & foe.damage > 1 &
     ^foe.debuffs.string ! "feeble" &
     ^c.canUseAbility("staff_ice")
       c.useAbility_TH(a.staffIceHidden)
@@ -403,7 +407,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?c.canUseAbility("dash")
     a.ldtF("dash")
 
-  :?c.canUseAbility("staff_poison")
+  :?c.canUseAbility("staff_poison") &
+  ^!c.isDashingRange()
     c.useAbility_TH(a.staffPoisonHidden)
 
   :?foe ! "phase3"
