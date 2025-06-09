@@ -201,7 +201,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?c.canUseAbility("staff_fire") &
 ^ai.enabled & !ai.paused & ai.walking &
 ^!(foe = "phase" & (foe.state = 116 | foe.state = -1)) &
-foe.distance = 9999 &
+^foe.distance = 9999 &
 ^(buffs.string ! "buff_inf_speed" | screen.i = 0)
   c.useAbility_TH(a.staffFireHidden)
 :?c.canUseAbility("quarterstaff") &
