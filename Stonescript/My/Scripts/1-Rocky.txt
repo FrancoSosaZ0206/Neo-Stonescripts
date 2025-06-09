@@ -325,7 +325,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^s.inRange("wand") & foe ! "warcaster")) |
 ^(!c.isPermapotSetup &
 ^foe.count > 1 & s.inRange("crossbow rune")))
-  ?!encounter.isElite
+  ?c.canUseAbility("wand_stone")
+    c.useAbility_TH(a.wandStoneHidden, hand)
+
+  :?!encounter.isElite
     ?c.canUseAbility("bash")
       a.ldtF("bash")
     :?c.canUseAbility("dash")
