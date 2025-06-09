@@ -234,9 +234,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // Summons
 :?c.canSummon("aether_talisman") &
 ^loc.stars > 15 &
-^!((foe = "boss" | encounter.eliteMod = "monarch") &
-^   foe.count = 1) &
-^!(foe = "phase" & (foe.state = -1 | foe.state = 1)) &
+^!((foe = "boss" | encounter.eliteMod = "monarch") & foe.count = 1) &
+^!(foe = "phase" & foe.state = -1) &
 ^!dysan_cutscenes.Contains(foe.state) // not a cutscene
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
