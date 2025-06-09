@@ -21,7 +21,7 @@ Made by IronHawk (Tom Crow)
 . ...................................... .
 
   Importing
-    
+
   var a = new MyArsenal
 
 . ...................................... .
@@ -362,7 +362,9 @@ func ldtF(mode)
         equipL @wandAetherDebuff@
       :
         equipL @swordAetherDebuff1@
-      equipR @shieldAetherDebuff@
+      
+      ?!c.isPermapotSetup
+        equipR @shieldAetherDebuff@
 
     :?mode = "regen"
       equipL triskelion
