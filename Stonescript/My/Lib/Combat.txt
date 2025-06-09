@@ -258,10 +258,18 @@ func useAbility_OH(itemName, hand)
   ^    itemName = "aether"      |
   ^    itemName = "fire"        |
   ^    itemName = "ice")          )
-    ?itemName = "talisman" & ai.walking &
-    ^foe.distance > s.getRange("triskelion") &
-    ^(hand = "r" | hand = "right")
-      equipL triskelion
+    ?itemName = "talisman"
+      ?ai.walking &
+      ^foe.distance > s.getRange("triskelion") &
+      ^(hand = "r" | hand = "right")
+        equipL triskelion
+
+      :?c.isDashingRange()
+        ?c.canUseAbility("bash")
+          equipR bash
+        ?c.canUseAbility("bash")
+          equipR dash
+
 
     ?itemName = "hatchet" | itemName = "mask"
       equipR @itemName@
