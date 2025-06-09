@@ -340,11 +340,11 @@ func ldtF(mode)
       :
         equipL @shieldTowering@
   :?mode = "magnet" | mode = "star" | mode = "star stone"
-    ?!c.isPermapotSetup
+    ?c.isPermapotSetup
+      equipL star
+    :
       equipL triskelion
       equipR star
-    :
-      equipL star
   :?mode = "harvest"
     ?loc = "rocky_plateau"
       equip shovel

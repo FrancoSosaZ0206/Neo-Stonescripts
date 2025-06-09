@@ -207,6 +207,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?choice & harvest.distance < 5
   a.ldtF("harvest")
 :?pickup.distance < 15
+  >c0,0,#red,PICKUP
   a.ldtF("magnet")
 
 // speed up
@@ -223,11 +224,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   c.useAbility_TH(a.myQuarterstaff)
 
 // Summons
-:?c.canSummon("aether_talisman") &
+:?c.canSummon("aether_talisman") & ai.enabled &
 ^loc.stars > 15 & foe ! "phase"
   >c0,0,#red,USING AETHER TALISMAN
   c.useAbility_OH("aether_talisman", hand)
-:?c.canSummon("fire_talisman") &
+:?c.canSummon("fire_talisman") & ai.enabled &
 ^(foe = "boss" | (loc.stars > 15 & foe = "phase"))
   >c0,0,#red,USING FIRE TALISMAN
   c.useAbility_OH("fire_talisman", hand)
