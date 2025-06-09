@@ -331,14 +331,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :?c.canUseAbility("dash")
       a.ldtF("dash")
 
+    :?c.isPermapotSetup &
+    ^foe.debuffs.string ! "stun" 
+      equipL grappling
     :?c.isPermapotSetup
-      ?foe.debuffs.string ! "stun" 
-        equipL grappling
-      :
-        equipL @a.wandAetherDebuff@
-      equipR mask
+      a.ldtF("magic unmake")
     :
-      fight("ranged")
+      a.ldtF("ranged unmake")
 
 
   : // enconuter.isElite
