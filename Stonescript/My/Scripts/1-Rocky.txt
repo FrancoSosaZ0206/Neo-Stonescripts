@@ -249,11 +249,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   fight("ranged") // fight ranged to avoid hit
 
 // Normal attacks
-:?foe.state = 32 &
-^(foe = "scout" & foe.time > 50) &
+:?foe.state = 32 & (
+^(foe = "scout" & foe.time > 50) |
 ^((foe = "phase1" & foe.time > 60) |
-^ (foe = "phase3" & foe.time > 85 & foe.damage > 1)) |
-^(foe ! "boss" & foe.time > 50)
+^ (foe = "phase3" & foe.time > 80 & foe.damage > 1)) |
+^(foe ! "boss" & foe.time > 50))
   >`1,7,#magenta,DEFENSIVE#-#NORMAL#ATTACKS
 
   // reduce damage amap
@@ -263,7 +263,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       c.useAbility_OH("mask", "r")
     :?c.canUseAbility("wand_poison")
       c.useAbility_OH(a.wandPoisonHidden, "l")
-
 
   // foe will break through armor
   :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
