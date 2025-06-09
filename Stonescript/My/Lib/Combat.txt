@@ -264,10 +264,10 @@ func useAbility_OH(itemName, hand)
       ^(hand = "r" | hand = "right")
         equipL triskelion
 
-      :?c.isDashingRange()
-        ?c.canUseAbility("bash")
+      :?isDashingRange()
+        ?canUseAbility("bash")
           equipR bash
-        ?c.canUseAbility("bash")
+        :?canUseAbility("bash")
           equipR dash
 
 
