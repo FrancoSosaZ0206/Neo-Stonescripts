@@ -315,7 +315,8 @@ func ldtF(mode)
     :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
       equipL Vantum Phoenix
     :
-      equipL Unbroken Faith
+      equipL Bifrost
+      // Unbroken Faith
 
     ?mode = "bash"
       equipR bashing shield
@@ -558,7 +559,7 @@ func ldtF(mode)
           :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
             c.doMoondial(swordAetherDebuff1, Vantum Phoenix) // swordAetherDebuff2
           : // foe = "stone
-            c.doMoondial(swordAetherDebuff1, Broken Faith) // swordAetherDebuff2
+            c.doMoondial(swordAetherDebuff1, Bifrost /*Broken Faith*/) // swordAetherDebuff2
       :?mode = "debuff"
         ?c.isPermapotSetup // all left hand
           ?c.canApplyChill()
