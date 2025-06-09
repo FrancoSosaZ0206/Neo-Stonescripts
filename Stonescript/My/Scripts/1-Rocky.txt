@@ -366,13 +366,14 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // .......... ENGAGE/WALKING LOGIC .......... //
 
 :?ai.paused |
-^(ai.idle & foe.distance > s.dash_range_min) | // if we're waiting
+^(ai.idle & foe.distance > s.dash_range_min) | // waiting for animation to complete
 ^c.isDead() |
 ^foe.state = 124 | foe.state = 125 | // dysangelos phase 1 to 2 states
 ^(foe.state = 107 & foe.damage ! 1) | // dsangelos' flying animation
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
-^foe.distance > s.dash_range_max // or we can't engage in a fight
+^foe.distance > s.dash_range_max | // too far to dash
+^foe.state = -1 // engaging state
   ?armor > a.compoundMaxArmor_boosted |
   ^(encounter.eliteMod = "metamorph" &
   ^foe.distance < s.shield_rune_range)
