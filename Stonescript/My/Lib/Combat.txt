@@ -173,7 +173,6 @@ func canUseAbility(abilityId)
       result = result & isSummoned(abilityId)
 
     :?abilityId = "wand_stone"
-      >`1,10,#magenta,canact stone wand = @item.CanActivate("wand_stone")@
       result = result & armor >= s.wand_stone_armor &
       ^foe.count > 1 & item.CanActivate("wand_stone")
     :?abilityId = "wand_poison"
