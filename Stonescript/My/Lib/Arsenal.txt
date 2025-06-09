@@ -302,7 +302,6 @@ func ldtF(mode)
     ?item.right ! "bardiche" &
     ^item.right ! "quarterstaff" &
     ^item.right ! "heavy_hammer"
-      equipL triskelion
       equipR mask
   :?mode = "bash" | mode = "dash"
     ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
