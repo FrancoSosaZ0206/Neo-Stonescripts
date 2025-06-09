@@ -374,7 +374,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ?!(foe.debuffs.string = "chill" |
   ^foe = "immune_to_debuff_chill" |
   ^encounter.eliteMod = "tenacious" |
-  ^foe.distance = 9999)
+  ^foe.distance > 17 | !ai.walking |
+  ^c.isPermapotSetup)
     a.ldtF("defense debuff chill")
 
   :?armor > a.compoundMaxArmor_boosted |
@@ -404,6 +405,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ?foe.buffs.string = "buff_protection" & // against debuffs
     ^c.canUseAbility("wand_vigor")
       c.useAbility_OH(a.wandVigorHidden, hand)
+    :?foe = "fire"
+      a.ldtF("melee 1v1 unmake")
     :
       fight("melee")
 
