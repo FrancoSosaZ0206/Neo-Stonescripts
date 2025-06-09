@@ -26,6 +26,7 @@ var hand       = null
 
 var margin = 8 // wand left hitbox + splash range
 
+var dysan_screen = null
 var dysan_cutscenes = [
 ^ 124, 125, // dysangelos phase1 to 2
 ^ 107, 108, // phase2 to 3
@@ -86,7 +87,10 @@ func fight(mode)
 
     // 2. Heal if needed
     :?hp ! maxhp
-      a.ldtF("melee 1v1 heal")
+      ?!c.isPermapotSetup
+        a.ldtF("melee 1v1 heal")
+      :?foe.count > 1
+        equipL grappling
 
       /*?mode = "melee"
         a.ldtF("melee 1v1 heal")
@@ -102,7 +106,13 @@ func fight(mode)
       ?mode = "melee"
         a.ldtF("melee 1v1 unmake")
       :?c.isPermapotSetup
-        a.ldtF("magic unmake")
+        ?c.canUseAbility("bash")
+          a.ldtF("bash")
+        :?c.canUseAbility("dash")
+          a.ldtF("dash")
+        :
+          a.ldtF("melee splash unmake")
+        // a.ldtF("magic unmake")
       :
         a.ldtF("ranged unmake")
 
@@ -130,8 +140,7 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-?foe = "phase3"
-  >c0,0,#red,DMG = @foe.damage@
+>c-10,0,#magenta,screen = @screen.i@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -187,6 +196,15 @@ disable npcDialog
         dontShowAgain = true
 
 
+// Set up dysan_screen
+?!dysan_screen
+  ?loc.stars <= 10 // cyan and white
+    dysan_screen = 2
+  :?loc.stars <= 15 // yellow
+    dysan_screen = 4
+  :?loc.stars <= 20 // green
+    dysan_screen = 8
+
 // Decide hand for one-handed items
 ?c.isPermapotSetup | c.isDashingRange()
   hand = "left"
@@ -212,18 +230,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-// Harvest/Pick up things
-?choice & harvest.distance < 5
-  a.ldtF("harvest")
-:?pickup.distance < 15
-  a.ldtF("magnet")
-
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ai.enabled & !ai.paused & ai.walking &
+^ai.walking &
 ^foe.state ! 116 &
-^foe.distance = 9999 &
-^(buffs.string ! "buff_inf_speed" | screen.i = 0)
+^!(foe.state = -1 & screen.i = dysan_screen) &
+^buffs.string ! "buff_inf_speed" &
+^!(loc.stars > 15 & c.isPermapotSetup) // save armor if it's setup run
   c.useAbility_TH(a.staffFireHidden)
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
@@ -231,10 +244,17 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^ai.enabled & !ai.paused
   c.useAbility_TH(a.myQuarterstaff)
 
+// Harvest/Pick up things
+?choice & harvest.distance < 5
+  a.ldtF("harvest")
+:?pickup.distance < 15
+  a.ldtF("magnet")
+
 // Summons
 :?c.canSummon("aether_talisman") &
 ^loc.stars > 15 &
-^!((foe = "boss" | encounter.eliteMod = "monarch") & foe.count = 1) &
+^!((foe = "boss" | encounter.eliteMod = "monarch") &
+^  foe.count = 1) &
 ^!(foe = "phase" & foe.state = -1) &
 ^!dysan_cutscenes.Contains(foe.state) // not a cutscene
   c.useAbility_OH("aether_talisman", hand)
@@ -311,7 +331,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // ............ AOE/RANGED LOGIC ............ //
 
-:?c.canUseAbility("voidweaver") & foe.count > 1
+:?c.canUseAbility("voidweaver") &
+^foe.count > 1 & !c.isPermapotSetup
   ?c.canUseAbility("dash")
     a.ldtF("dash")
   :?c.canUseAbility("bash")
@@ -338,13 +359,20 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ^foe.debuffs.string ! "stun" 
       equipL grappling
     :?c.isPermapotSetup
-      a.ldtF("magic unmake")
+      a.ldtF("melee splash unmake")
     :
       a.ldtF("ranged unmake")
 
   : // enconuter.isElite
     ?c.canUseAbility("heavy_hammer")
-      c.useAbility_TH("Guardian's Bane")
+      ?c.canUseAbility("bash")
+        a.ldtF("bash")
+      :?c.canUseAbility("dash")
+        a.ldtF("dash")
+      :?!s.inRange("triskelion")
+        equipL triskelion
+      :
+        c.useAbility_TH("Guardian's Bane")
 
     // Calamity - reduce hp
     :?encounter.eliteMod ! "tenacious" &
@@ -362,9 +390,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       c.useAbility_OH(a.wandFireHidden, hand)
 
     :?foe.distance < s.dash_range_min &
+    ^item.left ! a.swordBigAetherDebuff &
     ^c.canUseAbility("mind")
       a.ldtF("mind")
     :?foe.distance < s.dash_range_min &
+    ^item.left ! a.swordBigAetherDebuff &
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH(a.staffStoneHidden)
 

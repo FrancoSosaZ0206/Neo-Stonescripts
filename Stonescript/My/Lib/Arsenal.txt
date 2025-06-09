@@ -112,6 +112,7 @@ var staffVigorHidden = "staff vigor hidden *max" // aka Prevention Staff
 var swordAetherDmg = "sword aether -dU *max"
 var swordAetherDebuff1 = "sword aether dU *max -big golden"
 var swordAetherDebuff2 = "sword aether dU *max -big -golden"
+var swordBigAetherDebuff = "sword aether dU *max big golden"
 var shieldAetherDefense = "shield aether *max -au"
 var shieldAetherDebuff = "shield aether *max au"
 var hammerAetherDefense = "hammer aether *max aU"
@@ -459,7 +460,8 @@ func ldtF(mode)
             // c.doMoondial(,)
       :?mode = "unmake"
         ?c.isPermapotSetup
-          // equipL 
+          equipL @swordBigAetherDebuff@
+          >c0,0,#red,dU BIG SWORD
         :
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             // c.doMoondial(,)
