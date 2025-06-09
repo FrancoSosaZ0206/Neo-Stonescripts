@@ -727,6 +727,14 @@ func ldtF(mode)
 
   return
 
+func canSmartDash()
+  return c.canUseAbility("bash") | c.canUseAbility("dash")
+func smartDash()
+  ?c.canUseAbility("bash")
+    a.ldtF("bash")
+  :?c.canUseAbility("dash")
+    a.ldtF("dash")
+
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Arsenal" ▀▄▀▄▀▄▀▄▀▄▀ ┃  //

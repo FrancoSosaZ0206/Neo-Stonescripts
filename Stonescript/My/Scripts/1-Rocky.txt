@@ -87,10 +87,14 @@ func fight(mode)
 
     // 2. Heal if needed
     :?hp ! maxhp
-      ?!c.isPermapotSetup
+      ?!c.isPermapotSetup | mode = "melee"
         a.ldtF("melee 1v1 heal")
-      :?foe.count > 1
+      :?foe.count > 1 & foe.debuffs.string ! "stun"
         equipL grappling
+      :?a.canSmartDash()
+        a.smartDash()
+      :
+        a.ldtF("melee splash unmake")
 
       /*?mode = "melee"
         a.ldtF("melee 1v1 heal")
@@ -106,10 +110,8 @@ func fight(mode)
       ?mode = "melee"
         a.ldtF("melee 1v1 unmake")
       :?c.isPermapotSetup
-        ?c.canUseAbility("bash")
-          a.ldtF("bash")
-        :?c.canUseAbility("dash")
-          a.ldtF("dash")
+        ?a.canSmartDash()
+          a.smartDash()
         :
           a.ldtF("melee splash unmake")
         // a.ldtF("magic unmake")
@@ -350,10 +352,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     c.useAbility_TH(a.wandStoneHidden, hand)
 
   :?!encounter.isElite
-    ?c.canUseAbility("bash")
-      a.ldtF("bash")
-    :?c.canUseAbility("dash")
-      a.ldtF("dash")
+    ?a.canSmartDash()
+      a.smartDash()
 
     :?c.isPermapotSetup &
     ^foe.debuffs.string ! "stun" 
@@ -365,18 +365,17 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   : // enconuter.isElite
     ?c.canUseAbility("heavy_hammer")
-      ?c.canUseAbility("bash")
-        a.ldtF("bash")
-      :?c.canUseAbility("dash")
-        a.ldtF("dash")
+      ?a.canSmartDash()
+        a.smartDash()
       :?!s.inRange("triskelion")
         equipL triskelion
       :
         c.useAbility_TH("Guardian's Bane")
 
     // Calamity - reduce hp
-    :?encounter.eliteMod ! "tenacious" &
-    ^c.canUseAbility("wand_aether")
+    :?c.canUseAbility("wand_aether") &
+    ^(encounter.eliteMod = "berserk" |
+    ^encounter.eliteMod = "monarch")
       c.useAbility_OH(a.wandAetherHidden, hand)
 
     // reset buffs
@@ -431,10 +430,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
 
-  ?c.canUseAbility("bash")
-    a.ldtF("bash")
-  :?c.canUseAbility("dash")
-    a.ldtF("dash")
+  ?a.canSmartDash()
+    a.smartDash()
 
   :?foe ! "phase3"
     ?foe.buffs.string = "buff_protection" & // against debuffs
@@ -459,10 +456,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("melee")
 
 : // 1v1
-  ?c.canUseAbility("bash")
-    a.ldtF("bash")
-  :?c.canUseAbility("dash")
-    a.ldtF("dash")
+  ?a.canSmartDash()
+    a.smartDash()
   :?c.canUseAbility("staff_poison") & s.getTotalHP("foe") > 1000
     c.useAbility_TH(a.staffPoisonHidden)
   /*:?c.canUseAbility("wand_ice")
