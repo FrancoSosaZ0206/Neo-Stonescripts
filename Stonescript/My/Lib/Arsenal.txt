@@ -73,7 +73,7 @@ Guardian's Wrath = heavy_hammer *max shiny (enchanted: armor fatigue)
 theVwand = wand vigor *max D golden
 Frosty Crust = wand ice *max dI
 
-Almafuerte = sword ice *max dI shiny (enchanted: speed)
+Almafuerte = sword ice *max dI (enchanted: speed)
 Death's Kiss = sword poison *max dP shiny (enchanted: speed) */
 
 // Elemental
@@ -139,7 +139,7 @@ var staffFireHidden = "staff fire hidden *max" // aka Infernal Staff
 
 // ................ ICE ................. //
 
-var swordIceDebuff = "sword ice *max dI -shiny"
+var swordIceDebuff = "sword ice *max dI -prismatic"
 var swordIceDmg = "sword ice *max -dI"
 var shieldIceDefense = "shield ice *max -ai"
 var shieldIceDebuff = "shield ice *max ai"
