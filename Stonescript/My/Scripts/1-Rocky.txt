@@ -283,7 +283,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     // Heal to reduce damage
     :?loc.stars > 15 & c.isPermapotSetup & foe ! "phase2"
       a.ldtF("defense heal")
-    :?foe = "phase2"
+    :?foe = "phase2" & !c.isPermapotSetup
       a.ldtF("defense")
 
 // ............ AOE/RANGED LOGIC ............ //

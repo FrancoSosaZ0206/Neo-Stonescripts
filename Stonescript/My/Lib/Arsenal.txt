@@ -408,7 +408,19 @@ func ldtF(mode)
       :?mode = "stun"
         equipR @shieldCompound1@
 
-      :?mode = "evade"
+      :?mode = "buff" | mode = "debuff"
+        ?mode = "poison" | mode = "empower"
+          equipR @shieldPoisonBuff@
+        :?mode = "vigor" | mode = "heal"
+          equipR @shieldVigorBuff@
+        :?mode = "aether" | mode = "unmake"
+          equipR @shieldAetherDebuff@
+        :?mode = "fire" | mode = "burn"
+          equipR @shieldFireDebuff@
+        :?mode = "ice" | mode = "chill"
+          equipR @shieldIceDebuff@
+
+      :?!c.isPermapotSetup
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
           equipR @shieldIceDefense@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -421,18 +433,6 @@ func ldtF(mode)
           equipR @shieldFireDefense@
         : // foe = "stone"
           equipR @shieldStone@
-
-      :?mode = "buff" | mode = "debuff"
-        ?mode = "poison" | mode = "empower"
-          equipR @shieldPoisonBuff@
-        :?mode = "vigor" | mode = "heal"
-          equipR @shieldVigorBuff@
-        :?mode = "aether" | mode = "unmake"
-          equipR @shieldAetherDebuff@
-        :?mode = "fire" | mode = "burn"
-          equipR @shieldFireDebuff@
-        :?mode = "ice" | mode = "chill"
-          equipR @shieldIceDebuff@
 
   :?mode = "melee"
     ?mode = "aoe" | mode = "splash" // TO DO: big swords
