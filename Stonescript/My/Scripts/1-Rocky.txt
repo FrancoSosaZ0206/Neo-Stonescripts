@@ -203,19 +203,23 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
+// Harvest/Pick up things
+:?choice & harvest.distance < 5
+  a.ldtF("harvest")
+:?pickup.distance < 15
+  a.ldtF("magnet")
+
 // speed up
 :?c.canUseAbility("staff_fire") &
 ^ai.enabled & !ai.paused & ai.walking &
 ^foe.state ! 116 &
 ^foe.distance = 9999 &
 ^(buffs.string ! "buff_inf_speed" | screen.i = 0)
-  >c0,0,#red,USING INFERNAL STAFF
   c.useAbility_TH(a.staffFireHidden)
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
 ^ai.enabled & !ai.paused
-  >c0,0,#red,USING QUARTERSTAFF
   c.useAbility_TH(a.myQuarterstaff)
 
 // Summons
@@ -227,12 +231,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(foe = "boss" | (loc.stars > 15 & foe = "phase"))
   >c0,0,#red,USING FIRE TALISMAN
   c.useAbility_OH("fire_talisman", hand)
-
-// Harvest/Pick up things
-:?choice & harvest.distance < 5
-  a.ldtF("harvest")
-:?pickup.distance < 15
-  a.ldtF("magnet")
 
 // ............. DEFENSIVE LOGIC ............ //
 
