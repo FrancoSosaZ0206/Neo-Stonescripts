@@ -228,7 +228,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^loc.stars > 15 &
 ^!((foe = "boss" | encounter.eliteMod = "monarch") &
 ^   foe.count = 1) &
-^!(foe = "phase" & foe.state = -1 & foe.distance < 9999)
+^!(foe = "phase"/* & foe.state = -1 & foe.distance < 9999*/)
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^foe = "boss" & foe.count = 1
@@ -244,7 +244,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // Dysangelos's massive beam or putting shield up
 :?foe = "phase3" &
 ^((foe.state = 115 & foe.time > 70) |
-^ (foe.state = 32 & foe.time > 65 & foe.damage = 1))
+^ (foe.state = 32 & foe.time > 50 & foe.damage = 1))
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH(a.staffVigorHidden)
@@ -253,7 +253,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
-  >`1,7,#magenta,DEFENSIVE SCOUT WIND & CRIT
   fight("ranged") // fight ranged to avoid hit
 
 // Normal attacks
@@ -372,7 +371,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       equipL grappling
     :
       fight("ranged")
-      >c0,1,#yellow,FIGHTING RANGED | AOE STRAT
 
 // .......... ENGAGE/WALKING LOGIC .......... //
 
