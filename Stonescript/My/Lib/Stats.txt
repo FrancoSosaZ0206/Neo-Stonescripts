@@ -292,7 +292,7 @@ func getEffectStat(source, effectType, effectId, statType)
     // all effects are separated by a "," char
     var fxArr = string.Split(fxStr, ",")
 
-    for i = 0 .. a.Count(fxArr) - 1
+    for i = 0 .. fxArr.Count() - 1
       ?fxArr[i] = effectId // target effect is active
         var effectStats = string.Split(fxArr[i], ":")
 
@@ -376,7 +376,7 @@ func getEffectsTable(source, effectType, isSlim)
       fxTable += "<sym> x<n>, <mm:ss f>"
 
     var fxArr = string.Split(fxStr, ",")
-    for i = 0 .. a.Count(fxArr) - 1
+    for i = 0 .. fxArr.Count() - 1
       var effectStats = string.Split(fxArr[i], ":")
       var statsFormatted = null
 
