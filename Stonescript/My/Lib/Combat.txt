@@ -166,14 +166,12 @@ func canUseAbility(abilityId)
     :?abilityId = "quarterstaff" | abilityId = "talisman" // interruptible abilities
       result = result | isCasting(abilityId) // make sure not to change it while casting the ability
 
-    :?abilityId = "voidweaver" |
-    ^ abilityId = "cinderwisp"
-      result = result & isSummoned(abilityId)
-
-      ?abilityId = "voidweaver"
-        result = result & canUnmakeVoidweaver()
-      :?abilityId = "cinderwisp"
-        result = result & foe.debuffs.string = "ignition"
+    :?abilityId = "voidweaver"
+      result = result & isSummoned(abilityId) &
+      ^canUnmakeVoidweaver()
+    :?abilityId = "cinderwisp"
+      result = result & isSummoned(abilityId) &
+      ^foe.debuffs.string = "ignition"
 
     :?abilityId = "wand_stone"
       result = result & armor >= s.wand_stone_armor &
@@ -423,9 +421,12 @@ func devour(summonName)
   ?summonName = "voidweaver" |
   ^summonName = "cinderwisp"
     ?isSummoned(summonName)
-      activate @summonName@
+      ?summonName = "voidweaver"
+        activate voidweaver
+      : // summonName = "cinderwisp"
+        activate cinderwisp
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: <summonName> isn't summoned", false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: " + @summonName@ + " isn't summoned", false)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
@@ -435,7 +436,7 @@ effective against the current foes the player is
 facing. */
 func canUnmakeVoidweaver()
   return !(
-  ^ foe = "boss" | // bosses are immune to unmake
+  ^ (foe = "boss") | // bosses are immune to unmake
   ^ encounter.eliteMod = "tenacious" | ( // tenacious can't be debuffed
   ^   encounter.eliteMod = "monarch" &
   ^   foe.count = 1) // monarch foes can't be unmade
@@ -456,9 +457,17 @@ func canKillCinderwisp(cinderwispDmg, margin)
   var debuffCount = s.getEffectStat("foe","debuff","ignition","count") // amount of debuffs stacked
 
   ?canUseAbility("cinderwisp") & debuffCount
-    result = foe.hp + foe.armor <= (debuffCount * cinderwispDmg) + margin
+    result = s.getTotalHP("foe") <= (debuffCount * cinderwispDmg) + margin
 
   return result
+/* Checks if the maximum amount of ignition debuffs have been
+applied to a certain foe.
+
+ignitions_cap: maximum number of ignition debuffs
+               that can be applied. Varies on upgrade level or
+               boosted stat. */
+func isCinderwispCap(ignitions_cap)
+  return foe.debuffs.string = ignitions_cap
 
 // ............... Potions .............. //
 
