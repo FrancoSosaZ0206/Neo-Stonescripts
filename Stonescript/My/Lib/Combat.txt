@@ -147,20 +147,20 @@ func canUseAbility(abilityId)
       result = result & isDashingRange() & !ai.idle
     :?abilityId = "arm"
       result = result & item.CanActivate("arm") &
-      ^foe.distance <= s.getRange("arm") &
+      ^s.inRange("arm") &
       ^buffs.string = "pick_pocket"
     :?abilityId = "hatchet"
       result = result & loc = "deadwood_valley"
 
     :?abilityId = "hatchet"
       result = (result & // and it's in range
-      ^foe.distance <= s.getRange(abilityId)) |
+      ^s.inRange(abilityId)) |
       ^isCasting(abilityId) // won't get interrupted
 
     :?abilityId = "bardiche" |
     ^abilityId = "heavy_hammer"
       result = (result & // and it's in range
-      ^foe.distance <= s.getRange(abilityId + " ability")) |
+      ^s.inRange(abilityId + " ability")) |
       ^isCasting(abilityId) // won't get interrupted
 
     :?abilityId = "quarterstaff" | abilityId = "talisman" // interruptible abilities
@@ -259,8 +259,7 @@ func useAbility_OH(itemName, hand)
   ^    itemName = "fire"        |
   ^    itemName = "ice")          )
     ?itemName = "talisman"
-      ?ai.walking &
-      ^foe.distance > s.getRange("triskelion") &
+      ?ai.walking & !s.inRange("triskelion") &
       ^(hand = "r" | hand = "right")
         equipL triskelion
 

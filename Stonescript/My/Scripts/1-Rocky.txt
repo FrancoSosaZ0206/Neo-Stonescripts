@@ -53,7 +53,7 @@ func fight(mode)
     ^foe.distance < s.dash_range_min
       c.useAbility_TH(a.staffIceHidden)
 
-    :?foe.distance > s.getRange("sword")
+    :?!s.inRange("sword")
       ?foe.count > 1
         fight("magic")
       :
@@ -322,9 +322,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?loc.stars > 15 & (
 ^(c.isPermapotSetup &
 ^(foe.GetCount(foe.distance + margin) > 1 &
-^foe.distance <= s.getRange("wand") & foe ! "warcaster")) |
+^s.inRange("wand") & foe ! "warcaster")) |
 ^(!c.isPermapotSetup &
-^foe.count > 1 & foe.distance <= s.getRange("crossbow rune")))
+^foe.count > 1 & s.inRange("crossbow rune")))
   ?!encounter.isElite
     ?c.canUseAbility("bash")
       a.ldtF("bash")
@@ -434,7 +434,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   /*:?c.canUseAbility("wand_ice")
     c.useAbility_OH(a.wandIceHidden, hand)*/
   :
-    fight("melee")
+    ?!encounter.isElite & foe ! "boss"
+      a.ldtF("melee 1v1 unmake")
+    :
+      fight("melee")
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

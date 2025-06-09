@@ -251,6 +251,8 @@ func getRange(itemName)
     result = -1
 
   return result
+func inRange(itemName)
+  return foe.distance <= getRange(itemName)
 
 /* Returns a stat of an effect,
 or null if there was an error.
