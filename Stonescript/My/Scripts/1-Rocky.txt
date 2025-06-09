@@ -224,10 +224,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // Summons
 :?c.canSummon("aether_talisman") &
-^loc.stars > 15 & foe ! "phase"
+^loc.stars > 15 & !(foe = "boss" & foe.count = 1)
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
-^(foe = "boss" | (loc.stars > 15 & foe = "phase"))
+^foe = "boss" & foe.count = 1
   c.useAbility_OH("fire_talisman", hand)
 
 // ............. DEFENSIVE LOGIC ............ //
@@ -300,8 +300,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // ............ AOE/RANGED LOGIC ............ //
 
 :?c.canUseAbility("voidweaver") & foe.count > 1
-  c.devour("voidweaver")
-  >c0,3,#red,DEVOUR VOIDWEAVER
+  ?c.canUseAbility("dash")
+    a.ldtF("dash")
+  :?c.canUseAbility("bash")
+    a.ldtF("bash")
+  :
+    c.devour("voidweaver")
+    >c0,3,#red,DEVOUR VOIDWEAVER
 
 :?loc.stars > 15 & (
 ^(c.isPermapotSetup &
