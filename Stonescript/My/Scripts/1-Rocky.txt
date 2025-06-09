@@ -180,7 +180,7 @@ disable npcDialog
 
 
 // Decide hand for one-handed items
-?c.isPermapotSetup
+?c.isPermapotSetup | c.isDashingRange()
   hand = "left"
 :
   hand = "right"
