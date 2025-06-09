@@ -1,9 +1,9 @@
-﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
-// ///////////////// IMPORTS ///////////////// //
+// //////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
 var u     = import My/Lib/Utilities
@@ -12,7 +12,7 @@ var s     = import My/Lib/Stats
 var a     = import My/Lib/Arsenal
 
 
-// //////////////// VARIABLES //////////////// //
+// /////////////// VARIABLES //////////////// //
 
 var yesButton     = null
 var noButton      = null
@@ -27,7 +27,7 @@ var hand       = null
 var margin = 8 // wand left hitbox + splash range
 
 
-// //////////////// FUNCTIONS //////////////// //
+// /////////////// FUNCTIONS //////////////// //
 
 func harvestFunc(button)
   buttonPressed = true
@@ -122,14 +122,9 @@ func fight(mode)
         a.ldtF("ranged dmg")*/
 
 
-// //////////////// PROCEDURE //////////////// //
+// /////////////// PROCEDURE //////////////// //
 
-/*?foe.distance ! 9999
-  >`1,15,#magenta,dist#=#@foe.distance@\n
-  ^dist#+#margin#=#@foe.distance + margin@\n
-  ^count#=#@foe.count@\n
-  ^count#in#dist#=#@foe.GetCount(foe.distance)@\n
-  ^count#in#dist#+#margin#=#@foe.GetCount(foe.distance + margin)@\n*/
+// .............. SETUP LOGIC ............... //
 
 c.Init()
 c.smiteScreen_Target = 2
@@ -138,6 +133,8 @@ disable npcDialog
 
 // Auto-harvesting logic
 ?!buttonPressed
+  u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
+
   ?!yesButton
     yesButton = uimkr.mkButton(
     ^-5,9,null,2,null,null, // x, y, w, h, anchor, dock,
@@ -153,9 +150,6 @@ disable npcDialog
     ^null,null,null, // tcol, bcol, hcol,
     ^-5,harvestFunc, // style, pressed,
     ^null,null,null) // down, up, sound
-
-
-  u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
 :
   ?yesButton
     yesButton.Recycle()
@@ -191,11 +185,12 @@ c.smiteScreen_Max = 4
 c.screen_DS_Change("blade")
 c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
-// Auto Brewing
+// Auto brewing
 ?c.canBrewPotion(potionType)
   c.brewPotion(potionType)
 
-?loc.begin // initial equipment
+// Initial equipments
+?loc.begin
   a.ldtF("default")
 :?c.isPermapotSetup
   a.ldtF("permapot")
@@ -203,27 +198,34 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-?c.canSummon("aether_talisman") &
+?c.canSummon("aether_talisman") & loc.stars > 15 &
 ^((foe ! "boss" & foe.distance ! 9999) |
 ^screen.i = 0)
   c.useAbility_OH("aether_talisman", hand)
-:?c.canSummon("fire_talisman") & (foe = "boss" | loc.stars < 15)
+:?c.canSummon("fire_talisman") &
+^(foe = "boss" | loc.stars <= 15)
   c.useAbility_OH("fire_talisman", hand)
 
 :?c.canUsePotion(potionType) & c.isPermapotSetup
   activate potion
-:?choice & harvest.distance < 5
+:?ai.walking
+  // speed up
+  ?c.canUseAbility("staff_fire") &
+  ^buffs.string ! "buff_inf_speed" &
+  ^ai.enabled & !ai.paused & ai.walking
+    c.useAbility_TH(a.staffFireHidden)
+
+  :?c.canUseAbility("quarterstaff") &
+  ^!c.isDashingRange() & ai.walking
+    c.useAbility_TH(a.myQuarterstaff)
+
+?choice & harvest.distance < 5
   a.ldtF("harvest")
 :?pickup.distance < 15
   a.ldtF("magnet")
 
-:?c.canUseAbility("staff_fire") &
-^buffs.string ! "buff_inf_speed" &
-^ai.enabled & !ai.paused
-  // speed up
-  c.useAbility_TH(a.staffFireHidden)
+// ............. DEFENSIVE LOGIC ............ //
 
-// ABOUT TO ATTACK
 :?(foe.state = 32 & (
 ^ (foe = "scout" & (
 ^   (foe.damage <= 5 & foe.time > 50)   |
@@ -240,6 +242,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   // a bit into the attack state
 ^(foe.state = 33 & foe.time = 0 &
 ^ (foe = "phase2" | foe = "phase3"))
+  // About to attack
+
   ?foe = "phase3" &
   ^(foe.state = 115 | foe.damage = 1)
     ?foe.damage = 1 & // prevent the stun
@@ -277,13 +281,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       :
         a.ldtF("defense")
 
+// ............ AOE/RANGED LOGIC ............ //
 
-:?c.canUseAbility("quarterstaff") &
-^!c.isDashingRange() & ai.walking
-  c.useAbility_TH(a.myQuarterstaff)
-
-
-// AOE strategy
 :?(c.isPermapotSetup &
 ^(foe.GetCount(foe.distance + margin) > 1 &
 ^foe.distance <= s.getRange("wand") & foe ! "warcaster")) |
@@ -355,6 +354,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("ranged")
       >c0,1,#yellow,FIGHTING RANGED | AOE STRAT
 
+// ........... ENGAGE/WALK LOGIC ............ //
 
 :?ai.paused |
 ^(ai.idle & foe.distance > s.dash_range_min) | // if we're waiting
@@ -374,8 +374,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :
     a.ldtF("defense regen fast")
 
+// .............. COMBAT LOGIC .............. //
 
-// fighting range
 :?foe = "phase" // Dysangelos fight logic
   ?c.canUseAbility("bash")
     a.ldtF("bash")
@@ -416,6 +416,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     fight("melee")
 
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
