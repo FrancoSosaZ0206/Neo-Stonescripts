@@ -200,7 +200,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // speed up
 :?c.canUseAbility("staff_fire") &
 ^ai.enabled & !ai.paused & ai.walking &
-^!(foe = "phase3" & (foe.state = 4 | foe.state = -1)) &
+^!(foe = "phase3" & (foe.state = 116 | foe.state = -1)) &
 ^foe.distance = 9999 &
 ^(buffs.string ! "buff_inf_speed" | screen.i = 0)
   c.useAbility_TH(a.staffFireHidden)
@@ -250,7 +250,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?foe.state = 32 & (
 ^(foe = "scout" & foe.time > 50) |
 ^((foe = "phase1" & foe.time > 60) |
-^ (foe = "phase3" & foe.time > 80 & foe.damage > 1)) |
+^ (foe = "phase3" & foe.time > 85 & foe.damage > 1)) |
 ^(foe ! "boss" & foe.time > 50))
   >`1,7,#magenta,DEFENSIVE#-#NORMAL#ATTACKS
 
