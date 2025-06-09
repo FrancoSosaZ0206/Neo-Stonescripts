@@ -341,7 +341,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       c.useAbility_OH(a.wandAetherHidden, hand)
 
     // reset buffs
-    :?encounter.eliteMod ! "tenacious" &
+    :?encounter.eliteMod = "stoic" &
     ^c.canUseAbility("wand_vigor")
       c.useAbility_OH(a.wandVigorHidden, hand)
 
