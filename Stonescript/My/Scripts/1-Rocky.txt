@@ -54,9 +54,10 @@ func fight(mode)
       :
         fight("ranged")
 
-    :?foe ! "boss" &
-    ^encounter.eliteMod ! "tenacious" &
-    ^encounter.eliteMod ! "monarch" // can unmake
+    // Unmake
+    :?foe ! "boss" & !(
+    ^encounter.eliteMod = "tenacious" |
+    ^(encounter.eliteMod = "monarch" & foe.count = 1))
       a.ldtF("defense unmake")
     :
       a.ldtF("defense")
@@ -92,7 +93,7 @@ func fight(mode)
     // 3. Unmake
     :?foe ! "boss" & !(
     ^encounter.eliteMod = "tenacious" |
-    ^(encounter.eliteMod = "monarch" & foe.count = 1))
+    ^(encounter.eliteMod = "monarch" & foe.GetCount(foe.distance + margin) = 1))
       ?mode = "melee"
         a.ldtF("melee 1v1 unmake")
       :?c.isPermapotSetup
@@ -179,7 +180,7 @@ disable npcDialog
 
 
 // Decide hand for one-handed items
-?c.isPermapotSetup
+?c.isPermapotSetup | c.isDashingRange()
   hand = "left"
 :
   hand = "right"
@@ -227,7 +228,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^loc.stars > 15 &
 ^!((foe = "boss" | encounter.eliteMod = "monarch") &
 ^   foe.count = 1) &
-^!(foe = "phase" & foe.state = -1)
+^!(foe = "phase" & foe.state = -1 & foe.distance < 9999)
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^foe = "boss" & foe.count = 1
@@ -242,7 +243,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
 // Dysangelos's massive beam or putting shield up
 :?foe = "phase3" &
-^((foe.state = 115 & foe.time > 73) |
+^((foe.state = 115 & foe.time > 70) |
 ^ (foe.state = 32 & foe.time > 65 & foe.damage = 1))
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
@@ -261,15 +262,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^((foe = "phase1" & foe.time > 60) |
 ^ (foe = "phase3" & foe.time > 85 & foe.damage > 1)) |
 ^(foe ! "boss" & foe.time > 50))
-  >`1,7,#magenta,DEFENSIVE#-#NORMAL#ATTACKS
-
   // reduce damage amap
   ?foe = "phase3" &
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
     ?c.canUseAbility("mask")
       c.useAbility_OH("mask", "r")
     :?c.canUseAbility("wand_poison")
-      c.useAbility_OH(a.wandPoisonHidden, "l")
+      c.useAbility_OH(a.wandPoisonHidden, hand)
 
   // foe will break through armor
   :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
@@ -309,7 +308,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     a.ldtF("bash")
   :
     c.devour("voidweaver")
-    >c0,3,#red,DEVOUR VOIDWEAVER
 
 :?loc.stars > 15 & (
 ^(c.isPermapotSetup &
@@ -326,7 +324,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   // Calamity - reduce hp
   :?encounter.eliteMod ! "tenacious" &
   ^c.canUseAbility("wand_aether")
-    c.useAbility_OH(a.wandAetherHidden, "l")
+    c.useAbility_OH(a.wandAetherHidden, hand)
 
   :?!encounter.isElite
     ?c.canUseAbility("bash")
@@ -350,16 +348,17 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     // reset buffs
     ?encounter.eliteMod ! "tenacious" &
     ^c.canUseAbility("wand_vigor")
-      c.useAbility_OH(a.wandVigorHidden, "l")
+      c.useAbility_OH(a.wandVigorHidden, hand)
 
-    // Hinder regen
+    // hinder regen
     :?encounter.eliteMod = "regen" &
     ^c.canUseAbility("wand_fire")
-      c.useAbility_OH(a.wandFireHidden, "l")
+      c.useAbility_OH(a.wandFireHidden, hand)
 
+    // align foes
     :?foe.distance <= s.getRange("wand") &
-    ^c.canUseAbility("wand_stone") // align foes
-      c.useAbility_OH(a.wandStoneHidden, "l")
+    ^c.canUseAbility("wand_stone") & !encounter.isElite
+      c.useAbility_OH(a.wandStoneHidden, hand)
 
     :?foe.distance < s.dash_range_min &
     ^c.canUseAbility("mind")
@@ -368,13 +367,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH(a.staffStoneHidden)
 
-    :?c.isPermapotSetup
-      ?encounter.eliteMod ! "tenacious" &
-      ^foe.debuffs.string ! "stun" 
-        equipL grappling
-      :
-        equipL @a.wandAetherDebuff@
-      equipR mask
+    :?c.isPermapotSetup &
+    ^encounter.eliteMod ! "tenacious" &
+    ^foe.debuffs.string ! "stun"
+      equipL grappling
     :
       fight("ranged")
       >c0,1,#yellow,FIGHTING RANGED | AOE STRAT
@@ -425,9 +421,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :?c.canUseAbility("staff_poison") & !c.isDashingRange()
       c.useAbility_TH(a.staffPoisonHidden)
     /*:?c.canUseAbility("wand_ice") & !c.isDashingRange()
-      c.useAbility_OH(a.wandIceHidden, "l")
+      c.useAbility_OH(a.wandIceHidden, hand)
     :?c.canUseAbility("wand_fire") & !c.isDashingRange()
-      c.useAbility_OH(a.wandFireHidden, "l")*/
+      c.useAbility_OH(a.wandFireHidden, hand)*/
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.isPermapotSetup
       c.useAbility_TH("Guardian's Bane") //'
@@ -442,7 +438,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?c.canUseAbility("staff_poison")
     c.useAbility_TH(a.staffPoisonHidden)
   /*:?c.canUseAbility("wand_ice")
-    c.useAbility_OH(a.wandIceHidden, "l")*/
+    c.useAbility_OH(a.wandIceHidden, hand)*/
   :
     fight("melee")
 

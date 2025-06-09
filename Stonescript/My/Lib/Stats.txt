@@ -47,7 +47,7 @@ Ranges + Hitboxes table
 
 Link: https://discord.com/channels/423242655498240000/609453573113249924/1283482516287918153
 
-"So here are the main hitboxes, with slashes
+"So here are the main hitboxes, with slashes ('/')
 showing splash area to the right vs odd-width foe.
 
 All hitbox widths are odd unless it says even,
