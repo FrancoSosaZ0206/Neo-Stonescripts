@@ -731,9 +731,9 @@ func canSmartDash()
   return c.canUseAbility("bash") | c.canUseAbility("dash")
 func smartDash()
   ?c.canUseAbility("bash")
-    a.ldtF("bash")
+    ldtF("bash")
   :?c.canUseAbility("dash")
-    a.ldtF("dash")
+    ldtF("dash")
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
