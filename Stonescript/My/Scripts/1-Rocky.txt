@@ -87,7 +87,7 @@ func fight(mode)
 
     // 2. Heal if needed
     :?hp ! maxhp
-      ?c.permapotSetup
+      ?c.permapotSetup & foe ! "boss"
         // perma stun
         ?foe.count > 1 &
         ^encounter.eliteMod ! "tenacious" &
@@ -211,7 +211,7 @@ disable npcDialog
   :?loc.stars <= 15 // yellow
     dysan_screen = 4
   :?loc.stars <= 20 // green
-    dysan_screen = 8
+    dysan_screen = 7
 
 // Decide hand for one-handed items
 ?c.permapotSetup | c.isDashingRange()
@@ -464,7 +464,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 : // 1v1
   ?a.canSmartDash()
     a.smartDash()
-  :?c.canUseAbility("staff_poison") & s.getTotalHP("foe") > 1000
+  :?c.canUseAbility("staff_poison") &
+  ^!c.permapotSetup & s.getTotalHP("foe") > 1000
     c.useAbility_TH(a.staffPoisonHidden)
   /*:?c.canUseAbility("wand_ice")
     c.useAbility_OH(a.wandIceHidden, hand)*/
