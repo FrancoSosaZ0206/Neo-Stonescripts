@@ -197,25 +197,25 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-?c.canSummon("aether_talisman") & loc.stars > 15 & (
+// speed up
+:?c.canUseAbility("staff_fire") & (
+^  (buffs.string ! "buff_inf_speed" &
+^   ai.walking & !c.isDashingRange() &
+^   ai.enabled & !ai.paused) |
+^ screen.i = 0 & !(foe = "phase" & foe.distance = 9999))
+  c.useAbility_TH(a.staffFireHidden)
+:?c.canUseAbility("quarterstaff") &
+^ai.walking & !c.isDashingRange() &
+^ai.enabled & !ai.paused
+  c.useAbility_TH(a.myQuarterstaff)
+
+:?c.canSummon("aether_talisman") & loc.stars > 15 & (
 ^((foe ! "boss" & foe.distance ! 9999) |
 ^screen.i = 0))
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^(foe = "boss" | loc.stars <= 15)
   c.useAbility_OH("fire_talisman", hand)
-
-// speed up
-:?c.canUseAbility("staff_fire") & (
-^  (buffs.string ! "buff_inf_speed" &
-^   ai.walking & !c.isDashingRange() &
-^   ai.enabled & !ai.paused) |
-^ screen.i = 0)
-  c.useAbility_TH(a.staffFireHidden)
-:?c.canUseAbility("quarterstaff") &
-^ai.walking & !c.isDashingRange() &
-^ai.enabled & !ai.paused
-  c.useAbility_TH(a.myQuarterstaff)
 
 :?choice & harvest.distance < 5
   a.ldtF("harvest")
@@ -254,7 +254,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 
   // Avoid or reduce damage
   ?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
-    ?c.canUseAbility("wand_poison")
+    ?c.canUseAbility("mask")
+      c.useAbility_OH("mask", "r")
+    :?c.canUseAbility("wand_poison")
       c.useAbility_OH(a.wandPoisonHidden, "l")
     // Avoid hit entirely
     :?foe = "phase3" & foe.damage > 1 &
@@ -413,8 +415,6 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   : // foe = phase3
     ?c.canUsePotion(potionType)
       activate potion
-    :?c.canUseAbility("mask")
-      c.useAbility_OH("mask", "r")
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.isPermapotSetup
       c.useAbility_TH("Guardian's Bane") //'
