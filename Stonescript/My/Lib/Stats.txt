@@ -203,9 +203,7 @@ func getRange(itemName)
       :
         result = crossbow_range
 
-    :?itemName = "quarterstaff"
-      result = staff_range
-    :?itemName = "staff"
+    :?itemName = "quarterstaff" | itemName = "staff"
       result = staff_range
 
     :?itemName = "arm"
@@ -227,6 +225,10 @@ func getRange(itemName)
 
     :?itemName = "grappling_hook"
       result = grapplingHook_range
+
+    :?itemName = "trisk" | itemName = "triskelion"
+      result = stone_triskelion_range
+      canIncrease = false
 
     :
       showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getRange\nCAUSE: unknown <itemName>: " + itemName, false)
