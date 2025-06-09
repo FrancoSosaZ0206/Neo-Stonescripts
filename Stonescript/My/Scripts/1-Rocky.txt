@@ -204,7 +204,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!c.isDashingRange() &
 ^ (buffs.string ! "buff_inf_speed" |
 ^  screen.i = 0 |
-^ (foe = "phase" & foe.distance = 9999))
+^ (foe = "phase" & !c.isDashingRange()))
   c.useAbility_TH(a.staffFireHidden)
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
