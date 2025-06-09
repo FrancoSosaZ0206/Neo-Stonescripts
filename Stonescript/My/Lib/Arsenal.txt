@@ -281,7 +281,7 @@ func ldtF(mode)
     :
       equipL triskelion
 
-    ?!c.isPermapotSetup
+    ?!c.permapotSetup
       ?foe ! "immune_to_debuff_chill" &
       ^foe.debuffs.string ! "chill" &
       ^encounter.eliteMod ! "tenacious"
@@ -327,7 +327,7 @@ func ldtF(mode)
   :?mode = "escape" | mode = "mind" | mode = "mindstone"
     equipL mind
 
-    ?!c.isPermapotSetup
+    ?!c.permapotSetup
       ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
         equipL @shieldIceDefense@
       :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -341,7 +341,7 @@ func ldtF(mode)
       :
         equipL @shieldTowering@
   :?mode = "magnet" | mode = "star" | mode = "star stone"
-    ?c.isPermapotSetup
+    ?c.permapotSetup
       equipL star
     :
       equipL triskelion
@@ -358,7 +358,7 @@ func ldtF(mode)
     // Special cases (both left and right are dedicated to the loadout's goal)
     ?mode = "heal"
       equipL @hammerVigorBuff@
-      ?!c.isPermapotSetup
+      ?!c.permapotSetup
         equipR @shieldVigorBuff@
     :?mode = "unmake" // unmake when hit
       ?foe.count > 1
@@ -366,13 +366,13 @@ func ldtF(mode)
       :
         equipL @swordAetherDebuff1@
       
-      ?!c.isPermapotSetup
+      ?!c.permapotSetup
         equipR @shieldAetherDebuff@
 
     :?mode = "regen"
       equipL triskelion
 
-      ?!c.isPermapotSetup
+      ?!c.permapotSetup
         ?mode = "max" | mode = "slow"
           equipR @shieldCompound1@
         :?mode = "fast"
@@ -425,7 +425,7 @@ func ldtF(mode)
         :?mode = "ice" | mode = "chill"
           equipR @shieldIceDebuff@
 
-      :?!c.isPermapotSetup
+      :?!c.permapotSetup
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
           equipR @shieldIceDefense@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -443,7 +443,7 @@ func ldtF(mode)
     ?mode = "aoe" | mode = "splash" // TO DO: big swords
       // Special cases:
       ?mode = "heal"
-        ?c.isPermapotSetup
+        ?c.permapotSetup
           // equipL 
         :
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -459,7 +459,7 @@ func ldtF(mode)
           : // foe = "stone"
             // c.doMoondial(,)
       :?mode = "unmake"
-        ?c.isPermapotSetup
+        ?c.permapotSetup
           equipL @swordBigAetherDebuff@
           >c0,0,#red,dU BIG SWORD
         :
@@ -476,7 +476,7 @@ func ldtF(mode)
           : // foe = "stone"
             // c.doMoondial(,)
       :?mode = "debuff"
-        ?c.isPermapotSetup // all left hand
+        ?c.permapotSetup // all left hand
           ?c.canApplyChill()
             // equipL 
           :?c.canApplyWeaken()
@@ -484,7 +484,7 @@ func ldtF(mode)
           :?c.canApplyBurn()
             // equipL 
 
-        : // !c.isPermapotSetup
+        : // !c.permapotSetup
 
           // Left hand:
           ?c.canApplyWeaken()
@@ -499,7 +499,7 @@ func ldtF(mode)
           ?c.canApplyChill()
             // equipR 
       :?mode = "dmg"
-        ?c.isPermapotSetup // all left hand
+        ?c.permapotSetup // all left hand
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             // equipL 
           :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -513,7 +513,7 @@ func ldtF(mode)
           : // foe = "stone"
             // equipL 
 
-        : // !c.isPermapotSetup
+        : // !c.permapotSetup
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             // c.doMoondial(,)
           :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -530,7 +530,7 @@ func ldtF(mode)
     :?mode = "1v1"
       // Special cases:
       ?mode = "heal"
-        ?c.isPermapotSetup
+        ?c.permapotSetup
           equipL Soulfetcher
         :
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -546,7 +546,7 @@ func ldtF(mode)
           : // foe = "stone
             c.doMoondial(Bifrost /*Broken Faith*/ /*swordVigorBuff*/, Soulfetcher)
       :?mode = "unmake"
-        ?c.isPermapotSetup
+        ?c.permapotSetup
           equipL @swordAetherDebuff1@
         :
           // put a 2nd dU sword when we have it
@@ -563,7 +563,7 @@ func ldtF(mode)
           : // foe = "stone
             c.doMoondial(swordAetherDebuff1, Bifrost /*Broken Faith*/) // swordAetherDebuff2
       :?mode = "debuff"
-        ?c.isPermapotSetup // all left hand
+        ?c.permapotSetup // all left hand
           ?c.canApplyChill()
             equipL Almafuerte
           :?c.canApplyWeaken()
@@ -572,7 +572,7 @@ func ldtF(mode)
           :?c.canApplyBurn()
             equipL @swordFireDebuff@
 
-        : // !c.isPermapotSetup
+        : // !c.permapotSetup
           var swordDmg = null
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             swordDmg = Bifrost
@@ -594,7 +594,7 @@ func ldtF(mode)
             //'
             equipR @swordFireDebuff@
       :?mode = "dmg"
-        ?c.isPermapotSetup // all left hand
+        ?c.permapotSetup // all left hand
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             equipL Bifrost
           :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -608,7 +608,7 @@ func ldtF(mode)
           : // foe = "stone"
             equipL Bifrost // Unbroken Faith
 
-        : // !c.isPermapotSetup
+        : // !c.permapotSetup
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             c.doMoondial(Bifrost, swordIceDmg)
           :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -624,21 +624,21 @@ func ldtF(mode)
 
   :?mode = "magic" // wands and staves
     ?mode = "heal"
-      ?c.isPermapotSetup
+      ?c.permapotSetup
         equipL @wandVigorBuff@
       :
         // equip @staffVigorBuff@
         equipL moon
         equipR @wandVigorBuff@
     :?mode = "unmake"
-      ?c.isPermapotSetup
+      ?c.permapotSetup
         equipL @wandAetherDebuff@
       :
         equipL moon
         equip @wandAetherDebuff@
         // equip @staffAetherDebuff@
     :?mode = "debuff"
-      ?c.isPermapotSetup
+      ?c.permapotSetup
         ?c.canApplyChill()
           equipL Frosty Crust
         :?c.canApplyWeaken()
@@ -654,7 +654,7 @@ func ldtF(mode)
           equip @staffFireDebuff@
 
     :?mode = "dmg"
-      ?c.isPermapotSetup // all left hand
+      ?c.permapotSetup // all left hand
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
           equipL @wandIceDmg@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -667,7 +667,7 @@ func ldtF(mode)
           equipL @wandFireDmg@
         : // foe = "stone"
           equipL Frosty Crust // @wandStoneDmg@
-      : // !c.isPermapotSetup
+      : // !c.permapotSetup
         equip @bowAetherDebuff@
 
         /* ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -684,10 +684,10 @@ func ldtF(mode)
           equip @staffIceDebuff@ // @staffStoneDmg@ */
 
   :?mode = "ranged" // crossbows
-    ?c.isPermapotSetup
+    ?c.permapotSetup
       equipL @bowAlternate@
 
-    : // !c.isPermapotSetup
+    : // !c.permapotSetup
       ?mode = "heal"
         equipL @wandVigorBuff@
         equipR Frosty Crust

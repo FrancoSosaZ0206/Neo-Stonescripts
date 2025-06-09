@@ -64,7 +64,7 @@ var burstingCdTimer = 0
 
 // Others
 
-var isPermapotSetup = true
+var permapotSetup = true
 
 
 // //////////////// FUNCTIONS //////////////// //
@@ -82,7 +82,7 @@ func Init()
   ?loc.begin
     smiteScreen_Target = 1
   :?loc.loop
-    isPermapotSetup = false
+    permapotSetup = false
 
 // ............... GLOBAL ............... //
 

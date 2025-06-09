@@ -75,7 +75,7 @@ func fight(mode)
     ^foe.buffs.string = "buff_protection")
       ?mode = "melee"
         a.ldtF("melee 1v1 debuff")
-      :?c.isPermapotSetup
+      :?c.permapotSetup
         a.ldtF("magic debuff")
       :
         a.ldtF("ranged debuff")
@@ -87,14 +87,20 @@ func fight(mode)
 
     // 2. Heal if needed
     :?hp ! maxhp
-      ?!c.isPermapotSetup | mode = "melee"
+      ?c.permapotSetup
+        // perma stun
+        ?foe.count > 1 &
+        ^encounter.eliteMod ! "tenacious" &
+        ^foe.debuffs.string ! "stun"
+          equipL grappling
+        :?a.canSmartDash() // dash and
+          a.smartDash()
+        :?encounter.eliteMod ! "tenacious" // unmake
+          a.ldtF("melee splash unmake")
+        : // heal
+          a.ldtF("melee 1v1 heal")
+      : // !c.permapotSetup
         a.ldtF("melee 1v1 heal")
-      :?foe.count > 1 & foe.debuffs.string ! "stun"
-        equipL grappling
-      :?a.canSmartDash()
-        a.smartDash()
-      :
-        a.ldtF("melee splash unmake")
 
       /*?mode = "melee"
         a.ldtF("melee 1v1 heal")
@@ -109,7 +115,7 @@ func fight(mode)
     ^(encounter.eliteMod = "monarch" & foe.GetCount(foe.distance + margin) = 1))
       ?mode = "melee"
         a.ldtF("melee 1v1 unmake")
-      :?c.isPermapotSetup
+      :?c.permapotSetup
         ?a.canSmartDash()
           a.smartDash()
         :
@@ -125,11 +131,11 @@ func fight(mode)
 
     : // 4. Deal max damage
       ?mode = "melee"
-        /*?!c.isPermapotSetup & foe ! "phase2" & foe ! "phase3"
+        /*?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
           c.doBursting(a.burstingSwords)
         :*/
           a.ldtF("melee 1v1 dmg")
-      :?!c.isPermapotSetup
+      :?!c.permapotSetup
         a.ldtF("magic dmg")
       :
         a.ldtF("ranged dmg")
@@ -146,7 +152,7 @@ func fight(mode)
 
 // ............ WITHDRAWAL LOGIC ............ //
 
-?c.isPermapotSetup &
+?c.permapotSetup &
 ^encounter.eliteMod = "tenacious"
   loc.Leave()
 
@@ -208,7 +214,7 @@ disable npcDialog
     dysan_screen = 8
 
 // Decide hand for one-handed items
-?c.isPermapotSetup | c.isDashingRange()
+?c.permapotSetup | c.isDashingRange()
   hand = "left"
 :
   hand = "right"
@@ -224,10 +230,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // Initial equipments
 ?loc.begin
   a.ldtF("default")
-:?c.isPermapotSetup
+:?c.permapotSetup
   a.ldtF("permapot")
 
-?c.canUsePotion(potionType) & c.isPermapotSetup
+?c.canUsePotion(potionType) & c.permapotSetup
   activate potion
 ?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
@@ -238,7 +244,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.state ! 116 &
 ^!(foe.state = -1 & screen.i = dysan_screen) &
 ^buffs.string ! "buff_inf_speed" &
-^!(loc.stars > 15 & c.isPermapotSetup) // save armor if it's setup run
+^!(loc.stars > 15 & c.permapotSetup) // save armor if it's setup run
   c.useAbility_TH(a.staffFireHidden)
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
@@ -313,7 +319,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       a.ldtF("defense heal")
 
   // Apply effects
-  :?!c.isPermapotSetup
+  :?!c.permapotSetup
     // get additional damage
     ?buffs.string ! "buff_damage"
       a.ldtF("defense buff empower")
@@ -328,13 +334,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     : // all effects applied
       a.ldtF("defense")
 
-  : // c.isPermapotSetup
+  : // c.permapotSetup
     a.ldtF("defense")
 
 // ............ AOE/RANGED LOGIC ............ //
 
 :?c.canUseAbility("voidweaver") &
-^foe.count > 1 & !c.isPermapotSetup
+^foe.count > 1 & !c.permapotSetup
   ?c.canUseAbility("dash")
     a.ldtF("dash")
   :?c.canUseAbility("bash")
@@ -343,10 +349,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     c.devour("voidweaver")
 
 :?loc.stars > 15 & (
-^(c.isPermapotSetup &
+^(c.permapotSetup &
 ^(foe.GetCount(foe.distance + margin) > 1 &
 ^s.inRange("wand") & foe ! "warcaster")) |
-^(!c.isPermapotSetup &
+^(!c.permapotSetup &
 ^foe.count > 1 & s.inRange("crossbow rune")))
   ?c.canUseAbility("wand_stone")
     c.useAbility_TH(a.wandStoneHidden, hand)
@@ -355,10 +361,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ?a.canSmartDash()
       a.smartDash()
 
-    :?c.isPermapotSetup &
+    :?c.permapotSetup &
     ^foe.debuffs.string ! "stun" 
       equipL grappling
-    :?c.isPermapotSetup
+    :?c.permapotSetup
       a.ldtF("melee splash unmake")
     :
       a.ldtF("ranged unmake")
@@ -397,7 +403,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH(a.staffStoneHidden)
 
-    :?c.isPermapotSetup &
+    :?c.permapotSetup &
     ^encounter.eliteMod ! "tenacious" &
     ^foe.debuffs.string ! "stun"
       equipL grappling
@@ -450,7 +456,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :?c.canUseAbility("wand_fire") & !c.isDashingRange()
       c.useAbility_OH(a.wandFireHidden, hand)*/
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
-    ^!c.isPermapotSetup
+    ^!c.permapotSetup
       c.useAbility_TH("Guardian's Bane") //'
     :
       fight("melee")
