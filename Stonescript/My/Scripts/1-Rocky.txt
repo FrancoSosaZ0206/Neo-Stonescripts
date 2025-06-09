@@ -125,6 +125,9 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
+?foe = "phase3" & foe.state = 32
+  >c0,0,#red,DMG = @foe.damage@
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?c.isPermapotSetup &
@@ -314,15 +317,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.distance <= s.getRange("wand") & foe ! "warcaster")) |
 ^(!c.isPermapotSetup &
 ^foe.count > 1 & foe.distance <= s.getRange("crossbow rune")))
-  ?c.canUseAbility("heavy_hammer")
-    c.useAbility_TH("Guardian's Bane")
-
-  // Calamity - reduce hp
-  :?encounter.eliteMod ! "tenacious" &
-  ^c.canUseAbility("wand_aether")
-    c.useAbility_OH(a.wandAetherHidden, hand)
-
-  :?!encounter.isElite
+  ?!encounter.isElite
     ?c.canUseAbility("bash")
       a.ldtF("bash")
     :?c.canUseAbility("dash")
@@ -336,11 +331,17 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :
       a.ldtF("ranged unmake")
 
-
   : // enconuter.isElite
+    ?c.canUseAbility("heavy_hammer")
+      c.useAbility_TH("Guardian's Bane")
+
+    // Calamity - reduce hp
+    :?encounter.eliteMod ! "tenacious" &
+    ^c.canUseAbility("wand_aether")
+      c.useAbility_OH(a.wandAetherHidden, hand)
 
     // reset buffs
-    ?encounter.eliteMod ! "tenacious" &
+    :?encounter.eliteMod ! "tenacious" &
     ^c.canUseAbility("wand_vigor")
       c.useAbility_OH(a.wandVigorHidden, hand)
 
