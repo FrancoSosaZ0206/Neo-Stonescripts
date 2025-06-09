@@ -226,14 +226,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // Unmake Dysangelos's fire arm
 :?foe = "phase2" & foe = "fire" &
 ^foe.state = 32 & foe.time > 97
-  >c0,0,#magenta,DEFENSE UNMAKE
   a.ldtF("defense unmake")
 
 // Dysangelos's massive beam or putting shield up
 :?foe = "phase3" &
 ^((foe.state = 115 & foe.time > 73) |
 ^ (foe.state = 32 & foe.time > 65 & foe.damage = 1))
-  >c0,0,#magenta,DEFENSIVE BEAM/SHIELD
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH(a.staffVigorHidden)
