@@ -244,7 +244,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // Dysangelos's massive beam or putting shield up
 :?foe = "phase3" &
 ^((foe.state = 115 & foe.time > 70) |
-^ (foe.state = 32 & foe.time > 50 & foe.damage = 1))
+^ (foe.state = 32 & foe.time > 50 & foe.damage <= 1))
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH(a.staffVigorHidden)
@@ -315,10 +315,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(!c.isPermapotSetup &
 ^foe.count > 1 & foe.distance <= s.getRange("crossbow rune")))
   ?c.canUseAbility("heavy_hammer")
-    ?encounter.eliteMod = "plated"
-      c.useAbility_TH("Guardian's Bane")
-    :
-      c.useAbility_TH(Mjölnir)
+    c.useAbility_TH("Guardian's Bane")
 
   // Calamity - reduce hp
   :?encounter.eliteMod ! "tenacious" &
