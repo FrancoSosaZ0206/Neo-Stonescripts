@@ -201,9 +201,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?c.canUseAbility("staff_fire") &
 ^ai.enabled & !ai.paused & ai.walking &
 ^!(foe = "phase3" & (foe.state = 4 | foe.state = -1)) &
-^!c.isDashingRange() &
-^ (buffs.string ! "buff_inf_speed" |
-^  screen.i = 0)
+^foe.distance = 9999 &
+^(buffs.string ! "buff_inf_speed" | screen.i = 0)
   c.useAbility_TH(a.staffFireHidden)
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
@@ -407,22 +406,19 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?c.canUseAbility("dash")
     a.ldtF("dash")
 
-  :?c.canUseAbility("staff_poison") &
-  ^!c.isDashingRange()
-    c.useAbility_TH(a.staffPoisonHidden)
-
   :?foe ! "phase3"
     ?foe.buffs.string = "buff_protection" & // against debuffs
     ^c.canUseAbility("wand_vigor")
       c.useAbility_OH(a.wandVigorHidden, hand)
-    /*:?foe = "fire"
-      a.ldtF("melee 1v1 unmake")*/
     :
       fight("melee")
 
   : // foe = phase3
     ?c.canUsePotion(potionType)
       activate potion
+    :?c.canUseAbility("staff_poison") &
+    ^!c.isDashingRange()
+      c.useAbility_TH(a.staffPoisonHidden)
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.isPermapotSetup
       c.useAbility_TH("Guardian's Bane") //'
