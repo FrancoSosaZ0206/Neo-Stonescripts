@@ -373,17 +373,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^foe.state = 108 | // dysangelos phase 2 to 3 states
 ^foe.state = 116 | // dysangelos phase 3 death animation state
 ^foe.distance > s.dash_range_max // or we can't engage in a fight
-  // ai shields' chill duration is longer than any other ice weapon.
-  ?!(// foe.count = 1 | // boss or 1 remaining foe (1v1 situation)
-  ^foe.debuffs.string = "chill" | // already debuffed
-  ^foe = "immune_to_debuff_chill" |
-  ^encounter.eliteMod = "tenacious" |
-  ^foe.distance > 17 | /*!ai.walking |*/
-  ^!ai.enabled | ai.paused |
-  ^c.isPermapotSetup)
-    a.ldtF("defense debuff chill")
-
-  :?armor > a.compoundMaxArmor_boosted |
+  ?armor > a.compoundMaxArmor_boosted |
   ^(encounter.eliteMod = "metamorph" &
   ^foe.distance < s.shield_rune_range)
     a.ldtF("engage")
