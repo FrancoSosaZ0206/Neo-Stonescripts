@@ -415,9 +415,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   : // foe = phase3
     ?c.canUsePotion(potionType)
       activate potion
-    :?c.canUseAbility("staff_poison") &
-    ^!c.isDashingRange()
+    :?c.canUseAbility("staff_poison") & !c.isDashingRange()
       c.useAbility_TH(a.staffPoisonHidden)
+    :?c.canUseAbility("wand_ice") & !c.isDashingRange()
+      c.useAbility_OH(a.wandIceHidden, "l")
+    :?c.canUseAbility("wand_fire") & !c.isDashingRange()
+      c.useAbility_OH(a.wandFireHidden, "l")
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.isPermapotSetup
       c.useAbility_TH("Guardian's Bane") //'
@@ -431,6 +434,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     a.ldtF("dash")
   :?c.canUseAbility("staff_poison")
     c.useAbility_TH(a.staffPoisonHidden)
+  :?c.canUseAbility("wand_ice")
+    c.useAbility_OH(a.wandIceHidden, "l")
   :
     fight("melee")
 

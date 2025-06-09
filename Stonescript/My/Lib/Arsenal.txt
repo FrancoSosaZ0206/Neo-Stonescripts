@@ -73,6 +73,7 @@ Guardian's Wrath = heavy_hammer *max shiny (enchanted: armor fatigue)
 theVwand = wand vigor *max D golden
 Frosty Crust = wand ice *max dI
 
+Almafuerte = sword ice *max dI shiny (enchanted: speed)
 Death's Kiss = sword poison *max dP shiny (enchanted: speed) */
 
 // Elemental
@@ -138,8 +139,7 @@ var staffFireHidden = "staff fire hidden *max" // aka Infernal Staff
 
 // ................ ICE ................. //
 
-var swordIceDebuff1 = "sword ice *max dI shiny"
-var swordIceDebuff2 = "sword ice *max dI -shiny"
+var swordIceDebuff = "sword ice *max dI -shiny"
 var swordIceDmg = "sword ice *max -dI"
 var shieldIceDefense = "shield ice *max -ai"
 var shieldIceDebuff = "shield ice *max ai"
@@ -176,7 +176,7 @@ var shieldTowering = "shield towering *max golden"
 // ............... OTHERS ............... //
 
 var burstingSwords = [
-^     Soulfetcher     , swordIceDebuff1,
+^     Soulfetcher     , Almafuerte,
 ^     Mamba Negra     , swordPoisonDmg,
 ^     Dothaneel       , swordVigorDmg,
 ^     Void Slayer     , swordAetherDmg,
@@ -561,7 +561,7 @@ func ldtF(mode)
       :?mode = "debuff"
         ?c.isPermapotSetup // all left hand
           ?c.canApplyChill()
-            equipL @swordIceDebuff1@
+            equipL Almafuerte
           :?c.canApplyWeaken()
             equipL Death's Kiss
             //'
@@ -584,7 +584,7 @@ func ldtF(mode)
             swordDmg = Bifrost // Unbroken Faith
 
           ?c.canApplyChill()
-            c.doMoondial(swordDmg, swordIceDebuff1)
+            c.doMoondial(swordDmg, Almafuerte)
           :?c.canApplyWeaken() | c.canApplyBurn()
             equipL Death's Kiss
             //'
