@@ -157,12 +157,6 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-?foe = "phase3"
-  >`1,15,#yellow,DMG = @foe.damage@\n
-  ^mind cd = @item.GetCooldown("mind")@\n
-  ^acrobatic cd = @item.GetCooldown("staff_stone")@\n
-  ^canDash = @canDash@
-
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?c.permapotSetup &
@@ -306,13 +300,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     loc.Pause()
   : // evade attack
     // fight("evade")
-    >c0,0,#red,DASH BACK
     canDash = false
 
     ?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.dash_range_min))
-      >c0,2,#yellow,MINDSTONE
       a.ldtF("mind")
     :?c.canUseAbility("staff_stone") &
     ^(foe ! "ranged" |
