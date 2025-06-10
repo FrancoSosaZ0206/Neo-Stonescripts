@@ -48,14 +48,16 @@ func fight(mode)
   ?mode = "evade"
     ?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
-    ^(foe = "phase" & s.inRange("sword")))
+    ^(foe = "phase" & foe.distance < s.dash_range_min))
+      >c0,2,#yellow,MINDSTONE
       a.ldtF("mind")
     :?c.canUseAbility("staff_stone") &
     ^(foe ! "ranged" |
-    ^(foe = "phase" & s.inRange("sword")))
+    ^(foe = "phase" & foe.distance < s.dash_range_min))
+      >c0,2,#yellow,ACROBATIC STAFF
       c.useAbility_TH(a.staffStoneHidden)
 
-    :?c.canUseAbility("staff_ice") & s.inRange("sword")
+    :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
       c.useAbility_TH(a.staffIceHidden)
 
     :?!s.inRange("sword")
@@ -295,17 +297,34 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 :?foe = "phase3" &
 ^((foe.state = 115 & foe.time > 70) |
 ^ (foe.damage = 1 &
-^   (foe.state = 32 & foe.time > 45) |
-^   (foe.state = 33 & foe.time < 25)))
-  >c0,0,#red,DASH BACK
-  canDash = false
-
+^  ((foe.state = 32 & foe.time > 45) |
+^   (foe.state = 33 & foe.time < 25))))
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH(a.staffVigorHidden)
+    >c0,0,#red,PREVENT STUN
+    loc.Pause()
   : // evade attack
-    fight("evade")
-    
+    // fight("evade")
+    >c0,0,#red,DASH BACK
+    canDash = false
+
+    ?c.canUseAbility("mind") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & foe.distance < s.dash_range_min))
+      >c0,2,#yellow,MINDSTONE
+      a.ldtF("mind")
+    :?c.canUseAbility("staff_stone") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & foe.distance < s.dash_range_min))
+      >c0,2,#yellow,ACROBATIC STAFF
+      c.useAbility_TH(a.staffStoneHidden)
+
+    :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
+      c.useAbility_TH(a.staffIceHidden)
+    :
+      a.ldtF("ranged dmg")    
+
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
   fight("ranged") // fight ranged to avoid hit

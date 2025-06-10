@@ -329,17 +329,17 @@ func ldtF(mode)
 
     ?!c.permapotSetup
       ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-        equipL @shieldIceDefense@
+        equipR @shieldIceDefense@
       :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-        equipL @shieldPoisonDefense@
+        equipR @shieldPoisonDefense@
       :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-        equipL @shieldVigorDefense@
+        equipR @shieldVigorDefense@
       :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-        equipL @shieldAetherDefense@
+        equipR @shieldAetherDefense@
       :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-        equipL @shieldFireDefense@
+        equipR @shieldFireDefense@
       :
-        equipL @shieldTowering@
+        equipR @shieldTowering@
   :?mode = "magnet" | mode = "star" | mode = "star stone"
     ?c.permapotSetup
       equipL star
