@@ -20,6 +20,8 @@ var choice        = false
 var buttonPressed = false
 var dontShowAgain = false
 
+var canDash = true
+
 var weakenType = a.weaken_default
 var potionType = "lucky"
 var hand       = null
@@ -153,10 +155,11 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-/*?foe = "phase3"
-  >c-10,0,DMG = @foe.damage@\n
+?foe = "phase3"
+  >`1,15,#yellow,DMG = @foe.damage@\n
   ^mind cd = @item.GetCooldown("mind")@\n
-  ^acrobatic cd = @item.GetCooldown("staff_stone")@*/
+  ^acrobatic cd = @item.GetCooldown("staff_stone")@\n
+  ^canDash = @canDash@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -291,10 +294,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // Dysangelos's massive beam or putting shield up
 :?foe = "phase3" &
 ^((foe.state = 115 & foe.time > 70) |
-^ (foe.damage <= 1 &
-^   (foe.state = 32 & foe.time > 50) |
-^   (foe.state = 33 & foe.time < 10)))
-  >`1,15,DASH BACK
+^ (foe.damage = 1 &
+^   (foe.state = 32 & foe.time > 45) |
+^   (foe.state = 33 & foe.time < 25)))
+  >c0,0,#red,DASH BACK
+  canDash = false
 
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
@@ -352,11 +356,18 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // ............ AOE/RANGED LOGIC ............ //
 
 :?c.canUseAbility("voidweaver") &
-^foe.count > 1 & !c.permapotSetup
+^foe.count > 1 & !c.permapotSetup &
+^!encounter.isElite
   ?c.canUseAbility("dash")
     a.ldtF("dash")
   :?c.canUseAbility("bash")
     a.ldtF("bash")
+  :?!s.inRange("sword")
+    ?totaltime % 2 = 0
+      equipL triskelion
+    :
+      equipL sword
+    equipR @a.shieldCompound2@
   :
     c.devour("voidweaver")
 
@@ -448,7 +459,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
 
-  ?a.canSmartDash()
+  ?a.canSmartDash() & canDash
     a.smartDash()
 
   :?foe ! "phase3"
@@ -459,6 +470,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       fight("melee")
 
   : // foe = phase3
+    canDash = true
+
     ?c.canUsePotion(potionType)
       activate potion
     :?c.canUseAbility("staff_poison") & !c.isDashingRange()

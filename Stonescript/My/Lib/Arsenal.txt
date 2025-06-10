@@ -170,8 +170,8 @@ var shieldDashing = "shield dashing *max HoH24"
 var myQuarterstaff = "quarterstaff *max glitched"
 var fastBardiche = "bardiche *max" // enchanted: speed
 var bowRepeating = "bow repeating *max golden"
-var shieldCompound1 = "shield compound *max shiny"
-var shieldCompound2 = "shield compound *max -shiny"
+var shieldCompound1 = "shield compound *max shiny" // enchanted: armor
+var shieldCompound2 = "shield compound *max -shiny" // enchanted: armor/s
 var shieldTowering = "shield towering *max golden"
 
 // ............... OTHERS ............... //
