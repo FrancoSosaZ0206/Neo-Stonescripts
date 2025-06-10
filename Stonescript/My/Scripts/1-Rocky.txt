@@ -150,10 +150,10 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-?foe = "phase3"
+/*?foe = "phase3"
   >c-10,0,DMG = @foe.damage@\n
   ^mind cd = @item.GetCooldown("mind")@\n
-  ^acrobatic cd = @item.GetCooldown("staff_stone")@
+  ^acrobatic cd = @item.GetCooldown("staff_stone")@*/
 
 // ............ WITHDRAWAL LOGIC ............ //
 
