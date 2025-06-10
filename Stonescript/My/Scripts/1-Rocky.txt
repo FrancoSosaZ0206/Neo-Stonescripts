@@ -293,7 +293,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^((foe.state = 115 & foe.time > 70) |
 ^ (foe.damage <= 1 &
 ^   (foe.state = 32 & foe.time > 50) |
-^   (foe.state = 33 & foe.time < 5)))
+^   (foe.state = 33 & foe.time < 10)))
   >`1,15,DASH BACK
 
   // prevent the stun
@@ -482,10 +482,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   /*:?c.canUseAbility("wand_ice")
     c.useAbility_OH(a.wandIceHidden, hand)*/
   :
-    ?!encounter.isElite & foe ! "boss"
-      a.ldtF("melee 1v1 unmake")
-    :
-      fight("melee")
+    fight("melee")
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
