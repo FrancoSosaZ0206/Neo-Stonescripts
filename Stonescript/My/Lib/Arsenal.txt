@@ -461,7 +461,6 @@ func ldtF(mode)
       :?mode = "unmake"
         ?c.permapotSetup
           equipL @swordBigAetherDebuff@
-          >c0,0,#red,dU BIG SWORD
         :
           ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
             // c.doMoondial(,)
