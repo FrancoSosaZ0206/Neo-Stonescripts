@@ -101,7 +101,10 @@ func fight(mode)
           a.ldtF("melee splash unmake")
         : // heal
           a.ldtF("melee 1v1 heal")
-      : // !c.permapotSetup
+      // !c.permapotSetup
+      :?foe ! "boss"
+        a.ldtF("ranged unmake")
+      :
         a.ldtF("melee 1v1 heal")
 
       /*?mode = "melee"
