@@ -44,14 +44,16 @@ func harvestFunc(button)
 
 func fight(mode)
   ?mode = "evade"
-    ?c.canUseAbility("mind") & (foe ! "ranged" | foe = "phase")
+    ?c.canUseAbility("mind") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & s.inRange("sword")))
       a.ldtF("mind")
-    :?c.canUseAbility("staff_stone") & (foe ! "ranged" | foe = "phase")
-    ^& foe.distance < s.dash_range_min
+    :?c.canUseAbility("staff_stone") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & s.inRange("sword")))
       c.useAbility_TH(a.staffStoneHidden)
 
-    :?c.canUseAbility("staff_ice") &
-    ^foe.distance < s.dash_range_min
+    :?c.canUseAbility("staff_ice") & s.inRange("sword")
       c.useAbility_TH(a.staffIceHidden)
 
     :?!s.inRange("sword")
@@ -147,6 +149,11 @@ func fight(mode)
 
 
 // /////////////// PROCEDURE //////////////// //
+
+?foe = "phase3"
+  >c-10,0,DMG = @foe.damage@\n
+  ^mind cd = @item.GetCooldown("mind")@\n
+  ^acrobatic cd = @item.GetCooldown("staff_stone")@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -247,11 +254,13 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
-^ai.enabled & !ai.paused
+^ai.enabled & !ai.paused &
+^(c.permapotSetup |
+^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH(a.myQuarterstaff)
 
 // Harvest/Pick up things
-?choice & harvest.distance < 5
+:?choice & harvest.distance < 5
   a.ldtF("harvest")
 :?pickup.distance < 15
   a.ldtF("magnet")
@@ -262,7 +271,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^!((foe = "boss" | encounter.eliteMod = "monarch") &
 ^  foe.count = 1) &
 ^!(foe = "phase" & foe.state = -1) &
-^!dysan_cutscenes.Contains(foe.state) // not a cutscene
+^screen.i < dysan_screen // not a cutscene
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^(loc.stars <= 15 |
@@ -282,6 +291,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^ (foe.damage <= 1 &
 ^   (foe.state = 32 & foe.time > 50) |
 ^   (foe.state = 33 & foe.time < 5)))
+  >`1,15,DASH BACK
+
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH(a.staffVigorHidden)
