@@ -148,8 +148,6 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
->c-10,0,#magenta,screen = @screen.i@
-
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?c.permapotSetup &
