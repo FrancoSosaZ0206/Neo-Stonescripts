@@ -55,10 +55,10 @@ func fight(mode)
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.dash_range_min))
       >c0,2,#yellow,ACROBATIC STAFF
-      c.useAbility_TH(a.staffStoneHidden)
+      c.useAbility_TH(a.stSh)
 
     :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
-      c.useAbility_TH(a.staffIceHidden)
+      c.useAbility_TH(a.stIh)
 
     :?!s.inRange("sword")
       ?foe.count > 1
@@ -228,7 +228,7 @@ disable npcDialog
 
 c.smiteScreen_Max = 4
 c.screen_DS_Change("blade")
-c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
+c.doAAC(a.hVeff, a.sFeff)
 
 // Auto brewing
 ?c.canBrewPotion(potionType)
@@ -248,24 +248,20 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // speed up
 :?c.canUseAbility("staff_fire") &
 ^ai.walking &
-^foe.state ! 116 & foe.state ! -1 &
+^foe.state ! 116 &
+^!(foe.state = -1 & foe.distance ! 9999) &
 ^screen.i < dysan_screen &
 ^buffs.string ! "buff_inf_speed" &
 ^!(loc.stars > 15 & c.permapotSetup) // save armor if it's setup run
-  c.useAbility_TH(a.staffFireHidden)
+  c.useAbility_TH(a.stFh)
+
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & !c.isDashingRange() &
 ^ai.enabled & !ai.paused &
 ^(c.permapotSetup |
 ^ (!c.permapotSetup & screen.i > 0))
-  c.useAbility_TH(a.myQuarterstaff)
-
-// Harvest/Pick up things
-:?choice & harvest.distance < 5
-  a.ldtF("harvest")
-:?pickup.distance < 15
-  a.ldtF("magnet")
+  c.useAbility_TH(a.myQ)
 
 // Summons
 :?c.canSummon("aether_talisman") &
@@ -279,6 +275,12 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(loc.stars <= 15 |
 ^ (foe = "boss" & foe.count = 1))
   c.useAbility_OH("fire_talisman", hand)
+
+// Harvest/Pick up things
+:?choice & harvest.distance < 5
+  a.ldtF("harvest")
+:?pickup.distance < 15
+  a.ldtF("magnet")
 
 // ............. DEFENSIVE LOGIC ............ //
 
@@ -295,7 +297,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^   (foe.state = 33 & foe.time < 25))))
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
-    c.useAbility_TH(a.staffVigorHidden)
+    c.useAbility_TH(a.stVh)
     >c0,0,#red,PREVENT STUN
     loc.Pause()
   : // evade attack
@@ -310,10 +312,10 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.dash_range_min))
       >c0,2,#yellow,ACROBATIC STAFF
-      c.useAbility_TH(a.staffStoneHidden)
+      c.useAbility_TH(a.stSh)
 
     :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
-      c.useAbility_TH(a.staffIceHidden)
+      c.useAbility_TH(a.stIh)
     :
       a.ldtF("ranged dmg")    
 
@@ -333,7 +335,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ?c.canUseAbility("mask")
       c.useAbility_OH("mask", "r")
     :?c.canUseAbility("wand_poison")
-      c.useAbility_OH(a.wandPoisonHidden, hand)
+      c.useAbility_OH(a.wPh, hand)
 
   // foe will break through armor
   :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
@@ -341,7 +343,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ?foe = "phase3" & foe.damage > 1 &
     ^foe.debuffs.string ! "feeble" &
     ^c.canUseAbility("staff_ice")
-      c.useAbility_TH(a.staffIceHidden)
+      c.useAbility_TH(a.stIh)
     : // Heal to reduce damage even more
       a.ldtF("defense heal")
 
@@ -378,7 +380,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
       equipL triskelion
     :
       equipL sword
-    equipR @a.shieldCompound2@
+    equipR @a.shC2@
   :
     c.devour("voidweaver")
 
@@ -389,7 +391,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 ^(!c.permapotSetup &
 ^foe.count > 1 & s.inRange("crossbow rune")))
   ?c.canUseAbility("wand_stone")
-    c.useAbility_TH(a.wandStoneHidden, hand)
+    c.useAbility_TH(a.wSh, hand)
 
   :?!encounter.isElite
     ?a.canSmartDash()
@@ -416,26 +418,26 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     :?c.canUseAbility("wand_aether") &
     ^(encounter.eliteMod = "berserk" |
     ^encounter.eliteMod = "monarch")
-      c.useAbility_OH(a.wandAetherHidden, hand)
+      c.useAbility_OH(a.wAh, hand)
 
     // reset buffs
     :?encounter.eliteMod = "stoic" &
     ^c.canUseAbility("wand_vigor")
-      c.useAbility_OH(a.wandVigorHidden, hand)
+      c.useAbility_OH(a.wVh, hand)
 
     // hinder regen
     :?encounter.eliteMod = "regen" &
     ^c.canUseAbility("wand_fire")
-      c.useAbility_OH(a.wandFireHidden, hand)
+      c.useAbility_OH(a.wFh, hand)
 
     :?foe.distance < s.dash_range_min &
-    ^item.left ! a.swordBigAetherDebuff &
+    ^item.left ! a.bsAeff &
     ^c.canUseAbility("mind")
       a.ldtF("mind")
     :?foe.distance < s.dash_range_min &
-    ^item.left ! a.swordBigAetherDebuff &
+    ^item.left ! a.bsAeff &
     ^c.canUseAbility("staff_stone")
-      c.useAbility_TH(a.staffStoneHidden)
+      c.useAbility_TH(a.stSh)
 
     :?c.permapotSetup &
     ^encounter.eliteMod ! "tenacious" &
@@ -476,7 +478,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :?foe ! "phase3"
     ?foe.buffs.string = "buff_protection" & // against debuffs
     ^c.canUseAbility("wand_vigor")
-      c.useAbility_OH(a.wandVigorHidden, hand)
+      c.useAbility_OH(a.wVh, hand)
     :
       fight("melee")
 
@@ -486,11 +488,11 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     ?c.canUsePotion(potionType)
       activate potion
     :?c.canUseAbility("staff_poison") & !c.isDashingRange()
-      c.useAbility_TH(a.staffPoisonHidden)
+      c.useAbility_TH(a.stPh)
     /*:?c.canUseAbility("wand_ice") & !c.isDashingRange()
-      c.useAbility_OH(a.wandIceHidden, hand)
+      c.useAbility_OH(a.wIh, hand)
     :?c.canUseAbility("wand_fire") & !c.isDashingRange()
-      c.useAbility_OH(a.wandFireHidden, hand)*/
+      c.useAbility_OH(a.wFh, hand)*/
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.permapotSetup
       c.useAbility_TH("Guardian's Bane") //'
@@ -502,9 +504,9 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
     a.smartDash()
   :?c.canUseAbility("staff_poison") &
   ^!c.permapotSetup & s.getTotalHP("foe") > 1000
-    c.useAbility_TH(a.staffPoisonHidden)
+    c.useAbility_TH(a.sPh)
   /*:?c.canUseAbility("wand_ice")
-    c.useAbility_OH(a.wandIceHidden, hand)*/
+    c.useAbility_OH(a.wIh, hand)*/
   :
     fight("melee")
 
