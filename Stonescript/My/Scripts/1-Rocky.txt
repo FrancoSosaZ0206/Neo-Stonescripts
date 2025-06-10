@@ -239,8 +239,8 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
 // speed up
 :?c.canUseAbility("staff_fire") &
 ^ai.walking &
-^foe.state ! 116 &
-^!(foe.state = -1 & screen.i = dysan_screen) &
+^foe.state ! 116 & foe.state ! -1 &
+^screen.i < dysan_screen &
 ^buffs.string ! "buff_inf_speed" &
 ^!(loc.stars > 15 & c.permapotSetup) // save armor if it's setup run
   c.useAbility_TH(a.staffFireHidden)
