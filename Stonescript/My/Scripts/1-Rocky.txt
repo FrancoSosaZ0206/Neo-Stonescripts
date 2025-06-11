@@ -116,7 +116,7 @@ func fight(mode)
         :?foe.count - foe.GetCount(foe.distance + margin) = 3
           a.ldtF("ranged unmake")
         : // Unmake with dU small sword
-          a.ldtF("sword unmake")
+          a.ldtF("big sword unmake")
 
       : // !c.permapotSetup
         ?foe.count = 1
