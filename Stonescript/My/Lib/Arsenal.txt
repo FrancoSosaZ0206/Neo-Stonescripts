@@ -214,7 +214,7 @@ var bAlt    = "*max crossbow golden"
 
 // ............ SPECIAL WEAPONS ............. //
 
-var myQ     = "*max quarterstaff glitched"
+var myQ     = "*max quarterstaff"
 var fastB   = "*max bardiche" // enchanted: speed
 var bR      = "*max crossbow repeating golden"
 var shC1    = "*max shield compound shiny" // enchanted: armor
@@ -329,9 +329,7 @@ func ldtF(mode)
       equipL triskelion
 
     ?!c.permapotSetup
-      ?foe ! "immune_to_debuff_chill" &
-      ^foe.debuffs.string ! "chill" &
-      ^encounter.eliteMod ! "tenacious"
+      ?c.canApplyChill()
         equipR @shIeff@
       :
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -522,7 +520,7 @@ func ldtF(mode)
           c.doMoondial(sAeff1, Bifrost /*Broken Faith*/) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?c.canApplyChill()
+        ?c.canApplyChillFull()
           equipL Almafuerte
         :?c.canApplyWeaken()
           equipL Death's Kiss
@@ -545,7 +543,7 @@ func ldtF(mode)
         : // foe = "stone"
           sDmg = Bifrost // Unbroken Faith
 
-        ?c.canApplyChill()
+        ?c.canApplyChillFull()
           c.doMoondial(sDmg, Almafuerte)
         :?c.canApplyWeaken() | c.canApplyBurn()
           equipL Death's Kiss
@@ -615,7 +613,7 @@ func ldtF(mode)
           // c.doMoondial(,)
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?c.canApplyChill()
+        ?c.canApplyChillFull()
           // equipL 
         :?c.canApplyWeaken()
           // equipL 
@@ -630,11 +628,11 @@ func ldtF(mode)
           //'
         :?c.canApplyBurn()
           // equipL 
-        :?c.canApplyChill()
+        :?c.canApplyChillFull()
           // equipL 
 
         // Right hand:
-        ?c.canApplyChill()
+        ?c.canApplyChillFull()
           // equipR 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
@@ -682,14 +680,14 @@ func ldtF(mode)
         // equip @stAeff@
     :?mode = "debuff"
       ?c.permapotSetup
-        ?c.canApplyChill()
+        ?c.canApplyChillFull()
           equipL Frosty Crust
         :?c.canApplyWeaken()
           equipL @wPeff@
         :?c.canApplyBurn()
           equipL @wFeff@
       :
-        ?c.canApplyChill()
+        ?c.canApplyChillFull()
           equip @stIeff@
         :?c.canApplyWeaken()
           equip @stPeff@
@@ -738,7 +736,7 @@ func ldtF(mode)
         equip @bAeff@
 
       :?mode = "debuff"
-        ?c.canApplyChill()
+        ?c.canApplyChillFull()
           equip @stIeff@
           // @bIeff@
         :?c.canApplyWeaken()

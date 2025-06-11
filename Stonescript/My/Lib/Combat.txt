@@ -70,12 +70,12 @@ var item_TH_IDs = [ // two-handed item IDs
 ^   "heavy_hammer",
 ^   "quarterstaff",
 
-^   "staff_hidden_poison",
-^   "staff_hidden_vigor",
-^   "staff_hidden_aether",
-^   "staff_hidden_fire",
-^   "staff_hidden_ice",
-^   "staff_hidden_stone"
+^   "staff_poison",
+^   "staff_vigor",
+^   "staff_aether",
+^   "staff_fire",
+^   "staff_ice",
+^   "staff_stone"
 ^]
 
 var item_OH_IDs = [ // one-handed item IDs
@@ -89,12 +89,12 @@ var item_OH_IDs = [ // one-handed item IDs
 ^   "fire_talisman",
 // ^   "ice_talisman",
 
-^   "wand_hidden_poison",
-^   "wand_hidden_vigor",
-^   "wand_hidden_aether",
-^   "wand_hidden_fire",
-^   "wand_hidden_ice",
-^   "wand_hidden_stone"
+^   "wand_poison",
+^   "wand_vigor",
+^   "wand_aether",
+^   "wand_fire",
+^   "wand_ice",
+^   "wand_stone"
 ^]
 
 var item_DS_IDs = [ // IDs of items' abilities that can be used in 2 screens
@@ -115,7 +115,8 @@ func Init()
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
 
-  ?buffs.string = "⊙" // berserk potion
+  ?buffs.string = "⊙" | // berserk potion
+  ^buffs.string = "buff_infernal" // infernal staff's attack speed buff
     moondialMode = 2
   :
     moondialMode = 0
@@ -129,7 +130,7 @@ func Init()
 
 /* Returns true if a given weapon's special ability can be activated.
 
-Valid abilityId values:
+Valid abilityID values:
 - blade >> Blade of the Fallen God
 - mask >> Cultist Mask
 - arm >> Skeleton Arm (REQUIRES GAINING AT LEAST 1 PICK-POCKET BUFF)
@@ -146,120 +147,129 @@ Valid abilityId values:
 - wand + <name>, wand + <element> >> Hidden wands
 - <element>_talisman >> Talismans */
 func canUseAbility(abilityID)
+  // var 
   var result = false
 
-  ?cooldown_IDs.Contains(abilityID)
+  ?s.ability_table.Contains(abilityID)
     // Valid ID
     result = item.CanActivate() &
-    ^item.GetCooldown(abilityId) <= 0
+    ^item.GetCooldown(abilityID) <= 0
 
-    ?abilityId = "bash" | abilityId = "dash"
+    ?abilityID = "bash" | abilityID = "dash"
       result = result & s.inRange("dash") & !ai.idle
-    :?abilityId = "arm"
-      result = result & item.CanActivate("arm") &
+
+    :?abilityID = "arm"
+      result = result & // item.CanActivate("arm") &
       ^s.inRange("arm") &
       ^buffs.string = "pick_pocket"
 
-    :?abilityId = "hatchet"
+    :?abilityID = "hatchet"
       result = (result & loc = "deadwood_valley" &
-      ^         s.inRange(abilityId)) |
-      ^isCasting(abilityId) // won't get interrupted
+      ^         s.inRange(abilityID)) |
+      ^isCasting(abilityID) // won't get interrupted
 
-    :?abilityId = "bardiche" |
-    ^abilityId = "heavy_hammer"
-      result = (result & s.inRange(abilityId + " ability")) |
-      ^isCasting(abilityId) // won't get interrupted
+    :?abilityID = "bardiche" |
+    ^abilityID = "heavy_hammer"
+      result = (result & s.inRange(abilityID + " ability")) |
+      ^isCasting(abilityID) // won't get interrupted
 
-    :?abilityId = "quarterstaff" |
-    ^abilityId = "talisman" // interruptible abilities
-      result = result | isCasting(abilityId) // make sure not to change it while casting the ability
+    :?abilityID = "quarterstaff" |
+    ^abilityID = "talisman" // interruptible abilities
+      result = result | isCasting(abilityID) // make sure not to change it while casting the ability
 
-    :?s.getSummon(abilityId) ! -1
-      result = result & isSummoned(abilityId)
+    :?abilityID = "staff" | abilityID = "wand"
+      result = (result & armor >= s.getArmor(abilityID))
 
-      ?abilityId = "voidweaver"
-        result = result & canUnmakeVoidweaver()
-      :?abilityId = "cinderwisp"
-        result = result & foe.debuffs.string = "ignition"
-
-    :?abilityId = "_hidden_"
-      result = result & armor >= s.getArmor(abilityID)
-
-      ?abilityId = "wand_poison"
+      ?abilityID = "wand_poison"
         result = result &
         ^!(foe = "immune_to_debuff_damage" |
         ^  encounter.eliteMod = "tenacious")
-      :?abilityId = "wand_ice"
+      :?abilityID = "wand_ice"
         result = result &
         ^!(foe = "immune_to_stun" |
         ^  encounter.eliteMod = "tenacious")
-      : // abilityId = "wand_stone"
+      :?abilityID = "wand_stone"
         result = result & foe.count > 1 &
         ^item.CanActivate("wand_stone")
+
+    :?s.talisman_table.Contains(abilityID) // it's a summon
+      result = result & isSummoned(abilityID)
+
+      ?abilityID = "voidweaver"
+        result = result & canUnmakeVoidweaver()
+      :?abilityID = "cinderwisp"
+        result = result & foe.debuffs.string = "ignition"
+
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityId>:\n\n" + abilityId, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityID>:\n\n" + abilityID, false)
     loc.Pause()
+
+  /*?abilityID = "fire_talisman"
+    >`1,10,#magenta,ability ID = @s.ability_table[s.ability_table.IndexOf(abilityID)]@\ncd = @item.GetCooldown(abilityID)@\ncanact any = @item.CanActivate()@\ncasting = @isCasting(abilityID)@\n\nresult = @result@*/
 
   return result
 
 /* Activates a two-handed item's ability.
-ACCEPTS RENAMED WEAPONS!
 
-Valid itemName values:
+itemName = your item to activate.
+
+Valid abilityID values:
 - blade >> Blade of the Fallen God
 - arm >> Skeleton Arm
 - bardiche
 - heavy + hammer >> Heavy Hammer
 - quarterstaff
 - staff + <element> + hidden >> Hidden staves */
-func useAbility_TH(itemName)
-  equip @itemName@
-
-  ?item_TH_IDs.Contains(itemName) |
-  ^item_TH_IDs.Contains(item.right)
+func useAbility_TH(abilityID, itemName)
+  ?item_TH_IDs.Contains(abilityID)
+    equip @itemName@
     activate R
-  :
-    ?!item_TH_IDs.Contains(itemName)
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: <itemName> unknown:\n\n" + itemName, false)
-    : // !item_TH_IDs.Contains(item.right)
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: " + itemName + " failed to equip:\n\n" + item.right, false)
+
+    >`1,17,#red,TH? @item_TH_IDs.Contains(abilityID)@\nabilityID = @abilityID@\nitemName = @itemName@\nR = @item.right@
+  : // invalid abilityID
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: <abilityID> unknown:\n\n" + abilityID, false)
+    loc.Pause()
 /* Activates a one-handed item's ability.
 
-Valid itemName values:
+itemName = your item to activate.
+
+Valid abilityID values:
 - hatchet
 - mask >> Cultist Mask
 - <element> + talisman >> Talismans
 - wand <element> + hidden >> Hidden wands */
-func useAbility_OH(itemName, hand)
-  ?item_OH_IDs.Contains(itemName)
-    // talismans equipment logic
-    ?itemName = "talisman"
-      ?ai.walking & !s.inRange("triskelion") &
-      ^(hand = "r" | hand = "right")
-        equipL triskelion
-
-      :?s.inRange("dash")
-        ?canUseAbility("bash")
-          equipR bash
-        :?canUseAbility("bash")
-          equipR dash
-
+func useAbility_OH(abilityID, itemName, hand)
+  ?item_OH_IDs.Contains(abilityID)
     // special one-handed weapons equipment logic
-    :?itemName = "hatchet" | itemName = "mask"
-      equipR @itemName@
+    ?abilityID = "hatchet" | abilityID = "mask"
+      equipR @abilityID@
       activate R
     
     // normal equipment logic
     :?hand = "l" | hand = "left"
       equipL @itemName@
       activate L
+
+      // talismans equipment logic
+      ?abilityID = "talisman" & s.inRange("dash")
+        ?canUseAbility("bash")
+          equipR bash
+        :?canUseAbility("bash")
+          equipR dash
+
     :?hand = "r" | hand = "right"
       equipR @itemName@
       activate R
+
+      // talismans equipment logic
+      ?abilityID = "talisman" &
+      ^ai.walking & !s.inRange("triskelion")
+        equipL triskelion
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
+      loc.Pause()
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_T\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_T\nCAUSE: unknown <abilityID>:\n\n" + abilityID, false)
     loc.Pause()
 
 /* Returns true if a given item is equipped. */
@@ -326,7 +336,7 @@ func useAbility_DS(itemName)
       slideCount--
 
       ?slideCount = 0
-        useAbility_TH(itemName)
+        useAbility_TH(itemName, itemName)
         screen.ResetOffset()
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
@@ -337,14 +347,13 @@ func isSummoned(summonName)
   return summon.GetId() = summonName
 /* Checks if a summon can be invoked by its respective talisman. */
 func canSummon(summonName)
-  var result = s.getTalisman(summonName)
-
-  ?result
-    return canUseAbility(result) & !isSummoned(summonName)
+  var talisman = s.getTalisman(summonName)
+  ?talisman
+    return canUseAbility(talisman) & !isSummoned(summonName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canSummon\nCAUSE: unknown <summonName>: " + summonName, false)
+    return false
 
-  return result
 /* Checks if a summon can be hidden by its respective talisman. */
 func canHide(summonName)
   var result = s.getTalisman(summonName)
@@ -554,6 +563,14 @@ func canApplyBurn()
   return canDebuff() &
   ^foe.debuffs.string ! "dot" &
   ^foe ! "immune_to_debuff_dot"
+
+/* Returns true if the foe is
+vulnerable to Stun and if the
+debuff isn't applied yet. */
+func canApplyStun()
+  return canDebuff() &
+  ^!(foe.debuffs.string = "stun" | // already stunned
+  ^  foe = "immune_to_stun") // can't stun
 
 /* checks if the foe is vulnerable
 to at least one of the following

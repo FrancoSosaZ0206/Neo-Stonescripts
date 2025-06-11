@@ -115,7 +115,12 @@ var u = import My/Lib/Utilities
 
 // .................. IDs ................... //
 
-var cooldown_table = [ // ability cooldowns only
+// TO DO: implement for renamed weapons
+/*var item_table = [ // all items with their names and stonescript IDs
+^   "NAME"          , "STONESCRIPT ID"      , "STAR LEVEL"      , "ENCHANT LEVEL"       , "LOST"    , "COSMETIC"
+^]*/
+
+var ability_table = [ // ability cooldown IDs only
 ^   "blade",
 ^   "mask",
 ^   "arm",
@@ -173,20 +178,20 @@ var hidden_table = [
 ^   "ID"                  , "NAME"              , "REQUIRED ARMOR",
 
 // Hidden wands
-^   "wand_hidden_poison"  , "plague wand"       , 6   ,
-^   "wand_hidden_vigor"   , "reset wand"        , 1   ,
-^   "wand_hidden_aether"  , "calamity wand"     , 14  ,
-^   "wand_hidden_fire"    , "explosive wand"    , 4   ,
-^   "wand_hidden_ice"     , "frost wand"        , 3   ,
-^   "wand_hidden_stone"   , "gravity wand"      , 0   ,
+^   "wand_poison"  , "plague wand"       , 6   ,
+^   "wand_vigor"   , "reset wand"        , 1   ,
+^   "wand_aether"  , "calamity wand"     , 14  ,
+^   "wand_fire"    , "explosive wand"    , 4   ,
+^   "wand_ice"     , "frost wand"        , 3   ,
+^   "wand_stone"   , "gravity wand"      , 0   ,
 
 // Hidden staves
-^   "staff_hidden_poison" , "berserker staff"   , 8   ,
-^   "staff_hidden_vigor"  , "prevention staff"  , 4   ,
-^   "staff_hidden_aether" , "grasping staff"    , 2   ,
-^   "staff_hidden_fire"   , "infernal staff"    , 6   ,
-^   "staff_hidden_ice"    , "eternity staff"    , 1   ,
-^   "staff_hidden_stone"  , "acrobatic staff"   , 3
+^   "staff_poison" , "berserker staff"   , 8   ,
+^   "staff_vigor"  , "prevention staff"  , 4   ,
+^   "staff_aether" , "grasping staff"    , 2   ,
+^   "staff_fire"   , "infernal staff"    , 6   ,
+^   "staff_ice"    , "eternity staff"    , 1   ,
+^   "staff_stone"  , "acrobatic staff"   , 3
 ^]
 
 
@@ -389,38 +394,37 @@ func getTotalHP(source)
 
     return null
 
-/* Returns an armor stat from an item's ID.
+/* Returns an armor stat from an item's ID or null if there was an error.
 Works with hidden items only. */
 func getArmor(source)
   var armorI = hidden_table.IndexOf(source) +
   ^            hidden_table.IndexOf("REQUIRED ARMOR")
 
-  ?armorI > -1
+  ?armorI >= 5 // first armor value's index
     return hidden_table[armorI]
-  : // armorI <= -1 -- not found or error
+  : // armorI <= 0 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getArmor\nCAUSE: unknown <source>:\n\n" + source, false)
     return null
-/* Returns a talisman's name/ID from a summon's ID. */
+/* Returns a talisman's name/ID from a summon's ID or null if there was an error. */
 func getTalisman(source)
-  var talismanI = talisman_table.IndexOf(source) +
-  ^             talisman_table.IndexOf("TALISMAN")
+  var talismanI = talisman_table.IndexOf(source) - 1 // index of "TALISMAN"
 
-  ?talismanI > -1
+  ?talismanI >= 2 // first talisman value's index
     return talisman_table[talismanI]
   : // talismanI <= -1 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getTalisman\nCAUSE: unknown <source>:\n\n" + source, false)
     return null
-/* Returns a summon's name/ID from a talisman's ID. */
+/* Returns a summon's name/ID from a talisman's ID or null if there was an error. */
 func getSummon(source)
   var summonI = talisman_table.IndexOf(source) +
   ^             talisman_table.IndexOf("SUMMON")
 
-  ?summonI > -1
+  ?summonI >= 3 // first summon value's index
     return talisman_table[summonI]
-  : // summonI <= -1 -- not found or error
+  : // summonI <= 0 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getSummon\nCAUSE: unknown <source>:\n\n" + source, false)
     return null
-/* Returns each weapon's range, or -1
+/* Returns each weapon's range, or null
 if there was an error.
 
 Accounts for the Grasping Staff's
@@ -437,7 +441,7 @@ func getRange(source)
   var rangeI = range_table.IndexOf(source) +
   ^            range_table.IndexOf("RANGE")
 
-  ?armorI > -1
+  ?rangeI >= 3 // first range value's index
     result = range_table[rangeI]
 
     ?source = "crossbow" |
