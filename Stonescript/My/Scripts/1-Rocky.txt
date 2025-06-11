@@ -46,6 +46,8 @@ func harvestFunc(button)
 
 func fight(mode)
   ?mode = "evade"
+    canDash = false
+    
     ?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
@@ -110,10 +112,10 @@ func fight(mode)
           : // attack
             a.ldtF("big sword unmake")
 
-        // Unmake with dU small sword
+        // there are 2 foes in front and 1 behind it
         :?foe.count - foe.GetCount(foe.distance + margin) = 3
           a.ldtF("ranged unmake")
-        :
+        : // Unmake with dU small sword
           a.ldtF("sword unmake")
 
       : // !c.permapotSetup
@@ -133,8 +135,10 @@ func fight(mode)
       ?mode = "melee"
         /*?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
           c.doBursting(a.burstingSwords)
-        :*/
-          a.ldtF("sword dmg")
+        :
+          a.ldtF("sword dmg")*/
+        a.ldtF("sword dmg")
+
       :?!c.permapotSetup
         a.ldtF("magic dmg")
       :
@@ -151,7 +155,7 @@ func fight(mode)
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?c.permapotSetup &
-^encounter.eliteMod = "tenacious"
+^foe.buffs.string = "tenacious"
   loc.Leave()
 
 // .............. SETUP LOGIC ............... //
@@ -257,14 +261,14 @@ c.doAAC(a.hVeff, a.sFeff)
 // Summons
 :?c.canSummon("aether_talisman") &
 ^loc.stars > 15 &
-^!((foe = "boss" | encounter.eliteMod = "monarch") &
+^!((foe = "boss" | foe = "monarch") &
 ^  foe.count = 1) &
-^!(foe = "phase" & foe.state = -1) &
 ^screen.i < dysan_screen // not a cutscene
   c.useAbility_OH("aether_talisman", hand)
 :?c.canSummon("fire_talisman") &
 ^(loc.stars <= 15 |
-^ (foe = "boss" & foe.count = 1))
+^ ((foe = "boss" | foe = "monarch") &
+^  foe.count = 1))
   c.useAbility_OH("fire_talisman", hand)
 
 // Harvest/Pick up things
@@ -292,8 +296,8 @@ c.doAAC(a.hVeff, a.sFeff)
     >c0,0,#red,PREVENT STUN
     loc.Pause()
   : // evade attack
-    // fight("evade")
-    canDash = false
+    fight("evade")
+    /*canDash = false
 
     ?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
@@ -308,7 +312,7 @@ c.doAAC(a.hVeff, a.sFeff)
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH(a.stIh)
     :
-      a.ldtF("ranged dmg")    
+      a.ldtF("ranged dmg")*/
 
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
