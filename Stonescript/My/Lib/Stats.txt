@@ -198,38 +198,38 @@ var hidden_table = [
 // ............. Weapon Ranges .............. //
 
 var range_table = [
-^   "ID"                  , "RANGE",
+^   "ID"                    , "RANGE",
 
-^   "blade"               , 11,
-^   "arm"                 , 7,
+^   "blade"                 , 11,
+^   "arm"                   , 7,
 
-^   "bardiche"            , 9,
-^   "bardiche R"          , 7,  // Ability
-^   "heavy_hammer"        , 7,
-^   "heavy_hammer R"      , 21, // Ability
+^   "bardiche"              , 9,
+^   "bardiche ability"      , 7,  // Ability
+^   "heavy_hammer"          , 7,
+^   "heavy_hammer ability"  , 21, // Ability
 
 // These count both for dashing and bashing shields:
-^   "dash_min"            , 11,
-^   "dash_max"            , 15,
+^   "dash_min"              , 11,
+^   "dash_max"              , 15,
 
-^   "hatchet"             , 5,
-^   "grappling_hook"      , 13,
+^   "hatchet"               , 5,
+^   "grappling_hook"        , 13,
 
 // soul stones (the mindstone can be used no matter the range)
-^   "star"                , 12,
-^   "ki"                  , 18,
-^   "experience"          , 18,
-^   "triskelion"          , 10,
-^   "moon"                , 18,
+^   "star"                  , 12,
+^   "ki"                    , 18,
+^   "experience"            , 18,
+^   "triskelion"            , 10,
+^   "moon"                  , 18,
 
-^   "sword"               , 5,
-^   "hammer"              , 5,
-^   "quarterstaff"        , 5,
-^   "big_sword"           , 6,
-^   "wand"                , 20,
-^   "socketed_staff"      , 20,
-^   "crossbow"            , 22,
-^   "socketed_shield"     , 40  // Engaging range
+^   "sword"                 , 5,
+^   "hammer"                , 5,
+^   "quarterstaff"          , 5,
+^   "big_sword"             , 6,
+^   "wand"                  , 20,
+^   "socketed_staff"        , 20,
+^   "crossbow"              , 22,
+^   "socketed_shield"       , 40  // Engaging range
 ^]
 
 // Special stats

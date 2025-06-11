@@ -147,7 +147,6 @@ Valid abilityID values:
 - wand + <name>, wand + <element> >> Hidden wands
 - <element>_talisman >> Talismans */
 func canUseAbility(abilityID)
-  // var 
   var result = false
 
   ?s.ability_table.Contains(abilityID)
@@ -225,7 +224,6 @@ func useAbility_TH(abilityID, itemName)
     equip @itemName@
     activate R
 
-    >`1,17,#red,TH? @item_TH_IDs.Contains(abilityID)@\nabilityID = @abilityID@\nitemName = @itemName@\nR = @item.right@
   : // invalid abilityID
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: <abilityID> unknown:\n\n" + abilityID, false)
     loc.Pause()

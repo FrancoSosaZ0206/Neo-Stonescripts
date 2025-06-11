@@ -399,7 +399,7 @@ c.doAAC(a.hVeff, a.sFeff)
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
-  :?foe = "elite"
+  :?foe ! "elite"
     ?a.canSmartDash()
       a.smartDash()
 
@@ -410,7 +410,7 @@ c.doAAC(a.hVeff, a.sFeff)
     :
       a.ldtF("ranged unmake")
 
-  : // foe ! "elite"
+  : // foe = "elite"
     ?c.canUseAbility("heavy_hammer")
       ?a.canSmartDash()
         a.smartDash()
@@ -432,10 +432,7 @@ c.doAAC(a.hVeff, a.sFeff)
     ^(c.permapotSetup | foe = "soldier")
       equipL grappling
     :
-      ?foe = "soldier"
-        fight("ranged")
-      :
-        fight("melee")
+      fight("ranged")
 
 // .......... ENGAGE/WALKING LOGIC .......... //
 
