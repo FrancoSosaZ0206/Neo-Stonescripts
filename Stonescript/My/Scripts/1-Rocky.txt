@@ -48,16 +48,16 @@ func fight(mode)
   ?mode = "evade"
     ?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.dash_range_min))
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       >c0,2,#yellow,MINDSTONE
       a.ldtF("mind")
     :?c.canUseAbility("staff_stone") &
     ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.dash_range_min))
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       >c0,2,#yellow,ACROBATIC STAFF
       c.useAbility_TH(a.stSh)
 
-    :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
+    :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH(a.stIh)
 
     :?!s.inRange("sword")
@@ -67,17 +67,13 @@ func fight(mode)
         fight("ranged")
 
     // Unmake
-    :?foe ! "boss" & !(
-    ^encounter.eliteMod = "tenacious" |
-    ^(encounter.eliteMod = "monarch" & foe.count = 1))
+    :?c.canUnmake()
       a.ldtF("defense unmake")
     :
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?c.canDebuffAny() & !(
-    ^encounter.eliteMod = "tenacious" |
-    ^foe.buffs.string = "buff_protection")
+    ?c.canApplyAny()
       ?mode = "melee"
         a.ldtF("sword debuff")
       :?c.permapotSetup
@@ -105,12 +101,10 @@ func fight(mode)
         a.ldtF("ranged heal")*/
 
     // 3. Unmake
-    :?!(foe = "boss" |
-    ^encounter.eliteMod = "tenacious" |
-    ^(encounter.eliteMod = "monarch" & foe.count = 1)
+    :?c.canUnmake()
       ?c.permapotSetup
         // Big sword splash area
-        ?foe.GetCount(foe.distance + margin) > 3)
+        ?foe.GetCount(foe.distance + margin) > 3
           ?a.canSmartDash() // get closer
             a.smartDash()
           : // attack
@@ -303,15 +297,15 @@ c.doAAC(a.hVeff, a.sFeff)
 
     ?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.dash_range_min))
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       a.ldtF("mind")
     :?c.canUseAbility("staff_stone") &
     ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.dash_range_min))
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       >c0,2,#yellow,ACROBATIC STAFF
       c.useAbility_TH(a.stSh)
 
-    :?c.canUseAbility("staff_ice") & foe.distance < s.dash_range_min
+    :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH(a.stIh)
     :
       a.ldtF("ranged dmg")    
@@ -367,7 +361,7 @@ c.doAAC(a.hVeff, a.sFeff)
 
 :?c.canUseAbility("voidweaver") &
 ^foe.count > 1 & !c.permapotSetup &
-^!encounter.isElite
+^c.canUnmakeVoidweaver()
   ?c.canUseAbility("dash")
     a.ldtF("dash")
   :?c.canUseAbility("bash")
@@ -386,11 +380,11 @@ c.doAAC(a.hVeff, a.sFeff)
 ^(foe.GetCount(foe.distance + margin) > 1 &
 ^s.inRange("wand") & foe ! "warcaster")) |
 ^(!c.permapotSetup &
-^foe.count > 1 & s.inRange("crossbow rune")))
+^foe.count > 1 & s.inRange("crossbow")))
   ?c.canUseAbility("wand_stone")
     c.useAbility_TH(a.wSh, hand)
 
-  :?!encounter.isElite
+  :?foe = "elite"
     ?a.canSmartDash()
       a.smartDash()
 
@@ -402,7 +396,7 @@ c.doAAC(a.hVeff, a.sFeff)
     :
       a.ldtF("ranged unmake")
 
-  : // enconuter.isElite
+  : // encounter.isElite
     ?c.canUseAbility("heavy_hammer")
       ?a.canSmartDash()
         a.smartDash()
@@ -427,11 +421,11 @@ c.doAAC(a.hVeff, a.sFeff)
     ^c.canUseAbility("wand_fire")
       c.useAbility_OH(a.wFh, hand)
 
-    :?foe.distance < s.dash_range_min &
+    :?foe.distance < s.getRange("dash_min") &
     ^item.left ! a.bsAeff &
     ^c.canUseAbility("mind")
       a.ldtF("mind")
-    :?foe.distance < s.dash_range_min &
+    :?foe.distance < s.getRange("dash_min") &
     ^item.left ! a.bsAeff &
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH(a.stSh)
@@ -446,7 +440,7 @@ c.doAAC(a.hVeff, a.sFeff)
 // .......... ENGAGE/WALKING LOGIC .......... //
 
 :?ai.paused |
-^(ai.idle & foe.distance > s.dash_range_min) | // waiting for animation to complete
+^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
 ^c.isDead() |
 ^ (dysan_cutscenes.Contains(foe.state) & // is a cutscene
 ^ foe.damage > 1) | // dysan state 107 fight (flying)

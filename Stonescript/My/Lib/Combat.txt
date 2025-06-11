@@ -238,7 +238,7 @@ func useAbility_OH(itemName, hand)
       ^(hand = "r" | hand = "right")
         equipL triskelion
 
-      :?isDashingRange()
+      :?s.inRange("dash")
         ?canUseAbility("bash")
           equipR bash
         :?canUseAbility("bash")
@@ -381,6 +381,10 @@ func devour(summonName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
+/* Checks if the Voidweaver's devour ability
+will successfully unmake a foe. */
+func canUnmakeVoidweaver()
+  return canUnmake() & foe ! "elite"
 
 /* Checks if the cinderwisp's "devour" ability damage
 will kill the foe.
@@ -512,17 +516,15 @@ func getFoeDamage(weakenAmount, feebleCount)
 /* Returns true if the current foes the player is
 facing can be unmade. */
 func canDebuff()
-  return !(
-  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
-  ^)
+  return
+  ^!(foe.buffs.string = "buff_tenacious" | // tenacious foes can't be debuffed
+  ^  foe.buffs.string = "buff_protection")
 /* Returns true if the current foes the player is
 facing can be unmade. */
 func canUnmake()
-  return !(
-  ^ foe = "boss" | // bosses are immune to unmake
-  ^ foe = "monarch" | // monarch foes can't be unmade
-  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
-  ^)
+  return 
+  ^!(foe = "boss" |  // bosses are immune to unmake
+  ^  foe = "monarch") // monarch foes can't be unmade
 
 /* Returns true if the foe is
 vulnerable to Chill and if the
@@ -560,10 +562,13 @@ typical debuffs:
 - Weaken (damage reduction)
 - Burn (damage over time) */
 func canApplyAny()
-  return
-  ^canApplyChill() |
-  ^canApplyWeaken() |
-  ^canApplyBurn()
+  ?canDebuff()
+    return
+    ^canApplyChill() |
+    ^canApplyWeaken() |
+    ^canApplyBurn()
+  :
+    return false
 /* checks if the foe is vulnerable
 to ALL of the following
 typical debuffs:
@@ -571,10 +576,13 @@ typical debuffs:
 - Weaken (damage reduction)
 - Burn (damage over time) */
 func canApplyAll()
-  return canDebuff()  &
-  ^canApplyChill()    &
-  ^canApplyWeaken()   &
-  ^canApplyBurn()
+  ?canDebuff()
+    return
+    ^canApplyChill() &
+    ^canApplyWeaken() &
+    ^canApplyBurn()
+  :
+    return false
 
 // ......... Damage min-maxing .......... //
 
@@ -671,12 +679,6 @@ func doAAC(itemLeft, itemRight)
   ?item.right.state = 3
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
-
-// ............... Others ............... //
-
-func isDashingRange()
-  return s.dash_range_min <= foe.distance &
-  ^      foe.distance <= s.dash_range_max
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

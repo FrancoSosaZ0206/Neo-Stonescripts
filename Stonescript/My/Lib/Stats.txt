@@ -159,7 +159,7 @@ var cooldown_table = [ // ability cooldowns only
 ^]
 
 var talisman_table = [
-^   "TALISMAN ID"              , "SUMMON ID",
+^   "TALISMAN"        , "SUMMON"      ,
 
 // ^   "poison_talisman" , ""  ,
 // ^   "vigor_talisman"  , ""  ,
@@ -403,7 +403,7 @@ func getArmor(source)
 /* Returns a talisman's name/ID from a summon's ID. */
 func getTalisman(source)
   var talismanI = talisman_table.IndexOf(source) +
-  ^             talisman_table.IndexOf("TALISMAN ID")
+  ^             talisman_table.IndexOf("TALISMAN")
 
   ?talismanI > -1
     return talisman_table[talismanI]
@@ -413,7 +413,7 @@ func getTalisman(source)
 /* Returns a summon's name/ID from a talisman's ID. */
 func getSummon(source)
   var summonI = talisman_table.IndexOf(source) +
-  ^             talisman_table.IndexOf("SUMMON ID")
+  ^             talisman_table.IndexOf("SUMMON")
 
   ?summonI > -1
     return talisman_table[summonI]
