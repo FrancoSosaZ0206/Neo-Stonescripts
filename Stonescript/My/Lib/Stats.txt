@@ -113,56 +113,121 @@ var u = import My/Lib/Utilities
 
 // /////////////// VARIABLES //////////////// //
 
-// ............. Weapon Ranges .............. //
+// .................. IDs ................... //
 
-var skeletonArm_range = 7
+var cooldown_IDs = [ // ability cooldowns only
+^   "blade",
+^   "mask",
+^   "arm",
 
-var bardiche_range = 9
-var bardiche_ability_range = 7
-var heavyHammer_range = 7 // CHECK
-var heavyHammer_ability_range = 21 // CHECK
+^   "mind",
 
-// These count both for dashing and bashing shields:
-var dash_range_min = 11
-var dash_range_max = 15
+^   "bash",
+^   "dash",
 
-var hatchet_range = 5
-var grapplingHook_range = 13
+^   "bardiche",
+^   "heavy_hammer",
+^   "quarterstaff",
 
-// soul stones (the mindstone can be used no matter the range)
-var stone_star_range = 12
-var stone_ki_range = 18
-var stone_experience_range = 18
-var stone_triskelion_range = 10
-var stone_moondial_range = 18
+// ^   "stone_talisman",
+// ^   "poison_talisman",
+// ^   "vigor_talisman",
+^   "aether_talisman",
+^   "fire_talisman",
+// ^   "ice_talisman",
 
-var sword_range = 5
-var hammer_range = 5
-var quarterstaff_range = 5
-var sword_big_range = 6
-var wand_range = 20
-var staff_range = 20
-var crossbow_range = 22
-var crossbow_rune_range = 23
-var shield_rune_range = 40
+// ^   "",
+// ^   "",
+// ^   "",
+^   "voidweaver",
+^   "cinderwisp",
+// ^   "",
 
-// Special stats
+^   "wand_stone",
+^   "wand_poison",
+^   "wand_vigor",
+^   "wand_aether",
+^   "wand_fire",
+^   "wand_ice",
+
+^   "staff_stone",
+^   "staff_poison",
+^   "staff_vigor",
+^   "staff_aether",
+^   "staff_fire",
+^   "staff_ice"
+^]
+
+var talisman_stats = [
+^ "ID"                 , "SUMMON ID",
+
+// ^   "poison_talisman" , ""  ,
+// ^   "vigor_talisman"  , ""  ,
+^   "aether_talisman" , "voidweaver"  ,
+^   "fire_talisman"   , "cinderwisp" //  ,
+// ^   "ice_talisman"    , ""  ,
+// ^   "stone_talisman"  , ""
+^]
+
+var hidden_stats = [
+^ "ID"                     , "NAME"                , "REQUIRED ARMOR",
 
 // Hidden wands
-var wand_stone_armor = 0      // gravity
-var wand_poison_armor = 6     // plague
-var wand_vigor_armor = 1      // reset
-var wand_aether_armor = 14    // calamity
-var wand_fire_armor = 4       // explosive
-var wand_ice_armor = 3        // frost
+^   "wand_hidden_poison"  , "plague wand"       , 6   ,
+^   "wand_hidden_vigor"   , "reset wand"        , 1   ,
+^   "wand_hidden_aether"  , "calamity wand"     , 14  ,
+^   "wand_hidden_fire"    , "explosive wand"    , 4   ,
+^   "wand_hidden_ice"     , "frost wand"        , 3   ,
+^   "wand_hidden_stone"   , "gravity wand"      , 0   ,
 
 // Hidden staves
-var staff_stone_armor = 3     // acrobatic
-var staff_poison_armor = 8    // berserker
-var staff_vigor_armor = 4     // prevention
-var staff_aether_armor = 2    // grasping
-var staff_fire_armor = 6      // infernal
-var staff_ice_armor = 1       // eternity
+^   "staff_hidden_poison" , "berserker staff"   , 8   ,
+^   "staff_hidden_vigor"  , "prevention staff"  , 4   ,
+^   "staff_hidden_aether" , "grasping staff"    , 2   ,
+^   "staff_hidden_fire"   , "infernal staff"    , 6   ,
+^   "staff_hidden_ice"    , "eternity staff"    , 1   ,
+^   "staff_hidden_stone"  , "acrobatic staff"   , 3
+^]
+
+
+// ............. Weapon Ranges .............. //
+
+var ranges = [
+^   "ID"                  , "RANGE",
+
+^   "arm"                 , 7,
+
+^   "bardiche"            , 9,
+^   "bardiche_ability"    , 7,
+^   "heavyHammer"         , 7,  // CHECK
+^   "heavyHammer_ability" , 21, // CHECK
+
+// These count both for dashing and bashing shields:
+^   "dash_min"            , 11,
+^   "dash_max"            , 15,
+
+^   "hatchet"             , 5,
+^   "grapplingHook"       , 13,
+
+// soul stones (the mindstone can be used no matter the range)
+^   "star"                , 12,
+^   "ki"                  , 18,
+^   "experience"          , 18,
+^   "triskelion"          , 10,
+^   "moon"                , 18,
+
+^   "sword"               , 5,
+^   "hammer"              , 5,
+^   "quarterstaff"        , 5,
+^   "big_sword"           , 6,
+^   "wand"                , 20,
+^   "staff"               , 20,
+^   "crossbow"            , 22,
+^   "crossbow_rune"       , 23,
+^   "shield_rune"         , 40
+^]
+
+// Special stats
 
 /* the added range that the
 Grasping Staff's ability adds: */
@@ -171,88 +236,6 @@ var grasping_cap = 22
 
 
 // //////////////// FUNCTIONS //////////////// //
-
-/* Returns each weapon's range.
-Accounts for the Grasping Staff's
-buff and Pallas's debuff, or -1
-if there was an error.
-************************************
-DOESN'T ACCEPT WEAPONS, BUT SPECIFIC
-KEYWORDS THAT REPRESENT THEM.
-************************************ */
-// TO DO: ADD THE REMAINING WEAPONS' RANGES.
-func getRange(itemName)
-  var result = null
-  var isIncreased = false
-  var canIncrease = true
-  var isReduced = false
-
-  ?!result
-    ?itemName = "sword"
-      result = sword_range
-    :?itemName = "sword big"
-      result = sword_big_range
-    :?itemName = "hammer" & itemName ! "heavy"
-      result = hammer_range
-
-    :?itemName = "wand" & !result
-      result = wand_range
-    :?itemName = "crossbow" & !result
-      ?itemName = "rune"
-        result = crossbow_rune_range
-      :
-        result = crossbow_range
-
-    :?itemName = "quarterstaff" | itemName = "staff"
-      result = staff_range
-
-    :?itemName = "arm"
-      result = arm_range
-
-    :?itemName = "hatchet"
-      result = hatchet_range
-
-    :?itemName = "bardiche"
-      ?itemName = "ability"
-        result = bardiche_ability_range
-      :
-        result = bardiche_range
-    :?itemName = "heavy_hammer"
-      ?itemName = "ability"
-        result = heavyHammer_ability_range
-      :
-        result = heavyHammer_range
-
-    :?itemName = "grappling_hook"
-      result = grapplingHook_range
-
-    :?itemName = "trisk" | itemName = "triskelion"
-      result = stone_triskelion_range
-      canIncrease = false
-
-    :
-      showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getRange\nCAUSE: unknown <itemName>: " + itemName, false)
-
-  ?buffs.string = "buff_range" &
-  ^!isIncreased & canIncrease
-    result = result & grasping_buff
-    isIncreased = true
-
-  ?debuffs.string = "pallas_phase2_debuff" & !isReduced
-    result--
-    isReduced = true
-
-  ?result
-    ?result >= grasping_cap
-      ?isIncreased
-      :
-        result = grasping_cap
-  :
-    result = -1
-
-  return result
-func inRange(itemName)
-  return foe.distance <= getRange(itemName)
 
 /* Returns a stat of an effect,
 or null if there was an error.
@@ -308,7 +291,6 @@ func getEffectStat(source, effectType, effectId, statType)
           stat = effectStats[3]
 
   return stat
-
 /* Returns a string formatted like a table with
 a given target's active effects and their stats.
 Has a full and a slim version.
@@ -406,6 +388,110 @@ func getTotalHP(source)
     showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getTotalHP\nCAUSE: unknown <source>: " + source, false)
 
     return null
+
+/* Returns an armor stat from an item's ID.
+Works with hidden items only. */
+func getArmor(source)
+  var armorI = hidden_stats.IndexOf(source) +
+  ^            hidden_stats.IndexOf("REQUIRED ARMOR")
+
+  ?armorI > -1
+    return hidden_stats[armorI]
+  : // armorI <= -1 -- not found or error
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getArmor\nCAUSE: unknown <source>:\n\n" + source, false)
+    return false
+/* Returns a summon's name/ID from a talisman's ID. */
+func getSummon(source)
+  var summonI = talisman_stats.IndexOf(source) +
+  ^             talisman_stats.IndexOf("SUMMON ID")
+
+  ?summonI > -1
+    return talisman_stats[summonI]
+  : // summonI <= -1 -- not found or error
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getSummon\nCAUSE: unknown <source>:\n\n" + source, false)
+    return false
+
+/* Returns each weapon's range.
+Accounts for the Grasping Staff's
+buff and Pallas's debuff, or -1
+if there was an error.
+************************************
+DOESN'T ACCEPT WEAPONS, BUT SPECIFIC
+KEYWORDS THAT REPRESENT THEM.
+************************************ */
+// TO DO: ADD THE REMAINING WEAPONS' RANGES.
+func getRange(source)
+  var result = null
+  var isIncreased = false
+  var canIncrease = true
+  var isReduced = false
+
+  ?!result
+    ?source = "sword"
+      result = sword_range
+    :?source = "sword big"
+      result = sword_big_range
+    :?source = "hammer" & source ! "heavy"
+      result = hammer_range
+
+    :?source = "wand" & !result
+      result = wand_range
+    :?source = "crossbow" & !result
+      ?source = "rune"
+        result = crossbow_rune_range
+      :
+        result = crossbow_range
+
+    :?source = "quarterstaff" | source = "staff"
+      result = staff_range
+
+    :?source = "arm"
+      result = arm_range
+
+    :?source = "hatchet"
+      result = hatchet_range
+
+    :?source = "bardiche"
+      ?source = "ability"
+        result = bardiche_ability_range
+      :
+        result = bardiche_range
+    :?source = "heavy_hammer"
+      ?source = "ability"
+        result = heavyHammer_ability_range
+      :
+        result = heavyHammer_range
+
+    :?source = "grappling_hook"
+      result = grapplingHook_range
+
+    :?source = "trisk" | source = "triskelion"
+      result = stone_triskelion_range
+      canIncrease = false
+
+    :
+      showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getRange\nCAUSE: unknown <source>: " + source, false)
+
+  ?buffs.string = "buff_range" &
+  ^!isIncreased & canIncrease
+    result = result & grasping_buff
+    isIncreased = true
+
+  ?debuffs.string = "pallas_phase2_debuff" & !isReduced
+    result--
+    isReduced = true
+
+  ?result
+    ?result >= grasping_cap
+      ?isIncreased
+      :
+        result = grasping_cap
+  :
+    result = -1
+
+  return result
+func inRange(source)
+  return foe.distance <= getRange(source)
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

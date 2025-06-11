@@ -85,26 +85,27 @@ var c = import My/Lib/Combat
 
 /* ................ RENAMED ................. //
 
-Unbroken Faith    = *max sword stone (enchanted: speed)
-Broken Faith      = *max sword stone (enchanted: speed)
-Mamba Negra       = *max sword poison D (enchanted: speed)
-Dothaneel         = *max sword vigor D (enchanted: speed)
-Void Slayer       = *max sword aether D (enchanted: speed)
-Vantum Phoenix    = *max sword fire D (enchanted: speed)
-Bifrost           = *max sword ice D (enchanted: speed/crit)
+Unbroken Faith      = *max sword stone (enchanted: speed)
+Broken Faith        = *max sword stone (enchanted: speed)
+Mamba Negra         = *max sword poison D (enchanted: speed)
+Dothaneel           = *max sword vigor D (enchanted: speed)
+Void Slayer         = *max sword aether D (enchanted: speed)
+Vantum Phoenix      = *max sword fire D (enchanted: speed)
+Bifrost             = *max sword ice D (enchanted: speed/crit)
 
-Soulfetcher       = *max sword vigor dL +21/ (enchanted: speed/L)
+Death's Kiss        = *max sword -big poison dP shiny (enchanted: speed)
+Soulfetcher         = *max sword -big vigor dL +21/ (enchanted: speed/L)
+Existential Crisis  = *max sword -big aether dU +21 (enchanted: speed)
+Almafuerte          = *max sword -big ice dI (enchanted: speed)
 
-Speedy Hammer     = *max hammer stone
-Kubikiribocho     = *max bardiche (enchanted: crit)
-Mjölnir           = *max heavy_hammer (enchanted: damage)
-Guardian's Wrath  = *max heavy_hammer shiny (enchanted: armor fatigue)
+theVwand            = *max wand vigor D golden
+Frosty Crust        = *max wand ice dI
 
-theVwand          = *max wand vigor D golden
-Frosty Crust      = *max wand ice dI
-
-Almafuerte        = *max sword ice dI (enchanted: speed)
-Death's Kiss      = *max sword poison dP shiny (enchanted: speed)
+Subspace Bubble     = *max shield dashing HoH24
+Speedy Hammer       = *max hammer stone
+Kubikiribocho       = *max bardiche (enchanted: crit)
+Mjölnir             = *max heavy_hammer (enchanted: damage)
+Guardian's Wrath    = *max heavy_hammer shiny (enchanted: armor fatigue)
 
 ............................................. */
 
@@ -112,10 +113,12 @@ Death's Kiss      = *max sword poison dP shiny (enchanted: speed)
 
 // ................. POISON ................. //
 
-var sPdmg   = "*max sword poison -dP"
+var sPdmg   = "*max sword -big poison -dP" // 2nd
+var bsPdmg  = "*max sword big poison -dP"
+var bsPeff  = "*max sword big poison dP"
+var hPeff   = "*max hammer poison aP"
 var shPdef  = "*max shield poison -ap"
 var shPeff  = "*max shield poison ap"
-var hPeff   = "*max hammer poison aP"
 var bPdmg   = "*max crossbow poison -dP"
 var bPeff   = "*max crossbow poison dP"
 var wPDmg   = "*max wand poison -dP -hidden"
@@ -124,11 +127,13 @@ var stPeff  = "*max staff poison dP -hidden"
 
 // ................. VIGOR .................. //
 
-var sVDmg   = "*max sword vigor -dL Spring24"
-var sVeff   = "*max sword vigor dL -gold"
+var sVDmg   = "*max sword -big vigor -dL Spring24" // 2nd
+var sVeff   = "*max sword -big vigor dL -gold" // 2nd
+var bsVDmg  = "*max sword vigor -dL"
+var bsVeff  = "*max sword vigor dL"
+var hVeff   = "*max hammer vigor ah"
 var shVdef  = "*max shield vigor -ah"
 var shVeff  = "*max shield vigor ah"
-var hVeff   = "*max hammer vigor ah"
 var bVeff   = "*max crossbow vigor dL"
 var bVDmg   = "*max crossbow vigor -dL"
 var wVeff   = "*max wand vigor dL -hidden"
@@ -137,13 +142,14 @@ var stVeff  = "*max staff vigor dL -hidden"
 
 // ................. AETHER ................. //
 
-var sADmg   = "*max sword aether -dU"
-var sAeff1  = "*max sword aether dU -big golden"
-var sAeff2  = "*max sword aether dU -big -golden"
-var bsAeff  = "*max sword aether dU big golden"
+var sADmg   = "*max sword -big aether -dU" // 2nd
+var sAeff1  = "*max sword -big aether dU golden" // enchanted: speed
+var sAeff2  = "*max sword -big aether dU -golden" // 2nd
+var bsAdmg  = "*max sword big aether -dU golden"
+var bsAeff  = "*max sword big aether dU -golden"
+var hAeff   = "*max hammer aether aU"
 var shAdef  = "*max shield aether -au"
 var shAeff  = "*max shield aether au"
-var hAdef   = "*max hammer aether aU"
 var bADmg   = "*max crossbow aether -dU"
 var bAeff   = "*max crossbow aether dU"
 var wAeff   = "*max wand aether dU -hidden"
@@ -151,11 +157,13 @@ var stAeff  = "*max staff aether dU -hidden"
 
 // .................. FIRE .................. //
 
-var sFeff   = "*max sword fire dF"
-var sFDmg   = "*max sword fire -dF"
+var sFDmg   = "*max sword -big fire -dF"
+var sFeff   = "*max sword -big fire dF"
+var bsFDmg  = "*max sword big fire -dF"
+var bsFeff  = "*max sword big fire dF"
+var hFeff   = "*max hammer fire aF"
 var shFdef  = "*max shield fire -af"
 var shFeff  = "*max shield fire af"
-var hFdef   = "*max hammer fire aF"
 var bFDmg   = "*max crossbow fire -dF"
 var bFeff   = "*max crossbow fire dF"
 var wFDmg   = "*max wand fire -dF -hidden"
@@ -164,11 +172,13 @@ var stFeff  = "*max staff fire dF -hidden"
 
 // .................. ICE ................... //
 
-var sIeff   = "*max sword ice dI -prismatic"
-var sIDmg   = "*max sword ice -dI"
+var sIeff   = "*max sword -big ice dI -prismatic"
+var sIDmg   = "*max sword -big ice -dI"
+var bsIeff  = "*max sword big ice dI"
+var bsIDmg  = "*max sword big ice -dI"
+var hIeff   = "*max hammer ice aI"
 var shIdef  = "*max shield ice -ai"
 var shIeff  = "*max shield ice ai"
-var hIdef   = "*max hammer ice aI"
 var bIDmg   = "*max crossbow ice -dI"
 var bIeff   = "*max crossbow ice dI"
 var wIDmg   = "*max wand ice -dI -hidden"
@@ -189,6 +199,7 @@ var wAh     = "*max wand_hidden_aether"  // aka Calamity Wand
 var wFh     = "*max wand_hidden_fire"    // aka Explosive Wand
 var wIh     = "*max wand_hidden_ice"     // aka Frost Wand
 var wSh     = "*max wand_hidden_stone"   // aka Gravity Wand
+
 // Staves
 var stPh    = "*max staff_hidden_poison" // aka Berserker Staff
 var stVh    = "*max staff_hidden_vigor"  // aka Prevention Staff
@@ -203,7 +214,6 @@ var bAlt    = "*max crossbow golden"
 
 // ............ SPECIAL WEAPONS ............. //
 
-var shD     = "*max shield dashing HoH24"
 var myQ     = "*max quarterstaff glitched"
 var fastB   = "*max bardiche" // enchanted: speed
 var bR      = "*max crossbow repeating golden"
@@ -304,15 +314,15 @@ func ldtF(mode)
     ?buffs.string ! "buff_inf_speed" & // infernal staff
     ^totaltime % 2 = 0 // every even frame
       ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-        equipL @hIdef@
+        equipL @hIeff@
       :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
         equipL @hPeff@
       :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
         equipL @hVeff@
       :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-        equipL @hAdef@
+        equipL @hAeff@
       :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-        equipL @hFdef@
+        equipL @hFeff@
       :
         equipL triskelion
     :
@@ -359,7 +369,7 @@ func ldtF(mode)
     ?mode = "bash"
       equipR bashing shield
     :?mode = "dash"
-      equipR @shD@
+      equipR Subspace Bubble
 
   :?mode = "escape" | mode = "mind" | mode = "mindstone"
     equipL mind
@@ -389,7 +399,6 @@ func ldtF(mode)
     :?loc = "deadwood_valley"
       equipL moon
       equipR hatchet
-
 
   :?mode = "defense" // evade/buff/debuff when hit
     // Special cases (both left and right are dedicated to the loadout's goal)
@@ -476,187 +485,185 @@ func ldtF(mode)
         : // foe = "stone"
           equipR @shS@
 
-  :?mode = "melee"
-    ?mode = "aoe" | mode = "splash" // TO DO: big swords
-      // Special cases:
-      ?mode = "heal"
-        ?c.permapotSetup
+  :?mode = "sword" & mode ! "big" // normal swords
+    // Special cases:
+    ?mode = "heal"
+      ?c.permapotSetup
+        equipL Soulfetcher
+      :
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          c.doMoondial(Bifrost /*sVeff*/, Soulfetcher)
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          c.doMoondial(Mamba Negra /*sVeff*/, Soulfetcher)
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          c.doMoondial(Dothaneel /*sVeff*/, Soulfetcher)
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          c.doMoondial(Void Slayer /*sVeff*/, Soulfetcher)
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          c.doMoondial(Vantum Phoenix /*sVeff*/, Soulfetcher)
+        : // foe = "stone
+          c.doMoondial(Bifrost /*Broken Faith*/ /*sVeff*/, Soulfetcher)
+    :?mode = "unmake"
+      ?c.permapotSetup
+        equipL @sAeff1@
+      :
+        // put a 2nd dU sword when we have it
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          c.doMoondial(sAeff1, Bifrost) // sAeff2
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          c.doMoondial(sAeff1, Mamba Negra) // sAeff2
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          c.doMoondial(sAeff1, Dothaneel) // sAeff2
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          c.doMoondial(sAeff1, Void Slayer) // sAeff2
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          c.doMoondial(sAeff1, Vantum Phoenix) // sAeff2
+        : // foe = "stone
+          c.doMoondial(sAeff1, Bifrost /*Broken Faith*/) // sAeff2
+    :?mode = "debuff"
+      ?c.permapotSetup // all left hand
+        ?c.canApplyChill()
+          equipL Almafuerte
+        :?c.canApplyWeaken()
+          equipL Death's Kiss
+          //'
+        :?c.canApplyBurn()
+          equipL @sFeff@
+
+      : // !c.permapotSetup
+        var sDmg = null
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          sDmg = Bifrost
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          sDmg = Mamba Negra
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          sDmg = Dothaneel
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          sDmg = Void Slayer
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          sDmg = Vantum Phoenix
+        : // foe = "stone"
+          sDmg = Bifrost // Unbroken Faith
+
+        ?c.canApplyChill()
+          c.doMoondial(sDmg, Almafuerte)
+        :?c.canApplyWeaken() | c.canApplyBurn()
+          equipL Death's Kiss
+          //'
+          equipR @sFeff@
+    :?mode = "dmg"
+      ?c.permapotSetup // all left hand
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          equipL Bifrost
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          equipL Mamba Negra
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          equipL Dothaneel
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          equipL Void Slayer
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          equipL Vantum Phoenix
+        : // foe = "stone"
+          equipL Bifrost // Unbroken Faith
+
+      : // !c.permapotSetup
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          c.doMoondial(Bifrost, sIDmg)
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          c.doMoondial(Mamba Negra, sPdmg)
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          c.doMoondial(Dothaneel, sVDmg)
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          c.doMoondial(Void Slayer, sADmg)
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          c.doMoondial(Vantum Phoenix, sFDmg)
+        : // foe = "stone"
+          c.doMoondial(Bifrost /*Unbroken Faith*/, sFDmg /*Broken Faith*/)
+  :?mode = "big sword" // TO DO: big swords
+    // Special cases:
+    ?mode = "heal"
+      ?c.permapotSetup
+        equipL @bsVeff@
+      :
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          // c.doMoondial(,)
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          // c.doMoondial(,)
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          // c.doMoondial(,)
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          // c.doMoondial(,)
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          // c.doMoondial(,)
+        : // foe = "stone"
+          // c.doMoondial(,)
+    :?mode = "unmake"
+      ?c.permapotSetup
+        equipL @bsAeff@
+      :
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          // c.doMoondial(,)
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          // c.doMoondial(,)
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          // c.doMoondial(,)
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          // c.doMoondial(,)
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          // c.doMoondial(,)
+        : // foe = "stone"
+          // c.doMoondial(,)
+    :?mode = "debuff"
+      ?c.permapotSetup // all left hand
+        ?c.canApplyChill()
           // equipL 
-        :
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            // c.doMoondial(,)
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            // c.doMoondial(,)
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            // c.doMoondial(,)
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            // c.doMoondial(,)
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            // c.doMoondial(,)
-          : // foe = "stone"
-            // c.doMoondial(,)
-      :?mode = "unmake"
-        ?c.permapotSetup
-          equipL @bsAeff@
-        :
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            // c.doMoondial(,)
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            // c.doMoondial(,)
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            // c.doMoondial(,)
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            // c.doMoondial(,)
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            // c.doMoondial(,)
-          : // foe = "stone"
-            // c.doMoondial(,)
-      :?mode = "debuff"
-        ?c.permapotSetup // all left hand
-          ?c.canApplyChill()
-            // equipL 
-          :?c.canApplyWeaken()
-            // equipL 
-          :?c.canApplyBurn()
-            // equipL 
+        :?c.canApplyWeaken()
+          // equipL 
+        :?c.canApplyBurn()
+          // equipL 
 
-        : // !c.permapotSetup
+      : // !c.permapotSetup
 
-          // Left hand:
-          ?c.canApplyWeaken()
-            // equipL 
-            //'
-          :?c.canApplyBurn()
-            // equipL 
-          :?c.canApplyChill()
-            // equipL 
+        // Left hand:
+        ?c.canApplyWeaken()
+          // equipL 
+          //'
+        :?c.canApplyBurn()
+          // equipL 
+        :?c.canApplyChill()
+          // equipL 
 
-          // Right hand:
-          ?c.canApplyChill()
-            // equipR 
-      :?mode = "dmg"
-        ?c.permapotSetup // all left hand
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            // equipL 
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            // equipL 
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            // equipL 
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            // equipL 
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_ice") | mode = "fire"
-            // equipL 
-          : // foe = "stone"
-            // equipL 
+        // Right hand:
+        ?c.canApplyChill()
+          // equipR 
+    :?mode = "dmg"
+      ?c.permapotSetup // all left hand
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          // equipL 
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          // equipL 
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          // equipL 
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          // equipL 
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_ice") | mode = "fire"
+          // equipL 
+        : // foe = "stone"
+          // equipL 
 
-        : // !c.permapotSetup
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            // c.doMoondial(,)
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            // c.doMoondial(,)
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            // c.doMoondial(,)
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            // c.doMoondial(,)
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            // c.doMoondial(,)
-          : // foe = "stone"
-            // c.doMoondial(,)
-
-    :?mode = "1v1"
-      // Special cases:
-      ?mode = "heal"
-        ?c.permapotSetup
-          equipL Soulfetcher
-        :
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            c.doMoondial(Bifrost /*sVeff*/, Soulfetcher)
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            c.doMoondial(Mamba Negra /*sVeff*/, Soulfetcher)
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            c.doMoondial(Dothaneel /*sVeff*/, Soulfetcher)
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            c.doMoondial(Void Slayer /*sVeff*/, Soulfetcher)
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            c.doMoondial(Vantum Phoenix /*sVeff*/, Soulfetcher)
-          : // foe = "stone
-            c.doMoondial(Bifrost /*Broken Faith*/ /*sVeff*/, Soulfetcher)
-      :?mode = "unmake"
-        ?c.permapotSetup
-          equipL @sAeff1@
-        :
-          // put a 2nd dU sword when we have it
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            c.doMoondial(sAeff1, Bifrost) // sAeff2
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            c.doMoondial(sAeff1, Mamba Negra) // sAeff2
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            c.doMoondial(sAeff1, Dothaneel) // sAeff2
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            c.doMoondial(sAeff1, Void Slayer) // sAeff2
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            c.doMoondial(sAeff1, Vantum Phoenix) // sAeff2
-          : // foe = "stone
-            c.doMoondial(sAeff1, Bifrost /*Broken Faith*/) // sAeff2
-      :?mode = "debuff"
-        ?c.permapotSetup // all left hand
-          ?c.canApplyChill()
-            equipL Almafuerte
-          :?c.canApplyWeaken()
-            equipL Death's Kiss
-            //'
-          :?c.canApplyBurn()
-            equipL @sFeff@
-
-        : // !c.permapotSetup
-          var sDmg = null
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            sDmg = Bifrost
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            sDmg = Mamba Negra
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            sDmg = Dothaneel
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            sDmg = Void Slayer
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            sDmg = Vantum Phoenix
-          : // foe = "stone"
-            sDmg = Bifrost // Unbroken Faith
-
-          ?c.canApplyChill()
-            c.doMoondial(sDmg, Almafuerte)
-          :?c.canApplyWeaken() | c.canApplyBurn()
-            equipL Death's Kiss
-            //'
-            equipR @sFeff@
-      :?mode = "dmg"
-        ?c.permapotSetup // all left hand
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            equipL Bifrost
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            equipL Mamba Negra
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            equipL Dothaneel
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            equipL Void Slayer
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            equipL Vantum Phoenix
-          : // foe = "stone"
-            equipL Bifrost // Unbroken Faith
-
-        : // !c.permapotSetup
-          ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-            c.doMoondial(Bifrost, sIDmg)
-          :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-            c.doMoondial(Mamba Negra, sPdmg)
-          :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-            c.doMoondial(Dothaneel, sVDmg)
-          :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-            c.doMoondial(Void Slayer, sADmg)
-          :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-            c.doMoondial(Vantum Phoenix, sFDmg)
-          : // foe = "stone"
-            c.doMoondial(Bifrost /*Unbroken Faith*/, sFDmg /*Broken Faith*/)
+      : // !c.permapotSetup
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          // c.doMoondial(,)
+        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+          // c.doMoondial(,)
+        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+          // c.doMoondial(,)
+        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+          // c.doMoondial(,)
+        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+          // c.doMoondial(,)
+        : // foe = "stone"
+          // c.doMoondial(,)
 
   :?mode = "magic" // wands and staves
     ?mode = "heal"
@@ -718,7 +725,6 @@ func ldtF(mode)
           equip @stFDmg@
         : // foe = "stone"
           equip @stIeff@ // @stSDmg@ */
-
   :?mode = "ranged" // crossbows
     ?c.permapotSetup
       equipL @bAlt@

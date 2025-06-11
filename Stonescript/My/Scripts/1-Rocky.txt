@@ -26,7 +26,7 @@ var weakenType = a.weaken_default
 var potionType = "lucky"
 var hand       = null
 
-var margin = 8 // wand left hitbox + splash range
+var margin = 8 // big sword left hitbox + splash range
 
 var dysan_screen = null
 var dysan_cutscenes = [
@@ -80,7 +80,7 @@ func fight(mode)
     ^encounter.eliteMod = "tenacious" |
     ^foe.buffs.string = "buff_protection")
       ?mode = "melee"
-        a.ldtF("melee 1v1 debuff")
+        a.ldtF("sword debuff")
       :?c.permapotSetup
         a.ldtF("magic debuff")
       :
@@ -93,47 +93,45 @@ func fight(mode)
 
     // 2. Heal if needed
     :?hp ! maxhp
-      ?c.permapotSetup & foe ! "boss"
-        // perma stun
-        ?foe.count > 1 &
-        ^encounter.eliteMod ! "tenacious" &
-        ^foe.debuffs.string ! "stun"
-          equipL grappling
-        :?a.canSmartDash() // dash and
-          a.smartDash()
-        :?encounter.eliteMod ! "tenacious" // unmake
-          a.ldtF("melee splash unmake")
-        : // heal
-          a.ldtF("melee 1v1 heal")
-      // !c.permapotSetup
-      :?foe ! "boss"
-        a.ldtF("ranged unmake")
-      :
-        a.ldtF("melee 1v1 heal")
+    // ****************************** //
+    ^& foe = "boss"
+      a.ldtF("sword heal")
+    // ****************************** //
 
       /*?mode = "melee"
-        a.ldtF("melee 1v1 heal")
+        a.ldtF("sword heal")
       :?mode = "magic"
         a.ldtF("magic heal")
       :?mode = "ranged"
         a.ldtF("ranged heal")*/
 
     // 3. Unmake
-    :?foe ! "boss" & !(
+    :?!(foe = "boss" |
     ^encounter.eliteMod = "tenacious" |
-    ^(encounter.eliteMod = "monarch" & foe.GetCount(foe.distance + margin) = 1))
-      ?mode = "melee"
-        a.ldtF("melee 1v1 unmake")
-      :?c.permapotSetup
-        ?a.canSmartDash()
-          a.smartDash()
-        :
-          a.ldtF("melee splash unmake")
-        // a.ldtF("magic unmake")
-      :
-        a.ldtF("ranged unmake")
+    ^(encounter.eliteMod = "monarch" & foe.count = 1)
+      ?c.permapotSetup
+        // Big sword splash area
+        ?foe.GetCount(foe.distance + margin) > 3)
+          ?a.canSmartDash() // get closer
+            a.smartDash()
+          : // attack
+            a.ldtF("big sword unmake")
 
-      /*:?mode = "magic"
+        // Unmake with dU small sword
+        :?foe.count - foe.GetCount(foe.distance + margin) = 3
+          a.ldtF("ranged unmake")
+        :
+          a.ldtF("sword unmake")
+
+      : // !c.permapotSetup
+        ?foe.count = 1
+          a.ldtF("sword unmake")
+        :
+          a.ldtF("ranged unmake")
+
+      /*?mode = "melee"
+        a.ldtF("sword unmake")
+      :?mode = "magic"
         a.ldtF("magic unmake")
       :?mode = "ranged"
         a.ldtF("ranged unmake")*/
@@ -143,7 +141,7 @@ func fight(mode)
         /*?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
           c.doBursting(a.burstingSwords)
         :*/
-          a.ldtF("melee 1v1 dmg")
+          a.ldtF("sword dmg")
       :?!c.permapotSetup
         a.ldtF("magic dmg")
       :
@@ -401,7 +399,7 @@ c.doAAC(a.hVeff, a.sFeff)
     ^foe.debuffs.string ! "stun" 
       equipL grappling
     :?c.permapotSetup
-      a.ldtF("melee splash unmake")
+      a.ldtF("big sword unmake")
     :
       a.ldtF("ranged unmake")
 
