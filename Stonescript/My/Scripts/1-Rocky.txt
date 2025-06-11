@@ -254,15 +254,15 @@ c.doAAC(a.hVeff, a.sFeff)
 // Summons
 :?c.canSummon("voidweaver") &
 ^(loc.stars > 15 &
-^((!((foe = "phase" | foe = "monarch") &
+^((!((foe = "boss" | foe = "monarch") &
 ^    foe.count = 1) &
 ^   screen.i < dysan_screen) | // not a cutscene
 ^   screen.i = 0))
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
 ^(loc.stars <= 15 |
-^ (foe = "phase" |
-^  (foe = "monarch" & foe.count = 1)))
+^ (foe = "boss" | foe = "monarch") &
+^  foe.count = 1)
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // Harvest/Pick up things
