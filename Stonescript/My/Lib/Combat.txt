@@ -382,21 +382,6 @@ func devour(summonName)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
 
-/* Returns true if the current foes the player is
-facing can be unmade. */
-func canDebuff()
-  return !(
-  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
-  ^)
-/* Returns true if the current foes the player is
-facing can be unmade. */
-func canUnmake()
-  return !(
-  ^ foe = "boss" | // bosses are immune to unmake
-  ^ foe = "monarch" | // monarch foes can't be unmade
-  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
-  ^)
-
 /* Checks if the cinderwisp's "devour" ability damage
 will kill the foe.
 
@@ -524,6 +509,21 @@ func getFoeDamage(weakenAmount, feebleCount)
 
   return result
 
+/* Returns true if the current foes the player is
+facing can be unmade. */
+func canDebuff()
+  return !(
+  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
+  ^)
+/* Returns true if the current foes the player is
+facing can be unmade. */
+func canUnmake()
+  return !(
+  ^ foe = "boss" | // bosses are immune to unmake
+  ^ foe = "monarch" | // monarch foes can't be unmade
+  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
+  ^)
+
 /* Returns true if the foe is
 vulnerable to Chill and if the
 debuff isn't applied yet. */
@@ -571,10 +571,10 @@ typical debuffs:
 - Weaken (damage reduction)
 - Burn (damage over time) */
 func canApplyAll()
-  return
-  ^foe ! "immune_to_debuff_chill" &
-  ^foe ! "immune_to_debuff_damage" &
-  ^foe ! "immune_to_debuff_dot"
+  return canDebuff()  &
+  ^canApplyChill()    &
+  ^canApplyWeaken()   &
+  ^canApplyBurn()
 
 // ......... Damage min-maxing .......... //
 
