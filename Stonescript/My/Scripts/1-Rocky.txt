@@ -104,20 +104,15 @@ func fight(mode)
 
     // 3. Unmake
     :?c.canUnmake()
-      ?c.permapotSetup
+      ?mode = "melee"
+        a.ldtF("sword unmake")
+
+      :?c.permapotSetup
         // Big sword splash area
-        ?foe.GetCount(foe.distance + margin) > 3
-          ?a.canSmartDash() // get closer
-            a.smartDash()
-          : // attack
-            a.ldtF("big sword unmake")
-
-        // there are 2 foes in front and 1 behind it
-        :?foe.count - foe.GetCount(foe.distance + margin) = 3
-          a.ldtF("ranged unmake")
-        : // Unmake with dU small sword
+        ?a.canSmartDash() // get closer
+          a.smartDash()
+        : // attack
           a.ldtF("big sword unmake")
-
       : // !c.permapotSetup
         ?foe.count = 1
           a.ldtF("sword unmake")

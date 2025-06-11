@@ -144,8 +144,8 @@ var stVeff  = "*max staff vigor dL -hidden"
 
 var sADmg   = "*max sword -big aether -dU" // 2nd
 var sAeff2  = "*max sword -big aether dU -golden" // 2nd
-var bsAdmg  = "*max sword big aether -dU golden"
-var bsAeff  = "*max sword big aether dU -golden"
+var bsAdmg  = "*max sword big aether -dU -golden"
+var bsAeff  = "*max sword big aether dU golden"
 var hAeff   = "*max hammer aether aU"
 var shAdef  = "*max shield aether -au"
 var shAeff  = "*max shield aether au"
@@ -405,7 +405,7 @@ func ldtF(mode)
         equipR @shVeff@
     :?mode = "unmake" // unmake when hit
       ?foe.count > 1
-        equipL @wAeff@
+        equipL @bsAeff@
       :
         equipL Existential Crisis
       
@@ -504,19 +504,22 @@ func ldtF(mode)
       ?c.permapotSetup
         equipL Existential Crisis
       :
+        var sword = null
         // put a 2nd dU sword when we have it
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          c.doMoondial(Existential Crisis, Bifrost) // sAeff2
+          sword = Bifrost
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          c.doMoondial(Existential Crisis, Mamba Negra) // sAeff2
+          sword = Mamba Negra
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          c.doMoondial(Existential Crisis, Dothaneel) // sAeff2
+          sword = Dothaneel
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          c.doMoondial(Existential Crisis, Void Slayer) // sAeff2
+          sword = Void Slayer
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          c.doMoondial(Existential Crisis, Vantum Phoenix) // sAeff2
-        : // foe = "stone
-          c.doMoondial(Existential Crisis, Bifrost /*Broken Faith*/) // sAeff2
+          sword = Vantum Phoenix
+        : // foe = "stone"
+          sword = Bifrost // Broken Faith
+
+        c.doMoondial(Existential Crisis, sword) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
         ?c.canApplyChillFull()
@@ -598,18 +601,21 @@ func ldtF(mode)
       ?c.permapotSetup
         equipL @bsAeff@
       :
+        var bigSword = null
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          // c.doMoondial(,)
+          bigSword = bsIdmg
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          // c.doMoondial(,)
+          bigSword = bsPdmg
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          // c.doMoondial(,)
+          bigSword = bsVdmg
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          // c.doMoondial(,)
+          bigSword = bsAdmg
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          // c.doMoondial(,)
+          bigSword = bsFdmg
         : // foe = "stone"
-          // c.doMoondial(,)
+          bigSword = bsFdmg// bsSDmg
+
+        c.doMoondial(bsAeff,bigSword)
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
         ?c.canApplyChillFull()
