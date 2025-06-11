@@ -115,9 +115,12 @@ func Init()
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
 
-  ?buffs.string = "⊙" | // berserk potion
-  ^buffs.string = "buff_infernal" // infernal staff's attack speed buff
-    moondialMode = 2
+  ?buffs.string
+    ?buffs.string = "⊙" | // berserk potion
+    ^buffs.string = "buff_infernal" // infernal staff's attack speed buff
+      moondialMode = 2
+    :
+      moondialMode = 0
   :
     moondialMode = 0
 
@@ -197,7 +200,10 @@ func canUseAbility(abilityID)
       ?abilityID = "voidweaver"
         result = result & canUnmakeVoidweaver()
       :?abilityID = "cinderwisp"
-        result = result & foe.debuffs.string = "ignition"
+        ?foe.debuffs.string
+          result = result & foe.debuffs.string = "ignition"
+        :
+          result = false
 
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityID>:\n\n" + abilityID, false)
@@ -405,9 +411,10 @@ margin: number representing a health margin to add
         Send 0 if you don't want to use a margin. */
 func canKillCinderwisp(cinderwispDmg, margin)
   var result = false
-  var debuffCount = s.getEffectStat("foe","debuff","ignition","count") // amount of debuffs stacked
+  var debuffCount = null // amount of debuffs stacked
 
   ?canUseAbility("cinderwisp") & debuffCount
+    debuffCount = s.getEffectStat("foe","debuff","ignition","count")
     result = s.getTotalHP("foe") <= (debuffCount * cinderwispDmg) + margin
 
   return result
@@ -418,7 +425,10 @@ ignitions_cap: maximum number of ignition debuffs
                that can be applied. Varies on upgrade level or
                boosted stat. */
 func isCinderwispCap(ignitions_cap)
-  return foe.debuffs.string = ignitions_cap
+  ?foe.debuffs.string
+    return foe.debuffs.string = ignitions_cap
+  :
+    return false
 
 // ............... Potions .............. //
 
@@ -508,12 +518,13 @@ func getFoeDamage(weakenAmount, feebleCount)
   var isWeakened = false
   var isFeebled = false
 
-  ?foe.debuffs.string = "feeble" & !isWeakened
-    result -= (2 * feebleCount)
-    isWeakened = true
-  ?foe.debuffs.string = "debuff_damage" & !isFeebled
-    result -= weakenAmount
-    isFeebled = true
+  ?foe.debuffs.string
+    ?foe.debuffs.string = "feeble" & !isWeakened
+      result -= (2 * feebleCount)
+      isWeakened = true
+    ?foe.debuffs.string = "debuff_damage" & !isFeebled
+      result -= weakenAmount
+      isFeebled = true
 
   ?result < 0
     result = 0
