@@ -73,7 +73,6 @@ func fight(mode)
       a.ldtF("defense unmake")
     :
       a.ldtF("defense")
-
   :
     // 1. debuff, if possible
     ?c.canDebuffAny() & !(
@@ -219,7 +218,7 @@ disable npcDialog
     dysan_screen = 7
 
 // Decide hand for one-handed items
-?c.permapotSetup | c.isDashingRange()
+?c.permapotSetup | s.inRange("dash")
   hand = "left"
 :
   hand = "right"
@@ -255,7 +254,7 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
-^ai.walking & !c.isDashingRange() &
+^ai.walking & !s.inRange("dash") &
 ^ai.enabled & !ai.paused &
 ^(c.permapotSetup |
 ^ (!c.permapotSetup & screen.i > 0))
@@ -485,11 +484,11 @@ c.doAAC(a.hVeff, a.sFeff)
 
     ?c.canUsePotion(potionType)
       activate potion
-    :?c.canUseAbility("staff_poison") & !c.isDashingRange()
+    :?c.canUseAbility("staff_poison") & !s.inRange("dash")
       c.useAbility_TH(a.stPh)
-    /*:?c.canUseAbility("wand_ice") & !c.isDashingRange()
+    /*:?c.canUseAbility("wand_ice") & !s.inRange("dash")
       c.useAbility_OH(a.wIh, hand)
-    :?c.canUseAbility("wand_fire") & !c.isDashingRange()
+    :?c.canUseAbility("wand_fire") & !s.inRange("dash")
       c.useAbility_OH(a.wFh, hand)*/
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.permapotSetup

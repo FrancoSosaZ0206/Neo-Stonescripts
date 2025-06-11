@@ -154,30 +154,27 @@ func canUseAbility(abilityID)
     ^item.GetCooldown(abilityId) <= 0
 
     ?abilityId = "bash" | abilityId = "dash"
-      result = result & isDashingRange() & !ai.idle
+      result = result & s.inRange("dash") & !ai.idle
     :?abilityId = "arm"
       result = result & item.CanActivate("arm") &
       ^s.inRange("arm") &
       ^buffs.string = "pick_pocket"
-    :?abilityId = "hatchet"
-      result = result & loc = "deadwood_valley"
 
     :?abilityId = "hatchet"
-      result = (result & // and it's in range
-      ^s.inRange(abilityId)) |
+      result = (result & loc = "deadwood_valley" &
+      ^         s.inRange(abilityId)) |
       ^isCasting(abilityId) // won't get interrupted
 
     :?abilityId = "bardiche" |
     ^abilityId = "heavy_hammer"
-      result = (result & // and it's in range
-      ^s.inRange(abilityId + " ability")) |
+      result = (result & s.inRange(abilityId + " ability")) |
       ^isCasting(abilityId) // won't get interrupted
 
     :?abilityId = "quarterstaff" |
     ^abilityId = "talisman" // interruptible abilities
       result = result | isCasting(abilityId) // make sure not to change it while casting the ability
 
-    :?summon_IDs.Contains(abilityId)
+    :?s.getSummon(abilityId) ! -1
       result = result & isSummoned(abilityId)
 
       ?abilityId = "voidweaver"
@@ -340,22 +337,24 @@ func isSummoned(summonName)
   return summon.GetId() = summonName
 /* Checks if a summon can be invoked by its respective talisman. */
 func canSummon(summonName)
-  ?canUseAbility(summonName)
-    var summonIndex = summon_IDs.IndexOf(summonName)
-    return !isSummoned(summon_IDs[summonIndex])
+  var result = s.getTalisman(summonName)
+
+  ?result
+    return canUseAbility(result) & !isSummoned(summonName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canSummon\nCAUSE: unknown <summonName>: " + summonName, false)
 
-    return false
+  return result
 /* Checks if a summon can be hidden by its respective talisman. */
 func canHide(summonName)
-  ?canUseAbility(summonName)
-    var summonIndex = summon_IDs.IndexOf(summonName)
-    return isSummoned(summon_IDs[summonIndex])
-  :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canSummon\nCAUSE: unknown <summonName>: " + summonName, false)
+  var result = s.getTalisman(summonName)
 
-    return false
+  ?result
+    return canUseAbility(result) & isSummoned(summonName)
+  :
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canHide\nCAUSE: unknown <summonName>: " + summonName, false)
+
+  return result
 
 /* Activates a summon's "Devour" ability.
 
@@ -363,8 +362,7 @@ Valid summonName values:
 - voidweaver
 - cinderwisp */
 func devour(summonName)
-  ?summonName = "voidweaver" |
-  ^summonName = "cinderwisp"
+  ?s.talisman_table.Contains(summonName)
     ?isSummoned(summonName)
       /*?summonName = ""
         activate */
@@ -384,15 +382,19 @@ func devour(summonName)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
 
-/* Returns true if the voidweaver's ability is
-effective against the current foes the player is
-facing. */
-func canUnmakeVoidweaver()
+/* Returns true if the current foes the player is
+facing can be unmade. */
+func canDebuff()
   return !(
-  ^ (foe = "boss") | // bosses are immune to unmake
-  ^ encounter.eliteMod = "tenacious" | ( // tenacious can't be debuffed
-  ^   encounter.eliteMod = "monarch" &
-  ^   foe.count = 1) // monarch foes can't be unmade
+  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
+  ^)
+/* Returns true if the current foes the player is
+facing can be unmade. */
+func canUnmake()
+  return !(
+  ^ foe = "boss" | // bosses are immune to unmake
+  ^ foe = "monarch" | // monarch foes can't be unmade
+  ^ foe.buffs.string = "buff_tenacious" // tenacious foes can't be debuffed
   ^)
 
 /* Checks if the cinderwisp's "devour" ability damage
@@ -526,21 +528,28 @@ func getFoeDamage(weakenAmount, feebleCount)
 vulnerable to Chill and if the
 debuff isn't applied yet. */
 func canApplyChill()
-  return
+  return canDebuff() &
+  ^foe.debuffs.string ! "chill" &
+  ^foe ! "immune_to_debuff_chill"
+/* Returns true if the foe is
+vulnerable to Chill and the debuff
+stack isn't full yet. */
+func canApplyChillFull()
+  return canDebuff() &
   ^foe.debuffs.string ! "chill:6" &
   ^foe ! "immune_to_debuff_chill"
 /* Returns true if the foe is
 vulnerable to Weaken and if the
 debuff isn't applied yet. */
 func canApplyWeaken()
-  return
+  return canDebuff() &
   ^foe.debuffs.string ! "damage" &
   ^foe ! "immune_to_debuff_damage"
 /* Returns true if the foe is
 vulnerable to Burn and if the
 debuff isn't applied yet. */
 func canApplyBurn()
-  return
+  return canDebuff() &
   ^foe.debuffs.string ! "dot" &
   ^foe ! "immune_to_debuff_dot"
 
@@ -550,7 +559,7 @@ typical debuffs:
 - Chill (attack and movement speed reduction)
 - Weaken (damage reduction)
 - Burn (damage over time) */
-func canDebuffAny()
+func canApplyAny()
   return
   ^canApplyChill() |
   ^canApplyWeaken() |
@@ -561,7 +570,7 @@ typical debuffs:
 - Chill (attack and movement speed reduction)
 - Weaken (damage reduction)
 - Burn (damage over time) */
-func canDebuffAll()
+func canApplyAll()
   return
   ^foe ! "immune_to_debuff_chill" &
   ^foe ! "immune_to_debuff_damage" &

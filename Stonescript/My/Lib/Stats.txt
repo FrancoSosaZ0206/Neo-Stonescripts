@@ -115,7 +115,7 @@ var u = import My/Lib/Utilities
 
 // .................. IDs ................... //
 
-var cooldown_IDs = [ // ability cooldowns only
+var cooldown_table = [ // ability cooldowns only
 ^   "blade",
 ^   "mask",
 ^   "arm",
@@ -158,8 +158,8 @@ var cooldown_IDs = [ // ability cooldowns only
 ^   "staff_ice"
 ^]
 
-var talisman_stats = [
-^ "ID"                 , "SUMMON ID",
+var talisman_table = [
+^   "TALISMAN ID"              , "SUMMON ID",
 
 // ^   "poison_talisman" , ""  ,
 // ^   "vigor_talisman"  , ""  ,
@@ -169,8 +169,8 @@ var talisman_stats = [
 // ^   "stone_talisman"  , ""
 ^]
 
-var hidden_stats = [
-^ "ID"                     , "NAME"                , "REQUIRED ARMOR",
+var hidden_table = [
+^   "ID"                  , "NAME"              , "REQUIRED ARMOR",
 
 // Hidden wands
 ^   "wand_hidden_poison"  , "plague wand"       , 6   ,
@@ -192,22 +192,23 @@ var hidden_stats = [
 
 // ............. Weapon Ranges .............. //
 
-var ranges = [
+var range_table = [
 ^   "ID"                  , "RANGE",
 
+^   "blade"               , 11,
 ^   "arm"                 , 7,
 
 ^   "bardiche"            , 9,
-^   "bardiche_ability"    , 7,
-^   "heavyHammer"         , 7,  // CHECK
-^   "heavyHammer_ability" , 21, // CHECK
+^   "bardiche R"          , 7,  // Ability
+^   "heavy_hammer"        , 7,
+^   "heavy_hammer R"      , 21, // Ability
 
 // These count both for dashing and bashing shields:
 ^   "dash_min"            , 11,
 ^   "dash_max"            , 15,
 
 ^   "hatchet"             , 5,
-^   "grapplingHook"       , 13,
+^   "grappling_hook"      , 13,
 
 // soul stones (the mindstone can be used no matter the range)
 ^   "star"                , 12,
@@ -221,10 +222,9 @@ var ranges = [
 ^   "quarterstaff"        , 5,
 ^   "big_sword"           , 6,
 ^   "wand"                , 20,
-^   "staff"               , 20,
+^   "socketed_staff"      , 20,
 ^   "crossbow"            , 22,
-^   "crossbow_rune"       , 23,
-^   "shield_rune"         , 40
+^   "socketed_shield"     , 40  // Engaging range
 ^]
 
 // Special stats
@@ -392,106 +392,80 @@ func getTotalHP(source)
 /* Returns an armor stat from an item's ID.
 Works with hidden items only. */
 func getArmor(source)
-  var armorI = hidden_stats.IndexOf(source) +
-  ^            hidden_stats.IndexOf("REQUIRED ARMOR")
+  var armorI = hidden_table.IndexOf(source) +
+  ^            hidden_table.IndexOf("REQUIRED ARMOR")
 
   ?armorI > -1
-    return hidden_stats[armorI]
+    return hidden_table[armorI]
   : // armorI <= -1 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getArmor\nCAUSE: unknown <source>:\n\n" + source, false)
-    return false
+    return null
+/* Returns a talisman's name/ID from a summon's ID. */
+func getTalisman(source)
+  var talismanI = talisman_table.IndexOf(source) +
+  ^             talisman_table.IndexOf("TALISMAN ID")
+
+  ?talismanI > -1
+    return talisman_table[talismanI]
+  : // talismanI <= -1 -- not found or error
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getTalisman\nCAUSE: unknown <source>:\n\n" + source, false)
+    return null
 /* Returns a summon's name/ID from a talisman's ID. */
 func getSummon(source)
-  var summonI = talisman_stats.IndexOf(source) +
-  ^             talisman_stats.IndexOf("SUMMON ID")
+  var summonI = talisman_table.IndexOf(source) +
+  ^             talisman_table.IndexOf("SUMMON ID")
 
   ?summonI > -1
-    return talisman_stats[summonI]
+    return talisman_table[summonI]
   : // summonI <= -1 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getSummon\nCAUSE: unknown <source>:\n\n" + source, false)
-    return false
-
-/* Returns each weapon's range.
-Accounts for the Grasping Staff's
-buff and Pallas's debuff, or -1
+    return null
+/* Returns each weapon's range, or -1
 if there was an error.
-************************************
-DOESN'T ACCEPT WEAPONS, BUT SPECIFIC
-KEYWORDS THAT REPRESENT THEM.
-************************************ */
-// TO DO: ADD THE REMAINING WEAPONS' RANGES.
+
+Accounts for the Grasping Staff's
+buff and Pallas's debuff.
+*************************************
+   REQUIRES WEAPON ID EXCLUSIVELY.
+************************************* */
 func getRange(source)
   var result = null
   var isIncreased = false
   var canIncrease = true
   var isReduced = false
 
-  ?!result
-    ?source = "sword"
-      result = sword_range
-    :?source = "sword big"
-      result = sword_big_range
-    :?source = "hammer" & source ! "heavy"
-      result = hammer_range
+  var rangeI = range_table.IndexOf(source) +
+  ^            range_table.IndexOf("RANGE")
 
-    :?source = "wand" & !result
-      result = wand_range
-    :?source = "crossbow" & !result
-      ?source = "rune"
-        result = crossbow_rune_range
-      :
-        result = crossbow_range
+  ?armorI > -1
+    result = range_table[rangeI]
 
-    :?source = "quarterstaff" | source = "staff"
-      result = staff_range
-
-    :?source = "arm"
-      result = arm_range
-
-    :?source = "hatchet"
-      result = hatchet_range
-
-    :?source = "bardiche"
-      ?source = "ability"
-        result = bardiche_ability_range
-      :
-        result = bardiche_range
-    :?source = "heavy_hammer"
-      ?source = "ability"
-        result = heavyHammer_ability_range
-      :
-        result = heavyHammer_range
-
-    :?source = "grappling_hook"
-      result = grapplingHook_range
-
-    :?source = "trisk" | source = "triskelion"
-      result = stone_triskelion_range
+    ?source = "crossbow" |
+    ^source = "triskelion"
       canIncrease = false
 
-    :
-      showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getRange\nCAUSE: unknown <source>: " + source, false)
+    ?buffs.string = "buff_range" &
+    ^canIncrease & !isIncreased
+      result = result + grasping_buff
+      isIncreased = true
 
-  ?buffs.string = "buff_range" &
-  ^!isIncreased & canIncrease
-    result = result & grasping_buff
-    isIncreased = true
+    ?debuffs.string = "pallas_phase2_debuff" & !isReduced
+      result--
+      isReduced = true
 
-  ?debuffs.string = "pallas_phase2_debuff" & !isReduced
-    result--
-    isReduced = true
-
-  ?result
-    ?result >= grasping_cap
-      ?isIncreased
-      :
-        result = grasping_cap
+    ?result >= grasping_cap & isIncreased
+      result = grasping_cap
   :
-    result = -1
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getRange\nCAUSE: unknown <source>:\n\n" + source, false)
+    result = false
 
   return result
 func inRange(source)
-  return foe.distance <= getRange(source)
+  ?source = "dash" | source = "bash"
+    return getRange("dash_min") <= foe.distance &
+    ^      foe.distance <= getRange("dash_max")
+  :
+    return foe.distance <= getRange(source)
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
