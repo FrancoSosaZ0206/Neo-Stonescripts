@@ -358,16 +358,28 @@ c.doAAC(a.hVeff, a.sFeff)
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
-^ foe = "monarch")
-  c.useAbility_OH("wand_aether", a.wAh, hand)
+^ foe = "monarch") &
+^foe.distance < s.getRange("dash_min")
+  ?a.canSmartDash()
+    a.smartDash()
+  :
+    c.useAbility_OH("wand_aether", a.wAh, hand)
 // reset buffs
 :?foe.buffs.string = "stoic" &
-^c.canUseAbility("wand_vigor")
-  c.useAbility_OH("wand_vigor", a.wVh, hand)
+^c.canUseAbility("wand_vigor") &
+^foe.distance < s.getRange("dash_min")
+  ?a.canSmartDash()
+    a.smartDash()
+  :
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
 // hinder regen
 :?encounter.eliteMod = "regen" &
-^c.canUseAbility("wand_fire")
-  c.useAbility_OH("wand_fire", a.wFh, hand)
+^c.canUseAbility("wand_fire") &
+^foe.distance < s.getRange("dash_min")
+  ?a.canSmartDash()
+    a.smartDash()
+  :
+    c.useAbility_OH("wand_fire", a.wFh, hand)
 
 :?loc.stars > 15 & (
 ^(c.permapotSetup &
