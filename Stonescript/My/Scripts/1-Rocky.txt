@@ -51,12 +51,10 @@ func fight(mode)
     ?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
-      >c0,2,#yellow,MINDSTONE
       a.ldtF("mind")
     :?c.canUseAbility("staff_stone") &
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
-      >c0,2,#yellow,ACROBATIC STAFF
       c.useAbility_TH("staff_stone", a.stSh)
 
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
@@ -291,22 +289,6 @@ c.doAAC(a.hVeff, a.sFeff)
     loc.Pause()
   : // evade attack
     fight("evade")
-    /*canDash = false
-
-    ?c.canUseAbility("mind") &
-    ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
-      a.ldtF("mind")
-    :?c.canUseAbility("staff_stone") &
-    ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
-      >c0,2,#yellow,ACROBATIC STAFF
-      c.useAbility_TH("staff_stone", a.stSh)
-
-    :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
-      c.useAbility_TH("staff_ice", a.stIh)
-    :
-      a.ldtF("ranged dmg")*/
 
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
