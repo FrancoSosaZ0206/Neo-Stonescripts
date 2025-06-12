@@ -239,8 +239,7 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ai.walking & ai.enabled &
-^!(ai.paused | ai.idle) &
+^ai.walking &
 ^(foe.distance < s.getRange("dash_min") |
 ^ foe.distance = 9999) &
 ^screen.i < dysan_screen &
@@ -250,9 +249,8 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
-^!s.inRange("dash") &
-^ai.walking & ai.enabled &
-^!(ai.paused | ai.idle) &
+^!s.inRange("dash") & ai.walking &
+^ai.enabled & !ai.paused &
 ^(c.permapotSetup |
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
