@@ -239,7 +239,8 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ai.walking &
+^ai.walking & ai.enabled &
+^!(ai.paused | ai.idle) &
 ^(foe.distance < s.getRange("dash_min") |
 ^ foe.distance = 9999) &
 ^screen.i < dysan_screen &
@@ -249,8 +250,9 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
-^ai.walking & !s.inRange("dash") &
-^ai.enabled & !ai.paused &
+^!s.inRange("dash") &
+^ai.walking & ai.enabled &
+^!(ai.paused | ai.idle) &
 ^(c.permapotSetup |
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
@@ -462,7 +464,7 @@ c.doAAC(a.hVeff, a.sFeff)
 ^foe.state = -1 // engaging state
   ?armor > a.compoundMaxArmor_boosted |
   ^(c.canApplyChill(1) & s.inRange("crossbow") &
-  ^ ai.walking & !(ai.paused | ai.idle)) |
+  ^ ai.walking & ai.enabled & !(ai.paused | ai.idle)) |
   ^(encounter.eliteMod = "metamorph" &
   ^ s.inRange("crossbow"))
     a.ldtF("engage")

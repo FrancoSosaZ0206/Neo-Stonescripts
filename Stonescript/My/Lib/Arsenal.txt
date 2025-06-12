@@ -342,7 +342,7 @@ func ldtF(mode)
 
     ?!c.permapotSetup
       ?c.canApplyChill(1) & s.inRange("crossbow") &
-      ^ai.walking & !(ai.paused | ai.idle)
+      ^ai.walking & ai.enabled & !(ai.paused | ai.idle)
         equipR @shIeff@
       :
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
