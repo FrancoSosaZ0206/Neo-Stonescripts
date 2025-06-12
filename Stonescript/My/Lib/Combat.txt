@@ -201,7 +201,7 @@ func canUseAbility(abilityID)
         result = result & canUnmakeVoidweaver()
       :?abilityID = "cinderwisp"
         ?foe.debuffs.string
-          result = result & foe.debuffs.string = "ignition"
+          result = result & (foe.debuffs.string = "ignition")
         :
           result = false
 
