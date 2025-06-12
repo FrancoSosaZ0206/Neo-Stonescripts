@@ -237,8 +237,7 @@ c.doAAC(a.hVeff, a.sFeff)
 :?c.canUseAbility("staff_fire") &
 ^ai.walking & !(ai.paused | ai.idle) &
 ^(foe.distance < s.getRange("dash_min") | foe.distance = 9999) &
-^pickup.distance >= 15 &
-// ^screen.i < dysan_screen &
+^screen.i < dysan_screen &
 ^buffs.string ! "buff_inf_speed" &
 ^!(loc.stars > 15 & c.permapotSetup) // save armor if it's setup run
   c.useAbility_TH("staff_fire", a.stFh)
