@@ -247,7 +247,7 @@ func useAbility_OH(abilityID, itemName, hand)
     ?abilityID = "hatchet" | abilityID = "mask"
       equipR @abilityID@
       activate R
-    
+
     // normal equipment logic
     :?hand = "l" | hand = "left"
       equipL @itemName@
@@ -544,19 +544,16 @@ func canUnmake()
   ^  foe = "monarch") // monarch foes can't be unmade
 
 /* Returns true if the foe is
-vulnerable to Chill and if the
-debuff isn't applied yet. */
-func canApplyChill()
-  return canDebuff() &
-  ^foe.debuffs.string ! "chill" &
-  ^foe ! "immune_to_debuff_chill"
-/* Returns true if the foe is
-vulnerable to Chill and the debuff
-stack isn't full yet. */
-func canApplyChillFull()
-  return canDebuff() &
-  ^foe.debuffs.string ! "chill:6" &
-  ^foe ! "immune_to_debuff_chill"
+vulnerable to Chill and if a given
+debuff count hasn't been reached. */
+func canApplyChill(chillCount)
+  ?chillCount < 1 | chillCount > 6
+    u.showStrCtr(0,30,#red,"ERROR:\nFILE: Combat\nFUNCTION: canApplyChill\nCAUSE: invalid <chillCount>: " + chillCount, false)
+    return false
+  :
+    return canDebuff() &
+    ^(foe.debuffs.string ! "chill:" + chillCount) &
+    ^foe ! "immune_to_debuff_chill"
 /* Returns true if the foe is
 vulnerable to Weaken and if the
 debuff isn't applied yet. */
@@ -589,7 +586,7 @@ typical debuffs:
 func canApplyAny()
   ?canDebuff()
     return
-    ^canApplyChill() |
+    ^canApplyChill(6) |
     ^canApplyWeaken() |
     ^canApplyBurn()
   :
@@ -603,7 +600,7 @@ typical debuffs:
 func canApplyAll()
   ?canDebuff()
     return
-    ^canApplyChill() &
+    ^canApplyChill(6) &
     ^canApplyWeaken() &
     ^canApplyBurn()
   :
@@ -613,7 +610,7 @@ func canApplyAll()
 
 func doMoondial(weapon1, weapon2)
   var moondialFrame = null
-  
+
   ?moondialMode = 0 // Normal moondialing
     moondialTimer++
     moondialFrame = moondialTimer % 3
