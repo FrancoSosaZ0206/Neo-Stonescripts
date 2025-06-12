@@ -341,7 +341,8 @@ func ldtF(mode)
       equipL triskelion
 
     ?!c.permapotSetup
-      ?c.canApplyChill(1)
+      ?c.canApplyChill(1) & s.inRange("crossbow") &
+      ^ai.walking & !(ai.paused | ai.idle)
         equipR @shIeff@
       :
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -564,16 +565,13 @@ func ldtF(mode)
 
         ?c.canApplyChill(6)
           c.doMoondial(Almafuerte, sDmg)
-          >c0,0,#cyan,APPLYING CHILL
         :
           equipL moon
           ?c.canApplyWeaken()
             equipR Death's Kiss
             //'
-            >c0,0,#green,APPLYING WEAKEN
           :?c.canApplyBurn()
             equipR @sFeff@
-            >c0,0,#red,APPLYING BURN
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -717,13 +715,10 @@ func ldtF(mode)
       :
         ?effCount <= 6 // c.canApplyChill(6)
           equip @stIeff@
-          >c0,0,#cyan,APPLYING CHILL
         :?effCount = 7 // c.canApplyWeaken()
           equip @stPeff@
-          >c0,0,#green,APPLYING WEAKEN
         :?effCount = effCap // c.canApplyBurn()
           equip @stFeff@
-          >c0,0,#red,APPLYING BURN
 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand

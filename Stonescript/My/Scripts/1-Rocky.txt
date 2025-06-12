@@ -352,7 +352,7 @@ c.doAAC(a.hVeff, a.sFeff)
   :?c.canUseAbility("bash")
     a.ldtF("bash")
   :?!s.inRange("sword")
-    ?totaltime % 2 = 0
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
       equipL triskelion
     :
       equipL sword
@@ -369,7 +369,7 @@ c.doAAC(a.hVeff, a.sFeff)
   :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_aether", a.wAh, hand)
   : // get closer
-    ?!s.inRange("triskelion")
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
       equipL triskelion
     :
       equipL sword
@@ -383,7 +383,7 @@ c.doAAC(a.hVeff, a.sFeff)
   :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_vigor", a.wVh, hand)
   : // get closer
-    ?!s.inRange("triskelion")
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
       equipL triskelion
     :
       equipL sword
@@ -397,7 +397,7 @@ c.doAAC(a.hVeff, a.sFeff)
   :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_fire", a.wFh, hand)
   : // get closer
-    ?!s.inRange("triskelion")
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
       equipL triskelion
     :
       equipL sword
@@ -461,9 +461,10 @@ c.doAAC(a.hVeff, a.sFeff)
 ^foe.distance > s.getRange("dash_max") | // too far to dash
 ^foe.state = -1 // engaging state
   ?armor > a.compoundMaxArmor_boosted |
-  ^c.canApplyChill(1) |
+  ^(c.canApplyChill(1) & s.inRange("crossbow") &
+  ^ ai.walking & !(ai.paused | ai.idle)) |
   ^(encounter.eliteMod = "metamorph" &
-  ^s.inRange("socketed_shield"))
+  ^ s.inRange("crossbow"))
     a.ldtF("engage")
   :?a.compoundMaxArmor_default <= armor &
   ^armor <= a.compoundMaxArmor_boosted
@@ -473,15 +474,15 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // .............. COMBAT LOGIC .............. //
 
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
 :?foe = "phase" // Dysangelos fight logic
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
 
-  ?a.canSmartDash() & canDash
-    a.smartDash()
-
-  :?foe ! "phase3"
+  ?foe ! "phase3"
     ?foe.buffs.string = "buff_protection" & // against debuffs
     ^c.canUseAbility("wand_vigor")
       c.useAbility_OH("wand_vigor", a.wVh, hand)
@@ -500,15 +501,13 @@ c.doAAC(a.hVeff, a.sFeff)
     :?c.canUseAbility("wand_fire") & !s.inRange("dash")
       c.useAbility_OH("wand_fire", a.wFh, hand)*/
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
-    ^!c.permapotSetup
+    ^!c.permapotSetup & s.inRange("dash_min")
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
       fight("melee")
 
 : // 1v1
-  ?a.canSmartDash()
-    a.smartDash()
-  :?c.canUseAbility("staff_poison") &
+  ?c.canUseAbility("staff_poison") &
   ^!c.permapotSetup & s.getTotalHP("foe") > 1000
     c.useAbility_TH("staff_poison", a.stPh)
   /*:?c.canUseAbility("wand_ice")
