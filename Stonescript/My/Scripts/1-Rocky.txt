@@ -330,7 +330,7 @@ c.doAAC(a.hVeff, a.sFeff)
     :?c.canApplyBurn()
       a.ldtF("defense debuff burn")
     // ai shields' chill duration is longer than any other ice weapon.
-    :?c.canApplyChill()
+    :?c.canApplyChill(1)
       a.ldtF("defense debuff chill")
     : // all effects applied
       a.ldtF("defense")
