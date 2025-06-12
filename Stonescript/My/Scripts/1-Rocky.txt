@@ -382,8 +382,8 @@ c.doAAC(a.hVeff, a.sFeff)
     ?a.canSmartDash()
       a.smartDash()
 
-    :?c.canApplyStun() & c.permapotSetup
-      equipL grappling
+    :?c.canApplyStun()
+      a.ldtF("grappling")
     :?c.permapotSetup
       a.ldtF("big sword unmake")
     :
@@ -407,9 +407,8 @@ c.doAAC(a.hVeff, a.sFeff)
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH("staff_stone", a.stSh)
 
-    :?c.canApplyStun() &
-    ^(c.permapotSetup | foe = "soldier")
-      equipL grappling
+    :?c.canApplyStun() & foe = "soldier"
+      a.ldtF("grappling")
     :
       fight("ranged")
 

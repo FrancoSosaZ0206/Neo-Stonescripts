@@ -367,6 +367,10 @@ func ldtF(mode)
       equipR bashing shield
     :?mode = "dash"
       equipR Subspace Bubble
+  :?mode = "grappling"
+    equipL grappling
+    ?!c.permapotSetup
+      equipR moon
 
   :?mode = "escape" | mode = "mind" | mode = "mindstone"
     equipL mind
