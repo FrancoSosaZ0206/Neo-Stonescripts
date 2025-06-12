@@ -235,8 +235,9 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ai.walking & !(ai.paused | ai.idle) &
-^(foe.distance < s.getRange("dash_min") | foe.distance = 9999) &
+^ai.walking &
+^(foe.distance < s.getRange("dash_min") |
+^ foe.distance = 9999) &
 ^screen.i < dysan_screen &
 ^buffs.string ! "buff_inf_speed" &
 ^!(loc.stars > 15 & c.permapotSetup) // save armor if it's setup run
@@ -300,7 +301,8 @@ c.doAAC(a.hVeff, a.sFeff)
 ^(foe = "scout" & foe.time > 50) |
 ^((foe = "phase1" & foe.time > 60) |
 ^ (foe = "phase3" & foe.time > 85 & foe.damage > 1)) |
-^(foe ! "boss" & foe.time > 50))
+^(foe ! "boss" & foe.time > 50 &
+^ foe.debuffs.string ! "stun"))
   // reduce damage amap
   ?foe = "phase3" &
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
