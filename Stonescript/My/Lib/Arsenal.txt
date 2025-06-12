@@ -294,6 +294,11 @@ var bardicheCrit = 13.5
 var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
 /* ****************************************** */
 
+// ............ FUNCTION RELATED ............ //
+
+var effCount = 1
+var effCap = 8
+var canIncrease = true
 
 // /////////////// FUNCTIONS //////////////// //
 
@@ -550,14 +555,17 @@ func ldtF(mode)
           sDmg = Bifrost // Unbroken Faith
 
         ?c.canApplyChill(6)
-          c.doMoondial(sDmg, Almafuerte)
+          c.doMoondial(Almafuerte, sDmg)
+          >c0,0,#cyan,APPLYING CHILL
         :
           equipL moon
           ?c.canApplyWeaken()
-            equipL Death's Kiss
+            equipR Death's Kiss
             //'
+            >c0,0,#green,APPLYING WEAKEN
           :?c.canApplyBurn()
             equipR @sFeff@
+            >c0,0,#red,APPLYING BURN
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -691,20 +699,41 @@ func ldtF(mode)
         equip @wAeff@
         // equip @stAeff@
     :?mode = "debuff"
-      ?c.permapotSetup
-        ?c.canApplyChill(6)
-          equipL Frosty Crust
-        :?c.canApplyWeaken()
-          equipL @wPeff@
-        :?c.canApplyBurn()
-          equipL @wFeff@
+      >`1,7,#magenta,@effCount@ <= @effCap@ >>> @effCount <= effCap@
+
+      ?(item.left = "wand" & item.left.state = 3) | // perf state
+      ^((item.right = "wand" | item.right = "staff") &
+        item.right.state = 3) & canIncrease
+        effCount++
+        canIncrease = false
+        >`1,8,INCREMENT
       :
-        ?c.canApplyChill(6)
+        canIncrease = true
+        ?effCount > effCap | // reached limit
+        ^foe.state = 4 // or foe died
+          >c0,0,RESET
+          effCount = 1 // reset counter
+
+      ?c.permapotSetup
+        ?effCount <= 6 // c.canApplyChill(6)
+          equipL Frosty Crust
+          >c0,0,#cyan,APPLYING CHILL
+        :?effCount = 7 // c.canApplyWeaken()
+          equipL @wPeff@
+          >c0,0,#green,APPLYING WEAKEN
+        :?effCount = effCap // c.canApplyBurn()
+          equipL @wFeff@
+          >c0,0,#red,APPLYING BURN
+      :
+        ?effCount <= 6 // c.canApplyChill(6)
           equip @stIeff@
-        :?c.canApplyWeaken()
+          >c0,0,#cyan,APPLYING CHILL
+        :?effCount = 7 // c.canApplyWeaken()
           equip @stPeff@
-        :?c.canApplyBurn()
+          >c0,0,#green,APPLYING WEAKEN
+        :?effCount = effCap // c.canApplyBurn()
           equip @stFeff@
+          >c0,0,#red,APPLYING BURN
 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand

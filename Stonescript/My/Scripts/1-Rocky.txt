@@ -73,7 +73,7 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?c.canApplyAny()
+    ?c.canApplyAny() & (mode ! "melee" & a.effCount <= a.effCap)
       ?mode = "melee"
         a.ldtF("sword debuff")
       :?c.permapotSetup
