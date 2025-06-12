@@ -77,6 +77,7 @@ HH = heavy hammer */
 
 var u = import My/Lib/Utilities
 var c = import My/Lib/Combat
+var s = import My/Lib/Stats
 
 
 // /////////////// VARIABLES //////////////// //
@@ -296,7 +297,14 @@ var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
 
 // ............ FUNCTION RELATED ............ //
 
-var effCount = 1
+var chillCount = null
+chillCount = s.getEffectStat("foe","debuff","chill","count")
+var weakenCount = null
+weakenCount = s.getEffectStat("foe","debuff","damage","count")
+var burnCount = null
+burnCount = s.getEffectStat("foe","debuff","dot","count")
+
+var effCount = 0
 var effCap = 8
 var canIncrease = true
 
@@ -699,31 +707,13 @@ func ldtF(mode)
         equip @wAeff@
         // equip @stAeff@
     :?mode = "debuff"
-      >`1,7,#magenta,@effCount@ <= @effCap@ >>> @effCount <= effCap@
-
-      ?(item.left = "wand" & item.left.state = 3) | // perf state
-      ^((item.right = "wand" | item.right = "staff") &
-        item.right.state = 3) & canIncrease
-        effCount++
-        canIncrease = false
-        >`1,8,INCREMENT
-      :
-        canIncrease = true
-        ?effCount > effCap | // reached limit
-        ^foe.state = 4 // or foe died
-          >c0,0,RESET
-          effCount = 1 // reset counter
-
       ?c.permapotSetup
         ?effCount <= 6 // c.canApplyChill(6)
           equipL Frosty Crust
-          >c0,0,#cyan,APPLYING CHILL
         :?effCount = 7 // c.canApplyWeaken()
           equipL @wPeff@
-          >c0,0,#green,APPLYING WEAKEN
         :?effCount = effCap // c.canApplyBurn()
           equipL @wFeff@
-          >c0,0,#red,APPLYING BURN
       :
         ?effCount <= 6 // c.canApplyChill(6)
           equip @stIeff@
@@ -815,6 +805,40 @@ func smartDash()
     ldtF("bash")
   :?c.canUseAbility("dash")
     ldtF("dash")
+
+func canSmartDebuff()
+  return c.canApplyAny() & effCount <= effCap
+func smartDebuff()
+  var debuffAffix = ["dI", "dP", "dF"]
+  var validEffItem = false
+
+  for i = 0 .. debuffAffix.Count() - 1
+    ?(item.left = debuffAffix[i] & item.left = "wand") |
+    ^(item.right = debuffAffix[i] &
+    ^ (item.right = "wand" | item.right = "staff"))
+      validEffItem = true
+
+  ?validEffItem &
+  ^(item.left.state = 3 | item.right.state = 3) & // perf state
+  ^canIncrease
+    effCount++
+    canIncrease = false
+  :
+    canIncrease = true
+
+  ?effCount > effCap & // else, no need to reset
+  ^(effCount > effCap | // reached limit
+  ^foe.state = 4 | // foe died
+  ^!c.canApplyAny()) // can no longer apply debuffs
+    // reset counter
+    ?chillCount
+      effCount = chillCount
+    :
+      effCount = 0
+    ?weakenCount
+      effCount += weakenCount
+    ?burnCount
+      effCount += burnCount
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

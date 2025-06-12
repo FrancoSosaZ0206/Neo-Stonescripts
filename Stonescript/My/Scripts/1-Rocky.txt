@@ -73,7 +73,9 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?c.canApplyAny() | (mode ! "melee" & a.effCount <= a.effCap)
+    ?(foe = "elite" | foe = "boss") &
+    ^(c.canApplyAny() |
+    ^(mode ! "melee" & a.canSmartDebuff()))
       ?mode = "melee"
         a.ldtF("sword debuff")
       :?c.permapotSetup
@@ -155,6 +157,8 @@ func fight(mode)
 
 c.Init()
 c.smiteScreen_Target = 2
+
+a.smartDebuff()
 
 disable npcDialog
 
@@ -457,6 +461,7 @@ c.doAAC(a.hVeff, a.sFeff)
 ^foe.distance > s.getRange("dash_max") | // too far to dash
 ^foe.state = -1 // engaging state
   ?armor > a.compoundMaxArmor_boosted |
+  ^c.canApplyChill(1) |
   ^(encounter.eliteMod = "metamorph" &
   ^s.inRange("socketed_shield"))
     a.ldtF("engage")
