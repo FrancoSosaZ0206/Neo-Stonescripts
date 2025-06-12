@@ -236,7 +236,7 @@ c.doAAC(a.hVeff, a.sFeff)
 // speed up
 :?c.canUseAbility("staff_fire") &
 ^ai.walking & !(ai.paused | ai.idle) &
-^(!s.inRange("dash") | foe.distance = 9999) &
+^(foe.distance < s.getRange("dash_min") | foe.distance = 9999) &
 ^pickup.distance >= 15 &
 // ^screen.i < dysan_screen &
 ^buffs.string ! "buff_inf_speed" &
