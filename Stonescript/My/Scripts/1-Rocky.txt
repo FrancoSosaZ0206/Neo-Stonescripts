@@ -386,8 +386,10 @@ c.doAAC(a.hVeff, a.sFeff)
       a.ldtF("grappling")
     :?c.permapotSetup
       a.ldtF("big sword unmake")
-    :
+    :?foe.GetCount(foe.distance + margin) > 1
       a.ldtF("ranged unmake")
+    :
+      a.ldtF("sword unmake")
 
   : // foe = "elite"
     ?c.canUseAbility("heavy_hammer")
@@ -409,8 +411,10 @@ c.doAAC(a.hVeff, a.sFeff)
 
     :?c.canApplyStun() & foe = "soldier"
       a.ldtF("grappling")
-    :
+    :?foe.GetCount(foe.distance + margin) > 1
       fight("ranged")
+    :
+      fight("melee")
 
 // .......... ENGAGE/WALKING LOGIC .......... //
 
