@@ -487,7 +487,7 @@ c.doAAC(a.hVeff, a.sFeff)
     a.smartDash()
   :?c.canUseAbility("staff_poison") &
   ^!c.permapotSetup & s.getTotalHP("foe") > 1000
-    c.useAbility_TH("staff_poison", a.sPh)
+    c.useAbility_TH("staff_poison", a.stPh)
   /*:?c.canUseAbility("wand_ice")
     c.useAbility_OH("wand_ice", a.wIh, hand)*/
   :
