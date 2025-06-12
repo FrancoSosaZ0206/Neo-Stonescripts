@@ -235,8 +235,10 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ai.walking & foe.distance = 9999 &
-^screen.i < dysan_screen &
+^ai.walking & !(ai.paused | ai.idle) &
+^(!s.inRange("dash") | foe.distance = 9999) &
+^pickup.distance >= 15 &
+// ^screen.i < dysan_screen &
 ^buffs.string ! "buff_inf_speed" &
 ^!(loc.stars > 15 & c.permapotSetup) // save armor if it's setup run
   c.useAbility_TH("staff_fire", a.stFh)
@@ -280,8 +282,8 @@ c.doAAC(a.hVeff, a.sFeff)
 :?foe = "phase3" &
 ^((foe.state = 115 & foe.time > 70) |
 ^ (foe.damage = 1 &
-^  ((foe.state = 32 & foe.time > 45) |
-^   (foe.state = 33 & foe.time < 25))))
+^  ((foe.state = 32 & foe.time > 60) |
+^   (foe.state = 33 & foe.time < 5))))
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
