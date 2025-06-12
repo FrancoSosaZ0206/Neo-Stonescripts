@@ -358,28 +358,46 @@ c.doAAC(a.hVeff, a.sFeff)
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
-^ foe = "monarch") &
-^foe.distance < s.getRange("dash_min")
+^ foe = "monarch")
   ?a.canSmartDash()
     a.smartDash()
-  :
+  :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_aether", a.wAh, hand)
+  : // get closer
+    ?!s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    ?!c.permapotSetup
+      equipR @a.shC2@
 // reset buffs
 :?foe.buffs.string = "stoic" &
-^c.canUseAbility("wand_vigor") &
-^foe.distance < s.getRange("dash_min")
+^c.canUseAbility("wand_vigor")
   ?a.canSmartDash()
     a.smartDash()
-  :
+  :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_vigor", a.wVh, hand)
+  : // get closer
+    ?!s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    ?!c.permapotSetup
+      equipR @a.shC2@
 // hinder regen
 :?encounter.eliteMod = "regen" &
-^c.canUseAbility("wand_fire") &
-^foe.distance < s.getRange("dash_min")
+^c.canUseAbility("wand_fire")
   ?a.canSmartDash()
     a.smartDash()
-  :
+  :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_fire", a.wFh, hand)
+  : // get closer
+    ?!s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    ?!c.permapotSetup
+      equipR @a.shC2@
 
 :?loc.stars > 15 & (
 ^(c.permapotSetup &
