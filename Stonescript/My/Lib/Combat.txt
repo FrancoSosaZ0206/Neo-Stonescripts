@@ -498,38 +498,6 @@ func canUsePotion(potionName)
 
 // ........... Status effects ........... //
 
-/* Returns foe's damage, accounting for
-any damage-reduction debuffs applied.
-
-weakenAmount = if applied, amount of damage
-              deducted to the foe by the
-              weapon you used for it.
-feebleCount = if applied, amount of Feeble
-              debuffs your Cultist Mask can
-              apply.
-***************** WARNING *****************
-  Since these are variable, they can't be
-  calculated, so they have to be provided
-        for this function to work.
-******************************************* */
-func getFoeDamage(weakenAmount, feebleCount)
-  var result = foe.damage
-  var isWeakened = false
-  var isFeebled = false
-
-  ?foe.debuffs.string
-    ?foe.debuffs.string = "feeble" & !isWeakened
-      result -= (2 * feebleCount)
-      isWeakened = true
-    ?foe.debuffs.string = "debuff_damage" & !isFeebled
-      result -= weakenAmount
-      isFeebled = true
-
-  ?result < 0
-    result = 0
-
-  return result
-
 /* Returns true if the current foes the player is
 facing can be unmade. */
 func canDebuff()
@@ -605,6 +573,15 @@ func canApplyAll()
     ^canApplyBurn()
   :
     return false
+
+/* Returns true if the player is engaging in a fight.
+
+This enables the player to benefit from effects
+that are applied when engaging, like ai or A/a
+affix items. */
+func canEngage()
+  return s.inRange("crossbow") &
+  ^      ai.walking & ai.enabled & !(ai.paused | ai.idle)
 
 // ......... Damage min-maxing .......... //
 

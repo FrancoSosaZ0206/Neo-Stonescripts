@@ -243,6 +243,11 @@ var weaken_boosted = 9 // Death's Kiss
 // amount of health healed when using an ah affix weapon
 var ah_heal = 2
 
+// Plague Wand's enchantment level
+var plagueLvl = 11
+// Berserker Staff's enchantment level
+var berserkerLvl = 21
+
 // ............ COMPOUND SHIELD ............. //
 
 var compoundMaxArmor_default = 14
@@ -250,21 +255,20 @@ var compoundMaxArmor_boosted = 35
 
 // .............. CULTIST MASK .............. //
 
-var mask_feebleCount = 5 // amount of feeble debuffs the Mask applies
-var mask_feebleDmg = 9 // amount of damage each debuff deals to the foe
-var mask_feebleReduction = 2 // amount of damage each debuff deducts from the foe
+// mask's current star level
+var maskLvl = 9
 
 // ........ BLADE OF THE FALLEN GOD ......... //
 
-var blade_Dmg = 310
-var blade_RDmg = 170
+var bladeDmg = 310
+var bladeDmgR = 170
 var smiteDmg = 40 // smite flat bonus damage
 
 // .............. SKELETON ARM .............. //
 
 var armDmg = 56
-var armRDmg = armDmg / 2
-var maxPickPockets = "pick_pocket:4"
+var armDmgR = armDmg / 2
+var armEffCap = "pick_pocket:4"
 
 // ............... CINDERWISP ............... //
 
@@ -276,9 +280,11 @@ var maxIgnitions_Boosted = "ignition:17"
 
 // ............... VOIDWEAVER ............... //
 
-var voidweaverDmg = 1
+var voidweaverDmg_Default = 1
+// var voidweaverDmg_Boosted = 1
 var voidweaverUnmakeChance = 0.14 // %
-var voidweaverArmor = 1.35
+var voidweaverArmor_Default = 0.7
+var voidweaverArmor_Boosted = 1.35
 
 // .............. HEAVY HAMMER .............. //
 
@@ -286,14 +292,11 @@ var heavyHammerDmg = 145
 
 // ................ BARDICHE ................ //
 
-/* ***************** WARNING **************** */
-/*         These stats only apply for         */
-/*              [Kubikiribocho]!              */
-
-var bardicheDmg = 52
-var bardicheCrit = 13.5
-var bardicheRDmg = (bardicheDmg + 17) * bardicheCrit
-/* ****************************************** */
+// Assuming *max level
+var bardicheDmg_Default = 52
+var bardicheDmg_Boosted = 0 // TO DO: add when I boost it
+var bardicheMult_Default = 4
+var bardicheMult_Boosted = 13.5
 
 // ............ FUNCTION RELATED ............ //
 
@@ -301,8 +304,6 @@ var chillCount = null
 chillCount = s.getEffectStat("foe","debuff","chill","count")
 var weakenCount = null
 weakenCount = s.getEffectStat("foe","debuff","damage","count")
-var burnCount = null
-burnCount = s.getEffectStat("foe","debuff","dot","count")
 
 var effCount = 0
 var effCap = 8
@@ -341,8 +342,7 @@ func ldtF(mode)
       equipL triskelion
 
     ?!c.permapotSetup
-      ?c.canApplyChill(1) & s.inRange("crossbow") &
-      ^ai.walking & ai.enabled & !(ai.paused | ai.idle)
+      ?c.canEngage() & c.canApplyChill(1)
         equipR @shIeff@
       :
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -804,7 +804,7 @@ func smartDash()
 func canSmartDebuff()
   return c.canApplyAny() & effCount <= effCap
 func smartDebuff()
-  var debuffAffix = ["dI", "dP", "dF"]
+  var debuffAffix = ["dI", "dP"]
   var validEffItem = false
 
   for i = 0 .. debuffAffix.Count() - 1
@@ -834,6 +834,7 @@ func smartDebuff()
       effCount += weakenCount
     ?burnCount
       effCount += burnCount
+
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

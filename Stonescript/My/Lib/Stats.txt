@@ -239,6 +239,20 @@ Grasping Staff's ability adds: */
 var grasping_buff = 10
 var grasping_cap = 22
 
+// Berserker Staff's bonus damage (%) at +1.
+var berserker_base = 10
+var reset_base = 29.5
+// Plague Wand's Weaken level table
+var plague_table = [1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6]
+
+// Mask
+var mask_lvl_table = [
+^[5, 6, 7, 8, 9, 10], // Feeble: damage
+^[1, 2, 3, 4, 5, 6 ]  // Active: max stacks
+^]
+// damage reduction per feeble applied
+var maskEffReduction = 2
+
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -466,10 +480,139 @@ func getRange(source)
   return result
 func inRange(source)
   ?source = "dash" | source = "bash"
-    return getRange("dash_min") <= foe.distance &
-    ^      foe.distance <= getRange("dash_max")
+    return foe.distance = math.Clamp(foe.distance, getRange("dash_min"), getRange("dash_max"))
   :
     return foe.distance <= getRange(source)
+
+// TO DO: COMPLETE THIS FUNCTION
+/* Calculates the damage the player will deal
+in their next hit.
+
+Accounts for these external factors:
+  - Lucky potion.
+  - Strength potion.
+  - Berserker Staff's damage increment.
+  - Weaken debuffs dealt to the player.
+  - If the item is a hammer and the foe has armor.
+
+itemDmg = the base damage of your target weapon (> 0).
+itemMult = the item's critical damage multiplier (> 0)
+           (only taken into account when using Lucky potion).
+berserkerLvl = your Berserker Staff's enchantment level
+             (1 <= x <= 21).
+armorMult = if the target item is a hammer, its bonus
+            damage multiplier to foes with armor (> 0). */
+/* func getPlayerDmg(itemDmg, itemMult, berserkerLvl, armorMult)
+  var result = null
+  var applied = [false,false,false,false]
+
+  ?itemDmg > 0 & itemMult > 0 &
+  ^1 <= berserkerLvl & berserkerLvl <= 21
+    ?!result
+      result = itemDmg
+
+    ?buffs.string
+      ?buffs.string = "buff_staff_berserk" & !applied[0]
+        result += getHiddenStat("berserk staff", berserkerLvl)
+        applied[0] = true
+
+      ?buffs.string = "!" & !applied[1] // lucky crit buff
+        ?buffs.string = "✖" & !applied[2] // lucky_mult buff
+          itemMult += // whatever lucky_mult is
+        result *= itemMult
+        applied[1] = true
+  :
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getPlayerDmg\nCAUSE: invalid entry/entries:\n\n" + source, false)
+
+    result = null
+  
+  return result*/
+
+/* Calculates a foe's damage.
+
+Accounts for damage-reduction debuffs applied,
+or other external factors.
+Returns null if there was an error.
+
+plagueLvl = if used, your Plague Wand's
+            enchantment level (1 <= x <= 21).
+berserkerLvl = your Berserker Staff's enchantment
+             level (1 <= x <= 21).
+***************** WARNING *****************
+  Since these are variable, they can't be
+  calculated, so they have to be provided
+        for this function to work.
+******************************************* */
+func getFoeDmg(berserkerLvl, plagueLvl, maskLvl)
+  ?(buffs.string = "buff_frozen") // Eternity Staff will prevent any damage
+    return 0
+
+  :?berserkerLvl = math.Clamp(berserkerLvl, 1, 21) &
+  ^plagueLvl = math.Clamp(plagueLvl, 1, 21) &
+  ^maskLvl = math.Clamp(maskLvl, 5, 10)
+
+    var result = foe.damage
+    // TO DO: get way to identify Plague Wand debuff
+    var applied = [false,false,false,false]
+
+    ?foe.debuffs.string
+      ?buffs.string = "buff_staff_berserk" & !applied[0]
+        result += (foe.damage *
+        ^          (getHiddenStat("berserker staff", berserkerLvl)
+        ^           / 100))
+        applied[0] = true
+
+      ?foe.debuffs.string = "debuff_damage" & !applied[1]
+        result -= 4
+        applied[1] = true
+
+      ?foe.debuffs.string = "debuff_damage" &
+      ^item.GetCooldown("wand_poison") >= ((30 * u.sec) - (3 * u.sec)) & // (total cd duration) - (effect duration)
+      ^!applied[2]
+        result -= getHiddenStat("plague wand", plagueLvl)
+        applied[2] = true
+
+      ?foe.debuffs.string = "feeble" & !applied[3]
+        result -= (2 * (maskLvl - 4))
+        applied[3] = true
+
+    ?result < 0
+      result = 0
+
+    return result
+  
+  : // invalid entries
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getFoeDmg\nCAUSE: invalid entry/entries:\n\n" + "plagueLvl = " + plagueLvl + "\nberserkerLvl = " + berserkerLvl, false)
+
+    return null
+
+// TO DO: COMPLETE MISSING HIDDEN STAVES AND WANDS
+/* Returns stats for hidden wands or staves, based
+on their enchant level. */
+func getHiddenStat(hiddenName, lvl)
+  // Entry sanitization
+  hiddenName = string.ToLower(hiddenName)
+  ?hidden_table.Contains(hiddenName) // valid hiddenName
+    ?math.Clamp(lvl, 1, 21) = lvl // lvl is in range
+      ?hiddenName = "berserker staff"
+        return berserker_base + lvl - 1
+      :?hiddenName = "plague wand"
+        return plagueW_table[lvl - 1]
+      :?hiddenName = "reset wand"
+        return resetWCd_base - (0.5 * (lvl - 1))
+    :
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getHiddenStat\nCAUSE: invalid <lvl>:\n\n" + lvl, false)
+
+      return null
+  :
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getHiddenStat\nCAUSE: unknown <hiddenName>:\n\n" + hiddenName, false)
+
+    return null
+
+/* Calculates the damage the Bardiche's ability will do,
+based on its base damage and crit multiplier. */
+func bardicheAbilityDmg(dmg, mult)
+  return (dmg + 17) * mult
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

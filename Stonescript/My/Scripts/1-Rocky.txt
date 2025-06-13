@@ -30,9 +30,11 @@ var margin = 8 // big sword left hitbox + splash range
 
 var dysan_screen = null
 var dysan_cutscenes = [
-^ 124, 125, // dysangelos phase1 to 2
+^ 100, 101, 102, // getting soul stones pre-phase1
+^ 117, 118, // finishing phase1 cutscene
+^ 124, 125, // phase1 to 2
 ^ 107, 108, // phase2 to 3
-^ 116] // phase3 death animation state
+^ 116] // phase3 death cutscene state
 
 
 // /////////////// FUNCTIONS //////////////// //
@@ -316,7 +318,7 @@ c.doAAC(a.hVeff, a.sFeff)
       c.useAbility_OH("wand_poison", a.wPh, hand)
 
   // foe will break through armor
-  :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
+  :?armor < s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
     // Avoid hit entirely
     ?foe = "phase3" & foe.damage > 1 &
     ^foe.debuffs.string ! "feeble" &
@@ -334,7 +336,7 @@ c.doAAC(a.hVeff, a.sFeff)
     :?c.canApplyBurn()
       a.ldtF("defense debuff burn")
     // ai shields' chill duration is longer than any other ice weapon.
-    :?c.canApplyChill(1)
+    :?c.canEngage() & c.canApplyChill(1)
       a.ldtF("defense debuff chill")
     : // all effects applied
       a.ldtF("defense")
@@ -453,7 +455,32 @@ c.doAAC(a.hVeff, a.sFeff)
 
 // .......... ENGAGE/WALKING LOGIC .......... //
 
-:?ai.paused |
+// Dysangelos pre-phase1 cutscene damage strat
+:?!c.permapotSetup &
+^[100, 101, 102, 116, 117, 118].Contains(foe.state) &
+^foe ! "phase3" & screen.i = dysan_screen &
+^(item.GetCooldown("bardiche") <= 0 | c.isCasting("bardiche"))
+  ?c.canUseAbility("heavy_hammer")
+    c.useAbility_TH("heavy_hammer", Mjölnir)
+  :?foe.distance <= 18
+    ?c.canUseAbility("quarterstaff")
+      c.useAbility_TH("quarterstaff", a.myQ)
+    :?a.canSmartDash()
+      a.smartDash()
+    :?c.canUseAbility("staff_aether")
+      c.useAbility_TH("staff_aether", a.stAh)
+    : // c.canUseAbility("bardiche")
+      c.useAbility_TH("bardiche", Kubikiribocho)
+  :
+    ?a.compoundMaxArmor_default <= armor &
+    ^armor <= a.compoundMaxArmor_boosted
+      a.ldtF("defense regen max")
+    :
+      a.ldtF("defense regen fast")
+
+  >c0,0,#red,DAMAGING IN CUTSCENE!!!
+
+:?ai.paused | !ai.enabled |
 ^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
 ^c.isDead() |
 ^ (dysan_cutscenes.Contains(foe.state) & // is a cutscene
@@ -461,11 +488,9 @@ c.doAAC(a.hVeff, a.sFeff)
 ^foe.distance > s.getRange("dash_max") | // too far to dash
 ^foe.state = -1 // engaging state
   ?armor > a.compoundMaxArmor_boosted |
-  ^(c.canApplyChill(1) & s.inRange("crossbow") &
-  ^ ai.walking & ai.enabled & !(ai.paused | ai.idle)) |
-  ^(encounter.eliteMod = "metamorph" &
-  ^ s.inRange("crossbow"))
+  ^c.canEngage() & c.canApplyChill(1)
     a.ldtF("engage")
+
   :?a.compoundMaxArmor_default <= armor &
   ^armor <= a.compoundMaxArmor_boosted
     a.ldtF("defense regen max")
