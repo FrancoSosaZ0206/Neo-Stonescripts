@@ -611,7 +611,7 @@ func getHiddenStat(hiddenName, lvl)
 
 /* Calculates the damage the Bardiche's ability will do,
 based on its base damage and crit multiplier. */
-func bardicheAbilityDmg(dmg, mult)
+func bardicheDmgR(dmg, mult)
   return (dmg + 17) * mult
 
 

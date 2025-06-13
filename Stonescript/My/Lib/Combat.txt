@@ -585,7 +585,17 @@ func canEngage()
 
 // ......... Damage min-maxing .......... //
 
-func doMoondial(weapon1, weapon2)
+/* Moondialing is a trick that boosts dps
+with 2 swords whose attack speed stat is
+maxed out (+21 enchantment).
+  
+It's a cycle that repeats every 3 frames:
+- In the first 2, the Moondial Stone is held
+with each sword, boosting their attack speed
+even further.
+- In the last one, both swords are held to
+spend the cooldown frame. */
+func moondialing(weapon1, weapon2)
   var moondialFrame = null
 
   ?moondialMode = 0 // Normal moondialing
@@ -637,7 +647,9 @@ func doMoondial(weapon1, weapon2)
 Requires a minimum of 2 swords to cycle through.
 Works with an unlimited number of swords
 
-weaponsArr: array with all the swords to use. Every sword must have a +21 enchanted boosting its stat attack speed.
+weaponsArr: array with all the swords to use.
+            Every sword must have a +21 enchanted
+            boosting its attack speed stat.
 
 Usage example:
   doBursting([sword fire *max +21,
@@ -645,7 +657,7 @@ Usage example:
               sword poison *max +21,
               sword vigor *max +21,
               sword aether *max +21]) */
-func doBursting(weaponsArr)
+func burst(weaponsArr)
   var n = weaponsArr.Count()
 
   ?n >= 2
@@ -669,8 +681,12 @@ func doBursting(weaponsArr)
 
 /* AAC = Attack Animation Cancelling
 Widely used trick to enable a
-massive attack speed boost*/
-func doAAC(itemLeft, itemRight)
+massive attack speed boost.
+
+It works by skipping the "perf"
+animation/state of an item, interrupting
+it by switching to another item momentarily. */
+func AAC(itemLeft, itemRight)
   ?item.left.state = 3
     equipL @itemLeft@
     equipL @item.left@
@@ -678,6 +694,17 @@ func doAAC(itemLeft, itemRight)
   ?item.right.state = 3
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
+
+/* Smooth Casting is a trick where you
+hold the triskelion stone every certain
+amount of frames to enable walking while
+dealing damage. */
+func smoothCast(itemName, hand)
+  ?totaltime % 2 = 0
+    equipL trisk
+    equipR hatchet
+  :
+    equip @itemName@
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

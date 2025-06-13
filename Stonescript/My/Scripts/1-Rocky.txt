@@ -23,7 +23,7 @@ var dontShowAgain = false
 var canDash = true
 
 var weakenType = a.weaken_default
-var potionType = "lucky"
+var potionType = "berserk"
 var hand       = null
 
 var margin = 8 // big sword left hitbox + splash range
