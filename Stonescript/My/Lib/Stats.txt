@@ -311,20 +311,18 @@ func getEffectStat(source, effectType, effectId, statType)
   var stat = null // the effect stat to return
   var fxStr = null // the full effects string
 
-  ?source = "foe" & effectType = "buff"
+  ?source = "foe" & string.Equals(effectType, "buff")
     fxStr = foe.buffs.string
   :?source = "foe" & effectType = "debuff"
     fxStr = foe.debuffs.string
-    >c0,1,#red,FOE DEBUFFS
 
-  :?source = "player" & effectType = "buff"
+  :?source = "player" & string.Equals(effectType, "buff")
     fxStr = buffs.string
   :?source = "player" & effectType = "debuff"
     fxStr = debuffs.string
 
   :
     showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getEffectStat\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
-
 
   ?fxStr // there are active effects
     // all effects are separated by a "," char
@@ -334,8 +332,6 @@ func getEffectStat(source, effectType, effectId, statType)
       ?fxArr[i] = effectId // target effect is active
         var fxStats = string.Split(fxArr[i], ":")
 
-        >c0,2,#red,fxStats
-
         ?statType = "1" | statType = "symbol"
           stat = fxStats[0]
         :?statType = "2" | statType = "name" | statType = "id"
@@ -344,9 +340,6 @@ func getEffectStat(source, effectType, effectId, statType)
           stat = fxStats[2]
         :?statType = "4" | statType = "time" | statType = "duration"
           stat = fxStats[3]
-    ?foe.debuffs.string = "stun" | foe.debuffs.string = "o"
-      >c0,0,#red,time = @stat@
-      loc.Pause()
 
   return stat
 /* Returns a string formatted like a table with
@@ -380,14 +373,14 @@ func getEffectsTable(source, effectType, isSlim)
   var fxStr = null
   var fxTable = null
 
-  ?source = "foe" & effectType = "buff"
+  ?source = "foe" & string.Equals(effectType, "buff")
     fxStr = foe.buffs.string
     fxTable = "Foe buffs"
   :?source = "foe" & effectType = "debuff"
     fxStr = foe.debuffs.string
     fxTable = "Foe debuffs"
 
-  :?source = "player" & effectType = "buff"
+  :?source = "player" & string.Equals(effectType, "buff")
     fxStr = buffs.string
     fxTable = "Player buffs"
   :?source = "player" & effectType = "debuff"

@@ -1,0 +1,15 @@
+var s = import My/Lib/Stats
+var fxTime = null
+fxTime = s.getEffectStat("foe","debuff","stun","time")
+
+>`1,10,#magenta,fxTime = @fxTime@
+
+?fxTime
+  ?fxTime < 15
+    equip Mjölnir
+  :
+    >c0,0,#red,@fxTime@ >= 15
+    loc.Pause()
+:
+  equipL grappling
+  equipR moon
