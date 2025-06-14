@@ -106,7 +106,7 @@ var item_DS_IDs = [ // IDs of items' abilities that can be used in 2 screens
 // Others
 
 var permapotSetup = loc.stars > 10 // only true from yellow onwards
-
+var potionType = null
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -115,8 +115,8 @@ func Init()
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
 
-  ?buffs.string
-    ?buffs.string = "⊙" // berserk potion
+  ?potionType
+    ?potionType = "berserk" // berserk potion
       moondialMode = 2
     :
       moondialMode = 0
@@ -289,42 +289,42 @@ func isDead()
 
 // ......... Double Screen (DS) ......... //
 
-func isScreen_DS_Target(itemName)
+func isScreenTarget_DS(itemName)
   ?item_DS_IDs.Contains(itemName)
     ?itemName = "blade"
       return screen.i = smiteScreen_Target
     : // itemName = "mask"
       return screen.i = maskScreen_Target
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreen_DS_Target\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreenTarget_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
     return false
-func isScreen_DS_Max(itemName)
+func isScreenMax_DS(itemName)
   ?item_DS_IDs.Contains(itemName)
     ?itemName = "blade"
       return smiteScreen_Target = smiteScreen_Max
     : // itemName = "mask"
       return maskScreen_Target = maskScreen_Max
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreen_DS_Max\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreenMax_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
     return false
-func screen_DS_Change(itemName)
-  ?loc.loop & totaltime = 1 & !isScreen_DS_Max(itemName)
+func screenChange_DS(itemName)
+  ?loc.loop & totaltime = 1 & !isScreenMax_DS(itemName)
     ?item_DS_IDs.Contains(itemName)
       ?itemName = "blade"
         smiteScreen_Target++
       : // itemName = "mask"
         maskScreen_Target++
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screen_DS_Change\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenChange_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
 
 /* Checks if a weapon ability can be used in 2 screens
 of distance, according to a certain screen index. */
 func canUseAbility_DS(itemName)
   ?item_DS_IDs.Contains(itemName)
     return canUseAbility(itemName) &
-    ^isScreen_DS_Target(itemName)
+    ^isScreenTarget_DS(itemName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
 
@@ -431,70 +431,90 @@ func isCinderwispCap(ignitions_cap)
 
 // ............... Potions .............. //
 
-/* Checks if a certain potion can be brewed.
-**********************************************
-REQUISITE: POTION NAMES MUST BE ALL LOWERCASE.
-********************************************** */
-func canBrewPotion(potionName)
-  var result = loc.begin & item.potion ! potionName
-
-  ?potionName = "strength"
-    result = result & res.stone >= 20
-  :?potionName = "experience"
-    result = result & res.wood >= 20
-  :?potionName = "healing"
-    result = result & res.tar >= 20
-  :?potionName = "lightning"
-    result = result & res.bronze >= 20
-  :?potionName = "vampiric"
-    result = result & res.tar >= 10 & res.bronze >= 10
-  :?potionName = "lucky"
-    result = result & res.stone >= 10 & res.bronze >= 10
-  :?potionName = "berserk"
-    result = result & res.wood >= 10 & res.bronze >= 10
-  :?potionName = "cleansing"
-    result = result & res.wood >= 10 & res.tar >= 10
-  :?potionName = "defensive"
-    result = result & res.stone >= 10 & res.tar >= 10
-  :?potionName = "invisibility"
-    result = result & res.wood >= 10 & res.stone >= 10
-
+/* Checks if a certain potion can be brewed. */
+func canBrewPotion()
+  ?!potionType
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canBrewPotion\nCAUSE: <potionType> has not been set.\n\n", false)
+    return false
   :
-    result = false
+    // Entry sanitization
+    potionType = string.ToLower(potionType)
 
-  return result
-/* Brews a certain potion.
-**********************************************
-REQUISITE: POTION NAMES MUST BE ALL LOWERCASE.
-********************************************** */
-func brewPotion(potionName)
-  ?potionName = "strength"
-    brew stone
-  :?potionName = "experience"
-    brew wood
-  :?potionName = "healing"
-    brew tar
-  :?potionName = "lightning"
-    brew bronze
-  :?potionName = "vampiric"
-    brew tar + bronze
-  :?potionName = "lucky"
-    brew stone + bronze
-  :?potionName = "berserk"
-    brew wood + bronze
-  :?potionName = "cleansing"
-    brew wood + tar
-  :?potionName = "defensive"
-    brew stone + tar
-  :?potionName = "invisibility"
-    brew wood + stone
+    ?!s.potion_table.Contains(potionType)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canBrewPotion\nCAUSE: unknown <potionType>:\n\n" + potionType, false)
+      return false
+    :
+      var result = loc.begin & item.potion ! potionType
+
+      ?potionType   = "strength"
+        result = result & res.stone >= 20
+      :?potionType  = "experience"
+        result = result & res.wood >= 20
+      :?potionType  = "healing"
+        result = result & res.tar >= 20
+      :?potionType  = "lightning"
+        result = result & res.bronze >= 20
+      :?potionType  = "vampiric"
+        result = result & res.tar >= 10 & res.bronze >= 10
+      :?potionType  = "lucky"
+        result = result & res.stone >= 10 & res.bronze >= 10
+      :?potionType  = "berserk"
+        result = result & res.wood >= 10 & res.bronze >= 10
+      :?potionType  = "cleansing"
+        result = result & res.wood >= 10 & res.tar >= 10
+      :?potionType  = "defensive"
+        result = result & res.stone >= 10 & res.tar >= 10
+      : // potionType  = "invisibility"
+        result = result & res.wood >= 10 & res.stone >= 10
+
+      return result
+/* Brews a certain potion. */
+func brewPotion()
+  ?!potionType
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: brewPotion\nCAUSE: <potionType> has not been set.\n\n", false)
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: brewPotion\nCAUSE: unknown <potionName>: " + potionName)
+    // Entry sanitization
+    potionType = string.ToLower(potionType)
 
-func canUsePotion(potionName)
-  return item.CanActivate() &
-  ^item.potion ! "empty" &
-  ^item.potion = potionName
+    ?!s.potion_table.Contains(potionType)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: brewPotion\nCAUSE: unknown <potionType>:\n\n" + potionType, false)
+    :
+      ?potionType   = "strength"
+        brew stone
+      :?potionType  = "experience"
+        brew wood
+      :?potionType  = "healing"
+        brew tar
+      :?potionType  = "lightning"
+        brew bronze
+      :?potionType  = "vampiric"
+        brew tar + bronze
+      :?potionType  = "lucky"
+        brew stone + bronze
+      :?potionType  = "berserk"
+        brew wood + bronze
+      :?potionType  = "cleansing"
+        brew wood + tar
+      :?potionType  = "defensive"
+        brew stone + tar
+      : // potionType  = "invisibility"
+        brew wood + stone
+
+func canUsePotion()
+  ?!potionType
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canBrewPotion\nCAUSE: <potionType> has not been set.\n\n", false)
+    return false
+  :
+    // Entry sanitization
+    potionType = string.ToLower(potionType)
+
+    ?!s.potion_table.Contains(potionType)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canBrewPotion\nCAUSE: unknown <potionType>:\n\n" + potionType, false)
+      return false
+    :
+      return item.CanActivate() &
+      ^      item.potion ! "empty" &
+      ^      item.potion = potionType
 
 // ........... Status effects ........... //
 
@@ -549,28 +569,24 @@ func canApplyStun()
 to at least one of the following
 typical debuffs:
 - Chill (attack and movement speed reduction)
-- Weaken (damage reduction)
-- Burn (damage over time) */
+- Weaken (damage reduction) */
 func canApplyAny()
   ?canDebuff()
     return
     ^canApplyChill(6) |
-    ^canApplyWeaken() |
-    ^canApplyBurn()
+    ^canApplyWeaken()
   :
     return false
 /* checks if the foe is vulnerable
 to ALL of the following
 typical debuffs:
 - Chill (attack and movement speed reduction)
-- Weaken (damage reduction)
-- Burn (damage over time) */
+- Weaken (damage reduction) */
 func canApplyAll()
   ?canDebuff()
     return
     ^canApplyChill(6) &
-    ^canApplyWeaken() &
-    ^canApplyBurn()
+    ^canApplyWeaken()
   :
     return false
 

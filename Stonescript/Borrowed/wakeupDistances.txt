@@ -1,0 +1,519 @@
+bronzemine\boss\BombCart
+	wakeupDistance: 24
+	wakeupTics: 0
+bronzemine\boss\BronzeGuardian
+	wakeupDistance: 22
+	wakeupTics: 334
+bronzemine\boss\BronzeGuardianHard
+	wakeupDistance: 22
+	wakeupTics: 334
+bronzemine\boss\BronzeGuardianHarder
+	wakeupDistance: 22
+	wakeupTics: 334
+bronzemine\boss\CyanBronzeGuardian
+	wakeupDistance: 22
+	wakeupTics: 334
+bronzemine\boss\YellowBronzeGuardian
+	wakeupDistance: 22
+	wakeupTics: 334
+bronzemine\enemies\BigSlaveMaster
+	wakeupDistance: 36
+	wakeupTics: 28
+bronzemine\enemies\CyanBigSlaveMaster
+	wakeupDistance: 36
+	wakeupTics: 28
+bronzemine\enemies\CyanFireElemental
+	wakeupDistance: 35
+	wakeupTics: 30
+bronzemine\enemies\CyanFireElementalFromGeyser
+	wakeupDistance: 36
+	wakeupTics: 28
+bronzemine\enemies\CyanFireGeyser
+	wakeupDistance: 40
+	wakeupTics: 0
+bronzemine\enemies\CyanMineWalker
+	wakeupDistance: 45
+	wakeupTics: 46
+bronzemine\enemies\CyanSlaveMaster
+	wakeupDistance: 36
+	wakeupTics: 28
+bronzemine\enemies\FireElemental
+	wakeupDistance: 35
+	wakeupTics: 30
+bronzemine\enemies\FireElementalFromGeyser
+	wakeupDistance: 36
+	wakeupTics: 28
+bronzemine\enemies\FireGeyser
+	wakeupDistance: 40
+	wakeupTics: 0
+bronzemine\enemies\FirstSlaveMaster
+	wakeupDistance: 36
+	wakeupTics: 28
+bronzemine\enemies\MineWalker
+	wakeupDistance: 45
+	wakeupTics: 46
+bronzemine\enemies\SlaveMaster
+	wakeupDistance: 36
+	wakeupTics: 28
+causticcaves\boss\CoolBat
+	wakeupDistance: 20
+	wakeupTics: 0
+causticcaves\boss\CyanSpiderBoss
+	wakeupDistance: 30
+	wakeupTics: 270
+causticcaves\boss\SpiderBoss
+	wakeupDistance: 30
+	wakeupTics: 270
+causticcaves\boss\SpiderBossHard
+	wakeupDistance: 30
+	wakeupTics: 270
+causticcaves\boss\SpiderBossHarder
+	wakeupDistance: 30
+	wakeupTics: 270
+causticcaves\boss\YellowSpiderBoss
+	wakeupDistance: 30
+	wakeupTics: 270
+causticcaves\enemies\CyanMediumBat
+	wakeupDistance: 20
+	wakeupTics: 0
+causticcaves\enemies\CyanSmallBat
+	wakeupDistance: 20
+	wakeupTics: 0
+causticcaves\enemies\CyanSmallSpiderSpawn
+	wakeupDistance: 30
+	wakeupTics: 0
+causticcaves\enemies\CyanSpiderEggs
+	wakeupDistance: 32
+	wakeupTics: 0
+causticcaves\enemies\CyanTinySpiderSpawn
+	wakeupDistance: 30
+	wakeupTics: 0
+causticcaves\enemies\MediumBat
+	wakeupDistance: 20
+	wakeupTics: 0
+causticcaves\enemies\Scorpion
+	wakeupDistance: 21
+	wakeupTics: 0
+causticcaves\enemies\SmallBat
+	wakeupDistance: 20
+	wakeupTics: 0
+causticcaves\enemies\SmallSpider
+	wakeupDistance: 14
+	wakeupTics: 0
+causticcaves\enemies\SpiderEggs
+	wakeupDistance: 0
+	wakeupTics: 0
+causticcaves\enemies\TinySpider
+	wakeupDistance: 18
+	wakeupTics: 0
+deadwoodvalley\enemies\CyanFleshScarab
+	wakeupDistance: 20
+	wakeupTics: 0
+deadwoodvalley\enemies\CyanHugeMosquito
+	wakeupDistance: 23
+	wakeupTics: 0
+deadwoodvalley\enemies\CyanTreeBoss
+	wakeupDistance: 46
+	wakeupTics: 120
+deadwoodvalley\enemies\CyanTreeBoss_phase2
+	wakeupDistance: 46
+	wakeupTics: 120
+deadwoodvalley\enemies\FleshScarab
+	wakeupDistance: 11
+	wakeupTics: 0
+deadwoodvalley\enemies\HugeMosquito
+	wakeupDistance: 20
+	wakeupTics: 0
+deadwoodvalley\enemies\TreeBoss
+	wakeupDistance: 46
+	wakeupTics: 120
+deadwoodvalley\enemies\TreeBossHard
+	wakeupDistance: 46
+	wakeupTics: 120
+deadwoodvalley\enemies\TreeBossHarder
+	wakeupDistance: 46
+	wakeupTics: 120
+deadwoodvalley\enemies\Wasp
+	wakeupDistance: 20
+	wakeupTics: 0
+deadwoodvalley\enemies\WaspNest
+	wakeupDistance: 46
+	wakeupTics: 0
+deadwoodvalley\enemies\YellowTreeBoss
+	wakeupDistance: 46
+	wakeupTics: 120
+deadwoodvalley\enemies\YellowTreeBoss_phase2
+	wakeupDistance: 46
+	wakeupTics: 120
+fungusforest\boss\CyanMushroomBoss
+	wakeupDistance: 24
+	wakeupTics: 100
+fungusforest\boss\CyanMushroomBossSplit
+	wakeupDistance: 0
+	wakeupTics: 0
+fungusforest\boss\CyanMushroomBoss_Fat
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\CyanMushroomBoss_Skinny
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\MushroomBoss
+	wakeupDistance: 24
+	wakeupTics: 100
+fungusforest\boss\MushroomBossHard
+	wakeupDistance: 24
+	wakeupTics: 100
+fungusforest\boss\MushroomBossHarder
+	wakeupDistance: 24
+	wakeupTics: 100
+fungusforest\boss\MushroomBossSplitHard
+	wakeupDistance: 0
+	wakeupTics: 0
+fungusforest\boss\MushroomBossSplitHarder
+	wakeupDistance: 0
+	wakeupTics: 0
+fungusforest\boss\MushroomBoss_Fat
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\MushroomBoss_FatHarder
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\MushroomBoss_Skinny
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\MushroomBoss_SkinnyHarder
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\YellowFluff
+	wakeupDistance: 35
+	wakeupTics: 0
+fungusforest\boss\YellowMushroomBoss
+	wakeupDistance: 24
+	wakeupTics: 100
+fungusforest\boss\YellowMushroomBossSplit
+	wakeupDistance: 0
+	wakeupTics: 0
+fungusforest\boss\YellowMushroomBoss_Fat
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\YellowMushroomBoss_Skinny
+	wakeupDistance: 70
+	wakeupTics: 0
+fungusforest\boss\YellowSnail
+	wakeupDistance: 27
+	wakeupTics: 0
+fungusforest\enemies\Ant
+	wakeupDistance: 36
+	wakeupTics: 0
+fungusforest\enemies\AntFromHill
+	wakeupDistance: 36
+	wakeupTics: 0
+fungusforest\enemies\AntHill
+	wakeupDistance: 40
+	wakeupTics: 0
+fungusforest\enemies\CollossalSnail
+	wakeupDistance: 20
+	wakeupTics: 0
+fungusforest\enemies\CyanAnt
+	wakeupDistance: 36
+	wakeupTics: 0
+fungusforest\enemies\CyanAntHill
+	wakeupDistance: 40
+	wakeupTics: 0
+fungusforest\enemies\CyanCollossalSnail
+	wakeupDistance: 29
+	wakeupTics: 0
+fungusforest\enemies\CyanEpicSnail
+	wakeupDistance: 27
+	wakeupTics: 0
+fungusforest\enemies\EpicSnail
+	wakeupDistance: 0
+	wakeupTics: 0
+icyridge\boss\CyanYeti
+	wakeupDistance: 0
+	wakeupTics: 150
+icyridge\boss\YellowElementalFromGiant
+	wakeupDistance: 36
+	wakeupTics: 33
+icyridge\boss\YellowGiantIceElemental
+	wakeupDistance: 30
+	wakeupTics: 24
+icyridge\boss\YellowYeti
+	wakeupDistance: 0
+	wakeupTics: 150
+icyridge\boss\Yeti
+	wakeupDistance: 0
+	wakeupTics: 150
+icyridge\boss\YetiHard
+	wakeupDistance: 0
+	wakeupTics: 150
+icyridge\boss\YetiHarder
+	wakeupDistance: 0
+	wakeupTics: 150
+icyridge\enemies\CyanIceElemental
+	wakeupDistance: 36
+	wakeupTics: 33
+icyridge\enemies\CyanIceElementalElite
+	wakeupDistance: 35
+	wakeupTics: 24
+icyridge\enemies\CyanIceElementalFromPillar
+	wakeupDistance: 36
+	wakeupTics: 33
+icyridge\enemies\CyanIcePillar
+	wakeupDistance: 22
+	wakeupTics: 0
+icyridge\enemies\CyanKiEater
+	wakeupDistance: 29
+	wakeupTics: 10
+icyridge\enemies\CyanKiGobbler
+	wakeupDistance: 25
+	wakeupTics: 10
+icyridge\enemies\CyanKiSlerper
+	wakeupDistance: 35
+	wakeupTics: 46
+icyridge\enemies\IceElemental
+	wakeupDistance: 36
+	wakeupTics: 33
+icyridge\enemies\IceElementalElite
+	wakeupDistance: 35
+	wakeupTics: 24
+icyridge\enemies\IceElementalFromPillar
+	wakeupDistance: 36
+	wakeupTics: 33
+icyridge\enemies\IcePillar
+	wakeupDistance: 22
+	wakeupTics: 0
+icyridge\enemies\IceWall
+	wakeupDistance: 0
+	wakeupTics: 1
+icyridge\enemies\KiEater
+	wakeupDistance: 29
+	wakeupTics: 10
+icyridge\enemies\KiGobbler
+	wakeupDistance: 25
+	wakeupTics: 10
+icyridge\enemies\KiSlerper
+	wakeupDistance: 35
+	wakeupTics: 46
+rockyplateau\boss\CyanDysangelosBearer
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\CyanDysangelosElementalist
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\CyanDysangelosPerfected
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\DysangelosBearer
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\DysangelosBearerHard
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\DysangelosBearerHarder
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\DysangelosElementalist
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\DysangelosElementalistHarder
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\DysangelosPerfected
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\YellowAcronianScout
+	wakeupDistance: 25
+	wakeupTics: 60
+rockyplateau\boss\YellowAcronianScoutDialog
+	wakeupDistance: 25
+	wakeupTics: 60
+rockyplateau\boss\YellowDysangelosBearer
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\YellowDysangelosElementalist
+	wakeupDistance: 0
+	wakeupTics: 0
+rockyplateau\boss\YellowDysangelosPerfected
+	wakeupDistance: 0
+	wakeupTics: 0
+temple\boss\CyanNagaraja
+	wakeupDistance: 27
+	wakeupTics: 337
+temple\boss\Nagaraja
+	wakeupDistance: 27
+	wakeupTics: 337
+temple\boss\NagarajaHard
+	wakeupDistance: 27
+	wakeupTics: 337
+temple\boss\NagarajaHarder
+	wakeupDistance: 27
+	wakeupTics: 337
+temple\boss\YellowAcronianCultist
+	wakeupDistance: 30
+	wakeupTics: 0
+temple\boss\YellowNagaraja
+	wakeupDistance: 27
+	wakeupTics: 337
+temple\enemies\CultGuardPoisonShield
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CultHeavyHitter
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CultMarksman
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CultSorcerer
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CyanCultGuardPoisonShield
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CyanCultHeavyHitter
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CyanCultMarksman
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CyanCultSorcerer
+	wakeupDistance: 36
+	wakeupTics: 0
+temple\enemies\CyanFlyingSerpent
+	wakeupDistance: 28
+	wakeupTics: 0
+temple\enemies\CyanFlyingSerpentFromSpawn
+	wakeupDistance: 28
+	wakeupTics: 15
+temple\enemies\CyanGroundSerpent
+	wakeupDistance: 28
+	wakeupTics: 0
+temple\enemies\CyanPoisonAdept
+	wakeupDistance: 38
+	wakeupTics: 0
+temple\enemies\CyanSerpentHandler
+	wakeupDistance: 45
+	wakeupTics: 0
+temple\enemies\CyanWormRiderSword
+	wakeupDistance: 45
+	wakeupTics: 0
+temple\enemies\FlyingSerpent
+	wakeupDistance: 28
+	wakeupTics: 0
+temple\enemies\FlyingSerpentFromSpawn
+	wakeupDistance: 28
+	wakeupTics: 15
+temple\enemies\GroundSerpent
+	wakeupDistance: 28
+	wakeupTics: 0
+temple\enemies\PoisonAdept
+	wakeupDistance: 38
+	wakeupTics: 0
+temple\enemies\SerpentHandler
+	wakeupDistance: 45
+	wakeupTics: 0
+temple\enemies\WormRiderSword
+	wakeupDistance: 45
+	wakeupTics: 0
+undeadcrypt\boss\CyanSkeletonBoss
+	wakeupDistance: 24
+	wakeupTics: 147
+undeadcrypt\boss\CyanSkeletonBossStage2
+	wakeupDistance: 99999
+	wakeupTics: 64
+undeadcrypt\boss\CyanSkeletonBoss_sword_arm
+	wakeupDistance: 25
+	wakeupTics: 150
+undeadcrypt\boss\CyanSpawnedGhost
+	wakeupDistance: 25
+	wakeupTics: 0
+undeadcrypt\boss\CyanSpawnedSkeleton
+	wakeupDistance: 9999
+	wakeupTics: 0
+undeadcrypt\boss\SkeletonBoss
+	wakeupDistance: 24
+	wakeupTics: 147
+undeadcrypt\boss\SkeletonBossHard
+	wakeupDistance: 24
+	wakeupTics: 147
+undeadcrypt\boss\SkeletonBossHarder
+	wakeupDistance: 24
+	wakeupTics: 147
+undeadcrypt\boss\SkeletonBossHarder_sword_arm
+	wakeupDistance: 25
+	wakeupTics: 150
+undeadcrypt\boss\SkeletonBossHard_sword_arm
+	wakeupDistance: 25
+	wakeupTics: 150
+undeadcrypt\boss\SkeletonBossStage2Hard
+	wakeupDistance: 99999
+	wakeupTics: 64
+undeadcrypt\boss\SkeletonBossStage2Harder
+	wakeupDistance: 99999
+	wakeupTics: 64
+undeadcrypt\boss\SkeletonBoss_sword_arm
+	wakeupDistance: 25
+	wakeupTics: 150
+undeadcrypt\boss\SmallSkeleton_Awake
+	wakeupDistance: 9999
+	wakeupTics: 0
+undeadcrypt\boss\YellowBigTomb
+	wakeupDistance: 45
+	wakeupTics: 0
+undeadcrypt\boss\YellowLargeGhostFromTomb
+	wakeupDistance: 22
+	wakeupTics: 0
+undeadcrypt\boss\YellowSkeletonBoss
+	wakeupDistance: 24
+	wakeupTics: 147
+undeadcrypt\boss\YellowSkeletonBossStage2
+	wakeupDistance: 99999
+	wakeupTics: 64
+undeadcrypt\boss\YellowSkeletonBoss_sword_arm
+	wakeupDistance: 25
+	wakeupTics: 150
+undeadcrypt\boss\YellowSkeletonBoss_sword_arm2
+	wakeupDistance: 25
+	wakeupTics: 90
+undeadcrypt\boss\YellowSpawnedGhost
+	wakeupDistance: 25
+	wakeupTics: 0
+undeadcrypt\boss\YellowSpawnedSkeleton
+	wakeupDistance: 9999
+	wakeupTics: 0
+undeadcrypt\enemies\CyanGhost
+	wakeupDistance: 25
+	wakeupTics: 0
+undeadcrypt\enemies\CyanGhostFromTomb
+	wakeupDistance: 18
+	wakeupTics: 0
+undeadcrypt\enemies\CyanGhostTomb
+	wakeupDistance: 35
+	wakeupTics: 0
+undeadcrypt\enemies\CyanLargeGhost
+	wakeupDistance: 22
+	wakeupTics: 0
+undeadcrypt\enemies\CyanLargeSkeleton
+	wakeupDistance: 30
+	wakeupTics: 50
+undeadcrypt\enemies\CyanSmallSkeleton
+	wakeupDistance: 24
+	wakeupTics: 0
+undeadcrypt\enemies\Ghost
+	wakeupDistance: 18
+	wakeupTics: 0
+undeadcrypt\enemies\GhostFromTomb
+	wakeupDistance: 18
+	wakeupTics: 0
+undeadcrypt\enemies\GhostTomb
+	wakeupDistance: 40
+	wakeupTics: 0
+undeadcrypt\enemies\LargeGhost
+	wakeupDistance: 16
+	wakeupTics: 0
+undeadcrypt\enemies\LargeSkeleton
+	wakeupDistance: 30
+	wakeupTics: 50
+undeadcrypt\enemies\SmallSkeleton
+	wakeupDistance: 24
+	wakeupTics: 0

@@ -251,7 +251,7 @@ var berserkerLvl = 21
 // ............ COMPOUND SHIELD ............. //
 
 var compoundMaxArmor_default = 14
-var compoundMaxArmor_boosted = 35
+var compoundMaxArmor_boosted = 30
 
 // .............. CULTIST MASK .............. //
 
@@ -306,7 +306,7 @@ var weakenCount = null
 weakenCount = s.getEffectStat("foe","debuff","damage","count")
 
 var effCount = 0
-var effCap = 8
+var effCap = 7
 var canIncrease = true
 
 // /////////////// FUNCTIONS //////////////// //
@@ -326,6 +326,8 @@ func ldtF(mode)
   :?mode = "engage"
     ?buffs.string ! "buff_inf_speed" & // infernal staff
     ^totaltime % 2 = 0 // every even frame
+      equipL triskelion
+    :
       ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
         equipL @hIeff@
       :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -337,9 +339,7 @@ func ldtF(mode)
       :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
         equipL @hFeff@
       :
-        equipL triskelion
-    :
-      equipL triskelion
+        equipL Unbroken Faith
 
     ?!c.permapotSetup
       ?c.canEngage() & c.canApplyChill(1)
@@ -507,17 +507,17 @@ func ldtF(mode)
         equipL Soulfetcher
       :
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          c.doMoondial(Bifrost /*sVeff*/, Soulfetcher)
+          c.moondialing(Bifrost /*sVeff*/, Soulfetcher)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          c.doMoondial(Mamba Negra /*sVeff*/, Soulfetcher)
+          c.moondialing(Mamba Negra /*sVeff*/, Soulfetcher)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          c.doMoondial(Dothaneel /*sVeff*/, Soulfetcher)
+          c.moondialing(Dothaneel /*sVeff*/, Soulfetcher)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          c.doMoondial(Void Slayer /*sVeff*/, Soulfetcher)
+          c.moondialing(Void Slayer /*sVeff*/, Soulfetcher)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          c.doMoondial(Vantum Phoenix /*sVeff*/, Soulfetcher)
+          c.moondialing(Vantum Phoenix /*sVeff*/, Soulfetcher)
         : // foe = "stone
-          c.doMoondial(Bifrost /*Broken Faith*/ /*sVeff*/, Soulfetcher)
+          c.moondialing(Bifrost /*Broken Faith*/ /*sVeff*/, Soulfetcher)
     :?mode = "unmake"
       ?c.permapotSetup
         equipL Existential Crisis
@@ -537,7 +537,7 @@ func ldtF(mode)
         : // foe = "stone"
           sword = Bifrost // Broken Faith
 
-        c.doMoondial(Existential Crisis, sword) // sAeff2
+        c.moondialing(Existential Crisis, sword) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
         ?c.canApplyChill(6)
@@ -545,8 +545,8 @@ func ldtF(mode)
         :?c.canApplyWeaken()
           equipL Death's Kiss
           //'
-        :?c.canApplyBurn()
-          equipL @sFeff@
+        /*:?c.canApplyBurn()
+          equipL @sFeff@*/
 
       : // !c.permapotSetup
         var sDmg = null
@@ -564,14 +564,14 @@ func ldtF(mode)
           sDmg = Bifrost // Unbroken Faith
 
         ?c.canApplyChill(6)
-          c.doMoondial(Almafuerte, sDmg)
+          c.moondialing(Almafuerte, sDmg)
         :
           equipL moon
           ?c.canApplyWeaken()
             equipR Death's Kiss
             //'
-          :?c.canApplyBurn()
-            equipR @sFeff@
+          /*:?c.canApplyBurn()
+            equipR @sFeff@*/
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -589,17 +589,17 @@ func ldtF(mode)
 
       : // !c.permapotSetup
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          c.doMoondial(Bifrost, sIDmg)
+          c.moondialing(Bifrost, sIDmg)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          c.doMoondial(Mamba Negra, sPdmg)
+          c.moondialing(Mamba Negra, sPdmg)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          c.doMoondial(Dothaneel, sVDmg)
+          c.moondialing(Dothaneel, sVDmg)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          c.doMoondial(Void Slayer, sADmg)
+          c.moondialing(Void Slayer, sADmg)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          c.doMoondial(Vantum Phoenix, sFDmg)
+          c.moondialing(Vantum Phoenix, sFDmg)
         : // foe = "stone"
-          c.doMoondial(Bifrost /*Unbroken Faith*/, sFDmg /*Broken Faith*/)
+          c.moondialing(Bifrost /*Unbroken Faith*/, sFDmg /*Broken Faith*/)
   :?mode = "big sword" // TO DO: big swords
     // Special cases:
     ?mode = "heal"
@@ -607,17 +607,17 @@ func ldtF(mode)
         equipL @bsVeff@
       :
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         : // foe = "stone"
-          // c.doMoondial(,)
+          // c.moondialing(,)
     :?mode = "unmake"
       ?c.permapotSetup
         equipL @bsAeff@
@@ -636,7 +636,7 @@ func ldtF(mode)
         : // foe = "stone"
           bigSword = bsFdmg// bsSDmg
 
-        c.doMoondial(bsAeff,bigSword)
+        c.moondialing(bsAeff,bigSword)
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
         ?c.canApplyChill(6)
@@ -677,17 +677,17 @@ func ldtF(mode)
 
       : // !c.permapotSetup
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          // c.doMoondial(,)
+          // c.moondialing(,)
         : // foe = "stone"
-          // c.doMoondial(,)
+          // c.moondialing(,)
 
   :?mode = "magic" // wands and staves
     ?mode = "heal"
@@ -708,17 +708,13 @@ func ldtF(mode)
       ?c.permapotSetup
         ?effCount <= 6 // c.canApplyChill(6)
           equipL Frosty Crust
-        :?effCount = 7 // c.canApplyWeaken()
+        :?effCount = effCap // c.canApplyWeaken()
           equipL @wPeff@
-        :?effCount = effCap // c.canApplyBurn()
-          equipL @wFeff@
       :
         ?effCount <= 6 // c.canApplyChill(6)
           equip @stIeff@
-        :?effCount = 7 // c.canApplyWeaken()
+        :?effCount = effCap // c.canApplyWeaken()
           equip @stPeff@
-        :?effCount = effCap // c.canApplyBurn()
-          equip @stFeff@
 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
@@ -763,14 +759,16 @@ func ldtF(mode)
 
       :?mode = "debuff"
         ?c.canApplyChill(6)
-          equip @stIeff@
-          // @bIeff@
-        :?c.canApplyWeaken()
+          c.smoothCast(bIeff, "b")
+        :?effCount <= effCap // c.canApplyWeaken()
           equip @stPeff@
           // @bPeff@
-        :?c.canApplyBurn()
-          equip @stFeff@
-          // @bFeff@
+
+      :?mode = "knockback"
+        ?buffs.string = "⊙" // berserk potion
+          c.smoothCast(bS, "b")
+        :
+          equip bS
 
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
           equip @bAeff@
@@ -801,6 +799,15 @@ func smartDash()
   :?c.canUseAbility("dash")
     ldtF("dash")
 
+/* Smart debuffing is a faster,
+more efficient method to debuff
+with ranged weapons.
+
+It counts the amount of times a
+debuffing weapon is cast, instead
+of counting the foe's debuffs,
+eliminating the time it takes for
+the projectiles to land. */
 func canSmartDebuff()
   return c.canApplyAny() & effCount <= effCap
 func smartDebuff()
@@ -830,10 +837,9 @@ func smartDebuff()
       effCount = chillCount
     :
       effCount = 0
+
     ?weakenCount
       effCount += weakenCount
-    ?burnCount
-      effCount += burnCount
 
 
 

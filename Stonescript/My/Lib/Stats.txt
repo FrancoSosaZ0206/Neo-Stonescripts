@@ -106,6 +106,26 @@ I don't recall how even enemy widths round, it might
 depend if the projectile hitbox is even or odd, [...]."
 */
 
+/* ENGAGING RANGE AND CONDITIONS
+
+Engage conditions
+
+Link: https://discord.com/channels/423242655498240000/597668520888762388/1242108255178592339
+
+Hallifax: "You get the armor when the enemy goes to state 2, [...] Maybe check how many foes there are and how much armor you gained, and do some math to check whether you got all? Idk."
+
+Engage ranges
+
+Link: https://discord.com/channels/423242655498240000/609453573113249924/1198026098143932546
+
+By Ket
+
+Related files are downloaded in Stonescript/Borrowed
+wakeupTimes.txt
+wakeupStats.txt
+
+*/
+
 // //////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities
@@ -192,6 +212,19 @@ var hidden_table = [
 ^   "staff_fire"   , "infernal staff"    , 6   ,
 ^   "staff_ice"    , "eternity staff"    , 1   ,
 ^   "staff_stone"  , "acrobatic staff"   , 3
+^]
+
+var potion_table = [
+^   "strength"        ,
+^   "experience"      ,
+^   "healing"         ,
+^   "lightning"       ,
+^   "vampiric"        ,
+^   "lucky"           ,
+^   "berserk"         ,
+^   "cleansing"       ,
+^   "defensive"       ,
+^   "invisibility"
 ^]
 
 

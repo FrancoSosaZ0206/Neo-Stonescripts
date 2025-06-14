@@ -23,7 +23,6 @@ var dontShowAgain = false
 var canDash = true
 
 var weakenType = a.weaken_default
-var potionType = "berserk"
 var hand       = null
 
 var margin = 8 // big sword left hitbox + splash range
@@ -131,7 +130,7 @@ func fight(mode)
     : // 4. Deal max damage
       ?mode = "melee"
         /*?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
-          c.doBursting(a.burstingSwords)
+          c.burst(a.burstingSwords)
         :
           a.ldtF("sword dmg")*/
         a.ldtF("sword dmg")
@@ -157,11 +156,13 @@ func fight(mode)
 
 // .............. SETUP LOGIC ............... //
 
+?loc.stars <= 15
+  c.potionType = "lucky"
+:
+  c.potionType = "berserk"
+c.smiteScreen_Target = 1
 c.Init()
-c.smiteScreen_Target = 2
-
 a.smartDebuff()
-
 disable npcDialog
 
 // Auto-harvesting logic
@@ -220,13 +221,13 @@ disable npcDialog
 :
   hand = "right"
 
-c.smiteScreen_Max = 4
-c.screen_DS_Change("blade")
-c.doAAC(a.hVeff, a.sFeff)
+c.smiteScreen_Max = 5
+c.screenChange_DS("blade")
+c.AAC(a.hVeff, a.sFeff)
 
 // Auto brewing
-?c.canBrewPotion(potionType)
-  c.brewPotion(potionType)
+?c.canBrewPotion()
+  c.brewPotion()
 
 // Initial equipments
 ?loc.begin
@@ -234,7 +235,7 @@ c.doAAC(a.hVeff, a.sFeff)
 :?c.permapotSetup
   a.ldtF("permapot")
 
-?c.canUsePotion(potionType) & c.permapotSetup
+?c.canUsePotion() & c.permapotSetup
   activate potion
 :?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
@@ -517,7 +518,7 @@ c.doAAC(a.hVeff, a.sFeff)
   : // foe = phase3
     canDash = true
 
-    ?c.canUsePotion(potionType)
+    ?c.canUsePotion()
       activate potion
     :?c.canUseAbility("staff_poison") & !s.inRange("dash")
       c.useAbility_TH("staff_poison", a.stPh)
