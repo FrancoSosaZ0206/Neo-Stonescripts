@@ -719,7 +719,7 @@ func canSmoothCast()
 hold the triskelion stone every certain
 amount of frames to enable walking while
 dealing damage. */
-func smoothCast(itemName, hand)
+func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL trisk
     equipR hatchet
