@@ -298,11 +298,8 @@ var enduse = 0
 
 // Summons
 :?c.canSummon("voidweaver") &
-^(loc.stars > 15 &
-^((!((foe = "boss" | foe = "monarch") &
-^    foe.count = 1) &
-^   screen.i < dysan_screen) | // not a cutscene
-^   screen.i = 0))
+^loc.stars > 15 &
+^screen.i < dysan_screen - 1 // not a cutscene
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
 ^(loc.stars <= 15 | screen.i >= dysan_screen - 1)
