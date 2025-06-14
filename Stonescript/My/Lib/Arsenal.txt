@@ -545,8 +545,7 @@ func ldtF(mode)
         :?c.canApplyWeaken()
           equipL Death's Kiss
           //'
-        :?c.canApplyBurn() &
-        ^(foe = "boss" | foe = "monarch")
+        :?c.canApplyBurn()
           equipL @sFeff@
 
       : // !c.permapotSetup
@@ -571,8 +570,7 @@ func ldtF(mode)
           ?c.canApplyWeaken()
             equipR Death's Kiss
             //'
-          :?c.canApplyBurn() &
-          ^(foe = "boss" | foe = "monarch")
+          :?c.canApplyBurn()
             equipR @sFeff@
     :?mode = "dmg"
       ?c.permapotSetup // all left hand

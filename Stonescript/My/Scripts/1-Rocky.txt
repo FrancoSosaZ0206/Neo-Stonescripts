@@ -76,7 +76,9 @@ func fight(mode)
     // 1. debuff, if possible
     ?(foe = "elite" | foe = "boss") &
     ^((mode = "melee" &
-    ^  (c.canApplyAny() | c.canApplyBurn())) |
+    ^  (c.canApplyAny() |
+    ^   (c.canApplyBurn() &
+    ^    (foe = "boss" | foe = "monarch")))) |
     ^ (mode ! "melee" & a.canSmartDebuff()))
       ?mode = "melee"
         a.ldtF("sword debuff")
@@ -490,8 +492,10 @@ var enduse = 0
 
     :?foe.GetCount(foe.distance + margin) > 1
       ?c.canApplyStun() & foe = "soldier"
+        >c0,0,#yellow,#STUNNING ELITES
         a.ldtF("grappling")
       :
+        >c0,0,#yellow,#RANGED ELITES
         fight("ranged")
     :
       fight("melee")
@@ -516,7 +520,9 @@ var enduse = 0
 
 :?!c.permapotSetup &
 ^(foe.state = 118 |
-^ (foe = "phase1" & foe.hp = foe.maxhp)) &
+^ (foe = "phase1" &
+^  foe.hp = foe.maxhp &
+^  foe.distance <= 18)) &
 ^(item.GetCooldown("bardiche") <= 0 |
 ^ c.isCasting("bardiche"))
   ?c.canUseAbility("quarterstaff")
