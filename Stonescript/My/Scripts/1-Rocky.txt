@@ -74,18 +74,18 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?(foe = "elite" | foe = "boss") &
-    ^((mode = "melee" &
+    ?(foe = "monarch" /*"elite"*/ | foe = "boss") &
+    ^/*((*/mode = "melee" &
     ^  (c.canApplyAny() |
-    ^   (c.canApplyBurn() &
-    ^    (foe = "boss" | foe = "monarch")))) |
-    ^ (mode ! "melee" & a.canSmartDebuff()))
-      ?mode = "melee"
-        a.ldtF("sword debuff")
-      :?c.permapotSetup
+    ^   /*(*/c.canApplyBurn() // &
+    /*^    (foe = "boss" | foe = "monarch")))) |
+    ^ (mode ! "melee" & a.canSmartDebuff())*/)
+      //?mode = "melee"
+      a.ldtF("sword debuff")
+      /*:?c.permapotSetup
         a.ldtF("magic debuff")
       :
-        a.ldtF("ranged debuff")
+        a.ldtF("ranged debuff")*/
 
       /*:?mode = "magic"
         a.ldtF("magic debuff")
@@ -109,6 +109,7 @@ func fight(mode)
     // 3. Unmake
     :?c.canUnmake()
       ?mode = "melee"
+        >c0,0,#yellow,UNMAKE MELEE
         a.ldtF("sword unmake")
 
       :?c.permapotSetup
@@ -255,10 +256,14 @@ var enduse = 0
   old_t = item.GetTreasureCount()
   enduse = 0
 
->c-10,-3,#magenta,
-^old_t#=#@old_t@\n
-^treasures#=#@item.GetTreasureCount()@\n
-^counter###=#@enduse@\n\n
+?screen.i = dysan_screen
+  >`1,15,#magenta,
+  ^old_t#=#@old_t@\n
+  ^treasures#=#@item.GetTreasureCount()@\n
+  ^counter###=#@enduse@\n\n
+  ^inf#cd#=#@item.GetCooldown("staff_fire")@\n
+  ^@armor@ >= 6 > @armor >= 6@\n\n
+  ^bard#cd#=#@item.GetCooldown("bardiche")@
 
 ?old_t ! item.GetTreasureCount()
   enduse++
@@ -268,8 +273,8 @@ var enduse = 0
 // speed up
 :?item.GetCooldown("staff_fire") <= 0 &
 ^armor >= 6 &
-^(old_t ! item.GetTreasureCount() /*|
-^ enduse >= 15*/)
+^(old_t ! item.GetTreasureCount() |
+^ enduse > 0)
   >c0,4,#yellow,USING INFERNAL STAFF
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -463,7 +468,7 @@ var enduse = 0
     ?a.canSmartDash()
       a.smartDash()
     :?c.permapotSetup
-      ?c.canApplyStun()
+      ?c.canApplyStun() | s.getEffectStat("foe","debuff","stun","time") < 11 // frames
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
@@ -494,6 +499,9 @@ var enduse = 0
       ?c.canApplyStun() & foe = "soldier"
         >c0,0,#yellow,#STUNNING ELITES
         a.ldtF("grappling")
+      :?foe = "soldier" & s.getEffectStat("foe","debuff","stun","time") < 6 // frames
+        >c0,0,#yellow,#REFRESHING STUN
+        equip Mjölnir
       :
         >c0,0,#yellow,#RANGED ELITES
         fight("ranged")
