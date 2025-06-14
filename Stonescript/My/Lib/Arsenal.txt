@@ -755,7 +755,10 @@ func ldtF(mode)
 
       :?mode = "debuff"
         ?effCount < effCap // c.canApplyChill(6)
-          equip @bIeff@
+          ?foe.count > 3
+            equip @stIeff@
+          :
+            equip @bIeff@
         :?effCount = effCap // c.canApplyWeaken()
           equipL moon
           equipR @wPeff@
