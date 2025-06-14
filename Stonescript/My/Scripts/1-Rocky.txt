@@ -518,9 +518,9 @@ var enduse = 0
       a.ldtF("defense regen fast")
 
 :?(!c.permapotSetup &
-^foe.state = 118) |
-^(item.GetCooldown("bardiche") <= 0 |
-^ c.isCasting("bardiche"))
+^[118].Contains(foe.state) &
+^item.GetCooldown("bardiche") <= 0) |
+^c.isCasting("bardiche")
   ?c.canUseAbility("quarterstaff")
     c.useAbility_TH("quarterstaff", a.myQ)
   :?a.canSmartDash()
