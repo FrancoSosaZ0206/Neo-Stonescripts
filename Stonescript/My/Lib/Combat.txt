@@ -604,7 +604,7 @@ func canEngage()
 /* Moondialing is a trick that boosts dps
 with 2 swords whose attack speed stat is
 maxed out (+21 enchantment).
-  
+
 It's a cycle that repeats every 3 frames:
 - In the first 2, the Moondial Stone is held
 with each sword, boosting their attack speed
@@ -711,6 +711,10 @@ func AAC(itemLeft, itemRight)
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
 
+func canSmoothCast()
+  return !c.permapotSetup &
+  ^(buffs.string = "⊙" | // berserk potion
+  ^buffs.string = "buff_infernal")
 /* Smooth Casting is a trick where you
 hold the triskelion stone every certain
 amount of frames to enable walking while
