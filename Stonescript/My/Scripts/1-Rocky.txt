@@ -281,7 +281,7 @@ var enduse = 0
 :?c.canUseAbility("staff_fire") &
 ^screen.i < dysan_screen &
 ^ai.walking &
-^s.inRange("dash") &
+^!s.inRange("dash") &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
 ^!(loc.stars > 15 & c.permapotSetup)
