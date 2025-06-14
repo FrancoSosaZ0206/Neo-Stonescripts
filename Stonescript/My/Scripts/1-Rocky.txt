@@ -154,21 +154,22 @@ var enduse = 0
   old_t = item.GetTreasureCount()
   enduse = 0
 
->c-10,-3,#magenta,treasures#=#@old_t@\n
+>c-10,-3,#magenta,
+^old_t#=#@old_t@\n
+^treasures#=#@item.GetTreasureCount()@\n
 ^counter###=#@enduse@\n\n
 
 ?old_t ! item.GetTreasureCount()
   enduse++
-  >c-10,0,#rainbow,+1 chest!\n\n
+  >c-10,0,#rainFF,+1 chest!\n\n
   ^DYSAN DEAD!!!
-  loc.Pause()
 
 /*?((foe.state = 2 | foe.state = -1) &
 ^ foe.distance = math.Clamp(foe.distance, 16, 17) &
 ^ ai.walking & ai.enabled &
 ^ !(ai.paused | ai.idle)) &
 ^foe.debuffs.string = "chill:1"
-  loc.Pause()*/
+  >c0,0,#cyan,ai debuffed!*/
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -262,10 +263,12 @@ c.AAC(a.hVeff, a.sFeff)
 :?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
+// ***************************************** //
 // speed up
-:?c.canUseAbility("staff_fire") &
+:?item.GetCooldown("staff_fire") <= 0 &
 ^(old_t ! item.GetTreasureCount())
   c.useAbility_TH("staff_fire", a.stFh)
+
 :?c.canUseAbility("staff_fire") &
 ^  (ai.walking &
 ^   (foe.distance < s.getRange("dash_min") |
@@ -275,6 +278,7 @@ c.AAC(a.hVeff, a.sFeff)
     // save armor if it's setup run
 ^   !(loc.stars > 15 & c.permapotSetup))
   c.useAbility_TH("staff_fire", a.stFh)
+// ***************************************** //
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
@@ -321,7 +325,6 @@ c.AAC(a.hVeff, a.sFeff)
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
     >c0,0,#red,PREVENT STUN
-    loc.Pause()
   : // evade attack
     fight("evade")
 
