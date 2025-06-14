@@ -754,19 +754,13 @@ func ldtF(mode)
 
       :?mode = "debuff"
         ?c.canApplyChill(6)
-          ?c.canSmoothCast()
-            c.smoothCast(bIeff, "b")
-          :
-            equip bIeff
+          equip bIeff
         :?effCount <= effCap // c.canApplyWeaken()
           equip @stPeff@
           // @bPeff@
 
       :?mode = "knockback"
-        ?c.canSmoothCast()
-          c.smoothCast(bS, "b")
-        :
-          equip bS
+        equip bS
 
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
           equip @bAeff@
