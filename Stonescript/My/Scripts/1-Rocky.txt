@@ -264,14 +264,16 @@ c.AAC(a.hVeff, a.sFeff)
 
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ (enduse > 0 |
+^(old_t ! item.GetTreasureCount())
+  c.useAbility_TH("staff_fire", a.stFh)
+:?c.canUseAbility("staff_fire") &
 ^  (ai.walking &
 ^   (foe.distance < s.getRange("dash_min") |
 ^    (screen.i < dysan_screen &
 ^     foe.distance = 9999)) &
 ^   buffs.string ! "buff_inf_speed" &
     // save armor if it's setup run
-^   !(loc.stars > 15 & c.permapotSetup)))
+^   !(loc.stars > 15 & c.permapotSetup))
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
