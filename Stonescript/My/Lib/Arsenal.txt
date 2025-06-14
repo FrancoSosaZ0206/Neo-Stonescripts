@@ -545,8 +545,8 @@ func ldtF(mode)
         :?c.canApplyWeaken()
           equipL Death's Kiss
           //'
-        /*:?c.canApplyBurn()
-          equipL @sFeff@*/
+        :?c.canApplyBurn()
+          equipL @sFeff@
 
       : // !c.permapotSetup
         var sDmg = null
@@ -570,8 +570,8 @@ func ldtF(mode)
           ?c.canApplyWeaken()
             equipR Death's Kiss
             //'
-          /*:?c.canApplyBurn()
-            equipR @sFeff@*/
+          :?c.canApplyBurn()
+            equipR @sFeff@
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -643,16 +643,11 @@ func ldtF(mode)
           // equipL 
         :?c.canApplyWeaken()
           // equipL 
-        :?c.canApplyBurn()
-          // equipL 
 
       : // !c.permapotSetup
 
         // Left hand:
         ?c.canApplyWeaken()
-          // equipL 
-          //'
-        :?c.canApplyBurn()
           // equipL 
         :?c.canApplyChill(6)
           // equipL 
@@ -759,16 +754,13 @@ func ldtF(mode)
 
       :?mode = "debuff"
         ?c.canApplyChill(6)
-          c.smoothCast(bIeff, "b")
+          equip bIeff
         :?effCount <= effCap // c.canApplyWeaken()
           equip @stPeff@
           // @bPeff@
 
       :?mode = "knockback"
-        ?buffs.string = "⊙" // berserk potion
-          c.smoothCast(bS, "b")
-        :
-          equip bS
+        equip bS
 
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
           equip @bAeff@
