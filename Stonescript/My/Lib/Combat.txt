@@ -714,7 +714,7 @@ func AAC(itemLeft, itemRight)
 func canSmoothCast()
   return !permapotSetup &
   ^(buffs.string = "⊙" | // berserk potion
-  ^buffs.string = "buff_infernal")
+  ^ buffs.string = "buff_infernal")
 /* Smooth Casting is a trick where you
 hold the triskelion stone every certain
 amount of frames to enable walking while
