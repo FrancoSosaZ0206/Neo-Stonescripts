@@ -91,9 +91,9 @@ func fight(mode)
         a.ldtF("magic debuff") // ranged*/
 
     // 2. Heal if needed
-    :?hp ! maxhp
+    :?hp ! maxhp &
     // ****************************** //
-    ^& foe.count = 1
+    ^foe.GetCount(foe.distance + margin) = 1
       a.ldtF("sword heal")
     // ****************************** //
 
@@ -264,16 +264,17 @@ var enduse = 0
   ^DYSAN DEAD!!!
 
 // speed up
-:?c.canUseAbility("staff_fire") &
+:?item.GetCooldown("staff_fire") <= 0 &
+^armor >= 6 &
 ^(old_t ! item.GetTreasureCount() /*|
 ^ enduse >= 15*/)
   >c0,4,#yellow,USING INFERNAL STAFF
   c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
-^screen.i < dysan_screen & ai.walking &
-^(foe.distance < s.getRange("dash_min") |
-^ foe.distance = 9999) &
+^screen.i < dysan_screen &
+^ai.walking &
+^s.inRange("dash") &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
 ^!(loc.stars > 15 & c.permapotSetup)
@@ -451,18 +452,19 @@ var enduse = 0
 ^(foe.GetCount(foe.distance + margin) > 1 &
 ^s.inRange("wand") & foe ! "warcaster")) |
 ^(!c.permapotSetup &
-^foe.count > 1 & s.inRange("crossbow")))
+^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &
+^s.inRange("crossbow")))
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   :?foe ! "elite"
     ?a.canSmartDash()
       a.smartDash()
-
-    :?c.canApplyStun()
-      a.ldtF("grappling")
     :?c.permapotSetup
-      a.ldtF("big sword unmake")
+      ?c.canApplyStun()
+        a.ldtF("grappling")
+      :
+        a.ldtF("big sword unmake")
     :?foe.GetCount(foe.distance + margin) > 1
       a.ldtF("ranged unmake")
     :
@@ -477,21 +479,20 @@ var enduse = 0
       :
         c.useAbility_TH("heavy_hammer", "Guardian's Bane")
 
-    :?c.permapotSetup &
-    ^foe.distance < s.getRange("dash_min") &
+    :?foe.distance < s.getRange("dash_min") &
     ^!c.isEquipped(a.bsAeff) &
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH("staff_stone", a.stSh)
-    :?c.permapotSetup &
-    ^foe.distance < s.getRange("dash_min") &
+    :?foe.distance < s.getRange("dash_min") &
     ^!c.isEquipped(a.bsAeff) &
     ^c.canUseAbility("mind")
       a.ldtF("mind")
 
-    :?c.canApplyStun() & foe = "soldier"
-      a.ldtF("grappling")
     :?foe.GetCount(foe.distance + margin) > 1
-      fight("ranged")
+      ?c.canApplyStun() & foe = "soldier"
+        a.ldtF("grappling")
+      :
+        fight("ranged")
     :
       fight("melee")
 
