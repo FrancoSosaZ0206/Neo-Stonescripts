@@ -162,8 +162,9 @@ func fight(mode)
 
 // ............ WITHDRAWAL LOGIC ............ //
 
-?c.permapotSetup &
-^foe.buffs.string = "buff_tenacious"
+?(c.permapotSetup &
+^foe.buffs.string = "buff_tenacious") |
+^s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
   loc.Leave()
 
 // .............. SETUP LOGIC ............... //
