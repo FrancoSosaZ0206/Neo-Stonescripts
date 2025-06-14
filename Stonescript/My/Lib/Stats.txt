@@ -315,6 +315,7 @@ func getEffectStat(source, effectType, effectId, statType)
     fxStr = foe.buffs.string
   :?source = "foe" & effectType = "debuff"
     fxStr = foe.debuffs.string
+    >c0,1,#red,FOE DEBUFFS
 
   :?source = "player" & effectType = "buff"
     fxStr = buffs.string
@@ -331,16 +332,21 @@ func getEffectStat(source, effectType, effectId, statType)
 
     for i = 0 .. fxArr.Count() - 1
       ?fxArr[i] = effectId // target effect is active
-        var effectStats = string.Split(fxArr[i], ":")
+        var fxStats = string.Split(fxArr[i], ":")
+
+        >c0,2,#red,fxStats
 
         ?statType = "1" | statType = "symbol"
-          stat = effectStats[0]
+          stat = fxStats[0]
         :?statType = "2" | statType = "name" | statType = "id"
-          stat = effectStats[1]
+          stat = fxStats[1]
         :?statType = "3" | statType = "count" | statType = "stack"
-          stat = effectStats[2]
+          stat = fxStats[2]
         :?statType = "4" | statType = "time" | statType = "duration"
-          stat = effectStats[3]
+          stat = fxStats[3]
+    ?foe.debuffs.string = "stun" | foe.debuffs.string = "o"
+      >c0,0,#red,time = @stat@
+      loc.Pause()
 
   return stat
 /* Returns a string formatted like a table with
@@ -371,7 +377,6 @@ func getEffectsTable(source, effectType, isSlim)
   source = string.ToLower(source)
   effectType = string.ToLower(effectType)
 
-  var fxPanel = null
   var fxStr = null
   var fxTable = null
 
@@ -412,20 +417,24 @@ func getEffectsTable(source, effectType, isSlim)
       fxTable += "<sym> x<n>, <mm:ss f>"
 
     var fxArr = string.Split(fxStr, ",")
+    var fxArrFormatted = []
     for i = 0 .. fxArr.Count() - 1
-      var effectStats = string.Split(fxArr[i], ":")
+      var fxStats = string.Split(fxArr[i], ":")
       var statsFormatted = null
 
       ?!isSlim
         statsFormatted = string.Join(" | ", fxArr)
       :
-        statsFormatted = fxArr[0] + " x" + // <sym>
-        ^fxArr[2] + ", " + // <n>
-        ^u.myFormatSpeedrun(fxArr[3]) // <t>
+        statsFormatted = fxStats[0] + " x" + // <sym>
+        ^fxStats[2] + ", " + // <n>
+        ^u.myFormatSpeedrun(fxStats[3]) // <t>
 
-      fxArr = a.Add(statsFormatted)
+      ?i < fxArr.Count() - 1
+        statsFormatted += "\n"
 
-    fxTable += string.Join("\n", fxArr)
+      fxArrFormatted.Add(statsFormatted)
+
+    fxTable += string.Join("\n", fxArrFormatted)
 
   return fxTable
 

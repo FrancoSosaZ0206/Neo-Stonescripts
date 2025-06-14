@@ -21,6 +21,7 @@ var buttonPressed = false
 var dontShowAgain = false
 
 var canDash = true
+var stunTime = null
 
 var weakenType = a.weaken_default
 var hand       = null
@@ -158,6 +159,9 @@ func fight(mode)
 ^ !(ai.paused | ai.idle)) &
 ^foe.debuffs.string = "chill:1"
   >c0,0,#cyan,ai debuffed!*/
+
+?foe.debuffs.string = "stun"
+  >`1,15,#magenta,time = @s.getEffectStat("foe","debuff","stun","time")@ frms
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -468,7 +472,8 @@ var enduse = 0
     ?a.canSmartDash()
       a.smartDash()
     :?c.permapotSetup
-      ?c.canApplyStun() | s.getEffectStat("foe","debuff","stun","time") < 11 // frames
+      stunTime = s.getEffectStat("foe","debuff","stun","time")
+      ?c.canApplyStun() | (stunTime & stunTime < 11) // frames
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
@@ -499,12 +504,18 @@ var enduse = 0
       ?c.canApplyStun() & foe = "soldier"
         >c0,0,#yellow,#STUNNING ELITES
         a.ldtF("grappling")
-      :?foe = "soldier" & s.getEffectStat("foe","debuff","stun","time") < 6 // frames
-        >c0,0,#yellow,#REFRESHING STUN
-        equip Mjölnir
       :
-        >c0,0,#yellow,#RANGED ELITES
-        fight("ranged")
+        stunTime = s.getEffectStat("foe","debuff","stun","time")
+        ?stunTime
+          ?foe = "soldier" & (stunTime < 15) // frames
+            >c0,0,#yellow,#REFRESHING STUN
+            equip Mjölnir
+          :
+            >c0,0,#yellow,#RANGED ELITES
+            fight("ranged")
+        :
+          >c0,0,#yellow,#RANGED ELITES
+          fight("ranged")
     :
       fight("melee")
 
