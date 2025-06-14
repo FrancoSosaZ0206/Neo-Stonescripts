@@ -174,6 +174,10 @@ c.Init()
 a.smartDebuff()
 disable npcDialog
 
+stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
+?!stunTime
+  stunTime = -1
+
 // Auto-harvesting logic
 ?!buttonPressed
   u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
@@ -463,7 +467,7 @@ var enduse = 0
       a.smartDash()
     :?c.permapotSetup
       ?c.canApplyStun() |
-      ^s.getEffectStat("foe","debuff","stun","time") < 11 // frames
+      ^stunTime = math.Clamp(stunTime, 1, 11) // frames
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
@@ -481,18 +485,20 @@ var enduse = 0
       :
         c.useAbility_TH("heavy_hammer", "Guardian's Bane")
 
-    :?foe.distance < s.getRange("dash_min") &
+    :?!c.permapotSetup &
+    ^foe.distance < s.getRange("dash_min") &
     ^!c.isEquipped(a.bsAeff) &
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH("staff_stone", a.stSh)
-    :?foe.distance < s.getRange("dash_min") &
+    :?!c.permapotSetup &
+    ^foe.distance < s.getRange("dash_min") &
     ^!c.isEquipped(a.bsAeff) &
     ^c.canUseAbility("mind")
       a.ldtF("mind")
 
     :?foe.GetCount(foe.distance + margin) > 1 & foe = "soldier"
       ?c.canApplyStun() |
-      ^s.getEffectStat("foe","debuff","stun","time") < 11 // frames
+      ^stunTime = math.Clamp(stunTime, 1, 11)
         >c0,0,#yellow,#REFRESHING STUN WITH HOOK
         a.ldtF("grappling")
       :
@@ -518,7 +524,7 @@ var enduse = 0
       a.ldtF("defense regen fast")
 
 :?(!c.permapotSetup &
-^[118].Contains(foe.state) &
+^[118, 124, 107].Contains(foe.state) &
 ^item.GetCooldown("bardiche") <= 0) |
 ^c.isCasting("bardiche")
   ?c.canUseAbility("quarterstaff")
