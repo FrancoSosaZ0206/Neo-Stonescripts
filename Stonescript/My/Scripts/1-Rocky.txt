@@ -271,10 +271,9 @@ var enduse = 0
   ^DYSAN DEAD!!!
 
 // speed up
-:?item.GetCooldown("staff_fire") <= 0 &
+:?// item.GetCooldown("staff_fire") <= 0 &
 ^armor >= 6 &
-^(old_t ! item.GetTreasureCount() |
-^ enduse > 0)
+^old_t ! item.GetTreasureCount()
   >c0,4,#yellow,USING INFERNAL STAFF
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -518,11 +517,8 @@ var enduse = 0
     :
       a.ldtF("defense regen fast")
 
-:?!c.permapotSetup &
-^(foe.state = 118 |
-^ (foe = "phase1" &
-^  foe.hp = foe.maxhp &
-^  foe.distance <= 18)) &
+:?(!c.permapotSetup &
+^foe.state = 118) |
 ^(item.GetCooldown("bardiche") <= 0 |
 ^ c.isCasting("bardiche"))
   ?c.canUseAbility("quarterstaff")
