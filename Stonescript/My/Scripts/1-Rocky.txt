@@ -503,11 +503,11 @@ var enduse = 0
       ?c.canApplyStun() & foe = "soldier"
         >c0,0,#yellow,#STUNNING ELITES
         a.ldtF("grappling")
-      :?foe = "soldier" & !c.permapotSetup &
+      /*:?foe = "soldier" & !c.permapotSetup &
       ^s.getEffectStat("foe","debuff","stun","time") < 15 // frames
         >c0,0,#yellow,#REFRESHING STUN WITH HAMMER
-        equip Mjölnir
-      :?foe = "soldier" & c.permapotSetup &
+        equip Mjölnir*/
+      :?foe = "soldier" & // c.permapotSetup &
       ^s.getEffectStat("foe","debuff","stun","time") < 11 // frames
         >c0,0,#yellow,#REFRESHING STUN WITH HOOK
         a.ldtF("grappling")
