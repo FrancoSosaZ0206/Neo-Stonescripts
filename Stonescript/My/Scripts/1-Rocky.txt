@@ -258,13 +258,12 @@ var enduse = 0
   enduse = 0
 
 ?screen.i = dysan_screen
-  >`1,15,#magenta,
+  >`1,17,#magenta,
   ^old_t = @old_t@\n
   ^treasures = @item.GetTreasureCount()@\n
   ^counter   = @enduse@\n\n
   ^inf cd = @item.GetCooldown("staff_fire")@\n
-  ^@armor@ >= 6 > @armor >= 6@\n\n
-  ^bard cd = @item.GetCooldown("bardiche")@
+  ^@armor@ >= 6 > @armor >= 6@
 
 ?old_t ! item.GetTreasureCount()
   enduse++
@@ -306,9 +305,7 @@ var enduse = 0
 ^   screen.i = 0))
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
-^(loc.stars <= 15 |
-^ (foe = "boss" | foe = "monarch") &
-^  foe.count = 1)
+^(loc.stars <= 15 | screen.i >= dysan_screen - 1)
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // Harvest/Pick up things
@@ -469,10 +466,8 @@ var enduse = 0
     ?a.canSmartDash()
       a.smartDash()
     :?c.permapotSetup
-      ?c.canApplyStun()
-        a.ldtF("grappling")
-      :?s.getEffectStat("foe","debuff","stun","time") < 11 // frames
-        >c0,0,#yellow,#REFRESHING STUN
+      ?c.canApplyStun() |
+      ^s.getEffectStat("foe","debuff","stun","time") < 11 // frames
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
@@ -499,15 +494,8 @@ var enduse = 0
     ^c.canUseAbility("mind")
       a.ldtF("mind")
 
-    :?foe.GetCount(foe.distance + margin) > 1
-      ?c.canApplyStun() & foe = "soldier"
-        >c0,0,#yellow,#STUNNING ELITES
-        a.ldtF("grappling")
-      /*:?foe = "soldier" & !c.permapotSetup &
-      ^s.getEffectStat("foe","debuff","stun","time") < 15 // frames
-        >c0,0,#yellow,#REFRESHING STUN WITH HAMMER
-        equip Mjölnir*/
-      :?foe = "soldier" & // c.permapotSetup &
+    :?foe.GetCount(foe.distance + margin) > 1 & foe = "soldier"
+      ?c.canApplyStun() |
       ^s.getEffectStat("foe","debuff","stun","time") < 11 // frames
         >c0,0,#yellow,#REFRESHING STUN WITH HOOK
         a.ldtF("grappling")
@@ -533,8 +521,6 @@ var enduse = 0
     :
       a.ldtF("defense regen fast")
 
-  >c0,0,#red,HEAVY HAMMER IN CUTSCENE!!!
-
 :?!c.permapotSetup &
 ^(foe.state = 118 |
 ^ (foe = "phase1" &
@@ -548,8 +534,6 @@ var enduse = 0
     a.smartDash()
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
-
-  >c0,0,#red,BARDICHE IN CUTSCENE!!!
 
 :?ai.paused | !ai.enabled | ai.paused |
 ^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
