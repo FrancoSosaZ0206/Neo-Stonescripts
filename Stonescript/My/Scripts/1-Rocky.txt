@@ -442,7 +442,7 @@ var enduse = 0
   ?a.canSmartDash()
     a.smartDash()
   : // c.canSmoothCast()
-    c.smoothCast(a.bS)
+    c.smoothCast(a.bS, "b")
 
 :?loc.stars > 15 & (
 ^(c.permapotSetup &
