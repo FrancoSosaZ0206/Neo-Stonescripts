@@ -77,7 +77,7 @@ func fight(mode)
     ?(foe = "elite" | foe = "boss") &
     ^(c.canApplyAny() |
     ^(mode ! "melee" & a.canSmartDebuff()))
-      ?mode = "melee"
+      ?mode = "melee" & c.canApplyBurn()
         a.ldtF("sword debuff")
       :?c.permapotSetup
         a.ldtF("magic debuff")
