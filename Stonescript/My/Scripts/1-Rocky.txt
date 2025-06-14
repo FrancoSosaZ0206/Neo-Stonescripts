@@ -148,22 +148,6 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-var old_t = item.GetTreasureCount()
-var enduse = 0
-?loc.loop 
-  old_t = item.GetTreasureCount()
-  enduse = 0
-
->c-10,-3,#magenta,
-^old_t#=#@old_t@\n
-^treasures#=#@item.GetTreasureCount()@\n
-^counter###=#@enduse@\n\n
-
-?old_t ! item.GetTreasureCount()
-  enduse++
-  >c-10,0,#rainFF,+1 chest!\n\n
-  ^DYSAN DEAD!!!
-
 /*?((foe.state = 2 | foe.state = -1) &
 ^ foe.distance = math.Clamp(foe.distance, 16, 17) &
 ^ ai.walking & ai.enabled &
@@ -179,11 +163,8 @@ var enduse = 0
 
 // .............. SETUP LOGIC ............... //
 
-?loc.stars <= 15
-  c.potionType = "lucky"
-:
-  c.potionType = "berserk"
-c.smiteScreen_Target = 1
+c.potionType = "lucky"
+c.smiteScreen_Target = 2
 c.Init()
 a.smartDebuff()
 disable npcDialog
@@ -264,9 +245,27 @@ c.AAC(a.hVeff, a.sFeff)
   c.useAbility_DS("blade")
 
 // ***************************************** //
+
+var old_t = item.GetTreasureCount()
+var enduse = 0
+?loc.loop 
+  old_t = item.GetTreasureCount()
+  enduse = 0
+
+>c-10,-3,#magenta,
+^old_t#=#@old_t@\n
+^treasures#=#@item.GetTreasureCount()@\n
+^counter###=#@enduse@\n\n
+
+?old_t ! item.GetTreasureCount()
+  enduse++
+  >c-10,0,#rainFF,+1 chest!\n\n
+  ^DYSAN DEAD!!!
+
 // speed up
 :?item.GetCooldown("staff_fire") <= 0 &
-^(old_t ! item.GetTreasureCount())
+^old_t ! item.GetTreasureCount() &
+^enduse >= 30
   c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
@@ -435,6 +434,15 @@ c.AAC(a.hVeff, a.sFeff)
       equipL sword
     ?!c.permapotSetup
       equipR @a.shC2@
+
+// Knockback farming
+:?foe ! "unpushable" &
+^c.canSmoothCast() &
+^s.inRange("crossbow")
+  ?a.canSmartDash()
+    a.smartDash()
+  : // c.canSmoothCast()
+    c.smoothCast(a.bS)
 
 :?loc.stars > 15 & (
 ^(c.permapotSetup &
