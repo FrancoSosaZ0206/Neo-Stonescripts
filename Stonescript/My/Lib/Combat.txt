@@ -712,7 +712,7 @@ func AAC(itemLeft, itemRight)
     equip @item.right@ // equip works for two-handed items as well
 
 func canSmoothCast()
-  return !c.permapotSetup &
+  return !permapotSetup &
   ^(buffs.string = "⊙" | // berserk potion
   ^buffs.string = "buff_infernal")
 /* Smooth Casting is a trick where you
