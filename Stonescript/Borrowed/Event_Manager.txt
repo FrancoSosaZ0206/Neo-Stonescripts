@@ -1,0 +1,64 @@
+// By Hallifax
+
+var listeners = [
+  ^ [], // onTick
+  ^ [], // onLoop
+  ^ []  // onEnterBossLoc
+^]
+
+var to_remove = [
+  ^ [], // onTick
+  ^ [], // onLoop
+  ^ []  // onEnterBossLoc
+^]
+
+var entered_boss_loc = false
+
+func _addListener(eventId, f)
+  ?! listeners[eventId].Contains(f)
+    listeners[eventId].Add(f)
+
+func _removeListener(eventId, f)
+  to_remove[eventId].Add(f)
+
+func _evalListeners(eventId)
+  for f: to_remove[eventId]
+    var idx = listeners[eventId].IndexOf(f)
+    ?idx > -1
+      listeners[eventId].RemoveAt(idx)
+  to_remove[eventId].Clear()
+  for f: listeners[eventId]
+    f()
+
+func addTickListener(f)
+  _addListener(0,f)
+
+func removeTickListener(f)
+  _removeListener(0,f)
+
+func onTick()
+  ?loc.loop
+    entered_boss_loc = false
+    onLoop()
+  ?loc = "boss" & ! entered_boss_loc
+    onEnterBossLoc()
+    entered_boss_loc = true
+  _evalListeners(0)
+
+func addLoopListener(f)
+  _addListener(1,f)
+
+func removeLoopListener(f)
+  _removeListener(1,f)
+
+func onLoop()
+  _evalListeners(1)
+
+func addBossLocListener(f)
+  _addListener(2,f)
+
+func removeBossLocListener(f)
+  _removeListener(2,f)
+
+func onEnterBossLoc()
+  _evalListeners(2)

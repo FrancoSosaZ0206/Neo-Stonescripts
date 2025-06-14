@@ -49,14 +49,14 @@ func fight(mode)
   ?mode = "evade"
     canDash = false
 
-    ?c.canUseAbility("mind") &
-    ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
-      a.ldtF("mind")
-    :?c.canUseAbility("staff_stone") &
+    ?c.canUseAbility("staff_stone") &
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       c.useAbility_TH("staff_stone", a.stSh)
+    :?c.canUseAbility("mind") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+      a.ldtF("mind")
 
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH("staff_ice", a.stIh)
@@ -75,9 +75,10 @@ func fight(mode)
   :
     // 1. debuff, if possible
     ?(foe = "elite" | foe = "boss") &
-    ^(c.canApplyAny() |
-    ^(mode ! "melee" & a.canSmartDebuff()))
-      ?mode = "melee" & c.canApplyBurn()
+    ^((mode = "melee" &
+    ^  (c.canApplyAny() | c.canApplyBurn())) |
+    ^ (mode ! "melee" & a.canSmartDebuff()))
+      ?mode = "melee"
         a.ldtF("sword debuff")
       :?c.permapotSetup
         a.ldtF("magic debuff")
@@ -225,7 +226,7 @@ disable npcDialog
 :
   hand = "right"
 
-c.smiteScreen_Max = 5
+c.smiteScreen_Max = dysan_screen - 2
 c.screenChange_DS("blade")
 c.AAC(a.hVeff, a.sFeff)
 
@@ -263,9 +264,10 @@ var enduse = 0
   ^DYSAN DEAD!!!
 
 // speed up
-:?item.GetCooldown("staff_fire") <= 0 &
-^old_t ! item.GetTreasureCount() &
-^enduse >= 30
+:?c.canUseAbility("staff_fire") &
+^(old_t ! item.GetTreasureCount() /*|
+^ enduse >= 15*/)
+  >c0,4,#yellow,USING INFERNAL STAFF
   c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
@@ -441,6 +443,7 @@ var enduse = 0
   ?a.canSmartDash()
     a.smartDash()
   : // c.canSmoothCast()
+    >c0,0,#red,KNOCKBACK FARMING
     c.smoothCast(a.bS)
 
 :?loc.stars > 15 & (
@@ -474,14 +477,16 @@ var enduse = 0
       :
         c.useAbility_TH("heavy_hammer", "Guardian's Bane")
 
-    :?foe.distance < s.getRange("dash_min") &
-    ^!c.isEquipped(a.bsAeff) &
-    ^c.canUseAbility("mind")
-      a.ldtF("mind")
-    :?foe.distance < s.getRange("dash_min") &
+    :?c.permapotSetup &
+    ^foe.distance < s.getRange("dash_min") &
     ^!c.isEquipped(a.bsAeff) &
     ^c.canUseAbility("staff_stone")
       c.useAbility_TH("staff_stone", a.stSh)
+    :?c.permapotSetup &
+    ^foe.distance < s.getRange("dash_min") &
+    ^!c.isEquipped(a.bsAeff) &
+    ^c.canUseAbility("mind")
+      a.ldtF("mind")
 
     :?c.canApplyStun() & foe = "soldier"
       a.ldtF("grappling")
@@ -493,30 +498,12 @@ var enduse = 0
 // .......... ENGAGE/WALKING LOGIC .......... //
 
 // Dysangelos pre-phase1 cutscene damage strat
-/*:?!c.permapotSetup &
-^[100, 101, 102, 126, 127, 116,
-^ 117, 118].Contains(foe.state) &
-^foe ! "phase3" & screen.i = dysan_screen // &
-// ^(item.GetCooldown("bardiche") <= 0 | c.isCasting("bardiche"))
+:?!c.permapotSetup &
+^[100, 101, 102].Contains(foe.state) &
+^(item.GetCooldown("heavy_hammer") <= 0 |
+^ c.isCasting("heavy_hammer"))
   ?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
-  :?foe.distance <= 18
-    ?c.canUseAbility("quarterstaff")
-      c.useAbility_TH("quarterstaff", a.myQ)
-    :?a.canSmartDash()
-      a.smartDash()
-    :?c.canUseAbility("staff_aether")
-      c.useAbility_TH("staff_aether", a.stAh)
-    :?(item.GetCooldown("bardiche") <= 0 |
-    ^  c.isCasting("bardiche")) &
-    ^ buffs.string = "buff_range"
-      c.useAbility_TH("bardiche", Kubikiribocho)
-    :
-      ?a.compoundMaxArmor_default <= armor &
-      ^armor <= a.compoundMaxArmor_boosted
-        a.ldtF("defense regen max")
-      :
-        a.ldtF("defense regen fast")
   :
     ?a.compoundMaxArmor_default <= armor &
     ^armor <= a.compoundMaxArmor_boosted
@@ -524,8 +511,21 @@ var enduse = 0
     :
       a.ldtF("defense regen fast")
 
-  >c0,0,#red,DAMAGING IN CUTSCENE!!!
-*/
+  >c0,0,#red,HEAVY HAMMER IN CUTSCENE!!!
+
+:?!c.permapotSetup &
+^(foe.state = 118 |
+^ (foe = "phase1" & foe.hp = foe.maxhp)) &
+^(item.GetCooldown("bardiche") <= 0 |
+^ c.isCasting("bardiche"))
+  ?c.canUseAbility("quarterstaff")
+    c.useAbility_TH("quarterstaff", a.myQ)
+  :?a.canSmartDash()
+    a.smartDash()
+  : // c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+
+  >c0,0,#red,BARDICHE IN CUTSCENE!!!
 
 :?ai.paused | !ai.enabled | ai.paused |
 ^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
@@ -534,7 +534,8 @@ var enduse = 0
 ^ foe.damage > 1) | // dysan state 107 fight (flying)
 ^foe.distance > s.getRange("dash_max") | // too far to dash
 ^foe.state = -1 | // sleep state
-^foe.state = 2 // engaging state
+^(foe.state = 2 & // engaging state
+^ foe.distance > s.getRange("dash_max"))
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")

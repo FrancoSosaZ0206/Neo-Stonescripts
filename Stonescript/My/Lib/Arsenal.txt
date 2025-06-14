@@ -701,15 +701,16 @@ func ldtF(mode)
         // equip @stAeff@
     :?mode = "debuff"
       ?c.permapotSetup
-        ?effCount <= 6 // c.canApplyChill(6)
+        ?effCount < effCap // c.canApplyChill(6)
           equipL Frosty Crust
         :?effCount = effCap // c.canApplyWeaken()
           equipL @wPeff@
       :
-        ?effCount <= 6 // c.canApplyChill(6)
+        ?effCount < effCap // c.canApplyChill(6)
           equip @stIeff@
         :?effCount = effCap // c.canApplyWeaken()
-          equip @stPeff@
+          equipL moon
+          equipR @wPeff@
 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
@@ -753,10 +754,11 @@ func ldtF(mode)
         equip @bAeff@
 
       :?mode = "debuff"
-        ?c.canApplyChill(6)
-          equip bIeff
-        :?effCount <= effCap // c.canApplyWeaken()
-          equip @stPeff@
+        ?effCount < effCap // c.canApplyChill(6)
+          equip @bIeff@
+        :?effCount = effCap // c.canApplyWeaken()
+          equipL moon
+          equipR @wPeff@
           // @bPeff@
 
       :?mode = "knockback"
@@ -809,7 +811,9 @@ func smartDebuff()
   for i = 0 .. debuffAffix.Count() - 1
     ?(item.left = debuffAffix[i] & item.left = "wand") |
     ^(item.right = debuffAffix[i] &
-    ^ (item.right = "wand" | item.right = "staff"))
+    ^ (item.right = "wand"  |
+    ^  item.right = "staff" |
+    ^  item.right = "crossbow"))
       validEffItem = true
 
   ?validEffItem &
