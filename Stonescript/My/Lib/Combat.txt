@@ -310,7 +310,7 @@ func isScreenMax_DS(itemName)
 
     return false
 func screenChange_DS(itemName)
-  ?loc.loop & totaltime = 1 & !isScreenMax_DS(itemName)
+  ?totaltime = 1 & !isScreenMax_DS(itemName)
     ?item_DS_IDs.Contains(itemName)
       ?itemName = "blade"
         smiteScreen_Target++

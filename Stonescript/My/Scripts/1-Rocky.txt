@@ -160,6 +160,10 @@ func fight(mode)
 ^foe.debuffs.string = "chill:1"
   >c0,0,#cyan,ai debuffed!*/
 
+>c0,-3,#red,
+^smite scr=@c.smiteScreen_Target@\n
+^smite max=@c.smiteScreen_Max@
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?(c.permapotSetup &
@@ -472,7 +476,7 @@ var enduse = 0
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
-    :?foe.GetCount(foe.distance + margin) > 1
+    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
       a.ldtF("ranged unmake")
     :
       a.ldtF("sword unmake")
@@ -497,7 +501,7 @@ var enduse = 0
     ^c.canUseAbility("mind")
       a.ldtF("mind")
 
-    :?foe.GetCount(foe.distance + margin) > 1 & foe = "soldier"
+    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 & foe = "soldier"
       ?c.canApplyStun() |
       ^stunTime = math.Clamp(stunTime, 1, 11)
         >c0,0,#yellow,#REFRESHING STUN WITH HOOK
@@ -505,8 +509,10 @@ var enduse = 0
       :
         >c0,0,#yellow,#RANGED ELITES
         fight("ranged")
-    :
+    :?s.inRange("sword")
       fight("melee")
+    :
+      a.ldtF("defense heal")
 
 // .......... ENGAGE/WALKING LOGIC .......... //
 
@@ -525,7 +531,7 @@ var enduse = 0
       a.ldtF("defense regen fast")
 
 :?(!c.permapotSetup &
-^[118, 124, 107].Contains(foe.state) &
+^[118, 124, 108].Contains(foe.state) &
 ^item.GetCooldown("bardiche") <= 0) |
 ^c.isCasting("bardiche")
   ?c.canUseAbility("quarterstaff")
