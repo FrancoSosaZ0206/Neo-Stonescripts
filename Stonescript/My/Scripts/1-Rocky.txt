@@ -160,12 +160,6 @@ func fight(mode)
 ^foe.debuffs.string = "chill:1"
   >c0,0,#cyan,ai debuffed!*/
 
-stunTime = s.getEffectStat("foe","debuff","stun","time")
->`1,15,#magenta,time = @stunTime@ frms
-?!stunTime & foe.debuffs.string = "stun"
-  >c0,0,#red,stunTime = @stunTime@
-  loc.Pause()
-
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?c.permapotSetup &
@@ -475,13 +469,11 @@ var enduse = 0
     ?a.canSmartDash()
       a.smartDash()
     :?c.permapotSetup
-      // stunTime = s.getEffectStat("foe","debuff","stun","time")
-      
       ?c.canApplyStun()
         a.ldtF("grappling")
-      /*:?stunTime ! null
-        ?(stunTime < 11) // frames
-          a.ldtF("grappling")*/
+      :?s.getEffectStat("foe","debuff","stun","time") < 11 // frames
+        >c0,0,#yellow,#REFRESHING STUN
+        a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
     :?foe.GetCount(foe.distance + margin) > 1
@@ -511,16 +503,15 @@ var enduse = 0
       ?c.canApplyStun() & foe = "soldier"
         >c0,0,#yellow,#STUNNING ELITES
         a.ldtF("grappling")
+      :?foe = "soldier" & !c.permapotSetup &
+      ^s.getEffectStat("foe","debuff","stun","time") < 15 // frames
+        >c0,0,#yellow,#REFRESHING STUN WITH HAMMER
+        equip Mjölnir
+      :?foe = "soldier" & c.permapotSetup &
+      ^s.getEffectStat("foe","debuff","stun","time") < 11 // frames
+        >c0,0,#yellow,#REFRESHING STUN WITH HOOK
+        a.ldtF("grappling")
       :
-        /*stunTime = s.getEffectStat("foe","debuff","stun","time")
-        ?stunTime
-          ?foe = "soldier" & (stunTime < 15) // frames
-            >c0,0,#yellow,#REFRESHING STUN
-            equip Mjölnir
-          :
-            >c0,0,#yellow,#RANGED ELITES
-            fight("ranged")
-        :*/
         >c0,0,#yellow,#RANGED ELITES
         fight("ranged")
     :

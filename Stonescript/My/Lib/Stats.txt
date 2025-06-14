@@ -337,9 +337,9 @@ func getEffectStat(source, effectType, effectId, statType)
         :?statType = "2" | statType = "name" | statType = "id"
           stat = fxStats[1]
         :?statType = "3" | statType = "count" | statType = "stack"
-          stat = fxStats[2]
+          stat = int.Parse(fxStats[2]) // convert into an int to be able to operate with in conditionals.
         :?statType = "4" | statType = "time" | statType = "duration"
-          stat = fxStats[3]
+          stat = int.Parse(fxStats[3]) // convert into an int to be able to operate with in conditionals.
 
   return stat
 /* Returns a string formatted like a table with
