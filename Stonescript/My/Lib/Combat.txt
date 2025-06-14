@@ -596,7 +596,7 @@ This enables the player to benefit from effects
 that are applied when engaging, like ai or A/a
 affix items. */
 func canEngage()
-  return s.inRange("crossbow") &
+  return (foe.state = 2 | foe.state = -1) & foe.distance < 17 &
   ^      ai.walking & ai.enabled & !(ai.paused | ai.idle)
 
 // ......... Damage min-maxing .......... //

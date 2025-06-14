@@ -630,9 +630,9 @@ func getHiddenStat(hiddenName, lvl)
       ?hiddenName = "berserker staff"
         return berserker_base + lvl - 1
       :?hiddenName = "plague wand"
-        return plagueW_table[lvl - 1]
+        return plague_table[lvl - 1]
       :?hiddenName = "reset wand"
-        return resetWCd_base - (0.5 * (lvl - 1))
+        return reset_base - (0.5 * (lvl - 1))
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getHiddenStat\nCAUSE: invalid <lvl>:\n\n" + lvl, false)
 

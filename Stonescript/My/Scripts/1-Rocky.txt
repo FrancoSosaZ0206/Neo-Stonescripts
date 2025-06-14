@@ -148,6 +148,28 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
+var old_t = item.GetTreasureCount()
+var enduse = 0
+?loc.loop 
+  old_t = item.GetTreasureCount()
+  enduse = 0
+
+>c-10,-3,#magenta,treasures#=#@old_t@\n
+^counter###=#@enduse@\n\n
+
+?old_t ! item.GetTreasureCount()
+  enduse++
+  >c-10,0,#rainbow,+1 chest!\n\n
+  ^DYSAN DEAD!!!
+  loc.Pause()
+
+/*?((foe.state = 2 | foe.state = -1) &
+^ foe.distance = math.Clamp(foe.distance, 16, 17) &
+^ ai.walking & ai.enabled &
+^ !(ai.paused | ai.idle)) &
+^foe.debuffs.string = "chill:1"
+  loc.Pause()*/
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?c.permapotSetup &
@@ -242,12 +264,14 @@ c.AAC(a.hVeff, a.sFeff)
 
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ai.walking &
-^(foe.distance < s.getRange("dash_min") |
-^ foe.distance = 9999) &
-^screen.i < dysan_screen &
-^buffs.string ! "buff_inf_speed" &
-^!(loc.stars > 15 & c.permapotSetup) // save armor if it's setup run
+^ (enduse > 0 |
+^  (ai.walking &
+^   (foe.distance < s.getRange("dash_min") |
+^    (screen.i < dysan_screen &
+^     foe.distance = 9999)) &
+^   buffs.string ! "buff_inf_speed" &
+    // save armor if it's setup run
+^   !(loc.stars > 15 & c.permapotSetup)))
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -457,10 +481,11 @@ c.AAC(a.hVeff, a.sFeff)
 // .......... ENGAGE/WALKING LOGIC .......... //
 
 // Dysangelos pre-phase1 cutscene damage strat
-:?!c.permapotSetup &
-^[100, 101, 102, 116, 117, 118].Contains(foe.state) &
-^foe ! "phase3" & screen.i = dysan_screen &
-^(item.GetCooldown("bardiche") <= 0 | c.isCasting("bardiche"))
+/*:?!c.permapotSetup &
+^[100, 101, 102, 126, 127, 116,
+^ 117, 118].Contains(foe.state) &
+^foe ! "phase3" & screen.i = dysan_screen // &
+// ^(item.GetCooldown("bardiche") <= 0 | c.isCasting("bardiche"))
   ?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
   :?foe.distance <= 18
@@ -470,8 +495,16 @@ c.AAC(a.hVeff, a.sFeff)
       a.smartDash()
     :?c.canUseAbility("staff_aether")
       c.useAbility_TH("staff_aether", a.stAh)
-    : // c.canUseAbility("bardiche")
+    :?(item.GetCooldown("bardiche") <= 0 |
+    ^  c.isCasting("bardiche")) &
+    ^ buffs.string = "buff_range"
       c.useAbility_TH("bardiche", Kubikiribocho)
+    :
+      ?a.compoundMaxArmor_default <= armor &
+      ^armor <= a.compoundMaxArmor_boosted
+        a.ldtF("defense regen max")
+      :
+        a.ldtF("defense regen fast")
   :
     ?a.compoundMaxArmor_default <= armor &
     ^armor <= a.compoundMaxArmor_boosted
@@ -480,16 +513,18 @@ c.AAC(a.hVeff, a.sFeff)
       a.ldtF("defense regen fast")
 
   >c0,0,#red,DAMAGING IN CUTSCENE!!!
+*/
 
-:?ai.paused | !ai.enabled |
+:?ai.paused | !ai.enabled | ai.paused |
 ^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
 ^c.isDead() |
 ^ (dysan_cutscenes.Contains(foe.state) & // is a cutscene
 ^ foe.damage > 1) | // dysan state 107 fight (flying)
 ^foe.distance > s.getRange("dash_max") | // too far to dash
-^foe.state = -1 // engaging state
+^foe.state = -1 | // sleep state
+^foe.state = 2 // engaging state
   ?armor > a.compoundMaxArmor_boosted |
-  ^c.canEngage() & c.canApplyChill(1)
+  ^c.canEngage()
     a.ldtF("engage")
 
   :?a.compoundMaxArmor_default <= armor &
