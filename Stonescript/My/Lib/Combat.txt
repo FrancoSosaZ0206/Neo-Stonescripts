@@ -172,8 +172,7 @@ func canUseAbility(abilityID)
     ^abilityID = "talisman" // interruptible abilities
       result = result | isCasting(abilityID) // make sure not to change it while casting the ability
 
-    :?(abilityID = "staff" | abilityID = "wand") &
-    ^abilityID ! "wand_stone"
+    :?abilityID = "staff" | abilityID = "wand"
       result = (result & armor > s.getArmor(abilityID))
 
       ?abilityID = "wand_poison"
