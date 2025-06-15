@@ -275,17 +275,18 @@ var enduse = 0
 // speed up
 :?item.GetCooldown("staff_fire") <= 0 &
 ^armor >= 6 &
-^old_t ! item.GetTreasureCount()
-  // >c0,4,#yellow,USING INFERNAL STAFF
+^old_t ! item.GetTreasureCount() &
+^enduse >= 30
+  >c0,4,#yellow,INFERNAL STAFF CHEST
   c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
 ^screen.i < dysan_screen &
-^ai.walking &
-^!s.inRange("dash") &
+^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
 ^!(loc.stars > 15 & c.permapotSetup)
+  >c0,4,#yellow,INFERNAL STAFF
   c.useAbility_TH("staff_fire", a.stFh)
 // ***************************************** //
 
