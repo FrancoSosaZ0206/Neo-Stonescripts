@@ -22,6 +22,7 @@ var smiteScreen = 1
 var stunTime  = null
 var margin    = 8 // big sword left hitbox + splash range
 var hand      = null
+var canDash   = true
 
 var boss_screen = null
 var boss_cutscenes = [] // TO DO
@@ -112,7 +113,7 @@ func fight(mode)
 
 // .............. SETUP LOGIC ............... //
 
-c.potionType = "berserk"
+c.potionType = "lucky"
 c.Init()
 a.smartDebuff()
 disable npcDialog
@@ -167,20 +168,20 @@ var enduse = 0
 
 // speed up
 :?item.GetCooldown("staff_fire") <= 0 &
-^armor >= 6 &
+^armor > 6 &
 ^((old_t ! item.GetTreasureCount() &
-^enduse >= 30) | pickup = "treasure")
+^enduse < 30) | pickup = "treasure")
   >c0,4,#yellow,INFERNAL STAFF CHEST
   c.useAbility_TH("staff_fire", a.stFh)
+// ***************************************** //
 
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
 // ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
-^!(loc.stars > 15 & c.permapotSetup)
+^!c.permapotSetup
   c.useAbility_TH("staff_fire", a.stFh)
-// ***************************************** //
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
@@ -204,7 +205,20 @@ var enduse = 0
 
 // ............. DEFENSIVE LOGIC ............ //
 
+:?foe = "phase" &
+^foe.state = 132 & foe.time > 65
+  // about to blow air and apply chill
+  ?c.canUseAbility("staff_vigor") // try to prevent the debuff
+    c.useAbility_TH("staff_vigor", a.stVh)
+  :?c.canUseAbility("wand_ice")
+    c.useAbility_OH("wand_ice", a.wIh, hand)
+  :
+    fight("melee")
 
+:?foe = "phase" &
+^foe.state = 133 // blowing air
+  canDash = false
+  fight("ranged")
 
 // ............ AOE/RANGED LOGIC ............ //
 
@@ -280,8 +294,8 @@ var enduse = 0
 
 :?loc.stars > 15 & (
 ^(c.permapotSetup &
-^(foe.GetCount(foe.distance + margin) > 1 &
-^s.inRange("wand") & foe ! "warcaster")) |
+^foe.GetCount(foe.distance + margin) > 1 &
+^s.inRange("wand")) |
 ^(!c.permapotSetup &
 ^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &
 ^s.inRange("crossbow")))
@@ -289,6 +303,7 @@ var enduse = 0
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   :?foe ! "elite"
+    >`1,10,#red,foe ! elite
     ?a.canSmartDash()
       a.smartDash()
     :?c.permapotSetup
@@ -296,6 +311,7 @@ var enduse = 0
       ^stunTime = math.Clamp(stunTime, 1, 11) // frames
         a.ldtF("grappling")
       :
+        >`1,10,#red,foe ! elite
         a.ldtF("big sword unmake")
     :?a.canSmartDash()
       a.smartDash()
@@ -362,154 +378,39 @@ var enduse = 0
 
 // .............. COMBAT LOGIC .............. //
 
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
 // Boss fight (Hrímnir)
-:?foe = "yeti"
-  ?c.canUseCinderwisp() &
-  ^foe.debuffs.string = a.maxIgnitions_Default
-    c.useCinderwisp()
+:?foe = "phase"
+  canDash = true
+  ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
+  ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
+    c.devour("cinderwisp")
   
   ?foe.state > 1 // states 0 and 1 are when he has the ice shield
-    ?c.canUsePotionDmg()
+    ?c.canUsePotion()
       activate potion
+    :?c.canUseAbility("staff_poison") & !s.inRange("dash")
+      c.useAbility_TH("staff_poison", a.stPh)
+    // stun and finish him off
+    :?loc.stars <= 15 &
+    ^c.canUseAbility("wand_ice")
+      c.useAbility_OH("wand_ice", a.wIh, hand)
+  : // normal melee combat logic
+    fight("melee")
 
-    :?c.canUseStaffBerserker()
-      c.useStaffHidden(a.staffPoisonHidden)
-    :?loc.stars <= 15 & keepCultistMask &
-    ^c.canUseWandFrost()
-      // stun and finish him off
-      c.useWandFrost(a.wandIceHidden, "l")
-
-  
-  ?foe.state = 132 & foe.time >= 68
-    // about to blow air and apply chill
-    ?c.canUseWandFrost()
-      c.useWandFrost(a.wandIceHidden, "l")
-    :?c.canUseStaffPrevention() // try to prevent the debuff
-      c.useStaffHidden(a.staffVigorHidden)
-    :
-      fight1v1()
-
-  :?foe.state = 133 // blowing air
-    ?c.canDebuffAny()
-      ldtF("rangedDebuffAOE")
-    :
-      ldtF("rangedDmgAOE")
-
-  : // dash and fight melee
-    ?c.canUseBashingShield()
-      c.useBashingShield(a.swordIceDebuff)
-    :?c.canUseDashingShield()
-      c.useDashingShield(a.swordIceDebuff, a.shieldDashing)
-
-    :
-      fight1v1()
-
-:?encounter.eliteMod = "monarch"
-  ?foe.count > 1 // eliminate the other foes
-    ?c.canUseBFG()
-      c.useBFG()
-    :?c.canUseWandExplosive()
-      c.useWandExplosive(a.wandFireHidden, "l")
-
-    :?foe.distance < c.getRange(sword) & // if too close, try to escape
-    ^(c.canUseMindstone() | c.canUseStaffAcrobatic())
-      ?c.canUseMindstone()
-        ldtF("escape")
-      :
-        c.useStaffHidden(a.staffStoneHidden)
-
-    :?c.canUseHeavyHammer() // if close, use hammer
-      c.useHeavyHammer(Mjölnir)
-    :?c.canDebuffAny()
-      ldtF("rangedDebuffAOE")
-    :
-      ldtF("rangedDmgAOE")
-
-  :?c.canUseBashingShield()
-    c.useBashingShield(Vantum Phoenix)
-  :?c.canUseDashingShield()
-    c.useDashingShield(Vantum Phoenix, a.shieldDashing)
-
-  : // 1v1 with the monarch
-    ?foe.hp + foe.armor >= a.bardicheRDmg &
-    ^c.canUseBardiche()
-      c.useBardiche(Kubikiribocho)
-    :
-      fight1v1()
-
-:?c.canUseBashingShield()
-  c.useBashingShield(Mamba Negra)
-:?c.canUseDashingShield()
-  c.useDashingShield(Mamba Negra, a.shieldDashing)
-
-:?foe.name = "Giant Ice Elemental" // the miniboss
-  ?c.canUseCultistMask()
-    c.useCultistMask()
-
-  :?loc.stars > 15 & c.canUseWandFrost()
-    c.useWandFrost(a.wandIceHidden, "l")
-
-  :?loc.stars > 15 & c.canUseStaffBerserker()
-    c.useStaffHidden(a.staffPoisonHidden)
-
-  :?keepCultistMask & c.canUseBardiche()
-    c.useBardiche(Kubikiribocho)
-
+: // 1v1
+  ?c.canUseAbility("staff_poison") &
+  ^!c.permapotSetup & s.getTotalHP("foe") > 1000
+    c.useAbility_TH("staff_poison", a.stPh)
+  // finish off with bardiche ability
+  :?c.canUseAbility("bardiche") &
+  ^s.getTotalHP("foe") <= s.bardicheDmgR(a.bardicheDmg_Default,
+  ^                                      a.bardicheMult_Boosted)
+    c.useAbility_TH("bardiche", Kubikiribocho)
   :
-    fight1v1()
-
-:?foe.count > 1
-  ?c.canUseBFG_DS(screen.i) &
-  ^screen.i ! smiteScreen
-    c.useBFG_DS()
-
-  ?!encounter.isElite &
-  ^screen.i ! smiteScreen &
-  ^c.canUseVoidweaver()
-    c.useVoidweaver()
-
-  ?encounter.isElite &
-  ^encounter.eliteMod ! "tenacious" &
-  ^c.canUseWandGravity()
-    c.useWandGravity(a.wandStoneHidden, "l")
-
-  // Hinder regen
-  ?encounter.eliteMod = "regen" &
-  ^c.canUseWandExplosive()
-    c.useWandExplosive(a.wandFireHidden, "l")
-
-  // Remove armor
-  :?c.canUseHeavyHammer()
-    c.useHeavyHammer(Mjölnir)
-
-
-  :?foe.hp + foe.armor > 1000 & // tanky normal foe
-  ^foe.GetCount(c.getRange(sword)) = 1 // at melee range
-    ?c.canUseBardiche() &
-    ^foe.hp + foe.armor >= a.bardicheRDmg
-      c.useBardiche(Kubikiribocho)
-    :?encounter.eliteMod ! "tenacious"
-      ldtF("unmake1v1")
-    :
-      fight1v1()
-
-
-  :?c.canDebuffAny() &
-  ^encounter.eliteMod ! "tenacious"
-    ldtF("rangedDebuffAOE")
-  
-  :?encounter.eliteMod = "mundane" &
-  ^!keepCultistMask
-    equip @a.bowAetherDmg@
-  :
-    ldtF("rangedDmgAOE")
-
-: // 1 normal foe
-  ?c.canUseBardiche() &
-  ^foe.hp + foe.armor >= a.bardicheRDmg
-    c.useBardiche(Kubikiribocho)
-  :
-    fight1v1()
+    fight("melee")
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

@@ -244,10 +244,11 @@ var enduse = 0
 // speed up
 :?item.GetCooldown("staff_fire") <= 0 &
 ^armor > 6 &
-^old_t ! item.GetTreasureCount() &
-^enduse < 30
+^((old_t ! item.GetTreasureCount() &
+^enduse < 30) | pickup = "treasure")
   >c0,4,#yellow,INFERNAL STAFF CHEST
   c.useAbility_TH("staff_fire", a.stFh)
+// ***************************************** //
 
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
@@ -256,7 +257,6 @@ var enduse = 0
 // save armor if it's setup run
 ^!(loc.stars > 15 & c.permapotSetup)
   c.useAbility_TH("staff_fire", a.stFh)
-// ***************************************** //
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
