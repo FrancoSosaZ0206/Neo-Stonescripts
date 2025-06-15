@@ -473,12 +473,14 @@ var enduse = 0
     :?a.canSmartDash()
       a.smartDash()
     :?!s.inRange("triskelion")
-      a.ldtF("default")
+      equipL triskelion
     :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
       a.ldtF("ranged unmake")
+    :?!s.inRange("sword") & totaltime % 2 = 0
+      equipL triskelion
+      equipR hatchet
     :
       a.ldtF("sword unmake")
-
   : // foe = "elite"
     ?c.canUseAbility("heavy_hammer")
       ?a.canSmartDash()
@@ -501,10 +503,12 @@ var enduse = 0
         a.ldtF("grappling")
       :
         fight("ranged")
-    :?!s.inRange("triskelion")
-      equipL triskelion
     :?c.canSmartDash()
       c.smartDash()
+    :?!s.inRange("triskelion") |
+    ^(!s.inRange("sword") & totaltime % 2 = 0)
+      equipL triskelion
+      equipR hatchet
     :
       fight("melee")
 
