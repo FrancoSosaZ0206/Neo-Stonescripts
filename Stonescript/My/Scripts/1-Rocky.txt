@@ -243,9 +243,9 @@ var enduse = 0
 
 // speed up
 :?item.GetCooldown("staff_fire") <= 0 &
-^armor >= 6 &
-^old_t ! item.GetTreasureCount() &
-^enduse >= 30
+^armor > 6 &
+^old_t ! item.GetTreasureCount()/* &
+^enduse >= 30*/
   >c0,4,#yellow,INFERNAL STAFF CHEST
   c.useAbility_TH("staff_fire", a.stFh)
 

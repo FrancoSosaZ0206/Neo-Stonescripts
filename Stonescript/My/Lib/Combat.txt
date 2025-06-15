@@ -173,7 +173,7 @@ func canUseAbility(abilityID)
       result = result | isCasting(abilityID) // make sure not to change it while casting the ability
 
     :?abilityID = "staff" | abilityID = "wand"
-      result = (result & armor >= s.getArmor(abilityID))
+      result = (result & armor > s.getArmor(abilityID))
 
       ?abilityID = "wand_poison"
         result = result &
