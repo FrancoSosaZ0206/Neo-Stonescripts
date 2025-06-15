@@ -110,7 +110,6 @@ func fight(mode)
     // 3. Unmake
     :?c.canUnmake()
       ?mode = "melee"
-        >c0,0,#yellow,UNMAKE MELEE
         a.ldtF("sword unmake")
 
       :?c.permapotSetup
@@ -260,24 +259,24 @@ var enduse = 0
   old_t = item.GetTreasureCount()
   enduse = 0
 
-?screen.i = dysan_screen
+/*?screen.i = dysan_screen
   >`1,17,#magenta,
   ^old_t = @old_t@\n
   ^treasures = @item.GetTreasureCount()@\n
   ^counter   = @enduse@\n\n
   ^inf cd = @item.GetCooldown("staff_fire")@\n
-  ^@armor@ >= 6 > @armor >= 6@
+  ^@armor@ >= 6 > @armor >= 6@*/
 
 ?old_t ! item.GetTreasureCount()
   enduse++
-  >c-10,0,#rainFF,+1 chest!\n\n
-  ^DYSAN DEAD!!!
+  /*>c-10,0,#rainFF,+1 chest!\n\n
+  ^DYSAN DEAD!!!*/
 
 // speed up
-:?// item.GetCooldown("staff_fire") <= 0 &
+:?item.GetCooldown("staff_fire") <= 0 &
 ^armor >= 6 &
 ^old_t ! item.GetTreasureCount()
-  >c0,4,#yellow,USING INFERNAL STAFF
+  // >c0,4,#yellow,USING INFERNAL STAFF
   c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
@@ -329,7 +328,7 @@ var enduse = 0
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
-    >c0,0,#red,PREVENT STUN
+    // >c0,0,#red,PREVENT STUN
   : // evade attack
     fight("evade")
 
@@ -448,7 +447,7 @@ var enduse = 0
   ?a.canSmartDash()
     a.smartDash()
   : // c.canSmoothCast()
-    >c0,0,#red,KNOCKBACK FARMING
+    // >c0,0,#red,KNOCKBACK FARMING
     c.smoothCast(a.bS)
 
 :?loc.stars > 15 & (
@@ -502,10 +501,8 @@ var enduse = 0
     :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 & foe = "soldier"
       ?c.canApplyStun() |
       ^stunTime = math.Clamp(stunTime, 1, 11)
-        >c0,0,#yellow,#REFRESHING STUN WITH HOOK
         a.ldtF("grappling")
       :
-        >c0,0,#yellow,#RANGED ELITES
         fight("ranged")
     :?s.inRange("sword")
       fight("melee")
