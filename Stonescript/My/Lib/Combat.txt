@@ -311,25 +311,18 @@ func screenMngr_DS(itemName, scrTarget, scrMax)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenMngr_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
   :?scrMax < 0
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenMngr_DS\nCAUSE: invalid <scrMax>:\n\n" + scrMax, false)
-  :?scrTarget ! math.Clamp(scrMax, 0, scrMax)
+  :?scrTarget ! math.Clamp(scrTarget, 0, scrMax)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenMngr_DS\nCAUSE: invalid <scrTarget>:\n\n" + scrTarget, false)
   // OK, proceed
-  :?loc.begin
-    ?itemName = "blade"
-        smiteScreenMax = scr
-      : // type = "target"
-        ?!smiteScreenMax | scr <= smiteScreenMax
-          smiteScreenTarget = scr
-    : // itemName = "mask"
-        maskScreenMax = scr
-      : // type = "target"
-        ?!maskScreenMax | scr <= maskScreenMax
-          maskScreenTarget = scr
-  :?loc.loop & !isScreen_DS(itemName, "MAX")
-    ?itemName = "blade"
-      smiteScreenTarget++
-    : // itemName = "mask"
-      maskScreenTarget++
+  :
+    var itemI = table_itemDS.IndexOf(itemName)
+    var targetI = table_itemDS.IndexOf("TARGET")
+    var maxI = table_itemDS.IndexOf("MAX")
+    ?loc.begin
+      table_itemDS[itemI + targetI] = scrTarget
+      table_itemDS[itemI + maxI] = scrMax
+    :?loc.loop & !isScreen_DS(itemName, "MAX")
+      table_itemDS[itemI + targetI] += 1
 /* Checks if a weapon ability can be used in 2 screens
 of distance, according to a certain screen index. */
 func canUseAbility_DS(itemName)

@@ -161,8 +161,16 @@ func fight(mode)
   >c0,0,#cyan,ai debuffed!*/
 
 >c0,-3,#red,
-^smite scr target=@c.table_itemDS["blade","TARGET"]@\n
-^smite scr max   =@c.table_itemDS["blade","MAX"   ]@
+^smite scr target=
+^@c.table_itemDS[
+^   c.table_itemDS.IndexOf("blade") +
+^   c.table_itemDS.IndexOf("TARGET")
+^]@\n
+^smite scr max   =
+^@c.table_itemDS[
+^   c.table_itemDS.IndexOf("blade") +
+^   c.table_itemDS.IndexOf("MAX")
+^]@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
