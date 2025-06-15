@@ -161,8 +161,8 @@ func fight(mode)
   >c0,0,#cyan,ai debuffed!*/
 
 >c0,-3,#red,
-^smite scr=@c.smiteScreen_Target@\n
-^smite max=@c.smiteScreen_Max@
+^smite scr target=@c.table_itemDS["blade","TARGET"]@\n
+^smite scr max   =@c.table_itemDS["blade","MAX"   ]@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -238,9 +238,7 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 :
   hand = "right"
 
-c.screenSet_DS("blade", "target", 2)
-c.screenSet_DS("blade", "max", dysan_screen - 3)
-c.screenChange_DS("blade")
+c.screenMngr_DS("blade", 2, dysan_screen - 3)
 c.AAC(a.hVeff, a.sFeff)
 
 // Auto brewing

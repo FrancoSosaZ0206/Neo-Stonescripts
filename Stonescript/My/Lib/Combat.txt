@@ -50,11 +50,6 @@ var hihp
 
 // Function-related
 
-var smiteScreen_Target = null
-var smiteScreen_Max = null
-var maskScreen_Target = null
-var maskScreen_Max = null
-
 var slideCount = 0 // counter to give screen.Next() time to slide in _DS functions.
 
 var moondialMode = -1
@@ -97,9 +92,10 @@ var item_OH_IDs = [ // one-handed item IDs
 ^   "wand_stone"
 ^]
 
-var item_DS_IDs = [ // IDs of items' abilities that can be used in 2 screens
-^   "blade",
-^   "mask"
+var table_itemDS = [ // IDs of items' abilities that can be used in 2 screens
+^   "ID"    , "TARGET", "MAX" ,
+^   "blade" , null    , null  ,
+^   "mask"  , null    , null
 ^]
 
 
@@ -287,75 +283,65 @@ func isDead()
 
 // ......... Double Screen (DS) ......... //
 
-func isScreenTarget_DS(itemName)
-  ?item_DS_IDs.Contains(itemName)
+func isScreen_DS(itemName, type)
+  var result = false
+  ?!table_itemDS.Contains(itemName)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreen_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+  :?!table_itemDS.Contains(type)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreen_DS\nCAUSE: unknown <type>:\n\n" + type, false)
+  :
+    var scrTarget =
+    ^table_itemDS[table_itemDS.IndexOf(itemName) + 
+    ^             table_itemDS.IndexOf("TARGET")]
+
+    ?type = "TARGET"
+      result = (screen.i = scrTarget)
+    : // type = "MAX"
+      result = (scrTarget =
+      ^table_itemDS[table_itemDS.IndexOf(itemName) + 
+      ^            table_itemDS.IndexOf("MAX")])
+  
+  return result
+func screenMngr_DS(itemName, scrTarget, scrMax)
+  // Entry sanitization
+  itemName = string.ToLower(itemName)
+
+  // Error handling
+  ?!table_itemDS.Contains(itemName)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenMngr_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+  :?scrMax < 0
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenMngr_DS\nCAUSE: invalid <scrMax>:\n\n" + scrMax, false)
+  :?scrTarget ! math.Clamp(scrMax, 0, scrMax)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenMngr_DS\nCAUSE: invalid <scrTarget>:\n\n" + scrTarget, false)
+  // OK, proceed
+  :?loc.begin
     ?itemName = "blade"
-      return screen.i = smiteScreen_Target
+        smiteScreenMax = scr
+      : // type = "target"
+        ?!smiteScreenMax | scr <= smiteScreenMax
+          smiteScreenTarget = scr
     : // itemName = "mask"
-      return screen.i = maskScreen_Target
-  :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreenTarget_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
-
-    return false
-func isScreenMax_DS(itemName)
-  ?item_DS_IDs.Contains(itemName)
+        maskScreenMax = scr
+      : // type = "target"
+        ?!maskScreenMax | scr <= maskScreenMax
+          maskScreenTarget = scr
+  :?loc.loop & !isScreen_DS(itemName, "MAX")
     ?itemName = "blade"
-      return smiteScreen_Target = smiteScreen_Max
+      smiteScreenTarget++
     : // itemName = "mask"
-      return maskScreen_Target = maskScreen_Max
-  :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: isScreenMax_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
-
-    return false
-func screenSet_DS(itemName, type, scr)
-  ?item_DS_IDs.Contains(itemName) &
-  ^["target","max"].Contains(type)
-    ?scr >= 0
-      ?loc.begin
-        ?itemName = "blade"
-          ?type = "max"
-            smiteScreen_Max = scr
-          : // type = "target"
-            ?!smiteScreen_Max | scr <= smiteScreen_Max
-              smiteScreen_Target = scr
-            :
-              u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenInit_DS\nCAUSE: <scr> was greater than the max value set (" + smiteScreen_Max + "):\n\n" + scr, false)
-              loc.Pause()
-        : // itemName = "mask"
-          ?type = "max"
-            maskScreen_Max = scr
-          : // type = "target"
-            ?!maskScreen_Max | scr <= maskScreen_Max
-              maskScreen_Target = scr
-            :
-              u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenInit_DS\nCAUSE: <scr> was greater than the max value set (" + maskScreen_Max + "):\n\n" + scr, false)
-              loc.Pause()
-    :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenInit_DS\nCAUSE: invalid <scr>:\n\n" + scr, false)
-  :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenInit_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
-func screenChange_DS(itemName)
-  ?item_DS_IDs.Contains(itemName)
-    ?loc.loop & !isScreenMax_DS(itemName)
-      ?itemName = "blade"
-        smiteScreen_Target++
-      : // itemName = "mask"
-        maskScreen_Target++
-  :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: screenChange_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
-
+      maskScreenTarget++
 /* Checks if a weapon ability can be used in 2 screens
 of distance, according to a certain screen index. */
 func canUseAbility_DS(itemName)
-  ?item_DS_IDs.Contains(itemName)
+  ?table_itemDS.Contains(itemName)
     return canUseAbility(itemName) &
-    ^isScreenTarget_DS(itemName)
+    ^isScreen_DS(itemName, "TARGET")
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
 
     return false
 func useAbility_DS(itemName)
-  ?item_DS_IDs.Contains(itemName)
+  ?table_itemDS.Contains(itemName)
     ?slideCount = 0
       screen.Next()
       slideCount = 20
