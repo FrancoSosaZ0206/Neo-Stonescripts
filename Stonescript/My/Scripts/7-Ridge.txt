@@ -23,6 +23,9 @@ var stunTime  = null
 var margin    = 8 // big sword left hitbox + splash range
 var hand      = null
 
+var boss_screen = null
+var boss_cutscenes = [] // TO DO
+
 
 // /////////////// FUNCTIONS //////////////// //
 
@@ -123,7 +126,7 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
   ?loc.stars <= 10 // cyan and white
     boss_screen = 2
   :?loc.stars <= 15 // yellow
-    boss_screen = 4
+    boss_screen = 6
   :?loc.stars <= 20 // green
     boss_screen = 7
 
@@ -172,7 +175,7 @@ var enduse = 0
 
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
-^(!s.inRange("dash") | foe.distance = 9999) &
+// ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
 ^!(loc.stars > 15 & c.permapotSetup)
@@ -184,8 +187,7 @@ var enduse = 0
 :?c.canUseAbility("quarterstaff") &
 ^!s.inRange("dash") & ai.walking &
 ^ai.enabled & !ai.paused &
-^(c.permapotSetup |
-^ (!c.permapotSetup & screen.i > 0))
+^foe.state ! 133 // Hrímnir's blowing state
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // Summons
@@ -203,45 +205,163 @@ var enduse = 0
 
 // ............. DEFENSIVE LOGIC ............ //
 
-?foe ! "boss" &
-^foe.state ! 4 & foe.state ! -1 &
-^c.canUseAetherTalisman()
-  ?keepCultistMask
-    c.useAetherTalisman("l")
+
+
+// ............ AOE/RANGED LOGIC ............ //
+
+:?c.canUseAbility("voidweaver") &
+^foe.count > 1 & !c.permapotSetup &
+^c.canUnmakeVoidweaver()
+  ?c.canUseAbility("dash")
+    a.ldtF("dash")
+  :?c.canUseAbility("bash")
+    a.ldtF("bash")
+  :?!s.inRange("sword")
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    equipR @a.shC2@
   :
-    equipL triskelion
-    c.useAetherTalisman("r")
-:?foe = "boss" &
-^c.canUseFireTalisman()
-  ?keepCultistMask
-    c.useFireTalisman("l")
+    c.devour("voidweaver")
+
+// Calamity - reduce hp
+:?c.canUseAbility("wand_aether") &
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch")
+  ?a.canSmartDash()
+    a.smartDash()
+  :?foe.distance < s.getRange("dash_min")
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+  : // get closer
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    ?!c.permapotSetup
+      equipR @a.shC2@
+// reset buffs
+:?foe.buffs.string = "stoic" &
+^c.canUseAbility("wand_vigor")
+  ?a.canSmartDash()
+    a.smartDash()
+  :?foe.distance < s.getRange("dash_min")
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+  : // get closer
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    ?!c.permapotSetup
+      equipR @a.shC2@
+// hinder regen
+:?encounter.eliteMod = "regen" &
+^c.canUseAbility("wand_fire")
+  ?a.canSmartDash()
+    a.smartDash()
+  :?foe.distance < s.getRange("dash_min")
+    c.useAbility_OH("wand_fire", a.wFh, hand)
+  : // get closer
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    ?!c.permapotSetup
+      equipR @a.shC2@
+
+// Knockback farming
+:?foe ! "unpushable" &
+^c.canSmoothCast() &
+^s.inRange("crossbow")
+  ?a.canSmartDash()
+    a.smartDash()
+  : // c.canSmoothCast()
+    >c0,0,#red,KNOCKBACK FARMING
+    c.smoothCast(a.bS)
+
+:?loc.stars > 15 & (
+^(c.permapotSetup &
+^(foe.GetCount(foe.distance + margin) > 1 &
+^s.inRange("wand") & foe ! "warcaster")) |
+^(!c.permapotSetup &
+^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &
+^s.inRange("crossbow")))
+  ?c.canUseAbility("wand_stone")
+    c.useAbility_OH("wand_stone", a.wSh, hand)
+
+  :?foe ! "elite"
+    ?a.canSmartDash()
+      a.smartDash()
+    :?c.permapotSetup
+      ?c.canApplyStun() |
+      ^stunTime = math.Clamp(stunTime, 1, 11) // frames
+        a.ldtF("grappling")
+      :
+        a.ldtF("big sword unmake")
+    :?a.canSmartDash()
+      a.smartDash()
+    :?!s.inRange("triskelion")
+      equipL triskelion
+    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
+      a.ldtF("ranged unmake")
+    :?!s.inRange("sword") & totaltime % 2 = 0
+      equipL triskelion
+      equipR hatchet
+    :
+      a.ldtF("sword unmake")
+  : // foe = "elite"
+    ?c.canUseAbility("heavy_hammer")
+      ?a.canSmartDash()
+        a.smartDash()
+      :?!s.inRange("triskelion")
+        equipL triskelion
+      :
+        c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+
+    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
+      ?foe.distance < s.getRange("dash_min") &
+      ^c.canUseAbility("staff_stone")
+        c.useAbility_TH("staff_stone", a.stSh)
+      :?foe.distance < s.getRange("dash_min") &
+      ^c.canUseAbility("mind")
+        a.ldtF("mind")
+
+      :?c.canApplyStun() |
+      ^stunTime = math.Clamp(stunTime, 1, 11)
+        a.ldtF("grappling")
+      :
+        fight("ranged")
+    :?c.canSmartDash()
+      c.smartDash()
+    :?!s.inRange("triskelion") |
+    ^(!s.inRange("sword") & totaltime % 2 = 0)
+      equipL triskelion
+      equipR hatchet
+    :
+      fight("melee")
+
+// .......... ENGAGE/WALKING LOGIC .......... //
+
+:?ai.paused | !ai.enabled | ai.paused |
+^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
+^c.isDead() |
+^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
+^ foe.damage > 1) | // dysan state 107 fight (flying)
+^foe.distance > s.getRange("dash_max") | // too far to dash
+^foe.state = -1 | // sleep state
+^(foe.state = 2 & // engaging state
+^ foe.distance > s.getRange("dash_max"))
+  ?armor > a.compoundMaxArmor_boosted |
+  ^c.canEngage()
+    a.ldtF("engage")
+
+  :?a.compoundMaxArmor_default <= armor &
+  ^armor <= a.compoundMaxArmor_boosted
+    a.ldtF("defense regen max")
   :
-    equipL triskelion
-    c.useFireTalisman("r")
+    a.ldtF("defense regen fast")
 
-
-:?pickup.distance < 15
-  ldtF("magnet")
-
-
-:?foe.state ! 133 & // Hrímnir's blowing state
-^ai.walking &
-^(foe.distance < 11 | foe.distance > 15) &
-^c.canUseQuarterstaff()
-  c.useQuarterstaff(a.myQuarterstaff)
-
-:?foe.state ! 133 & // Hrímnir's blowing state
-^(ai.paused |
-^(ai.idle & foe.distance > 11) | // if we're waiting
-^foe.state = -1 | foe.state = 4 | // foe death states
-^foe.distance > 15) // or we can't engage in a fight
-  ?armor > 29 |
-  ^(foe ! "phase1" & foe.distance < 40)
-    ldtF("engage")
-  :?14 <= armor & armor <= 29
-    ldtF("default")
-  :
-    ldtF("armorRegen")
+// .............. COMBAT LOGIC .............. //
 
 // Boss fight (Hrímnir)
 :?foe = "yeti"

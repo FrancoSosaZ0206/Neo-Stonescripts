@@ -28,8 +28,8 @@ var hand       = null
 
 var margin = 8 // big sword left hitbox + splash range
 
-var dysan_screen = null
-var dysan_cutscenes = [
+var boss_screen = null
+var boss_cutscenes = [
 ^ 100, 101, 102, // getting soul stones pre-phase1
 ^ 117, 118, // finishing phase1 cutscene
 ^ 124, 125, // phase1 to 2
@@ -187,14 +187,14 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
         dontShowAgain = true
 
 
-// Set up dysan_screen
-?!dysan_screen
+// Set up boss_screen
+?!boss_screen
   ?loc.stars <= 10 // cyan and white
-    dysan_screen = 2
+    boss_screen = 2
   :?loc.stars <= 15 // yellow
-    dysan_screen = 4
+    boss_screen = 4
   :?loc.stars <= 20 // green
-    dysan_screen = 7
+    boss_screen = 7
 
 // Decide hand for one-handed items
 ?c.permapotSetup | s.inRange("dash")
@@ -202,7 +202,7 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 :
   hand = "right"
 
-c.screenMngr_DS("blade", 2, dysan_screen - 3)
+c.screenMngr_DS("blade", 2, boss_screen - 3)
 c.AAC(a.hVeff, a.sFeff)
 
 // Auto brewing
@@ -228,7 +228,7 @@ var enduse = 0
   old_t = item.GetTreasureCount()
   enduse = 0
 
-/*?screen.i = dysan_screen
+/*?screen.i = boss_screen
   >`1,17,#magenta,
   ^old_t = @old_t@\n
   ^treasures = @item.GetTreasureCount()@\n
@@ -250,7 +250,7 @@ var enduse = 0
   c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
-^screen.i < dysan_screen &
+^screen.i < boss_screen &
 ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
@@ -270,10 +270,10 @@ var enduse = 0
 // Summons
 :?c.canSummon("voidweaver") &
 ^loc.stars > 15 &
-^screen.i < dysan_screen - 1 // not a cutscene
+^screen.i < boss_screen - 1 // not a cutscene
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
-^(loc.stars <= 15 | screen.i >= dysan_screen - 1)
+^(loc.stars <= 15 | screen.i >= boss_screen - 1)
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // Harvest/Pick up things
@@ -511,7 +511,7 @@ var enduse = 0
 :?ai.paused | !ai.enabled | ai.paused |
 ^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
 ^c.isDead() |
-^ (dysan_cutscenes.Contains(foe.state) & // is a cutscene
+^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
 ^ foe.damage > 1) | // dysan state 107 fight (flying)
 ^foe.distance > s.getRange("dash_max") | // too far to dash
 ^foe.state = -1 | // sleep state
