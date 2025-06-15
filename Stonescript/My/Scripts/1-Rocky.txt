@@ -503,6 +503,8 @@ var enduse = 0
         fight("ranged")
     :?!s.inRange("triskelion")
       equipL triskelion
+    :?c.canSmartDash()
+      c.smartDash()
     :
       fight("melee")
 
