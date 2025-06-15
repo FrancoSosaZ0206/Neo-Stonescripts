@@ -1,60 +1,17 @@
-// *******************************************************
-//                       7-Ridge.txt                      
-// *******************************************************
-
-// Script for Icy Ridge
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "7-Ridge" ▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 
+// //////////////// IMPORTS ///////////////// //
 
-// /////////////////////////////////////////// //
-
-// IMPORTS
-
-var uimkr = new MyScripts/Lib/UI_Maker
-var u = new MyScripts/Lib/Utilities
-var a = new MyScripts/Lib/MyArsenal
-var i = new MyScripts/Lib/MyBetterInfo
-var c = new MyScripts/Lib/Combat
-
-/***********************************************/
-
-import UI/FoeStateTracker
-
-/***********************************************
-
-var som = new MyScripts/Lib/Speed_O_Meter
-
-var somPanel = som.mkUI(0, 1,
-^u.colorToHex("red"), true, false)
-?som.Update(false)
-  somPanel.Recycle()
-  somPanel = null
-
-  somPanel = som.mkUI(0, 1,
-  ^u.colorToHex("red"), true, false)
-
-/***********************************************
-
-var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
-
-dpsm.ENABLED = true
-dpsm.refreshRate = 30
-
-var dpsPanel
-?dpsm.Update()
-  ?dpsPanel
-    dpsPanel.Recycle()
-    dpsPanel = null
-
-  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
-
-/***********************************************/
+var u = import My/Lib/Utilities
+var c = import My/Lib/Combat
+var s = import My/Lib/Stats
+var a = import My/Lib/Arsenal
 
 
-
-// /////////////////////////////////////////// //
-
-// VARIABLES
+// /////////////// VARIABLES //////////////// //
 
 var blowing
 
@@ -62,185 +19,189 @@ var keepCultistMask = true
 var voidweaverScreen = 3
 var smiteScreen = 1
 
-var moondialMode = -1
+var stunTime  = null
+var margin    = 8 // big sword left hitbox + splash range
+var hand      = null
 
 
-?loc.loop
-  keepCultistMask = false
+// /////////////// FUNCTIONS //////////////// //
 
-  ?loc.stars > 10
-    smiteScreen = 2
+func fight(mode)
+  ?mode = "evade"
+    canDash = false
 
-?buffs.string = "berserk" &
-^debuffs.string ! "chill"
-  moondialMode = 2
-:
-  moondialMode = 0
+    ?c.canUseAbility("staff_stone") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+      c.useAbility_TH("staff_stone", a.stSh)
+    :?c.canUseAbility("mind") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+      a.ldtF("mind")
 
+    :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
+      c.useAbility_TH("staff_ice", a.stIh)
 
+    :?!s.inRange("sword")
+      ?foe.count > 1
+        fight("magic")
+      :
+        fight("ranged")
 
-// /////////////////////////////////////////// //
-
-// FUNCTIONS
-
-func ldtF(mode)
-
-  ?mode = "default"
-    equipL triskelion
-    ?!keepCultistMask
-      equipR @a.shieldCompound1@
-  :?mode = "armorRegen"
-    equipL triskelion
-    ?!keepCultistMask
-      equipR @a.shieldCompound2@
-  :?mode = "engage"
-    ?buffs.string ! "buff_inf_speed" & // infernal staff
-    ^totaltime % 2 = 0 // every even frame
-      equipL @a.hammerFireDefense@
+    // Unmake
+    :?c.canUnmake()
+      a.ldtF("defense unmake")
     :
-      equipL triskelion
-
-    ?!keepCultistMask
-      equipR @a.shieldFireDefense@
-
-  :?mode = "escape"
-    equipL mind
-    ?!keepCultistMask
-      equipR @a.shieldFireDefense@
-  :?mode = "magnet"
-    equipL star
-    ?!keepCultistMask
-      equipR triskelion
-
-  :?mode = "meleeDmg"
-    ?keepCultistMask
-      equipL Vantum Phoenix
-    :
-      c.doMoondial(Vantum Phoenix, a.swordFireDmg, moondialMode)
-  :?mode = "meleeDebuff"
-    ?keepCultistMask
-      ?c.canDebuffChill()
-        equipL @a.swordIceDebuff@
-      :?c.canDebuffWeaken()
-        equipL @a.swordPoisonDebuff@
-      :?c.canDebuffBurn()
-        equipL @a.swordFireDebuff@
-    :
-      //Left hand:
-      ?c.canDebuffWeaken()
-        equipL @a.swordPoisonDebuff@
-      :?c.canDebuffBurn()
-        equipL @a.swordFireDebuff@
-      :?c.canDebuffChill()
-        equipL @a.wandIceDebuff@
-
-      //Right hand:
-      ?c.canDebuffChill()
-        equipR @a.swordIceDebuff@
-  :?mode = "meleeHeal"
-    ?keepCultistMask
-      equipL Soulfetcher
-    :
-      c.doMoondial(Vantum Phoenix, Soulfetcher, moondialMode)
-
-  :?mode = "unmakeAOE"
-    equip @a.staffAetherDebuff@
-    /* ?keepCultistMask
-      equipL @a.bigSwordAetherDebuff@
-    : */
-  :?mode = "unmake1v1"
-    equip @a.staffAetherDebuff@
-    /* ?keepCultistMask
-      equipL @a.swordAetherDebuff@
-    :
-      // put a 2nd dU sword when we have it
-      c.doMoondial(a.swordAetherDebuff, Vantum Phoenix, moondialMode)*/
-
-  :?mode = "rangedDmgAOE"
-    ?keepCultistMask
-      equipL @a.wandFireDmg@
-    :
-      equip @a.staffFireDebuff@ // @a.bowFireDmg@
-  :?mode = "rangedDebuffAOE"
-    ?keepCultistMask
-      ?c.canDebuffChill()
-        equipL @a.wandIceDebuff@
-      :?c.canDebuffWeaken()
-        equipL @a.wandPoisonDebuff@
-      :?c.canDebuffBurn()
-        equipL @a.wandFireDebuff@
-
-    :
-      ?c.canDebuffChill()
-        equip @a.staffIceDebuff@
-      :?c.canDebuffWeaken()
-        equip @a.staffPoisonDebuff@
-      :?c.canDebuffBurn()
-        equip @a.staffFireDebuff@
-  :?mode = "rangedHealAOE"
-    ?keepCultistMask
-      equipL @a.wandVigorBuff@
-    :
-      equip @a.staffVigorBuff@ // @a.bowVigorBuff@
-
+      a.ldtF("defense")
   :
-    >c-10,0,#red,
-    ^ERROR: ldtF() recieved incorrect mode: @mode@
+    // 1. debuff, if possible
+    ?(foe = "monarch" | foe = "boss") &
+    ^mode = "melee" &
+    ^(c.canApplyAny() | c.canApplyBurn())
+      a.ldtF("sword debuff")
 
-  return
+    // 2. Heal if needed
+    :?hp ! maxhp &
+    ^foe.GetCount(foe.distance + margin) = 1
+      a.ldtF("sword heal")
 
-func fight1v1()
+    // 3. Unmake
+    :?c.canUnmake()
+      ?mode = "melee"
+        a.ldtF("sword unmake")
 
-  ?c.canDebuffAny() & // foe can be debuffed
-  ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
-    ldtF("meleeDebuff")
+      :?(c.permapotSetup &
+      ^foe.GetCount(foe.distance + margin) > 1) |
+      ^foe.GetCount(foe.distance + margin) = 1
+        // Big sword splash area
+        ?a.canSmartDash() // get closer
+          a.smartDash()
+        : // attack
+          ?c.permapotSetup &
+          ^foe.GetCount(foe.distance + margin) > 1
+            a.ldtF("big sword unmake")
+          : // foe.GetCount(foe.distance + margin) = 1
+            a.ldtF("sword unmake")
+      :
+        a.ldtF("ranged unmake")
 
-  : // all possible debuffs applied
-    ?hp ! maxhp // heal up
-      ldtF("meleeHeal")
+    : // 4. Deal max damage
+      ?mode = "melee"
+        a.ldtF("sword dmg")
 
-    : // deal max damage
-      ldtF("meleeDmg")
-
-  return
-
-
-
-// /////////////////////////////////////////// //
-
-// PROCEDURE:
-
-?buffs.string ! "buff_inf_speed" & // infernal staff
-^totaltime % 2 = 0 & // every even frame
-^item.left = "triskelion"
-  equipL @a.hammerFireDefense@ // gain extra armor without slowing down
-
-c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
-
-// Auto Brewing
-?c.canBrewPotion("berserk")
-  c.brewPotion("berserk")
-:?c.canBrewPotion("lucky")
-  c.brewPotion("lucky")
-
-?loc.begin // initial equipment
-  equipL triskelion
-  equipR @a.shieldCompound1@
-:?keepCultistMask
-  ?item.right ! "bardiche" &
-  ^item.right ! "quarterstaff" &
-  ^item.right ! "heavy hammer" &
-  ^item.right ! "quarterstaff"
-    equipL triskelion
-    equipR mask
+      :?!c.permapotSetup
+        a.ldtF("magic dmg")
+      :
+        a.ldtF("ranged dmg")
 
 
-?c.canUsePotionDmg() & keepCultistMask
+// /////////////// PROCEDURE //////////////// //
+
+>`1,10,#magenta,pickup=@pickup@\n
+^scr i=@screen.i@
+
+// ............ WITHDRAWAL LOGIC ............ //
+
+?(c.permapotSetup &
+^foe.buffs.string = "buff_tenacious") |
+^s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+  loc.Leave()
+
+// .............. SETUP LOGIC ............... //
+
+c.potionType = "berserk"
+c.Init()
+a.smartDebuff()
+disable npcDialog
+
+stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
+?!stunTime
+  stunTime = -1
+
+// Set up boss_screen
+?!boss_screen
+  ?loc.stars <= 10 // cyan and white
+    boss_screen = 2
+  :?loc.stars <= 15 // yellow
+    boss_screen = 4
+  :?loc.stars <= 20 // green
+    boss_screen = 7
+
+// Decide hand for one-handed items
+?c.permapotSetup | s.inRange("dash")
+  hand = "left"
+:
+  hand = "right"
+
+c.screenMngr_DS("blade", 1, boss_screen - 3)
+c.AAC(a.hVeff, a.sFeff)
+
+// Auto brewing
+?c.canBrewPotion()
+  c.brewPotion()
+
+// Initial equipments
+?loc.begin
+  a.ldtF("default")
+:?c.permapotSetup
+  a.ldtF("permapot")
+
+?c.canUsePotion() & c.permapotSetup
   activate potion
+:?c.canUseAbility_DS("blade") & loc.stars > 15
+  c.useAbility_DS("blade")
 
+// ***************************************** //
 
-?c.canUseBFG_DS(smiteScreen)
-  c.useBFG_DS()
+var old_t = item.GetTreasureCount()
+var enduse = 0
+?loc.loop 
+  old_t = item.GetTreasureCount()
+  enduse = 0
+
+?old_t ! item.GetTreasureCount()
+  enduse++
+
+// speed up
+:?item.GetCooldown("staff_fire") <= 0 &
+^armor >= 6 &
+^((old_t ! item.GetTreasureCount() &
+^enduse >= 30) | pickup = "treasure")
+  >c0,4,#yellow,INFERNAL STAFF CHEST
+  c.useAbility_TH("staff_fire", a.stFh)
+
+:?c.canUseAbility("staff_fire") &
+^screen.i < boss_screen &
+^(!s.inRange("dash") | foe.distance = 9999) &
+^buffs.string ! "buff_inf_speed" &
+// save armor if it's setup run
+^!(loc.stars > 15 & c.permapotSetup)
+  >c0,4,#yellow,INFERNAL STAFF
+  c.useAbility_TH("staff_fire", a.stFh)
+// ***************************************** //
+
+// mini-dash
+:?c.canUseAbility("quarterstaff") &
+^!s.inRange("dash") & ai.walking &
+^ai.enabled & !ai.paused &
+^(c.permapotSetup |
+^ (!c.permapotSetup & screen.i > 0))
+  c.useAbility_TH("quarterstaff", a.myQ)
+
+// Summons
+:?c.canSummon("voidweaver") &
+^loc.stars > 15 &
+^screen.i < boss_screen - 1 // not a cutscene
+  c.useAbility_OH("aether_talisman", "aether_talisman", hand)
+:?c.canSummon("cinderwisp") &
+^(loc.stars <= 15 | screen.i >= boss_screen - 1)
+  c.useAbility_OH("fire_talisman", "fire_talisman", hand)
+
+// Pick up things
+:?pickup.distance < 15
+  a.ldtF("magnet")
+
+// ............. DEFENSIVE LOGIC ............ //
 
 ?foe ! "boss" &
 ^foe.state ! 4 & foe.state ! -1 &
@@ -431,6 +392,7 @@ c.doAAC(a.hammerFireDefense, a.shieldFireDefense)
   :
     fight1v1()
 
-// *******************************************************
-//                  END OF "7-Ridge.txt"                  
-// *******************************************************
+
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ END OF "7-Ridge" ▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //

@@ -75,61 +75,35 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?(foe = "monarch" /*"elite"*/ | foe = "boss") &
-    ^/*((*/mode = "melee" &
-    ^  (c.canApplyAny() |
-    ^   /*(*/c.canApplyBurn() // &
-    /*^    (foe = "boss" | foe = "monarch")))) |
-    ^ (mode ! "melee" & a.canSmartDebuff())*/)
-      //?mode = "melee"
+    ?(foe = "monarch" | foe = "boss") &
+    ^mode = "melee" &
+    ^(c.canApplyAny() | c.canApplyBurn())
       a.ldtF("sword debuff")
-      /*:?c.permapotSetup
-        a.ldtF("magic debuff")
-      :
-        a.ldtF("ranged debuff")*/
-
-      /*:?mode = "magic"
-        a.ldtF("magic debuff")
-      :?mode = "ranged"
-        a.ldtF("magic debuff") // ranged*/
 
     // 2. Heal if needed
     :?hp ! maxhp &
-    // ****************************** //
     ^foe.GetCount(foe.distance + margin) = 1
       a.ldtF("sword heal")
-    // ****************************** //
-
-      /*?mode = "melee"
-        a.ldtF("sword heal")
-      :?mode = "magic"
-        a.ldtF("magic heal")
-      :?mode = "ranged"
-        a.ldtF("ranged heal")*/
 
     // 3. Unmake
     :?c.canUnmake()
       ?mode = "melee"
         a.ldtF("sword unmake")
 
-      :?c.permapotSetup
+      :?(c.permapotSetup & 
+      ^foe.GetCount(foe.distance + margin) > 1) |
+      ^foe.GetCount(foe.distance + margin) = 1
         // Big sword splash area
         ?a.canSmartDash() // get closer
           a.smartDash()
         : // attack
-          a.ldtF("big sword unmake")
-      : // !c.permapotSetup
-        ?foe.count = 1
-          a.ldtF("sword unmake")
-        :
-          a.ldtF("ranged unmake")
-
-      /*?mode = "melee"
-        a.ldtF("sword unmake")
-      :?mode = "magic"
-        a.ldtF("magic unmake")
-      :?mode = "ranged"
-        a.ldtF("ranged unmake")*/
+          ?c.permapotSetup &
+          ^foe.GetCount(foe.distance + margin) > 1
+            a.ldtF("big sword unmake")
+          : // foe.GetCount(foe.distance + margin) = 1
+            a.ldtF("sword unmake")
+      :
+        a.ldtF("ranged unmake")
 
     : // 4. Deal max damage
       ?mode = "melee"
@@ -143,11 +117,6 @@ func fight(mode)
         a.ldtF("magic dmg")
       :
         a.ldtF("ranged dmg")
-
-      /*:?mode = "magic"
-        a.ldtF("magic dmg")
-      :?mode = "ranged"
-        a.ldtF("ranged dmg")*/
 
 
 // /////////////// PROCEDURE //////////////// //
