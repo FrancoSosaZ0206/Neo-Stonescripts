@@ -179,7 +179,6 @@ var enduse = 0
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
 ^!(loc.stars > 15 & c.permapotSetup)
-  >c0,4,#yellow,INFERNAL STAFF
   c.useAbility_TH("staff_fire", a.stFh)
 // ***************************************** //
 
