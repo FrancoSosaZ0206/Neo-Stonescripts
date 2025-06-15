@@ -174,7 +174,6 @@ func fight(mode)
 // .............. SETUP LOGIC ............... //
 
 c.potionType = "lucky"
-c.smiteScreen_Target = 2
 c.Init()
 a.smartDebuff()
 disable npcDialog
@@ -239,7 +238,8 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 :
   hand = "right"
 
-c.smiteScreen_Max = dysan_screen - 2
+c.screenSet_DS("blade", "target", 2)
+c.screenSet_DS("blade", "max", dysan_screen - 3)
 c.screenChange_DS("blade")
 c.AAC(a.hVeff, a.sFeff)
 
