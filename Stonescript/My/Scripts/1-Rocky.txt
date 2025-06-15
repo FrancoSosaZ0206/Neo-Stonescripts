@@ -160,18 +160,6 @@ func fight(mode)
 ^foe.debuffs.string = "chill:1"
   >c0,0,#cyan,ai debuffed!*/
 
->c0,-3,#red,
-^smite scr target=
-^@c.table_itemDS[
-^   c.table_itemDS.IndexOf("blade") +
-^   c.table_itemDS.IndexOf("TARGET")
-^]@\n
-^smite scr max   =
-^@c.table_itemDS[
-^   c.table_itemDS.IndexOf("blade") +
-^   c.table_itemDS.IndexOf("MAX")
-^]@
-
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?(c.permapotSetup &
@@ -482,6 +470,10 @@ var enduse = 0
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
+    :?a.canSmartDash()
+      a.smartDash()
+    :?!s.inRange("triskelion")
+      a.ldtF("default")
     :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
       a.ldtF("ranged unmake")
     :
