@@ -540,12 +540,12 @@ func ldtF(mode)
         c.moondialing(Existential Crisis, sword) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?c.canApplyChill(6) | mode = "chill"
+        ?c.canApplyChill(6) & (mode = "auto" | mode = "chill")
           equipL Almafuerte
-        :?c.canApplyWeaken() | mode = "weaken"
+        :?c.canApplyWeaken() & (mode = "auto" | mode = "weaken")
           equipL Death's Kiss
           //'
-        :?c.canApplyBurn() | mode = "burn"
+        :?c.canApplyBurn() & (mode = "auto" | mode = "burn")
           equipL @sFeff@
 
       : // !c.permapotSetup
@@ -563,14 +563,14 @@ func ldtF(mode)
         : // foe = "stone"
           sDmg = Bifrost // Unbroken Faith
 
-        ?c.canApplyChill(6)
+        ?c.canApplyChill(6) & (mode = "auto" | mode = "chill")
           c.moondialing(Almafuerte, sDmg)
         :
           equipL moon
-          ?c.canApplyWeaken()
+          ?c.canApplyWeaken() & (mode = "auto" | mode = "weaken")
             equipR Death's Kiss
             //'
-          :?c.canApplyBurn()
+          :?c.canApplyBurn() & (mode = "auto" | mode = "burn")
             equipR @sFeff@
     :?mode = "dmg"
       ?c.permapotSetup // all left hand

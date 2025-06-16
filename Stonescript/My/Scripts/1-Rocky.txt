@@ -77,10 +77,11 @@ func fight(mode)
     // 1. debuff, if possible
     ?loc.stars <= 15 & c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
-    :?(foe = "monarch" | foe = "boss") &
+    :?loc.stars > 15 &
+    ^(foe = "monarch" | foe = "boss") &
     ^mode = "melee" &
     ^(c.canApplyAny() | c.canApplyBurn())
-      a.ldtF("sword debuff")
+      a.ldtF("sword debuff auto")
 
     // 2. Heal if needed
     :?hp ! maxhp &
