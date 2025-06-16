@@ -357,7 +357,7 @@ var enduse = 0
 
 // .......... ENGAGE/WALKING LOGIC .......... //
 
-:?ai.paused | !ai.enabled | ai.paused |
+:?ai.paused | !ai.enabled |
 ^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
 ^c.isDead() |
 ^ (boss_cutscenes.Contains(foe.state) & // is a cutscene

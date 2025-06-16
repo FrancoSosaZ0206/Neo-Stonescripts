@@ -600,8 +600,8 @@ This enables the player to benefit from effects
 that are applied when engaging, like ai or A/a
 affix items. */
 func canEngage()
-  return (foe.state = -1 | (foe.state = 2 &
-  ^foe.distance = math.Clamp(foe.distance, s.getRange("dash_max") + 1, 17))) &
+  return (foe.state = -1 | foe.state = 2) &
+  ^foe.distance = math.Clamp(foe.distance, s.getRange("dash_max") + 1, 17) &
   ^ai.walking & ai.enabled & !(ai.paused | ai.idle)
 
 // ......... Damage min-maxing .......... //

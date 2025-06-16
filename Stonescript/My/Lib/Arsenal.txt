@@ -339,7 +339,7 @@ func ldtF(mode)
       :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
         equipL @hFeff@
       :
-        equipL Unbroken Faith
+        equipL @hVeff@
 
     ?!c.permapotSetup
       ?c.canApplyChill(1)

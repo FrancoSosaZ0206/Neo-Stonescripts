@@ -186,7 +186,6 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
       ?!dontShowAgain
         dontShowAgain = true
 
-
 // Set up boss_screen
 ?!boss_screen
   ?loc.stars <= 10 // cyan and white
@@ -195,6 +194,10 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
     boss_screen = 4
   :?loc.stars <= 20 // green
     boss_screen = 7
+    c.screenMngr_DS("blade", 2, boss_screen - 3)
+
+    ?c.canUseAbility_DS("blade")
+      c.useAbility_DS("blade")
 
 // Decide hand for one-handed items
 ?c.permapotSetup | s.inRange("dash")
@@ -202,7 +205,6 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 :
   hand = "right"
 
-c.screenMngr_DS("blade", 2, boss_screen - 3)
 c.AAC(a.hVeff, a.sFeff)
 
 // Auto brewing
@@ -217,8 +219,6 @@ c.AAC(a.hVeff, a.sFeff)
 
 ?c.canUsePotion() & c.permapotSetup
   activate potion
-:?c.canUseAbility_DS("blade") & loc.stars > 15
-  c.useAbility_DS("blade")
 
 // ***************************************** //
 
@@ -507,7 +507,7 @@ var enduse = 0
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
-:?ai.paused | !ai.enabled | ai.paused |
+:?ai.paused | !ai.enabled |
 ^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
 ^c.isDead() |
 ^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
@@ -518,6 +518,7 @@ var enduse = 0
 ^ foe.distance > s.getRange("dash_max"))
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
+    >c0,0,#red,ENGAGING
     a.ldtF("engage")
 
   :?a.compoundMaxArmor_default <= armor &
