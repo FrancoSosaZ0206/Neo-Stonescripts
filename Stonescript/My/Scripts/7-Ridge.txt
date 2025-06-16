@@ -162,7 +162,7 @@ var enduse = 0
   
   // speed up (picking chest)
   ?c.canUseAbility("staff_fire") &
-  ^enduse >= 15
+  ^enduse >= 5
     c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
