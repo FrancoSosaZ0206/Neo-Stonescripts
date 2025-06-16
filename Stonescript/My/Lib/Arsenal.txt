@@ -216,7 +216,7 @@ var bAlt    = "*max crossbow golden"
 
 var myQ     = "*max quarterstaff"
 var fastB   = "*max bardiche" // enchanted: speed
-var bR      = "*max crossbow repeating golden"
+var bR      = "*max crossbow repeating golden" // enchanted: pierce
 var shC1    = "*max shield compound shiny" // enchanted: armor
 var shC2    = "*max shield compound -shiny" // enchanted: armor/s
 var shT     = "*max shield towering golden"
@@ -437,14 +437,19 @@ func ldtF(mode)
       ?!c.permapotSetup
         equipR @shAeff@
 
-    :?mode = "regen"
-      equipL triskelion
+    :?mode = "armor regen"
+      ?!s.inRange("triskelion") &
+      ^(totaltime % 2 = 0 |
+      ^buffs.string = "buff_inf_speed") // infernal staff
+        equipL triskelion
+      :
+        equipL sword
 
       ?!c.permapotSetup
-        ?mode = "max" | mode = "slow"
-          equipR @shC1@
-        :?mode = "fast"
+        ?armor < compoundMaxArmor_default
           equipR @shC2@
+        : // armor = math.Clamp(armor, compoundMaxArmor_default, compoundMaxArmor_boosted)
+          equipR @shC1@
 
     :
       // Left hand

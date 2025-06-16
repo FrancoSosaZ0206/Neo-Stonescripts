@@ -172,6 +172,11 @@ func canUseAbility(abilityID)
     ^abilityID = "talisman" // interruptible abilities
       result = result | isCasting(abilityID) // make sure not to change it while casting the ability
 
+    // Special case, stone wand doesn't require armor.
+    :?abilityID = "wand_stone"
+      result = result & foe.count > 1 /*&
+      ^item.CanActivate("wand_stone")*/
+
     :?abilityID = "staff" | abilityID = "wand"
       result = result &
       ^((10 * armor) + armor.f > 10 * s.getArmor(abilityID))
@@ -184,9 +189,6 @@ func canUseAbility(abilityID)
         result = result &
         ^!(foe = "immune_to_stun" |
         ^  encounter.eliteMod = "tenacious")
-      :?abilityID = "wand_stone"
-        result = result & foe.count > 1 &
-        ^item.CanActivate("wand_stone")
 
     :?s.talisman_table.Contains(abilityID) // it's a summon
       result = result & isSummoned(abilityID)
@@ -202,9 +204,6 @@ func canUseAbility(abilityID)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityID>:\n\n" + abilityID, false)
     loc.Pause()
-
-  /*?abilityID = "fire_talisman"
-    >`1,10,#magenta,ability ID = @s.ability_table[s.ability_table.IndexOf(abilityID)]@\ncd = @item.GetCooldown(abilityID)@\ncanact any = @item.CanActivate()@\ncasting = @isCasting(abilityID)@\n\nresult = @result@*/
 
   return result
 
@@ -727,7 +726,7 @@ amount of frames to enable walking while
 dealing damage. */
 func smoothCast(itemName)
   ?totaltime % 2 = 0
-    equipL trisk
+    equipL triskelion
     equipR hatchet
     >c0,0,#cyan,advancing
   :

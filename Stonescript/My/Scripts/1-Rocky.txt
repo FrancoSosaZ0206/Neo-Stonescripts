@@ -365,143 +365,6 @@ var enduse = 0
   : // c.permapotSetup
     a.ldtF("defense")
 
-// ............ AOE/RANGED LOGIC ............ //
-
-:?c.canUseAbility("voidweaver") &
-^foe.count > 1 & !c.permapotSetup &
-^c.canUnmakeVoidweaver()
-  ?c.canUseAbility("dash")
-    a.ldtF("dash")
-  :?!s.inRange("sword")
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
-    equipR @a.shC2@
-  :
-    c.devour("voidweaver")
-
-// Calamity - reduce hp
-:?c.canUseAbility("wand_aether") &
-^(encounter.eliteMod = "berserk" |
-^ foe = "monarch")
-  ?a.canSmartDash() & canDash
-    a.smartDash()
-  :?foe.distance < s.getRange("dash_min")
-    c.useAbility_OH("wand_aether", a.wAh, hand)
-  : // get closer
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
-    ?!c.permapotSetup
-      equipR @a.shC2@
-// reset buffs
-:?foe.buffs.string = "stoic" &
-^c.canUseAbility("wand_vigor")
-  ?a.canSmartDash() & canDash
-    a.smartDash()
-  :?foe.distance < s.getRange("dash_min")
-    c.useAbility_OH("wand_vigor", a.wVh, hand)
-  : // get closer
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
-    ?!c.permapotSetup
-      equipR @a.shC2@
-// hinder regen
-:?encounter.eliteMod = "regen" &
-^c.canUseAbility("wand_fire")
-  ?a.canSmartDash() & canDash
-    a.smartDash()
-  :?foe.distance < s.getRange("dash_min")
-    c.useAbility_OH("wand_fire", a.wFh, hand)
-  : // get closer
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
-    ?!c.permapotSetup
-      equipR @a.shC2@
-
-// Knockback farming
-/*:?foe ! "unpushable" &
-^c.canSmoothCast() &
-^s.inRange("crossbow") &
-^!c.permapotSetup
-  ?a.canSmartDash()
-    a.smartDash()
-  : // c.canSmoothCast()
-    >c0,0,#red,KNOCKBACK FARMING
-    a.ldtF("ranged knockback")*/
-
-:?loc.stars > 15 & foe ! "warcaster" & (
-^(c.permapotSetup &
-^(foe.GetCount(foe.distance + margin) > 1 &
-^s.inRange("wand"))) |
-^(!c.permapotSetup &
-^foe.count > 1 &
-// ^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &
-^s.inRange("crossbow")))
-  ?c.canUseAbility("wand_stone")
-    c.useAbility_OH("wand_stone", a.wSh, hand)
-
-  :?foe ! "elite"
-    ?a.canSmartDash()
-      a.smartDash()
-    :?c.permapotSetup
-      ?c.canApplyStun() |
-      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-      ^foe.debuffs.string ! "debuff_armor_fatigue")
-        a.ldtF("grappling")
-      :
-        a.ldtF("big sword unmake")
-    :?!s.inRange("triskelion")
-      equipL triskelion
-    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
-      a.ldtF("ranged unmake")
-    :?!s.inRange("sword") & totaltime % 2 = 0
-      equipL triskelion
-      equipR hatchet
-    :
-      a.ldtF("sword unmake")
-  : // foe = "elite"
-    ?c.canUseAbility("heavy_hammer")
-      >c0,0,#red,HEAVY HAMMER
-      ?a.canSmartDash() & canDash
-        a.smartDash()
-      :?!s.inRange("triskelion")
-        equipL triskelion
-      :
-        c.useAbility_TH("heavy_hammer", Mjölnir) // "Guardian's Bane")
-
-    :?foe.count > 1
-      ?!c.permapotSetup
-        canDash = false
-      // foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
-      // low health or too many enemies, keep distance
-      ?!c.permapotSetup &
-      ^(s.getTotalHP("player") <= c.midhp |
-      ^ (foe.GetCount(foe.distance + s.getRange("crossbow")) > 3 &
-      ^  foe.distance < s.getRange("dash_min")))
-        fight("evade")
-
-      ?c.canApplyStun() |
-      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-      ^foe.debuffs.string ! "debuff_armor_fatigue")
-        a.ldtF("grappling")
-      :
-        fight("ranged")
-    :?a.canSmartDash() & canDash
-      a.smartDash()
-    :?!s.inRange("triskelion") |
-    ^(!s.inRange("sword") & totaltime % 2 = 0)
-      equipL triskelion
-      equipR hatchet
-    :
-      fight("melee")
-
 // .......... ENGAGE/WALKING LOGIC .......... //
 
 // Dysangelos pre-phase1 cutscene damage strat
@@ -512,11 +375,7 @@ var enduse = 0
   ?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
   :
-    ?a.compoundMaxArmor_default <= armor &
-    ^armor <= a.compoundMaxArmor_boosted
-      a.ldtF("defense regen max")
-    :
-      a.ldtF("defense regen fast")
+    a.ldtF("defense armor regen")
 
 :?(!c.permapotSetup &
 ^[118, 124, 108].Contains(foe.state) &
@@ -542,17 +401,93 @@ var enduse = 0
   ^c.canEngage()
     >c0,0,#red,ENGAGING
     a.ldtF("engage")
-
-  :?a.compoundMaxArmor_default <= armor &
-  ^armor <= a.compoundMaxArmor_boosted
-    a.ldtF("defense regen max")
   :
-    a.ldtF("defense regen fast")
+    a.ldtF("defense armor regen")
 
 // .............. COMBAT LOGIC .............. //
 
+// Voidweaver - use it if possible
+:?c.canUseAbility("voidweaver") &
+^foe.count > 1 & !c.permapotSetup &
+^c.canUnmakeVoidweaver()
+  ?c.canUseAbility("dash")
+    a.ldtF("dash")
+  :?!s.inRange("sword")
+    ?totaltime % 2 = 0 & !s.inRange("triskelion")
+      equipL triskelion
+    :
+      equipL sword
+    equipR @a.shC2@
+  :
+    c.devour("voidweaver")
+
 :?a.canSmartDash() & canDash
   a.smartDash()
+// if in range, get closer while trying to unmake with repeating bow
+:?foe.distance =
+^   math.Clamp(foe.distance,
+^              s.getRange("dash_min") + 1,
+^              s.getRange("crossbow"))
+  c.smoothCast(a.bR)
+
+// Calamity - reduce hp
+:?c.canUseAbility("wand_aether") &
+^(encounter.eliteMod = "berserk" | foe = "monarch" |
+^encounter.eliteMod = "blessed")
+  c.useAbility_OH("wand_aether", a.wAh, hand)
+// Reset buff
+:?foe.buffs.string = "stoic" &
+^c.canUseAbility("wand_vigor")
+  c.useAbility_OH("wand_vigor", a.wVh, hand)
+// Hinder regen
+:?encounter.eliteMod = "regen" &
+^c.canUseAbility("wand_fire")
+  c.useAbility_OH("wand_fire", a.wFh, hand)
+// Reduce damage
+:?foe = "elite" &
+^c.canUseAbility("wand_poison")
+  c.useAbility_OH("wand_poison", a.wPh, hand)
+// Stun enemies
+:?foe = "elite" &
+^c.canUseAbility("wand_ice")
+  c.useAbility_OH("wand_ice", a.wIh, hand)
+
+// Knockback farming
+/*:?foe ! "unpushable" &
+^c.canSmoothCast() &
+^s.inRange("crossbow") &
+^!c.permapotSetup
+  ?a.canSmartDash()
+    a.smartDash()
+  : // c.canSmoothCast()
+    >c0,0,#red,KNOCKBACK FARMING
+    a.ldtF("ranged knockback")*/
+
+// Ranged attacks
+:?foe.count > 1
+  ?item.GetCooldown("wand_stone") > 0
+    >c0,1,#yellow,GRAVITY WAND ON COOLDOWN
+  
+  // Align foes
+  ?c.canUseAbility("wand_stone")
+    c.useAbility_OH("wand_stone", a.wSh, hand)
+    >c0,0,#red,USING GRAVITY WAND
+
+  :?c.canUseAbility("heavy_hammer") & foe = "elite"
+    >c0,0,#red,HEAVY HAMMER
+    ?encounter.eliteMod = "plated"
+      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+    :
+      c.useAbility_TH("heavy_hammer", Mjölnir)
+
+  :?c.canApplyStun() |
+  ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
+  ^foe.debuffs.string ! "debuff_armor_fatigue")
+    a.ldtF("grappling")
+  :?c.permapotSetup
+    a.ldtF("big sword unmake")
+  :
+    equip Kubikiribocho
 
 :?foe = "phase" // Dysangelos fight logic
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
