@@ -427,7 +427,7 @@ var enduse = 0
       a.smartDash()
     :?c.permapotSetup
       ?c.canApplyStun() |
-      ^(stunTime = math.Clamp(stunTime, 1, 11) // frames &
+      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
       ^foe.debuffs.string ! "debuff_armor_fatigue")
         a.ldtF("grappling")
       :
@@ -470,7 +470,7 @@ var enduse = 0
         canDash = true
 
       ?c.canApplyStun() |
-      ^(stunTime = math.Clamp(stunTime, 1, 11) &
+      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
       ^foe.debuffs.string ! "debuff_armor_fatigue")
         a.ldtF("grappling")
       :
