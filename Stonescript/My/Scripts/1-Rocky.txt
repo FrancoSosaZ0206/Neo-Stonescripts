@@ -76,7 +76,7 @@ func fight(mode)
   :
     // 1. debuff, if possible
     a.smartDebuff()
-    
+
     ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
     :?a.canSmartDebuff() & c.permapotSetup &
@@ -139,6 +139,11 @@ func fight(mode)
 ^foe.debuffs.string = "chill:1"
   >c0,0,#cyan,ai debuffed!*/
 
+?canDash
+  >`1,17,#green,CAN DASH
+:
+  >`1,18,#red,CAN'T DASH
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?(c.permapotSetup &
@@ -147,6 +152,8 @@ func fight(mode)
   loc.Leave()
 
 // .............. SETUP LOGIC ............... //
+
+canDash = true
 
 c.potionType = "lucky"
 c.Init()
@@ -239,7 +246,7 @@ var enduse = 0
 
 ?old_t ! item.GetTreasureCount()
   enduse++
-  
+
   // speed up (picking chest)
   ?c.canUseAbility("staff_fire") &
   ^enduse > 5
