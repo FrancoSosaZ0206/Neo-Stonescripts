@@ -94,7 +94,7 @@ func fight(mode)
     ^(loc.stars > 15 | c.permapotSetup) &
     ^(foe = "monarch" | foe = "boss") &
     ^mode = "melee"
-      >c0,0,#red,1 tough foe, debuff melee!
+      // >c0,0,#red,1 tough foe, debuff melee!
       a.ldtF("sword debuff auto")
 
     // 2. Heal if needed
@@ -145,10 +145,11 @@ func fight(mode)
 ^foe.debuffs.string = "chill:1"
   >c0,0,#cyan,ai debuffed!*/
 
-?canDash
+/*?canDash
   >`1,17,#green,CAN DASH
 :
   >`1,18,#red,CAN'T DASH
+*/
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -326,7 +327,8 @@ var enduse = 0
 ^    (foe.debuffs.string ! "chill" & foe.time > 45  )))) |
 ^(foe ! "boss" & foe.debuffs.string ! "stun" &
 ^   ((foe.debuffs.string = "chill:6" & foe.time > 50) |
-^    (foe.debuffs.string ! "chill" & foe.time > 10))))
+^    (foe.debuffs.string ! "chill" & foe.time > 10))
+^))
   // reduce damage amap
   ?foe = "phase3" &
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
@@ -370,8 +372,6 @@ var enduse = 0
 ^c.canUnmakeVoidweaver()
   ?c.canUseAbility("dash")
     a.ldtF("dash")
-  :?c.canUseAbility("bash")
-    a.ldtF("bash")
   :?!s.inRange("sword")
     ?totaltime % 2 = 0 & !s.inRange("triskelion")
       equipL triskelion
@@ -385,7 +385,7 @@ var enduse = 0
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch")
-  ?a.canSmartDash()
+  ?a.canSmartDash() & canDash
     a.smartDash()
   :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_aether", a.wAh, hand)
@@ -399,7 +399,7 @@ var enduse = 0
 // reset buffs
 :?foe.buffs.string = "stoic" &
 ^c.canUseAbility("wand_vigor")
-  ?a.canSmartDash()
+  ?a.canSmartDash() & canDash
     a.smartDash()
   :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_vigor", a.wVh, hand)
@@ -413,7 +413,7 @@ var enduse = 0
 // hinder regen
 :?encounter.eliteMod = "regen" &
 ^c.canUseAbility("wand_fire")
-  ?a.canSmartDash()
+  ?a.canSmartDash() & canDash
     a.smartDash()
   :?foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_fire", a.wFh, hand)
@@ -426,7 +426,7 @@ var enduse = 0
       equipR @a.shC2@
 
 // Knockback farming
-:?foe ! "unpushable" &
+/*:?foe ! "unpushable" &
 ^c.canSmoothCast() &
 ^s.inRange("crossbow") &
 ^!c.permapotSetup
@@ -434,12 +434,12 @@ var enduse = 0
     a.smartDash()
   : // c.canSmoothCast()
     >c0,0,#red,KNOCKBACK FARMING
-    c.smoothCast(a.bS)
+    a.ldtF("ranged knockback")*/
 
-:?loc.stars > 15 & (
+:?loc.stars > 15 & foe ! "warcaster" & (
 ^(c.permapotSetup &
 ^(foe.GetCount(foe.distance + margin) > 1 &
-^s.inRange("wand") & foe ! "warcaster")) |
+^s.inRange("wand"))) |
 ^(!c.permapotSetup &
 ^foe.count > 1 &
 // ^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &

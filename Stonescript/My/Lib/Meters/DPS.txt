@@ -189,7 +189,8 @@ var DPS = "N/A" // damage per second
 func canUpdate(frameRate)
   ?frameRate > 0
     // only works when there's a boss
-    return foe = "boss" & totaltime % frameRate = 0
+    return (foe = "boss" | foe = "monarch") &
+    ^totaltime % frameRate = 0
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: canUpdate\nCAUSE: invalid <frameRate>:\n\n" + frameRate, false)
 
