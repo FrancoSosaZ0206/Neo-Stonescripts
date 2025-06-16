@@ -174,8 +174,8 @@ func canUseAbility(abilityID)
 
     // Special case, stone wand doesn't require armor.
     :?abilityID = "wand_stone"
-      result = result & foe.count > 1 /*&
-      ^item.CanActivate("wand_stone")*/
+      result = result & foe.count > 1 &
+      ^item.CanActivate("wand_stone")
 
     :?abilityID = "staff" | abilityID = "wand"
       result = result &

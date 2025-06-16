@@ -393,10 +393,9 @@ var enduse = 0
 ^c.isDead() |
 ^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
 ^ foe.damage > 1) | // dysan state 107 fight (flying)
-^foe.distance > s.getRange("dash_max") | // too far to dash
+^!s.inRange("crossbow") | // too far to dash
 ^foe.state = -1 | // sleep state
-^(foe.state = 2 & // engaging state
-^ foe.distance > s.getRange("dash_max"))
+^(foe.state = 2 & foe.debuffs.string ! "stun") // engaging state
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     >c0,0,#red,ENGAGING
@@ -426,9 +425,12 @@ var enduse = 0
 // if in range, get closer while trying to unmake with repeating bow
 :?foe.distance =
 ^   math.Clamp(foe.distance,
-^              s.getRange("dash_min") + 1,
+^              s.getRange("dash_max") + 1,
 ^              s.getRange("crossbow"))
-  c.smoothCast(a.bR)
+  ?c.permapotSetup
+    c.smoothCast(a.bR)
+  :
+    a.ldtF("defense armor regen")
 
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
@@ -463,15 +465,11 @@ var enduse = 0
     >c0,0,#red,KNOCKBACK FARMING
     a.ldtF("ranged knockback")*/
 
-// Ranged attacks
-:?foe.count > 1
-  ?item.GetCooldown("wand_stone") > 0
-    >c0,1,#yellow,GRAVITY WAND ON COOLDOWN
-  
+// AOE Strat
+:?foe.GetCount(foe.distance + margin) > 1
   // Align foes
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
-    >c0,0,#red,USING GRAVITY WAND
 
   :?c.canUseAbility("heavy_hammer") & foe = "elite"
     >c0,0,#red,HEAVY HAMMER
@@ -480,10 +478,12 @@ var enduse = 0
     :
       c.useAbility_TH("heavy_hammer", Mjölnir)
 
+  // Perma-stun
   :?c.canApplyStun() |
   ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
   ^foe.debuffs.string ! "debuff_armor_fatigue")
     a.ldtF("grappling")
+
   :?c.permapotSetup
     a.ldtF("big sword unmake")
   :
