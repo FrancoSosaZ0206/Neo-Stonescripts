@@ -79,16 +79,22 @@ func fight(mode)
 
     ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
-    :?a.canSmartDebuff() & c.permapotSetup &
-    ^foe = "elite" & foe.buffs.string ! "tenacious"
-      ?foe.GetCount(foe.distance + margin) > 1
-        a.ldtF("magic debuff")
-      :
-        a.ldtF("sword debuff auto")
-    :?(loc.stars > 15 | c.permapotSetup) &
+
+    ?c.permapotSetup &
+    ^a.canSmartDebuff() & foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) > 1
+      a.ldtF("magic debuff")
+    :?!c.permapotSetup &
+    ^a.canSmartDebuff() & foe = "elite" &
+    ^foe.count = math.Clamp(foe.count, 2, 3)
+      >c0,0,#red,3 elites, debuff ranged!
+      a.ldtF("ranged debuff")
+
+    :?(c.canApplyAny() | c.canApplyBurn()) &
+    ^(loc.stars > 15 | c.permapotSetup) &
     ^(foe = "monarch" | foe = "boss") &
-    ^mode = "melee" &
-    ^(c.canApplyAny() | c.canApplyBurn())
+    ^mode = "melee"
+      >c0,0,#red,1 tough foe, debuff melee!
       a.ldtF("sword debuff auto")
 
     // 2. Heal if needed
@@ -462,6 +468,7 @@ var enduse = 0
       a.ldtF("sword unmake")
   : // foe = "elite"
     ?c.canUseAbility("heavy_hammer")
+      >c0,0,#red,HEAVY HAMMER
       ?a.canSmartDash() & canDash
         a.smartDash()
       :?!s.inRange("triskelion")
