@@ -257,7 +257,8 @@ var enduse = 0
 // Summons
 :?c.canSummon("voidweaver") &
 ^loc.stars > 15 &
-^screen.i < boss_screen - 1 // not a cutscene
+^(screen.i = 0 |
+^screen.i = math.Clamp(screen.i, 2, boss_screen - 2)) // not a cutscene
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
 ^(loc.stars <= 15 | screen.i >= boss_screen - 1)
@@ -426,7 +427,8 @@ var enduse = 0
       a.smartDash()
     :?c.permapotSetup
       ?c.canApplyStun() |
-      ^stunTime = math.Clamp(stunTime, 1, 11) // frames
+      ^(stunTime = math.Clamp(stunTime, 1, 11) // frames &
+      ^foe.debuffs.string ! "debuff_armor_fatigue")
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
@@ -468,7 +470,8 @@ var enduse = 0
         canDash = true
 
       ?c.canApplyStun() |
-      ^stunTime = math.Clamp(stunTime, 1, 11)
+      ^(stunTime = math.Clamp(stunTime, 1, 11) &
+      ^foe.debuffs.string ! "debuff_armor_fatigue")
         a.ldtF("grappling")
       :
         fight("ranged")
