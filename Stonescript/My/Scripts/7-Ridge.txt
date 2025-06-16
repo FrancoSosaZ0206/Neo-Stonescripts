@@ -2,14 +2,12 @@
 //  ┃ ▄▀▄▀▄▀▄▀ START OF "7-Ridge" ▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
 // //////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities
 var c = import My/Lib/Combat
 var s = import My/Lib/Stats
 var a = import My/Lib/Arsenal
-
 
 // /////////////// VARIABLES //////////////// //
 
@@ -26,7 +24,6 @@ var canDash   = true
 
 var boss_screen = null
 var boss_cutscenes = [] // TO DO
-
 
 // /////////////// FUNCTIONS //////////////// //
 
@@ -62,7 +59,7 @@ func fight(mode)
     ?(foe = "monarch" | foe = "boss") &
     ^mode = "melee" &
     ^(c.canApplyAny() | c.canApplyBurn())
-      a.ldtF("sword debuff")
+      a.ldtF("sword debuff auto")
 
     // 2. Heal if needed
     :?hp ! maxhp &
@@ -97,7 +94,6 @@ func fight(mode)
         a.ldtF("magic dmg")
       :
         a.ldtF("ranged dmg")
-
 
 // /////////////// PROCEDURE //////////////// //
 
@@ -155,8 +151,6 @@ c.AAC(a.hVeff, a.sFeff)
 :?c.canUseAbility_DS("blade") & loc.stars > 15
   c.useAbility_DS("blade")
 
-// ***************************************** //
-
 var old_t = item.GetTreasureCount()
 var enduse = 0
 ?loc.loop 
@@ -165,19 +159,15 @@ var enduse = 0
 
 ?old_t ! item.GetTreasureCount()
   enduse++
-
-// speed up
-:?item.GetCooldown("staff_fire") <= 0 &
-^armor > 6 &
-^((old_t ! item.GetTreasureCount() &
-^enduse < 30) | pickup = "treasure")
-  >c0,4,#yellow,INFERNAL STAFF CHEST
-  c.useAbility_TH("staff_fire", a.stFh)
-// ***************************************** //
+  
+  // speed up (picking chest)
+  ?c.canUseAbility("staff_fire") &
+  ^enduse >= 15
+    c.useAbility_TH("staff_fire", a.stFh)
 
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
-// ^(!s.inRange("dash") | foe.distance = 9999) &
+^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
 ^!c.permapotSetup
@@ -411,7 +401,6 @@ var enduse = 0
     c.useAbility_TH("bardiche", Kubikiribocho)
   :
     fight("melee")
-
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄ END OF "7-Ridge" ▀▄▀▄▀▄▀▄▀ ┃  //

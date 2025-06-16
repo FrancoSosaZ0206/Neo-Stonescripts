@@ -75,9 +75,9 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?loc.stars <= 15 & c.canApplyWeaken()
+    ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
-    :?loc.stars > 15 &
+    :?(loc.stars > 15 | c.permapotSetup) &
     ^(foe = "monarch" | foe = "boss") &
     ^mode = "melee" &
     ^(c.canApplyAny() | c.canApplyBurn())
@@ -234,8 +234,7 @@ var enduse = 0
   
   // speed up (picking chest)
   ?c.canUseAbility("staff_fire") &
-  ^enduse >= 15
-    >c0,4,#yellow,INFERNAL STAFF CHEST
+  ^enduse > 5
     c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)

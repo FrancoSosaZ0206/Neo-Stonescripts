@@ -2,7 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄ START OF "main" ▀▄▀▄▀▄▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
 /* // //////////// FILE INFO //////////////// //
 
 Multi-location, general script
@@ -93,7 +92,6 @@ Written by IronHawk (Tom Crow)
 
 Enjoy! ;) */
 
-
 /* //////////////// MOBILE ////////////////// //
 // ↓↓↓ COPY FROM HERE ↓↓↓
 
@@ -111,7 +109,6 @@ import My/Scripts/main
 
 // ↑↑↑ COPY UNTIL HERE ↑↑↑
 // ////////////////////////////////////////// */
-
 
 // /////////////////// PC /////////////////// //
 
@@ -133,9 +130,8 @@ import My/Cosmetics
   import My/Scripts/Hotspring_Shop
 :?loc = "undead_crypt_intro" // Haunted Gate
   import My/Scripts/Gate
-
 :
-  import UI/FoeStateTracker
+  // import UI/FoeStateTracker
   var tm = import My/Lib/Meters/Times
   var dps = import My/Lib/Meters/DPS
 
@@ -158,7 +154,6 @@ import My/Cosmetics
     import My/Scripts/7-Ridge
   :?loc = "temple"
     import My/Scripts/8-Temple
-
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "main" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //

@@ -406,8 +406,15 @@ func ldtF(mode)
     ?c.permapotSetup
       equipL star
     :
-      equipL triskelion
-      equipR star
+      ?pickup = "treasure"
+        equipL star
+        ?armor < compoundMaxArmor_default
+          equipR @shC2@
+        :
+          equipR @shC1@
+      :
+        equipL triskelion
+        equipR star
   :?mode = "harvest"
     ?loc = "rocky_plateau"
       equip shovel
