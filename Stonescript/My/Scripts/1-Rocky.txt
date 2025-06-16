@@ -145,11 +145,10 @@ func fight(mode)
 ^foe.debuffs.string = "chill:1"
   >c0,0,#cyan,ai debuffed!*/
 
-/*?canDash
+?canDash
   >`1,17,#green,CAN DASH
 :
   >`1,18,#red,CAN'T DASH
-*/
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -427,6 +426,7 @@ var enduse = 0
 ^   math.Clamp(foe.distance,
 ^              s.getRange("dash_max") + 1,
 ^              s.getRange("crossbow"))
+  >
   ?c.permapotSetup
     c.smoothCast(a.bR)
   :
@@ -441,10 +441,6 @@ var enduse = 0
 :?foe.buffs.string = "stoic" &
 ^c.canUseAbility("wand_vigor")
   c.useAbility_OH("wand_vigor", a.wVh, hand)
-// Hinder regen
-:?encounter.eliteMod = "regen" &
-^c.canUseAbility("wand_fire")
-  c.useAbility_OH("wand_fire", a.wFh, hand)
 // Reduce damage
 :?foe = "elite" &
 ^c.canUseAbility("wand_poison")
@@ -453,17 +449,15 @@ var enduse = 0
 :?foe = "elite" &
 ^c.canUseAbility("wand_ice")
   c.useAbility_OH("wand_ice", a.wIh, hand)
+// Hinder regen
+:?encounter.eliteMod = "regen" &
+^c.canUseAbility("wand_fire")
+  c.useAbility_OH("wand_fire", a.wFh, hand)
 
 // Knockback farming
-/*:?foe ! "unpushable" &
-^c.canSmoothCast() &
-^s.inRange("crossbow") &
-^!c.permapotSetup
-  ?a.canSmartDash()
-    a.smartDash()
-  : // c.canSmoothCast()
-    >c0,0,#red,KNOCKBACK FARMING
-    a.ldtF("ranged knockback")*/
+/* :?c.canKbFarm()
+  >c0,0,#red,KNOCKBACK FARMING
+  c.smoothCast(a.bS) */
 
 // AOE Strat
 :?foe.GetCount(foe.distance + margin) > 1

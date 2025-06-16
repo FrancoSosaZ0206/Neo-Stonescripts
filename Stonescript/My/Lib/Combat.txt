@@ -716,14 +716,16 @@ func AAC(itemLeft, itemRight)
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
 
+/* Smooth Casting is a trick where you
+hold the triskelion stone every certain
+amount of frames to enable walking while
+dealing damage.
+
+Requires berserk potion. */
 func canSmoothCast()
   return !permapotSetup &
   ^!s.inRange("triskelion") &
   ^buffs.string = "⊙" // berserk potion
-/* Smooth Casting is a trick where you
-hold the triskelion stone every certain
-amount of frames to enable walking while
-dealing damage. */
 func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL triskelion
@@ -732,6 +734,22 @@ func smoothCast(itemName)
   :
     equip @itemName@
     >c0,1,#yellow,attacking
+
+/* Checks if the player can use "Knockback Farming",
+a strategy where you can walk while damaging and
+pushing back foes, minimizing the time the stonehead
+is still.
+
+Requires Smooth Casting. */
+func canKbFarm()
+  return foe ! "unpushable" & // immune to knockback
+  ^!permapotSetup &
+  ^canSmoothCast() & // smooth cast is required
+  // between dashing and crossbow range
+  ^foe.distance =
+  ^   math.Clamp(foe.distance,
+  ^              s.getRange("dash_max"),
+  ^              s.getRange("crossbow"))
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
