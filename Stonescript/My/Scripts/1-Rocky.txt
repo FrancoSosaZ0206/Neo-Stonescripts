@@ -75,7 +75,9 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?(foe = "monarch" | foe = "boss") &
+    ?loc.stars <= 15 & c.canApplyWeaken()
+      a.ldtF("sword debuff weaken")
+    :?(foe = "monarch" | foe = "boss") &
     ^mode = "melee" &
     ^(c.canApplyAny() | c.canApplyBurn())
       a.ldtF("sword debuff")
@@ -220,36 +222,24 @@ c.AAC(a.hVeff, a.sFeff)
 ?c.canUsePotion() & c.permapotSetup
   activate potion
 
-// ***************************************** //
-
 var old_t = item.GetTreasureCount()
 var enduse = 0
 ?loc.loop 
   old_t = item.GetTreasureCount()
   enduse = 0
 
-?screen.i = boss_screen
-  >`1,17,#magenta,
-  ^old_t = @old_t@\n
-  ^treasures = @item.GetTreasureCount()@\n
-  ^counter   = @enduse@\n\n
-  ^inf cd = @item.GetCooldown("staff_fire")@\n
-  ^@armor@ > 6 -> @armor > 6@
-
 ?old_t ! item.GetTreasureCount()
   enduse++
-  /*>c-10,0,#rainFF,+1 chest!\n\n
-  ^DYSAN DEAD!!!*/
+  
+  // speed up (picking chest)
+  ?item.GetCooldown("staff_fire") <= 0 &
+  ^armor > 6 &
+  // c.canUseAbility("staff_fire") &
+  ^enduse >= 30
+    >c0,4,#yellow,INFERNAL STAFF CHEST
+    c.useAbility_TH("staff_fire", a.stFh)
 
-// speed up
-:?item.GetCooldown("staff_fire") <= 0 &
-^armor > 6 &
-^((old_t ! item.GetTreasureCount() &
-^enduse < 30) | pickup = "treasure")
-  >c0,4,#yellow,INFERNAL STAFF CHEST
-  c.useAbility_TH("staff_fire", a.stFh)
-// ***************************************** //
-
+// speed up (normal)
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
 ^(!s.inRange("dash") | foe.distance = 9999) &

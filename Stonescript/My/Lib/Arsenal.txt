@@ -540,12 +540,12 @@ func ldtF(mode)
         c.moondialing(Existential Crisis, sword) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?c.canApplyChill(6)
+        ?c.canApplyChill(6) | mode = "chill"
           equipL Almafuerte
-        :?c.canApplyWeaken()
+        :?c.canApplyWeaken() | mode = "weaken"
           equipL Death's Kiss
           //'
-        :?c.canApplyBurn()
+        :?c.canApplyBurn() | mode = "burn"
           equipL @sFeff@
 
       : // !c.permapotSetup
