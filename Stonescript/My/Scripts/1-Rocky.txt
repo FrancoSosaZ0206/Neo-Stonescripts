@@ -450,7 +450,7 @@ var enduse = 0
       :?!s.inRange("triskelion")
         equipL triskelion
       :
-        c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+        c.useAbility_TH("heavy_hammer", Mjölnir) // "Guardian's Bane")
 
     :?a.canSmartDash() & canDash
       a.smartDash()
