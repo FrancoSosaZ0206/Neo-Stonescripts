@@ -441,8 +441,6 @@ var enduse = 0
         a.ldtF("grappling")
       :
         a.ldtF("big sword unmake")
-    :?a.canSmartDash()
-      a.smartDash()
     :?!s.inRange("triskelion")
       equipL triskelion
     :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
@@ -464,16 +462,16 @@ var enduse = 0
     :?a.canSmartDash() & canDash
       a.smartDash()
     :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
-      // low health, keep distance
-      ?s.getTotalHP("player") <= c.midhp &
-      ^!c.permapotSetup
+      // low health or too many enemies, keep distance
+      ?!c.permapotSetup &
+      ^(s.getTotalHP("player") <= c.midhp |
+      ^ foe.GetCount(foe.distance + s.getRange("crossbow")) > 3) &
+      ^(c.canUseAbility("staff_stone") | c.canUseAbility("mind"))
         canDash = false
 
-        ?foe.distance < s.getRange("dash_min") &
-        ^c.canUseAbility("staff_stone")
+        ?c.canUseAbility("staff_stone")
           c.useAbility_TH("staff_stone", a.stSh)
-        :?foe.distance < s.getRange("dash_min") &
-        ^c.canUseAbility("mind")
+        : // c.canUseAbility("mind")
           a.ldtF("mind")
       :
         canDash = true

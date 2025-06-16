@@ -156,7 +156,7 @@ c.AAC(a.hVeff, a.sFeff)
 
 ?c.canUsePotion() & c.permapotSetup
   activate potion
-:?c.canUseAbility_DS("blade") & loc.stars > 15
+:?c.canUseAbility_DS("blade")
   c.useAbility_DS("blade")
 
 var old_t = item.GetTreasureCount()
