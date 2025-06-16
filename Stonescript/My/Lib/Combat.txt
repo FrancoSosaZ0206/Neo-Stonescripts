@@ -173,12 +173,8 @@ func canUseAbility(abilityID)
       result = result | isCasting(abilityID) // make sure not to change it while casting the ability
 
     :?abilityID = "staff" | abilityID = "wand"
-      result = result & ((10 * armor) + armor.f > 10 * s.getArmor(abilityID))
-
-      ?abilityID = "staff_fire"
-        >`1,15,#magenta,armor > req armor\n
-        ^@(10 * armor) + armor.f@ > @10 * s.getArmor(abilityID)@\n
-        ^@(10 * armor) + armor.f > 10 * s.getArmor(abilityID)@
+      result = result &
+      ^((10 * armor) + armor.f > 10 * s.getArmor(abilityID))
 
       ?abilityID = "wand_poison"
         result = result &
@@ -724,8 +720,7 @@ func AAC(itemLeft, itemRight)
 func canSmoothCast()
   return !permapotSetup &
   ^!s.inRange("triskelion") &
-  ^(buffs.string = "⊙" | // berserk potion
-  ^ buffs.string = "buff_infernal")
+  ^buffs.string = "⊙" // berserk potion
 /* Smooth Casting is a trick where you
 hold the triskelion stone every certain
 amount of frames to enable walking while
@@ -734,8 +729,10 @@ func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL trisk
     equipR hatchet
+    >c0,0,#cyan,advancing
   :
     equip @itemName@
+    >c0,1,#yellow,attacking
 
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

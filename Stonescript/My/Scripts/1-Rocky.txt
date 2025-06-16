@@ -318,8 +318,9 @@ var enduse = 0
 ^ (foe = "phase3" & foe.damage > 1 &
 ^   ((foe.debuffs.string = "chill:6" & foe.time > 85) |
 ^    (foe.debuffs.string ! "chill" & foe.time > 45  )))) |
-^(foe ! "boss" & foe.time > 50 &
-^ foe.debuffs.string ! "stun"))
+^(foe ! "boss" & foe.debuffs.string ! "stun" &
+^   ((foe.debuffs.string = "chill:6" & foe.time > 50) |
+^    (foe.debuffs.string ! "chill" & foe.time > 10))))
   // reduce damage amap
   ?foe = "phase3" &
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
@@ -329,7 +330,8 @@ var enduse = 0
       c.useAbility_OH("wand_poison", a.wPh, hand)
 
   // foe will break through armor
-  :?armor < s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+  :?armor < s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) &
+  ^(foe = "phase" | foe = "monarch")
     // Avoid hit entirely
     ?foe = "phase3" & foe.damage > 1 &
     ^foe.debuffs.string ! "feeble" &
@@ -433,7 +435,8 @@ var enduse = 0
 ^(foe.GetCount(foe.distance + margin) > 1 &
 ^s.inRange("wand") & foe ! "warcaster")) |
 ^(!c.permapotSetup &
-^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &
+^foe.count > 1 &
+// ^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &
 ^s.inRange("crossbow")))
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
@@ -459,29 +462,23 @@ var enduse = 0
       a.ldtF("sword unmake")
   : // foe = "elite"
     ?c.canUseAbility("heavy_hammer")
-      ?a.canSmartDash()
+      ?a.canSmartDash() & canDash
         a.smartDash()
       :?!s.inRange("triskelion")
         equipL triskelion
       :
         c.useAbility_TH("heavy_hammer", Mjölnir) // "Guardian's Bane")
 
-    :?a.canSmartDash() & canDash
-      a.smartDash()
-    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
+    :?foe.count > 1
+      ?!c.permapotSetup
+        canDash = false
+      // foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
       // low health or too many enemies, keep distance
       ?!c.permapotSetup &
       ^(s.getTotalHP("player") <= c.midhp |
-      ^ foe.GetCount(foe.distance + s.getRange("crossbow")) > 3) &
-      ^(c.canUseAbility("staff_stone") | c.canUseAbility("mind"))
-        canDash = false
-
-        ?c.canUseAbility("staff_stone")
-          c.useAbility_TH("staff_stone", a.stSh)
-        : // c.canUseAbility("mind")
-          a.ldtF("mind")
-      :
-        canDash = true
+      ^ (foe.GetCount(foe.distance + s.getRange("crossbow")) > 3 &
+      ^  foe.distance < s.getRange("dash_min")))
+        fight("evade")
 
       ?c.canApplyStun() |
       ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
@@ -489,6 +486,8 @@ var enduse = 0
         a.ldtF("grappling")
       :
         fight("ranged")
+    :?a.canSmartDash() & canDash
+      a.smartDash()
     :?!s.inRange("triskelion") |
     ^(!s.inRange("sword") & totaltime % 2 = 0)
       equipL triskelion

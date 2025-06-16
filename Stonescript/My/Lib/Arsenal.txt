@@ -758,7 +758,10 @@ func ldtF(mode)
         equipR Frosty Crust
         // @bVeff@
       :?mode = "unmake"
-        equip @bAeff@
+        ?c.canSmoothCast()
+          c.smoothCast(bAeff)
+        :
+          equip @bAeff@
 
       :?mode = "debuff"
         ?effCount < effCap // c.canApplyChill(6)
@@ -775,7 +778,10 @@ func ldtF(mode)
         equip bS
 
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
-        equip @bAeff@
+        ?c.canSmoothCast()
+          c.smoothCast(bAeff)
+        :
+          equip @bAeff@
 
         /*?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
           equip @bIDmg@
