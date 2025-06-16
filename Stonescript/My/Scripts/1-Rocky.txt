@@ -233,10 +233,8 @@ var enduse = 0
   enduse++
   
   // speed up (picking chest)
-  ?item.GetCooldown("staff_fire") <= 0 &
-  ^armor > 6 &
-  // c.canUseAbility("staff_fire") &
-  ^enduse >= 30
+  ?c.canUseAbility("staff_fire") &
+  ^enduse >= 15
     >c0,4,#yellow,INFERNAL STAFF CHEST
     c.useAbility_TH("staff_fire", a.stFh)
 
@@ -299,8 +297,12 @@ var enduse = 0
 // Normal attacks
 :?foe.state = 32 & (
 ^(foe = "scout" & foe.time > 50) |
-^((foe = "phase1" & foe.time > 60) |
-^ (foe = "phase3" & foe.time > 85 & foe.damage > 1)) |
+^((foe = "phase1" &
+^  ((foe.debuffs.string = "chill:6" & foe.time > 60) |
+^   (foe.debuffs.string ! "chill" & foe.time > 20))) |
+^ (foe = "phase3" & foe.damage > 1 &
+^   ((foe.debuffs.string = "chill:6" & foe.time > 85) |
+^    (foe.debuffs.string ! "chill" & foe.time > 45  )))) |
 ^(foe ! "boss" & foe.time > 50 &
 ^ foe.debuffs.string ! "stun"))
   // reduce damage amap
