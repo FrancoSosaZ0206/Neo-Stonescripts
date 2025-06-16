@@ -74,8 +74,9 @@ func fight(mode)
     :
       a.ldtF("defense")
   :
-    a.smartDebuff()
     // 1. debuff, if possible
+    a.smartDebuff()
+    
     ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
     :?a.canSmartDebuff() & c.permapotSetup &

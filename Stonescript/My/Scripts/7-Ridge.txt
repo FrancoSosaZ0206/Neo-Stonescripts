@@ -56,7 +56,15 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    ?(foe = "monarch" | foe = "boss") &
+    a.smartDebuff()
+    
+    ?a.canSmartDebuff() & c.permapotSetup &
+    ^foe = "elite" & foe.buffs.string ! "tenacious"
+      ?foe.GetCount(foe.distance + margin) > 1
+        a.ldtF("magic debuff")
+      :
+        a.ldtF("sword debuff auto")
+    :?(foe = "monarch" | foe = "boss") &
     ^mode = "melee" &
     ^(c.canApplyAny() | c.canApplyBurn())
       a.ldtF("sword debuff auto")
@@ -275,7 +283,8 @@ var enduse = 0
 // Knockback farming
 :?foe ! "unpushable" &
 ^c.canSmoothCast() &
-^s.inRange("crossbow")
+^s.inRange("crossbow") &
+^!c.permapotSetup
   ?a.canSmartDash()
     a.smartDash()
   : // c.canSmoothCast()
@@ -298,10 +307,10 @@ var enduse = 0
       a.smartDash()
     :?c.permapotSetup
       ?c.canApplyStun() |
-      ^stunTime = math.Clamp(stunTime, 1, 11) // frames
+      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
+      ^foe.debuffs.string ! "debuff_armor_fatigue")
         a.ldtF("grappling")
       :
-        >`1,10,#red,foe ! elite
         a.ldtF("big sword unmake")
     :?a.canSmartDash()
       a.smartDash()
@@ -323,21 +332,29 @@ var enduse = 0
       :
         c.useAbility_TH("heavy_hammer", "Guardian's Bane")
 
+    :?a.canSmartDash() & canDash
+      a.smartDash()
     :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
-      ?foe.distance < s.getRange("dash_min") &
-      ^c.canUseAbility("staff_stone")
-        c.useAbility_TH("staff_stone", a.stSh)
-      :?foe.distance < s.getRange("dash_min") &
-      ^c.canUseAbility("mind")
-        a.ldtF("mind")
+      // low health, keep distance
+      ?s.getTotalHP("player") <= c.midhp &
+      ^!c.permapotSetup
+        canDash = false
 
-      :?c.canApplyStun() |
-      ^stunTime = math.Clamp(stunTime, 1, 11)
+        ?foe.distance < s.getRange("dash_min") &
+        ^c.canUseAbility("staff_stone")
+          c.useAbility_TH("staff_stone", a.stSh)
+        :?foe.distance < s.getRange("dash_min") &
+        ^c.canUseAbility("mind")
+          a.ldtF("mind")
+      :
+        canDash = true
+
+      ?c.canApplyStun() |
+      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
+      ^foe.debuffs.string ! "debuff_armor_fatigue")
         a.ldtF("grappling")
       :
         fight("ranged")
-    :?c.canSmartDash()
-      c.smartDash()
     :?!s.inRange("triskelion") |
     ^(!s.inRange("sword") & totaltime % 2 = 0)
       equipL triskelion
