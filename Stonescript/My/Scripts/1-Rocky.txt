@@ -375,7 +375,7 @@ var enduse = 0
     c.useAbility_TH("bardiche", Kubikiribocho)
 
 :?ai.walking & !s.inRange("crossbow")
-  >c0,0,#red,WALK & ENGAGE | ARMOR
+  >c0,0,#red,WALKING ENGAGE | ARMOR
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     >c0,1,#red,ENGAGING
@@ -383,19 +383,9 @@ var enduse = 0
   :
     a.ldtF("defense armor regen")
 
-:?!ai.walking &
-^ (ai.paused | !ai.enabled |
-^  (ai.idle & foe.distance > s.getRange("dash_min")))
-  >c0,0,#red,IDLE & ENGAGE | ARMOR
+:?ai.paused | !ai.enabled
+  >c0,0,#red,STATIC ENGAGE | ARMOR
   a.ldtF("defense armor regen")
-
-/*^ ((ai.idle | // waiting for animation to complete
-^   (foe.state = 2 & // engaging state
-^    foe.debuffs.string ! "stun")) & // not stunned
-^  foe.distance > s.getRange("dash_min")) |
-^ foe.state = 4 | // foe is dead
-^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
-^  foe.damage > 1)) // dysan state 107 fight (flying)*/
 
 // .............. COMBAT LOGIC .............. //
 
@@ -475,13 +465,14 @@ var enduse = 0
     a.ldtF("grappling")
 
   :?c.permapotSetup
+    >c0,0,#red,FIGHT RANGED AOE
     fight("ranged")
   :
     equip Kubikiribocho
 
 :?foe = "phase" // Dysangelos fight logic
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
-  ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
+  ^c.isCinderwispCap(a.maxIgnitions_Default) // reached ignition cap
     c.devour("cinderwisp")
 
   ?foe ! "phase3"
