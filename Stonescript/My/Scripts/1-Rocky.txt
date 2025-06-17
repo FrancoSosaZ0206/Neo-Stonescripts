@@ -324,7 +324,9 @@ c.AAC(a.hVeff, a.sFeff)
 ^ (foe = "phase3" & foe.damage > 1 &
 ^   ((foe.debuffs.string = "chill:6" & foe.time > 85) |
 ^    (foe.debuffs.string ! "chill" & foe.time > 45  )))) |
-^(foe ! "boss" & foe.debuffs.string ! "stun" &
+^(foe ! "boss" &
+^ foe.debuffs.string ! "stun" &
+^ s.inRange("dash_min") &
 ^   ((foe.debuffs.string = "chill:6" & foe.time > 50) |
 ^    (foe.debuffs.string ! "chill" & foe.time > 10))
 ^))
