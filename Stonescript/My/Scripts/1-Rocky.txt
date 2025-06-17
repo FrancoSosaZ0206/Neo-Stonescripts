@@ -2,7 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
 // //////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
@@ -10,7 +9,6 @@ var u     = import My/Lib/Utilities
 var c     = import My/Lib/Combat
 var s     = import My/Lib/Stats
 var a     = import My/Lib/Arsenal
-
 
 // /////////////// VARIABLES //////////////// //
 
@@ -193,6 +191,11 @@ func fight(mode)
 ?old_t ! item.GetTreasureCount()
   enduse++
 
+  // speed up (picking chest)
+  ?c.canUseAbility("staff_fire") &
+  ^enduse > 5 & !(loc.stars > 15 & nRuns = 1)
+    c.useAbility_TH("staff_fire", a.stFh)
+
 // Set up boss_screen
 ?!boss_screen
   ?loc.stars <= 10 // cyan and white
@@ -208,6 +211,12 @@ func fight(mode)
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
+
+// BFG logic
+?nRuns > 1
+  c.screenMngr_DS("blade", 2, boss_screen - 3)
+  ?c.canUseAbility_DS("blade")
+    c.useAbility_DS("blade")
 
 canDash = true
 
@@ -229,31 +238,18 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
-?c.canUsePotion() & c.permapotSetup & !buffs.string
+?c.canUsePotion() & c.permapotSetup
   activate potion
 
 // Permapot equipment
 ?c.permapotSetup
   a.ldtF("permapot")
 
-// BFG logic
-?nRuns > 1
-  c.screenMngr_DS("blade", 2, boss_screen - 3)
-  ?c.canUseAbility_DS("blade")
-    c.useAbility_DS("blade")
-
 c.AAC(a.hVeff, a.sFeff)
 
 // Initial equipments
 ?loc.begin
   a.ldtF("default")
-  >c0,0,#red,Default equipment
-
-// speed up (picking chest)
-:?c.canUseAbility("staff_fire") &
-^old_t ! item.GetTreasureCount() &
-^enduse > 5 & !(loc.stars > 15 & nRuns = 1)
-  c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
@@ -261,7 +257,10 @@ c.AAC(a.hVeff, a.sFeff)
 ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
-^!(loc.stars > 15 & nRuns = 1)
+^!(loc.stars > 15 &
+^(nRuns = 1 |
+// Don't use it when facing the scout
+^(nRuns > 1 & screen.i = 1 & foe = "scout" & foe.count = 1)))
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -456,10 +455,10 @@ c.AAC(a.hVeff, a.sFeff)
 // AOE Strat
 :?foe.GetCount(foe.distance + margin) > 1
   // Align foes
-  ?c.canUseAbility("wand_stone")
-    c.useAbility_OH("wand_stone", a.wSh, hand)
+  /*?c.canUseAbility("wand_stone")
+    c.useAbility_OH("wand_stone", a.wSh, hand)*/
 
-  :?c.canUseAbility("heavy_hammer") & foe = "elite"
+  ?c.canUseAbility("heavy_hammer") & foe = "elite"
     ?encounter.eliteMod = "plated"
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
@@ -536,14 +535,16 @@ c.AAC(a.hVeff, a.sFeff)
 
 : // 1v1
   // Tanky foe, use bardiche ability to lower its hitpoints
-  ?c.canUseAbility("bardiche") &
-  ^(foe = "scout" |
-  ^ (foe = "monarch" &
-  ^  foe.GetCount(foe.distance + margin) = 1))
-    c.useAbility_TH("bardiche", Kubikiribocho)
+  ?(foe = "scout" | foe = "monarch") &
+  ^foe.GetCount(foe.distance + margin) = 1 &
+  ^(c.canUseAbility("bardiche") |
+  ^c.canUseAbility("staff_poison"))
+    ?c.canUseAbility("staff_poison")
+      c.useAbility_TH("staff_poison", a.stPh)
+    : // c.canuseAbility("bardiche")
+      c.useAbility_TH("bardiche", Kubikiribocho)
   :
     fight("melee")
-
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀ ┃  //

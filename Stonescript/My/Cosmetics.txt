@@ -8,7 +8,13 @@
   import Hats/MushroomHat
   import Pets/Skully
   import Weapons/LanternTalisman
+  import Weapons/AR
+
 
   // Foe cosmetics
-  import Foes/PallasCrown
-  import Foes/SurferGuardian
+  ?loc = "undead_crypt"
+    import Foes/PallasCrown
+  :?loc = "bronze_mine"
+    import Foes/SurferGuardian
+  :
+    import Foes/FlowerFoes
