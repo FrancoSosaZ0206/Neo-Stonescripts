@@ -104,7 +104,7 @@ Frosty Crust        = *max wand ice dI
 
 Subspace Bubble     = *max shield dashing HoH24
 Speedy Hammer       = *max hammer stone
-Kubikiribocho       = *max bardiche (enchanted: crit)
+Kubikiribocho       = *max bardiche (enchanted: crit/damage)
 Mjölnir             = *max heavy_hammer (enchanted: damage)
 Guardian's Wrath    = *max heavy_hammer shiny (enchanted: armor fatigue)
 
@@ -294,7 +294,7 @@ var heavyHammerDmg = 145
 
 // Assuming *max level
 var bardicheDmg_Default = 52
-var bardicheDmg_Boosted = 0 // TO DO: add when I boost it
+var bardicheDmg_Boosted = 107
 var bardicheMult_Default = 4
 var bardicheMult_Boosted = 13.5
 

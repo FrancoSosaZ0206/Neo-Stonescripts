@@ -277,9 +277,6 @@ func isCasting(itemName)
   return
   ^(item.left = itemName & item.left.state = 2) |
   ^(item.right = itemName & item.right.state = 2)
-/* Returns true if a foe has been defeated. */
-func isDead()
-  return foe.state = 4 | foe.state = -1 // foe death states
 
 // ......... Double Screen (DS) ......... //
 

@@ -138,13 +138,6 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-/*?((foe.state = 2 | foe.state = -1) &
-^ foe.distance = math.Clamp(foe.distance, 16, 17) &
-^ ai.walking & ai.enabled &
-^ !(ai.paused | ai.idle)) &
-^foe.debuffs.string = "chill:1"
-  >c0,0,#cyan,ai debuffed!*/
-
 ?canDash
   >`1,17,#green,CAN DASH
 :
@@ -388,13 +381,15 @@ var enduse = 0
     c.useAbility_TH("bardiche", Kubikiribocho)
 
 :?ai.paused | !ai.enabled |
-^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
-^c.isDead() |
-^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
+^((ai.idle | // waiting for animation to complete
+^  (foe.state = 2 & // engaging state
+^   foe.debuffs.string ! "stun")) & // not stunned
+^ foe.distance > s.getRange("dash_min")) |
+^foe.state = 4 | // foe is dead
+// is a cutscene
+^(boss_cutscenes.Contains(foe.state) & 
 ^ foe.damage > 1) | // dysan state 107 fight (flying)
-^!s.inRange("crossbow") | // too far to dash
-^foe.state = -1 | // sleep state
-^(foe.state = 2 & foe.debuffs.string ! "stun") // engaging state
+^!s.inRange("crossbow")
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     >c0,0,#red,ENGAGING
@@ -422,12 +417,12 @@ var enduse = 0
 :?a.canSmartDash() & canDash
   a.smartDash()
 // if in range, get closer while trying to unmake with repeating bow
-:?foe.distance =
+:?canDash & foe.distance =
 ^   math.Clamp(foe.distance,
 ^              s.getRange("dash_max") + 1,
 ^              s.getRange("crossbow"))
-  >
-  ?c.permapotSetup
+  >`1,10,#red,GETTING CLOSER
+  ?!c.permapotSetup
     c.smoothCast(a.bR)
   :
     a.ldtF("defense armor regen")
@@ -479,7 +474,7 @@ var enduse = 0
     a.ldtF("grappling")
 
   :?c.permapotSetup
-    a.ldtF("big sword unmake")
+    a.ldtF("magic unmake")
   :
     equip Kubikiribocho
 
@@ -513,11 +508,10 @@ var enduse = 0
       fight("melee")
 
 : // 1v1
-  ?c.canUseAbility("staff_poison") &
-  ^!c.permapotSetup & s.getTotalHP("foe") > 1000
-    c.useAbility_TH("staff_poison", a.stPh)
-  /*:?c.canUseAbility("wand_ice")
-    c.useAbility_OH("wand_ice", a.wIh, hand)*/
+  // Tanky foe, use bardiche ability to lower its hitpoints
+  ?c.canUseAbility("bardiche") &
+  ^(foe = "monarch" | foe = "scout")
+    c.useAbility_TH("bardiche", Kubikiribocho)
   :
     fight("melee")
 
