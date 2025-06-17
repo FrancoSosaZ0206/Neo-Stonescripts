@@ -250,12 +250,12 @@ c.AAC(a.hVeff, a.sFeff)
   a.ldtF("permapot")
 
 // speed up (picking chest)
-:?c.canUseAbility("staff_fire") &
+?c.canUseAbility("staff_fire") &
 ^enduse > 5 & loc.stars > 15
   c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
-?c.canUseAbility("staff_fire") &
+:?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
 ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
@@ -481,7 +481,8 @@ c.AAC(a.hVeff, a.sFeff)
   ^foe.buffs.string = "buff_tenacious"
     >c0,0,#yellow,BLESSED/TENACIOUS STRAT
 
-    ?c.canSmartDebuff()
+    a.smartDebuff()
+    ?a.canSmartDebuff()
       a.ldtF("magic debuff")
     :
       a.ldtF("big sword unmake")
