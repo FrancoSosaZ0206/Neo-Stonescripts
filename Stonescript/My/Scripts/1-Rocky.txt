@@ -229,7 +229,7 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
-?c.canUsePotion() & c.permapotSetup
+?c.canUsePotion() & c.permapotSetup & !buffs.string
   activate potion
 
 // Permapot equipment
