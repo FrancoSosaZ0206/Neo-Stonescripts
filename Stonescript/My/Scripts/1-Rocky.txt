@@ -252,7 +252,7 @@ c.AAC(a.hVeff, a.sFeff)
 // speed up (picking chest)
 :?c.canUseAbility("staff_fire") &
 ^old_t ! item.GetTreasureCount() &
-^enduse > 5 & loc.stars > 15
+^enduse > 5 & !(loc.stars > 15 & nRuns = 1)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
@@ -261,7 +261,7 @@ c.AAC(a.hVeff, a.sFeff)
 ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
-^!(loc.stars > 15 & c.permapotSetup)
+^!(loc.stars > 15 & nRuns = 1)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
