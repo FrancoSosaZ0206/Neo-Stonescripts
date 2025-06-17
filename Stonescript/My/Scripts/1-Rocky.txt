@@ -213,10 +213,6 @@ func fight(mode)
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
-/*?c.permapotSetup &
-^foe.GetCount(foe.distance + margin) > 1
-  canDash = false
-:*/
 canDash = true
 
 c.potionType = "lucky"
@@ -242,12 +238,13 @@ c.AAC(a.hVeff, a.sFeff)
 ?c.canUsePotion() & c.permapotSetup
   activate potion
 
+?c.permapotSetup
+  a.ldtF("permapot")
+
 // Initial equipments
 ?loc.begin
   a.ldtF("default")
   >c0,0,#red,Default equipment
-:?c.permapotSetup
-  a.ldtF("permapot")
 
 // speed up (picking chest)
 :?c.canUseAbility("staff_fire") &
@@ -424,8 +421,9 @@ c.AAC(a.hVeff, a.sFeff)
 
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
-^(encounter.eliteMod = "berserk" | foe = "monarch" |
-^encounter.eliteMod = "blessed")
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed")
   c.useAbility_OH("wand_aether", a.wAh, hand)
 // Reset buff
 :?foe.buffs.string = "stoic" &
@@ -436,14 +434,11 @@ c.AAC(a.hVeff, a.sFeff)
 ^c.canUseAbility("wand_poison")
   c.useAbility_OH("wand_poison", a.wPh, hand)
 // Stun enemies
-:?foe = "elite" & foe.count > 1 &
+:?c.canApplyStun() & foe = "elite" &
+^foe.count > 1 &
+^s.getTotalHP("player") < c.midhp &
 ^c.canUseAbility("wand_ice")
   c.useAbility_OH("wand_ice", a.wIh, hand)
-// Hinder regen
-:?encounter.eliteMod = "regen" &
-^foe.count > 1 &
-^c.canUseAbility("wand_fire")
-  c.useAbility_OH("wand_fire", a.wFh, hand)
 
 // Knockback farming
 /* :?c.canKbFarm()
