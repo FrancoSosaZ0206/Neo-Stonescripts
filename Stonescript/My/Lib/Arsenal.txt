@@ -146,7 +146,8 @@ var stVeff  = "*max staff vigor dL -hidden"
 var sADmg   = "*max sword -big aether -dU" // 2nd
 var sAeff2  = "*max sword -big aether dU -golden" // 2nd
 var bsAdmg  = "*max sword big aether -dU -golden"
-var bsAeff  = "*max sword big aether dU golden"
+var bsAeff  = "*max sword big aether dU shiny" // enchanted: speed
+var bsAeff2 = "*max sword big aether dU -shiny" // enchanted: speed
 var hAeff   = "*max hammer aether aU"
 var shAdef  = "*max shield aether -au"
 var shAeff  = "*max shield aether au"
@@ -641,21 +642,8 @@ func ldtF(mode)
       ?c.permapotSetup
         equipL @bsAeff@
       :
-        var bigSword = null
-        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          bigSword = bsIdmg
-        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          bigSword = bsPdmg
-        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          bigSword = bsVdmg
-        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          bigSword = bsAdmg
-        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          bigSword = bsFdmg
-        : // foe = "stone"
-          bigSword = bsFdmg// bsSDmg
-
-        c.moondialing(bsAeff,bigSword)
+        equipL @bsAeff@
+        equipR @bsAeff2@
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
         ?c.canApplyChill(6)
@@ -720,14 +708,15 @@ func ldtF(mode)
         // equip @stAeff@
     :?mode = "debuff"
       ?c.permapotSetup
-        ?effCount < effCap // c.canApplyChill(6)
+        ?effCount < effCap
           equipL Frosty Crust
-        :?effCount = effCap // c.canApplyWeaken()
+        :?effCount = effCap
           equipL @wPeff@
       :
-        ?effCount < effCap // c.canApplyChill(6)
-          equip @stIeff@
-        :?effCount = effCap // c.canApplyWeaken()
+        ?effCount < effCap
+          equipL moon
+          equipR Frosty Crust
+        :?effCount = effCap
           equipL moon
           equipR @wPeff@
 

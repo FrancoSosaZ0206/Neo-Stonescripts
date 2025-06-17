@@ -36,6 +36,11 @@ var boss_cutscenes = [
 ^ 107, 108, // phase2 to 3
 ^ 116] // phase3 death cutscene state
 
+var nRuns = 1 // number of runs in this session
+
+var old_t = item.GetTreasureCount()
+var enduse = 0
+
 
 // /////////////// FUNCTIONS //////////////// //
 
@@ -97,7 +102,7 @@ func fight(mode)
     :?!c.permapotSetup &
     ^a.canSmartDebuff() & foe = "elite" &
     ^foe.count = math.Clamp(foe.count, 2, 3)
-      a.ldtF("ranged debuff")
+      a.ldtF("magic debuff")
 
     :?(c.canApplyAny() | c.canApplyBurn()) &
     ^(loc.stars > 15 | c.permapotSetup) &
@@ -132,6 +137,23 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
+>`1,10,#yellow,nRuns = @nRuns@
+?c.permapotSetup
+  >`1,11,#green,permapotSetup
+:
+  >`1,11,#red,permapotSetup
+
+?boss_screen
+  ?screen.i >= boss_screen - 1
+    >`1,12,#green,equip mask
+  :
+    >`1,12,#red,equip mask
+
+  >`1,14,#magenta,screen.i = @screen.i@\n
+  ^boss_screen = @boss_screen@\n
+  ^screen.i >= boss_screen - 1 = 
+  ^@screen.i >= boss_screen - 1@
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?(c.permapotSetup &
@@ -141,20 +163,12 @@ func fight(mode)
 
 // .............. SETUP LOGIC ............... //
 
-?c.permapotSetup &
-^foe.GetCount(foe.distance + margin) > 1
-  canDash = false
-:
-  canDash = true
+?old_t ! item.GetTreasureCount()
+  enduse++
 
-c.potionType = "lucky"
-c.Init()
-a.smartDebuff()
-disable npcDialog
-
-stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
-?!stunTime
-  stunTime = -1
+?loc.loop
+  old_t = item.GetTreasureCount()
+  enduse = 0
 
 // Auto-harvesting logic
 ?!buttonPressed
@@ -196,6 +210,9 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
       ?!dontShowAgain
         dontShowAgain = true
 
+?loc.loop
+  nRuns++
+
 // Set up boss_screen
 ?!boss_screen
   ?loc.stars <= 10 // cyan and white
@@ -209,6 +226,24 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
     ?c.canUseAbility_DS("blade")
       c.useAbility_DS("blade")
 
+?nRuns = 1 & loc.stars > 15 & boss_screen
+  c.permapotSetup = (screen.i >= boss_screen - 1)
+
+/*?c.permapotSetup &
+^foe.GetCount(foe.distance + margin) > 1
+  canDash = false
+:*/
+canDash = true
+
+c.potionType = "lucky"
+c.Init()
+a.smartDebuff()
+disable npcDialog
+
+stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
+?!stunTime
+  stunTime = -1
+
 // Decide hand for one-handed items
 ?c.permapotSetup | s.inRange("dash")
   hand = "left"
@@ -220,29 +255,20 @@ c.AAC(a.hVeff, a.sFeff)
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
+:?c.canUsePotion() & c.permapotSetup
+  activate potion
 
 // Initial equipments
-?loc.begin
+:?loc.begin
   a.ldtF("default")
+  >c0,0,#red,Default equipment
 :?c.permapotSetup
   a.ldtF("permapot")
 
-?c.canUsePotion() & c.permapotSetup
-  activate potion
-
-var old_t = item.GetTreasureCount()
-var enduse = 0
-?loc.loop 
-  old_t = item.GetTreasureCount()
-  enduse = 0
-
-?old_t ! item.GetTreasureCount()
-  enduse++
-
-  // speed up (picking chest)
-  ?c.canUseAbility("staff_fire") &
-  ^enduse > 5
-    c.useAbility_TH("staff_fire", a.stFh)
+// speed up (picking chest)
+:?c.canUseAbility("staff_fire") &
+^enduse > 5 & loc.stars > 15
+  c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
@@ -459,12 +485,13 @@ var enduse = 0
   ^foe.debuffs.string ! "debuff_armor_fatigue"))
     a.ldtF("grappling")
 
-  :?c.permapotSetup
-    ?c.canEscape()
+  :?nRuns = 1 // c.permapotSetup
+    /*?c.canEscape()
       fight("escape")
     :
       >c0,0,#red,FIGHTING RANGED
-      fight("ranged")
+      fight("ranged")*/
+    a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
 
@@ -487,10 +514,6 @@ var enduse = 0
       activate potion
     :?c.canUseAbility("staff_poison") & !s.inRange("dash")
       c.useAbility_TH("staff_poison", a.stPh)
-    /*:?c.canUseAbility("wand_ice") & !s.inRange("dash")
-      c.useAbility_OH("wand_ice", a.wIh, hand)
-    :?c.canUseAbility("wand_fire") & !s.inRange("dash")
-      c.useAbility_OH("wand_fire", a.wFh, hand)*/
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.permapotSetup & s.inRange("dash_min")
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
