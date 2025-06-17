@@ -248,6 +248,7 @@ c.AAC(a.hVeff, a.sFeff)
 
 // speed up (picking chest)
 :?c.canUseAbility("staff_fire") &
+^old_t ! item.GetTreasureCount() &
 ^enduse > 5 & loc.stars > 15
   c.useAbility_TH("staff_fire", a.stFh)
 
