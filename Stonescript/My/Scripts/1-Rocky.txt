@@ -81,20 +81,20 @@ func fight(mode)
       a.ldtF("sword debuff weaken")
 
     ?c.permapotSetup &
-    ^a.canSmartDebuff() & foe = "elite" &
-    ^foe.GetCount(foe.distance + margin) > 1
-      a.ldtF("magic debuff")
+    ^a.canSmartDebuff() & foe = "elite"
+      ?foe.GetCount(foe.distance + margin) > 1
+        a.ldtF("magic debuff")
+      :
+        a.ldtF("sword debuff auto")
     :?!c.permapotSetup &
     ^a.canSmartDebuff() & foe = "elite" &
     ^foe.count = math.Clamp(foe.count, 2, 3)
-      >c0,0,#red,3 elites, debuff ranged!
       a.ldtF("ranged debuff")
 
     :?(c.canApplyAny() | c.canApplyBurn()) &
     ^(loc.stars > 15 | c.permapotSetup) &
     ^(foe = "monarch" | foe = "boss") &
     ^mode = "melee"
-      // >c0,0,#red,1 tough foe, debuff melee!
       a.ldtF("sword debuff auto")
 
     // 2. Heal if needed
@@ -122,16 +122,7 @@ func fight(mode)
       :
         a.ldtF("ranged dmg")
 
-
 // /////////////// PROCEDURE //////////////// //
-
-?canDash
-  >`1,17,#green,CAN DASH
-:
-  >`1,18,#red,CAN'T DASH
-
->`1,10,#magenta,dist = @foe.distance@\n
-^wand range = @s.getRange("wand")@\n
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -375,16 +366,13 @@ var enduse = 0
     c.useAbility_TH("bardiche", Kubikiribocho)
 
 :?ai.walking & !s.inRange("crossbow")
-  >c0,0,#red,WALKING ENGAGE | ARMOR
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
-    >c0,1,#red,ENGAGING
     a.ldtF("engage")
   :
     a.ldtF("defense armor regen")
 
 :?ai.paused | !ai.enabled
-  >c0,0,#red,STATIC ENGAGE | ARMOR
   a.ldtF("defense armor regen")
 
 // .............. COMBAT LOGIC .............. //
@@ -411,7 +399,6 @@ var enduse = 0
 ^   math.Clamp(foe.distance,
 ^              s.getRange("dash_max") + 1,
 ^              s.getRange("crossbow"))
-  >c0,-1,#yellow,GETTING CLOSER
   ?!c.permapotSetup
     c.smoothCast(a.bR)
   :
@@ -451,7 +438,6 @@ var enduse = 0
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   :?c.canUseAbility("heavy_hammer") & foe = "elite"
-    >c0,0,#red,HEAVY HAMMER
     ?encounter.eliteMod = "plated"
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
@@ -468,7 +454,6 @@ var enduse = 0
     ?foe.distance < s.getRange("dash_min")
       fight("evade")
     :
-      >c0,0,#red,FIGHT RANGED AOE
       fight("ranged")
   :
     equip Kubikiribocho
@@ -505,7 +490,9 @@ var enduse = 0
 : // 1v1
   // Tanky foe, use bardiche ability to lower its hitpoints
   ?c.canUseAbility("bardiche") &
-  ^(foe = "monarch" | foe = "scout")
+  ^(foe = "scout" |
+  ^ (foe = "monarch" &
+  ^  foe.GetCount(foe.distance + margin) = 1))
     c.useAbility_TH("bardiche", Kubikiribocho)
   :
     fight("melee")
