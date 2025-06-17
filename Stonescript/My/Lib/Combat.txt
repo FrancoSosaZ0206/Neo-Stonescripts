@@ -748,6 +748,11 @@ func canKbFarm()
   ^              s.getRange("dash_max"),
   ^              s.getRange("crossbow"))
 
+func canEscape()
+  return foe ! "ranged" &
+  ^foe.distance < s.getRange("dash_min") &
+  ^(canUseAbility("staff_stone") |
+  ^ canUseAbility("mind"))
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Combat" ▀▄▀▄▀▄▀▄▀▄▀▄ ┃  //

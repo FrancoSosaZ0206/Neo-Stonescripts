@@ -47,7 +47,15 @@ func harvestFunc(button)
     choice = false
 
 func fight(mode)
-  ?mode = "evade"
+  ?mode = "escape"
+    canDash = false
+
+    ?c.canUseAbility("mind")
+      a.ldtF("mind")
+    : // c.canUseAbility("staff_stone")
+      c.useAbility_TH("staff_stone", a.stSh)
+
+  :?mode = "evade"
     canDash = false
 
     ?c.canUseAbility("staff_stone") &
@@ -452,17 +460,10 @@ var enduse = 0
     a.ldtF("grappling")
 
   :?c.permapotSetup
-    ?foe ! "ranged" &
-    ^foe.distance < s.getRange("dash_min") &
-    ^(c.canUseAbility("staff_stone") |
-    ^ c.canUseAbility("mind"))
-      canDash = false
-
-      ?c.canUseAbility("mind")
-        a.ldtF("mind")
-      : // c.canUseAbility("staff_stone")
-        c.useAbility_TH("staff_stone", a.stSh)
+    ?c.canEscape()
+      fight("escape")
     :
+      >c0,0,#red,FIGHTING RANGED
       fight("ranged")
   :
     equip Kubikiribocho
