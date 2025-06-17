@@ -465,8 +465,11 @@ var enduse = 0
     a.ldtF("grappling")
 
   :?c.permapotSetup
-    >c0,0,#red,FIGHT RANGED AOE
-    fight("ranged")
+    ?foe.distance < s.getRange("dash_min")
+      fight("evade")
+    :
+      >c0,0,#red,FIGHT RANGED AOE
+      fight("ranged")
   :
     equip Kubikiribocho
 
