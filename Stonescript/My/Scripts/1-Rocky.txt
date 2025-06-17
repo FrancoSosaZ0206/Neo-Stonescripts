@@ -37,10 +37,10 @@ var boss_cutscenes = [
 ^ 116] // phase3 death cutscene state
 
 var nRuns = 1 // number of runs in this session
+var permapotActTime = -1 // time when permapot was activated, -1 means not activated
 
 var old_t = item.GetTreasureCount()
 var enduse = 0
-
 
 // /////////////// FUNCTIONS //////////////// //
 
@@ -137,38 +137,12 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
->`1,10,#yellow,nRuns = @nRuns@
-?c.permapotSetup
-  >`1,11,#green,permapotSetup
-:
-  >`1,11,#red,permapotSetup
-
-?boss_screen
-  ?screen.i >= boss_screen - 1
-    >`1,12,#green,equip mask
-  :
-    >`1,12,#red,equip mask
-
-  >`1,14,#magenta,screen.i = @screen.i@\n
-  ^boss_screen = @boss_screen@\n
-  ^screen.i >= boss_screen - 1 = 
-  ^@screen.i >= boss_screen - 1@
-
 // ............ WITHDRAWAL LOGIC ............ //
 
-?(c.permapotSetup &
-^foe.buffs.string = "buff_tenacious") |
-^s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+?s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
   loc.Leave()
 
 // .............. SETUP LOGIC ............... //
-
-?old_t ! item.GetTreasureCount()
-  enduse++
-
-?loc.loop
-  old_t = item.GetTreasureCount()
-  enduse = 0
 
 // Auto-harvesting logic
 ?!buttonPressed
@@ -213,6 +187,12 @@ func fight(mode)
 ?loc.loop
   nRuns++
 
+  old_t = item.GetTreasureCount()
+  enduse = 0
+
+?old_t ! item.GetTreasureCount()
+  enduse++
+
 // Set up boss_screen
 ?!boss_screen
   ?loc.stars <= 10 // cyan and white
@@ -228,6 +208,10 @@ func fight(mode)
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
   c.permapotSetup = (screen.i >= boss_screen - 1)
+
+// Record time when permapot was activated
+?c.permapotSetup & permapotActTime = -1
+  permapotActTime = totaltime
 
 /*?c.permapotSetup &
 ^foe.GetCount(foe.distance + margin) > 1
@@ -255,11 +239,11 @@ c.AAC(a.hVeff, a.sFeff)
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
-:?c.canUsePotion() & c.permapotSetup
+?c.canUsePotion() & c.permapotSetup
   activate potion
 
 // Initial equipments
-:?loc.begin
+?loc.begin
   a.ldtF("default")
   >c0,0,#red,Default equipment
 :?c.permapotSetup
@@ -271,7 +255,7 @@ c.AAC(a.hVeff, a.sFeff)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
-:?c.canUseAbility("staff_fire") &
+?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
 ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
@@ -485,13 +469,21 @@ c.AAC(a.hVeff, a.sFeff)
   ^foe.debuffs.string ! "debuff_armor_fatigue"))
     a.ldtF("grappling")
 
-  :?nRuns = 1 // c.permapotSetup
+  :?nRuns = 1
     /*?c.canEscape()
       fight("escape")
     :
       >c0,0,#red,FIGHTING RANGED
       fight("ranged")*/
     a.ldtF("big sword unmake")
+  // Debuff and unmake
+  :?encounter.eliteMod = "blessed"
+    >c0,0,#yellow,BLESSED STRAT
+
+    ?c.canSmartDebuff()
+      a.ldtF("magic debuff")
+    :
+      a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
 
@@ -518,7 +510,25 @@ c.AAC(a.hVeff, a.sFeff)
     ^!c.permapotSetup & s.inRange("dash_min")
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
-      fight("melee")
+      // Buy time
+      ?c.permapotSetup &
+      ^(totaltime - permapotActTime
+      ^<
+      ^loc.averageTime - (loc.averageTime / 10))
+        // Debuff
+        ?c.canApplyChill(6)
+          a.ldtF("sword debuff chill")
+        :?c.canApplyWeaken()
+          a.ldtF("sword debuff weaken")
+        // Heal
+        :?hp ! maxhp
+          a.ldtF("sword heal")
+        : // wait
+          >c0,0,#red,WAITING PERMAPOT
+          equipL sword 0*
+          equipR mask
+      :
+        fight("melee")
 
 : // 1v1
   // Tanky foe, use bardiche ability to lower its hitpoints
