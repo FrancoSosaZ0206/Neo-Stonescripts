@@ -250,7 +250,7 @@ c.AAC(a.hVeff, a.sFeff)
   a.ldtF("permapot")
 
 // speed up (picking chest)
-?c.canUseAbility("staff_fire") &
+:?c.canUseAbility("staff_fire") &
 ^enduse > 5 & loc.stars > 15
   c.useAbility_TH("staff_fire", a.stFh)
 
