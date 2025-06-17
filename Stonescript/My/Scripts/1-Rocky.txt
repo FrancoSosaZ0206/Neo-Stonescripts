@@ -201,10 +201,6 @@ func fight(mode)
     boss_screen = 4
   :?loc.stars <= 20 // green
     boss_screen = 7
-    c.screenMngr_DS("blade", 2, boss_screen - 3)
-
-    ?c.canUseAbility_DS("blade")
-      c.useAbility_DS("blade")
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
   c.permapotSetup = (screen.i >= boss_screen - 1)
@@ -230,16 +226,22 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 :
   hand = "right"
 
-c.AAC(a.hVeff, a.sFeff)
-
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
 ?c.canUsePotion() & c.permapotSetup
   activate potion
 
+// Permapot equipment
 ?c.permapotSetup
   a.ldtF("permapot")
+
+// BFG logic
+c.screenMngr_DS("blade", 2, boss_screen - 3)
+?c.canUseAbility_DS("blade")
+  c.useAbility_DS("blade")
+
+c.AAC(a.hVeff, a.sFeff)
 
 // Initial equipments
 ?loc.begin
