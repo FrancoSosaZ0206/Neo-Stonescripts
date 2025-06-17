@@ -477,8 +477,9 @@ c.AAC(a.hVeff, a.sFeff)
       fight("ranged")*/
     a.ldtF("big sword unmake")
   // Debuff and unmake
-  :?encounter.eliteMod = "blessed"
-    >c0,0,#yellow,BLESSED STRAT
+  :?encounter.eliteMod = "blessed" |
+  ^foe.buffs.string = "buff_tenacious"
+    >c0,0,#yellow,BLESSED/TENACIOUS STRAT
 
     ?c.canSmartDebuff()
       a.ldtF("magic debuff")
