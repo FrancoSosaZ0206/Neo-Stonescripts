@@ -452,8 +452,16 @@ var enduse = 0
     a.ldtF("grappling")
 
   :?c.permapotSetup
-    ?foe.distance < s.getRange("dash_min")
-      fight("evade")
+    ?foe ! "ranged" &
+    ^foe.distance < s.getRange("dash_min") &
+    ^(c.canUseAbility("staff_stone") |
+    ^ c.canUseAbility("mind"))
+      canDash = false
+
+      ?c.canUseAbility("mind")
+        a.ldtF("mind")
+      : // c.canUseAbility("staff_stone")
+        c.useAbility_TH("staff_stone", a.stSh)
     :
       fight("ranged")
   :
