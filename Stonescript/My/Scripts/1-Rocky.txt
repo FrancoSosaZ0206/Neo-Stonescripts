@@ -424,15 +424,19 @@ c.AAC(a.hVeff, a.sFeff)
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch" | encounter.eliteMod = "monarch" |
-^ encounter.eliteMod = "blessed")
+^ encounter.eliteMod = "blessed" |
+^ foe.buffs.string = "buff_tenacious")
   c.useAbility_OH("wand_aether", a.wAh, hand)
 // Reset buff
 :?foe.buffs.string = "stoic" &
 ^c.canUseAbility("wand_vigor")
   c.useAbility_OH("wand_vigor", a.wVh, hand)
 // Reduce damage
-:?foe = "elite" &
-^c.canUseAbility("wand_poison")
+:?c.canUseAbility("wand_poison") &
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed" |
+^ foe.buffs.string = "buff_tenacious")
   c.useAbility_OH("wand_poison", a.wPh, hand)
 // Stun enemies
 :?c.canApplyStun() & foe = "elite" &
