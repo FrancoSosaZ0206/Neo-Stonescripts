@@ -195,6 +195,9 @@ func fight(mode)
   ?c.canUseAbility("staff_fire") &
   ^enduse > 5 & !(loc.stars > 15 & nRuns = 1)
     c.useAbility_TH("staff_fire", a.stFh)
+  :
+    a.ldtF("defense armor regen")
+    >c0,0,#red,ARMOR REGEN
 
 // Set up boss_screen
 ?!boss_screen
@@ -537,6 +540,7 @@ c.AAC(a.hVeff, a.sFeff)
   // Tanky foe, use bardiche ability to lower its hitpoints
   ?(foe = "scout" | foe = "monarch") &
   ^foe.GetCount(foe.distance + margin) = 1 &
+  ^s.inRange("sword") &
   ^(c.canUseAbility("bardiche") |
   ^c.canUseAbility("staff_poison"))
     ?c.canUseAbility("staff_poison")
