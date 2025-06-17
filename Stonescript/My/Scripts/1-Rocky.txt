@@ -237,9 +237,10 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
   a.ldtF("permapot")
 
 // BFG logic
-c.screenMngr_DS("blade", 2, boss_screen - 3)
-?c.canUseAbility_DS("blade")
-  c.useAbility_DS("blade")
+?nRuns > 1
+  c.screenMngr_DS("blade", 2, boss_screen - 3)
+  ?c.canUseAbility_DS("blade")
+    c.useAbility_DS("blade")
 
 c.AAC(a.hVeff, a.sFeff)
 
