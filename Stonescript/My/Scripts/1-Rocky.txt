@@ -106,21 +106,8 @@ func fight(mode)
     :?c.canUnmake()
       ?mode = "melee"
         a.ldtF("sword unmake")
-
-      :?(c.permapotSetup & 
-      ^foe.GetCount(foe.distance + margin) > 1) |
-      ^foe.GetCount(foe.distance + margin) = 1
-        // Big sword splash area
-        ?a.canSmartDash() // get closer
-          a.smartDash()
-        : // attack
-          ?c.permapotSetup &
-          ^foe.GetCount(foe.distance + margin) > 1
-            a.ldtF("big sword unmake")
-          : // foe.GetCount(foe.distance + margin) = 1
-            a.ldtF("sword unmake")
-      :
-        a.ldtF("ranged unmake")
+      : // foe.GetCount(foe.distance + margin) > 1
+        a.ldtF("magic unmake")
 
     : // 4. Deal max damage
       ?mode = "melee"
@@ -143,6 +130,9 @@ func fight(mode)
 :
   >`1,18,#red,CAN'T DASH
 
+>`1,10,#magenta,dist = @foe.distance@\n
+^wand range = @s.getRange("wand")@\n
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?(c.permapotSetup &
@@ -152,7 +142,11 @@ func fight(mode)
 
 // .............. SETUP LOGIC ............... //
 
-canDash = true
+?c.permapotSetup &
+^foe.GetCount(foe.distance + margin) > 1
+  canDash = false
+:
+  canDash = true
 
 c.potionType = "lucky"
 c.Init()
@@ -380,22 +374,26 @@ var enduse = 0
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
-:?ai.paused | !ai.enabled |
-^((ai.idle | // waiting for animation to complete
-^  (foe.state = 2 & // engaging state
-^   foe.debuffs.string ! "stun")) & // not stunned
-^ foe.distance > s.getRange("dash_min")) |
-^foe.state = 4 | // foe is dead
-// is a cutscene
-^(boss_cutscenes.Contains(foe.state) & 
-^ foe.damage > 1) | // dysan state 107 fight (flying)
-^!s.inRange("crossbow")
+:?ai.walking & !s.inRange("crossbow")
+  >c0,0,#red,WALK & ENGAGE | ARMOR
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
-    >c0,0,#red,ENGAGING
+    >c0,1,#red,ENGAGING
     a.ldtF("engage")
   :
     a.ldtF("defense armor regen")
+
+:?!ai.walking & (ai.paused | !ai.enabled | ai.idle)
+  >c0,0,#red,IDLE & ENGAGE | ARMOR
+  a.ldtF("defense armor regen")
+
+/*^ ((ai.idle | // waiting for animation to complete
+^   (foe.state = 2 & // engaging state
+^    foe.debuffs.string ! "stun")) & // not stunned
+^  foe.distance > s.getRange("dash_min")) |
+^ foe.state = 4 | // foe is dead
+^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
+^  foe.damage > 1)) // dysan state 107 fight (flying)*/
 
 // .............. COMBAT LOGIC .............. //
 
@@ -468,13 +466,14 @@ var enduse = 0
       c.useAbility_TH("heavy_hammer", Mjölnir)
 
   // Perma-stun
-  :?c.canApplyStun() |
+  :?s.inRange("grappling_hook") &
+  ^(c.canApplyStun() |
   ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-  ^foe.debuffs.string ! "debuff_armor_fatigue")
+  ^foe.debuffs.string ! "debuff_armor_fatigue"))
     a.ldtF("grappling")
 
   :?c.permapotSetup
-    a.ldtF("magic unmake")
+    fight("ranged")
   :
     equip Kubikiribocho
 
