@@ -418,11 +418,12 @@ var enduse = 0
 ^c.canUseAbility("wand_poison")
   c.useAbility_OH("wand_poison", a.wPh, hand)
 // Stun enemies
-:?foe = "elite" &
+:?foe = "elite" & foe.count > 1 &
 ^c.canUseAbility("wand_ice")
   c.useAbility_OH("wand_ice", a.wIh, hand)
 // Hinder regen
 :?encounter.eliteMod = "regen" &
+^foe.count > 1 &
 ^c.canUseAbility("wand_fire")
   c.useAbility_OH("wand_fire", a.wFh, hand)
 
