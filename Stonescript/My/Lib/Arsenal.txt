@@ -438,12 +438,18 @@ func ldtF(mode)
         equipR @shAeff@
 
     :?mode = "armor regen"
-      ?!s.inRange("triskelion") &
-      ^(totaltime % 2 = 0 |
-      ^buffs.string = "buff_inf_speed") // infernal staff
-        equipL triskelion
-      :
-        equipL sword
+      ?ai.walking
+        ?!s.inRange("triskelion") &
+        ^(totaltime % 2 = 0 |
+        ^buffs.string = "buff_inf_speed") // infernal staff
+          equipL triskelion
+        :
+          equipL sword
+
+      :?hp ! maxhp // passive regen
+        equipL ouroboros
+      : // try to deal extra damage if possible
+        equipL fissure
 
       ?!c.permapotSetup
         ?armor < compoundMaxArmor_default

@@ -383,7 +383,9 @@ var enduse = 0
   :
     a.ldtF("defense armor regen")
 
-:?!ai.walking & (ai.paused | !ai.enabled | ai.idle)
+:?!ai.walking &
+^ (ai.paused | !ai.enabled |
+^  (ai.idle & foe.distance > s.getRange("dash_min")))
   >c0,0,#red,IDLE & ENGAGE | ARMOR
   a.ldtF("defense armor regen")
 
@@ -419,7 +421,7 @@ var enduse = 0
 ^   math.Clamp(foe.distance,
 ^              s.getRange("dash_max") + 1,
 ^              s.getRange("crossbow"))
-  >`1,10,#red,GETTING CLOSER
+  >c0,-1,#yellow,GETTING CLOSER
   ?!c.permapotSetup
     c.smoothCast(a.bR)
   :
