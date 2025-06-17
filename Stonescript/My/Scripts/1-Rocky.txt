@@ -529,7 +529,6 @@ c.AAC(a.hVeff, a.sFeff)
         :?hp ! maxhp
           a.ldtF("sword heal")
         : // wait
-          >c0,0,#red,WAITING PERMAPOT
           equipL sword 0*
           equipR mask
       :
