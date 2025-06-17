@@ -727,10 +727,8 @@ func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL triskelion
     equipR hatchet
-    >c0,0,#cyan,advancing
   :
     equip @itemName@
-    >c0,1,#yellow,attacking
 
 /* Checks if the player can use "Knockback Farming",
 a strategy where you can walk while damaging and
