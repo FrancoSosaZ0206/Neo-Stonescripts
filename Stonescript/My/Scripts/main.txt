@@ -131,7 +131,7 @@ import My/Cosmetics
 :?loc = "undead_crypt_intro" // Haunted Gate
   import My/Scripts/Gate
 :
-  // import UI/FoeStateTracker
+  import UI/FoeStateTracker
   var tm = import My/Lib/Meters/Times
   var dps = import My/Lib/Meters/DPS
 

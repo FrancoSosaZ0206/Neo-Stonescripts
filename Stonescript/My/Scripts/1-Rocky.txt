@@ -188,17 +188,6 @@ func fight(mode)
   old_t = item.GetTreasureCount()
   enduse = 0
 
-?old_t ! item.GetTreasureCount()
-  enduse++
-
-  // speed up (picking chest)
-  ?c.canUseAbility("staff_fire") &
-  ^enduse > 5 & !(loc.stars > 15 & nRuns = 1)
-    c.useAbility_TH("staff_fire", a.stFh)
-  :
-    a.ldtF("defense armor regen")
-    >c0,0,#red,ARMOR REGEN
-
 // Set up boss_screen
 ?!boss_screen
   ?loc.stars <= 10 // cyan and white
@@ -253,6 +242,18 @@ c.AAC(a.hVeff, a.sFeff)
 // Initial equipments
 ?loc.begin
   a.ldtF("default")
+
+// speed up (picking chest)
+:?old_t ! item.GetTreasureCount() &
+^c.canUseAbility("staff_fire") &
+^!(loc.stars > 15 & nRuns = 1)
+  enduse++
+
+  ?c.canUseAbility("staff_fire") & enduse > 5
+    c.useAbility_TH("staff_fire", a.stFh)
+  :
+    a.ldtF("defense armor regen")
+    >c0,0,#red,ARMOR REGEN
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
