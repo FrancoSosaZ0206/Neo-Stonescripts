@@ -252,6 +252,9 @@ c.AAC(a.hVeff, a.sFeff)
   ?c.canUseAbility("staff_fire") & enduse > 5
     c.useAbility_TH("staff_fire", a.stFh)
     >c0,0,#red,USING INFERNAL STAFF
+  :?pickup.distance < 15
+    a.ldtF("magnet")
+    >c0,0,#red,MAGNET TREASURE
   :
     a.ldtF("defense armor regen")
     >c0,0,#red,ARMOR REGEN
