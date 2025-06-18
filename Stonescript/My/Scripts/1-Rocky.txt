@@ -248,16 +248,13 @@ c.AAC(a.hVeff, a.sFeff)
 ^!(loc.stars > 15 & nRuns = 1)
   enduse++
 
-  >c0,-1,#yellow,PICKING UP TREASURE
   ?c.canUseAbility("staff_fire") & enduse > 5
     c.useAbility_TH("staff_fire", a.stFh)
     >c0,0,#red,USING INFERNAL STAFF
   :?pickup.distance < 15
     a.ldtF("magnet")
-    >c0,0,#red,MAGNET TREASURE
   :
     a.ldtF("defense armor regen")
-    >c0,0,#red,ARMOR REGEN
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
