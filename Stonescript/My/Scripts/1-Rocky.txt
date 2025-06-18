@@ -19,11 +19,9 @@ var buttonPressed = false
 var dontShowAgain = false
 
 var canDash = true
+
 var stunTime = null
-
-var weakenType = a.weaken_default
 var hand       = null
-
 var margin = 8 // big sword left hitbox + splash range
 
 var boss_screen = null
@@ -127,11 +125,12 @@ func fight(mode)
         :
           a.ldtF("sword dmg")*/
         a.ldtF("sword dmg")
-
-      :?!c.permapotSetup
+      :
+        a.ldtF("magic dmg")
+      /*:?c.permapotSetup
         a.ldtF("magic dmg")
       :
-        a.ldtF("ranged dmg")
+        a.ldtF("ranged dmg")*/
 
 // /////////////// PROCEDURE //////////////// //
 
@@ -237,7 +236,7 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?c.permapotSetup
   a.ldtF("permapot")
 
-c.AAC(a.hVeff, a.sFeff)
+c.AAC(a.hVeff, a.sIeff)
 
 // Initial equipments
 ?loc.begin
@@ -250,7 +249,6 @@ c.AAC(a.hVeff, a.sFeff)
 
   ?c.canUseAbility("staff_fire") & enduse > 5
     c.useAbility_TH("staff_fire", a.stFh)
-    >c0,0,#red,USING INFERNAL STAFF
   :?pickup.distance < 15
     a.ldtF("magnet")
   :
@@ -542,7 +540,7 @@ c.AAC(a.hVeff, a.sFeff)
 
 : // 1v1
   // Tanky foe, use bardiche ability to lower its hitpoints
-  ?(foe = "scout" | foe = "monarch") &
+  ?(foe = "boss" | foe = "monarch") &
   ^foe.GetCount(foe.distance + margin) = 1 &
   ^s.inRange("sword") &
   ^(c.canUseAbility("bardiche") |

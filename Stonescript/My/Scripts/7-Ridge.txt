@@ -1,15 +1,15 @@
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀ START OF "7-Ridge" ▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "7-Ridge" ▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-// //////////////// IMPORTS ///////////////// //
+// ///////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities
 var c = import My/Lib/Combat
 var s = import My/Lib/Stats
 var a = import My/Lib/Arsenal
 
-// /////////////// VARIABLES //////////////// //
+// //////////////// VARIABLES //////////////// //
 
 var blowing
 
@@ -17,18 +17,33 @@ var keepCultistMask = true
 var voidweaverScreen = 3
 var smiteScreen = 1
 
-var stunTime  = null
-var margin    = 8 // big sword left hitbox + splash range
-var hand      = null
 var canDash   = true
+
+var stunTime  = null
+var hand      = null
+var margin    = 8 // big sword left hitbox + splash range
 
 var boss_screen = null
 var boss_cutscenes = [] // TO DO
 
-// /////////////// FUNCTIONS //////////////// //
+var nRuns = 1 // number of runs in this session
+var permapotActTime = -1 // time when permapot was activated, -1 means not activated
+
+var old_t = item.GetTreasureCount()
+var enduse = 0
+
+// //////////////// FUNCTIONS //////////////// //
 
 func fight(mode)
-  ?mode = "evade"
+  ?mode = "escape"
+    canDash = false
+
+    ?c.canUseAbility("mind")
+      a.ldtF("mind")
+    : // c.canUseAbility("staff_stone")
+      c.useAbility_TH("staff_stone", a.stSh)
+
+  :?mode = "evade"
     canDash = false
 
     ?c.canUseAbility("staff_stone") &
@@ -57,16 +72,25 @@ func fight(mode)
   :
     // 1. debuff, if possible
     a.smartDebuff()
-    
-    ?a.canSmartDebuff() & c.permapotSetup &
-    ^foe = "elite" & foe.buffs.string ! "tenacious"
+
+    ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
+      a.ldtF("sword debuff weaken")
+
+    ?c.permapotSetup &
+    ^a.canSmartDebuff() & foe = "elite"
       ?foe.GetCount(foe.distance + margin) > 1
         a.ldtF("magic debuff")
       :
         a.ldtF("sword debuff auto")
-    :?(foe = "monarch" | foe = "boss") &
-    ^mode = "melee" &
-    ^(c.canApplyAny() | c.canApplyBurn())
+    :?!c.permapotSetup &
+    ^a.canSmartDebuff() & foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) > 1
+      a.ldtF("magic debuff")
+
+    :?(c.canApplyAny() | c.canApplyBurn()) &
+    ^(loc.stars > 15 | c.permapotSetup) &
+    ^(foe = "monarch" | foe = "boss") &
+    ^mode = "melee"
       a.ldtF("sword debuff auto")
 
     // 2. Heal if needed
@@ -78,46 +102,57 @@ func fight(mode)
     :?c.canUnmake()
       ?mode = "melee"
         a.ldtF("sword unmake")
-
-      :?(c.permapotSetup &
-      ^foe.GetCount(foe.distance + margin) > 1) |
-      ^foe.GetCount(foe.distance + margin) = 1
-        // Big sword splash area
-        ?a.canSmartDash() // get closer
-          a.smartDash()
-        : // attack
-          ?c.permapotSetup &
-          ^foe.GetCount(foe.distance + margin) > 1
-            a.ldtF("big sword unmake")
-          : // foe.GetCount(foe.distance + margin) = 1
-            a.ldtF("sword unmake")
-      :
-        a.ldtF("ranged unmake")
+      : // foe.GetCount(foe.distance + margin) > 1
+        a.ldtF("magic unmake")
 
     : // 4. Deal max damage
       ?mode = "melee"
         a.ldtF("sword dmg")
-
-      :?!c.permapotSetup
-        a.ldtF("magic dmg")
       :
-        a.ldtF("ranged dmg")
+        a.ldtF("magic dmg")
 
-// /////////////// PROCEDURE //////////////// //
+// //////////////// PROCEDURE //////////////// //
 
->`1,10,#magenta,pickup=@pickup@\n
-^scr i=@screen.i@
+>`1,7,#magenta,screen.i = @screen.i@
 
-// ............ WITHDRAWAL LOGIC ............ //
+// ............. WITHDRAWAL LOGIC ............ //
 
-?(c.permapotSetup &
-^foe.buffs.string = "buff_tenacious") |
-^s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+?s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
   loc.Leave()
 
-// .............. SETUP LOGIC ............... //
+// ............... SETUP LOGIC ............... //
 
-c.potionType = "lucky"
+?loc.loop
+  nRuns++
+
+  old_t = item.GetTreasureCount()
+  enduse = 0
+
+// Set up boss_screen
+?!boss_screen
+  ?loc.stars <= 10 // cyan and white
+    boss_screen = 2
+  :?loc.stars <= 15 // yellow
+    boss_screen = 4
+  :?loc.stars <= 20 // green
+    boss_screen = 7
+
+?nRuns = 1 & loc.stars > 15 & boss_screen
+  c.permapotSetup = (screen.i >= boss_screen - 1)
+
+// Record time when permapot was activated
+?c.permapotSetup & permapotActTime = -1
+  permapotActTime = totaltime
+
+// BFG logic
+?nRuns > 1
+  c.screenMngr_DS("blade", 2, boss_screen - 3)
+  ?c.canUseAbility_DS("blade")
+    c.useAbility_DS("blade")
+
+canDash = true
+
+c.potionType = "berserk" // "lucky"
 c.Init()
 a.smartDebuff()
 disable npcDialog
@@ -126,59 +161,47 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?!stunTime
   stunTime = -1
 
-// Set up boss_screen
-?!boss_screen
-  ?loc.stars <= 10 // cyan and white
-    boss_screen = 2
-  :?loc.stars <= 15 // yellow
-    boss_screen = 6
-  :?loc.stars <= 20 // green
-    boss_screen = 7
-
 // Decide hand for one-handed items
 ?c.permapotSetup | s.inRange("dash")
   hand = "left"
 :
   hand = "right"
 
-c.screenMngr_DS("blade", 1, boss_screen - 3)
-c.AAC(a.hVeff, a.sFeff)
-
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
+?c.canUsePotion() & c.permapotSetup
+  activate potion
+
+// Permapot equipment
+?c.permapotSetup
+  a.ldtF("permapot")
+
+c.AAC(a.hVeff, a.sIeff)
 
 // Initial equipments
 ?loc.begin
   a.ldtF("default")
-:?c.permapotSetup
-  a.ldtF("permapot")
 
-?c.canUsePotion() & c.permapotSetup
-  activate potion
-:?c.canUseAbility_DS("blade")
-  c.useAbility_DS("blade")
-
-var old_t = item.GetTreasureCount()
-var enduse = 0
-?loc.loop 
-  old_t = item.GetTreasureCount()
-  enduse = 0
-
-?old_t ! item.GetTreasureCount()
+// speed up (picking chest)
+:?old_t ! item.GetTreasureCount() &
+^!(loc.stars > 15 & nRuns = 1)
   enduse++
-  
-  // speed up (picking chest)
-  ?c.canUseAbility("staff_fire") &
-  ^enduse >= 5
-    c.useAbility_TH("staff_fire", a.stFh)
 
+  ?c.canUseAbility("staff_fire") & enduse > 5
+    c.useAbility_TH("staff_fire", a.stFh)
+  :?pickup.distance < 15
+    a.ldtF("magnet")
+  :
+    a.ldtF("defense armor regen")
+
+// speed up (normal)
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
 ^(!s.inRange("dash") | foe.distance = 9999) &
 ^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
-^!c.permapotSetup
+^!(loc.stars > 15 & nRuns = 1)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -201,7 +224,7 @@ var enduse = 0
 :?pickup.distance < 15
   a.ldtF("magnet")
 
-// ............. DEFENSIVE LOGIC ............ //
+// .............. DEFENSIVE LOGIC ............ //
 
 :?foe = "phase" &
 ^foe.state = 132 & foe.time > 65
@@ -215,18 +238,28 @@ var enduse = 0
 
 :?foe = "phase" &
 ^foe.state = 133 // blowing air
-  canDash = false
   fight("ranged")
 
-// ............ AOE/RANGED LOGIC ............ //
+// ........... ENGAGE/WALKING LOGIC .......... //
 
+:?ai.walking & !s.inRange("crossbow")
+  ?armor > a.compoundMaxArmor_boosted |
+  ^c.canEngage()
+    a.ldtF("engage")
+  :
+    a.ldtF("defense armor regen")
+
+:?ai.paused | !ai.enabled
+  a.ldtF("defense armor regen")
+
+// ............... COMBAT LOGIC .............. //
+
+// Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
 ^foe.count > 1 & !c.permapotSetup &
 ^c.canUnmakeVoidweaver()
   ?c.canUseAbility("dash")
     a.ldtF("dash")
-  :?c.canUseAbility("bash")
-    a.ldtF("bash")
   :?!s.inRange("sword")
     ?totaltime % 2 = 0 & !s.inRange("triskelion")
       equipL triskelion
@@ -236,161 +269,89 @@ var enduse = 0
   :
     c.devour("voidweaver")
 
+:?a.canSmartDash() & canDash
+  a.smartDash()
+// if in range, get closer while trying to unmake with repeating bow
+:?canDash & foe.distance =
+^   math.Clamp(foe.distance,
+^              s.getRange("dash_max") + 1,
+^              s.getRange("crossbow"))
+  ?!c.permapotSetup
+    c.smoothCast(a.bR)
+  :
+    a.ldtF("defense armor regen")
+
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
-^ foe = "monarch")
-  ?a.canSmartDash()
-    a.smartDash()
-  :?foe.distance < s.getRange("dash_min")
-    c.useAbility_OH("wand_aether", a.wAh, hand)
-  : // get closer
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
-    ?!c.permapotSetup
-      equipR @a.shC2@
-// reset buffs
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed" |
+^ foe.buffs.string = "buff_tenacious")
+  c.useAbility_OH("wand_aether", a.wAh, hand)
+// Reset buff
 :?foe.buffs.string = "stoic" &
 ^c.canUseAbility("wand_vigor")
-  ?a.canSmartDash()
-    a.smartDash()
-  :?foe.distance < s.getRange("dash_min")
-    c.useAbility_OH("wand_vigor", a.wVh, hand)
-  : // get closer
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
-    ?!c.permapotSetup
-      equipR @a.shC2@
-// hinder regen
-:?encounter.eliteMod = "regen" &
-^c.canUseAbility("wand_fire")
-  ?a.canSmartDash()
-    a.smartDash()
-  :?foe.distance < s.getRange("dash_min")
-    c.useAbility_OH("wand_fire", a.wFh, hand)
-  : // get closer
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
-    ?!c.permapotSetup
-      equipR @a.shC2@
+  c.useAbility_OH("wand_vigor", a.wVh, hand)
+// Reduce damage
+:?c.canUseAbility("wand_poison") &
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed" |
+^ foe.buffs.string = "buff_tenacious")
+  c.useAbility_OH("wand_poison", a.wPh, hand)
+// Stun enemies
+:?c.canApplyStun() & foe = "elite" &
+^foe.count > 1 &
+^s.getTotalHP("player") < c.midhp &
+^c.canUseAbility("wand_ice")
+  c.useAbility_OH("wand_ice", a.wIh, hand)
 
 // Knockback farming
-:?foe ! "unpushable" &
-^c.canSmoothCast() &
-^s.inRange("crossbow") &
-^!c.permapotSetup
-  ?a.canSmartDash()
-    a.smartDash()
-  : // c.canSmoothCast()
-    >c0,0,#red,KNOCKBACK FARMING
-    c.smoothCast(a.bS)
+:?c.canKbFarm()
+  >c0,0,#red,KNOCKBACK FARMING
+  c.smoothCast(a.bS)
 
-:?loc.stars > 15 & (
-^(c.permapotSetup &
-^foe.GetCount(foe.distance + margin) > 1 &
-^s.inRange("wand")) |
-^(!c.permapotSetup &
-^foe.GetCount(foe.distance + s.getRange("crossbow")) > 1 &
-^s.inRange("crossbow")))
+// AOE Strat
+:?foe.GetCount(foe.distance + margin) > 1
+  // Align foes
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
-  :?foe ! "elite"
-    >`1,10,#red,foe ! elite
-    ?a.canSmartDash()
-      a.smartDash()
-    :?c.permapotSetup
-      ?c.canApplyStun() |
-      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-      ^foe.debuffs.string ! "debuff_armor_fatigue")
-        a.ldtF("grappling")
-      :
-        a.ldtF("big sword unmake")
-    :?a.canSmartDash()
-      a.smartDash()
-    :?!s.inRange("triskelion")
-      equipL triskelion
-    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
-      a.ldtF("ranged unmake")
-    :?!s.inRange("sword") & totaltime % 2 = 0
-      equipL triskelion
-      equipR hatchet
+  ?c.canUseAbility("heavy_hammer") & foe = "elite"
+    ?encounter.eliteMod = "plated"
+      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
-      a.ldtF("sword unmake")
-  : // foe = "elite"
-    ?c.canUseAbility("heavy_hammer")
-      ?a.canSmartDash()
-        a.smartDash()
-      :?!s.inRange("triskelion")
-        equipL triskelion
-      :
-        c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+      c.useAbility_TH("heavy_hammer", Mjölnir)
 
-    :?a.canSmartDash() & canDash
-      a.smartDash()
-    :?foe.GetCount(foe.distance + s.getRange("crossbow")) > 1
-      // low health, keep distance
-      ?s.getTotalHP("player") <= c.midhp &
-      ^!c.permapotSetup
-        canDash = false
+  // Perma-stun
+  :?s.inRange("grappling_hook") &
+  ^(c.canApplyStun() |
+  ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
+  ^foe.debuffs.string ! "debuff_armor_fatigue"))
+    a.ldtF("grappling")
 
-        ?foe.distance < s.getRange("dash_min") &
-        ^c.canUseAbility("staff_stone")
-          c.useAbility_TH("staff_stone", a.stSh)
-        :?foe.distance < s.getRange("dash_min") &
-        ^c.canUseAbility("mind")
-          a.ldtF("mind")
-      :
-        canDash = true
-
-      ?c.canApplyStun() |
-      ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-      ^foe.debuffs.string ! "debuff_armor_fatigue")
-        a.ldtF("grappling")
-      :
-        fight("ranged")
-    :?!s.inRange("triskelion") |
-    ^(!s.inRange("sword") & totaltime % 2 = 0)
-      equipL triskelion
-      equipR hatchet
+  :?nRuns = 1
+    /*?c.canEscape()
+      fight("escape")
     :
-      fight("melee")
+      >c0,0,#red,FIGHTING RANGED
+      fight("ranged")*/
+    a.ldtF("big sword unmake")
+  // Debuff and unmake
+  :?encounter.eliteMod = "blessed" |
+  ^foe.buffs.string = "buff_tenacious"
+    >c0,0,#yellow,BLESSED/TENACIOUS STRAT
 
-// .......... ENGAGE/WALKING LOGIC .......... //
-
-:?ai.paused | !ai.enabled |
-^(ai.idle & foe.distance > s.getRange("dash_min")) | // waiting for animation to complete
-^c.isDead() |
-^ (boss_cutscenes.Contains(foe.state) & // is a cutscene
-^ foe.damage > 1) | // dysan state 107 fight (flying)
-^foe.distance > s.getRange("dash_max") | // too far to dash
-^foe.state = -1 | // sleep state
-^(foe.state = 2 & // engaging state
-^ foe.distance > s.getRange("dash_max"))
-  ?armor > a.compoundMaxArmor_boosted |
-  ^c.canEngage()
-    a.ldtF("engage")
-
-  :?a.compoundMaxArmor_default <= armor &
-  ^armor <= a.compoundMaxArmor_boosted
-    a.ldtF("defense regen max")
+    a.smartDebuff()
+    ?a.canSmartDebuff()
+      a.ldtF("magic debuff")
+    :
+      a.ldtF("big sword unmake")
   :
-    a.ldtF("defense regen fast")
-
-// .............. COMBAT LOGIC .............. //
-
-:?a.canSmartDash() & canDash
-  a.smartDash()
+    equip Kubikiribocho
 
 // Boss fight (Hrímnir)
 :?foe = "phase"
-  canDash = true
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
@@ -408,17 +369,19 @@ var enduse = 0
     fight("melee")
 
 : // 1v1
-  ?c.canUseAbility("staff_poison") &
-  ^!c.permapotSetup & s.getTotalHP("foe") > 1000
-    c.useAbility_TH("staff_poison", a.stPh)
-  // finish off with bardiche ability
-  :?c.canUseAbility("bardiche") &
-  ^s.getTotalHP("foe") <= s.bardicheDmgR(a.bardicheDmg_Default,
-  ^                                      a.bardicheMult_Boosted)
-    c.useAbility_TH("bardiche", Kubikiribocho)
+  // Tanky foe, use bardiche ability to lower its hitpoints
+  ?(foe = "boss" | foe = "monarch") &
+  ^foe.GetCount(foe.distance + margin) = 1 &
+  ^s.inRange("sword") &
+  ^(c.canUseAbility("bardiche") |
+  ^c.canUseAbility("staff_poison"))
+    ?c.canUseAbility("staff_poison")
+      c.useAbility_TH("staff_poison", a.stPh)
+    : // c.canuseAbility("bardiche")
+      c.useAbility_TH("bardiche", Kubikiribocho)
   :
     fight("melee")
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄ END OF "7-Ridge" ▀▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "7-Ridge" ▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
