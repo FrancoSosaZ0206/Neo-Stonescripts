@@ -99,7 +99,7 @@ func fight(mode)
         a.ldtF("sword debuff auto")
     :?!c.permapotSetup &
     ^a.canSmartDebuff() & foe = "elite" &
-    ^foe.count = math.Clamp(foe.count, 2, 3)
+    ^foe.GetCount(foe.distance + margin) > 1
       a.ldtF("magic debuff")
 
     :?(c.canApplyAny() | c.canApplyBurn()) &
