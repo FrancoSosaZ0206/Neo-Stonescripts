@@ -245,12 +245,13 @@ c.AAC(a.hVeff, a.sFeff)
 
 // speed up (picking chest)
 :?old_t ! item.GetTreasureCount() &
-^c.canUseAbility("staff_fire") &
 ^!(loc.stars > 15 & nRuns = 1)
   enduse++
 
+  >c0,-1,#yellow,PICKING UP TREASURE
   ?c.canUseAbility("staff_fire") & enduse > 5
     c.useAbility_TH("staff_fire", a.stFh)
+    >c0,0,#red,USING INFERNAL STAFF
   :
     a.ldtF("defense armor regen")
     >c0,0,#red,ARMOR REGEN
@@ -264,7 +265,7 @@ c.AAC(a.hVeff, a.sFeff)
 ^!(loc.stars > 15 &
 ^(nRuns = 1 |
 // Don't use it when facing the scout
-^(nRuns > 1 & screen.i = 1 & foe = "scout" & foe.count = 1)))
+^(nRuns > 1 & screen.i = 1)))
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
