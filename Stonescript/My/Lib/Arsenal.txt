@@ -821,7 +821,7 @@ eliminating the time it takes for
 the projectiles to land. */
 func canSmartDebuff()
   return c.canApplyAny() & effCount <= effCap
-func smartDebuff()
+func smartDebuff() // TO DO: move ldtF modes that use this func here
   var capDefined = [false,false]
   ?c.canApplyChill(6) & !capDefined[0] // foe is immune to Chill
     effCap += 6
