@@ -10,9 +10,15 @@ var c = import My/Lib/Combat
 
 var set = import Borrowed/scottyEyeTracker
 
+// /////////////// VARIABLES //////////////// //
+
+var colRand = color.Random() // generate a random color for the tracker
+
 // /////////////// PROCEDURE //////////////// //
 
-set.main()
+?totaltime % 8 = 0 // rotate to a new color
+  colRand = color.Random()
+set.main(colRand)
 
 ?loc.begin
   a.ldtF("default")

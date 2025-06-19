@@ -9,38 +9,33 @@ Library with my personal weapons,
 special stats and loadouts
 Made by IronHawk (Tom Crow)
 
-. ...................................... .
+. ................ Description ............... .
 
-  Description
+  This library has some variables and functions
+  that minimalize the usage of my current
+  arsenal and provide some info on their damage.
 
-  This library just has some variables
-  that minimalize the usage of my
-  current arsenal and provide some
-  info on their damage.
-
-. ...................................... .
-
-  Importing
+. ................. Importing ................ .
 
   var a = new MyArsenal
 
-. ...................................... .
-
-  Usage
+. ................... Usage .................. .
 
   ?foe.debuffs.count = maxIgnitions // example
 
-. ...................................... .
+* ****************** WARNING ***************** *
 
-  WARNING:
+  There are constant variables that are subject
+  to changes depending on the level or state of
+  your arsenal (i.e. bladeRDmg).
+  
+  It is recommended to check and change these
+  values accordingly for the functions to work
+  as intended.
 
-  There are constant variables that are subject to changes
-  depending on the level or state of your arsenal
-  (i.e. bladeRDmg). It is recommended to check
-  and change these values accordingly for the functions
-  to work as intended.
+* ******************************************** *
 
-*/
+Enjoy! ;) */
 
 /* //////////////// GLOSSARY //////////////// //
 

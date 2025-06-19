@@ -1,21 +1,37 @@
-/* ScottyEyeTracker v1.0 by MaxMinMedian
-Modified by: IronHawk (Tom Crow)
--------------------------------------
-A simple and short chest tracking script.
-It's quite a small script, it should easily fit 
-into your mindstone.
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀ START OF "scottyEyeTracker" ▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-Instructions:
-- At the correct location, just call:
-  main() */
+/* // //////////// FILE INFO ///////////////// //
+
+ScottyEyeTracker by: MaxMinMedian
+Modified by: IronHawk (Tom Crow)
+
+. ................ Description ................ .
+
+  A simple and short chest tracking script.
+  It's quite a small script, it should easily fit 
+  into your mindstone.
+
+. ............... Instructions ................ .
+
+  At the correct location, just paste this into
+  your mindstone, or import it if you're on
+  Desktop.
+
+. ............................................. .
+
+Enjoy! ;)*/
+
+// /////////////// VARIABLES //////////////// //
 
 var o_X = screen.w / 2
 var o_Y = 6
 var w = screen.w
 
-var colRand = color.Random()
+// //////////////// FUNCTIONS //////////////// //
 
-func main()
+func main(colHex)
   ?screen.x = 69 & loc = "undead_crypt_intro"
     var L
     var R
@@ -43,8 +59,9 @@ func main()
             y = 9
             x = 9
 
-    ?totaltime % 8 = 0 // rotate to a new color
-      colRand = color.Random()
+    draw.Bg(o_X, o_Y, colHex)
+    draw.Bg(o_X + 2, o_Y, colHex)
 
-    draw.Bg(o_X, o_Y, colRand)
-    draw.Bg(o_X + 2, o_Y, colRand)
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄ END OF "scottyEyeTracker" ▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
