@@ -822,10 +822,15 @@ the projectiles to land. */
 func canSmartDebuff()
   return c.canApplyAny() & effCount <= effCap
 func smartDebuff()
-  ?!c.canApplyWeaken() // foe is immune to weaken
-    effCap = 6 // chill only
-  :
-    effCap = 7 // chill + weaken
+  var capDefined = [false,false]
+  ?c.canApplyChill(6) & !capDefined[0] // foe is immune to Chill
+    effCap += 6
+    capDefined[0] = true
+  ?!c.canApplyWeaken() & !capDefined[1] // foe is immune to Weaken
+    effCap += 1
+    capDefined[1] = true
+
+  >c0,0,#red,effCap = @effCap@
 
   var debuffAffix = ["dI", "dP"]
   var validEffItem = false
