@@ -108,7 +108,7 @@ func Main()
         char1 = draw.GetSymbol(x1, y1)
         char2 = draw.GetSymbol(x2, y2)
 
-        ? char1 = "\"" | char1 = "^"
+        ? char1 = "\"" | char1 = "^" //"
             ? detectLock = MIDDLE
                 drawbg(x1, y1, detectCol)
                 //swaping left and mid
@@ -123,7 +123,7 @@ func Main()
             ? detectLock = LEFT
                 detectLock = MIDDLE
             
-        ? char2 = "\"" | char2 = "^"
+        ? char2 = "\"" | char2 = "^" //"
             ? detectLock = MIDDLE
                 drawbg(x2, y2, detectCol)
                 //swapping right and mid

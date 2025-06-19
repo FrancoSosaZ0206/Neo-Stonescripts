@@ -167,7 +167,7 @@ var shFdef  = "*max shield fire -af"
 var shFeff  = "*max shield fire af"
 var bFDmg   = "*max crossbow fire -dF"
 var bFeff   = "*max crossbow fire dF"
-var wFDmg   = "*max wand fire -dF -hidden"
+var wFDmg   = "*max wand fire -dF -hidden" // enchanted: speed
 var wFeff   = "*max wand fire dF -hidden"
 var stFeff  = "*max staff fire dF -hidden"
 
@@ -708,15 +708,15 @@ func ldtF(mode)
         // equip @stAeff@
     :?mode = "debuff"
       ?c.permapotSetup
-        ?effCount < effCap
+        ?effCount <= 6
           equipL Frosty Crust
-        :?effCount = effCap
+        :?effCount = 7
           equipL @wPeff@
       :
-        ?effCount < effCap
+        ?effCount <= 6
           equipL moon
           equipR Frosty Crust
-        :?effCount = effCap
+        :?effCount = 7
           equipL moon
           equipR @wPeff@
 
@@ -735,20 +735,20 @@ func ldtF(mode)
         : // foe = "stone"
           equipL Frosty Crust // @wSDmg@
       : // !c.permapotSetup
-        equip @bAeff@
+        equipL moon
 
-        /* ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equip @stIDmg@
+        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+          equipR @wIDmg@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          equip @stPDmg@
+          equipR @wPDmg@
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equip @stVDmg@
+          equipR @wVDmg@
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equip @stADmg@
+          equipR @wADmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equip @stFDmg@
+          equipR @wFDmg@
         : // foe = "stone"
-          equip @stIeff@ // @stSDmg@ */
+          equipR @wIeff@ // @stSDmg@
   :?mode = "ranged" // crossbows
     ?c.permapotSetup
       equipL @bAlt@
@@ -765,12 +765,12 @@ func ldtF(mode)
           equip @bAeff@
 
       :?mode = "debuff"
-        ?effCount < effCap // c.canApplyChill(6)
+        ?effCount <= 6 // c.canApplyChill(6)
           /*?foe.count > 3
             equip @stIeff@
           :*/
           equip @bIeff@
-        :?effCount = effCap // c.canApplyWeaken()
+        :?effCount = 7 // c.canApplyWeaken()
           equipL moon
           equipR @wPeff@
           // @bPeff@
@@ -822,6 +822,11 @@ the projectiles to land. */
 func canSmartDebuff()
   return c.canApplyAny() & effCount <= effCap
 func smartDebuff()
+  ?!c.canApplyWeaken() // foe is immune to weaken
+    effCap = 6 // chill only
+  :
+    effCap = 7 // chill + weaken
+
   var debuffAffix = ["dI", "dP"]
   var validEffItem = false
 

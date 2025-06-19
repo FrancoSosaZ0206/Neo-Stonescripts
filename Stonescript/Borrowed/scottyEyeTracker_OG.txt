@@ -1,0 +1,38 @@
+////////////////////////////////////////////////
+//     scottyEyeTracker() by MaxMinMedian     //
+////////////////////////////////////////////////
+
+var o_X = screen.w/2 + 1
+var o_Y = 6
+
+?loc = crypt_intro | loc = sly_loc
+  scottyEyeTracker()
+
+func scottyEyeTracker()
+  ?screen.x ! 69
+    return
+  var L
+  var R
+  var w = screen.w
+  var t = false
+
+  for i = 0 .. 2
+    L = draw.GetSymbol(w/2-5+6*i, 3*i)
+    R = draw.GetSymbol(w/2-3+6*i, 3*i)
+    ?"o-" = L & L = R
+      o_X = w/2-5+6*i
+      o_Y = 3*i
+      t = true
+  ?!t
+    for y = -1 .. 1 
+      t = 2 - math.Abs(y)
+      for x = -1 .. 1
+        L = draw.GetSymbol(o_X+t*x, o_Y+y)
+        R = draw.GetSymbol(o_X+t*x+2, o_Y+y)
+        ?"o-" = R & R+"\" = L
+          o_X = o_X+t*x
+          o_Y = o_Y+y
+          y = 9
+          x = 9
+  draw.Bg(o_X, o_Y, #green)
+  draw.Bg(o_X+2, o_Y, #green)

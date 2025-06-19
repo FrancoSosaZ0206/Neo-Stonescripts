@@ -89,7 +89,7 @@ func fight(mode)
     ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
 
-    ?c.permapotSetup &
+    :?c.permapotSetup &
     ^a.canSmartDebuff() & foe = "elite"
       ?foe.GetCount(foe.distance + margin) > 1
         a.ldtF("magic debuff")
@@ -214,7 +214,6 @@ canDash = true
 c.potionType = "lucky"
 c.Init()
 a.smartDebuff()
-disable npcDialog
 
 stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?!stunTime
@@ -236,7 +235,7 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?c.permapotSetup
   a.ldtF("permapot")
 
-c.AAC(a.hVeff, a.sIeff)
+c.AAC(a.hVeff, a.shIeff)
 
 // Initial equipments
 ?loc.begin
@@ -415,6 +414,11 @@ c.AAC(a.hVeff, a.sIeff)
   :
     c.devour("voidweaver")
 
+// Knockback farming
+/* :?c.canKbFarm()
+  >c0,0,#red,KNOCKBACK FARMING
+  c.smoothCast(a.bS) */
+
 :?a.canSmartDash() & canDash
   a.smartDash()
 // if in range, get closer while trying to unmake with repeating bow
@@ -451,11 +455,6 @@ c.AAC(a.hVeff, a.sIeff)
 ^s.getTotalHP("player") < c.midhp &
 ^c.canUseAbility("wand_ice")
   c.useAbility_OH("wand_ice", a.wIh, hand)
-
-// Knockback farming
-/* :?c.canKbFarm()
-  >c0,0,#red,KNOCKBACK FARMING
-  c.smoothCast(a.bS) */
 
 // AOE Strat
 :?foe.GetCount(foe.distance + margin) > 1

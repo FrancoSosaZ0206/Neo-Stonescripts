@@ -1,42 +1,41 @@
-﻿// *******************************************************
-//                     START OF "Gate"                    
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ START OF "Gate" ▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
+// //////////////// IMPORTS ///////////////// //
 
-
-// IMPORTS
-
-var c = import My/Lib/Combat
-var a = import My/Lib/Arsenal
 var u = import My/Lib/Utilities
+var a = import My/Lib/Arsenal
+var c = import My/Lib/Combat
 
 var set = import Borrowed/scottyEyeTracker
 
+// /////////////// PROCEDURE //////////////// //
 
-
-// PROCEDURE:
-
-set.scottyEyeTracker("#rainbow")
+set.main()
 
 ?loc.begin
-  equipL triskelion
-  equipR @a.shieldCompound1@
+  a.ldtF("default")
 
-:?pickup.distance < 12
+:?pickup.distance < 15
   a.ldtF("magnet", false)
 
-:?ai.walking
-  ?c.canUseStaffHidden("infernal")
-    c.useStaffHidden(a.staffFireHidden, "infernal")
-  :?c.canUseQuarterstaff()
-    c.useQuarterstaff(a.myQuarterstaff)
+:?ai.walking &
+^(item.GetCooldown("staff_fire") <= 0 |
+^ item.GetCooldown("quarterstaff") <= 0)
 
+  ?item.GetCooldown("staff_fire") <= 0
+    c.useAbility_TH("staff_fire", a.stFh)
+  : // item.GetCooldown("quarterstaff") <= 0
+    c.useAbility_TH("quarterstaff", a.myQ)
+
+:?armor < a.compoundMaxArmor_boosted &
+^(buffs.string = "buff_infernal" |
+^ buffs.string = "buff_inf_speed")
+  a.ldtF("defense armor regen")
 :
-  equipL triskelion
-  equipR @a.shieldCompound2@
+  equip @a.bR@
 
-
-
-// *******************************************************
-//                       END OF "Gate"                    
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "Gate" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //

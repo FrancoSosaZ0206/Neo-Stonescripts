@@ -1,46 +1,50 @@
 /* ScottyEyeTracker v1.0 by MaxMinMedian
-Modified by: MetalEagle26 (Tom Crow)
+Modified by: IronHawk (Tom Crow)
 -------------------------------------
 A simple and short chest tracking script.
 It's quite a small script, it should easily fit 
 into your mindstone.
 
 Instructions:
-- At the correct locations, just call:
-  scottyEyeTracker(col)
-  Where "col" is the color of the tracker (include "#"). */
+- At the correct location, just call:
+  main() */
 
-var o_X
-var o_Y
+var o_X = screen.w / 2
+var o_Y = 6
 var w = screen.w
 
-func scottyEyeTracker(col)
-  ?screen.x ! 69
-    return
-  var L
-  var R
-  var t = false
+var colRand = color.Random()
 
-  for i = 0 .. 2
-    L = draw.GetSymbol(w / 2 - 5 + 6 * i, 3 * i)
-    R = draw.GetSymbol(w / 2 - 3 + 6 * i, 3 * i)
-    ?"o-" = L & L = R
-      o_X = w / 2 - 5 + 6 * i
-      o_Y = 3 * i
-      t = true
-  ?!t
-    for y = -1 .. 1 
-      t = 2 - math.Abs(y)
-      for x = -1 .. 1
-        ?o_X & o_Y
+func main()
+  ?screen.x = 69 & loc = "undead_crypt_intro"
+    var L
+    var R
+    var t = false
+
+    for i = 0 .. 2
+      L = draw.GetSymbol(w / 2 - 5 + 6 * i, 3 * i)
+      R = draw.GetSymbol(w / 2 - 3 + 6 * i, 3 * i)
+
+      ?"o-" = L & L = R
+        o_X = w / 2 - 5 + 6 * i
+        o_Y = 3 * i
+        t = true
+
+    ?!t
+      for y = -1 .. 1
+        t = 2 - math.Abs(y)
+        for x = -1 .. 1
           L = draw.GetSymbol(o_X + t * x, o_Y + y)
           R = draw.GetSymbol(o_X + t * x + 2, o_Y + y)
-        ?"o-" = R & R + "\" = L
-          o_X = o_X + t * x
-          o_Y = o_Y + y
-          y = 9
-          x = 9
 
-  ?o_X & o_Y
-    draw.Bg(o_X, o_Y, col)
-    draw.Bg(o_X + 2, o_Y, col)
+          ?"o-" = R & R + "\" = L
+            o_X = o_X + t * x
+            o_Y = o_Y + y
+            y = 9
+            x = 9
+
+    ?totaltime % 8 = 0 // rotate to a new color
+      colRand = color.Random()
+
+    draw.Bg(o_X, o_Y, colRand)
+    draw.Bg(o_X + 2, o_Y, colRand)
