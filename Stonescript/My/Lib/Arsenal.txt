@@ -335,21 +335,21 @@ func ldtF(mode)
         equipL @hVeff@
 
     ?!c.permapotSetup
-      ?c.canApplyChill(1)
+      /*?c.canApplyChill(1)
         equipR @shIeff@
+      :*/
+      ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+        equipR @shIdef@
+      :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+        equipR @shPdef@
+      :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+        equipR @shVdef@
+      :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+        equipR @shAdef@
+      :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+        equipR @shFdef@
       :
-        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equipL @shIdef@
-        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          equipL @shPdef@
-        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equipL @shVdef@
-        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equipL @shAdef@
-        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equipL @shFdef@
-        :
-          equipL @shC1@
+        equipR @shC1@
   :?mode = "extend" | mode = "permapot"
     ?item.right ! "bardiche" &
     ^item.right ! "quarterstaff" &
@@ -464,6 +464,8 @@ func ldtF(mode)
           equipL @wADmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
           equipL @wFDmg@
+          >c0,0,#red,DEFENSE FIRE WAND D
+          loc.Pause()
         : // foe = "stone"
           equipL @wSh@
       :

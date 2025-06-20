@@ -245,7 +245,9 @@ c.AAC(a.hVeff, a.shFdef)
 
 // ........... ENGAGE/WALKING LOGIC .......... //
 
-:?ai.walking & !s.inRange("crossbow")
+:?ai.walking &
+^(!s.inRange("crossbow") |
+^!(a.canSmartDash() | s.inRange("triskelion")))
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
@@ -276,6 +278,7 @@ c.AAC(a.hVeff, a.shFdef)
 // Knockback farming
 :?c.canKbFarm()
   >c0,0,#red,KNOCKBACK FARMING
+  loc.Pause()
   c.smoothCast(a.bS)
 
 :?a.canSmartDash() & canDash
@@ -284,11 +287,9 @@ c.AAC(a.hVeff, a.shFdef)
 :?canDash & foe.distance =
 ^   math.Clamp(foe.distance,
 ^              s.getRange("dash_max") + 1,
-^              s.getRange("crossbow"))
-  ?!c.permapotSetup & debuffs.string ! "chill"
-    c.smoothCast(a.bR)
-  :
-    a.ldtF("defense armor regen")
+^              s.getRange("crossbow")) &
+^!c.permapotSetup & debuffs.string ! "chill"
+  c.smoothCast(a.bR)
 
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &

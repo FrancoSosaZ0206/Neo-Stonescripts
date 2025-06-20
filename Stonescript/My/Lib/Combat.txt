@@ -725,7 +725,7 @@ dealing damage.
 Requires berserk potion. */
 func canSmoothCast()
   return !permapotSetup &
-  ^!s.inRange("triskelion") &
+  // ^!s.inRange("triskelion") &
   ^buffs.string = "⊙" & // berserk potion
   ^!(debuffs.string = "stun" |
   ^  debuffs.string = "chill" )
