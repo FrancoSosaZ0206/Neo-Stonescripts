@@ -317,6 +317,7 @@ func ldtF(mode)
     equipR @shC1@
 
   :?mode = "engage"
+    // Left hand:
     ?totaltime % 2 = 0 | // every even frame
     ^buffs.string = "buff_inf_speed" // infernal staff
       equipL triskelion
@@ -334,6 +335,7 @@ func ldtF(mode)
       :
         equipL @hVeff@
 
+    // Right hand:
     ?!c.permapotSetup
       /*?c.canApplyChill(1)
         equipR @shIeff@
@@ -349,7 +351,11 @@ func ldtF(mode)
       :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
         equipR @shFdef@
       :
-        equipR @shC1@
+        ?armor < compoundMaxArmor_default
+          equipR @shC2@
+        : // armor = math.Clamp(armor, compoundMaxArmor_default, compoundMaxArmor_boosted)
+          equipR @shC1@
+
   :?mode = "extend" | mode = "permapot"
     ?item.right ! "bardiche" &
     ^item.right ! "quarterstaff" &
@@ -431,6 +437,7 @@ func ldtF(mode)
         equipR @shAeff@
 
     :?mode = "armor regen"
+      // Left hand:
       ?!ai.walking & (!ai.enabled | ai.paused)
         ?hp ! maxhp // passive regen
           equipL ouroboros
@@ -439,7 +446,7 @@ func ldtF(mode)
       :
         c.stutterStepping("sword")
 
-
+      // Right hand:
       ?!c.permapotSetup
         ?armor < compoundMaxArmor_default
           equipR @shC2@

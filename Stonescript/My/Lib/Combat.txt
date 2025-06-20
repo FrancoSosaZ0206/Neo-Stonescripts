@@ -110,7 +110,7 @@ func Init()
   ?loc.loop
     permapotSetup = false
 
-// ............... GLOBAL ............... //
+// ................. GLOBAL ................. //
 
 /* Returns true if a given weapon's special ability can be activated.
 
@@ -266,7 +266,7 @@ func isCasting(itemName)
   ^(item.left = itemName & item.left.state = 2) |
   ^(item.right = itemName & item.right.state = 2)
 
-// ......... Double Screen (DS) ......... //
+// ........... Double Screen (DS) ........... //
 
 func isScreen_DS(itemName, type)
   var result = false
@@ -333,7 +333,7 @@ func useAbility_DS(itemName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
 
-// ..... Talisman / Summon specific ..... //
+// ....... Talisman / Summon specific ....... //
 
 func isSummoned(summonName)
   return summon.GetId() = summonName
@@ -418,7 +418,7 @@ func isCinderwispCap(ignitions_cap)
   :
     return false
 
-// ............... Potions .............. //
+// ................. Potions ................ //
 
 /* Checks if a certain potion can be brewed. */
 func canBrewPotion()
@@ -505,7 +505,7 @@ func canUsePotion()
       ^      item.potion ! "empty" &
       ^      item.potion = potionType
 
-// ........... Status effects ........... //
+// ............. Status effects ............. //
 
 /* Returns true if the current foes the player is
 facing can be unmade. */
@@ -585,13 +585,14 @@ This enables the player to benefit from effects
 that are applied when engaging, like ai or A/a
 affix items. */
 func canEngage()
-  return ai.walking &
+  return foe.state = -1 |
+  ^(ai.walking &
   ^foe.distance =
   ^   math.Clamp(foe.distance,
   ^              s.getRange("dash_max") + 1,
-  ^              s.getRange("socketed_shield"))
+  ^              s.getRange("socketed_shield")))
 
-// ......... Damage min-maxing .......... //
+// ........... Damage min-maxing ............ //
 
 /* Moondialing is a trick that boosts dps
 with 2 swords whose attack speed stat is
