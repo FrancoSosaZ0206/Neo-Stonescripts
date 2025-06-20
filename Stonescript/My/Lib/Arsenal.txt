@@ -437,12 +437,7 @@ func ldtF(mode)
         : // try to deal extra damage if possible
           equipL fissure
       :
-        ?!s.inRange("triskelion") &
-        ^(totaltime % 2 = 0 |
-        ^buffs.string = "buff_inf_speed") // infernal staff
-          equipL triskelion
-        :
-          equipL sword
+        c.stutterStepping("sword")
 
 
       ?!c.permapotSetup

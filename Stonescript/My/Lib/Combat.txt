@@ -696,7 +696,7 @@ Staff's ability. */
 func canSmoothCast()
   return !permapotSetup &
   ^(buffs.string = "ʘ" | // berserk potion
-  ^ buffs.string = "buff_infernal") & // infernal staff
+  ^ buffs.string = "buff_infernal") & // infernal staff's attack speed buff
   ^!(debuffs.string = "stun" |
   ^  debuffs.string = "chill" )
 func smoothCast(itemName)
@@ -716,17 +716,30 @@ func canKbFarm()
   return foe ! "unpushable" & // immune to knockback
   ^!permapotSetup &
   ^canSmoothCast() & // smooth cast is required
+  ^s.inRange("crossbow")
   // between dashing and crossbow range
-  ^foe.distance =
+  /*^foe.distance =
   ^   math.Clamp(foe.distance,
   ^              s.getRange("dash_max"),
-  ^              s.getRange("crossbow"))
+  ^              s.getRange("crossbow"))*/
 
 func canEscape()
   return foe ! "ranged" &
   ^foe.distance < s.getRange("dash_min") &
   ^(canUseAbility("staff_stone") |
   ^ canUseAbility("mind"))
+
+/* Stutterstepping is a technique that enables
+walking with the Triskelion Stone while inside its
+attack range (where the player would normally stop
+to attack). */
+func stutterStepping(itemName)
+  ?totaltime % 2 = 0 |
+  ^!s.inRange("triskelion") |
+  ^buffs.string = "buff_inf_speed" // infernal staff's movement speed buff
+    equipL triskelion
+  :
+    equipL @itemName@
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Combat" ▀▄▀▄▀▄▀▄▀▄▀▄ ┃  //

@@ -386,7 +386,9 @@ c.AAC(a.hVeff, a.shIeff)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
-:?ai.walking & !s.inRange("crossbow")
+:?ai.walking &
+^!(s.inRange("crossbow") |
+^  a.canSmartDash())
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
@@ -405,10 +407,7 @@ c.AAC(a.hVeff, a.shIeff)
   ?c.canUseAbility("dash")
     a.ldtF("dash")
   :?!s.inRange("sword")
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
+    c.stutterStepping("sword")
     equipR @a.shC2@
   :
     c.devour("voidweaver")

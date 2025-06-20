@@ -82,7 +82,6 @@ func fight(mode)
       a.smartDebuff("magic")
 
     :?(c.canApplyAny() | c.canApplyBurn()) &
-    ^(loc.stars > 15 | c.permapotSetup) &
     ^(foe = "monarch" | foe = "boss") &
     ^mode = "melee"
       a.ldtF("sword debuff auto")
@@ -103,11 +102,25 @@ func fight(mode)
       ?mode = "melee" & !blowing
         a.ldtF("sword dmg")
       :
+        /*?blowing
+          canDash = false*/
         a.ldtF("magic dmg")
 
 // //////////////// PROCEDURE //////////////// //
 
 // >`1,12,#magenta,screen.i = @screen.i@
+>`1,12,#magenta,
+^can kb = @foe ! "unpushable"@\n
+^!permapotSetup = @!c.permapotSetup@\n
+^canSmoothCast() = @c.canSmoothCast()@\n
+^@foe.distance@ between 
+^@s.getRange("dash_max")@ and 
+^@s.getRange("crossbow")@ = 
+^@foe.distance =
+^   math.Clamp(foe.distance,
+^              s.getRange("dash_max"),
+^              s.getRange("crossbow"))@
+
 
 // ............. WITHDRAWAL LOGIC ............ //
 
@@ -208,7 +221,7 @@ c.AAC(a.hVeff, a.shFdef)
 :?c.canUseAbility("quarterstaff") &
 ^!s.inRange("dash") & ai.walking &
 ^ai.enabled & !ai.paused &
-^!blowing // Hrímnir's blowing state
+^!blowing
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // Summons
@@ -226,7 +239,9 @@ c.AAC(a.hVeff, a.shFdef)
 // .............. DEFENSIVE LOGIC ............ //
 
 :?foe = "phase" &
-^foe.state = 132 & foe.time > 65
+^foe.state = 132 &
+^((foe.debuffs.string = "chill:6" & foe.time > 65) |
+^ (foe.debuffs.string ! "chill" & foe.time > 27))
   // about to blow air and apply chill
   ?c.canUseAbility("staff_vigor") // try to prevent the debuff
     c.useAbility_TH("staff_vigor", a.stVh)
@@ -246,8 +261,8 @@ c.AAC(a.hVeff, a.shFdef)
   >c0,0,#red,KNOCKBACK FARMING
 
 :?ai.walking &
-^(!s.inRange("crossbow") |
-^!(a.canSmartDash() | s.inRange("triskelion")))
+^!(s.inRange("crossbow") |
+^  a.canSmartDash())
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
@@ -267,10 +282,7 @@ c.AAC(a.hVeff, a.shFdef)
   ?c.canUseAbility("dash")
     a.ldtF("dash")
   :?!s.inRange("sword")
-    ?totaltime % 2 = 0 & !s.inRange("triskelion")
-      equipL triskelion
-    :
-      equipL sword
+    c.stutterStepping("sword")
     equipR @a.shC2@
   :
     c.devour("voidweaver")
@@ -355,6 +367,7 @@ c.AAC(a.hVeff, a.shFdef)
     c.devour("cinderwisp")
 
   ?blowing
+    canDash = false
     fight("magic")
   :?foe.state > 1 // states 0 and 1 are when he has the ice shield
     ?c.canUsePotion()
