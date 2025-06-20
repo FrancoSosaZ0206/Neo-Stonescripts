@@ -49,7 +49,6 @@ var hihp
 
 var slideCount = 0 // counter to give screen.Next() time to slide in _DS functions.
 
-var moondialMode = -1
 var moondialTimer = 0
 var burstingTimer = 0
 var burstingCdTimer = 0
@@ -107,14 +106,6 @@ func Init()
   midhp = maxhp / 2
   lowhp = maxhp / 3
   hihp = (4 * maxhp) / 5
-
-  ?potionType
-    ?potionType = "berserk" // berserk potion
-      moondialMode = 2
-    :
-      moondialMode = 0
-  :
-    moondialMode = 0
 
   ?loc.loop
     permapotSetup = false
@@ -613,16 +604,19 @@ even further.
 - In the last one, both swords are held to
 spend the cooldown frame. */
 func moondialing(weapon1, weapon2)
-  var moondialFrame = null
-
+  /* moondialing isn't necessary or possible
+  under these conditions, do
+  dual wielding */
   ?debuffs.string = "stun" |
-  ^debuffs.string = "chill"
-    moondialMode = 2
+  ^debuffs.string = "chill" |
+  ^buffs.string = "ʘ" | // berserk potion
+  ^buffs.string = "buff_infernal" // infernal staff
+    equipL @weapon2@
+    equipR @weapon1@
 
-  // Normal moondialing
-  ?moondialMode = 0
+  : // Normal moondialing
     moondialTimer++
-    moondialFrame = moondialTimer % 3
+    var moondialFrame = moondialTimer % 3
 
     ?moondialFrame = 1
       equipL moon
@@ -634,36 +628,11 @@ func moondialing(weapon1, weapon2)
       equipL @weapon1@
       equipR @weapon2@
 
-  /* Berserk Moondialing (For non-speed enchanted *max
-  swords) */
-  :?moondialMode = 1
-    moondialTimer++
-    moondialFrame = moondialTimer % 4
-
-    ?moondialFrame = 1
-      equipL @weapon2@ // on cooldown
-      equipR @weapon1@
-    :?moondialFrame = 2
-      equipL moon
-      equipR @weapon1@
-    :?moondialFrame = 3
-      equipL @weapon1@ // on cooldown
-      equipR @weapon2@
-    :?moondialFrame = 4
-      equipL moon
-      equipR @weapon2@
-
-  /* Not moondialing, but useful to have here (speed
-  enchant *max swords) */
-  :?moondialMode = 2
-    equipL @weapon2@
-    equipR @weapon1@
-
   /* For when you have just 1 +21 sword (weapon2 can be
   anything, it will not be used) */
-  :?moondialMode = 3
+  /*:?moondialMode = 3
     equipL moon
-    equipR @weapon1@
+    equipR @weapon1@*/
 
 /* Moondialing variant, aka Bursting.
 Requires a minimum of 2 swords to cycle through.
@@ -722,11 +691,12 @@ hold the triskelion stone every certain
 amount of frames to enable walking while
 dealing damage.
 
-Requires berserk potion. */
+Requires berserk potion or Infernal
+Staff's ability. */
 func canSmoothCast()
   return !permapotSetup &
-  // ^!s.inRange("triskelion") &
-  ^buffs.string = "⊙" & // berserk potion
+  ^(buffs.string = "ʘ" | // berserk potion
+  ^ buffs.string = "buff_infernal") & // infernal staff
   ^!(debuffs.string = "stun" |
   ^  debuffs.string = "chill" )
 func smoothCast(itemName)

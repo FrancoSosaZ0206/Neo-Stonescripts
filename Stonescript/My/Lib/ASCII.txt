@@ -4,7 +4,7 @@
 
 // ///////// Commonly used characters //////// //
 
-// Elements / Elemental status effects
+// ... Elements / Elemental status effects ... //
 
 ∞  = poison, weaken, feeble
 ❤ = vigor, debuff_protection, debuff_vigor
@@ -12,8 +12,26 @@
 φ  = fire, dot (DoT)
 ❄ = ice, chill
 
+// ............. Potion effects .............. //
 
-// Other status effects
+ʘ = berserk
+! = lucky
+x = lucky (crit multiplier)
+@ = experience
+? = invisibility
+o = strength
+W = vampiric
+
+// ............ Elite modifiers .............  //
+
+* = Stability
+▲ = Stoic
+# = Immortal
+♥ = Tenacious
+∆ = Rebirth
+♀ = Mirror
+
+// .......... Other status effects ........... //
 
 o = stun
 x = armor_fatigue
@@ -22,8 +40,7 @@ i = ignition
 · = smite
 ≡ = pick_pocket
 
-
-// Resources
+// ................ Resources ................ //
 
 o   = stone
 _/` = wood
