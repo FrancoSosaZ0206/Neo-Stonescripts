@@ -11,7 +11,9 @@ var a = import My/Lib/Arsenal
 
 // //////////////// VARIABLES //////////////// //
 
-var blowing = (foe.state = 133) // Hrímnir's blowing state
+var blowing =
+^(foe.state = 133 | // Hrímnir's blowing state
+^ foe.state = 143) // Hrímnir blowing and putting ice wall
 
 var canDash   = true
 
@@ -129,7 +131,9 @@ func fight(mode)
   :?loc.stars <= 20 // green
     boss_screen = 7
 :?screen.i = boss_screen
-  blowing = (foe.state = 133)
+  blowing =
+  ^(foe.state = 133 | // Hrímnir's blowing state
+  ^ foe.state = 143) // Hrímnir blowing and putting ice wall
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
   c.permapotSetup = (screen.i >= boss_screen - 1)
@@ -254,10 +258,6 @@ c.AAC(a.hVeff, a.shFdef)
 :?ai.paused | !ai.enabled
   a.ldtF("defense armor regen")
 
-  ?ai.paused
-    >c0,0,#red,AI PAUSED
-  >c0,1,#red,ARMOR REGEN STILL
-
 // ............... COMBAT LOGIC .............. //
 
 // Voidweaver - use it if possible
@@ -311,8 +311,7 @@ c.AAC(a.hVeff, a.shFdef)
   c.useAbility_OH("wand_ice", a.wIh, hand)
 
 // AOE Strat
-:?foe.GetCount(foe.distance + margin) > 1 |
-^foe.state = 143 // Hrímnir blowing and putting ice wall
+:?foe.GetCount(foe.distance + margin) > 1
   // Align foes
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
@@ -354,7 +353,7 @@ c.AAC(a.hVeff, a.shFdef)
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
-  
+
   ?blowing
     fight("magic")
   :?foe.state > 1 // states 0 and 1 are when he has the ice shield
