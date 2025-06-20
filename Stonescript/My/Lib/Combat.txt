@@ -2,7 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "Combat" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
 /* // ///////////// FILE INFO //////////////// //
 
 Combat functions library
@@ -32,12 +31,10 @@ Made by IronHawk (Tom Crow)
 
 Enjoy! */
 
-
 // ///////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities
 var s = import My/Lib/Stats
-
 
 // //////////////// VARIABLES //////////////// //
 
@@ -597,9 +594,11 @@ This enables the player to benefit from effects
 that are applied when engaging, like ai or A/a
 affix items. */
 func canEngage()
-  return (foe.state = -1 | foe.state = 2) &
-  ^foe.distance = math.Clamp(foe.distance, s.getRange("dash_max") + 1, 17) &
-  ^ai.walking & ai.enabled & !(ai.paused | ai.idle)
+  return ai.walking &
+  ^foe.distance =
+  ^   math.Clamp(foe.distance,
+  ^              s.getRange("dash_max") + 1,
+  ^              s.getRange("socketed_shield"))
 
 // ......... Damage min-maxing .......... //
 
@@ -616,7 +615,12 @@ spend the cooldown frame. */
 func moondialing(weapon1, weapon2)
   var moondialFrame = null
 
-  ?moondialMode = 0 // Normal moondialing
+  ?debuffs.string = "stun" |
+  ^debuffs.string = "chill"
+    moondialMode = 2
+
+  // Normal moondialing
+  ?moondialMode = 0
     moondialTimer++
     moondialFrame = moondialTimer % 3
 
@@ -630,9 +634,9 @@ func moondialing(weapon1, weapon2)
       equipL @weapon1@
       equipR @weapon2@
 
+  /* Berserk Moondialing (For non-speed enchanted *max
+  swords) */
   :?moondialMode = 1
-    /* Berserk Moondialing (For non-speed enchanted *max
-    swords) */
     moondialTimer++
     moondialFrame = moondialTimer % 4
 
@@ -649,15 +653,15 @@ func moondialing(weapon1, weapon2)
       equipL moon
       equipR @weapon2@
 
+  /* Not moondialing, but useful to have here (speed
+  enchant *max swords) */
   :?moondialMode = 2
-    /* Not moondialing, but useful to have here (speed
-    enchant *max swords) */
     equipL @weapon2@
     equipR @weapon1@
 
+  /* For when you have just 1 +21 sword (weapon2 can be
+  anything, it will not be used) */
   :?moondialMode = 3
-    /* For when you have just 1 +21 sword (weapon2 can be
-    anything, it will not be used) */
     equipL moon
     equipR @weapon1@
 
@@ -722,7 +726,9 @@ Requires berserk potion. */
 func canSmoothCast()
   return !permapotSetup &
   ^!s.inRange("triskelion") &
-  ^buffs.string = "⊙" // berserk potion
+  ^buffs.string = "⊙" & // berserk potion
+  ^!(debuffs.string = "stun" |
+  ^  debuffs.string = "chill" )
 func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL triskelion

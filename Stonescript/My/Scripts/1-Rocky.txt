@@ -84,21 +84,20 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    a.smartDebuff()
 
     ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
 
     :?c.permapotSetup &
-    ^a.canSmartDebuff() & foe = "elite"
+    ^a.canSmartDebuff("magic") & foe = "elite"
       ?foe.GetCount(foe.distance + margin) > 1
-        a.ldtF("magic debuff")
+        a.smartDebuff("magic")
       :
         a.ldtF("sword debuff auto")
     :?!c.permapotSetup &
-    ^a.canSmartDebuff() & foe = "elite" &
+    ^a.canSmartDebuff("magic") & foe = "elite" &
     ^foe.GetCount(foe.distance + margin) > 1
-      a.ldtF("magic debuff")
+      a.smartDebuff("magic")
 
     :?(c.canApplyAny() | c.canApplyBurn()) &
     ^(loc.stars > 15 | c.permapotSetup) &
@@ -213,7 +212,7 @@ canDash = true
 
 c.potionType = "lucky"
 c.Init()
-a.smartDebuff()
+a.smartDebuff_Mgr()
 
 stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?!stunTime
@@ -487,9 +486,8 @@ c.AAC(a.hVeff, a.shIeff)
   ^foe.buffs.string = "buff_tenacious"
     >c0,0,#yellow,BLESSED/TENACIOUS STRAT
 
-    a.smartDebuff()
-    ?a.canSmartDebuff()
-      a.ldtF("magic debuff")
+    ?a.canSmartDebuff("magic")
+      a.smartDebuff("magic")
     :
       a.ldtF("big sword unmake")
   :

@@ -2,7 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄▀ START OF "Arsenal" ▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
 /* // //////////// FILE INFO //////////////// //
 
 Library with my personal weapons,
@@ -67,13 +66,11 @@ Q = quarterstaff
 B = bardiche
 HH = heavy hammer */
 
-
 // //////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities
 var c = import My/Lib/Combat
 var s = import My/Lib/Stats
-
 
 // /////////////// VARIABLES //////////////// //
 
@@ -297,12 +294,12 @@ var bardicheMult_Boosted = 13.5
 // ............ FUNCTION RELATED ............ //
 
 var chillCount = null
-chillCount = s.getEffectStat("foe","debuff","chill","count")
 var weakenCount = null
-weakenCount = s.getEffectStat("foe","debuff","damage","count")
+var chillLimit = null
+var weakenLimit = null
 
 var effCount = 0
-var effCap = 7
+var effLimit = 0
 var canIncrease = true
 
 // /////////////// FUNCTIONS //////////////// //
@@ -320,8 +317,8 @@ func ldtF(mode)
     equipR @shC1@
 
   :?mode = "engage"
-    ?buffs.string ! "buff_inf_speed" & // infernal staff
-    ^totaltime % 2 = 0 // every even frame
+    ?totaltime % 2 = 0 | // every even frame
+    ^buffs.string = "buff_inf_speed" // infernal staff
       equipL triskelion
     :
       ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -702,16 +699,19 @@ func ldtF(mode)
         equip @wAeff@
         // equip @stAeff@
     :?mode = "debuff"
+      >c0,0,#red,MAGIC DEBUFF
       ?c.permapotSetup
-        ?effCount <= 6
+        ?mode = "chill"
           equipL Frosty Crust
-        :?effCount = 7
+          >c0,1,#red,CHILL
+        :?mode = "weaken"
           equipL @wPeff@
       :
-        ?effCount <= 6
+        ?mode = "chill"
           equipL moon
           equipR Frosty Crust
-        :?effCount = 7
+          >c0,1,#red,CHILL
+        :?mode = "weaken"
           equipL moon
           equipR @wPeff@
 
@@ -760,12 +760,9 @@ func ldtF(mode)
           equip @bAeff@
 
       :?mode = "debuff"
-        ?effCount <= 6 // c.canApplyChill(6)
-          /*?foe.count > 3
-            equip @stIeff@
-          :*/
+        ?mode = "chill"
           equip @bIeff@
-        :?effCount = 7 // c.canApplyWeaken()
+        :?mode = "weaken"
           equipL moon
           equipR @wPeff@
           // @bPeff@
@@ -814,43 +811,42 @@ debuffing weapon is cast, instead
 of counting the foe's debuffs,
 eliminating the time it takes for
 the projectiles to land. */
-func canSmartDebuff()
-  return c.canApplyAny() & effCount <= effCap
-func smartDebuff() // TO DO: move ldtF modes that use this func here
-  var capDefined = [false,false]
-  ?c.canApplyChill(6) & !capDefined[0] // foe is immune to Chill
-    effCap += 6
-    capDefined[0] = true
-  ?!c.canApplyWeaken() & !capDefined[1] // foe is immune to Weaken
-    effCap += 1
-    capDefined[1] = true
+func canSmartDebuff(itemType)
+  // entry sanitization
+  itemType = string.ToLower(itemType)
 
-  >c0,0,#red,effCap = @effCap@
+  return c.canApplyAny() &
+  ^      effCount <= effLimit &
+  ^      ["magic","ranged"].Contains(itemType)
+func smartDebuff_Mgr()
+  // get individual counts
+  chillCount = s.getEffectStat("foe","debuff","chill","count")
+  weakenCount = s.getEffectStat("foe","debuff","damage","count")
 
-  var debuffAffix = ["dI", "dP"]
-  var validEffItem = false
+  ?!chillCount
+    chillCount = 0
+  ?!weakenCount
+    weakenCount = 0
 
-  for i = 0 .. debuffAffix.Count() - 1
-    ?(item.left = debuffAffix[i] & item.left = "wand") |
-    ^(item.right = debuffAffix[i] &
-    ^ (item.right = "wand"  |
-    ^  item.right = "staff" |
-    ^  item.right = "crossbow"))
-      validEffItem = true
+  // calculate individual limits
+  ?foe = "immune_to_debuff_chill" // immune, don't apply
+    chillLimit = 0
+  : // vulnerable, apply
+    // <limit> = <cap> - <applied count>
+    chillLimit = 6 - chillCount
 
-  ?validEffItem &
-  ^(item.left.state = 3 | item.right.state = 3) & // perf state
-  ^canIncrease
-    effCount++
-    canIncrease = false
+  ?foe = "immune_to_debuff_weaken"
+    weakenLimit = 0
   :
-    canIncrease = true
+    weakenLimit = 1 - weakenCount
 
-  ?effCount > effCap & // else, no need to reset
-  ^(effCount > effCap | // reached limit
+  effLimit = chillLimit + weakenLimit
+
+  // resetting logic
+  ?effCount > effLimit & // else, no need to reset
+  ^(effCount > effLimit | // reached limit
   ^foe.state = 4 | // foe died
   ^!c.canApplyAny()) // can no longer apply debuffs
-    // reset counter
     ?chillCount
       effCount = chillCount
     :
@@ -858,7 +854,31 @@ func smartDebuff() // TO DO: move ldtF modes that use this func here
 
     ?weakenCount
       effCount += weakenCount
+func smartDebuff(itemType)
+  // Apply effects
+  ?foe ! "immune_to_debuff_chill" &
+  ^effCount < chillLimit
+    ?itemName = "magic"
+      ldtF("magic debuff chill")
+    : // itemName = "ranged"
+      ldtF("ranged debuff chill")
 
+  :?foe ! "immune_to_debuff_weaken" &
+  ^effCount = math.Clamp(effCount, chillLimit, effLimit - 1)
+    ?itemName = "magic"
+      ldtF("magic debuff weaken")
+    : // itemName = "ranged"
+      ldtF("ranged debuff weaken")
+      
+
+  // incrementing logic
+  ?(item.left.state = 3 |
+  ^ item.right.state = 3) & // perf state
+  ^canIncrease
+    effCount++
+    canIncrease = false
+  :
+    canIncrease = true
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄ END OF "Arsenal" ▀▄▀▄▀▄▀▄▀ ┃  //

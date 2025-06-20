@@ -67,21 +67,17 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
-    a.smartDebuff()
-
-    /*?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
-      a.ldtF("sword debuff weaken")*/
 
     ?c.permapotSetup &
-    ^a.canSmartDebuff() & foe = "elite"
+    ^a.canSmartDebuff("magic") & foe = "elite"
       ?foe.GetCount(foe.distance + margin) > 1
-        a.ldtF("magic debuff")
+        a.smartDebuff("magic")
       :
         a.ldtF("sword debuff auto")
-    :?blowing | (!c.permapotSetup &
-    ^a.canSmartDebuff() & foe = "elite" &
-    ^foe.GetCount(foe.distance + margin) > 1)
-      a.ldtF("magic debuff")
+    :?(blowing | !c.permapotSetup) &
+    ^a.canSmartDebuff("magic") & foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) > 1
+      a.smartDebuff("magic")
       ?blowing
         >c0,0,#red,BLOWING DEBUFF
 
@@ -114,8 +110,11 @@ func fight(mode)
 
 // //////////////// PROCEDURE //////////////// //
 
->`1,7,#magenta,screen.i = @screen.i@
-
+// >`1,12,#magenta,screen.i = @screen.i@
+>`1,12,#magenta,
+^dist = @foe.distance@\n
+^max dash dist = @s.getRange("dash_max")@\n
+^dist between max dash and 40 = @foe.distance = math.Clamp(foe.distance, s.getRange("dash_max") + 1, 40)@
 // ............. WITHDRAWAL LOGIC ............ //
 
 ?s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
@@ -139,6 +138,7 @@ func fight(mode)
     boss_screen = 7
 :?screen.i = boss_screen
   blowing = (foe.state = 133)
+  >`1,10,#yellow,blowing = @blowing@
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
   c.permapotSetup = (screen.i >= boss_screen - 1)
@@ -157,7 +157,7 @@ canDash = true
 
 c.potionType = "berserk" // "lucky"
 c.Init()
-a.smartDebuff()
+a.smartDebuff_Mgr()
 disable npcDialog
 
 stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
@@ -191,7 +191,8 @@ c.AAC(a.hVeff, a.shFdef)
 ^!(loc.stars > 15 & nRuns = 1)
   enduse++
 
-  ?c.canUseAbility("staff_fire") & enduse >= 30
+  ?c.canUseAbility("staff_fire") &
+  ^enduse >= 5
     c.useAbility_TH("staff_fire", a.stFh)
   :?pickup.distance < 15
     a.ldtF("magnet")
@@ -234,8 +235,6 @@ c.AAC(a.hVeff, a.shFdef)
   // about to blow air and apply chill
   ?c.canUseAbility("staff_vigor") // try to prevent the debuff
     c.useAbility_TH("staff_vigor", a.stVh)
-    >c0,0,#red,PREVENTING CHILL
-    loc.Pause()
   :?c.canUseAbility("wand_ice")
     c.useAbility_OH("wand_ice", a.wIh, hand)
   :
@@ -250,6 +249,7 @@ c.AAC(a.hVeff, a.shFdef)
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
+    >c0,0,#red,ENGAGING
   :
     a.ldtF("defense armor regen")
 
@@ -285,7 +285,7 @@ c.AAC(a.hVeff, a.shFdef)
 ^   math.Clamp(foe.distance,
 ^              s.getRange("dash_max") + 1,
 ^              s.getRange("crossbow"))
-  ?!c.permapotSetup
+  ?!c.permapotSetup & debuffs.string ! "chill"
     c.smoothCast(a.bR)
   :
     a.ldtF("defense armor regen")
@@ -346,9 +346,8 @@ c.AAC(a.hVeff, a.shFdef)
   ^foe.buffs.string = "buff_tenacious"
     >c0,0,#yellow,BLESSED/TENACIOUS STRAT
 
-    a.smartDebuff()
-    ?a.canSmartDebuff()
-      a.ldtF("magic debuff")
+    ?a.canSmartDebuff("magic")
+      a.smartDebuff("magic")
     :
       a.ldtF("big sword unmake")
   :
