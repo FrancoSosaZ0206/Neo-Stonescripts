@@ -580,7 +580,7 @@ func ldtF(mode)
           sDmg = Bifrost // Unbroken Faith
 
         ?c.canApplyChill(6) & (mode = "auto" | mode = "chill")
-          c.moondialing(Almafuerte, sDmg)
+          c.moondialing(Almafuerte, sIeff)
         :
           equipL moon
           ?c.canApplyWeaken() & (mode = "auto" | mode = "weaken")
