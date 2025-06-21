@@ -703,7 +703,7 @@ func ldtF(mode)
         equip @wAeff@
         // equip @stAeff@
     :?mode = "debuff"
-      >c0,0,#red,MAGIC DEBUFF
+      >c0,1,#red,MAGIC DEBUFF
       ?c.permapotSetup
         ?mode = "chill"
           equipL Frosty Crust
@@ -874,7 +874,6 @@ func smartDebuff(itemType)
     : // itemName = "ranged"
       ldtF("ranged debuff weaken")
       
-
   // incrementing logic
   ?(item.left.state = 3 |
   ^ item.right.state = 3) & // perf state

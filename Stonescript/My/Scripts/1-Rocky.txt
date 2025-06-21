@@ -133,8 +133,6 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
->`1,12,#magenta,dist = @foe.distance@
-
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
@@ -472,6 +470,7 @@ c.AAC(a.hVeff, a.shIeff)
   ^(c.canApplyStun() |
   ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
   ^foe.debuffs.string ! "debuff_armor_fatigue"))
+    >c0,0,#red,PERMA STUN
     a.ldtF("grappling")
 
   :?nRuns = 1
@@ -488,7 +487,9 @@ c.AAC(a.hVeff, a.shIeff)
 
     ?a.canSmartDebuff("magic")
       a.smartDebuff("magic")
+      >c0,1,#red,SMART DEBUFF MAGIC
     :
+      >c0,1,#red,BIG SWORD UNMAKE
       a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
