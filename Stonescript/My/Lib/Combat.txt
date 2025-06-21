@@ -694,8 +694,7 @@ Requires berserk potion or Infernal
 Staff's ability. */
 func canSmoothCast()
   return !permapotSetup &
-  ^(buffs.string = "ʘ" | // berserk potion
-  ^ buffs.string = "buff_infernal") & // infernal staff's attack speed buff
+  ^buffs.string = "ʘ" & // berserk potion
   ^!(debuffs.string = "stun" |
   ^  debuffs.string = "chill" )
 func smoothCast(itemName)
