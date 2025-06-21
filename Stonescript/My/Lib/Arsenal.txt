@@ -703,7 +703,7 @@ func ldtF(mode)
         equip @wAeff@
         // equip @stAeff@
     :?mode = "debuff"
-      >c0,1,#red,MAGIC DEBUFF
+      >c0,2,#red,MAGIC DEBUFF
       ?c.permapotSetup
         ?mode = "chill"
           equipL Frosty Crust
@@ -714,7 +714,7 @@ func ldtF(mode)
         ?mode = "chill"
           equipL moon
           equipR Frosty Crust
-          >c0,1,#red,CHILL
+          >c0,3,#red,CHILL
         :?mode = "weaken"
           equipL moon
           equipR @wPeff@
@@ -858,20 +858,21 @@ func smartDebuff_Mgr()
 
     ?weakenCount
       effCount += weakenCount
+
 func smartDebuff(itemType)
   // Apply effects
   ?foe ! "immune_to_debuff_chill" &
   ^effCount < chillLimit
-    ?itemName = "magic"
+    ?itemType = "magic"
       ldtF("magic debuff chill")
-    : // itemName = "ranged"
+    : // itemType = "ranged"
       ldtF("ranged debuff chill")
 
   :?foe ! "immune_to_debuff_weaken" &
   ^effCount = math.Clamp(effCount, chillLimit, effLimit - 1)
-    ?itemName = "magic"
+    ?itemType = "magic"
       ldtF("magic debuff weaken")
-    : // itemName = "ranged"
+    : // itemType = "ranged"
       ldtF("ranged debuff weaken")
       
   // incrementing logic
