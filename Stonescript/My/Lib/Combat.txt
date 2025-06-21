@@ -717,10 +717,10 @@ func canKbFarm()
   ^canSmoothCast() & // smooth cast is required
   ^s.inRange("crossbow")
   // between dashing and crossbow range
-  /*^foe.distance =
+  ^foe.distance =
   ^   math.Clamp(foe.distance,
   ^              s.getRange("dash_max"),
-  ^              s.getRange("crossbow"))*/
+  ^              s.getRange("crossbow"))
 
 func canEscape()
   return foe ! "ranged" &

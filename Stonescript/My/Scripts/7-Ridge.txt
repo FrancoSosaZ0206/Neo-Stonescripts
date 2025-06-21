@@ -284,9 +284,6 @@ with bardiche */
 ^c.canUnmakeVoidweaver()
   ?c.canUseAbility("dash")
     a.ldtF("dash")
-  :?foe.distance > s.getRange("sword") + 1
-    c.stutterStepping("sword")
-    equipR @a.shC2@
   :
     c.devour("voidweaver")
 
