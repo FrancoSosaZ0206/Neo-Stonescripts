@@ -196,7 +196,7 @@ c.AAC(a.hVeff, a.shFdef)
 ^!(loc.stars > 15 & nRuns = 1)
   enduse++
 
-  ?c.canUseAbility("staff_fire") & enduse > 5
+  ?c.canUseAbility("staff_fire") & enduse > 1
     c.useAbility_TH("staff_fire", a.stFh)
   :?pickup.distance < 15
     a.ldtF("magnet")

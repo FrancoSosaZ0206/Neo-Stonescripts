@@ -605,16 +605,18 @@ even further.
 - In the last one, both swords are held to
 spend the cooldown frame. */
 func moondialing(weapon1, weapon2)
+  ?!s.inRange("sword") // get in range fast
+    stutterStepping("sword")
+
   /* moondialing isn't necessary or possible
   under these conditions, do
   dual wielding */
-  ?debuffs.string = "stun" |
+  :?debuffs.string = "stun" |
   ^debuffs.string = "chill" |
   ^buffs.string = "ʘ" | // berserk potion
   ^buffs.string = "buff_infernal" // infernal staff
     equipL @weapon2@
     equipR @weapon1@
-
   : // Normal moondialing
     moondialTimer++
     var moondialFrame = moondialTimer % 3

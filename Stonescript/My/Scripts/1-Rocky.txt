@@ -203,7 +203,7 @@ func fight(mode)
   permapotActTime = totaltime
 
 // BFG logic
-?nRuns > 1
+?nRuns > 1 & loc.stars > 15
   c.screenMngr_DS("blade", 2, boss_screen - 3)
   ?c.canUseAbility_DS("blade")
     c.useAbility_DS("blade")
@@ -245,7 +245,7 @@ c.AAC(a.hVeff, a.shIeff)
 ^!(loc.stars > 15 & nRuns = 1)
   enduse++
 
-  ?c.canUseAbility("staff_fire") & enduse > 5
+  ?c.canUseAbility("staff_fire") & enduse > 1
     c.useAbility_TH("staff_fire", a.stFh)
   :?pickup.distance < 15
     a.ldtF("magnet")
@@ -255,8 +255,9 @@ c.AAC(a.hVeff, a.shIeff)
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
+^(buffs.string ! "buff_inf_speed" |
+^ (foe = "scout" & foe.state = 4)) &
 ^(!s.inRange("dash") | foe.distance = 9999) &
-^buffs.string ! "buff_inf_speed" &
 // save armor if it's setup run
 ^!(loc.stars > 15 &
 ^(nRuns = 1 |
