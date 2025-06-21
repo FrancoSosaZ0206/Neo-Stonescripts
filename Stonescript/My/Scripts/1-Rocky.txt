@@ -414,9 +414,8 @@ c.AAC(a.hVeff, a.shIeff)
     c.devour("voidweaver")
 
 // Knockback farming
-/* :?c.canKbFarm()
-  >c0,0,#red,KNOCKBACK FARMING
-  c.smoothCast(a.bS) */
+:?c.canKbFarm()
+  c.smoothCast(a.bS)
 
 :?a.canSmartDash() & canDash
   a.smartDash()
@@ -470,26 +469,16 @@ c.AAC(a.hVeff, a.shIeff)
   ^(c.canApplyStun() |
   ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
   ^foe.debuffs.string ! "debuff_armor_fatigue"))
-    >c0,0,#red,PERMA STUN
     a.ldtF("grappling")
 
   :?nRuns = 1
-    /*?c.canEscape()
-      fight("escape")
-    :
-      >c0,0,#red,FIGHTING RANGED
-      fight("ranged")*/
     a.ldtF("big sword unmake")
   // Debuff and unmake
   :?encounter.eliteMod = "blessed" |
   ^foe.buffs.string = "buff_tenacious"
-    >c0,0,#yellow,BLESSED/TENACIOUS STRAT
-
     ?a.canSmartDebuff("magic")
       a.smartDebuff("magic")
-      >c0,1,#red,SMART DEBUFF MAGIC
     :
-      >c0,1,#red,BIG SWORD UNMAKE
       a.ldtF("big sword unmake")
   :
     equip Kubikiribocho

@@ -466,7 +466,6 @@ func ldtF(mode)
           equipL @wADmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
           equipL @wFDmg@
-          >c0,0,#red,DEFENSE FIRE WAND D
           loc.Pause()
         : // foe = "stone"
           equipL @wSh@
@@ -703,18 +702,15 @@ func ldtF(mode)
         equip @wAeff@
         // equip @stAeff@
     :?mode = "debuff"
-      >c0,2,#red,MAGIC DEBUFF
       ?c.permapotSetup
         ?mode = "chill"
           equipL Frosty Crust
-          >c0,1,#red,CHILL
         :?mode = "weaken"
           equipL @wPeff@
       :
         ?mode = "chill"
           equipL moon
           equipR Frosty Crust
-          >c0,3,#red,CHILL
         :?mode = "weaken"
           equipL moon
           equipR @wPeff@
