@@ -471,8 +471,8 @@ c.AAC(a.hVeff, a.shIeff)
   :?nRuns = 1
     a.ldtF("big sword unmake")
   // Debuff and unmake
-  :?encounter.eliteMod = "blessed" |
-  ^foe.buffs.string = "buff_tenacious"
+  :?encounter.eliteMod = "blessed"/* |
+  ^foe.buffs.string = "buff_tenacious"*/
     ?a.canSmartDebuff("magic")
       a.smartDebuff("magic")
     :

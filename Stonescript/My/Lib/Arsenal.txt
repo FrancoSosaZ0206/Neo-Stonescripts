@@ -466,7 +466,6 @@ func ldtF(mode)
           equipL @wADmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
           equipL @wFDmg@
-          loc.Pause()
         : // foe = "stone"
           equipL @wSh@
       :
