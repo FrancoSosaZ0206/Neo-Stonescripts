@@ -247,9 +247,11 @@ func useAbility_OH(abilityID, itemName, hand)
       activate R
 
       // talismans equipment logic
-      ?abilityID = "talisman" &
-      ^ai.walking & !s.inRange("triskelion")
-        equipL triskelion
+      ?abilityID = "talisman"
+        ?pickup.distance < 15
+          equipL star
+        :?ai.walking & !s.inRange("triskelion")
+          equipL triskelion
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_OH\nCAUSE: unknown <hand>:\n\n" + hand, false)
       loc.Pause()
