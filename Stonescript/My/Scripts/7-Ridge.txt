@@ -247,7 +247,6 @@ c.AAC(a.hVeff, a.shFdef)
 
 // **************************************  //
 
-
 // .............. DEFENSIVE LOGIC ............ //
 
 // about to blow air and apply chill
