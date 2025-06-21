@@ -234,9 +234,8 @@ c.AAC(a.hVeff, a.shFdef)
 
 // .............. SPECIAL LOGIC .............. //
 
-// **************************************  //
-// boss special -- get extra damage while
-// idle with bardiche
+/* boss special -- get extra damage while idle
+with bardiche */
 :?foe = "phase" & foe.state = 1
   ?c.canUseAbility("bardiche") & !c.permapotSetup
     c.useAbility_TH("bardiche", Kubikiribocho)
@@ -244,8 +243,6 @@ c.AAC(a.hVeff, a.shFdef)
     c.useAbility_OH("mask", "mask", "r")
   :
     a.ldtF("defense armor regen")
-
-// **************************************  //
 
 // .............. DEFENSIVE LOGIC ............ //
 
