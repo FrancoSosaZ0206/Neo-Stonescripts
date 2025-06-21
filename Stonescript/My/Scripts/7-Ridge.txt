@@ -69,14 +69,17 @@ func fight(mode)
       a.ldtF("defense")
   :
     // 1. debuff, if possible
+    ?blowing & a.canSmartDebuff("magic") &
+    ^foe.GetCount(foe.distance + margin) = 1
+      a.smartDebuff("magic")
 
-    ?c.permapotSetup &
+    :?c.permapotSetup &
     ^a.canSmartDebuff("magic") & foe = "elite"
       ?foe.GetCount(foe.distance + margin) > 1
         a.smartDebuff("magic")
       :
         a.ldtF("sword debuff auto")
-    :?(blowing | !c.permapotSetup) &
+    :?!c.permapotSetup &
     ^a.canSmartDebuff("magic") & foe = "elite" &
     ^foe.GetCount(foe.distance + margin) > 1
       a.smartDebuff("magic")
@@ -96,7 +99,7 @@ func fight(mode)
       ?mode = "melee"
         a.ldtF("sword unmake")
       : // foe.GetCount(foe.distance + margin) > 1
-        a.ldtF("magic unmake")
+        a.ldtF("big sword unmake")
 
     : // 4. Deal max damage
       ?mode = "melee" & !blowing
@@ -108,11 +111,8 @@ func fight(mode)
 
 // //////////////// PROCEDURE //////////////// //
 
-// >`1,12,#magenta,screen.i = @screen.i@
-?canDash
-  >`1,12,#green,canDash = @canDash@
-:
-  >`1,12,#red,canDash = @canDash@
+>`1,12,#magenta,screen.i = @screen.i@\n
+^boss_screen = @boss_screen@
 
 // ............. WITHDRAWAL LOGIC ............ //
 
@@ -133,6 +133,10 @@ func fight(mode)
     boss_screen = 2
   :?loc.stars <= 15 // yellow
     boss_screen = 7
+  :?loc.stars = 16
+    boss_screen = 3
+  :?loc.stars = 17
+    boss_screen = 4
   :?loc.stars <= 20 // green
     boss_screen = 7
 :?screen.i = boss_screen
@@ -152,6 +156,7 @@ func fight(mode)
   c.screenMngr_DS("blade", 1, boss_screen - 3)
   ?c.canUseAbility_DS("blade")
     c.useAbility_DS("blade")
+    >c0,0,#red,BFG DS
 
 canDash = true
 
@@ -191,8 +196,7 @@ c.AAC(a.hVeff, a.shFdef)
 ^!(loc.stars > 15 & nRuns = 1)
   enduse++
 
-  ?c.canUseAbility("staff_fire") &
-  ^enduse >= 5
+  ?c.canUseAbility("staff_fire") & enduse > 5
     c.useAbility_TH("staff_fire", a.stFh)
   :?pickup.distance < 15
     a.ldtF("magnet")
@@ -218,23 +222,38 @@ c.AAC(a.hVeff, a.shFdef)
 
 // Summons
 :?c.canSummon("voidweaver") &
-^screen.i < boss_screen - 3 // not a cutscene
+^screen.i < boss_screen - 1 // not a cutscene
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
-^screen.i >= boss_screen - 3
+^screen.i >= boss_screen - 1
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // Pick up things
 :?pickup.distance < 15
   a.ldtF("magnet")
 
+// .............. SPECIAL LOGIC .............. //
+
+// **************************************  //
+// boss special -- get extra damage while
+// idle with bardiche
+:?foe = "phase" & foe.state = 1
+  ?c.canUseAbility("bardiche") & !c.permapotSetup
+    c.useAbility_TH("bardiche", Kubikiribocho)
+  :?c.canUseAbility("mask")
+    c.useAbility_OH("mask", "mask", "r")
+  :
+    a.ldtF("defense armor regen")
+
+// **************************************  //
+
+
 // .............. DEFENSIVE LOGIC ............ //
 
-:?foe = "phase" &
-^foe.state = 132 &
+// about to blow air and apply chill
+:?foe = "phase" & foe.state = 132 &
 ^((foe.debuffs.string = "chill:6" & foe.time > 65) |
 ^ (foe.debuffs.string ! "chill" & foe.time > 27))
-  // about to blow air and apply chill
   ?c.canUseAbility("staff_vigor") // try to prevent the debuff
     c.useAbility_TH("staff_vigor", a.stVh)
   :?c.canUseAbility("wand_ice")
@@ -242,7 +261,9 @@ c.AAC(a.hVeff, a.shFdef)
   :
     fight("melee")
 
-:?foe = "phase" & blowing // blowing air
+:?blowing | // blowing air
+^foe.name = "Ice Wall"
+  canDash = false
   fight("magic")
 
 // ........... ENGAGE/WALKING LOGIC .......... //
@@ -332,17 +353,10 @@ c.AAC(a.hVeff, a.shFdef)
     a.ldtF("grappling")
 
   :?nRuns = 1
-    /*?c.canEscape()
-      fight("escape")
-    :
-      >c0,0,#red,FIGHTING RANGED
-      fight("magic")*/
     a.ldtF("big sword unmake")
   // Debuff and unmake
   :?encounter.eliteMod = "blessed" |
   ^foe.buffs.string = "buff_tenacious"
-    >c0,0,#yellow,BLESSED/TENACIOUS STRAT
-
     ?a.canSmartDebuff("magic")
       a.smartDebuff("magic")
     :
@@ -359,25 +373,12 @@ c.AAC(a.hVeff, a.shFdef)
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
 
-  // **************************************  //
-  // boss special -- get extra damage while
-  // idle with bardiche
-  ?foe.state = 0 & foe.armor <= 250 &
-  ^c.canUseAbility("bardiche") & !c.permapotSetup
-    c.useAbility_TH("bardiche", Kubikiribocho)
-    >c0,0,#red,BARD HRIMNIR
-  // **************************************  //
-
-  :?blowing
-    canDash = false
-    fight("magic")
-  :?foe.state > 1 // states 0 and 1 are when he has the ice shield
+  // states 0 and 1 are when he has the ice shield
+  ?foe.state > 1
     ?c.canUsePotion()
       activate potion
     :?c.canUseAbility("staff_poison") & !s.inRange("dash")
       c.useAbility_TH("staff_poison", a.stPh)
-    :?c.canUseAbility("mask")
-      c.useAbility_OH("mask", "mask", "r")
     :
       fight("melee")
   : // normal melee combat logic
