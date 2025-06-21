@@ -71,7 +71,7 @@ func fight(mode)
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH("staff_ice", a.stIh)
 
-    :?!s.inRange("sword")
+    :?foe.distance > s.getRange("sword") + 1
       ?foe.count > 1
         fight("magic")
       :
@@ -132,6 +132,8 @@ func fight(mode)
         a.ldtF("ranged dmg")*/
 
 // /////////////// PROCEDURE //////////////// //
+
+>`1,12,#magenta,dist = @foe.distance@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -407,7 +409,7 @@ c.AAC(a.hVeff, a.shIeff)
 ^c.canUnmakeVoidweaver()
   ?c.canUseAbility("dash")
     a.ldtF("dash")
-  :?!s.inRange("sword")
+  :?foe.distance > s.getRange("sword") + 1
     c.stutterStepping("sword")
     equipR @a.shC2@
   :
@@ -424,11 +426,9 @@ c.AAC(a.hVeff, a.shIeff)
 :?canDash & foe.distance =
 ^   math.Clamp(foe.distance,
 ^              s.getRange("dash_max") + 1,
-^              s.getRange("crossbow"))
-  ?!c.permapotSetup
-    c.smoothCast(a.bR)
-  :
-    a.ldtF("defense armor regen")
+^              s.getRange("crossbow")) &
+^!c.permapotSetup
+  c.smoothCast(a.bR)
 
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &

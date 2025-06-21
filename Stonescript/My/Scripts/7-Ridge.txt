@@ -56,7 +56,7 @@ func fight(mode)
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH("staff_ice", a.stIh)
 
-    :?!s.inRange("sword")
+    :?foe.distance > s.getRange("sword") + 1
       ?foe.count > 1
         fight("magic")
       :
@@ -284,7 +284,7 @@ with bardiche */
 ^c.canUnmakeVoidweaver()
   ?c.canUseAbility("dash")
     a.ldtF("dash")
-  :?!s.inRange("sword")
+  :?foe.distance > s.getRange("sword") + 1
     c.stutterStepping("sword")
     equipR @a.shC2@
   :

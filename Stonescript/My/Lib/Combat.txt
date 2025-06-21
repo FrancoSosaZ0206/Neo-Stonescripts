@@ -605,8 +605,9 @@ even further.
 - In the last one, both swords are held to
 spend the cooldown frame. */
 func moondialing(weapon1, weapon2)
-  ?!s.inRange("sword") // get in range fast
+  ?foe.distance > s.getRange("sword") + 1 // get in range fast
     stutterStepping("sword")
+    >c0,0,#red,GETTING IN SWORD RANGE BY STUTTERSTEPPING
 
   /* moondialing isn't necessary or possible
   under these conditions, do
