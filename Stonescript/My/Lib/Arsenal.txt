@@ -121,7 +121,7 @@ var stPeff  = "*max staff poison dP -hidden"
 // ................. VIGOR .................. //
 
 var sVDmg   = "*max sword -big vigor -dL Spring24" // 2nd
-var sVeff   = "*max sword -big vigor dL -gold" // 2nd
+var sVeff   = "*max sword -big vigor dL -gold" // 2nd (enchanted: speed)
 var bsVDmg  = "*max sword vigor -dL"
 var bsVeff  = "*max sword vigor dL"
 var hVeff   = "*max hammer vigor ah"
@@ -520,18 +520,21 @@ func ldtF(mode)
       ?c.permapotSetup
         equipL Soulfetcher
       :
+        /*var sDmg = null
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          c.moondialing(Bifrost /*sVeff*/, Soulfetcher)
+          sDmg = Bifrost
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          c.moondialing(Mamba Negra /*sVeff*/, Soulfetcher)
+          sDmg = Mamba Negra
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          c.moondialing(Dothaneel /*sVeff*/, Soulfetcher)
+          sDmg = Dothaneel
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          c.moondialing(Void Slayer /*sVeff*/, Soulfetcher)
+          sDmg = Void Slayer
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          c.moondialing(Vantum Phoenix /*sVeff*/, Soulfetcher)
+          sDmg = Vantum Phoenix
         : // foe = "stone
-          c.moondialing(Bifrost /*Broken Faith*/ /*sVeff*/, Soulfetcher)
+          sDmg = Unbroken Faith*/
+          
+        c.moondialing(Soulfetcher, sVeff)
     :?mode = "unmake"
       ?c.permapotSetup
         equipL Existential Crisis
