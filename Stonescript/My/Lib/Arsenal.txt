@@ -438,8 +438,13 @@ func ldtF(mode)
 
     :?mode = "armor regen"
       // Left hand:
-      ?!ai.walking & (!ai.enabled | ai.paused)
-        ?hp ! maxhp // passive regen
+      ?!ai.walking | // standing still
+      ^(!ai.enabled | ai.paused) // cutscene walking
+        ?armor < maxarmor |
+        ^player.direction = -1 |
+        ^(hp = maxhp & armor <= 2)
+          equipL quest
+        :?hp ! maxhp // passive regen
           equipL ouroboros
         : // try to deal extra damage if possible
           equipL fissure

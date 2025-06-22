@@ -63,46 +63,54 @@ func fight(mode)
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       c.useAbility_TH("staff_stone", a.stSh)
+      >c0,1,#red,ACROBATIC
     :?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       a.ldtF("mind")
+      >c0,1,#red,MINDSTONE
 
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH("staff_ice", a.stIh)
+      >c0,1,#red,ETERNITY
 
     :?foe.distance > s.getRange("sword") + 1
       ?foe.count > 1
         fight("magic")
+        >c0,1,#red,MAGIC
       :
         fight("ranged")
+        >c0,1,#red,RANGED
 
     // Unmake
     :?c.canUnmake()
       a.ldtF("defense unmake")
+      >c0,1,#red,
     :
       a.ldtF("defense")
+      >c0,1,#red,
   :
-    // 1. debuff, if possible
+    // ........... DEBUFFING LOGIC .......... //
 
-    ?loc.stars <= 15 & !c.permapotSetup & c.canApplyWeaken()
-      a.ldtF("sword debuff weaken")
-
-    :?c.permapotSetup &
-    ^a.canSmartDebuff("magic") & foe = "elite"
-      ?foe.GetCount(foe.distance + margin) > 1
-        a.smartDebuff("magic")
-      :
-        a.ldtF("sword debuff auto")
-    :?!c.permapotSetup &
-    ^a.canSmartDebuff("magic") & foe = "elite" &
+    // AOE debuffing
+    ?a.canSmartDebuff("magic") &
+    ^foe = "elite" &
     ^foe.GetCount(foe.distance + margin) > 1
       a.smartDebuff("magic")
 
+    // Permapot 1v1 debuffing
+    :?c.canApplyAny() &
+    ^c.permapotSetup & foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) = 1
+      a.ldtF("sword debuff auto")
+
+    // 1v1 strong foe Weaken
     :?c.canApplyWeaken() &
     ^(foe = "monarch" | foe = "boss") &
     ^mode = "melee"
       a.ldtF("sword debuff weaken")
+    
+    // 1v1 strong foe debuffing
     :?(c.canApplyAny() | c.canApplyBurn()) &
     ^((loc.stars > 15 & mode = "melee" &
     ^(foe = "monarch" | foe = "boss") &
@@ -110,32 +118,32 @@ func fight(mode)
     ^nRuns = 1)
       a.ldtF("sword debuff auto")
 
-    // 2. Heal if needed
+    // ............ HEALING LOGIC ........... //
     :?hp ! maxhp &
     ^foe.GetCount(foe.distance + margin) = 1
       a.ldtF("sword heal")
 
-    // 3. Unmake
+    // ........... UNMAKING LOGIC ........... //
     :?c.canUnmake()
       ?mode = "melee"
         a.ldtF("sword unmake")
       : // foe.GetCount(foe.distance + margin) > 1
         a.ldtF("magic unmake")
 
-    : // 4. Deal max damage
-      ?mode = "melee"
-        /*?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
-          c.burst(a.burstingSwords)
-        :
-          a.ldtF("sword dmg")*/
-
-        ?foe = "phase3" & !s.inRange("dash") &
-        ^c.canUseAbility("staff_poison")
-          c.useAbility_TH("staff_poison", a.stPh)
-        :
-          a.ldtF("sword dmg")
+    // ........... DAMAGE LOGIC ........... //
+    :?mode = "melee"
+      /*?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
+        c.burst(a.burstingSwords)
       :
-        a.ldtF("magic dmg")
+        a.ldtF("sword dmg")*/
+
+      ?foe = "phase3" & !s.inRange("dash") &
+      ^c.canUseAbility("staff_poison")
+        c.useAbility_TH("staff_poison", a.stPh)
+      :
+        a.ldtF("sword dmg")
+    :
+      a.ldtF("magic dmg")
 
 // /////////////// PROCEDURE //////////////// //
 
@@ -319,6 +327,7 @@ c.AAC(a.hVeff, a.shIeff)
     // >c0,0,#red,PREVENT STUN
   : // evade attack
     fight("evade")
+    >c0,0,#red,EVADING SHIELD OR BEAM
 
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
@@ -399,7 +408,7 @@ c.AAC(a.hVeff, a.shIeff)
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
-:?ai.walking &
+:?ai.walking & player.direction = 1
 ^!(s.inRange("crossbow") |
 ^  a.canSmartDash())
   ?armor > a.compoundMaxArmor_boosted |
@@ -408,7 +417,7 @@ c.AAC(a.hVeff, a.shIeff)
   :
     a.ldtF("defense armor regen")
 
-:?ai.paused | !ai.enabled
+:?ai.paused | !ai.enabled | player.direction = -1
   a.ldtF("defense armor regen")
 
 // .............. DASHING LOGIC ............. //

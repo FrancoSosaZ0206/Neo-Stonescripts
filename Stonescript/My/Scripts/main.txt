@@ -123,11 +123,12 @@ import My/Cosmetics
 enable npcDialog
 
 ?!loc.isQuest & (
-^loc = "Waterfall" |
 ^loc = "cross_deadwood_river" |
 ^loc = "cross_bridge")
   loc.Leave()
 
+:?loc = "Waterfall"
+  import UI/BragMeter
 :?loc = "uulaa_shop" // Hotspring Shop
   import My/Scripts/Hotspring_Shop
 :?loc = "undead_crypt_intro" // Haunted Gate
