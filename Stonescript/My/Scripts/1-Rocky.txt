@@ -100,15 +100,14 @@ func fight(mode)
       a.smartDebuff("magic")
 
     :?c.canApplyWeaken() &
-    ^(loc.stars > 15 | c.permapotSetup) &
     ^(foe = "monarch" | foe = "boss") &
     ^mode = "melee"
       a.ldtF("sword debuff weaken")
     :?(c.canApplyAny() | c.canApplyBurn()) &
-    ^(loc.stars > 15 | c.permapotSetup) &
+    ^((loc.stars > 15 & mode = "melee" &
     ^(foe = "monarch" | foe = "boss") &
-    ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0 &
-    ^mode = "melee"
+    ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
+    ^nRuns = 1)
       a.ldtF("sword debuff auto")
 
     // 2. Heal if needed
@@ -408,8 +407,8 @@ c.AAC(a.hVeff, a.shIeff)
 
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
-^foe.count > 1 & !c.permapotSetup &
-^c.canUnmakeVoidweaver()
+^c.canUnmakeVoidweaver() &
+^foe.count > 1 & screen.i > 1
   ?c.canUseAbility("dash")
     a.ldtF("dash")
   :
