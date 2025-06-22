@@ -597,7 +597,7 @@ func canEngage()
 
 // ........... Damage min-maxing ............ //
 
-/* Moondialing is a trick that boosts dps
+/* Moonjuggling is a trick that boosts dps
 with 2 swords whose attack speed stat is
 maxed out (+21 enchantment).
 
@@ -607,8 +607,8 @@ with each sword, boosting their attack speed
 even further.
 - In the last one, both swords are held to
 spend the cooldown frame. */
-func moondialing(weapon1, weapon2)
-  /* moondialing isn't necessary or possible
+func moonjuggle(weapon1, weapon2)
+  /* moonjuggling isn't necessary or possible
   under these conditions, do
   dual wielding */
   ?debuffs.string = "stun" |
@@ -616,7 +616,7 @@ func moondialing(weapon1, weapon2)
   ^buffs.string = "ʘ" // berserk potion
     equipL @weapon2@
     equipR @weapon1@
-  : // Normal moondialing
+  : // Normal moonjuggling
     moondialTimer++
     var moondialFrame = moondialTimer % 3
 
@@ -636,7 +636,7 @@ func moondialing(weapon1, weapon2)
     equipL moon
     equipR @weapon1@*/
 
-/* Moondialing variant, aka Bursting.
+/* Moonjuggling variant, aka Bursting.
 Requires a minimum of 2 swords to cycle through.
 Works with an unlimited number of swords
 
@@ -734,13 +734,12 @@ func canEscape()
 walking with the Triskelion Stone while inside its
 attack range (where the player would normally stop
 to attack). */
-func stutterStepping(itemName)
-  ?totaltime % 2 = 0 |
-  ^!s.inRange("triskelion") |
-  ^buffs.string = "buff_inf_speed" // infernal staff's movement speed buff
-    equipL triskelion
+func stutterStep()
+  ?totaltime % 2 = 0 // equip every other frame
+    equipR triskelion
   :
-    equipL @itemName@
+    equipR hatchet
+  equipL sword 0* +0
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Combat" ▀▄▀▄▀▄▀▄▀▄▀▄ ┃  //

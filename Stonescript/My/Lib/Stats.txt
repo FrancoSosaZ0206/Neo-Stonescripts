@@ -243,7 +243,7 @@ var range_table = [
 
 // These count both for dashing and bashing shields:
 ^   "dash_min"              , 11,
-^   "dash_max"              , 15,
+^   "dash_max"              , 16,
 
 ^   "hatchet"               , 5,
 ^   "grappling_hook"        , 13,

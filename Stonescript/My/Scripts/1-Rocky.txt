@@ -208,8 +208,8 @@ func fight(mode)
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
-// BFG logic
-/*?nRuns > 1 & loc.stars > 15
+/*// BFG logic
+?nRuns > 1 & loc.stars > 15
   c.screenMngr_DS("blade", 2, boss_screen - 3)
   ?c.canUseAbility_DS("blade")
     c.useAbility_DS("blade")*/
@@ -302,7 +302,9 @@ c.AAC(a.hVeff, a.shIeff)
 
 // Unmake Dysangelos's fire arm
 :?foe = "phase2" & foe = "fire" &
-^foe.state = 32 & foe.time > 97
+^foe.state = 32 &
+^  ((foe.debuffs.string = "chill:6" & foe.time > 97) |
+^   (foe.debuffs.string ! "chill" & foe.time > 55))
   a.ldtF("defense unmake")
 
 // Dysangelos's massive beam or putting shield up
@@ -320,11 +322,15 @@ c.AAC(a.hVeff, a.shIeff)
 
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
+  canDash = false
   fight("ranged") // fight ranged to avoid hit
+  >c0,0,#red,WIND CRIT, FIGHT RANGED
 
 // Normal attacks
 :?foe.state = 32 & (
-^(foe = "scout" & foe.time > 50) |
+^(foe = "scout" &
+^  ((foe.debuffs.string = "chill:6" & foe.time > 50) |
+^   (foe.debuffs.string ! "chill" & foe.time > 20))) |
 ^((foe = "phase1" &
 ^  ((foe.debuffs.string = "chill:6" & foe.time > 60) |
 ^   (foe.debuffs.string ! "chill" & foe.time > 20))) |
@@ -368,7 +374,7 @@ c.AAC(a.hVeff, a.shIeff)
     :
       a.ldtF("defense")
 
-// .......... ENGAGE/WALKING LOGIC .......... //
+// ............ CUTSCENES LOGIC ............. //
 
 // Dysangelos pre-phase1 cutscene damage strat
 :?!c.permapotSetup &
@@ -391,6 +397,8 @@ c.AAC(a.hVeff, a.shIeff)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
+// .......... ENGAGE/WALKING LOGIC .......... //
+
 :?ai.walking &
 ^!(s.inRange("crossbow") |
 ^  a.canSmartDash())
@@ -403,7 +411,7 @@ c.AAC(a.hVeff, a.shIeff)
 :?ai.paused | !ai.enabled
   a.ldtF("defense armor regen")
 
-// .............. COMBAT LOGIC .............. //
+// ........... PRE-DASHING LOGIC ............ //
 
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
@@ -414,12 +422,15 @@ c.AAC(a.hVeff, a.shIeff)
   :
     c.devour("voidweaver")
 
+// .............. DASHING LOGIC ............. //
+
 // Knockback farming
 :?c.canKbFarm()
   c.smoothCast(a.bS)
 
 :?a.canSmartDash() & canDash
   a.smartDash()
+
 // if in range, get closer while trying to unmake with repeating bow
 :?canDash & foe.distance =
 ^   math.Clamp(foe.distance,
@@ -428,19 +439,25 @@ c.AAC(a.hVeff, a.shIeff)
 ^!c.permapotSetup
   c.smoothCast(a.bR)
 
+// get in melee range faster
+:?foe.distance > s.getRange("sword") + 1
+  c.stutterStep()
+
+// ......... SPECIAL WEAPONS LOGIC .......... //
+
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch" | encounter.eliteMod = "monarch" |
 ^ encounter.eliteMod = "blessed" |
-^ foe.buffs.string = "buff_tenacious") &
-^s.inRange("dash_min")
+^ foe.buffs.string = "buff_tenacious")
   c.useAbility_OH("wand_aether", a.wAh, hand)
+
 // Reset buff
 :?foe.buffs.string = "stoic" &
-^c.canUseAbility("wand_vigor") &
-^s.inRange("dash_min")
+^c.canUseAbility("wand_vigor")
   c.useAbility_OH("wand_vigor", a.wVh, hand)
+
 // Reduce damage
 :?c.canUseAbility("wand_poison") &
 ^(encounter.eliteMod = "berserk" |
@@ -449,15 +466,16 @@ c.AAC(a.hVeff, a.shIeff)
 ^ foe.buffs.string = "buff_tenacious") &
 ^s.inRange("dash_min")
   c.useAbility_OH("wand_poison", a.wPh, hand)
+
 // Stun enemies
 :?c.canApplyStun() & foe = "elite" &
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.midhp &
-^c.canUseAbility("wand_ice") &
-^s.inRange("dash_min")
+^c.canUseAbility("wand_ice")
   c.useAbility_OH("wand_ice", a.wIh, hand)
 
-// AOE Strat
+// ............... AOE LOGIC ................ //
+
 :?foe.GetCount(foe.distance + margin) > 1
   // Align foes
   ?c.canUseAbility("wand_stone") &
@@ -489,7 +507,9 @@ c.AAC(a.hVeff, a.shIeff)
       a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
-    
+
+// ............... BOSS LOGIC ............... //
+
 :?foe = "phase" // Dysangelos fight logic
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Default) // reached ignition cap
@@ -503,8 +523,6 @@ c.AAC(a.hVeff, a.shIeff)
       fight("melee")
 
   : // foe = phase3
-    canDash = true
-
     ?c.canUsePotion()
       activate potion
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
@@ -530,10 +548,12 @@ c.AAC(a.hVeff, a.shIeff)
       :
         fight("melee")
 
-: // 1v1
+// ................ 1V1 LOGIC ............... //
+
+:
   // Tanky foe, use bardiche ability to lower its hitpoints
   ?(foe = "boss" | foe = "monarch") &
-  ^foe.GetCount(foe.distance + margin) = 1 &
+  ^foe.count = 1 &
   ^s.inRange("sword") &
   ^(c.canUseAbility("staff_poison") |
   ^c.canUseAbility("bardiche"))

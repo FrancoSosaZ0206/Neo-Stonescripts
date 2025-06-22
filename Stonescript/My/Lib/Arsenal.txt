@@ -444,7 +444,7 @@ func ldtF(mode)
         : // try to deal extra damage if possible
           equipL fissure
       :
-        c.stutterStepping("sword")
+        equipL triskelion
 
       // Right hand:
       ?!c.permapotSetup
@@ -533,8 +533,8 @@ func ldtF(mode)
           sDmg = Vantum Phoenix
         : // foe = "stone
           sDmg = Unbroken Faith*/
-          
-        c.moondialing(Soulfetcher, sVeff)
+
+        c.moonjuggle(Soulfetcher, sVeff)
     :?mode = "unmake"
       ?c.permapotSetup
         equipL Existential Crisis
@@ -554,7 +554,7 @@ func ldtF(mode)
         : // foe = "stone"
           sword = Bifrost // Broken Faith
 
-        c.moondialing(Existential Crisis, sword) // sAeff2
+        c.moonjuggle(Existential Crisis, sword) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
         ?c.canApplyChill(6) & (mode = "auto" | mode = "chill")
@@ -581,7 +581,7 @@ func ldtF(mode)
           sDmg = Bifrost // Unbroken Faith
 
         ?c.canApplyChill(6) & (mode = "auto" | mode = "chill")
-          c.moondialing(Almafuerte, sIeff)
+          c.moonjuggle(Almafuerte, sIeff)
         :
           equipL moon
           ?c.canApplyWeaken() & (mode = "auto" | mode = "weaken")
@@ -606,17 +606,17 @@ func ldtF(mode)
 
       : // !c.permapotSetup
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          c.moondialing(Bifrost, sIDmg)
+          c.moonjuggle(Bifrost, sIDmg)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          c.moondialing(Mamba Negra, sPdmg)
+          c.moonjuggle(Mamba Negra, sPdmg)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          c.moondialing(Dothaneel, sVDmg)
+          c.moonjuggle(Dothaneel, sVDmg)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          c.moondialing(Void Slayer, sADmg)
+          c.moonjuggle(Void Slayer, sADmg)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          c.moondialing(Vantum Phoenix, sFDmg)
+          c.moonjuggle(Vantum Phoenix, sFDmg)
         : // foe = "stone"
-          c.moondialing(Bifrost /*Unbroken Faith*/, sIDmg /*Broken Faith*/)
+          c.moonjuggle(Bifrost /*Unbroken Faith*/, sIDmg /*Broken Faith*/)
   :?mode = "big sword" // TO DO: big swords
     // Special cases:
     ?mode = "heal"
@@ -624,17 +624,17 @@ func ldtF(mode)
         equipL @bsVeff@
       :
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         : // foe = "stone"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
     :?mode = "unmake"
       ?c.permapotSetup
         equipL @bsAeff@
@@ -676,17 +676,17 @@ func ldtF(mode)
 
       : // !c.permapotSetup
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
         : // foe = "stone"
-          // c.moondialing(,)
+          // c.moonjuggle(,)
 
   :?mode = "magic" // wands and staves
     ?mode = "heal"
