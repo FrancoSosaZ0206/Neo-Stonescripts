@@ -397,7 +397,7 @@ c.AAC(a.hVeff, a.shIeff)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
-// .......... ENGAGE/WALKING LOGIC .......... //
+// ......... ENGAGING/WALKING LOGIC ......... //
 
 :?ai.walking &
 ^!(s.inRange("crossbow") |
@@ -411,17 +411,6 @@ c.AAC(a.hVeff, a.shIeff)
 :?ai.paused | !ai.enabled
   a.ldtF("defense armor regen")
 
-// ........... PRE-DASHING LOGIC ............ //
-
-// Voidweaver - use it if possible
-:?c.canUseAbility("voidweaver") &
-^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1
-  ?c.canUseAbility("dash")
-    a.ldtF("dash")
-  :
-    c.devour("voidweaver")
-
 // .............. DASHING LOGIC ............. //
 
 // Knockback farming
@@ -431,10 +420,16 @@ c.AAC(a.hVeff, a.shIeff)
 :?a.canSmartDash() & canDash
   a.smartDash()
 
+// Voidweaver - use it if possible
+:?c.canUseAbility("voidweaver") &
+^c.canUnmakeVoidweaver() &
+^foe.count > 1 & screen.i > 1
+  c.devour("voidweaver")
+
 // if in range, get closer while trying to unmake with repeating bow
 :?canDash & foe.distance =
 ^   math.Clamp(foe.distance,
-^              s.getRange("dash_max") + 1,
+^              s.getRange("dash_min"),
 ^              s.getRange("crossbow")) &
 ^!c.permapotSetup
   c.smoothCast(a.bR)
