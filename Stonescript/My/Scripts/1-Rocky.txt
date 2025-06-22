@@ -388,8 +388,6 @@ c.AAC(a.hVeff, a.shIeff)
     c.useAbility_TH("quarterstaff", a.myQ)
   :?a.canSmartDash()
     a.smartDash()
-  :?c.canUseAbility("staff_poison")
-    c.useAbility_TH("staff_poison", a.stPh)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
