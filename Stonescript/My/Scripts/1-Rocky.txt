@@ -440,7 +440,8 @@ c.AAC(a.hVeff, a.shIeff)
   c.smoothCast(a.bR)
 
 // get in melee range faster
-:?foe.distance > s.getRange("sword") + 1
+:?foe.distance > s.getRange("sword") + 1 &
+^!c.permapotSetup
   c.stutterStep()
 
 // ......... SPECIAL WEAPONS LOGIC .......... //
