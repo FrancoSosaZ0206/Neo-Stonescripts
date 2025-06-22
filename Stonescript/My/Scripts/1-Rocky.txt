@@ -420,12 +420,6 @@ c.AAC(a.hVeff, a.shIeff)
 :?a.canSmartDash() & canDash
   a.smartDash()
 
-// Voidweaver - use it if possible
-:?c.canUseAbility("voidweaver") &
-^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1
-  c.devour("voidweaver")
-
 // if in range, get closer while trying to unmake with repeating bow
 :?canDash & foe.distance =
 ^   math.Clamp(foe.distance,
@@ -439,7 +433,7 @@ c.AAC(a.hVeff, a.shIeff)
 ^!c.permapotSetup
   c.stutterStep()
 
-// ......... SPECIAL WEAPONS LOGIC .......... //
+// ........... SPECIAL ITEMS LOGIC .......... //
 
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
@@ -469,6 +463,12 @@ c.AAC(a.hVeff, a.shIeff)
 ^s.getTotalHP("player") < c.midhp &
 ^c.canUseAbility("wand_ice")
   c.useAbility_OH("wand_ice", a.wIh, hand)
+
+// Voidweaver - use it if possible
+:?c.canUseAbility("voidweaver") &
+^c.canUnmakeVoidweaver() &
+^foe.count > 1 & screen.i > 1
+  c.devour("voidweaver")
 
 // ............... AOE LOGIC ................ //
 
