@@ -305,7 +305,8 @@ func screenMngr_DS(itemName, scrTarget, scrMax)
     var itemI = table_itemDS.IndexOf(itemName)
     var targetI = table_itemDS.IndexOf("TARGET")
     var maxI = table_itemDS.IndexOf("MAX")
-    ?loc.begin
+    ?loc.begin | // beginning of the game
+    ^!(table_itemDS[itemI + targetI] & table_itemDS[itemI + maxI]) // or unset
       table_itemDS[itemI + targetI] = scrTarget
       table_itemDS[itemI + maxI] = scrMax
     :?loc.loop & !isScreen_DS(itemName, "MAX")

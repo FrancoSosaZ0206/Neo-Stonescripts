@@ -123,13 +123,14 @@ func fight(mode)
           c.burst(a.burstingSwords)
         :
           a.ldtF("sword dmg")*/
-        a.ldtF("sword dmg")
+
+        ?foe = "phase3" & !s.inRange("dash") &
+        ^c.canUseAbility("staff_poison")
+          c.useAbility_TH("staff_poison", a.stPh)
+        :
+          a.ldtF("sword dmg")
       :
         a.ldtF("magic dmg")
-      /*:?c.permapotSetup
-        a.ldtF("magic dmg")
-      :
-        a.ldtF("ranged dmg")*/
 
 // /////////////// PROCEDURE //////////////// //
 
@@ -255,9 +256,12 @@ c.AAC(a.hVeff, a.shIeff)
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
+// already has the speed effect
 ^(buffs.string ! "buff_inf_speed" |
-^ (foe = "scout" & foe.state = 4)) &
-^(!s.inRange("dash") | foe.distance = 9999) &
+// 1 foe just defeated
+^ (foe.count = 1 & foe.state = 4) |
+// too far to attack
+^ (!s.inRange("crossbow"))) &
 // save armor if it's setup run
 ^!(loc.stars > 15 &
 ^(nRuns = 1 |
@@ -376,16 +380,15 @@ c.AAC(a.hVeff, a.shIeff)
   :
     a.ldtF("defense armor regen")
 
-:?!c.permapotSetup &
+:?(!c.permapotSetup &
 ^[118, 124, 108].Contains(foe.state) &
-^c.canUseAbility("bardiche")
-/*item.GetCooldown("bardiche") <= 0) |
-^c.isCasting("bardiche")*/
+^item.GetCooldown("bardiche") <= 0) |
+^c.isCasting("bardiche")
   ?c.canUseAbility("quarterstaff")
     c.useAbility_TH("quarterstaff", a.myQ)
   :?a.canSmartDash()
     a.smartDash()
-  :?c.canuseAbility("staff_poison")
+  :?c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
@@ -475,7 +478,7 @@ c.AAC(a.hVeff, a.shIeff)
   ^foe.debuffs.string ! "debuff_armor_fatigue"))
     a.ldtF("grappling")
 
-  :?nRuns = 1
+  :?nRuns = 1 | foe ! "elite"
     a.ldtF("big sword unmake")
   // Debuff and unmake
   :?encounter.eliteMod = "blessed"/* |
@@ -486,6 +489,7 @@ c.AAC(a.hVeff, a.shIeff)
       a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
+    
 
 :?foe = "phase" // Dysangelos fight logic
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
@@ -504,8 +508,6 @@ c.AAC(a.hVeff, a.shIeff)
 
     ?c.canUsePotion()
       activate potion
-    :?c.canUseAbility("staff_poison") & !s.inRange("dash")
-      c.useAbility_TH("staff_poison", a.stPh)
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.permapotSetup & s.inRange("dash_min")
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
@@ -524,7 +526,7 @@ c.AAC(a.hVeff, a.shIeff)
         :?hp ! maxhp
           a.ldtF("sword heal")
         : // wait
-          equipL sword 0*
+          equipL Unbroken Faith
           equipR mask
       :
         fight("melee")

@@ -616,7 +616,7 @@ func ldtF(mode)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
           c.moondialing(Vantum Phoenix, sFDmg)
         : // foe = "stone"
-          c.moondialing(Bifrost /*Unbroken Faith*/, sFDmg /*Broken Faith*/)
+          c.moondialing(Bifrost /*Unbroken Faith*/, sIDmg /*Broken Faith*/)
   :?mode = "big sword" // TO DO: big swords
     // Special cases:
     ?mode = "heal"
