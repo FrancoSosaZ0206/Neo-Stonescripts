@@ -99,9 +99,15 @@ func fight(mode)
     ^foe.GetCount(foe.distance + margin) > 1
       a.smartDebuff("magic")
 
+    :?c.canApplyWeaken() &
+    ^(loc.stars > 15 | c.permapotSetup) &
+    ^(foe = "monarch" | foe = "boss") &
+    ^mode = "melee"
+      a.ldtF("sword debuff weaken")
     :?(c.canApplyAny() | c.canApplyBurn()) &
     ^(loc.stars > 15 | c.permapotSetup) &
     ^(foe = "monarch" | foe = "boss") &
+    ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0 &
     ^mode = "melee"
       a.ldtF("sword debuff auto")
 
@@ -204,10 +210,10 @@ func fight(mode)
   permapotActTime = totaltime
 
 // BFG logic
-?nRuns > 1 & loc.stars > 15
+/*?nRuns > 1 & loc.stars > 15
   c.screenMngr_DS("blade", 2, boss_screen - 3)
   ?c.canUseAbility_DS("blade")
-    c.useAbility_DS("blade")
+    c.useAbility_DS("blade")*/
 
 canDash = true
 
@@ -340,17 +346,6 @@ c.AAC(a.hVeff, a.shIeff)
     : // c.canUseAbility("wand_poison")
       c.useAbility_OH("wand_poison", a.wPh, hand)
 
-  // foe will break through armor
-  :?armor < s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) &
-  ^(foe = "phase" | foe = "monarch")
-    // Avoid hit entirely
-    ?foe = "phase3" & foe.damage > 1 &
-    ^foe.debuffs.string ! "feeble" &
-    ^c.canUseAbility("staff_ice")
-      c.useAbility_TH("staff_ice", a.stIh)
-    : // Heal to reduce damage even more
-      a.ldtF("defense heal")
-
   // Apply effects
   :?!c.permapotSetup
     // get additional damage
@@ -366,7 +361,13 @@ c.AAC(a.hVeff, a.shIeff)
       a.ldtF("defense")
 
   : // c.permapotSetup
-    a.ldtF("defense")
+    // foe will break through armor
+    ?armor < s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) &
+    ^(foe = "phase" | foe = "monarch")
+      // Heal to reduce damage even more
+      a.ldtF("defense heal")
+    :
+      a.ldtF("defense")
 
 // .......... ENGAGE/WALKING LOGIC .......... //
 
@@ -460,10 +461,12 @@ c.AAC(a.hVeff, a.shIeff)
 // AOE Strat
 :?foe.GetCount(foe.distance + margin) > 1
   // Align foes
-  /*?c.canUseAbility("wand_stone")
-    c.useAbility_OH("wand_stone", a.wSh, hand)*/
+  ?c.canUseAbility("wand_stone") &
+  ^foe.distance < s.getRange("dash_min")
+    c.useAbility_OH("wand_stone", a.wSh, hand)
 
-  ?c.canUseAbility("heavy_hammer") & foe = "elite"
+  :?c.canUseAbility("heavy_hammer") & foe = "elite" &
+  ^foe.distance < s.getRange("dash_min")
     ?encounter.eliteMod = "plated"
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
@@ -488,7 +491,6 @@ c.AAC(a.hVeff, a.shIeff)
   :
     equip Kubikiribocho
     
-
 :?foe = "phase" // Dysangelos fight logic
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Default) // reached ignition cap
