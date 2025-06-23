@@ -14,7 +14,13 @@ x Update Times meter:
     x Raw frames (as most speedrunners use it)
 
 x Update all location scripts:
-  ✔ Rocky
+  ... Rocky:
+    x Prevent Infernal Staff from activating when screen.i = 0, if the movement speed effect is already present.
+    x Test elemental debuff shields against phase 2
+    x Change Plague Wand logic so it only activates when Dysangelos is not feebled.
+    x when screen.i = 1 and there's 2 foes (1 normal + the scout), 1v1/unmake the foe to save time.
+    x when screen.i <= 1 or in the previous item's conditions, activate the Berserker Staff to deal extra damage to the Scout with Bardiche ability and others before armor runs out.
+    x in Phase 1, use defense heal ldtF mode when about to attack and not at maxhp, instead of using the ap shield, to heal faster.
   x Deadwood
   x Caves
   x Mushroom
