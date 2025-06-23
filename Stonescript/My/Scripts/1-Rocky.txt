@@ -428,12 +428,12 @@ c.AAC(a.hVeff, a.shIeff)
 
 // .............. DASHING LOGIC ............. //
 
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
 // Knockback farming
 :?c.canKbFarm()
   c.smoothCast(a.bS)
-
-:?a.canSmartDash() & canDash
-  a.smartDash()
 
 // if in range, get closer while trying to unmake with repeating bow
 :?canDash & foe.distance =
