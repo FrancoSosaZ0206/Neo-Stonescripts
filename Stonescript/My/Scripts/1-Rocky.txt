@@ -63,32 +63,25 @@ func fight(mode)
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       c.useAbility_TH("staff_stone", a.stSh)
-      >o0,1,#red,ACROBATIC
     :?c.canUseAbility("mind") &
     ^(foe ! "ranged" |
     ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
       a.ldtF("mind")
-      >o0,1,#red,MINDSTONE
 
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
       c.useAbility_TH("staff_ice", a.stIh)
-      >o0,1,#red,ETERNITY
 
     :?foe.distance > s.getRange("sword") + 1
       ?foe.count > 1
         fight("magic")
-        >c0,1,#red,MAGIC
       :
         fight("ranged")
-        >c0,1,#red,RANGED
 
     // Unmake
     :?c.canUnmake()
       a.ldtF("defense unmake")
-      >o0,1,#red,DEFENSE UNMAKE
     :
       a.ldtF("defense")
-      >o0,1,#red,DEFENSE
   :
     // ........... DEBUFFING LOGIC .......... //
 
@@ -98,20 +91,17 @@ func fight(mode)
     ^(foe = "elite" &
     ^foe.GetCount(foe.distance + margin) > 1))
       a.smartDebuff("magic")
-      >o0,2,#red,AOE DEBUFFING
 
     // Permapot 1v1 debuffing
     :?c.canApplyAny() & canDash &
     ^c.permapotSetup & foe = "elite" &
     ^foe.GetCount(foe.distance + margin) = 1
       a.ldtF("sword debuff auto")
-      >o0,2,#red,PERMAPOT 1V1 DEBUFFING
 
     // 1v1 strong foe weakening
     :?c.canApplyWeaken() & canDash &
     ^(foe = "monarch" | foe = "boss")
       a.ldtF("sword debuff weaken")
-      >o0,2,#red,1V1 STRONG FOE WEAKENING
 
     // 1v1 strong foe debuffing
     :?(c.canApplyChill(6) | c.canApplyBurn()) &
@@ -121,23 +111,19 @@ func fight(mode)
     ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
     ^nRuns = 1)
       a.ldtF("sword debuff auto")
-      >o0,2,#red,1V1 STRONG FOE DEBUFFING
 
     // ............ HEALING LOGIC ........... //
     :?hp ! maxhp & canDash &
     ^foe.GetCount(foe.distance + margin) = 1
       a.ldtF("sword heal")
-      >o0,2,#red,HEALING MELEE
 
     // ........... UNMAKING LOGIC ........... //
     :?c.canUnmake()
       ?canDash &
       ^foe.GetCount(foe.distance + margin) = 1
         a.ldtF("sword unmake")
-        >o0,2,#red,UNMAKE 1V1
       : // foe.GetCount(foe.distance + margin) > 1
         a.ldtF("magic unmake")
-        >o0,2,#red,UNMAKE AOE
 
     // ........... DAMAGE LOGIC ........... //
     :?canDash &
@@ -153,10 +139,8 @@ func fight(mode)
         c.useAbility_TH("staff_poison", a.stPh)
       :
         a.ldtF("sword dmg")
-        >o0,2,#red,DMG MELEE
     :
       a.ldtF("magic dmg")
-      >o0,2,#red,DMG AOE
 
 // /////////////// PROCEDURE //////////////// //
 
@@ -345,7 +329,6 @@ c.AAC(a.hVeff, a.shIeff)
     // >o0,0,#red,PREVENT STUN
   : // evade attack
     fight("evade")
-    >o0,0,#red,EVADING SHIELD OR BEAM
 
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32

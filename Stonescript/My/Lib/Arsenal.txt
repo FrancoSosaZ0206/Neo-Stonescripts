@@ -448,8 +448,10 @@ func ldtF(mode)
           equipL ouroboros
         : // try to deal extra damage if possible
           equipL fissure
-      :
+      :?totaltime % 2 = 0 | buffs.string = "buff_inf_speed"
         equipL triskelion
+      :
+        equipL quest
 
       // Right hand:
       ?!c.permapotSetup
