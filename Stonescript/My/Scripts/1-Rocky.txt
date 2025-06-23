@@ -504,7 +504,8 @@ c.AAC(a.hVeff, a.shIeff)
   :?s.inRange("grappling_hook") &
   ^(c.canApplyStun() |
   ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-  ^foe.debuffs.string ! "debuff_armor_fatigue")) &
+  ^foe.debuffs.string ! "debuff_armor_fatigue") &
+  ^foe.debuffs.string ! "debuff_frost_stun") &
   ^!c.isCasting("bardiche")
     a.ldtF("grappling")
 
