@@ -4,3 +4,11 @@ x = to do
 
 -----------------------------------------------------------
 
+Update Times meter:
+    - display times in a table format.
+    - display previous <n> times.
+    - color code based on better/worse/same time.
+    - hide toggle
+    - time format toggle. Formats:
+        - My custom speedrun format (myFormatSpeedrun)
+        - Raw frames (as most speedrunners use it)
