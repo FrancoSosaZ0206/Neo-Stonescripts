@@ -133,8 +133,8 @@ Valid abilityID values:
 func canUseAbility(abilityID)
   var result = false
 
+  // Valid ID
   ?s.ability_table.Contains(abilityID)
-    // Valid ID
     result = item.CanActivate() &
     ^item.GetCooldown(abilityID) <= 0
 
@@ -156,8 +156,7 @@ func canUseAbility(abilityID)
       result = (result & s.inRange(abilityID + " ability")) |
       ^isCasting(abilityID) // won't get interrupted
 
-    :?abilityID = "quarterstaff" |
-    ^abilityID = "talisman" // interruptible abilities
+    :?abilityID = "talisman" // interruptible abilities
       result = result | isCasting(abilityID) // make sure not to change it while casting the ability
 
     // Special case, stone wand doesn't require armor.
@@ -165,7 +164,8 @@ func canUseAbility(abilityID)
       result = result & foe.count > 1 &
       ^item.CanActivate("wand_stone")
 
-    :?abilityID = "staff" | abilityID = "wand"
+    :?(abilityID = "staff" & abilityID ! "quarterstaff") |
+    ^ abilityID = "wand"
       result = result &
       ^((10 * armor) + armor.f > 10 * s.getArmor(abilityID))
 
@@ -188,7 +188,6 @@ func canUseAbility(abilityID)
           result = result & (foe.debuffs.string = "ignition")
         :
           result = false
-
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canUseAbility\nCAUSE: unknown <abilityID>:\n\n" + abilityID, false)
     loc.Pause()

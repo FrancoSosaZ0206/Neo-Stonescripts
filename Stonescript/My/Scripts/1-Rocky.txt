@@ -396,7 +396,7 @@ c.AAC(a.hVeff, a.shIeff)
   :
     a.ldtF("defense armor regen")
 
-:?foe = "phase" & ((!c.permapotSetup &
+:?screen.i = boss_screen & ((!c.permapotSetup &
 ^[118, 124, 108].Contains(foe.state) &
 ^item.GetCooldown("bardiche") <= 0) |
 ^c.isCasting("bardiche"))
@@ -504,7 +504,7 @@ c.AAC(a.hVeff, a.shIeff)
   ^!c.isCasting("bardiche")
     a.ldtF("grappling")
 
-  :?nRuns = 1 | foe ! "elite"
+  :?nRuns = 1 // | foe ! "elite"
     a.ldtF("big sword unmake")
   // Debuff and unmake
   :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
@@ -530,7 +530,7 @@ c.AAC(a.hVeff, a.shIeff)
       fight("melee")
 
   : // foe = phase3
-    ?c.canUsePotion()
+    ?c.canUsePotion() & !c.canApplyAny()
       activate potion
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.permapotSetup & s.inRange("dash_min")
