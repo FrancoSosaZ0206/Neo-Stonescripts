@@ -181,7 +181,7 @@ var stIeff  = "*max staff ice dI -hidden"
 // .................. STONE ................. //
 
 var shS     = "*max shield stone" // enchanted: dodge chance
-var bS      = "*max crossbow stone socketed"
+var bS      = "0* crossbow stone socketed +21"
 
 // ................. HIDDEN ................. //
 

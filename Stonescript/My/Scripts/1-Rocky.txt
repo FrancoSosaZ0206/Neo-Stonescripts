@@ -344,7 +344,7 @@ c.AAC(a.hVeff, a.shIeff)
 :?foe.state = 32 & (
 ^(foe = "scout" &
 ^  ((foe.debuffs.string = "chill:6" & foe.time > 50) |
-^   (foe.debuffs.string ! "chill" & foe.time > 20))) |
+^   (foe.debuffs.string ! "chill" & foe.time > 10))) |
 ^((foe = "phase1" &
 ^  ((foe.debuffs.string = "chill:6" & foe.time > 60) |
 ^   (foe.debuffs.string ! "chill" & foe.time > 20))) |
