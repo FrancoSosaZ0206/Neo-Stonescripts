@@ -149,7 +149,12 @@ func fight(mode)
 
 // ............ WITHDRAWAL LOGIC ............ //
 
-?s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+?s.getTotalHP("player")
+^ <=
+^s.getFoeDmg(a.berserkerLvl,
+^            a.plagueLvl,
+^            a.maskLvl      ) |
+^nRuns >= 25
   loc.Leave()
 
 // .............. SETUP LOGIC ............... //
