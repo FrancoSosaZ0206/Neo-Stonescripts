@@ -73,16 +73,16 @@ func fight(mode)
 
     :?foe.distance > s.getRange("sword") + 1
       ?foe.count > 1
-        fight("magic")
+        fight("normal")
       :
-        fight("ranged")
+        fight("normal")
 
     // Unmake
     :?c.canUnmake()
       a.ldtF("defense unmake")
     :
       a.ldtF("defense")
-  :
+  :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
 
     // AOE debuffing
@@ -143,6 +143,8 @@ func fight(mode)
         a.ldtF("sword dmg")
     :
       a.ldtF("magic dmg")
+  : // invalid mode
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
 // /////////////// PROCEDURE //////////////// //
 
@@ -335,7 +337,7 @@ c.AAC(a.hVeff, a.shIeff)
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
   canDash = false
-  fight("ranged") // fight ranged to avoid hit
+  fight("normal") // fight ranged to avoid hit
   >c0,0,#red,WIND CRIT, FIGHT RANGED
 
 // Normal attacks
@@ -530,7 +532,7 @@ c.AAC(a.hVeff, a.shIeff)
     ^c.canUseAbility("wand_vigor")
       c.useAbility_OH("wand_vigor", a.wVh, hand)
     :
-      fight("melee")
+      fight("normal")
 
   : // foe = phase3
     ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
@@ -554,7 +556,7 @@ c.AAC(a.hVeff, a.shIeff)
           equipL Unbroken Faith
           equipR mask
       :
-        fight("melee")
+        fight("normal")
 
 // ................ 1V1 LOGIC ............... //
 
@@ -569,7 +571,7 @@ c.AAC(a.hVeff, a.shIeff)
     c.useAbility_TH("bardiche", Kubikiribocho)
     >o0,0,#red,BARD FOES
 :
-  fight("melee")
+  fight("normal")
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀ ┃  //
