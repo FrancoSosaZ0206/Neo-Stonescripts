@@ -4,11 +4,21 @@ x = to do
 
 -----------------------------------------------------------
 
-Update Times meter:
-    - display times in a table format.
-    - display previous <n> times.
-    - color code based on better/worse/same time.
-    - hide toggle
-    - time format toggle. Formats:
-        - My custom speedrun format (myFormatSpeedrun)
-        - Raw frames (as most speedrunners use it)
+x Update Times meter:
+  x display times in a table format.
+  x display previous <n> times.
+  x color code based on better/worse/same time.
+  x hide toggle
+  x time format toggle. Formats:
+    x My custom speedrun format (myFormatSpeedrun)
+    x Raw frames (as most speedrunners use it)
+
+x Update all location scripts:
+  ✔ Rocky
+  x Deadwood
+  x Caves
+  x Mushroom
+  x Halls
+  x Mine
+  ... Ridge
+  x Temple

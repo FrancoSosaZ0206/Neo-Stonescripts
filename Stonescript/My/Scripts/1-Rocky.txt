@@ -137,6 +137,8 @@ func fight(mode)
       ?foe = "phase3" & !s.inRange("dash") &
       ^c.canUseAbility("staff_poison")
         c.useAbility_TH("staff_poison", a.stPh)
+      :?c.canUsePotion()
+        activate potion
       :
         a.ldtF("sword dmg")
     :
@@ -531,9 +533,7 @@ c.AAC(a.hVeff, a.shIeff)
       fight("melee")
 
   : // foe = phase3
-    ?c.canUsePotion() & !c.canApplyAny() & !c.canApplyBurn()
-      activate potion
-    :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
+    ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.permapotSetup & s.inRange("dash_min")
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
