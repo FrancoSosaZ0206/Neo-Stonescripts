@@ -530,7 +530,7 @@ c.AAC(a.hVeff, a.shIeff)
       fight("melee")
 
   : // foe = phase3
-    ?c.canUsePotion() & !c.canApplyAny()
+    ?c.canUsePotion() & !c.canApplyAny() & !c.canApplyBurn()
       activate potion
     :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
     ^!c.permapotSetup & s.inRange("dash_min")
