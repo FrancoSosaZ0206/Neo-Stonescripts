@@ -87,7 +87,7 @@ func fight(mode)
 
     // AOE debuffing
     ?a.canSmartDebuff("magic") &
-    ^(mode ! "melee" | !canDash |
+    ^(!canDash |
     ^(foe = "elite" &
     ^foe.GetCount(foe.distance + margin) > 1))
       a.smartDebuff("magic")
@@ -137,7 +137,7 @@ func fight(mode)
       ?foe = "phase3" & !s.inRange("dash") &
       ^c.canUseAbility("staff_poison")
         c.useAbility_TH("staff_poison", a.stPh)
-      :?c.canUsePotion()
+      :?c.canUsePotion() & foe = "phase3"
         activate potion
       :
         a.ldtF("sword dmg")
@@ -414,9 +414,8 @@ c.AAC(a.hVeff, a.shIeff)
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
-:?ai.walking & player.direction = 1
-^!(s.inRange("crossbow") |
-^  a.canSmartDash())
+:?ai.walking & player.direction = 1 &
+^!s.inRange("dash_max")
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")

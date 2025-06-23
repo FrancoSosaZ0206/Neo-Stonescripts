@@ -590,8 +590,8 @@ func canEngage()
   return ai.walking &
   ^foe.distance =
   ^   math.Clamp(foe.distance,
-  ^              s.getRange("crossbow"),
-  ^              s.getRange("socketed_shield"))
+  ^              s.getRange("dash_max") + 1,
+  ^              s.getRange("socketed_shield") - 10)
 
 // ........... Damage min-maxing ............ //
 
