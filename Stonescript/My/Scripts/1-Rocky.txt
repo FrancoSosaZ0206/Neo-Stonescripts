@@ -343,7 +343,7 @@ c.AAC(a.hVeff, a.shIeff)
 // Normal attacks
 :?foe.state = 32 & (
 ^(foe = "scout" &
-^!(foe.debuffs.string = "stun" | s.isCasting("bardiche")) &
+^!(foe.debuffs.string = "stun" | c.isCasting("bardiche")) &
 ^  ((foe.debuffs.string = "chill:6" & foe.time > 50) |
 ^   (foe.debuffs.string ! "chill" & foe.time > 10))) |
 ^((foe = "phase1" &
