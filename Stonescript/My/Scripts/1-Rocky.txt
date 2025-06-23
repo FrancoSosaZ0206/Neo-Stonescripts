@@ -396,16 +396,17 @@ c.AAC(a.hVeff, a.shIeff)
   :
     a.ldtF("defense armor regen")
 
-:?(!c.permapotSetup &
+:?foe = "phase" & ((!c.permapotSetup &
 ^[118, 124, 108].Contains(foe.state) &
 ^item.GetCooldown("bardiche") <= 0) |
-^c.isCasting("bardiche")
+^c.isCasting("bardiche"))
   ?c.canUseAbility("quarterstaff")
     c.useAbility_TH("quarterstaff", a.myQ)
   :?a.canSmartDash()
     a.smartDash()
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
+    >o0,0,#red,BARD DYSAN CUTSCENE
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
@@ -499,14 +500,14 @@ c.AAC(a.hVeff, a.shIeff)
   :?s.inRange("grappling_hook") &
   ^(c.canApplyStun() |
   ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-  ^foe.debuffs.string ! "debuff_armor_fatigue"))
+  ^foe.debuffs.string ! "debuff_armor_fatigue")) &
+  ^!c.isCasting("bardiche")
     a.ldtF("grappling")
 
   :?nRuns = 1 | foe ! "elite"
     a.ldtF("big sword unmake")
   // Debuff and unmake
-  :?encounter.eliteMod = "blessed"/* |
-  ^foe.buffs.string = "buff_tenacious"*/
+  :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
     ?a.canSmartDebuff("magic")
       a.smartDebuff("magic")
     :
@@ -556,19 +557,18 @@ c.AAC(a.hVeff, a.shIeff)
 
 // ................ 1V1 LOGIC ............... //
 
+// Tanky foe, use bardiche ability to lower its hitpoints
+:?(foe = "boss" | foe = "monarch") &
+^foe.distance <= s.getRange("sword") + 1 &
+^(c.canUseAbility("staff_poison") |
+^c.canUseAbility("bardiche"))
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  : // c.canuseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+    >o0,0,#red,BARD FOES
 :
-  // Tanky foe, use bardiche ability to lower its hitpoints
-  ?(foe = "boss" | foe = "monarch") &
-  ^foe.count = 1 &
-  ^s.inRange("sword") &
-  ^(c.canUseAbility("staff_poison") |
-  ^c.canUseAbility("bardiche"))
-    ?c.canUseAbility("staff_poison")
-      c.useAbility_TH("staff_poison", a.stPh)
-    : // c.canuseAbility("bardiche")
-      c.useAbility_TH("bardiche", Kubikiribocho)
-  :
-    fight("melee")
+  fight("melee")
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀ ┃  //
