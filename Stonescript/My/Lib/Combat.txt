@@ -587,12 +587,11 @@ This enables the player to benefit from effects
 that are applied when engaging, like ai or A/a
 affix items. */
 func canEngage()
-  return foe.state = -1 |
-  ^(ai.walking &
+  return ai.walking &
   ^foe.distance =
   ^   math.Clamp(foe.distance,
-  ^              s.getRange("dash_max") + 1,
-  ^              s.getRange("socketed_shield")))
+  ^              s.getRange("crossbow"),
+  ^              s.getRange("socketed_shield"))
 
 // ........... Damage min-maxing ............ //
 

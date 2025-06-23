@@ -416,6 +416,7 @@ c.AAC(a.hVeff, a.shIeff)
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
+    >o0,0,#yellow,engaging
   :
     a.ldtF("defense armor regen")
 
