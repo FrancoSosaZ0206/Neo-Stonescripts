@@ -438,22 +438,19 @@ c.AAC(a.hVeff, a.shIeff)
   :
     a.ldtF("defense armor regen")
 
-// Use Berserk Staff to increment Bardiche ability and sword damage
-:?screen.i = boss_screen &
-^[116, 117, 118].Contains(foe.state) &
-^item.GetCooldown("staff_poison") <= 0 /*|
-^c.isCasting("staff_poison")*/
-  c.useAbility_TH("staff_poison", a.stPh)
-  >o0,0,#red,BERSERK STAFF CUTSCENE
 
 :?screen.i = boss_screen & ((!c.permapotSetup &
-^[117,118, 124,125, 107,108].Contains(foe.state) &
+^[117,118, /*124,125,*/ 107,108].Contains(foe.state) &
 ^item.GetCooldown("bardiche") <= 0) |
 ^c.isCasting("bardiche"))
-  ?c.canUseAbility("quarterstaff")
+  ?item.GetCooldown("quarterstaff") <= 0
     c.useAbility_TH("quarterstaff", a.myQ)
   :?a.canSmartDash()
     a.smartDash()
+  // Use Berserk Staff to increment Bardiche ability and sword damage
+  :?item.GetCooldown("staff_poison") <= 0
+    c.useAbility_TH("staff_poison", a.stPh)
+    >o0,0,#red,BERSERK STAFF CUTSCENE
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
