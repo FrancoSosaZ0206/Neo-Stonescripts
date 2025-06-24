@@ -38,6 +38,8 @@ var permapotActTime = -1 // time when permapot was activated, -1 means not activ
 var old_t = item.GetTreasureCount()
 var enduse = 0
 
+var phase3dmg = foe.damage
+
 // /////////////// FUNCTIONS //////////////// //
 
 func harvestFunc(button)
@@ -148,8 +150,6 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
->`1,12,#magenta,margin = @margin@
-
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?s.getTotalHP("player")
@@ -236,7 +236,11 @@ func fight(mode)
   ?c.canUseAbility_DS("blade")
     c.useAbility_DS("blade")*/
 
+// Set canDash default value
 canDash = true
+// Set phase3dmg
+?foe = "phase3" // only update when needed
+  phase3dmg = s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
 
 c.potionType = "lucky"
 c.Init()
@@ -267,6 +271,10 @@ c.AAC(a.hVeff, a.shIeff)
 // Initial equipments
 ?loc.begin
   a.ldtF("default")
+
+// grab extra ki (EXPERIMENTAL)
+:?foe.state = 4 & ai.enabled & !ai.paused
+  equipL ki stone
 
 // speed up (picking chest)
 :?old_t ! item.GetTreasureCount() &
@@ -324,8 +332,7 @@ c.AAC(a.hVeff, a.shIeff)
 // ............. DEFENSIVE LOGIC ............ //
 
 // phase2 about to attack
-:?foe = "phase2" &
-^foe.state = 32 &
+:?foe = "phase2" & foe.state = 32 &
 ^  ((foe.debuffs.string = "chill:6" & foe.time > 97) |
 ^   (foe.debuffs.string ! "chill" & foe.time > 55))
   // gain Empower to deal extra damage
@@ -384,11 +391,11 @@ c.AAC(a.hVeff, a.shIeff)
   ?foe = "phase1" & hp ! maxhp
     a.ldtF("defense heal")
   // reduce damage amap
-  :?foe = "phase3" &
+  :?foe = "phase3" & phase3dmg > 0 &
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
-    ?c.canUseAbility("mask")
+    ?c.canUseAbility("mask") & phase3dmg > 0
       c.useAbility_OH("mask", "mask", "r")
-    : // c.canUseAbility("wand_poison")
+    :?c.canUseAbility("wand_poison") & phase3dmg > 0
       c.useAbility_OH("wand_poison", a.wPh, hand)
 
   // Apply effects
@@ -440,7 +447,7 @@ c.AAC(a.hVeff, a.shIeff)
 // ......... ENGAGING/WALKING LOGIC ......... //
 
 :?ai.walking & player.direction = 1 &
-^!s.inRange("dash_max")
+^!s.inRange("crossbow")
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")

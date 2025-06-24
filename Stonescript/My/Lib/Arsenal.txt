@@ -335,32 +335,35 @@ func ldtF(mode)
       :
         ?hp ! maxhp
           equipL @hVeff@
-        :?armor < maxarmor
+        :?armor <= maxarmor
           equipL quest
         :
           equipL ki stone
 
     // Right hand:
     ?!c.permapotSetup
-      ?c.canApplyChill(1)
+      // elemental A shields
+      ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+        equipR @shIdef@
+      :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+        equipR @shPdef@
+      :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+        equipR @shVdef@
+      :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+        equipR @shAdef@
+      :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+        equipR @shFdef@
+
+      // on-engage debuffs
+      :?c.canApplyChill(1)
         equipR @shIeff@
         >o0,1,#cyan,ai shield
-      :
-        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equipR @shIdef@
-        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          equipR @shPdef@
-        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equipR @shVdef@
-        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equipR @shAdef@
-        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equipR @shFdef@
-        :
-          ?armor < compoundMaxArmor_default
-            equipR @shC2@
-          : // armor = math.Clamp(armor, compoundMaxArmor_default, compoundMaxArmor_boosted)
-            equipR @shC1@
+
+      // Normal armor (mode = "defense armor regen")
+      :?armor < compoundMaxArmor_default
+        equipR @shC2@
+      : // armor = math.Clamp(armor, compoundMaxArmor_default, compoundMaxArmor_boosted)
+        equipR @shC1@
 
   :?mode = "extend" | mode = "permapot"
     ?item.right ! "bardiche" &
@@ -446,7 +449,7 @@ func ldtF(mode)
       // Left hand:
       ?!ai.walking | // standing still
       ^(!ai.enabled | ai.paused) // cutscene walking
-        ?armor < maxarmor |
+        ?armor <= maxarmor |
         ^player.direction = -1 |
         ^(hp = maxhp & armor <= 2)
           equipL quest
