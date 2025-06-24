@@ -150,6 +150,11 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
+?item.GetCooldown("staff_poison") <= 0
+  >`1,12,#green,stPh cd = @item.GetCooldown("staff_poison")@
+:
+  >`1,12,#red,stPh cd = @item.GetCooldown("staff_poison")@
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?s.getTotalHP("player")
@@ -425,7 +430,7 @@ c.AAC(a.hVeff, a.shIeff)
 
 // Dysangelos pre-phase1 cutscene damage strat
 :?!c.permapotSetup &
-^[100, 101, 102].Contains(foe.state) &
+^[100, 101, 102, 126, 127].Contains(foe.state) &
 ^(item.GetCooldown("heavy_hammer") <= 0 |
 ^ c.isCasting("heavy_hammer"))
   ?c.canUseAbility("heavy_hammer")
@@ -433,8 +438,16 @@ c.AAC(a.hVeff, a.shIeff)
   :
     a.ldtF("defense armor regen")
 
+// Use Berserk Staff to increment Bardiche ability and sword damage
+:?screen.i = boss_screen &
+^[116, 117, 118].Contains(foe.state) &
+^item.GetCooldown("staff_poison") <= 0 /*|
+^c.isCasting("staff_poison")*/
+  c.useAbility_TH("staff_poison", a.stPh)
+  >o0,0,#red,BERSERK STAFF CUTSCENE
+
 :?screen.i = boss_screen & ((!c.permapotSetup &
-^[118, 124, 108].Contains(foe.state) &
+^[117,118, 124,125, 107,108].Contains(foe.state) &
 ^item.GetCooldown("bardiche") <= 0) |
 ^c.isCasting("bardiche"))
   ?c.canUseAbility("quarterstaff")
