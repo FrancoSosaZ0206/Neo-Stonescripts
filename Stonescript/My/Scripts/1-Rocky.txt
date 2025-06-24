@@ -279,14 +279,14 @@ c.AAC(a.hVeff, a.shIeff)
 // already has the speed effect
 ^buffs.string ! "buff_inf_speed" &
 // 1 foe just defeated
-^ ((foe.count = 1 & foe.state = 4) |
+^((foe.count = 1 & foe.state = 4) |
 // too far to attack
 ^ (!s.inRange("crossbow"))) &
 // save armor if it's setup run
 ^!(loc.stars > 15 &
-^(nRuns = 1 |
+^  (nRuns = 1 |
 // Don't use it when facing the scout
-^(nRuns > 1 & screen.i = 1)))
+^   (nRuns > 1 & screen.i = 1)))
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -316,7 +316,7 @@ c.AAC(a.hVeff, a.shIeff)
 // ............. DEFENSIVE LOGIC ............ //
 
 // phase2 about to attack
-:?foe = "phase2"
+:?foe = "phase2" &
 ^foe.state = 32 &
 ^  ((foe.debuffs.string = "chill:6" & foe.time > 97) |
 ^   (foe.debuffs.string ! "chill" & foe.time > 55))
