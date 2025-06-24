@@ -430,10 +430,12 @@ c.AAC(a.hVeff, a.shIeff)
 
 // Dysangelos pre-phase1 cutscene damage strat
 :?!c.permapotSetup &
-^[100, 101, 102, 126, 127].Contains(foe.state) &
+^[100, 101, 102].Contains(foe.state) &
 ^(item.GetCooldown("heavy_hammer") <= 0 |
 ^ c.isCasting("heavy_hammer"))
-  ?c.canUseAbility("heavy_hammer")
+  ?item.GetCooldown("quarterstaff") <= 0
+    c.useAbility_TH("quarterstaff", a.myQ)
+  :?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
   :
     a.ldtF("defense armor regen")
