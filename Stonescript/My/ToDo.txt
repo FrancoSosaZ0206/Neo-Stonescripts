@@ -19,7 +19,7 @@ x Update all location scripts:
     ✔ Test elemental debuff shields against phase 2
     ✔ when screen.i = 1 and there's 2 foes (1 normal + the scout), 1v1/unmake the foe to save time.
     x when screen.i <= 1 or in the previous item's conditions, activate the Berserker Staff to deal extra damage to the Scout with Bardiche ability and others before armor runs out.
-    x in Phase 1, use defense heal ldtF mode when about to attack and not at maxhp, instead of using the ap shield, to heal faster.
+    ✔ in Phase 1, use defense heal ldtF mode when about to attack and not at maxhp, instead of using the ap shield, to heal faster.
   x Deadwood
   x Caves
   x Mushroom
