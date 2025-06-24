@@ -265,7 +265,8 @@ c.AAC(a.hVeff, a.shIeff)
 ^!(loc.stars > 15 & nRuns = 1)
   enduse++
 
-  ?c.canUseAbility("staff_fire") & enduse > 1
+  ?c.canUseAbility("staff_fire") &
+  ^enduse > 1 & screen.i = boss_screen
     c.useAbility_TH("staff_fire", a.stFh)
   :?pickup.distance < 15
     a.ldtF("magnet")
@@ -276,9 +277,9 @@ c.AAC(a.hVeff, a.shIeff)
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
 // already has the speed effect
-^(buffs.string ! "buff_inf_speed" |
+^buffs.string ! "buff_inf_speed" &
 // 1 foe just defeated
-^ (foe.count = 1 & foe.state = 4) |
+^ ((foe.count = 1 & foe.state = 4) |
 // too far to attack
 ^ (!s.inRange("crossbow"))) &
 // save armor if it's setup run
@@ -314,12 +315,25 @@ c.AAC(a.hVeff, a.shIeff)
 
 // ............. DEFENSIVE LOGIC ............ //
 
-// Unmake Dysangelos's fire arm
-:?foe = "phase2" & foe = "fire" &
+// phase2 about to attack
+:?foe = "phase2"
 ^foe.state = 32 &
 ^  ((foe.debuffs.string = "chill:6" & foe.time > 97) |
 ^   (foe.debuffs.string ! "chill" & foe.time > 55))
-  a.ldtF("defense unmake")
+  // gain Empower to deal extra damage
+  ?foe = "vigor"
+    a.ldtF("defense buff empower")
+  // heal if needed
+  :?foe = "aether" & hp ! maxhp
+    a.ldtF("defense heal")
+  // unmake Dysangelos's fire arm
+  :?foe = "fire"
+    a.ldtF("defense unmake")
+  // apply burn with af shield
+  :?foe = "ice" & c.canApplyBurn()
+    a.ldtF("defense debuff burn")
+  :
+    fight("normal")
 
 // Dysangelos's massive beam or putting shield up
 :?foe = "phase3" &
@@ -358,8 +372,11 @@ c.AAC(a.hVeff, a.shIeff)
 ^   ((foe.debuffs.string = "chill:6" & foe.time > 50) |
 ^    (foe.debuffs.string ! "chill" & foe.time > 10))
 ^))
+  // heal faster
+  ?foe = "phase1" & hp ! maxhp
+    a.ldtF("defense heal")
   // reduce damage amap
-  ?foe = "phase3" &
+  :?foe = "phase3" &
   ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
     ?c.canUseAbility("mask")
       c.useAbility_OH("mask", "mask", "r")
@@ -411,7 +428,6 @@ c.AAC(a.hVeff, a.shIeff)
     a.smartDash()
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
-    >o0,0,#red,BARD DYSAN CUTSCENE
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
@@ -510,7 +526,9 @@ c.AAC(a.hVeff, a.shIeff)
   ^!c.isCasting("bardiche")
     a.ldtF("grappling")
 
-  :?nRuns = 1 // | foe ! "elite"
+  :?screen.i = 1 & foe.count = 2
+    a.ldtF("sword unmake")
+  :?nRuns = 1
     a.ldtF("big sword unmake")
   // Debuff and unmake
   :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
@@ -570,7 +588,6 @@ c.AAC(a.hVeff, a.shIeff)
     c.useAbility_TH("staff_poison", a.stPh)
   : // c.canuseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
-    >o0,0,#red,BARD FOES
 :
   fight("normal")
 
