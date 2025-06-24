@@ -22,7 +22,7 @@ var canDash = true
 
 var stunTime = null
 var hand       = null
-var margin = 8 // big sword left hitbox + splash range
+var margin = null
 
 var boss_screen = null
 var boss_cutscenes = [
@@ -148,6 +148,8 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
+>`1,12,#magenta,margin = @margin@
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?s.getTotalHP("player")
@@ -214,6 +216,12 @@ func fight(mode)
     boss_screen = 4
   :?loc.stars <= 20 // green
     boss_screen = 7
+
+// set up margin based on equipped item
+?item.right = "bardiche"
+  margin = 16
+: // big sword left hitbox + splash range
+  margin = 8
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
   c.permapotSetup = (screen.i >= boss_screen - 1)
@@ -528,7 +536,11 @@ c.AAC(a.hVeff, a.shIeff)
 
   :?screen.i = 1 & foe.count = 2
     a.ldtF("sword unmake")
-  :?nRuns = 1
+  // permapot run
+  :?nRuns = 1 |
+  // split hydra foes
+  ^(encounter.eliteMod = "hydra" &
+  ^ foe.buffs.string ! "stability")
     a.ldtF("big sword unmake")
   // Debuff and unmake
   :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
