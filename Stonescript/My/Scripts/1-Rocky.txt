@@ -280,20 +280,23 @@ c.AAC(a.hVeff, a.shIeff)
 ?loc.begin
   a.ldtF("default")
 
+/* activate potion after picking up treasure
+or while setting up permapot. */
+:?(c.permapotSetup |
+^  (end_t > 1 & screen.i = boss_screen)) &
+^ c.canUsePotion()
+  activate potion
+
 // grab extra ki (EXPERIMENTAL)
 :?foe.state = 4 & ai.enabled & !ai.paused
   equipL ki stone
   equipR mask
   >h0,0,#yellow,GETTING EXTRA KI!!!
 
-// after picking treasure up
+// after picking treasure up, speed up
 :?end_t > 1 & screen.i = boss_screen &
-^(c.canUseAbility("staff_fire") | c.canUsePotion())
-  // speed up (picking chest)
-  ?c.canUseAbility("staff_fire")
-    c.useAbility_TH("staff_fire", a.stFh)
-  : // ?c.canUsePotion()
-    activate potion
+^ c.canUseAbility("staff_fire")
+  c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
