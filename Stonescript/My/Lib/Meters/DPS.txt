@@ -151,11 +151,10 @@ func Main_DPS(x, y, colorHex, frameRate, mode)
     Update()
 
     ?mode = "ui"
-      ?panel
-        panel.Recycle()
-        panel = null
-
+      var pnl_old = panel
       panel = mkUI(x,y,colorHex,mode)
+
+      pnl_old.Recycle()
 
     :?mode = "print"
       Print(x,y,colorHex,mode,false)
@@ -268,18 +267,13 @@ func mkUI(x, y, colorHex, size)
   var txt = null
   var isValidSize = true
 
-  var panelAnchor = null
-  var panelDock = null
+  var panelAnchor = bottom_right
+  var panelDock = bottom_right
   var panelStyle = null
 
   ?size = "normal" | size = "default"
-    panelAnchor = top_left
-    panelDock = top_left
     panelStyle = -3
-
   :?size = "slim" | size = "small"
-    panelAnchor = top_center
-    panelDock = top_center
     panelStyle = -1
   :
     isValidSize = false

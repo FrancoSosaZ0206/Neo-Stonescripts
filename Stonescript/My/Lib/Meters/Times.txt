@@ -148,11 +148,10 @@ func Main_Times(x, y, colorHex, mode)
     Update(mode)
 
     ?mode = "ui"
-      ?panel
-        panel.Recycle()
-        panel = null
-
+      var pnl_old = panel
       panel = mkUI(x,y,colorHex,mode)
+
+      pnl_old.Recycle()
 
     :?mode = "print"
       Print(x,y,colorHex,mode,true)
@@ -177,11 +176,11 @@ func canUpdate(mode)
     return loc.begin | (totaltime % u.sec = 0)
 func Update(mode)
   ?mode = "speedrun" // update times every frame
-    tt    = u.formatSpeedrun(totaltime)
+    tt    = u.formatDigital(totaltime, true)
 
     ?loc.begin | loc.loop
-      pb  = u.formatSpeedrun(loc.bestTime)
-      avg = u.formatSpeedrun(loc.averageTime)
+      pb  = u.formatDigital(loc.bestTime, true)
+      avg = u.formatDigital(loc.averageTime, true)
 
   : // update times every second (30 frames)
     ?loc.begin | totaltime % u.sec = 0
@@ -229,18 +228,13 @@ func mkUI(x, y, colorHex, size)
   var isValidSize = true
 
   // For the panel:
-  var panelAnchor = null
-  var panelDock = null
+  var panelAnchor = bottom_left
+  var panelDock = bottom_left
   var panelStyle = null
   
   ?size = "normal" | size = "default"
-    panelAnchor = top_left
-    panelDock = top_left
     panelStyle = -2
-
   :?size = "slim" | size = "small"
-    panelAnchor = top_center
-    panelDock = top_center
     panelStyle = -1
   :
     isValidSize = false
