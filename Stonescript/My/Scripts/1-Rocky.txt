@@ -1,179 +1,648 @@
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄ START OF "main" ▀▄▀▄▀▄▀▄▀▄ ┃  //
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-/* // //////////// FILE INFO //////////////// //
+// //////////////// IMPORTS ///////////////// //
 
-Multi-location, general script
-Written by IronHawk (Tom Crow)
+var uimkr = import My/Lib/UI_Maker
+var u     = import My/Lib/Utilities
+var c     = import My/Lib/Combat
+var s     = import My/Lib/Stats
+var a     = import My/Lib/Arsenal
 
-. ................ Description ............... .
+// /////////////// VARIABLES //////////////// //
 
-  I have several farming scripts and libraries for
-  this game. Some time after I started scripting, I
-  noticed the increased baggage I needed to carry
-  everywhere, everytime I had to look or change
-  something. That was really tedious, so I decided to
-  write a main script to unify all. That way, I don't
-  need to worry about what location I'm in, and what
-  its corresponding script is. I just have to put this
-  script in the Mindstone, enter the location I want,
-  and voilà!
+// ui-related logic for harvesting
+var yesButton     = null
+var noButton      = null
+var choice        = false
+var buttonPressed = false
+var dontShowAgain = false
 
-. ................. Importing ................ .
+// flags
+var canDash  = true
 
-  If you're on PC, just save this file into the
-  Stonescripts folder and import it using the correct
-  path to the file.
+// values
+var stunTime = null
+var hand     = null
+var margin   = null
 
-  Example: if the file is saved in the Stonescript
-  folder,
-    import main
+var boss_screen = null
+var boss_cutscenes = [
+^ 100, 101, 102, // getting soul stones pre-phase1
+^ 117, 118, // finishing phase1 cutscene
+^ 124, 125, // phase1 to 2
+^ 107, 108, // phase2 to 3
+^ 116] // phase3 death cutscene state
 
-  If you're on mobile, go to the MOBILE section and
-  copy-paste that into the Mindstone. Then, upload
-  this script and any others you are using to the web,
-  and replace the URL template with the link to this
-  file.
+var phase3dmg = foe.damage
 
-  URL example template (GitHub repo):
-    "https://raw.githubusercontent.com/<USER_NAME>/
-    ^<REPO_NAME>/main/<FILE_DIRECTORY>/<FILE_NAME>"
+// counters
+var nRuns = 1 // number of runs in this session
+var permapotActTime = -1 // time when permapot was activated, -1 means not activated
 
-  Replace each <> with their respective values.
+var old_t = item.GetTreasureCount()
+var end_t = 0
 
-  Tip: break your link into several, shorter lines
-  like shown. Otherwise, the Mindstone could butcher
-  the line and break the script.
+// /////////////// FUNCTIONS //////////////// //
 
-. ........ How to do changes in mobil......... .
+func harvestFunc(button)
+  buttonPressed = true
+  ?button = yesButton
+    choice = true
+  : // button = noButton
+    choice = false
 
-  Q: I'm on mobile, and after some changes to my
-  scripts, it won't work anymore! What happened!?
+func fight(mode)
+  ?mode = "escape"
+    canDash = false
 
-  R: This is due to the intricacies of how the process of
-     importing works on mobile. To put it simply, the Mindstone
-     only updates upon opening the game and selecting "play",
-     so any changes made while you're in-game will only be
-     applied the next time you enter.
+    ?c.canUseAbility("mind")
+      a.ldtF("mind")
+    : // c.canUseAbility("staff_stone")
+      c.useAbility_TH("staff_stone", a.stSh)
 
-     Furthermore, any errors in the scripts used also prevent
-     updates. As you can see, it's quite a finicky process.
+  :?mode = "evade"
+    canDash = false
 
-  Q: Alright, so what do I do?
+    ?c.canUseAbility("staff_stone") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+      c.useAbility_TH("staff_stone", a.stSh)
+    :?c.canUseAbility("mind") &
+    ^(foe ! "ranged" |
+    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+      a.ldtF("mind")
 
-  R: To work around it, follow these steps:
+    :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
+      c.useAbility_TH("staff_ice", a.stIh)
 
-    1. Go to the Mindstone and comment out the script (find the
-       "COMMENT OUT HERE" headers down below. Use "//" to
-       comment the indicated line).
-    2. Enter any location and leave after a few seconds 
-    3. Close the game (CHECK THAT "SAVED!" APPEARS AT THE TOP
-       LEFT CORNER)
-    4. Change your script or dependencies and upload them to
-       your preferred website
-    5. Wait a few minutes for the changes to take effect
-    6. Enter the game. You should see a loading screen appear
-       for a second. If so, repeat step 2. Else, exit again
-       and try again later.
-    7. Go to the Mindstone again and uncomment the script
-    8. Enter your desired location.
+    :?foe.distance > s.getRange("sword") + 1
+      ?foe.count > 1
+        fight("normal")
+      :
+        fight("normal")
 
-    Make sure your script doesn't have any errors.
-    If everything is done correctly, you should see your
-    changes reflected in-game.
+    // Unmake
+    :?c.canUnmake()
+      a.ldtF("defense unmake")
+    :
+      a.ldtF("defense")
+  :?mode = "normal"
+    // ........... DEBUFFING LOGIC .......... //
 
-    I recommend debugging on PC or by pasting your script
-    directly in the Mindstone, though. Importing in mobile
-    is ideal for when your scripts are already done, in my
-    opinion.
+    // AOE debuffing
+    ?a.canSmartDebuff("magic") &
+    ^(!canDash |
+    ^(foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) > 1))
+      a.smartDebuff("magic")
 
-. ............................................ .
+    // Permapot 1v1 debuffing
+    :?c.canApplyAny() & canDash &
+    ^c.permapotSetup & foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) = 1
+      a.ldtF("sword debuff auto")
 
-Enjoy! ;) */
+    // 1v1 strong foe weakening
+    :?c.canApplyWeaken() & canDash &
+    ^(foe = "monarch" | foe = "boss")
+      a.ldtF("sword debuff weaken")
 
-/* //////////////// MOBILE ////////////////// //
-// ↓↓↓ COPY FROM HERE ↓↓↓
+    // 1v1 strong foe debuffing
+    :?(c.canApplyChill(6) | c.canApplyBurn()) &
+    ^canDash &
+    ^((loc.stars > 15 &
+    ^(foe = "monarch" | foe = "boss") &
+    ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
+    ^nRuns = 1)
+      a.ldtF("sword debuff auto")
 
-// Paste your url here ↓↓↓
-var mobileUrl =
-^"https://raw.githubusercontent.com/
-^FrancoSosaZ0206/Neo-Stonescripts/
-^main/Stonescript/"
+    // ............ HEALING LOGIC ........... //
+    :?hp ! maxhp & canDash &
+    ^foe.GetCount(foe.distance + margin) = 1
+      a.ldtF("sword heal")
 
-sys.SetFileUrl(mobileUrl)
+    // ........... UNMAKING LOGIC ........... //
+    :?c.canUnmake()
+      ?canDash &
+      ^foe.GetCount(foe.distance + margin) = 1
+        a.ldtF("sword unmake")
+      : // foe.GetCount(foe.distance + margin) > 1
+        a.ldtF("magic unmake")
 
-// ↓↓↓ COMMENT OUT HERE ↓↓↓
-import My/Scripts/main
-// ↑↑↑ COMMENT OUT HERE ↑↑↑
+    // ........... DAMAGE LOGIC ........... //
+    :?canDash &
+    ^(foe.GetCount(foe.distance + margin) = 1 |
+    ^foe = "monarch" | foe = "boss")
+      /* ?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
+        c.burst(a.burstingSwords)
+      :
+        a.ldtF("sword dmg") */
 
-// ↑↑↑ COPY UNTIL HERE ↑↑↑
-// ////////////////////////////////////////// */
+      ?foe = "phase3" & !s.inRange("dash") &
+      ^c.canUseAbility("staff_poison")
+        c.useAbility_TH("staff_poison", a.stPh)
+      :?c.canUsePotion() & foe = "phase3"
+        activate potion
+      :
+        a.ldtF("sword dmg")
+    :
+      a.ldtF("magic dmg")
+  : // invalid mode
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
-// /////////////////// PC /////////////////// //
+// /////////////// PROCEDURE //////////////// //
 
-// ················ IMPORTS ················· //
+// prints/monitor logic
 
-import My/Cosmetics
-?sys.isMobile
-  import UI/MindstoneButton
 
-// ··············· PROCEDURE ················ //
 
-enable npcDialog
+// ............ WITHDRAWAL LOGIC ............ //
 
-// Watermark & version control
-var author = "Tom Crow"
-var discordTag = "@metaleagle26"
-var scriptVer = "v1.0.0"
-
-var watermark = [
-^   "script by: " + author,
-^   "discord: " + discordTag,
-^   "v" + scriptVer
-^]
-
-for i = 0 .. watermark.Count() - 1
-  >`@screen.w - string.Size(watermark[i])@,i,#rainFF,@watermark[i]@\n
-
-?!loc.isQuest & (
-^loc = "cross_deadwood_river" |
-^loc = "cross_bridge")
+?s.getTotalHP("player")
+^ <=
+^s.getFoeDmg(a.berserkerLvl,
+^            a.plagueLvl,
+^            a.maskLvl      ) |
+^nRuns >= 25
   loc.Leave()
 
-:?loc = "Waterfall"
-  import UI/BragMeter
-:?loc = "uulaa_shop" // Hotspring Shop
-  import My/Scripts/Hotspring_Shop
-:?loc = "undead_crypt_intro" // Haunted Gate
-  disable npcDialog
-  import My/Scripts/Gate
+// .............. SETUP LOGIC ............... //
+
+// Auto-harvesting logic
+?!buttonPressed
+  u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
+
+  ?!yesButton
+    yesButton = uimkr.mkButton(
+    ^-5,9,null,2,null,null, // x, y, w, h, anchor, dock,
+    ^"Yes","#green", // txt, col,
+    ^null,null,null, // tcol, bcol, hcol,
+    ^-5,harvestFunc, // style, pressed,
+    ^null,null,null) // down, up, sound
+
+  ?!noButton
+    noButton = uimkr.mkButton(
+    ^5,9,8,2,null,null, // x, y, w, h, anchor, dock,
+    ^"No","red", // txt, col,
+    ^null,null,null, // tcol, bcol, hcol,
+    ^-5,harvestFunc, // style, pressed,
+    ^null,null,null) // down, up, sound
 :
-  import UI/FoeStateTracker
-  var tm = import My/Lib/Meters/Times
-  var dps = import My/Lib/Meters/DPS
+  ?yesButton
+    yesButton.Recycle()
+    yesButton = null
+  ?noButton
+    noButton.Recycle()
+    noButton = null
 
-  tm.Main_Times(0,1,#red,"slim ui speedrun")
-  dps.Main_DPS(0,3,#yellow,1,"slim ui")
+  ?!dontShowAgain
+    var aux = totaltime + 3*u.sec
+    ?totaltime < aux
+      ?choice
+        u.showStrCtr(6, 30,#green,
+        ^"Harvest boulders is enabled",false)
+      :
+        u.showStrCtr(6, 30,#red,
+        ^"Harvest boulders is disabled",false)
+    :
+      ?!dontShowAgain
+        dontShowAgain = true
 
-  ?loc = "rocky_plateau"
-    disable npcDialog
-    import My/Scripts/1-Rocky
-  :?loc = "deadwood_valley"
-    import My/Scripts/2-Deadwood
-  :?loc = "caustic_caves"
-    import My/Scripts/3-Caves
-  :?loc = "fungus_forest"
-    import My/Scripts/4-Mushroom
-  :?loc = "undead_crypt"
-    import My/Scripts/5-Halls
-  :?loc = "bronze_mine"
-    import My/Scripts/6-Mine
-  :?loc = "icy_ridge"
-    import My/Scripts/7-Ridge
-  :?loc = "temple"
-    import My/Scripts/8-Temple
+?loc.loop
+  nRuns++
+
+  old_t = item.GetTreasureCount()
+  end_t = 0
+
+// Set up boss_screen
+?!boss_screen
+  ?loc.stars <= 10 // cyan and white
+    boss_screen = 2
+  :?loc.stars <= 15 // yellow
+    boss_screen = 4
+  :?loc.stars <= 20 // green
+    boss_screen = 7
+
+?nRuns = 1 & loc.stars > 15 & boss_screen
+  c.permapotSetup = (screen.i >= boss_screen - 1)
+
+// Record time when permapot was activated
+?c.permapotSetup & permapotActTime = -1
+  permapotActTime = totaltime
+
+/* // BFG logic
+?nRuns > 1 & loc.stars > 15
+  c.screenMngr_DS("blade", 2, boss_screen - 3)
+  ?c.canUseAbility_DS("blade")
+    c.useAbility_DS("blade") */
+
+// set up margin default value
+margin = 16 // bardiche's hitbox + splash range
+// Set canDash default value
+canDash = true
+// Set phase3dmg
+?foe = "phase3" // only update when needed
+  phase3dmg = s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+
+c.potionType = "lucky"
+c.Init()
+a.smartDebuff_Mgr()
+
+stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
+?!stunTime
+  stunTime = -1
+
+// Decide hand for one-handed items
+?c.permapotSetup | s.inRange("dash")
+  hand = "left"
+:
+  hand = "right"
+
+// Auto brewing
+?c.canBrewPotion()
+  c.brewPotion()
+
+// track time after picking treasure up
+?old_t ! item.GetTreasureCount()
+  end_t++
+
+// ................................... //
+
+// Permapot equipment
+?c.permapotSetup
+  a.ldtF("permapot")
+
+c.AAC(a.hVeff, a.shIeff)
+
+// Initial equipments
+?loc.begin
+  a.ldtF("default")
+
+// grab extra ki (EXPERIMENTAL)
+:?foe.state = 4 & ai.enabled & !ai.paused
+  equipL ki stone
+  equipR mask
+  >h0,0,#yellow,GETTING EXTRA KI!!!
+
+// after picking treasure up
+:?end_t > 1 & screen.i = boss_screen &
+^(c.canUseAbility("staff_fire") | c.canUsePotion())
+  // speed up (picking chest)
+  ?c.canUseAbility("staff_fire")
+    c.useAbility_TH("staff_fire", a.stFh)
+  : // ?c.canUsePotion()
+    activate potion
+
+// speed up (normal)
+:?c.canUseAbility("staff_fire") &
+^screen.i < boss_screen &
+// already has the speed effect
+^buffs.string ! "buff_inf_speed" &
+// 1 foe just defeated
+^((foe.count = 1 & foe.state = 4) |
+// too far to attack
+^ (!s.inRange("crossbow"))) &
+// save armor if it's setup run
+^!(loc.stars > 15 &
+^  (nRuns = 1 |
+// Don't use it when facing the scout
+^   (nRuns > 1 & screen.i = 1)))
+  c.useAbility_TH("staff_fire", a.stFh)
+
+// mini-dash
+:?c.canUseAbility("quarterstaff") &
+^!s.inRange("dash") & ai.walking &
+^ai.enabled & !ai.paused &
+^(c.permapotSetup |
+^ (!c.permapotSetup & screen.i > 0))
+  c.useAbility_TH("quarterstaff", a.myQ)
+
+// Summons
+:?c.canSummon("voidweaver") &
+^loc.stars > 15 &
+^(screen.i = 0 |
+^screen.i = math.Clamp(screen.i, 2, boss_screen - 2)) // not a cutscene
+  c.useAbility_OH("aether_talisman", "aether_talisman", hand)
+:?c.canSummon("cinderwisp") &
+^(loc.stars <= 15 | screen.i >= boss_screen - 1)
+  c.useAbility_OH("fire_talisman", "fire_talisman", hand)
+
+// Harvest/Pick up things
+:?choice & harvest.distance < 5
+  a.ldtF("harvest")
+:?pickup.distance < 15
+  a.ldtF("magnet")
+
+// ............. DEFENSIVE LOGIC ............ //
+
+// phase2 about to attack
+:?foe = "phase2" & foe.state = 32 &
+^  ((foe.debuffs.string = "chill:6" & foe.time > 97) |
+^   (foe.debuffs.string ! "chill" & foe.time > 55))
+  // gain Empower to deal extra damage
+  ?foe = "vigor"
+    a.ldtF("defense buff empower")
+  // heal if needed
+  :?foe = "aether" & hp ! maxhp
+    a.ldtF("defense heal")
+  // unmake Dysangelos's fire arm
+  :?foe = "fire"
+    a.ldtF("defense unmake")
+  // apply burn with af shield
+  :?foe = "ice" & c.canApplyBurn()
+    a.ldtF("defense debuff burn")
+  :
+    fight("normal")
+
+// Dysangelos's massive beam or putting shield up
+:?foe = "phase3" &
+^((foe.state = 115 & foe.time > 70) |
+^ (foe.damage = 1 &
+^  ((foe.state = 32 & foe.time > 60) |
+^   (foe.state = 33 & foe.time < 5))))
+  // prevent the stun
+  ?foe.damage = 1 & c.canUseAbility("staff_vigor")
+    c.useAbility_TH("staff_vigor", a.stVh)
+  : // evade attack
+    fight("evade")
+
+// Acronian Scout's wind and critical attack
+:?foe = "scout" & foe.damage >= 8 & foe.state = 32
+  canDash = false
+  fight("normal") // fight ranged to avoid hit
+  >f0,0,#red,WIND CRIT, FIGHT RANGED
+
+// Normal attacks
+:?foe.state = 32 & (
+^(foe = "scout" &
+^!(foe.debuffs.string = "stun" | c.isCasting("bardiche")) &
+^  ((foe.debuffs.string = "chill:6" & foe.time > 50) |
+^   (foe.debuffs.string ! "chill" & foe.time > 10))) |
+^((foe = "phase1" &
+^  ((foe.debuffs.string = "chill:6" & foe.time > 60) |
+^   (foe.debuffs.string ! "chill" & foe.time > 20))) |
+^ (foe = "phase3" & foe.damage > 1 &
+^   ((foe.debuffs.string = "chill:6" & foe.time > 85) |
+^    (foe.debuffs.string ! "chill" & foe.time > 45  )))) |
+^(foe ! "boss" &
+^ foe.debuffs.string ! "stun" &
+^ s.inRange("dash_min") &
+^   ((foe.debuffs.string = "chill:6" & foe.time > 50) |
+^    (foe.debuffs.string ! "chill" & foe.time > 10))
+^))
+  // heal faster
+  ?foe = "phase1" & hp ! maxhp
+    a.ldtF("defense heal")
+  // reduce damage amap
+  :?foe = "phase3" & phase3dmg > 0 &
+  ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
+    ?c.canUseAbility("mask") & phase3dmg > 0
+      c.useAbility_OH("mask", "mask", "r")
+    :?c.canUseAbility("wand_poison") & phase3dmg > 0
+      c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  // Apply effects
+  :?!c.permapotSetup
+    // get additional damage
+    ?buffs.string ! "buff_damage"
+      a.ldtF("defense buff empower")
+    // af shields deal more DoT than any other fire debuff weapon.
+    :?c.canApplyBurn()
+      a.ldtF("defense debuff burn")
+    // ai shields' chill duration is longer than any other ice weapon.
+    :?c.canEngage() & c.canApplyChill(1)
+      a.ldtF("defense debuff chill")
+    : // all effects applied
+      a.ldtF("defense")
+
+  : // c.permapotSetup
+    // foe will break through armor
+    ?armor < s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) &
+    ^(foe = "phase" | foe = "monarch")
+      // Heal to reduce damage even more
+      a.ldtF("defense heal")
+    :
+      a.ldtF("defense")
+
+// ............ CUTSCENES LOGIC ............. //
+
+// Dysangelos pre-phase1 cutscene damage strat
+:?!c.permapotSetup & screen.i = boss_screen &
+^(([100, 101, 102].Contains(foe.state) &
+^  item.GetCooldown("heavy_hammer") <= 0) |
+^ c.isCasting("heavy_hammer"))
+  ?item.GetCooldown("quarterstaff") <= 0 &
+  ^!c.isCasting("heavy_hammer")
+    c.useAbility_TH("quarterstaff", a.myQ)
+  :?c.canUseAbility("heavy_hammer")
+    c.useAbility_TH("heavy_hammer", Mjölnir)
+  :
+    a.ldtF("defense armor regen")
+
+// Dysangelos post-phase1 cutscene damage strat
+:?!c.permapotSetup & screen.i = boss_screen & 
+^(([118, 107,108].Contains(foe.state) &
+^  item.GetCooldown("bardiche") <= 0) |
+^ c.isCasting("bardiche"))
+  // mini-dash to get closer
+  ?item.GetCooldown("quarterstaff") <= 0 &
+  ^!c.isCasting("bardiche")
+    c.useAbility_TH("quarterstaff", a.myQ)
+  // dash
+  :?a.canSmartDash() & !c.isCasting("bardiche")
+    a.smartDash()
+  /* Use Berserk Staff to increment Bardiche ability and sword damage
+  (only pre-phase1, in phase3 it's activated under different conditions) */
+  :?item.GetCooldown("staff_poison") <= 0 & foe = "phase1"
+    c.useAbility_TH("staff_poison", a.stPh)
+  : // c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+
+// ......... ENGAGING/WALKING LOGIC ......... //
+
+:?ai.walking & player.direction = 1 &
+^!s.inRange("crossbow")
+  ?armor > a.compoundMaxArmor_boosted |
+  ^c.canEngage()
+    a.ldtF("engage")
+  :
+    a.ldtF("defense armor regen")
+
+:?ai.paused | !ai.enabled | player.direction = -1
+  a.ldtF("defense armor regen")
+
+// .............. DASHING LOGIC ............. //
+
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
+// Knockback farming
+:?c.canKbFarm()
+  c.smoothCast(a.bS)
+
+// if in range, get closer while trying to unmake with repeating bow
+:?canDash & foe.distance =
+^   math.Clamp(foe.distance,
+^              s.getRange("dash_min"),
+^              s.getRange("crossbow")) &
+^!c.permapotSetup
+  c.smoothCast(a.bR)
+
+// get in melee range faster
+:?foe.distance > s.getRange("sword") + 1 &
+^!c.permapotSetup
+  c.stutterStep()
+
+// ........... SPECIAL ITEMS LOGIC .......... //
+
+// Calamity - reduce hp
+:?c.canUseAbility("wand_aether") &
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed" |
+^ foe.buffs.string = "buff_tenacious")
+  c.useAbility_OH("wand_aether", a.wAh, hand)
+
+// Reset buff
+:?c.canUseAbility("wand_vigor") &
+^foe.buffs.string = "stoic"
+  c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+// Reduce damage
+:?c.canUseAbility("wand_poison") &
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed" |
+^ encounter.eliteMod = "hydra" |
+^ foe.buffs.string = "buff_tenacious") &
+^s.inRange("dash_min")
+  c.useAbility_OH("wand_poison", a.wPh, hand)
+
+// Stun enemies
+:?c.canUseAbility("wand_ice") &
+^c.canApplyStun() & foe = "elite" &
+^foe.count > 1 &
+^s.getTotalHP("player") < c.midhp
+  c.useAbility_OH("wand_ice", a.wIh, hand)
+
+// Voidweaver - use it if possible
+:?c.canUseAbility("voidweaver") &
+^c.canUnmakeVoidweaver() &
+^foe.count > 1 & screen.i > 1
+  c.devour("voidweaver")
+
+// ............... AOE LOGIC ................ //
+
+:?foe.GetCount(foe.distance + margin) > 1 &
+^foe.distance <= s.getRange("sword") + 1
+  // Align foes
+  ?c.canUseAbility("wand_stone") &
+  ^foe.distance < s.getRange("dash_min")
+    c.useAbility_OH("wand_stone", a.wSh, hand)
+
+  /* Activate Berserk Staff early (in case there's
+  barely enough armor, to not lose it to the
+  Infernal Staff's Burn debuff). */
+  :?screen.i = 1 & c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+
+  :?c.canUseAbility("heavy_hammer") & foe = "elite" &
+  ^foe.distance < s.getRange("dash_min")
+    ?encounter.eliteMod = "plated"
+      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+    :
+      c.useAbility_TH("heavy_hammer", Mjölnir)
+
+  // Stun/Perma-stun logic
+  :?s.inRange("grappling_hook") &
+  // don't interrupt bardiche
+  ^!c.isCasting("bardiche") &
+  ^(c.canApplyStun() |
+    // stun time (frames) running out
+  ^ (stunTime = math.Clamp(stunTime, 1, 11) &
+     // not stunned with heavy hammer or Frost Wand
+  ^  foe.debuffs.string ! "armor_fatigue" &
+  ^  foe.debuffs.string ! "frost_stun"))
+    a.ldtF("grappling")
+
+  :?screen.i = 1 & foe.count = 2
+    a.ldtF("sword unmake")
+
+  // permapot run
+  :?nRuns = 1 |
+  // split hydra foes
+  ^(encounter.eliteMod = "hydra" &
+  ^ foe.buffs.string ! "stability")
+    // change margin as needed
+    margin = 8 // big sword left hitbox + splash range
+
+    a.ldtF("big sword unmake")
+  // Debuff and unmake
+  :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
+    ?a.canSmartDebuff("magic")
+      a.smartDebuff("magic")
+    :
+      // change margin as needed
+      margin = 8 // big sword left hitbox + splash range
+
+      a.ldtF("big sword unmake")
+  :?!(foe = "monarch" & foe = "soldier")
+    equip Kubikiribocho
+
+// ............... BOSS LOGIC ............... //
+
+:?foe = "phase" // Dysangelos fight logic
+  ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
+  ^c.isCinderwispCap(a.maxIgnitions_Default) // reached ignition cap
+    c.devour("cinderwisp")
+
+  ?foe ! "phase3"
+    ?foe.buffs.string = "buff_protection" & // against debuffs
+    ^c.canUseAbility("wand_vigor")
+      c.useAbility_OH("wand_vigor", a.wVh, hand)
+    :
+      fight("normal")
+
+  : // foe = phase3
+    ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
+    ^!c.permapotSetup & s.inRange("dash_min")
+      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+    :
+      // Buy time
+      ?c.permapotSetup &
+      ^(totaltime - permapotActTime
+      ^<
+      ^loc.averageTime - (loc.averageTime / 10))
+        // Debuff
+        ?c.canApplyChill(6)
+          a.ldtF("sword debuff chill")
+        :?c.canApplyWeaken()
+          a.ldtF("sword debuff weaken")
+        // Heal
+        :?hp ! maxhp
+          a.ldtF("sword heal")
+        : // wait
+          equipL Unbroken Faith
+          equipR mask
+      :
+        fight("normal")
+
+// ................ 1V1 LOGIC ............... //
+
+// Tanky foe, use bardiche ability to lower its hitpoints
+:?(foe = "boss" | foe = "monarch") &
+^foe.distance <= s.getRange("sword") + 1 &
+^(c.canUseAbility("staff_poison") |
+^c.canUseAbility("bardiche"))
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  : // c.canuseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+:
+  fight("normal")
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "main" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
