@@ -114,6 +114,7 @@ import My/Scripts/main
 
 // ················ IMPORTS ················· //
 
+var scrl = import UI/ScrollText
 import My/Cosmetics
 ?sys.isMobile
   import UI/MindstoneButton
@@ -127,20 +128,33 @@ var author = "Tom Crow"
 var discordTag = "@metaleagle26"
 var scriptVer = "v1.0.1"
 
-var watermark = [
-^   author      + "#|##author",
-^   discordTag  + "#|#discord",
-^   scriptVer   + "#|#version"
-^]
+// To format
+var watermark = "author:#{0}######discord:#{1}######version:#{2}######"
+// format watermark
+watermark = string.Format(watermark,author,discordTag,scriptVer)
 
-for i = 0 .. watermark.Count() - 1
-  >`@screen.w - string.Size(watermark[i])@,@i@,#rainFF,@watermark[i]@\n
+// print params
+var w = 20
+var stepWait = 7
+
+var colRng = color.Random()
+// generate new color every 3x stepWait frames
+?totaltime % (stepWait * 3) = 0
+  colRng = color.Random()
+
+// print watermark with ScrollText
+>`@screen.w - w@,0,@colRng@,
+^@scrl.ScrollText(watermark,w,stepWait,stepWait)@
+
+
+// withdrawal logic:
 
 ?!loc.isQuest & (
 ^loc = "cross_deadwood_river" |
 ^loc = "cross_bridge")
   loc.Leave()
 
+// special locations logic
 :?loc = "Waterfall"
   import UI/BragMeter
 :?loc = "uulaa_shop" // Hotspring Shop
@@ -148,7 +162,7 @@ for i = 0 .. watermark.Count() - 1
 :?loc = "undead_crypt_intro" // Haunted Gate
   disable npcDialog
   import My/Scripts/Gate
-:
+: // farming locations logic
   import UI/FoeStateTracker
   var tm = import My/Lib/Meters/Times
   var dps = import My/Lib/Meters/DPS

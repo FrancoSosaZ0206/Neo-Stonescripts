@@ -74,7 +74,7 @@ func SetNewTarget(SS,instance,
   var temp
   var tempArr = []
   var result=string.IndexOf(input,
-  ^                       “ “,next)
+  ^                       " ",next)
   ?result = -1
     return 0
   ?result <= next + 2
@@ -90,7 +90,7 @@ func SetNewTarget(SS,instance,
   var goal
   for i = 1..len/2+1
     goal = next-i
-    ?string.IndexOf(input,” “,goal)
+    ?string.IndexOf(input," ",goal)
     ^= goal
       return goal+1
 
@@ -100,13 +100,13 @@ func SetNewTarget(SS,instance,
 //END SetNewTarget
 
 func ScrollText(input,len,step,wait)
-  var extraSpace = “  ”
+  var extraSpace = "  "
   var smartScroll = true
 
   ?input = null
-    input = “”
-  :?Type(input) ! “string”
-    input = “Error: Input is wrong type.”
+    input = ""
+  :?Type(input) ! "string"
+    input = "Error: Input is wrong type."
 
   var inputSize
   input = input + extraSpace
