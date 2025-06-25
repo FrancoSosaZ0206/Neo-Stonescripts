@@ -131,10 +131,10 @@ func fight(mode)
     :?canDash &
     ^(foe.GetCount(foe.distance + margin) = 1 |
     ^foe = "monarch" | foe = "boss")
-      /*?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
+      /* ?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
         c.burst(a.burstingSwords)
       :
-        a.ldtF("sword dmg")*/
+        a.ldtF("sword dmg") */
 
       ?foe = "phase3" & !s.inRange("dash") &
       ^c.canUseAbility("staff_poison")
@@ -235,11 +235,11 @@ func fight(mode)
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
-/*// BFG logic
+/* // BFG logic
 ?nRuns > 1 & loc.stars > 15
   c.screenMngr_DS("blade", 2, boss_screen - 3)
   ?c.canUseAbility_DS("blade")
-    c.useAbility_DS("blade")*/
+    c.useAbility_DS("blade") */
 
 // set up margin default value
 margin = 16 // bardiche's hitbox + splash range
@@ -541,11 +541,11 @@ c.AAC(a.hVeff, a.shIeff)
 
 :?foe.GetCount(foe.distance + margin) > 1 &
 ^foe.distance <= s.getRange("sword") + 1
-  // Align foes
-  /*?c.canUseAbility("wand_stone") &
+  /* // Align foes
+  ?c.canUseAbility("wand_stone") &
   ^foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_stone", a.wSh, hand)
-    >h0,0,#red,GRAVITY WAND!!!*/
+    >h0,0,#red,GRAVITY WAND!!! */
 
   /* Activate Berserk Staff early (in case there's
   barely enough armor, to not lose it to the
@@ -569,11 +569,12 @@ c.AAC(a.hVeff, a.shIeff)
   ^ (stunTime = math.Clamp(stunTime, 1, 11) &
      // not stunned with heavy hammer or Frost Wand
   ^  foe.debuffs.string ! "armor_fatigue" &
-  ^  foe.debuffs.string ! "frost_stun")
+  ^  foe.debuffs.string ! "frost_stun"))
     a.ldtF("grappling")
 
   :?screen.i = 1 & foe.count = 2
     a.ldtF("sword unmake")
+
   // permapot run
   :?nRuns = 1 |
   // split hydra foes
