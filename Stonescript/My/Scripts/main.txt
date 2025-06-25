@@ -59,7 +59,7 @@ Written by IronHawk (Tom Crow)
 
      Furthermore, any errors in the scripts used also prevent
      updates. As you can see, it's quite a finicky process.
-     
+
   Q: Alright, so what do I do?
 
   R: To work around it, follow these steps:
@@ -121,6 +121,20 @@ import My/Cosmetics
 // ··············· PROCEDURE ················ //
 
 enable npcDialog
+
+// Watermark & version control
+var author = "Tom Crow"
+var discordTag = "@metaleagle26"
+var scriptVer = "v1.0.0"
+
+var watermark = [
+^   "script by: " + author,
+^   "discord: " + discordTag,
+^   "v" + scriptVer
+^]
+
+for i = 0 .. watermark.Count() - 1
+  >`@screen.w - string.Size(watermark[i])@,i,#rainFF,@watermark[i]@\n
 
 ?!loc.isQuest & (
 ^loc = "cross_deadwood_river" |
