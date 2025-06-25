@@ -15,8 +15,6 @@ x Update Times meter:
 
 x Update all location scripts:
   ... Rocky:
-    x fix heavy hammer bug which keeps equipping it when facing monarch.
-    x remove bardiche ability activation during phase2 cutscene.
   x Deadwood
   x Caves
   x Mushroom

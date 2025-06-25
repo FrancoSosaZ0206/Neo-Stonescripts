@@ -572,8 +572,8 @@ or while setting up permapot. */
     // stun time (frames) running out
   ^ (stunTime = math.Clamp(stunTime, 1, 11) &
      // not stunned with heavy hammer or Frost Wand
-  ^  foe.debuffs.string ! "armor_fatigue" &
-  ^  foe.debuffs.string ! "frost_stun"))
+  ^  foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^  foe.debuffs.string ! "debuff_frost_stun"))
     a.ldtF("grappling")
 
   :?screen.i = 1 & foe.count = 2
@@ -599,6 +599,8 @@ or while setting up permapot. */
       a.ldtF("big sword unmake")
   :?!(foe = "monarch" & foe = "soldier")
     equip Kubikiribocho
+  :
+    fight("normal")
 
 // ............... BOSS LOGIC ............... //
 
