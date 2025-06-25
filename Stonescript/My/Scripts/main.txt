@@ -128,13 +128,14 @@ var discordTag = "@metaleagle26"
 var scriptVer = "v1.0.0"
 
 var watermark = [
-^   "script by: " + author,
-^   "discord: " + discordTag,
-^   "v" + scriptVer
+^   "script#by:#" + author,
+^   "discord:###" + discordTag,
+^   "version:###" + scriptVer
 ^]
 
 for i = 0 .. watermark.Count() - 1
-  >`@screen.w - string.Size(watermark[i])@,i,#rainFF,@watermark[i]@\n
+  >`@screen.w - string.Size(watermark[i])@,
+  ^@i@,#rainFF,@watermark[i]@\n
 
 ?!loc.isQuest & (
 ^loc = "cross_deadwood_river" |
