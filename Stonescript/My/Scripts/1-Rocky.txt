@@ -287,13 +287,14 @@ c.AAC(a.hVeff, a.shIeff)
 :?old_t ! item.GetTreasureCount()
   enduse++
 
-  ?c.canUseAbility("staff_fire") &
-  ^enduse > 1 & screen.i = boss_screen
-    c.useAbility_TH("staff_fire", a.stFh)
+  // after picking treasure up
+  ?enduse > 1 & screen.i = boss_screen
+    ?c.canUseAbility("staff_fire")
+      c.useAbility_TH("staff_fire", a.stFh)
+    :?c.canUsePotion()
+      activate potion
   :?pickup.distance < 15
     a.ldtF("magnet")
-  :?c.canUsePotion()
-    activate potion
   :
     a.ldtF("defense armor regen")
 
