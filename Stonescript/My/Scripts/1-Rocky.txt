@@ -466,6 +466,10 @@ or while setting up permapot. */
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
+:?end_t > 1 &
+^!(c.canUsePotion() | c.canUseAbility("staff_fire"))
+  a.ldtF("defense armor regen")
+
 :?ai.walking & player.direction = 1 &
 ^!s.inRange("crossbow")
   ?armor > a.compoundMaxArmor_boosted |
