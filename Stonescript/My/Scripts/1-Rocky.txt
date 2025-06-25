@@ -266,8 +266,6 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
-?c.canUsePotion() & c.permapotSetup
-  activate potion
 
 // Permapot equipment
 ?c.permapotSetup
@@ -286,8 +284,7 @@ c.AAC(a.hVeff, a.shIeff)
   >h0,0,#yellow,GETTING EXTRA KI!!!
 
 // speed up (picking chest)
-:?old_t ! item.GetTreasureCount() &
-^!(loc.stars > 15 & nRuns = 1)
+:?old_t ! item.GetTreasureCount()
   enduse++
 
   ?c.canUseAbility("staff_fire") &
@@ -295,6 +292,8 @@ c.AAC(a.hVeff, a.shIeff)
     c.useAbility_TH("staff_fire", a.stFh)
   :?pickup.distance < 15
     a.ldtF("magnet")
+  :?c.canUsePotion()
+    activate potion
   :
     a.ldtF("defense armor regen")
 
