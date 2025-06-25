@@ -2,7 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "Times" ▀▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
 /* // ///////////// FILE INFO //////////////// //
 
 Time Display Utility
@@ -111,12 +110,10 @@ Current version: 2.1
 
 Enjoy! */
 
-
 // ///////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
 var u = import My/Lib/Utilities
-
 
 // ///////////////// PUBLIC ////////////////// //
 
@@ -151,13 +148,13 @@ func Main_Times(x, y, colorHex, mode)
       var pnl_old = panel
       panel = mkUI(x,y,colorHex,mode)
 
-      pnl_old.Recycle()
+      ?pnl_old ! panel
+        pnl_old.Recycle()
 
     :?mode = "print"
       Print(x,y,colorHex,mode,true)
     :
       u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: Main_Times\nCAUSE: invalid <mode>:\n\n" + mode, false)
-
 
 // ///////////////// PRIVATE ///////////////// //
 
@@ -194,18 +191,23 @@ func ToString(size)
   var str = null
 
   ?size = "slim" | size = "small"
-    str = "☆#" + pb +
-    ^     "#|#≈#" + avg +
-    ^     "#|#▶#" + tt
+    /* TO DO: implement dynamic column paddings.
+    var headers = ["☆", "≈", "▶"]
+    var data    = [pb, avg, tt]*/
+
+    str = "☆#{0}#|#≈#{1}#|#▶#{2}"
 
   :?size = "normal" | size = "default"
-    str = "####SPEED-O-METER####" + "\n" +
-    ^     "#·##·##·##·##·##·##·#" + "\n" +
-    ^     "#PB##" + pb + "\n" +
-    ^     "#AVG#" + avg + "\n" +
-    ^     "#CUR#" + tt
+    str = "####SPEED-O-METER####\n" +
+    ^     "#·##·##·##·##·##·##·#\n" +
+    ^     "#PB##{0}\n" +
+    ^     "#AVG#{1}\n" +
+    ^     "#CUR#{2}"
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
+
+  ?str
+    str = string.Format(str, pb,avg,tt)
 
   return str
 /* isAscii:
@@ -253,7 +255,6 @@ func mkUI(x, y, colorHex, size)
     ^ colorHex, panelStyle, txt) // colorHex, panelStyle, child
 
   return panel
-
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Times" ▀▄▀▄▀▄▀▄▀▄ ┃  //

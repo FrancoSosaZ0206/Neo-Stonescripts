@@ -126,7 +126,7 @@ enable npcDialog
 // Watermark & version control
 var author = "Tom Crow"
 var discordTag = "@metaleagle26"
-var scriptVer = "1.0.4"
+var scriptVer = "1.0.5"
 
 // To format
 var watermark = "author:#{0}######discord:#{1}######version:#{2}######"
@@ -161,13 +161,16 @@ var c = color.Random()
 :?loc = "undead_crypt_intro" // Haunted Gate
   disable npcDialog
   import My/Scripts/Gate
+
 : // farming locations logic
+  // disable hud // TO DO: uncomment this once we can print everything ourselves.
+
   import UI/FoeStateTracker
   var tm = import My/Lib/Meters/Times
   var dps = import My/Lib/Meters/DPS
 
   tm.Main_Times(0,-1,#red,"slim ui")
-  dps.Main_DPS(0,-1,#yellow,1,"slim ui")
+  dps.Main_DPS(-7,-1,#yellow,1,"slim ui")
 
   ?loc = "rocky_plateau"
     disable npcDialog

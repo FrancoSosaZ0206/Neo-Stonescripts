@@ -440,10 +440,10 @@ or while setting up permapot. */
   ?item.GetCooldown("quarterstaff") <= 0 &
   ^!c.isCasting("heavy_hammer")
     c.useAbility_TH("quarterstaff", a.myQ)
-  :?c.canUseAbility("heavy_hammer")
+  : // ?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
-  :
-    a.ldtF("defense armor regen")
+  /*:
+    a.ldtF("defense armor regen")*/
 
 // Dysangelos post-phase1 cutscene damage strat
 :?!c.permapotSetup & screen.i = boss_screen & 
