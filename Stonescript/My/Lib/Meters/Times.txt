@@ -148,7 +148,7 @@ func Main_Times(x, y, colorHex, mode)
       var pnl_old = panel
       panel = mkUI(x,y,colorHex,mode)
 
-      ?pnl_old ! panel
+      ?pnl_old ! panel & pnl_old
         pnl_old.Recycle()
 
     :?mode = "print"

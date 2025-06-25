@@ -234,9 +234,11 @@ func fight(mode)
 
 /* // BFG logic
 ?nRuns > 1 & loc.stars > 15
-  c.screenMngr_DS("blade", 2, boss_screen - 3)
-  ?c.canUseAbility_DS("blade")
-    c.useAbility_DS("blade") */
+  c.screenMngr_DS("blade", 2, boss_screen - 3) */
+
+/* // DS Mask logic (early scout wake up)
+?loc.stars = math.Clamp(loc.stars, 11, 15) & !c.permapotSetup
+  c.screenMngr_DS("mask", 1, 1) */
 
 // set up margin default value
 margin = 16 // bardiche's hitbox + splash range
@@ -435,19 +437,18 @@ or while setting up permapot. */
 // Dysangelos pre-phase1 cutscene damage strat
 :?!c.permapotSetup & screen.i = boss_screen &
 ^(([100, 101, 102].Contains(foe.state) &
-^  item.GetCooldown("heavy_hammer") <= 0) |
+^  item.GetCooldown("heavy_hammer") <= 0) &
+^  s.inRange("heavy_hammer ability") |
 ^ c.isCasting("heavy_hammer"))
   ?item.GetCooldown("quarterstaff") <= 0 &
   ^!c.isCasting("heavy_hammer")
     c.useAbility_TH("quarterstaff", a.myQ)
   : // ?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
-  /*:
-    a.ldtF("defense armor regen")*/
 
 // Dysangelos post-phase1 cutscene damage strat
 :?!c.permapotSetup & screen.i = boss_screen & 
-^(([118, 107,108].Contains(foe.state) &
+^(([118, 108].Contains(foe.state) &
 ^  item.GetCooldown("bardiche") <= 0) |
 ^ c.isCasting("bardiche"))
   // mini-dash to get closer

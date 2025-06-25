@@ -310,6 +310,9 @@ func screenMngr_DS(itemName, scrTarget, scrMax)
       table_itemDS[itemI + maxI] = scrMax
     :?loc.loop & !isScreen_DS(itemName, "MAX")
       table_itemDS[itemI + targetI] += 1
+
+    :?canUseAbility_DS(itemName)
+      useAbility_DS(itemName)
 /* Checks if a weapon ability can be used in 2 screens
 of distance, according to a certain screen index. */
 func canUseAbility_DS(itemName)
@@ -330,7 +333,10 @@ func useAbility_DS(itemName)
       slideCount--
 
       ?slideCount = 0
-        useAbility_TH(itemName, itemName)
+        ?itemName = "blade"
+          useAbility_TH(itemName, itemName)
+        :?itemName = "mask"
+          useAbility_OH(itemName, itemName, "r")
         screen.ResetOffset()
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_DS\nCAUSE: unknown <itemName>: " + itemName, false)
