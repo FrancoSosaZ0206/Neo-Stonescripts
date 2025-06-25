@@ -235,11 +235,11 @@ func fight(mode)
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
-// BFG logic
+/*// BFG logic
 ?nRuns > 1 & loc.stars > 15
   c.screenMngr_DS("blade", 2, boss_screen - 3)
   ?c.canUseAbility_DS("blade")
-    c.useAbility_DS("blade")
+    c.useAbility_DS("blade")*/
 
 // set up margin default value
 margin = 16 // bardiche's hitbox + splash range
@@ -437,13 +437,15 @@ c.AAC(a.hVeff, a.shIeff)
 ^(([100, 101, 102].Contains(foe.state) &
 ^  item.GetCooldown("heavy_hammer") <= 0) |
 ^ c.isCasting("heavy_hammer"))
-  ?item.GetCooldown("quarterstaff") <= 0
+  ?item.GetCooldown("quarterstaff") <= 0 &
+  ^!c.isCasting("heavy_hammer")
     c.useAbility_TH("quarterstaff", a.myQ)
   :?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
   :
     a.ldtF("defense armor regen")
 
+// Dysangelos post-phase1 cutscene damage strat
 :?!c.permapotSetup & screen.i = boss_screen & 
 ^(([118, 107,108].Contains(foe.state) &
 ^  item.GetCooldown("bardiche") <= 0) |
@@ -455,8 +457,9 @@ c.AAC(a.hVeff, a.shIeff)
   // dash
   :?a.canSmartDash() & !c.isCasting("bardiche")
     a.smartDash()
-  // Use Berserk Staff to increment Bardiche ability and sword damage
-  :?item.GetCooldown("staff_poison") <= 0
+  /* Use Berserk Staff to increment Bardiche ability and sword damage
+  (only pre-phase1, in phase3 it's activated under different conditions) */
+  :?item.GetCooldown("staff_poison") <= 0 & foe = "phase1"
     c.useAbility_TH("staff_poison", a.stPh)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
@@ -468,7 +471,6 @@ c.AAC(a.hVeff, a.shIeff)
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
-    >h0,0,#yellow,engaging
   :
     a.ldtF("defense armor regen")
 
@@ -496,7 +498,6 @@ c.AAC(a.hVeff, a.shIeff)
 :?foe.distance > s.getRange("sword") + 1 &
 ^!c.permapotSetup
   c.stutterStep()
-  >h0,0,#yellow,stutter stepping
 
 // ........... SPECIAL ITEMS LOGIC .......... //
 
@@ -509,8 +510,8 @@ c.AAC(a.hVeff, a.shIeff)
   c.useAbility_OH("wand_aether", a.wAh, hand)
 
 // Reset buff
-:?foe.buffs.string = "stoic" &
-^c.canUseAbility("wand_vigor")
+:?c.canUseAbility("wand_vigor") &
+^foe.buffs.string = "stoic"
   c.useAbility_OH("wand_vigor", a.wVh, hand)
 
 // Reduce damage
@@ -518,15 +519,16 @@ c.AAC(a.hVeff, a.shIeff)
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch" | encounter.eliteMod = "monarch" |
 ^ encounter.eliteMod = "blessed" |
+^ encounter.eliteMod = "hydra" |
 ^ foe.buffs.string = "buff_tenacious") &
 ^s.inRange("dash_min")
   c.useAbility_OH("wand_poison", a.wPh, hand)
 
 // Stun enemies
-:?c.canApplyStun() & foe = "elite" &
+:?c.canUseAbility("wand_ice") &
+^c.canApplyStun() & foe = "elite" &
 ^foe.count > 1 &
-^s.getTotalHP("player") < c.midhp &
-^c.canUseAbility("wand_ice")
+^s.getTotalHP("player") < c.midhp
   c.useAbility_OH("wand_ice", a.wIh, hand)
 
 // Voidweaver - use it if possible
@@ -540,15 +542,15 @@ c.AAC(a.hVeff, a.shIeff)
 :?foe.GetCount(foe.distance + margin) > 1 &
 ^foe.distance <= s.getRange("sword") + 1
   // Align foes
-  ?c.canUseAbility("wand_stone") &
+  /*?c.canUseAbility("wand_stone") &
   ^foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_stone", a.wSh, hand)
-    >h0,0,#red,GRAVITY WAND!!!
+    >h0,0,#red,GRAVITY WAND!!!*/
 
   /* Activate Berserk Staff early (in case there's
   barely enough armor, to not lose it to the
   Infernal Staff's Burn debuff). */
-  :?screen.i = 1 & c.canUseAbility("staff_poison")
+  ?screen.i = 1 & c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
 
   :?c.canUseAbility("heavy_hammer") & foe = "elite" &
@@ -558,13 +560,16 @@ c.AAC(a.hVeff, a.shIeff)
     :
       c.useAbility_TH("heavy_hammer", Mjölnir)
 
-  // Perma-stun
+  // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
+  // don't interrupt bardiche
+  ^!c.isCasting("bardiche") &
   ^(c.canApplyStun() |
-  ^(stunTime = math.Clamp(stunTime, 1, 11) & // frames
-  ^foe.debuffs.string ! "debuff_armor_fatigue") &
-  ^foe.debuffs.string ! "debuff_frost_stun") &
-  ^!c.isCasting("bardiche")
+    // stun time (frames) running out
+  ^ (stunTime = math.Clamp(stunTime, 1, 11) &
+     // not stunned with heavy hammer or Frost Wand
+  ^  foe.debuffs.string ! "armor_fatigue" &
+  ^  foe.debuffs.string ! "frost_stun")
     a.ldtF("grappling")
 
   :?screen.i = 1 & foe.count = 2
