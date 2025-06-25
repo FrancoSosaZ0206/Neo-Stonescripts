@@ -587,7 +587,7 @@ c.AAC(a.hVeff, a.shIeff)
       margin = 8 // big sword left hitbox + splash range
 
       a.ldtF("big sword unmake")
-  :
+  :?!(foe = "monarch" & foe = "soldier")
     equip Kubikiribocho
 
 // ............... BOSS LOGIC ............... //
