@@ -154,7 +154,7 @@ func fight(mode)
   >`1,12,#cyan,margin = @margin@
 
 ?foe.distance ! 9999 & foe ! "phase"
-  >c0,10,#magenta,dist = @foe.distance@
+  >c-5,12,#magenta,dist = @foe.distance@
   >f-2,6,#red,count#(46)#=#@foe.count@
   >f-2,7,#yellow,count#(@foe.distance + margin@)#=#
   ^@foe.GetCount(foe.distance + margin)@\n
@@ -544,6 +544,12 @@ c.AAC(a.hVeff, a.shIeff)
   ^foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_stone", a.wSh, hand)
     >h0,0,#red,GRAVITY WAND!!!
+
+  /* Activate Berserk Staff early (in case there's
+  barely enough armor, to not lose it to the
+  Infernal Staff's Burn debuff). */
+  :?screen.i = 1 & c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
 
   :?c.canUseAbility("heavy_hammer") & foe = "elite" &
   ^foe.distance < s.getRange("dash_min")
