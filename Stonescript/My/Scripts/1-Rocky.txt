@@ -150,10 +150,13 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-?item.GetCooldown("staff_poison") <= 0
-  >`1,12,#green,stPh cd = @item.GetCooldown("staff_poison")@
-:
-  >`1,12,#red,stPh cd = @item.GetCooldown("staff_poison")@
+?foe.count > 1
+  >`1,12,#cyan,margin = @margin@
+
+?foe.distance ! 9999 & foe ! "phase"
+  >f-2,6,#red,count#(46)#=#@foe.count@\n
+  ^count#(@foe.distance + margin@)#=#
+  ^@foe.GetCount(foe.distance + margin)@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -222,12 +225,6 @@ func fight(mode)
   :?loc.stars <= 20 // green
     boss_screen = 7
 
-// set up margin based on equipped item
-?item.right = "bardiche"
-  margin = 16
-: // big sword left hitbox + splash range
-  margin = 8
-
 ?nRuns = 1 & loc.stars > 15 & boss_screen
   c.permapotSetup = (screen.i >= boss_screen - 1)
 
@@ -235,12 +232,14 @@ func fight(mode)
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
-/*// BFG logic
+// BFG logic
 ?nRuns > 1 & loc.stars > 15
   c.screenMngr_DS("blade", 2, boss_screen - 3)
   ?c.canUseAbility_DS("blade")
-    c.useAbility_DS("blade")*/
+    c.useAbility_DS("blade")
 
+// set up margin default value
+margin = 16 // bardiche's hitbox + splash range
 // Set canDash default value
 canDash = true
 // Set phase3dmg
@@ -280,6 +279,8 @@ c.AAC(a.hVeff, a.shIeff)
 // grab extra ki (EXPERIMENTAL)
 :?foe.state = 4 & ai.enabled & !ai.paused
   equipL ki stone
+  equipR mask
+  >h0,0,#yellow,GETTING EXTRA KI!!!
 
 // speed up (picking chest)
 :?old_t ! item.GetTreasureCount() &
@@ -364,7 +365,7 @@ c.AAC(a.hVeff, a.shIeff)
   // prevent the stun
   ?foe.damage = 1 & c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
-    // >o0,0,#red,PREVENT STUN
+    // >h0,0,#red,PREVENT STUN
   : // evade attack
     fight("evade")
 
@@ -372,7 +373,7 @@ c.AAC(a.hVeff, a.shIeff)
 :?foe = "scout" & foe.damage >= 8 & foe.state = 32
   canDash = false
   fight("normal") // fight ranged to avoid hit
-  >c0,0,#red,WIND CRIT, FIGHT RANGED
+  >f0,0,#red,WIND CRIT, FIGHT RANGED
 
 // Normal attacks
 :?foe.state = 32 & (
@@ -429,9 +430,9 @@ c.AAC(a.hVeff, a.shIeff)
 // ............ CUTSCENES LOGIC ............. //
 
 // Dysangelos pre-phase1 cutscene damage strat
-:?!c.permapotSetup &
-^[100, 101, 102].Contains(foe.state) &
-^(item.GetCooldown("heavy_hammer") <= 0 |
+:?!c.permapotSetup & screen.i = boss_screen &
+^(([100, 101, 102].Contains(foe.state) &
+^  item.GetCooldown("heavy_hammer") <= 0) |
 ^ c.isCasting("heavy_hammer"))
   ?item.GetCooldown("quarterstaff") <= 0
     c.useAbility_TH("quarterstaff", a.myQ)
@@ -440,19 +441,20 @@ c.AAC(a.hVeff, a.shIeff)
   :
     a.ldtF("defense armor regen")
 
-
-:?screen.i = boss_screen & ((!c.permapotSetup &
-^[117,118, /*124,125,*/ 107,108].Contains(foe.state) &
-^item.GetCooldown("bardiche") <= 0) |
-^c.isCasting("bardiche"))
-  ?item.GetCooldown("quarterstaff") <= 0
+:?!c.permapotSetup & screen.i = boss_screen & 
+^(([118, 107,108].Contains(foe.state) &
+^  item.GetCooldown("bardiche") <= 0) |
+^ c.isCasting("bardiche"))
+  // mini-dash to get closer
+  ?item.GetCooldown("quarterstaff") <= 0 &
+  ^!c.isCasting("bardiche")
     c.useAbility_TH("quarterstaff", a.myQ)
-  :?a.canSmartDash()
+  // dash
+  :?a.canSmartDash() & !c.isCasting("bardiche")
     a.smartDash()
   // Use Berserk Staff to increment Bardiche ability and sword damage
   :?item.GetCooldown("staff_poison") <= 0
     c.useAbility_TH("staff_poison", a.stPh)
-    >o0,0,#red,BERSERK STAFF CUTSCENE
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 
@@ -463,7 +465,7 @@ c.AAC(a.hVeff, a.shIeff)
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
-    >o0,0,#yellow,engaging
+    >h0,0,#yellow,engaging
   :
     a.ldtF("defense armor regen")
 
@@ -560,12 +562,18 @@ c.AAC(a.hVeff, a.shIeff)
   // split hydra foes
   ^(encounter.eliteMod = "hydra" &
   ^ foe.buffs.string ! "stability")
+    // change margin as needed
+    margin = 8 // big sword left hitbox + splash range
+
     a.ldtF("big sword unmake")
   // Debuff and unmake
   :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
     ?a.canSmartDebuff("magic")
       a.smartDebuff("magic")
     :
+      // change margin as needed
+      margin = 8 // big sword left hitbox + splash range
+
       a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
