@@ -134,8 +134,7 @@ var watermark = [
 ^]
 
 for i = 0 .. watermark.Count() - 1
-  >`@screen.w - string.Size(watermark[i])@,
-  ^@i@,#rainFF,@watermark[i]@\n
+  >`@screen.w - string.Size(watermark[i])@,@i@,#rainFF,@watermark[i]@\n
 
 ?!loc.isQuest & (
 ^loc = "cross_deadwood_river" |
