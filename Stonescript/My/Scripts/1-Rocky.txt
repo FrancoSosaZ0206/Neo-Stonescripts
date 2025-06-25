@@ -293,9 +293,13 @@ c.AAC(a.hVeff, a.shIeff)
       c.useAbility_TH("staff_fire", a.stFh)
     :?c.canUsePotion()
       activate potion
+    : // regen armor
+      a.ldtF("defense armor regen")
+
+  // attract treasure
   :?pickup.distance < 15
     a.ldtF("magnet")
-  :
+  : // regen armor
     a.ldtF("defense armor regen")
 
 // speed up (normal)
