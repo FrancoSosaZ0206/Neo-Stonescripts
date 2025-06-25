@@ -154,9 +154,12 @@ func fight(mode)
   >`1,12,#cyan,margin = @margin@
 
 ?foe.distance ! 9999 & foe ! "phase"
-  >f-2,6,#red,count#(46)#=#@foe.count@\n
-  ^count#(@foe.distance + margin@)#=#
-  ^@foe.GetCount(foe.distance + margin)@
+  >c0,10,#magenta,dist = @foe.distance@
+  >f-2,6,#red,count#(46)#=#@foe.count@
+  >f-2,7,#yellow,count#(@foe.distance + margin@)#=#
+  ^@foe.GetCount(foe.distance + margin)@\n
+  >f-2,8,#cyan,tail#=#@foe.count -
+  ^                   foe.GetCount(foe.distance + margin)@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -493,6 +496,7 @@ c.AAC(a.hVeff, a.shIeff)
 :?foe.distance > s.getRange("sword") + 1 &
 ^!c.permapotSetup
   c.stutterStep()
+  >h0,0,#yellow,stutter stepping
 
 // ........... SPECIAL ITEMS LOGIC .......... //
 
@@ -533,11 +537,13 @@ c.AAC(a.hVeff, a.shIeff)
 
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(foe.distance + margin) > 1
+:?foe.GetCount(foe.distance + margin) > 1 &
+^foe.distance <= s.getRange("sword") + 1
   // Align foes
   ?c.canUseAbility("wand_stone") &
   ^foe.distance < s.getRange("dash_min")
     c.useAbility_OH("wand_stone", a.wSh, hand)
+    >h0,0,#red,GRAVITY WAND!!!
 
   :?c.canUseAbility("heavy_hammer") & foe = "elite" &
   ^foe.distance < s.getRange("dash_min")
