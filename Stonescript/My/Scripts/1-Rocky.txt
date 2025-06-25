@@ -36,7 +36,7 @@ var nRuns = 1 // number of runs in this session
 var permapotActTime = -1 // time when permapot was activated, -1 means not activated
 
 var old_t = item.GetTreasureCount()
-var enduse = 0
+var end_t = 0
 
 var phase3dmg = foe.damage
 
@@ -217,7 +217,7 @@ func fight(mode)
   nRuns++
 
   old_t = item.GetTreasureCount()
-  enduse = 0
+  end_t = 0
 
 // Set up boss_screen
 ?!boss_screen
@@ -267,6 +267,12 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?c.canBrewPotion()
   c.brewPotion()
 
+// track time after picking treasure up
+?old_t ! item.GetTreasureCount()
+  end_t++
+
+// ................................... //
+
 // Permapot equipment
 ?c.permapotSetup
   a.ldtF("permapot")
@@ -283,24 +289,14 @@ c.AAC(a.hVeff, a.shIeff)
   equipR mask
   >h0,0,#yellow,GETTING EXTRA KI!!!
 
-// speed up (picking chest)
-:?old_t ! item.GetTreasureCount()
-  enduse++
-
-  // after picking treasure up
-  ?enduse > 1 & screen.i = boss_screen
-    ?c.canUseAbility("staff_fire")
-      c.useAbility_TH("staff_fire", a.stFh)
-    :?c.canUsePotion()
-      activate potion
-    : // regen armor
-      a.ldtF("defense armor regen")
-
-  // attract treasure
-  :?pickup.distance < 15
-    a.ldtF("magnet")
-  : // regen armor
-    a.ldtF("defense armor regen")
+// after picking treasure up
+:?end_t > 1 & screen.i = boss_screen &
+^(c.canUseAbility("staff_fire") | c.canUsePotion())
+  // speed up (picking chest)
+  ?c.canUseAbility("staff_fire")
+    c.useAbility_TH("staff_fire", a.stFh)
+  : // ?c.canUsePotion()
+    activate potion
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
