@@ -14,11 +14,12 @@ x Update Times meter:
     x Raw frames (as most speedrunners use it)
 
 x Update all location scripts:
-  ... Rocky:
+  ✔ Rocky
   x Deadwood
   x Caves
   x Mushroom
   x Halls
   x Mine
-  ... Ridge
+  ... Ridge:
+    x update from Rocky
   x Temple

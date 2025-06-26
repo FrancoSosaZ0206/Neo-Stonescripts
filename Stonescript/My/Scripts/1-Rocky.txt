@@ -129,7 +129,7 @@ func fight(mode)
       ^foe.GetCount(foe.distance + margin) = 1
         a.ldtF("sword unmake")
       : // foe.GetCount(foe.distance + margin) > 1
-        a.ldtF("magic unmake")
+        a.ldtF("big sword unmake")
 
     // ........... DAMAGE LOGIC ........... //
     :?canDash &
@@ -154,7 +154,7 @@ func fight(mode)
 
 // /////////////// PROCEDURE //////////////// //
 
-// prints/monitor logic
+// ............. MONITOR LOGIC .............. //
 
 
 
@@ -276,7 +276,7 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?c.permapotSetup
   a.ldtF("permapot")
 
-c.AAC(a.hVeff, a.shIeff)
+c.AAC("sword *0", "hatchet")
 
 // Initial equipments
 ?loc.begin

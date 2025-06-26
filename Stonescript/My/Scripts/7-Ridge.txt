@@ -11,24 +11,26 @@ var a = import My/Lib/Arsenal
 
 // //////////////// VARIABLES //////////////// //
 
+// flags
+var canDash  = true
 var blowing =
 ^(foe.state = 133 | // Hrímnir's blowing state
 ^ foe.state = 143) // Hrímnir blowing and putting ice wall
 
-var canDash   = true
-
-var stunTime  = null
-var hand      = null
-var margin    = 8 // big sword left hitbox + splash range
+// values
+var stunTime = null
+var hand     = null
+var margin   = null
 
 var boss_screen = null
 var boss_cutscenes = [] // TO DO
 
+// counters
 var nRuns = 1 // number of runs in this session
 var permapotActTime = -1 // time when permapot was activated, -1 means not activated
 
 var old_t = item.GetTreasureCount()
-var enduse = 0
+var end_t = 0
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -58,65 +60,90 @@ func fight(mode)
 
     :?foe.distance > s.getRange("sword") + 1
       ?foe.count > 1
-        fight("magic")
+        fight("normal")
       :
-        fight("magic")
+        fight("normal")
 
     // Unmake
     :?c.canUnmake()
       a.ldtF("defense unmake")
     :
       a.ldtF("defense")
-  :
-    // 1. debuff, if possible
-    ?blowing & a.canSmartDebuff("magic") &
+  :?mode = "normal"
+    // ........... DEBUFFING LOGIC .......... //
+
+    // Hrímnir blowing debuffing
+    ?a.canSmartDebuff("magic") &
+    ^blowing & !canDash &
     ^foe.GetCount(foe.distance + margin) = 1
       a.smartDebuff("magic")
 
-    :?c.permapotSetup &
-    ^a.canSmartDebuff("magic") & foe = "elite"
-      ?foe.GetCount(foe.distance + margin) > 1
-        a.smartDebuff("magic")
-      :
-        a.ldtF("sword debuff auto")
-    :?!c.permapotSetup &
-    ^a.canSmartDebuff("magic") & foe = "elite" &
-    ^foe.GetCount(foe.distance + margin) > 1
+    // AOE debuffing
+    ?a.canSmartDebuff("magic") &
+    ^(!canDash |
+    ^(foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) > 1))
       a.smartDebuff("magic")
 
-    :?(c.canApplyAny() | c.canApplyBurn()) &
-    ^(foe = "monarch" | foe = "boss") &
-    ^mode = "melee"
+    // Permapot 1v1 debuffing
+    :?c.canApplyAny() & canDash &
+    ^c.permapotSetup & foe = "elite" &
+    ^foe.GetCount(foe.distance + margin) = 1
       a.ldtF("sword debuff auto")
 
-    // 2. Heal if needed
-    :?hp ! maxhp &
+    // 1v1 strong foe weakening
+    :?c.canApplyWeaken() & canDash &
+    ^(foe = "monarch" | foe = "boss")
+      a.ldtF("sword debuff weaken")
+
+    // 1v1 strong foe debuffing
+    :?(c.canApplyChill(6) | c.canApplyBurn()) &
+    ^canDash &
+    ^((foe = "monarch" | foe = "boss") &
+    ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0 |
+    ^nRuns = 1)
+      a.ldtF("sword debuff auto")
+
+    // ............ HEALING LOGIC ........... //
+    :?hp ! maxhp & canDash &
     ^foe.GetCount(foe.distance + margin) = 1
       a.ldtF("sword heal")
 
-    // 3. Unmake
+    // ........... UNMAKING LOGIC ........... //
     :?c.canUnmake()
-      ?mode = "melee"
+      ?canDash &
+      ^foe.GetCount(foe.distance + margin) = 1
         a.ldtF("sword unmake")
       : // foe.GetCount(foe.distance + margin) > 1
         a.ldtF("big sword unmake")
 
-    : // 4. Deal max damage
-      ?mode = "melee" & !blowing
-        a.ldtF("sword dmg")
-      :
-        ?blowing
-          canDash = false
-        a.ldtF("magic dmg")
+    // ........... DAMAGE LOGIC ........... //
+    :?canDash & !blowing
+    ^(foe.GetCount(foe.distance + margin) = 1 |
+    ^foe = "monarch" | foe = "boss")
+      a.ldtF("sword dmg")
+    :
+      ?blowing
+        canDash = false
+      a.ldtF("magic dmg")
+  : // invalid mode
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: 7-Ridge\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
 // //////////////// PROCEDURE //////////////// //
 
->`1,12,#magenta,screen.i = @screen.i@\n
+// ............. MONITOR LOGIC .............. //
+
+>`1,7,#magenta,screen = @screen.i@\n
 ^boss_screen = @boss_screen@
 
 // ............. WITHDRAWAL LOGIC ............ //
 
-?s.getTotalHP("player") <= s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+?s.getTotalHP("player")
+^ <=
+^s.getFoeDmg(a.berserkerLvl,
+^            a.plagueLvl,
+^            a.maskLvl      ) |
+^nRuns >= 25
   loc.Leave()
 
 // ............... SETUP LOGIC ............... //
@@ -125,7 +152,7 @@ func fight(mode)
   nRuns++
 
   old_t = item.GetTreasureCount()
-  enduse = 0
+  end_t = 0
 
 // Set up boss_screen
 ?!boss_screen
@@ -133,12 +160,16 @@ func fight(mode)
     boss_screen = 2
   :?loc.stars <= 15 // yellow
     boss_screen = 7
-  :?loc.stars = 16
+  :?loc.stars = 16 // green
     boss_screen = 3
   :?loc.stars = 17
     boss_screen = 4
-  :?loc.stars <= 20 // green
+  :?loc.stars = 18
+    boss_screen = 5
+  :?loc.stars <= 20
     boss_screen = 7
+
+// Set up blowing flag
 :?screen.i = boss_screen
   blowing =
   ^(foe.state = 133 | // Hrímnir's blowing state
@@ -154,16 +185,19 @@ func fight(mode)
 // BFG logic
 ?nRuns > 1
   c.screenMngr_DS("blade", 1, boss_screen - 3)
-  ?c.canUseAbility_DS("blade")
-    c.useAbility_DS("blade")
-    >c0,0,#red,BFG DS
 
+/* // DS Mask logic (early scout wake up)
+?loc.stars = math.Clamp(loc.stars, 11, 15) & !c.permapotSetup
+  c.screenMngr_DS("mask", 1, 1) */
+
+// set up margin default value
+margin = 16 // bardiche's hitbox + splash range
+// Set canDash default value
 canDash = true
 
 c.potionType = "berserk" // "lucky"
 c.Init()
 a.smartDebuff_Mgr()
-disable npcDialog
 
 stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?!stunTime
@@ -178,39 +212,56 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 // Auto brewing
 ?c.canBrewPotion()
   c.brewPotion()
-?c.canUsePotion() & c.permapotSetup
-  activate potion
+
+// track time after picking treasure up
+?old_t ! item.GetTreasureCount()
+  end_t++
+
+// ................................... //
 
 // Permapot equipment
 ?c.permapotSetup
   a.ldtF("permapot")
 
-c.AAC(a.hVeff, a.shFdef)
+c.AAC("sword *0", "hatchet")
 
 // Initial equipments
 ?loc.begin
   a.ldtF("default")
 
-// speed up (picking chest)
-:?old_t ! item.GetTreasureCount() &
-^!(loc.stars > 15 & nRuns = 1)
-  enduse++
+/* activate potion after picking up treasure
+or while setting up permapot. */
+:?c.canUsePotion() &
+^(c.permapotSetup |
+^ (end_t > 1 & screen.i = boss_screen &
+^  !c.canUseAbility("staff_fire")))
+  activate potion
 
-  ?c.canUseAbility("staff_fire") & enduse > 1
-    c.useAbility_TH("staff_fire", a.stFh)
-  :?pickup.distance < 15
-    a.ldtF("magnet")
-  :
-    a.ldtF("defense armor regen")
+// grab extra ki (EXPERIMENTAL)
+:?foe.state = 4 & ai.enabled & !ai.paused
+  equipL ki stone
+  equipR mask
+  >h0,0,#yellow,GETTING EXTRA KI!!!
+
+// speed up (post-treasure)
+:?end_t > 1 & screen.i = boss_screen &
+^ c.canUseAbility("staff_fire")
+  c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
-^nRuns > 1 &
-^(!s.inRange("dash") | foe.distance = 9999) &
+// already has the speed effect
 ^buffs.string ! "buff_inf_speed" &
+// 1 foe just defeated
+^((foe.count = 1 & foe.state = 4) |
+// too far to attack
+^ (!s.inRange("crossbow"))) &
 // save armor if it's setup run
-^!(loc.stars > 15 & nRuns = 1)
+^!(loc.stars > 15 &
+^  (nRuns = 1 |
+// Don't use it when facing the scout
+^   (nRuns > 1 & screen.i = 1)))
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -255,12 +306,12 @@ with bardiche */
   :?c.canUseAbility("wand_ice")
     c.useAbility_OH("wand_ice", a.wIh, hand)
   :
-    fight("melee")
+    fight("normal")
 
 :?blowing | // blowing air
 ^foe.name = "Ice Wall"
   canDash = false
-  fight("magic")
+  fight("normal")
 
 // ........... ENGAGE/WALKING LOGIC .......... //
 
@@ -373,9 +424,9 @@ with bardiche */
     :?c.canUseAbility("staff_poison") & !s.inRange("dash")
       c.useAbility_TH("staff_poison", a.stPh)
     :
-      fight("melee")
+      fight("normal")
   : // normal melee combat logic
-    fight("melee")
+    fight("normal")
 
 : // 1v1
   // Tanky foe, use bardiche ability to lower its hitpoints
@@ -396,7 +447,7 @@ with bardiche */
   ^foe.debuffs.string ! "debuff_armor_fatigue"))
     a.ldtF("grappling")
   :
-    fight("melee")
+    fight("normal")
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "7-Ridge" ▀▄▀▄▀▄▀▄▀ ┃  //
