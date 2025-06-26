@@ -173,11 +173,11 @@ func canUpdate(mode)
     return loc.begin | (totaltime % u.sec = 0)
 func Update(mode)
   ?mode = "speedrun" // update times every frame
-    tt    = u.formatDigital(totaltime, true)
+    tt    = time.formatDigital(totaltime, true)
 
     ?loc.begin | loc.loop
-      pb  = u.formatDigital(loc.bestTime, true)
-      avg = u.formatDigital(loc.averageTime, true)
+      pb  = time.formatDigital(loc.bestTime, true)
+      avg = time.formatDigital(loc.averageTime, true)
 
   : // update times every second (30 frames)
     ?loc.begin | totaltime % u.sec = 0
