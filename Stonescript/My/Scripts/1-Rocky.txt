@@ -547,8 +547,7 @@ or while setting up permapot. */
 :?foe.GetCount(foe.distance + margin) > 1 &
 ^foe.distance <= s.getRange("sword") + 1
   // Align foes
-  ?c.canUseAbility("wand_stone") &
-  ^foe.distance < s.getRange("dash_min")
+  ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   /* Activate Berserk Staff early (in case there's
@@ -557,8 +556,7 @@ or while setting up permapot. */
   :?screen.i = 1 & c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
 
-  :?c.canUseAbility("heavy_hammer") & foe = "elite" &
-  ^foe.distance < s.getRange("dash_min")
+  :?c.canUseAbility("heavy_hammer") & foe = "elite"
     ?encounter.eliteMod = "plated"
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :
@@ -576,8 +574,8 @@ or while setting up permapot. */
   ^  foe.debuffs.string ! "debuff_frost_stun"))
     a.ldtF("grappling")
 
-  :?screen.i = 1 & foe.count = 2
-    a.ldtF("sword unmake")
+  /*:?screen.i = 1 & foe.count = 2
+    a.ldtF("sword unmake")*/
 
   // permapot run
   :?nRuns = 1 |

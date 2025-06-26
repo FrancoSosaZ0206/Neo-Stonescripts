@@ -126,7 +126,7 @@ enable npcDialog
 // Watermark & version control
 var author = "Tom Crow"
 var discordTag = "@metaleagle26"
-var scriptVer = "1.1.0"
+var scriptVer = "1.1.1"
 
 // To format
 var watermark = "author:#{0}######discord:#{1}######version:#{2}######"
