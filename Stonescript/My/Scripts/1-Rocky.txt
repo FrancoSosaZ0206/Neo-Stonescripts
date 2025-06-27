@@ -297,35 +297,6 @@ or while setting up permapot. */
   equipR mask
   >h0,0,#yellow,GETTING EXTRA KI!!!
 
-// speed up (post-treasure)
-:?end_t > 1 & screen.i = boss_screen &
-^ c.canUseAbility("staff_fire")
-  c.useAbility_TH("staff_fire", a.stFh)
-
-// speed up (normal)
-:?c.canUseAbility("staff_fire") &
-^screen.i < boss_screen &
-// already has the speed effect
-^buffs.string ! "buff_inf_speed" &
-// 1 foe just defeated
-^((foe.count = 1 & foe.state = 4) |
-// too far to attack
-^ (!s.inRange("crossbow"))) &
-// save armor if it's setup run
-^!(loc.stars > 15 &
-^  (nRuns = 1 |
-// Don't use it when facing the scout
-^   (nRuns > 1 & screen.i = 1)))
-  c.useAbility_TH("staff_fire", a.stFh)
-
-// mini-dash
-:?c.canUseAbility("quarterstaff") &
-^!s.inRange("dash") & ai.walking &
-^ai.enabled & !ai.paused &
-^(c.permapotSetup |
-^ (!c.permapotSetup & screen.i > 0))
-  c.useAbility_TH("quarterstaff", a.myQ)
-
 // Summons
 :?c.canSummon("voidweaver") &
 ^loc.stars > 15 &
@@ -467,6 +438,36 @@ or while setting up permapot. */
     c.useAbility_TH("bardiche", Kubikiribocho)
 
 // ......... ENGAGING/WALKING LOGIC ......... //
+
+// speed up (post-treasure)
+:?end_t > 1 & screen.i = boss_screen &
+^ c.canUseAbility("staff_fire")
+  c.useAbility_TH("staff_fire", a.stFh)
+
+// speed up (normal)
+:?c.canUseAbility("staff_fire") &
+^screen.i < boss_screen &
+// already has the speed effect
+^buffs.string ! "buff_inf_speed" &
+// 1 foe just defeated
+^((foe.count = 1 & foe.state = 4) |
+// too far to attack
+^ (!s.inRange("crossbow"))) &
+// save armor if it's setup run
+^!(loc.stars > 15 &
+^  (nRuns = 1 |
+// Don't use it when facing the scout
+^   (nRuns > 1 & screen.i = 1)))
+  c.useAbility_TH("staff_fire", a.stFh)
+
+// mini-dash
+:?c.canUseAbility("quarterstaff") &
+^ai.walking & ai.enabled & !ai.paused &
+// Can dash and in shovel range
+^!(canDash & a.canSmartDash() & s.inRange("shovel")) &
+^(c.permapotSetup |
+^ (!c.permapotSetup & screen.i > 0))
+  c.useAbility_TH("quarterstaff", a.myQ)
 
 :?end_t > 1 &
 ^!(c.canUsePotion() | c.canUseAbility("staff_fire"))
@@ -613,29 +614,31 @@ unmake with repeating crossbow. */
     :
       fight("normal")
 
-  : // foe = phase3
-    ?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
-    ^!c.permapotSetup & s.inRange("dash_min")
-      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-    :
-      // Buy time
-      ?c.permapotSetup &
-      ^(totaltime - permapotActTime
-      ^<
-      ^loc.averageTime - (loc.averageTime / 10))
-        // Debuff
-        ?c.canApplyChill(6)
-          a.ldtF("sword debuff chill")
-        :?c.canApplyWeaken()
-          a.ldtF("sword debuff weaken")
-        // Heal
-        :?hp ! maxhp
-          a.ldtF("sword heal")
-        : // wait
-          equipL Unbroken Faith
-          equipR mask
-      :
-        fight("normal")
+  // foe = phase3
+  :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
+  ^!c.permapotSetup & s.inRange("dash_min")
+    c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+  
+  // Buy time
+  :?c.permapotSetup &
+  ^(totaltime - permapotActTime
+  ^<
+  ^loc.averageTime - (loc.averageTime / 10))
+    // Debuff
+    ?c.canApplyWeaken()
+      a.ldtF("sword debuff weaken")
+    :?c.canApplyChill(6)
+      a.ldtF("sword debuff chill")
+
+    // Heal
+    :?hp ! maxhp
+      a.ldtF("sword heal")
+
+    : // wait
+      equipL sword stone *0
+      // equipR mask
+  :
+    fight("normal")
 
 // ................ 1V1 LOGIC ............... //
 
