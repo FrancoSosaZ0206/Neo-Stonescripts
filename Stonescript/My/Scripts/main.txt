@@ -44,8 +44,8 @@ enable npcDialog
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.0.0"
-var lastUpdated = "2025/06/17 05:00 GMT-6"
+var scriptVer = "2.0.1"
+var lastUpdated = "2025/06/17 05:15 GMT-6"
 var disclaimer = te.xt("STEALING/MARKETING IS FORBIDDEN.")
 
 var dcTag = "@metaleagle26"
@@ -85,6 +85,11 @@ var c = color.Random()
 >`@screen.w - w@,0,@c@,
 ^@scrl.ScrollText(watermark,w,stepWait,stepWait)@
 
+
+// print identifier banner
+?time = 5 * 30 // seconds
+  ui.ShowBanner("Using IronHawk's Neo-Stonescripts!",
+  ^             "Enjoy! ;)")
 
 // withdrawal logic:
 
