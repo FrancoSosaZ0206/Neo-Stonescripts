@@ -159,6 +159,58 @@ func fight(mode)
 ?foe
   >f0,5,#magenta,dist#=#@foe.distance@
 
+/*
+// Persistent UI Manager
+var aiDisplayInitialized = false
+var aiMeter = null
+
+func InitAIDisplay()
+  aiMeter = ui.AddText()
+  
+  aiMeter.anchor = center_left
+  aiMeter.dock = center_left
+  
+  aiMeter.x = 1
+  aiMeter.y = 0
+  aiMeter.text = "ai: E | P | I | W"
+  aiMeter.w = 20
+  aiDisplayInitialized = true
+
+func RepairAIDisplay()
+  ?!aiMeter | !aiMeter.parent
+    InitAIDisplay()
+
+// Update function
+func UpdateAIFlags()
+  ?!aiDisplayInitialized
+    InitAIDisplay()
+
+  var output = "ai: "
+
+  var states = [ai.enabled, ai.paused, ai.idle, ai.walking]
+  var labels = ["E","P","I","W"]
+  var lblCols = ["red", "green"]
+  
+  for i = 0 .. states.Count() - 1
+    // assign label color based on state
+    var lblCol = "red"
+    ?states[i]
+      lblCol = "green"
+
+    // add colored label to the output string
+    output += string.Format("[color=#{0}]{1}[/color]",
+    ^                       lblCol, labels[i])
+    
+    ?i < states.Count() - 1
+      output += " | " // add separators
+  
+  aiMeter.text = output
+
+// Main loop - handles interruptions
+UpdateAIFlags()
+RepairAIDisplay()
+*/
+
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?s.getTotalHP("player")

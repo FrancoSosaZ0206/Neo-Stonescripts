@@ -44,28 +44,30 @@ enable npcDialog
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.0.1"
+var scriptVer = "2.0.2"
 var lastUpdated = "2025/06/17 05:15 GMT-6"
-var disclaimer = te.xt("STEALING/MARKETING IS FORBIDDEN.")
+var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
 
 var dcTag = "@metaleagle26"
 var dcUsername = "IronHawk, Imports Maniac"
-var ytChannel = "Frank's Creative Corner"
+var ytChannel = "IronHawk0206"
 
 // Formatted watermark array
-var watermark = [
-^te.xt("author: ")+author,
+var watermarkArr = [
+^"author: "+author,
 
-^te.xt("version: ")+scriptVer,
-^te.xt("last updated: ")+lastUpdated,
-^te.xt("source: ")+sys.fileUrl,
-^te.xt("DISCLAIMER: ")+disclaimer,
+^"version: "+scriptVer,
+^"last updated: "+lastUpdated,
+^"source: "+sys.fileUrl,
+^"DISCLAIMER: "+disclaimer,
 
 ^string.Format("discord: {0} (SSRPG {1}: {2})",
 ^              dcTag,
-^              te.xt("server username"),
+^              "server username",
 ^              dcUsername),
-^"YouTube: "+ytChannel]// format watermark
+^"YouTube: "+ytChannel,
+
+^"############"]
 
 // combine array with transparent char separators
 var watermarkStr = string.Join("############", watermarkArr)
@@ -75,7 +77,7 @@ watermarkStr = string.Join("#", watermarkStr)
 
 // print params
 var w = 16
-var stepWait = 2
+var stepWait = 3
 var c = color.Random()
 // color rotation logic
 ?totaltime % (math.Pow(stepWait, 2)) = 0
@@ -83,11 +85,11 @@ var c = color.Random()
 
 // print watermark with ScrollText
 >`@screen.w - w@,0,@c@,
-^@scrl.ScrollText(watermark,w,stepWait,stepWait)@
+^@scrl.ScrollText(watermarkStr,w,stepWait,stepWait)@
 
 
 // print identifier banner
-?time = 5 * 30 // seconds
+?loc.begin
   ui.ShowBanner("Using IronHawk's Neo-Stonescripts!",
   ^             "Enjoy! ;)")
 

@@ -498,26 +498,26 @@ func ldtF(mode)
         : // foe = "stone"
           equipL Bifrost // Unbroken Faith
 
-      // Right hand
-      ?mode = "tank"
-        equipR @shT@
-      :?mode = "stun"
-        equipR @shC1@
+      ?!c.permapotSetup
+        // Right hand
+        ?mode = "tank"
+          equipR @shT@
+        :?mode = "stun"
+          equipR @shC1@
 
-      :?mode = "buff" | mode = "debuff"
-        ?mode = "poison" | mode = "empower"
-          equipR @shPeff@
-        :?mode = "vigor" | mode = "heal"
-          equipR @shVeff@
-        :?mode = "aether" | mode = "unmake"
-          equipR @shAeff@
-        :?mode = "fire" | mode = "burn"
-          equipR @shFeff@
-        :?mode = "ice" | mode = "chill"
-          equipR @shIeff@
+        :?mode = "buff" | mode = "debuff"
+          ?mode = "poison" | mode = "empower"
+            equipR @shPeff@
+          :?mode = "vigor" | mode = "heal"
+            equipR @shVeff@
+          :?mode = "aether" | mode = "unmake"
+            equipR @shAeff@
+          :?mode = "fire" | mode = "burn"
+            equipR @shFeff@
+          :?mode = "ice" | mode = "chill"
+            equipR @shIeff@
 
-      :?!c.permapotSetup
-        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+        :?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
           equipR @shIdef@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
           equipR @shPdef@
