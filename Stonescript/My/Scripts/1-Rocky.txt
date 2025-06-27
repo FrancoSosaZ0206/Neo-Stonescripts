@@ -597,9 +597,9 @@ unmake with repeating crossbow. */
       a.ldtF("big sword unmake")
       
   :?!(foe = "monarch" & foe = "soldier") |
-  ^foe ! "elite" &
+  ^(foe ! "elite" &
   // no non-elites outside splash range
-  ^foe.count - foe.GetCount(foe.distance + margin) = 0
+  ^ foe.count - foe.GetCount(foe.distance + margin) = 0)
     equip Kubikiribocho
 
   // unmake non-elites if there's more foes outside splash range
