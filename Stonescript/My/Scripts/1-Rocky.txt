@@ -595,21 +595,15 @@ unmake with repeating crossbow. */
       margin = 8 // big sword left hitbox + splash range
 
       a.ldtF("big sword unmake")
-      
-  :?!(foe = "monarch" & foe = "soldier") |
-  ^(foe ! "elite" &
-  // no non-elites outside splash range
-  ^ foe.count - foe.GetCount(foe.distance + margin) = 0)
-    equip Kubikiribocho
 
   // unmake non-elites if there's more foes outside splash range
   :?foe ! "elite" &
-  ^foe.count - foe.GetCount(foe.distance + margin) <= 3
-    a.ldtF("ranged unmake")
-  :?foe ! "elite" &
-  ^foe.count - foe.GetCount(foe.distance + margin) > 3
+  ^foe.count - foe.GetCount(foe.distance + margin) > 0
     margin = 8
     a.ldtF("big sword unmake")
+
+  :?!(foe = "monarch" & foe = "soldier")
+    equip Kubikiribocho
   :
     fight("normal")
 
@@ -631,7 +625,7 @@ unmake with repeating crossbow. */
   :?c.canUseAbility("heavy_hammer") & foe.armor > 0 & // reduce armor
   ^!c.permapotSetup & s.inRange("dash_min")
     c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-  
+
   // Buy time
   :?c.permapotSetup &
   ^(totaltime - permapotActTime
@@ -649,7 +643,6 @@ unmake with repeating crossbow. */
 
     : // wait
       equipL sword stone *0
-      // equipR mask
   :
     fight("normal")
 
