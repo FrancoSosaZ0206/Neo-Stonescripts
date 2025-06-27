@@ -245,6 +245,7 @@ var range_table = [
 ^   "dash_min"              , 11,
 ^   "dash_max"              , 16,
 
+^   "shovel"                , 2,
 ^   "hatchet"               , 5,
 ^   "grappling_hook"        , 13,
 
@@ -515,9 +516,23 @@ func getRange(source)
   return result
 func inRange(source)
   ?source = "dash" | source = "bash"
-    return foe.distance = math.Clamp(foe.distance, getRange("dash_min"), getRange("dash_max"))
+    return foe.distance =
+    ^math.Clamp(foe.distance,
+    ^           getRange("dash_min"),
+    ^           getRange("dash_max") )
   :
-    return foe.distance <= getRange(source)
+    return foe.distance <= getRange(source) + 1
+/* Returns true if  */
+func betweenRange(source1, source2)
+  ?!range_table.Contains(source1) |
+  ^!range_table.Contains(source2)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: betweenRange\nCAUSE: unknown <source1> or <source2>:\n\n<"+source1+">,<"+source2+">", false)
+    return false
+  :
+    return foe.distance =
+    ^math.Clamp(foe.distance,
+    ^           getRange(source1),
+    ^           getRange(source2) )
 
 // TO DO: COMPLETE THIS FUNCTION
 /* Calculates the damage the player will deal

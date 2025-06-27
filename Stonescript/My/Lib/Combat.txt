@@ -739,11 +739,18 @@ walking with the Triskelion Stone while inside its
 attack range (where the player would normally stop
 to attack). */
 func stutterStep()
-  ?totaltime % 2 = 0 // equip every other frame
-    equipR triskelion
-  :
-    equipR hatchet
-  equipL sword 0* +0
+  ?foe.distance > s.getRange("hatchet")
+    equipL sword 0* +0
+    
+    ?totaltime % 2 = 0 // equip every other frame
+      equipR triskelion
+    :
+      equipR hatchet
+
+    >h0,0,#yellow,NORMAL STUTTERSTEP
+  : // s.inRange("shovel")
+    equip shovel
+    >h0,0,#red,SHOVEL STUTTERSTEP
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Combat" ▀▄▀▄▀▄▀▄▀▄▀▄ ┃  //

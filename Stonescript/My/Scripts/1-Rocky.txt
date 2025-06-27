@@ -156,7 +156,8 @@ func fight(mode)
 
 // ............. MONITOR LOGIC .............. //
 
-
+?foe
+  >f0,5,#magenta,dist#=#@foe.distance@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -491,18 +492,16 @@ or while setting up permapot. */
 :?c.canKbFarm()
   c.smoothCast(a.bS)
 
-// if in range, get closer while trying to unmake with repeating bow
-:?canDash & foe.distance =
-^   math.Clamp(foe.distance,
-^              s.getRange("dash_min"),
-^              s.getRange("crossbow")) &
+/* if in range, get closer while trying to
+unmake with repeating crossbow. */
+:?canDash & s.betweenRange("dash_min","crossbow") &
 ^!c.permapotSetup
   c.smoothCast(a.bR)
 
 // get in melee range faster
-:?foe.distance > s.getRange("sword") + 1 &
-^!c.permapotSetup
+:?!s.inRange("shovel") & !c.permapotSetup
   c.stutterStep()
+  >h0,-1,#red,STUTTERSTEPPING
 
 // ........... SPECIAL ITEMS LOGIC .......... //
 
@@ -545,7 +544,7 @@ or while setting up permapot. */
 // ............... AOE LOGIC ................ //
 
 :?foe.GetCount(foe.distance + margin) > 1 &
-^foe.distance <= s.getRange("sword") + 1
+^s.inRange("shovel")
   // Align foes
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
@@ -641,7 +640,8 @@ or while setting up permapot. */
 // ................ 1V1 LOGIC ............... //
 
 // Tanky foe, use bardiche ability to lower its hitpoints
-:?(foe = "boss" | foe = "monarch") &
+:?loc.stars > 15 &
+^(foe = "boss" | foe = "monarch") &
 ^foe.distance <= s.getRange("sword") + 1 &
 ^(c.canUseAbility("staff_poison") |
 ^c.canUseAbility("bardiche"))
