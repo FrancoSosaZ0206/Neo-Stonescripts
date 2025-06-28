@@ -5,11 +5,8 @@
 // ==============================================
 
 func main()
-  ?canDestroy()
-    destroy()
-
-  ?canConstruct()
-    construct()
+  ?canInit()
+    init()
 
   ?canUpdate()
     update()
@@ -18,42 +15,37 @@ func main()
 // PRIVATE
 // ==============================================
 
-var txt = null
+var txt_Ai = null
 
 // True on first frame of every run/loop
-func canConstruct()
+func canInit()
   return loc.begin | loc.loop
 
-// True if cleanup is needed
-func canDestroy()
-  return canConstruct() & txt
-
-// Cleanup
-func destroy()
-  txt.Recycle()
-  txt = null
-
 // UI construction
-func construct()
-  // create with placeholder string
-  txt = ui.AddText("AI Display")
+func init()
+  ?txt_Ai // recycle old component(s)
+    txt_Ai.Recycle()
+    txt_Ai = null
+  :
+    // create with placeholder string
+    txt_Ai = ui.AddText("AI Display")
 
-  // define properties
-  txt.x = 1
-  txt.y = 0
-  txt.w = string.Size("AI || E | P | I | W ||")
-  txt.anchor = "center_left"
-  txt.dock = "center_left"
-  txt.color = "#ffffff"
+    // define properties
+    txt_Ai.x = 1
+    txt_Ai.y = 0
+    txt_Ai.w = string.Size("AI || E | P | I | W ||")
+    txt_Ai.anchor = "center_left"
+    txt_Ai.dock = "center_left"
+    txt_Ai.color = "#ffffff"
 
 // Update condition
 func canUpdate()
-  return txt
+  return txt_Ai
 
 // Update display
 func update()
   // Ensure visibility
-  txt.visible = true
+  txt_Ai.visible = true
 
   // Collect AI values
   var values = [ai.enabled, ai.paused, ai.idle, ai.walking]
@@ -80,4 +72,4 @@ func update()
       output += "#||"
 
   // assign and parse output into ui textbox
-  txt.text = output
+  txt_Ai.text = output

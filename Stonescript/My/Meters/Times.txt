@@ -103,12 +103,13 @@ asciiend
     >`@x@,@y@,@colorHex@,@ToString(mode)@
 
 func UiMngr(x, y, colorHex, size)
-  // DESTROY — Recycle old components
-  ?(loc.loop | loc.begin) & pnl
-    pnl = uimkr.destruct(pnl)
-
-  // INIT — create UI if needed
   ?loc.begin | loc.loop
+    // DESTROY — Recycle old components
+    txt = uimkr.destroy(txt)
+    pnl = uimkr.destroy(pnl)
+
+
+    // INIT — create UI if needed
     var isValidSize = true
 
     // Panel settings

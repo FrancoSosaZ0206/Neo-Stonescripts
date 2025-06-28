@@ -2,121 +2,15 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄ START OF "UI_Maker" ▀▄▀▄▀▄▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
-/* // ///////////// FILE INFO //////////////// //
-
-UI functions library
-Made by IronHawk (Tom Crow)
-
-. ................ Description ................ .
-
-  This library offers a simple way to help make
-  UI component creation more concise and
-  straightforward.
-
-  All functions are one-liners!
-
-. .................. WARNING .................. .
-
-  It is recommended to know read and understand
-  what the functions do in order to make a good
-  usage of them.
-
-. ................. Importing ................. .
-
-  var uimkr = new UI_Maker
-
-. ................... Usage ................... .
-
-  Example - returns a button with these properties:
-  - location = 1, 10 (x, y),
-  - width, height = 12, 5,
-  - anchor = top_center,
-  - dock = top_left,
-  - text = "Phrases!",
-  - color = red,
-  - text color = yellow,
-  - border color = magenta,
-  - highlight color (when pressing) = rainbow,
-  - border style = 2,
-  - while pressed = call function "iLike"
-  - before pressed = call function "greetings"
-  - after pressed = call function "goodbye"
-  - sound played when pressed = buy
-
-  func greeting()
-    >c0,-1,#red,Hello world!
-  func iLike()
-    >c0,0,#yellow,I like trees .-.
-  func goodbye()
-    >c0,1,#green,Goodbye world!
-
-  var button = uimkr.mkButton(1,10,12,5,
-  ^            top_center,top_left,
-  ^            "Phrases!",
-  ^            #red,#yellow,#magenta,#rainbow,
-  ^            2,
-  ^            iLike,greetings,goodbye,
-  ^            buy)
-  
-. ............................................. .
-
-Enjoy! */
-
-
 // //////////////// FUNCTIONS //////////////// //
 
-/* **************** GLOSSARY ***************** **
-
-  x = horizontal position (relative to dock)
-  y = vertical position (relative to dock)
-
-  w = width
-  h = height
-
-  anchor = position relative to the screen
-  dock = position relative to parent UI component
-  
-  colorHex = color in hexadecimal (hex) format
-  style = numeric ID used for drawing rectangular
-          Components such as Panels and Buttons (range
-          from -8 to 8)
-
-
-  Optional properties/parameters:
-
-  send 0 if you don't want to use them.
-  The default value will be used instead. */
-
-
-/* Recursively destroys a UI component and all its children.
-NOTE: Does not nullify the *caller*'s variable. Do that
-manually if needed. */
 func destroy(component)
   ?component & Type(component) = "object"
-    // Handle children first
-    ?component.children
-      for child : component.children
-        destroy(child)
-
     // Recycle the component itself
     component.Recycle()
+    return null
 
 
-/* Makes a panel component.
-PARAMETERS:
-  Common:
-    - x
-    - y
-    - anchor
-    - dock
-
-  Optional:
-    - w
-    - h
-    - colorHex = color of the panel.
-    - style
-    - child = initial child component to add. */
 func mkPanel(x,y,w,h, anchor,dock, colorHex, style, child)
 
   var panel
@@ -144,23 +38,6 @@ func mkPanel(x,y,w,h, anchor,dock, colorHex, style, child)
 
   return panel
 
-/* Makes a textbox component.
-PARAMETERS:
-  Common:
-    - x
-    - y
-    - anchor
-    - dock
-  
-  Special:
-    - text = textbox contents.
-    - align = text justification/alignment inside the textbox.
-              Default: "left"
-  
-  Optional:
-    - w
-    - h
-    - colorHex = textbox color */
 func mkTextbox(x,y,w,h, anchor,dock, text, align, colorHex)
   // declarations:
   var textbox = null
@@ -214,28 +91,6 @@ func mkTextbox(x,y,w,h, anchor,dock, text, align, colorHex)
 
   return textbox
 
-/* Makes a button component.
-PARAMETERS
-  Common:
-    - x
-    - y
-    - anchor
-    - dock
-
-  Special:
-    - text = button text
-    - colorHex = general color of the button (colors below override it)
-    - pressedFunc = function that the button will perform when pressedFunc
-
-  Optionals:
-    - w
-    - h
-    - colorT   = text color
-    - colorB   = border color
-    - colorH   = highlight color (when pressedFunc)
-    - downFunc   = function that the button will perform when press begins
-    - upFunc     = function that the button will perform when press ends
-    - soundFx  = sound effect when pressedFunc */
 func mkButton(x,y,w,h, anchor,dock, text, colorHex,colorT,colorB,colorH, style, pressedFunc,downFunc,upFunc, soundFx)
   
   var button
@@ -293,7 +148,6 @@ func mkButton(x,y,w,h, anchor,dock, text, colorHex,colorT,colorB,colorH, style, 
     button.sound = soundFx
 
   return button
-
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "UI_Maker" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
