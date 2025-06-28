@@ -1,0 +1,167 @@
+/* For info about this file, see Ai_README.md */
+
+// ==============================================
+// PUBLIC
+// ==============================================
+
+func main()
+  ?canDestroy()
+    destroy()
+
+  ?canConstruct()
+    construct()
+
+  ?canUpdate()
+    update()
+
+// ==============================================
+// PRIVATE
+// ==============================================
+
+var aiText = null
+
+// True on first frame of every run/loop
+func canConstruct()
+  return loc.begin | loc.loop
+
+// True if cleanup is needed
+func canDestroy()
+  return canConstruct() & aiText
+
+// Cleanup
+func destroy()
+  ?aiText
+    aiText.Recycle()
+    aiText = null
+
+// UI construction
+func construct()
+  // create with placeholder string
+  aiText = ui.AddText("AI Display")
+
+  // define properties
+  aiText.x = 1
+  aiText.y = 0
+  aiText.w = string.Size("AI || E | P | I | W ||")
+  aiText.anchor = "center_left"
+  aiText.dock = "center_left"
+  aiText.color = "#ffffff"
+
+// Update condition
+func canUpdate()
+  return aiText
+
+// Update display
+func update()
+  // Ensure visibility
+  aiText.visible = true
+
+  // Collect AI flags
+  var flags = [ai.enabled, ai.paused, ai.idle, ai.walking]
+  var labels = ["E", "P", "I", "W"]
+  var output = "AI#||#"
+
+  var n = flags.Count() - 1
+  for i = 0 .. n
+
+    // add color metadata based on flag state
+    output += "[color=#"
+    ?flags[i]
+      output += "00ff00" // rGb -> green
+    :
+      output += "ff0000" // Rgb -> red
+
+    // add label
+    output += "]" + labels[i] + "[/color]"
+
+    // add separator (with transparent characters '#')
+    ?i < n
+      output += "#|#"
+    :
+      output += "#||"
+
+  // assign and parse output into ui textbox
+  aiText.text = output
+
+
+
+/* Older version:
+
+// DUAL-UI SYSTEM
+var normalUI = null
+var bossUI = null
+var currentDisplay = null
+
+// CREATE BOTH UI LAYERS
+func InitUI()
+  // Normal combat UI
+  normalUI = ui.AddText()
+  normalUI.x = 1
+  normalUI.y = 0
+  normalUI.w = 20
+  normalUI.anchor = "center_left"
+  normalUI.dock = "center_left"
+  
+  // Boss-proof UI (higher layer)
+  bossUI = ui.AddText()
+  bossUI.x = 1
+  bossUI.y = 0
+  bossUI.w = 20
+  bossUI.anchor = "center_left"
+  bossUI.dock = "center_left"
+  bossUI.visible = "false" // Start hidden
+
+// UPDATE BOTH DISPLAYS
+func UpdateDisplays()
+  var output = "ai: "
+  var states = [ai.enabled, ai.paused, ai.idle, ai.walking]
+  
+  for i = 0..states.Count()-1
+    ?states[i]
+      output += "[color=#green]"
+    :
+      output += "[color=#red]"
+    output += ["E","P","I","W"][i] + "[/color]"
+    ?i < 3
+      output += " | "
+  
+  // Update both displays simultaneously
+  ?normalUI ! null
+    normalUI.text = output
+  ?bossUI ! null
+    bossUI.text = output
+
+// MANAGE VISIBILITY
+func ManageLayers()
+  ?foe = "boss" | foe.count > 3 | foe = "elite"
+    // Combat-intensive situations - use boss layer
+    ?currentDisplay ! "boss"
+      ?normalUI ! null
+        normalUI.visible = "false"
+      ?bossUI ! null
+        bossUI.visible = "true"
+      currentDisplay = "boss"
+  :
+    // Normal combat - use default layer
+    ?currentDisplay ! "normal"
+      ?bossUI ! null
+        bossUI.visible = "false"
+      ?normalUI ! null
+        normalUI.visible = "true"
+      currentDisplay = "normal"
+
+// MAIN LOOP
+?loc.begin
+  InitUI()
+
+?true // Every frame
+  ManageLayers()
+  UpdateDisplays()
+
+  // Emergency recovery if elements get destroyed
+  ?normalUI = null | bossUI = null
+    InitUI()
+
+*/
+
+
