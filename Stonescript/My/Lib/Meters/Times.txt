@@ -2,114 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "Times" ▀▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-/* // ///////////// FILE INFO //////////////// //
-
-Time Display Utility
-Made by MetalEagle26 (Tom Crow)
-
-Current version: 2.1
-
-. ................ Description ................ .
-
-  This library displays your runs's times!
-  Includes a speedrunning version to track frames.
-
-. ................. Importing ................. .
-
-  Desktop:
-    Put this file in Stonescript/UI or your
-    directory of preference (inside Stonescript),
-    then do this:
-
-    var t = import <YourDirectory>/Times
-
-  Mobile:
-    Copy-Paste this script and any dependencies
-    into your Mindstone.
-
-. ................... Usage ................... .
-
-  Example - initialize the meter in 0,3 (x,y),
-  in red, in the slim, non-speedrun version, and
-  in the "ui" mode:
-
-  t.Main_Times(0, 1, "#red", "normal ui")
-
-· ···················· Tip ···················· ·
-
-  Keep in mind that speedrunning functions need to
-  update constantly to show the frames, which may cause
-  some lag.
-  
-  Also, remember to use ".Recycle()" function and assign
-  to "null" after using UI functions!
-
-. ................. CHANGELOG ................. .
-
-  - v1.2:
-    - Now you can choose a slim version
-      of the meter in all functions.
-  - v1.3:
-    - showSpeedOmeterUI() renamed to "speedOmeterUI".
-    - added import: UI_Maker.txt
-    - speedOmeterUI now uses functions from
-      the import "UI_Maker.txt".
-  - v1.4:
-    - Fixed bug that prevented displaying
-      the meter before the first
-      second of each run.
-  - v1.5:
-    - Now all functions that show the meter
-      depend on speedOmeterToStr().
-  - v1.6:
-    - formatSpeedrun(): now 1 digit frames
-      are prefixed with a zero ('0').
-    - myFormatDigital() and formatSpeedrun()
-      moved to Utilities.
-    - fixed tt update frequency. Now
-      it updates every frame as it should.
-  - v1.7:
-    - renamed all functions and variables
-      containing "speedOmeter" to "som".
-    - isAscii now belongs to Print() as
-      one of two modes of a new parameter: isAscii.
-    - uiSom() -> mkUI().
-    - mkUI(): if isSlim, the panel will now be borderless.
-    - ToString(): '#' replaced back with ' '.
-      Now not all functions replace it again, but those who do
-      delegate that task to Utilities -> replaceInStr().
-  - v1.8:
-    - Renamed functions: removed "Som" from them
-      to make them more concise and cohesive with
-      object-oriented programming and the "new" keyword.
-    - Added Import: Performance, to centralize dependencies
-      and upgrade performance.
-  - v1.9:
-    - Variable updates are now done in function Update().
-  - v2.0:
-    - Fixed bug that messed with ui panel updates
-    - Changed mode of use: now you only need to
-      import and use the function "main".
-    - Updates and ui components are now handled
-      internally.
-    - Renamed to "Times"
-  - v2.1:
-    - Added dependency: UI_Maker
-    - Added canUpdate().
-    - Now Update() only modifies the data when called is true.
-    - Update() should now only be called if canUpdate() returns true.
-    - Merged isSlim and isSpeedrun with mode
-    - Added error handling
-    - main >> Main_Times
-    - Added entry sanitization for mode
-    - Upgraded Main_Times() description
-    - Merged speedrun and normal (or "Digital") times into one of each.
-    - u.myFormatDigital() calls replaced by time.FormatDigital()
-
-. ............................................. .
-
-Enjoy! */
-
 // ///////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
@@ -136,8 +28,7 @@ Tertiary (Should go at the end)
 "ui" = makes an UI panel containing the meter.
 "print" = prints the meter normally.
 "print ascii" = prints the meter in ascii mode. */
-var panel = null
-func Main_Times(x, y, colorHex, mode)
+func main(x, y, colorHex, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
@@ -145,16 +36,23 @@ func Main_Times(x, y, colorHex, mode)
     Update(mode)
 
     ?mode = "ui"
-      var pnl_old = panel
-      panel = mkUI(x,y,colorHex,mode)
+      mkUI(x,y,colorHex,mode)
 
-      ?pnl_old ! panel & pnl_old
-        pnl_old.Recycle()
+        >c-10,0,#green,ascii
+TIMES: OK
+panel = @panel ! null@
+  - parent: @panel.parent ! null@
+  - visible: @panel.visible@
+txt = @txt@
+  - parent: @txt.parent ! null@
+  - visible: @txt.visible@
+  - text: @txt.text@
+asciiend
 
     :?mode = "print"
       Print(x,y,colorHex,mode,true)
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: Main_Times\nCAUSE: invalid <mode>:\n\n" + mode, false)
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: main\nCAUSE: invalid <mode>:\n\n" + mode, false)
 
 // ///////////////// PRIVATE ///////////////// //
 
@@ -163,6 +61,10 @@ func Main_Times(x, y, colorHex, mode)
 var tt  = null
 var pb  = null
 var avg = null
+
+var panel = null
+var txt = null
+var init = false
 
 // ................ Functions ................ //
 
@@ -173,11 +75,11 @@ func canUpdate(mode)
     return loc.begin | (totaltime % u.sec = 0)
 func Update(mode)
   ?mode = "speedrun" // update times every frame
-    tt    = time.formatDigital(totaltime, true)
+    tt    = u.formatSpeedrun(totaltime)
 
     ?loc.begin | loc.loop
-      pb  = time.formatDigital(loc.bestTime, true)
-      avg = time.formatDigital(loc.averageTime, true)
+      pb  = u.formatSpeedrun(loc.bestTime)
+      avg = u.formatSpeedrun(loc.averageTime)
 
   : // update times every second (30 frames)
     ?loc.begin | totaltime % u.sec = 0
@@ -223,38 +125,49 @@ func Print(x, y, colorHex, mode)
 asciiend
   :
     >`@x@,@y@,@colorHex@,@ToString(mode)@
-/* Returns ui panel containing the meter. */
+
 func mkUI(x, y, colorHex, size)
-  var panel = null
-  var txt = null
-  var isValidSize = true
+  ?!(panel & txt)
+    var isValidSize = true
 
-  // For the panel:
-  var panelAnchor = bottom_left
-  var panelDock = bottom_left
-  var panelStyle = null
-  
-  ?size = "normal" | size = "default"
-    panelStyle = -2
-  :?size = "slim" | size = "small"
-    panelStyle = -1
-  :
-    isValidSize = false
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
+    // For the panel:
+    var panelAnchor = bottom_left
+    var panelDock = bottom_left
+    var panelStyle = null
+    
+    ?size = "normal" | size = "default"
+      panelStyle = -2
+    :?size = "slim" | size = "small"
+      panelStyle = -1
+    :
+      isValidSize = false
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
 
-  ?isValidSize
-    txt = uimkr.mkTextbox(
-    ^ 1, 1, null, null, // x, y, w, h,
-    ^ top_left, top_left, // anchor, dock,
-    ^ ToString(size), // txt
-    ^ null, colorHex) // align, colorHex
+    ?isValidSize
+      txt = uimkr.mkTextbox(
+      ^ 1, 1, null, null,   // x, y, w, h,
+      ^ top_left, top_left, // anchor, dock,
+      ^ ToString(size),     // txt
+      ^ null, colorHex)     // align, colorHex
 
-    panel = uimkr.mkPanel(
-    ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
-    ^ panelAnchor, panelDock, // anchor, dock,
-    ^ colorHex, panelStyle, txt) // colorHex, panelStyle, child
+      panel = uimkr.mkPanel(
+      ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
+      ^ panelAnchor, panelDock,     // anchor, dock,
+      ^ colorHex, panelStyle, txt)  // colorHex, panelStyle, child
 
-  return panel
+      init = true
+
+  : // panel & txt
+    txt.text = ToString(size)
+
+    ?!panel.parent // destroy and re-init
+      txt.Recycle()
+      txt = null
+
+      panel.Recycle()
+      panel = null
+
+      init = false
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Times" ▀▄▀▄▀▄▀▄▀▄ ┃  //

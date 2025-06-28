@@ -44,8 +44,8 @@ enable npcDialog
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.0.2"
-var lastUpdated = "2025/06/17 05:15 GMT-6"
+var scriptVer = "2.0.3"
+var lastUpdated = "2025/06/28 14:40 GMT-6"
 var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
 
 var dcTag = "@metaleagle26"
@@ -110,12 +110,13 @@ var c = color.Random()
 : // farming locations logic
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
 
-  import UI/FoeStateTracker
-  var tm = import My/Lib/Meters/Times
-  var dps = import My/Lib/Meters/DPS
+  // import UI/FoeStateTracker
+  import My/Lib/Meters/Ai
+  // var tm = import My/Lib/Meters/Times
+  // var dps = import My/Lib/Meters/DPS
 
-  tm.Main_Times(0,-1,#red,"slim ui speedrun")
-  dps.Main_DPS(-7,-1,#yellow,1,"slim ui")
+  // tm.main(0,-1,#red,"slim ui speedrun")
+  // dps.main(-7,-1,#yellow,1,"slim ui")
 
   ?loc = "rocky_plateau"
     disable npcDialog

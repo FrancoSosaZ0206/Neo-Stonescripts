@@ -2,7 +2,7 @@
 
 Multi-location, general script.
 
-**Written by:** IronHawk (Tom Crow).
+**Author:** IronHawk (Tom Crow).
 
 ## Description
 

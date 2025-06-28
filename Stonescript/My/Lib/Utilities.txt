@@ -92,12 +92,12 @@ func myFormatDigital(frames)
     :
       secStr = secs
     
-    return minStr + ":" + secStr
+    return string.Format("{0}:{1}",minStr, secStr)
 
 /* returns time in a similar format to time.FormatDigital,
   but with frame presition. */
 func formatSpeedrun(frames)
-  var timeStr = "00:00 00f"
+  var timeStr = "00:00:00"
 
   ?frames > 0
     var frms    = null
@@ -116,7 +116,6 @@ func formatSpeedrun(frames)
       frmStr = "0" + frms
     :
       frmStr = frms
-    frmStr += "f"
 
     ?secs < 10
       secStr = "0" + secs
@@ -128,7 +127,7 @@ func formatSpeedrun(frames)
     :
       minStr = mins
 
-    timeStr = minStr + ":" + secStr + " " + frmStr
+    timeStr = string.Format("{0}:{1}:{2}",minStr, secStr, frmStr)
     
   return timeStr
 

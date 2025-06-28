@@ -159,58 +159,6 @@ func fight(mode)
 ?foe
   >f0,5,#magenta,dist#=#@foe.distance@
 
-/*
-// Persistent UI Manager
-var aiDisplayInitialized = false
-var aiMeter = null
-
-func InitAIDisplay()
-  aiMeter = ui.AddText()
-  
-  aiMeter.anchor = center_left
-  aiMeter.dock = center_left
-  
-  aiMeter.x = 1
-  aiMeter.y = 0
-  aiMeter.text = "ai: E | P | I | W"
-  aiMeter.w = 20
-  aiDisplayInitialized = true
-
-func RepairAIDisplay()
-  ?!aiMeter | !aiMeter.parent
-    InitAIDisplay()
-
-// Update function
-func UpdateAIFlags()
-  ?!aiDisplayInitialized
-    InitAIDisplay()
-
-  var output = "ai: "
-
-  var states = [ai.enabled, ai.paused, ai.idle, ai.walking]
-  var labels = ["E","P","I","W"]
-  var lblCols = ["red", "green"]
-  
-  for i = 0 .. states.Count() - 1
-    // assign label color based on state
-    var lblCol = "red"
-    ?states[i]
-      lblCol = "green"
-
-    // add colored label to the output string
-    output += string.Format("[color=#{0}]{1}[/color]",
-    ^                       lblCol, labels[i])
-    
-    ?i < states.Count() - 1
-      output += " | " // add separators
-  
-  aiMeter.text = output
-
-// Main loop - handles interruptions
-UpdateAIFlags()
-RepairAIDisplay()
-*/
-
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?s.getTotalHP("player")
@@ -358,12 +306,6 @@ or while setting up permapot. */
 :?c.canSummon("cinderwisp") &
 ^(loc.stars <= 15 | screen.i >= boss_screen - 1)
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
-
-// Harvest/Pick up things
-:?choice & harvest.distance < 5
-  a.ldtF("harvest")
-:?pickup.distance < 15
-  a.ldtF("magnet")
 
 // ............. DEFENSIVE LOGIC ............ //
 
@@ -516,10 +458,16 @@ or while setting up permapot. */
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & ai.enabled & !ai.paused &
 // Can dash and in shovel range
-^!(canDash & a.canSmartDash() & s.inRange("shovel")) &
+^!(canDash & a.canSmartDash() & !s.inRange("shovel")) &
 ^(c.permapotSetup |
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
+
+// Harvest/Pick up things
+:?choice & harvest.distance < 5
+  a.ldtF("harvest")
+:?pickup.distance < 15
+  a.ldtF("magnet")
 
 :?end_t > 1 &
 ^!(c.canUsePotion() | c.canUseAbility("staff_fire"))
@@ -626,8 +574,8 @@ unmake with repeating crossbow. */
   ^  foe.debuffs.string ! "debuff_frost_stun"))
     a.ldtF("grappling")
 
-  /*:?screen.i = 1 & foe.count = 2
-    a.ldtF("sword unmake")*/
+  /* :?screen.i = 1 & foe.count = 2
+    a.ldtF("sword unmake") */
 
   // permapot run
   :?nRuns = 1 |
@@ -648,11 +596,11 @@ unmake with repeating crossbow. */
 
       a.ldtF("big sword unmake")
 
-  // unmake non-elites if there's more foes outside splash range
+  /* // unmake non-elites if there's more foes outside splash range
   :?foe ! "elite" &
   ^foe.count - foe.GetCount(foe.distance + margin) > 0
     margin = 8
-    a.ldtF("big sword unmake")
+    a.ldtF("big sword unmake") */
 
   :?!(foe = "monarch" & foe = "soldier")
     equip Kubikiribocho

@@ -2,128 +2,10 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ START OF "DPS" ▀▄▀▄▀▄▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
-/* // ///////////// FILE INFO //////////////// //
-
-Made by: Pikarizard Charikachu xD
-Modified by: IronHawk (Tom Crow)
-
-Current version: v2.2
-
-. ................ Description ................ .
-
-  Displays various stats to help you in 
-  min-maxing your damage output. Only 
-  works on bosses. Also coded so that it 
-  only records stats the moment you 
-  damage bosses. Neat right?
-
-. ................. Importing ................. .
-
-  Desktop:
-    Put this file in Stonescript/UI or your
-    directory of preference (inside Stonescript),
-    then do this:
-
-    var dps_meter = import <YourDirectory>/DPS
-
-  Mobile:
-    Copy-paste this script and any dependencies
-    into your Mindstone.
-
-. ................... Usage ................... .
-
-  Example - initialize the meter in 0,3 (x,y),
-  in yellow, refreshing every 7 frames, in the
-  slim, ui mode:
-
-  dps_meter.Main_DPS(0,3,"#yellow", 7, "slim ui")
-
-. ................. CHANGELOG ................. .
-
-  - v1.1:
-    - Removed unnecessary information
-      from the print command.
-    - Changed variable names for
-      major clarity.
-    - Added commentary explaining some
-      of the process.
-  - v1.2:
-    - Changed display mode to functional.
-      Now, to print the data, you need
-      to call a function.
-  - v1.3:
-    - Changed file name:
-      DPS Checker >>> DPS Meter.
-  - v1.4:
-    - Added UI and toString style functions.
-  - v1.5:
-    - Added "DPSMeterEnabled" global variable:
-      Now, to enable the functions and procedure,
-      this variable has to be set to [true].
-  - v1.6:
-    - changed dpsMeterUpdate() to public.
-    - uiDPSMeter() and dpsMeterUpdate() have
-      a new "mode" parameter, allowing to display
-      less information in a slim design if desired.
-  - v1.7:
-    - minor bug fixes and improvements.
-  - v1.8:
-    - Renamed all functions and variables:
-      "DPSmeter" -> "dpsm".
-    - Added new variable: dpsmRefresh, which
-      is used to control the refresh rate of
-      the meter's UI panel.
-    - uiDPSMeter() -> mkDpsmUI().
-    - removed "dps_" from some variable names.
-    - dpsmUpdate(): now it doesn't depend on changes
-      of "_old" variables, though it still updates them.
-    - Added imports: Utilities, Performance for performance
-      and centralization of dependencies.
-    - Other minor changes.
-  - v1.9:
-    - Renamed functions and variables: removed "dpsm"
-      from them to make them more concise and cohesive with
-      object-oriented programming and the "new" keyword.
-    - Renamed variables:
-      - Enabled -> ENABLED
-      - Refresh -> refreshRate
-    - "_old" variables deprecated. Now the original
-      ones are used.
-    - Update() - mode parameter and "_old" vars deprecated.
-  - v2.0.0:
-    - Removed function dpsUpdate().
-    - All variable updates and calculations are now
-      done in function Update().
-  - v2.1:
-    - Updates and ui components are now handled internally.
-    - Added ToString() and Print() functions.
-    - Global variables are now adjusted in the main() function.
-    - Rearranged script layout -- now there's 2 sections:
-      public and private.
-    - Renamed file to "DPS".
-  - v2.2:
-    - Added dependency: UI_Maker
-    - Added canUpdate().
-    - Now Update() only modifies the data when called is true.
-    - Update() should now only be called if canUpdate() returns true.
-    - refreshRate >> frameRate
-    - Merged isSlim with mode
-    - Added error handling
-    - main >> Main_DPS
-    - added entry sanitization for mode
-    - upgraded Main_DPS() description
-
-. ............................................. .
-
-Enjoy! */
-
-
 // ///////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
 var u = import My/Lib/Utilities
-
 
 // ///////////////// PUBLIC ////////////////// //
 
@@ -142,8 +24,7 @@ Secondary (should go after primary)
 "ui" = makes an UI panel containing the meter.
 "print" = prints the meter normally.
 "print ascii" = prints the meter in ascii mode. */
-var panel = null
-func Main_DPS(x, y, colorHex, frameRate, mode)
+func main(x, y, colorHex, frameRate, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
@@ -151,38 +32,36 @@ func Main_DPS(x, y, colorHex, frameRate, mode)
     Update()
 
     ?mode = "ui"
-      var pnl_old = panel
-      panel = mkUI(x,y,colorHex,mode)
-
-      ?pnl_old ! panel & pnl_old
-        pnl_old.Recycle()
+      mkUI(x,y,colorHex,mode)
 
     :?mode = "print"
       Print(x,y,colorHex,mode,false)
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: Main_DPS\nCAUSE: invalid <mode>:\n\n" + mode, false)
-
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: main\nCAUSE: invalid <mode>:\n\n" + mode, false)
 
 // ///////////////// PRIVATE ///////////////// //
 
 // ................ Variables ................ //
 
-var sec = 30      // No need to import the whole Utilities script just for this variable.
-var currhp = 0    // foe's current hitpoints (with armor)
-var nethp = 0     // foe's net maximum hitpoints (with armor)
+var sec = 30        // No need to import the whole Utilities script just for this variable.
+var currhp = 0      // foe's current hitpoints (with armor)
+var nethp = 0       // foe's net maximum hitpoints (with armor)
 
-var hits      = 0 // hit counter
-var dmg       = 0 // current damage dealt
-var totalDmg  = 0 // total damage dealt
-var startTime = 0 // timestamp for the beginning of the fight
-var auxhp     = 0 // auxiliar variable to compare with currhp
+var hits      = 0   // hit counter
+var dmg       = 0   // current damage dealt
+var totalDmg  = 0   // total damage dealt
+var startTime = 0   // timestamp for the beginning of the fight
+var auxhp     = 0   // auxiliar variable to compare with currhp
 
-var FRM = "N/A" // frames elapsed from first hit
-var FPH = "N/A" // frames per hit >>> hit frequency | frames elapsed from each hit to the next
-var HPS = "N/A" // hits per second
-var DPF = "N/A" // damage per frame
-var DPS = "N/A" // damage per second
+var FRM = "N/A"     // frames elapsed from first hit
+var FPH = "N/A"     // frames per hit >>> hit frequency | frames elapsed from each hit to the next
+var HPS = "N/A"     // hits per second
+var DPF = "N/A"     // damage per frame
+var DPS = "N/A"     // damage per second
 
+var panel = null
+var txt = null
+var init = false
 
 // ................ Functions ................ //
 
@@ -262,38 +141,48 @@ func Print(x, y, colorHex, mode)
 asciiend
   :
     >`@x@,@y@,@colorHex@,@ToString(mode)@
-/* Returns ui panel containing the Meter. */
+
 func mkUI(x, y, colorHex, size)
-  var panel = null
-  var txt = null
-  var isValidSize = true
+  ?!(panel & txt)
+    var isValidSize = true
 
-  var panelAnchor = bottom_right
-  var panelDock = bottom_right
-  var panelStyle = null
+    var panelAnchor = bottom_right
+    var panelDock = bottom_right
+    var panelStyle = null
 
-  ?size = "normal" | size = "default"
-    panelStyle = -3
-  :?size = "slim" | size = "small"
-    panelStyle = -1
-  :
-    isValidSize = false
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
+    ?size = "normal" | size = "default"
+      panelStyle = -3
+    :?size = "slim" | size = "small"
+      panelStyle = -1
+    :
+      isValidSize = false
+      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
 
-  ?isValidSize
-    txt = uimkr.mkTextbox(
-    ^ 1, 1, null, null, // x, y, w, h,
-    ^ top_left, top_left, // anchor, dock,
-    ^ ToString(size), // txt
-    ^ null, colorHex) // align, colorHex
+    ?isValidSize
+      txt = uimkr.mkTextbox(
+      ^ 1, 1, null, null, // x, y, w, h,
+      ^ top_left, top_left, // anchor, dock,
+      ^ ToString(size), // txt
+      ^ null, colorHex) // align, colorHex
 
-    panel = uimkr.mkPanel(
-    ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
-    ^ panelAnchor, panelDock, // anchor, dock,
-    ^ colorHex, panelStyle, txt) // colorHex, style, child
+      panel = uimkr.mkPanel(
+      ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
+      ^ panelAnchor, panelDock, // anchor, dock,
+      ^ colorHex, panelStyle, txt) // colorHex, style, child
 
-  return panel
+      init = true
 
+  : // panel & txt
+    txt.text = ToString(size)
+
+    ?!panel.parent // destroy and re-init
+      txt.Recycle()
+      txt = null
+
+      panel.Recycle()
+      panel = null
+
+      init = false
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄▀ END OF "DPS" ▀▄▀▄▀▄▀▄▀▄▀ ┃  //

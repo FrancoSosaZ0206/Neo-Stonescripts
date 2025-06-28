@@ -1,0 +1,49 @@
+// ==============================================
+// PERSISTENT UI EXAMPLE
+// - Survives AI suppression (boss fights, cinematics)
+// - Updates dynamically without flickering
+// - Cleanly resets on location change
+// ==============================================
+
+// --- Initialize UI (runs once per location) ---
+?loc.begin | loc.loop
+  // Clear any existing UI (prevents duplicates)
+  ?Type(ui.root.children) ! "null"
+    ui.Clear()
+
+  // Create panel (container)
+  var panel = ui.AddPanel()
+  panel.w = 20
+  panel.h = 5
+  panel.color = "#333333"
+  panel.anchor = "top_left"
+  panel.dock = "top_left"
+  panel.x = 1
+  panel.y = 1
+
+  // Add text element
+  var text = ui.AddText("Waiting...")
+  text.color = "#ffffff"
+  panel.Add(text)
+
+  // Store references in variables (avoids recreation)
+  var uiPanel = panel
+  var uiText = text
+
+// --- Update UI Content (runs every frame) ---
+// Force visibility even during AI suppression
+uiPanel.visible = true
+uiText.visible = true
+
+// Dynamic content updates
+?foe ! null
+  uiText.text = "Fighting: "+foe.name+"\nHP: "+foe.hp+"/"+foe.maxhp
+:
+  ?harvest
+    uiText.text = "Harvesting: "+harvest
+  :
+    uiText.text = "Exploring: "+loc.name
+
+// --- Debugging (optional) ---
+// Uncomment to monitor suppression states:
+// >`0,10,AI: @ai.enabled@ | Paused: @ai.paused@"
