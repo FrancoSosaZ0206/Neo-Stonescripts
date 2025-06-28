@@ -5,70 +5,70 @@ var currentDisplay = null
 
 // CREATE BOTH UI LAYERS
 func InitUI()
-    // Normal combat UI
-    normalUI = ui.AddText()
-    normalUI.x = 1
-    normalUI.y = 0
-    normalUI.w = 20
-    normalUI.anchor = "center_left"
-    normalUI.dock = "center_left"
-    
-    // Boss-proof UI (higher layer)
-    bossUI = ui.AddText()
-    bossUI.x = 1
-    bossUI.y = 0
-    bossUI.w = 20
-    bossUI.anchor = "center_left"
-    bossUI.dock = "center_left"
-    bossUI.visible = "false" // Start hidden
+  // Normal combat UI
+  normalUI = ui.AddText()
+  normalUI.x = 1
+  normalUI.y = 0
+  normalUI.w = 20
+  normalUI.anchor = "center_left"
+  normalUI.dock = "center_left"
+  
+  // Boss-proof UI (higher layer)
+  bossUI = ui.AddText()
+  bossUI.x = 1
+  bossUI.y = 0
+  bossUI.w = 20
+  bossUI.anchor = "center_left"
+  bossUI.dock = "center_left"
+  bossUI.visible = "false" // Start hidden
 
 // UPDATE BOTH DISPLAYS
 func UpdateDisplays()
-    var output = "ai: "
-    var states = [ai.enabled, ai.paused, ai.idle, ai.walking]
-    
-    for i = 0..states.Count()-1
-        ?states[i]
-            output += "[color=#green]"
-        :
-            output += "[color=#red]"
-        output += ["E","P","I","W"][i] + "[/color]"
-        ?i < 3
-            output += " | "
-    
-    // Update both displays simultaneously
-    ?normalUI ! null
-        normalUI.text = output
-    ?bossUI ! null
-        bossUI.text = output
+  var output = "ai: "
+  var states = [ai.enabled, ai.paused, ai.idle, ai.walking]
+  
+  for i = 0..states.Count()-1
+    ?states[i]
+      output += "[color=#green]"
+    :
+      output += "[color=#red]"
+    output += ["E","P","I","W"][i] + "[/color]"
+    ?i < 3
+      output += " | "
+  
+  // Update both displays simultaneously
+  ?normalUI ! null
+    normalUI.text = output
+  ?bossUI ! null
+    bossUI.text = output
 
 // MANAGE VISIBILITY
 func ManageLayers()
-    ?foe = "boss" | foe.count > 3 | foe = "elite"
-        // Combat-intensive situations - use boss layer
-        ?currentDisplay ! "boss"
-            ?normalUI ! null
-                normalUI.visible = "false"
-            ?bossUI ! null
-                bossUI.visible = "true"
-            currentDisplay = "boss"
-    :
-        // Normal combat - use default layer
-        ?currentDisplay ! "normal"
-            ?bossUI ! null
-                bossUI.visible = "false"
-            ?normalUI ! null
-                normalUI.visible = "true"
-            currentDisplay = "normal"
+  ?foe = "boss" | foe.count > 3 | foe = "elite"
+    // Combat-intensive situations - use boss layer
+    ?currentDisplay ! "boss"
+      ?normalUI ! null
+        normalUI.visible = "false"
+      ?bossUI ! null
+        bossUI.visible = "true"
+      currentDisplay = "boss"
+  :
+    // Normal combat - use default layer
+    ?currentDisplay ! "normal"
+      ?bossUI ! null
+        bossUI.visible = "false"
+      ?normalUI ! null
+        normalUI.visible = "true"
+      currentDisplay = "normal"
 
 // MAIN LOOP
 ?loc.begin
-    InitUI()
+  InitUI()
 
 ?true // Every frame
-    ManageLayers()
-    UpdateDisplays()
+  ManageLayers()
+  UpdateDisplays()
 
-    // Emergency recovery if elements get destroyed
-    ?normalUI = null | bossUI = null
-        InitUI()
+  // Emergency recovery if elements get destroyed
+  ?normalUI = null | bossUI = null
+    InitUI()
