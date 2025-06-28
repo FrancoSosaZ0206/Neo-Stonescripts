@@ -89,6 +89,20 @@ Enjoy! */
   The default value will be used instead. */
 
 
+/* Recursively destroys a UI component and all its children.
+NOTE: Does not nullify the *caller*'s variable. Do that
+manually if needed. */
+func destruct(component)
+  ?component & Type(component) = "object"
+    // Handle children first
+    ?component.children
+      for child : component.children
+        destruct(child)
+
+    // Recycle the component itself
+    component.Recycle()
+
+
 /* Makes a panel component.
 PARAMETERS:
   Common:

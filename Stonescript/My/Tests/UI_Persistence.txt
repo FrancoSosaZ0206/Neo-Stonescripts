@@ -1,17 +1,57 @@
+/* For more info about this file, see
+UI_Persistence_README.md */
+
 // ==============================================
-// PERSISTENT UI EXAMPLE
-// - Survives AI suppression (boss fights, cinematics)
-// - Updates dynamically without flickering
-// - Cleanly resets on location change
+// PUBLIC
 // ==============================================
 
-// --- Initialize UI (runs once per location) ---
-?loc.begin | loc.loop
-  // Clear any existing UI (prevents duplicates)
-  ?Type(ui.root.children) ! "null"
-    ui.Clear()
+// functions:
+func main()
+  // Clear old UI elements (recycling/destruction)
+  ?canDestroy()
+    destruct()
 
-  // Create panel (container)
+  // Initialization / reset
+  ?canConstruct()
+    construct()
+  
+  // Mainteinance
+  ?canUpdate()
+    update()
+
+// ==============================================
+// PRIVATE
+// ==============================================
+
+// imports:
+var uimkr = import My/Lib/UI_Maker
+
+// variables:
+var uiPanel = null
+var uiText = null
+
+
+// functions:
+
+// returns true if, at the start of each run,
+// either uiPanel or uiText are not null.
+func canDestroy()
+  return canConstruct() & (uiPanel | uiText)
+
+// destroys this script's ui components, if needed.
+func destruct()
+  ?uiPanel
+    uimkr.destruct(uiPanel)
+    uiPanel = null
+    uiText = null
+
+// Returns true on the first frame of every run
+func canConstruct()
+  return loc.begin | loc.loop
+
+// --- Initializes the persistent UI (panel + text) ---
+func construct()
+  // Create container panel
   var panel = ui.AddPanel()
   panel.w = 20
   panel.h = 5
@@ -21,29 +61,31 @@
   panel.x = 1
   panel.y = 1
 
-  // Add text element
-  var text = ui.AddText("Waiting...")
+  // Add text element inside the panel
+  var text = ui.AddText("Waiting...") // placeholder string
   text.color = "#ffffff"
   panel.Add(text)
 
-  // Store references in variables (avoids recreation)
-  var uiPanel = panel
-  var uiText = text
+  // Store for use by update()
+  uiPanel = panel
+  uiText = text
 
-// --- Update UI Content (runs every frame) ---
-// Force visibility even during AI suppression
-uiPanel.visible = true
-uiText.visible = true
+// Returns true if both uiPanel and uiText are not null
+func canUpdate()
+  return uiPanel & uiText
 
-// Dynamic content updates
-?foe ! null
-  uiText.text = "Fighting: "+foe.name+"\nHP: "+foe.hp+"/"+foe.maxhp
-:
-  ?harvest
-    uiText.text = "Harvesting: "+harvest
-  :
-    uiText.text = "Exploring: "+loc.name
+// --- Updates UI content every frame ---
+func update()
+  // Force visibility, even during suppression
+  uiPanel.visible = true
+  uiText.visible = true
 
-// --- Debugging (optional) ---
-// Uncomment to monitor suppression states:
-// >`0,10,AI: @ai.enabled@ | Paused: @ai.paused@"
+  // Dynamic content logic
+  ?foe // ! null (not needed to explicitly check)
+    uiText.text = string.Format("Fighting: {0}\nHP: {1}/{2}",
+    ^                           foe.name, foe.hp, foe.maxhp)
+  : // !foe
+    ?harvest
+      uiText.text = "Harvesting: " + harvest
+    :
+      uiText.text = "Exploring: " + loc.name
