@@ -44,8 +44,8 @@ enable npcDialog
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.0.3"
-var lastUpdated = "2025/06/28 14:40 GMT-6"
+var scriptVer = "2.0.4"
+var lastUpdated = "2025/06/28 19:00 GMT-6"
 var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
 
 var dcTag = "@metaleagle26"

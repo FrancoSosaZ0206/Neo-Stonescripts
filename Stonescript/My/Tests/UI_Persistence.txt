@@ -9,7 +9,7 @@ UI_Persistence_README.md */
 func main()
   // Clear old UI elements (recycling/destruction)
   ?canDestroy()
-    destruct()
+    destroy()
 
   // Initialization / reset
   ?canConstruct()
@@ -27,23 +27,23 @@ func main()
 var uimkr = import My/Lib/UI_Maker
 
 // variables:
-var uiPanel = null
-var uiText = null
+var pnl = null
+var txt = null
 
 
 // functions:
 
 // returns true if, at the start of each run,
-// either uiPanel or uiText are not null.
+// either pnl or txt are not null.
 func canDestroy()
-  return canConstruct() & (uiPanel | uiText)
+  return canConstruct() & pnl
 
 // destroys this script's ui components, if needed.
-func destruct()
-  ?uiPanel
-    uimkr.destruct(uiPanel)
-    uiPanel = null
-    uiText = null
+func destroy()
+  uimkr.destroy(pnl)
+  pnl = null
+  txt = null
+
 
 // Returns true on the first frame of every run
 func canConstruct()
@@ -52,40 +52,37 @@ func canConstruct()
 // --- Initializes the persistent UI (panel + text) ---
 func construct()
   // Create container panel
-  var panel = ui.AddPanel()
-  panel.w = 20
-  panel.h = 5
-  panel.color = "#333333"
-  panel.anchor = "top_left"
-  panel.dock = "top_left"
-  panel.x = 1
-  panel.y = 1
+  pnl = ui.AddPanel()
+  pnl.w = 20
+  pnl.h = 5
+  pnl.color = "#333333"
+  pnl.anchor = "top_left"
+  pnl.dock = "top_left"
+  pnl.x = 1
+  pnl.y = 1
 
   // Add text element inside the panel
-  var text = ui.AddText("Waiting...") // placeholder string
-  text.color = "#ffffff"
-  panel.Add(text)
+  txt = ui.AddText("Waiting...") // placeholder string
+  txt.color = "#ffffff"
 
-  // Store for use by update()
-  uiPanel = panel
-  uiText = text
+  pnl.Add(txt)
 
-// Returns true if both uiPanel and uiText are not null
+// Returns true if both pnl and txt are not null
 func canUpdate()
-  return uiPanel & uiText
+  return pnl & txt
 
 // --- Updates UI content every frame ---
 func update()
   // Force visibility, even during suppression
-  uiPanel.visible = true
-  uiText.visible = true
+  pnl.visible = true
+  txt.visible = true
 
   // Dynamic content logic
-  ?foe // ! null (not needed to explicitly check)
-    uiText.text = string.Format("Fighting: {0}\nHP: {1}/{2}",
+  ?foe
+    txt.text = string.Format("Fighting: {0}\nHP: {1}/{2}",
     ^                           foe.name, foe.hp, foe.maxhp)
-  : // !foe
-    ?harvest
-      uiText.text = "Harvesting: " + harvest
-    :
-      uiText.text = "Exploring: " + loc.name
+
+  :?harvest
+    txt.text = "Harvesting: " + harvest
+  :
+    txt.text = "Exploring: " + loc.name

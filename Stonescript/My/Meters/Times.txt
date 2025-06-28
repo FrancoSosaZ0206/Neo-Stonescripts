@@ -9,25 +9,6 @@ var u = import My/Lib/Utilities
 
 // ///////////////// PUBLIC ////////////////// //
 
-/* Initializes and manages the times meter.
-
-Valid <mode> values:
-
-Primary (should go first)
-"normal", "default" = returns the full version
-                      of the Meter.
-"slim", "small" = returns a smaller version of
-                  it, containing less
-                  information.
-
-Secondary
-"speedrun" = displays times with frame
-             presition
-
-Tertiary (Should go at the end)
-"ui" = makes an UI panel containing the meter.
-"print" = prints the meter normally.
-"print ascii" = prints the meter in ascii mode. */
 func main(x, y, colorHex, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
@@ -36,23 +17,20 @@ func main(x, y, colorHex, mode)
     Update(mode)
 
     ?mode = "ui"
-      mkUI(x,y,colorHex,mode)
-
-        >c-10,0,#green,ascii
-TIMES: OK
-panel = @panel ! null@
-  - parent: @panel.parent ! null@
-  - visible: @panel.visible@
-txt = @txt@
-  - parent: @txt.parent ! null@
-  - visible: @txt.visible@
-  - text: @txt.text@
-asciiend
+      UiMngr(x,y,colorHex,mode)
 
     :?mode = "print"
       Print(x,y,colorHex,mode,true)
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: main\nCAUSE: invalid <mode>:\n\n" + mode, false)
+      u.showStrCtr(0,30,#red,ascii
+ERROR
+FILE: Times
+FUNCTION: main
+CAUSE: invalid <mode>:
+
+@mode@
+asciiend
+      ^, false                      )
 
 // ///////////////// PRIVATE ///////////////// //
 
@@ -62,9 +40,8 @@ var tt  = null
 var pb  = null
 var avg = null
 
-var panel = null
+var pnl = null
 var txt = null
-var init = false
 
 // ................ Functions ................ //
 
@@ -90,7 +67,11 @@ func Update(mode)
       avg = time.formatDigital(loc.averageTime)
 
 func ToString(size)
-  var str = null
+  var str = "####SPEED-O-METER####\n" +
+  ^         "#·##·##·##·##·##·##·#\n" +
+  ^         "#PB##{0}\n" +
+  ^         "#AVG#{1}\n" +
+  ^         "#CUR#{2}"
 
   ?size = "slim" | size = "small"
     /* TO DO: implement dynamic column paddings.
@@ -99,13 +80,8 @@ func ToString(size)
 
     str = "☆#{0}#|#≈#{1}#|#▶#{2}"
 
-  :?size = "normal" | size = "default"
-    str = "####SPEED-O-METER####\n" +
-    ^     "#·##·##·##·##·##·##·#\n" +
-    ^     "#PB##{0}\n" +
-    ^     "#AVG#{1}\n" +
-    ^     "#CUR#{2}"
-  :
+  :?!(size = "normal" | size = "default")
+    str = null
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
 
   ?str
@@ -126,48 +102,72 @@ asciiend
   :
     >`@x@,@y@,@colorHex@,@ToString(mode)@
 
-func mkUI(x, y, colorHex, size)
-  ?!(panel & txt)
+func UiMngr(x, y, colorHex, size)
+  // DESTROY — Recycle old components
+  ?(loc.loop | loc.begin) & pnl
+    pnl = uimkr.destruct(pnl)
+
+  // INIT — create UI if needed
+  ?loc.begin | loc.loop
     var isValidSize = true
 
-    // For the panel:
+    // Panel settings
     var panelAnchor = bottom_left
-    var panelDock = bottom_left
-    var panelStyle = null
-    
-    ?size = "normal" | size = "default"
-      panelStyle = -2
-    :?size = "slim" | size = "small"
+    var panelDock   = bottom_left
+    var panelStyle  = -2
+
+    // Textbox settings
+    var str = ToString(size)
+    var txtW = u.getLargestStr(string.Split(str, "\n"))
+    var txtH = string.Split(str,"\n").Count()
+
+    // default size: "normal"/"default"
+    ?size = "slim"      | size = "small"
       panelStyle = -1
-    :
+      txtW = string.Size(str)
+      txtH = 1
+
+    :?!(size = "normal" | size = "default")
       isValidSize = false
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Times\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
+      u.showStrCtr(0,30,#red,ascii
+ERROR
+FILE: Times
+FUNCTION: UiMngr
+CAUSE: invalid <size>:
+
+@size@
+asciiend
+      ^, false                     )
 
     ?isValidSize
-      txt = uimkr.mkTextbox(
-      ^ 1, 1, null, null,   // x, y, w, h,
-      ^ top_left, top_left, // anchor, dock,
-      ^ ToString(size),     // txt
-      ^ null, colorHex)     // align, colorHex
+      txt = ui.AddText(str)
+      txt.x = 1
+      txt.y = 1
+      txt.w = txtW
+      txt.h = txtH
+      txt.anchor = "top_left"
+      txt.dock = "top_left"
+      txt.color = colorHex
 
-      panel = uimkr.mkPanel(
-      ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
-      ^ panelAnchor, panelDock,     // anchor, dock,
-      ^ colorHex, panelStyle, txt)  // colorHex, panelStyle, child
+      pnl = ui.AddPanel()
+      pnl.Add(txt)
+      pnl.x = x
+      pnl.y = y
+      pnl.w = txt.w + 2
+      pnl.h = txt.h + 2
+      pnl.anchor = panelAnchor
+      pnl.dock = panelDock
+      pnl.color = colorHex
+      pnl.style = panelStyle
 
-      init = true
 
-  : // panel & txt
+  // UPDATE
+  ?pnl & txt
+    pnl.visible = true
+    txt.visible = true
+
+    // Update content
     txt.text = ToString(size)
-
-    ?!panel.parent // destroy and re-init
-      txt.Recycle()
-      txt = null
-
-      panel.Recycle()
-      panel = null
-
-      init = false
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Times" ▀▄▀▄▀▄▀▄▀▄ ┃  //
