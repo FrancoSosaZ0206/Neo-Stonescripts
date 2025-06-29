@@ -145,7 +145,10 @@ border of the screen).
 	mode; now it's persistent and updates properly.
 
 - **v3.0.0:**
-  - Modularized and encapsuled private modules
+  - Created project folder.
+  - Separated public and private into different files.
+  - Included this file (README.md) inside the folder.
+  - Modularized and encapsuled private modules.
   - Rearranged project files and layout.
   - Fixed ui persistence bugs.
 

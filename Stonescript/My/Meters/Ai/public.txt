@@ -1,0 +1,15 @@
+// For info, see ./README.md
+
+// imports
+
+var priv = import My/Meters/Ai/private
+
+// functions
+
+func main()
+  // priv.updateData()
+
+  ?priv.canInit()
+    priv.mk()
+  :
+    priv.update()

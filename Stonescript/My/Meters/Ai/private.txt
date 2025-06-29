@@ -1,0 +1,55 @@
+// For info, see ./README.md
+
+// Variables
+
+var txt = null
+
+// To format:
+var dataStr = "AI#||#[color=#{0}]{1}[/color]#|#[color=#{2}]{3}[/color]#|#[color=#{4}]{5}[/color]#|#[color=#{6}]{7}[/color]#||"
+
+var dataLbls = ["E", "P", "I", "W"]
+var dataCols = ["ffffff","ffffff","ffffff","ffffff"]
+var dataVals = [ai.enabled, ai.paused, ai.idle, ai.walking]
+
+// Functions
+
+// assigns individual color metadata for each value.
+func updateData()
+  for i = 0 .. dataVals.Count() - 1
+    // change color metadata based on value state
+    ?dataVals[i]
+      dataCols[i] = "00ff00" // rGb -> green
+    :
+      dataCols[i] = "ff0000" // Rgb -> red
+
+  return string.Format(dataStr,
+  ^   dataCols[0], dataLbls[0],
+  ^   dataCols[1], dataLbls[1],
+  ^   dataCols[2], dataLbls[2],
+  ^   dataCols[3], dataLbls[3]   )
+
+// True on first frame of every run/loop
+func canInit()
+  return !txt
+
+func dl()
+  txt.Recycle()
+  txt = null
+  txt_old = txt
+// UI construction
+func mk()
+  var str = updateData()
+
+  txt = ui.AddText(str)
+
+  // define properties
+  txt.x = 1
+  txt.y = 0
+  txt.w = string.Size(str)
+  txt.anchor = "center_left"
+  txt.dock = "center_left"
+  txt.color = "#ffffff"
+// Update display
+func updateUi()
+  // assign and parse output into ui textbox
+  txt.text = updateData()
