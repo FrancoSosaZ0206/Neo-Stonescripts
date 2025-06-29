@@ -34,10 +34,10 @@ into your Mindstone.
 ## Usage
 
 __Example__ - initialize the meter in `0,3` (x,y),
-in red, in the `slim`, default version, and
+in red, in the `slim`, non-speedrun version, and
 in the `ui` mode:
 
-`t.main(0, 1, "#red", "ui")`
+`t.main(0, 1, "#red", "slim ui")`
 
 > *Keep in mind that the speedrunning mode needs to*
 > *update constantly, which may cause some lag.*

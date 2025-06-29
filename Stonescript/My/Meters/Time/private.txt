@@ -1,3 +1,7 @@
+// ///////////////// IMPORTS ///////////////// //
+
+var u = import My/Lib/Utilities
+
 // ................ Variables ................ //
 
 var tt  = null
@@ -53,7 +57,7 @@ func print(x, y, colorHex)
   >`@x@,@y@,@colorHex@,@dataToString(mode)@
 
 func uiMngr(x, y, colorHex, mode)
-  ?canInitUi(x,y,colorHex,mode)
+  ?canInitUi()
     mkUi(x,y,colorHex,mode)
   :?canRegenUi()
     dlUi()
@@ -83,16 +87,19 @@ func mkUi(x, y, colorHex, mode)
 
   // Textbox presets
   var dataStr = dataToString(mode)
-  var txtW = string.Size(
-  ^           u.getLargestStr(
-  ^             string.Split(dataStr, "\n")))
-  var txtH = string.Split(dataStr,"\n").Count()
+  var txtW = null
+  var txtH = null
 
-  // default mode: "normal"/"default"
   ?mode = "slim" | mode = "small"
     panelStyle = -1
     txtW = string.Size(dataStr)
     txtH = 1
+  :
+    txtW = string.Size(
+    ^         u.getLargestStr(
+    ^             string.Split(dataStr, "\n")))
+
+    txtH = string.Split(dataStr,"\n").Count()
 
   txt = ui.AddText()
   txt.text = dataStr

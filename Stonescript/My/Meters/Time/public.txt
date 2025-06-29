@@ -1,7 +1,6 @@
 // ///////////////// IMPORTS ///////////////// //
 
-var u = import My/Lib/Utilities
-import My/Meters/Time/private
+var priv = import My/Meters/Time/private
 
 // ................ Functions ................ //
 
@@ -9,9 +8,9 @@ func main(x, y, colorHex, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
-  updateData(mode)
+  priv.updateData(mode)
 
   ?mode = "ui"
-    uiMngr(x,y,colorHex,mode)
+    priv.uiMngr(x,y,colorHex,mode)
   :
-    print(x,y,colorHex)
+    priv.print(x,y,colorHex)
