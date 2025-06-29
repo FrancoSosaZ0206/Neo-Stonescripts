@@ -9,7 +9,7 @@ var u = import My/Lib/Utilities
 
 // ///////////////// PUBLIC ////////////////// //
 
-func main_t(x, y, colorHex, mode)
+func main(x, y, colorHex, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
@@ -25,7 +25,7 @@ func main_t(x, y, colorHex, mode)
       u.showStrCtr(0,30,#red,
       ^            "ERROR\n"+
       ^            "FILE: Times\n"+
-      ^            "FUNCTION: main_t\n"+
+      ^            "FUNCTION: main\n"+
       ^            "CAUSE: invalid <mode>:\n\n"+
       ^            mode, false                      )
 
