@@ -2,7 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄ START OF "Utilities" ▀▄▀▄▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-
 /* // ///////////// FILE INFO //////////////// //
 
 Utilities library
@@ -40,11 +39,9 @@ Made by IronHawk (Tom Crow)
 
 Enjoy! */
 
-
 // ///////////////// IMPORTS ///////////////// //
 
 var uimkr = import My/Lib/UI_Maker
-
 
 // //////////////// VARIABLES //////////////// //
 
@@ -52,7 +49,6 @@ var uimkr = import My/Lib/UI_Maker
 
 var sec = 30 // frames
 var scr = 69 // 1 screen = 69 units
-
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -278,7 +274,6 @@ func colorToHex(colorName)
     return #rainbow
   :
     showStrCtr(0,30,#red,"ERROR\nFILE: Utilities\nFUNCTION: colorToHex\nCAUSE: unknown <colorName>: " + colorName, false)
-
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀ END OF "Utilities" ▄▀▄▀▄▀▄▀▄ ┃  //

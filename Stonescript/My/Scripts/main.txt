@@ -117,7 +117,7 @@ var c = color.Random()
 
   aim.main()
   tm.main(0,-1,#red,"slim ui speedrun")
-  dps.main(-7,-1,#yellow,1,"slim ui")
+  dps.main(-8,-1,#yellow,1,"slim ui")
 
   ?loc = "rocky_plateau"
     disable npcDialog

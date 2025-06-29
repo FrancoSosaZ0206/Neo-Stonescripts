@@ -13,4 +13,4 @@ func main(x, y, colorHex, mode)
   ?mode = "ui"
     priv.uiMngr(x,y,colorHex,mode)
   :
-    priv.print(x,y,colorHex)
+    priv.print(x,y,colorHex,mode)

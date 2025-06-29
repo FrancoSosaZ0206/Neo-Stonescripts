@@ -1,49 +1,10 @@
-﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀▄ START OF "DPS" ▀▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+﻿// ///////////////// IMPORTS ///////////////// //
 
-// ///////////////// IMPORTS ///////////////// //
-
-var uimkr = import My/Lib/UI_Maker
 var u = import My/Lib/Utilities
-
-// ///////////////// PUBLIC ////////////////// //
-
-/* Initializes and manages the dps meter.
-
-Valid <mode> values:
-
-Primary (should go first)
-"normal", "default" = returns the full version
-                      of the Meter.
-"slim", "small" = returns a smaller version of
-                  it, containing less
-                  information.
-
-Secondary (should go after primary)
-"ui" = makes an UI panel containing the meter.
-"print" = prints the meter normally.
-"print ascii" = prints the meter in ascii mode. */
-func main(x, y, colorHex, frameRate, mode)
-  // sanitize mode entries
-  mode = string.ToLower(mode)
-
-  ?canUpdate(frameRate)
-    Update()
-
-    ?mode = "ui"
-      mkUI(x,y,colorHex,mode)
-
-    :?mode = "print"
-      Print(x,y,colorHex,mode,false)
-    :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: main\nCAUSE: invalid <mode>:\n\n" + mode, false)
-
-// ///////////////// PRIVATE ///////////////// //
 
 // ................ Variables ................ //
 
-var sec = 30        // No need to import the whole Utilities script just for this variable.
+// var sec = 30        // Frames
 var currhp = 0      // foe's current hitpoints (with armor)
 var nethp = 0       // foe's net maximum hitpoints (with armor)
 
@@ -59,131 +20,148 @@ var HPS = "N/A"     // hits per second
 var DPF = "N/A"     // damage per frame
 var DPS = "N/A"     // damage per second
 
-var panel = null
+var pnl = null
 var txt = null
-var init = false
+
+var dataArr = [ascii
+DPS#|#{0}
+asciiend,
+
+^ascii
+###DPS#METER###
+#·##·##·##·##·#
+#No.#Hits#{0}
+#Hits/Sec#{1}
+#Dmg#/Hit#{2}
+#Dmg#/Frm#{3}
+#Dmg#/Sec#{4}
+asciiend]
 
 // ................ Functions ................ //
 
-func canUpdate(frameRate)
-  ?frameRate > 0
-    // only works when there's a boss
-    return (foe = "boss" | foe = "monarch") &
-    ^totaltime % frameRate = 0
-  :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: canUpdate\nCAUSE: invalid <frameRate>:\n\n" + frameRate, false)
+// DATA HANDLING
 
-    return false
-func Update()
-  currhp  = foe.hp + foe.armor
-  nethp   = foe.maxhp + foe.maxarmor
+func updateData(frameRate)
+  ?frameRate > 0 & totaltime % frameRate = 0 &
+  ^(foe = "boss" | foe = "monarch")
 
-  ?0 < currhp & currhp < nethp // boss lost hp/armor, but isn't dead
+    currhp  = foe.hp + foe.armor
+    nethp   = foe.maxhp + foe.maxarmor
 
-    ?auxhp > currhp // if current hp updates
-      hits += 1 // we count a hit
-      dmg       = auxhp - currhp // we get the damage dealt from the difference
-      totalDmg  = totalDmg + dmg // and we accumulate it in this variable
+    ?0 < currhp & currhp < nethp // boss lost hp/armor, but isn't dead
 
-  : // else, reset temporal variables
-    startTime = totaltime
-    hits      = 0
-    dmg       = 0
-    totalDmg  = 0
+      ?auxhp > currhp // if current hp updates
+        hits += 1 // we count a hit
+        dmg       = auxhp - currhp // we get the damage dealt from the difference
+        totalDmg  = totalDmg + dmg // and we accumulate it in this variable
+
+    : // else, reset temporal variables
+      startTime = totaltime
+      hits      = 0
+      dmg       = 0
+      totalDmg  = 0
 
 
-  FRM = totaltime - startTime // total time minus the time the first hit was dealt
-  ?hits > 1
-    FPH = FRM      / (hits /*- 1*/) // -1 is there to avoid stat flicking
-  :
-    FPH = "N/A"
-
-  ?FPH ! "N/A"
-    HPS = sec      / FPH
-  :
-    HPS = "N/A"
-    
-  ?FRM > 0
-    DPF = totalDmg / FRM // damage accumulated - no. frames elapsed
-  :
-    DPF = "N/A"
-
-  ?DPF ! "N/A"
-    DPS = DPF  * sec
-  :
-    DPS = "N/A"
-
-  auxhp = currhp
-
-func ToString(size)
-  var str = null
-
-  ?size = "slim" | size = "small"
-    str = "DPS#|#" + DPS
-
-  :?size = "normal" | size = "default"
-    str = "###DPS#METER###"   + "\n" +
-    ^     "#·##·##·##·##·#"   + "\n" +
-    ^     "#No.#Hits#" + hits + "\n" +
-    ^     "#Hits/Sec#" + HPS  + "\n" +
-    ^     "#Dmg#/Hit#" + dmg  + "\n" +
-    ^     "#Dmg#/Frm#" + DPF  + "\n" +
-    ^     "#Dmg#/Sec#" + DPS  + "\n" +
-    ^     "#·##·##·##·##·#"
-  :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: ToString\nCAUSE: invalid <size>:\n\n" + size, false)
-
-  return str
-func Print(x, y, colorHex, mode)
-  ?mode = "ascii"
-    >`@x@,@y@,@colorHex@,ascii
-@ToString(mode)@
-asciiend
-  :
-    >`@x@,@y@,@colorHex@,@ToString(mode)@
-
-func mkUI(x, y, colorHex, size)
-  ?!(panel & txt)
-    var isValidSize = true
-
-    var panelAnchor = bottom_right
-    var panelDock = bottom_right
-    var panelStyle = null
-
-    ?size = "normal" | size = "default"
-      panelStyle = -3
-    :?size = "slim" | size = "small"
-      panelStyle = -1
+    FRM = totaltime - startTime // total time minus the time the first hit was dealt
+    ?hits > 1
+      FPH = FRM      / (hits /*- 1*/) // -1 is there to avoid stat flicking
     :
-      isValidSize = false
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: DPS\nFUNCTION: mkUI\nCAUSE: invalid <size>:\n\n" + size, false)
+      FPH = "N/A"
 
-    ?isValidSize
-      txt = uimkr.mkTextbox(
-      ^ 1, 1, null, null, // x, y, w, h,
-      ^ top_left, top_left, // anchor, dock,
-      ^ ToString(size), // txt
-      ^ null, colorHex) // align, colorHex
+    ?FPH ! "N/A"
+      HPS = u.sec      / FPH
+    :
+      HPS = "N/A"
+      
+    ?FRM > 0
+      DPF = totalDmg / FRM // damage accumulated - no. frames elapsed
+    :
+      DPF = "N/A"
 
-      panel = uimkr.mkPanel(
-      ^ x, y, txt.w + 2, txt.h + 2, // x, y, w, h,
-      ^ panelAnchor, panelDock, // anchor, dock,
-      ^ colorHex, panelStyle, txt) // colorHex, style, child
+    ?DPF ! "N/A"
+      DPS = DPF  * u.sec
+    :
+      DPS = "N/A"
 
-      init = true
+    auxhp = currhp
 
-  : // panel & txt
-    txt.text = ToString(size)
+func dataToString(mode)
+  ?mode = "slim" | mode = "small"
+    return string.Format(dataArr[0], DPS)
+  :
+    return string.Format(dataArr[1],
+    ^               hits,HPS,dmg,DPF,DPS)
 
-    ?!panel.parent // destroy and re-init
-      txt.Recycle()
-      txt = null
+// PRINT
 
-      panel.Recycle()
-      panel = null
+func print(x, y, colorHex, mode)
+  >`@x@,@y@,@colorHex@,@dataToString(mode)@
 
-      init = false
+// UI
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀▄▀ END OF "DPS" ▀▄▀▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+func uiMngr(x, y, colorHex, mode)
+  ?canInitUi()
+    mkUi(x,y,colorHex,mode)
+  :?canRegenUi()
+    dlUi()
+    mkUi(x,y,colorHex,mode)
+  :
+    updateUi(mode)
+
+func canInitUi()
+  return !(pnl & txt)
+
+// Regenerates ui components every 3 seconds.
+func canRegenUi()
+  return (pnl | txt) & (totaltime % (3 * u.sec) = 0)
+
+func dlUi()
+  txt.Recycle()
+  txt = null
+  pnl.Recycle()
+  pnl = null
+
+func mkUi(x, y, colorHex, mode)
+  // Panel presets
+  var panelStyle = -3
+
+  // Textbox presets
+  var dataStr = dataToString(mode)
+  var txtW = null
+  var txtH = null
+
+  ?mode = "slim" | mode = "small"
+    panelStyle = -1
+    txtW = string.Size(dataStr)
+    txtH = 1
+  :
+    txtW = string.Size(
+    ^         u.getLargestStr(
+    ^             string.Split(dataStr, "\n")))
+
+    txtH = string.Split(dataStr,"\n").Count()
+
+  txt = ui.AddText()
+  txt.text = dataStr
+  txt.x = 1
+  txt.y = 1
+  txt.w = txtW
+  txt.h = txtH
+  txt.anchor = "top_left"
+  txt.dock = "top_left"
+  txt.color = colorHex
+
+  pnl = ui.AddPanel()
+  pnl.x = x
+  pnl.y = y
+  pnl.w = txt.w + 2
+  pnl.h = txt.h + 2
+  pnl.anchor  = "bottom_right"
+  pnl.dock    = "bottom_right"
+  pnl.color   = colorHex
+  pnl.style   = panelStyle
+
+  pnl.Add(txt)
+
+func updateUi(mode)
+  txt.text = dataToString(mode)

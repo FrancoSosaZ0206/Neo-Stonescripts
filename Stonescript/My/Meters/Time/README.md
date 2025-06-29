@@ -50,7 +50,7 @@ in the `ui` mode:
 
 #### Description
 
-Initializes and manages the times meter.
+Initializes and manages the time meter.
 
 #### Parameters
 
@@ -62,20 +62,20 @@ border of the screen).
 
 	Valid `mode` values:
 
-	- Primary (should go first)
-		- `"normal"`, `"default"`: returns the full version
-		of the Meter.
-		- `"slim"`, `"small"`: returns a smaller version of
-			it, containing less information.
+	1. :
+      - `""`: returns the full version of the Meter.
+      - `"slim"`, `"small"`: returns a smaller version of
+      it, containing less information.
 
-	- Secondary
-		- `"speedrun"`: displays times with frame
-		presition
+	2. :
+      - `""`: displays time with second presition.
+      - `"speedrun"`: displays time with frame presition.
 
-	- Tertiary (Should go at the end)
-		- `"ui"`: makes an UI panel containing the meter.
-		- `"print"`: prints the meter normally.
-		- `"print ascii"`: prints the meter in ascii mode.
+	3. :
+      - `""`: prints the meter normally.
+      - `"ui"`: makes an UI panel containing the meter.
+
+  `mode` usage template: `"<i.> <ii.> <iii.>"`
 
 ## CHANGELOG
 

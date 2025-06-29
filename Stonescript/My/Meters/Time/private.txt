@@ -10,19 +10,17 @@ var at = null
 
 var pnl = null
 var txt = null
-var pnl_old = pnl
-var txt_old = txt
 
 var dataArr = [ascii
+☆#{0}#|#≈#{1}#|#▶#{2}
+asciiend,
+
+^ascii
 ####SPEED-O-METER####
 #·##·##·##·##·##·##·#
 #BES#{0}
 #AVG#{1}
 #CUR#{2}
-asciiend,
-
-^ascii
-☆#{0}#|#≈#{1}#|#▶#{2}
 asciiend]
 
 // ................ Functions ................ //
@@ -47,14 +45,16 @@ func updateData(mode)
 
 func dataToString(mode)
   ?mode = "slim" | mode = "small"
-    return string.Format(dataArr[1], bt,at,tt)
-  :
     return string.Format(dataArr[0], bt,at,tt)
+  :
+    return string.Format(dataArr[1], bt,at,tt)
 
 // PRINT
 
-func print(x, y, colorHex)
+func print(x, y, colorHex, mode)
   >`@x@,@y@,@colorHex@,@dataToString(mode)@
+
+// UI
 
 func uiMngr(x, y, colorHex, mode)
   ?canInitUi()
@@ -63,23 +63,18 @@ func uiMngr(x, y, colorHex, mode)
     dlUi()
     mkUi(x,y,colorHex,mode)
   :
-    updateUi()
-
-// UI
+    updateUi(mode)
 
 func canInitUi()
   return !(pnl & txt)
 func canRegenUi()
-  return pnl ! pnl_old | txt ! pnl_old
+  return (pnl | txt) & (totaltime % (2 * u.sec) = 0)
 
 func dlUi()
   pnl.Remove(txt)
   txt = null
   pnl.Recycle()
   pnl = null
-  
-  pnl_old = pnl
-  txt_old = txt
 
 func mkUi(x, y, colorHex, mode)
   // Panel presets
@@ -123,5 +118,5 @@ func mkUi(x, y, colorHex, mode)
 
   pnl.Add(txt)
 
-func updateUi()
+func updateUi(mode)
   txt.text = dataToString(mode)

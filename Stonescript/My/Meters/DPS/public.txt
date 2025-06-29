@@ -1,0 +1,16 @@
+// ///////////////// IMPORTS ///////////////// //
+
+var priv = import My/Meters/DPS/private
+
+// ................ Functions ................ //
+
+func main(x, y, colorHex, frameRate, mode)
+  // sanitize mode entries
+  mode = string.ToLower(mode)
+
+  priv.updateData(frameRate)
+
+  ?mode = "ui"
+    priv.uiMngr(x,y,colorHex,mode)
+  :
+    priv.print(x,y,colorHex,mode)
