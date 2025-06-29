@@ -9,7 +9,7 @@ var u = import My/Lib/Utilities
 
 // ///////////////// PUBLIC ////////////////// //
 
-func main(x, y, colorHex, mode)
+func main_t(x, y, colorHex, mode)
   // sanitize mode entries
   mode = string.ToLower(mode)
 
@@ -20,17 +20,14 @@ func main(x, y, colorHex, mode)
       UiMngr(x,y,colorHex,mode)
 
     :?mode = "print"
-      Print(x,y,colorHex,mode,true)
+      Print(x,y,colorHex)
     :
-      u.showStrCtr(0,30,#red,ascii
-ERROR
-FILE: Times
-FUNCTION: main
-CAUSE: invalid <mode>:
-
-@mode@
-asciiend
-      ^, false                      )
+      u.showStrCtr(0,30,#red,
+      ^            "ERROR\n"+
+      ^            "FILE: Times\n"+
+      ^            "FUNCTION: main_t\n"+
+      ^            "CAUSE: invalid <mode>:\n\n"+
+      ^            mode, false                      )
 
 // ///////////////// PRIVATE ///////////////// //
 
@@ -40,8 +37,8 @@ var tt  = null
 var pb  = null
 var avg = null
 
-var pnl = null
-var txt = null
+var pnl_t = null
+var txt_t = null
 
 // ................ Functions ................ //
 
@@ -88,26 +85,15 @@ func ToString(size)
     str = string.Format(str, pb,avg,tt)
 
   return str
-/* isAscii:
-    true: prints the text in ascii format,
-          replacing the whitespace characters
-          with transparent characters.
-    false: prints normally. Whitespaces
-           will block the background. */
-func Print(x, y, colorHex, mode)
-  ?mode = "ascii"
-    >`@x@,@y@,@colorHex@,ascii
-@ToString(mode)@
-asciiend
-  :
-    >`@x@,@y@,@colorHex@,@ToString(mode)@
+
+func Print(x, y, colorHex)
+  >`@x@,@y@,@colorHex@,@ToString(mode)@
 
 func UiMngr(x, y, colorHex, size)
-  ?loc.begin | loc.loop
+  ?totaltime = 1*30 // loc.begin | loc.loop
     // DESTROY — Recycle old components
-    txt = uimkr.destroy(txt)
-    pnl = uimkr.destroy(pnl)
-
+    // txt_t = uimkr.destroy(txt_t)
+    pnl_t = uimkr.destroy(pnl_t)
 
     // INIT — create UI if needed
     var isValidSize = true
@@ -130,45 +116,43 @@ func UiMngr(x, y, colorHex, size)
 
     :?!(size = "normal" | size = "default")
       isValidSize = false
-      u.showStrCtr(0,30,#red,ascii
-ERROR
-FILE: Times
-FUNCTION: UiMngr
-CAUSE: invalid <size>:
-
-@size@
-asciiend
-      ^, false                     )
+      u.showStrCtr(0,30,#red,
+      ^            "ERROR\n"+
+      ^            "FILE: Times\n"+
+      ^            "FUNCTION: UiMngr\n"+
+      ^            "CAUSE: invalid <size>:\n\n"+
+      ^            size, false                     )
 
     ?isValidSize
-      txt = ui.AddText(str)
-      txt.x = 1
-      txt.y = 1
-      txt.w = txtW
-      txt.h = txtH
-      txt.anchor = "top_left"
-      txt.dock = "top_left"
-      txt.color = colorHex
+      txt_t = ui.AddText()
+      txt_t.text = str
+      txt_t.x = 1
+      txt_t.y = 1
+      txt_t.w = txtW
+      txt_t.h = txtH
+      txt_t.anchor = "top_left"
+      txt_t.dock = "top_left"
+      txt_t.color = colorHex
 
-      pnl = ui.AddPanel()
-      pnl.Add(txt)
-      pnl.x = x
-      pnl.y = y
-      pnl.w = txt.w + 2
-      pnl.h = txt.h + 2
-      pnl.anchor = panelAnchor
-      pnl.dock = panelDock
-      pnl.color = colorHex
-      pnl.style = panelStyle
+      pnl_t = ui.AddPanel()
+      pnl_t.Add(txt_t)
+      pnl_t.x = x
+      pnl_t.y = y
+      pnl_t.w = txt_t.w + 2
+      pnl_t.h = txt_t.h + 2
+      pnl_t.anchor = panelAnchor
+      pnl_t.dock = panelDock
+      pnl_t.color = colorHex
+      pnl_t.style = panelStyle
 
 
   // UPDATE
-  ?pnl & txt
-    pnl.visible = true
-    txt.visible = true
+  ?pnl_t & txt_t
+    pnl_t.visible = true
+    txt_t.visible = true
 
     // Update content
-    txt.text = ToString(size)
+    txt_t.text = ToString(size)
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Times" ▀▄▀▄▀▄▀▄▀▄ ┃  //

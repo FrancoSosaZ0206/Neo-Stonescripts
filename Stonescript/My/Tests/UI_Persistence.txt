@@ -6,7 +6,7 @@ UI_Persistence_README.md */
 // ==============================================
 
 // functions:
-func main()
+func main_ui_p()
   // Initialization / reset
   ?canInit()
     init()
@@ -23,54 +23,55 @@ func main()
 var uimkr = import My/Lib/UI_Maker
 
 // variables:
-var pnl_UiPersistence = null
-var txt_UiPersistence = null
+var pnl_ui_p = null
+var txt_ui_p = null
 
 
 // functions:
 
 // Returns true on the first frame of every run
 func canInit()
-  return loc.begin | loc.loop
+  return totaltime = 2*30 // loc.begin | loc.loop
 
 // --- Initializes the persistent UI (panel + text) ---
 func init()
   // recycle old component(s)
-  txt_UiPersistence = uimkr.destroy(txt_UiPersistence)
-  pnl_UiPersistence = uimkr.destroy(pnl_UiPersistence)
-
-  // Create container panel
-  pnl_UiPersistence = ui.AddPanel()
-  pnl_UiPersistence.w = 20
-  pnl_UiPersistence.h = 5
-  pnl_UiPersistence.color = "#333333"
-  pnl_UiPersistence.anchor = "top_left"
-  pnl_UiPersistence.dock = "top_left"
-  pnl_UiPersistence.x = 1
-  pnl_UiPersistence.y = 1
+  // txt_ui_p = uimkr.destroy(txt_ui_p)
+  pnl_ui_p = uimkr.destroy(pnl_ui_p)
 
   // Add text element inside the panel
-  txt_UiPersistence = ui.AddText("Waiting...") // placeholder string
-  txt_UiPersistence.color = "#ffffff"
+  txt_ui_p = ui.AddText()
+  // txt_ui_p.text = "Waiting..." // placeholder string
+  txt_ui_p.color = "#ffffff"
 
-  pnl_UiPersistence.Add(txt_UiPersistence)
+  // Create container panel
+  pnl_ui_p = ui.AddPanel()
+  pnl_ui_p.w = 20
+  pnl_ui_p.h = 5
+  pnl_ui_p.color = "#333333"
+  pnl_ui_p.anchor = "top_left"
+  pnl_ui_p.dock = "top_left"
+  pnl_ui_p.x = 1
+  pnl_ui_p.y = 1
 
-// Returns true if both pnl_UiPersistence and txt_UiPersistence are not null
+  pnl_ui_p.Add(txt_ui_p)
+
+// Returns true if both pnl_ui_p and txt_ui_p are not null
 func canUpdate()
-  return pnl_UiPersistence & txt_UiPersistence
+  return pnl_ui_p & txt_ui_p
 
 // --- Updates UI content every frame ---
 func update()
   // Force visibility, even during suppression
-  pnl_UiPersistence.visible = true
-  txt_UiPersistence.visible = true
+  pnl_ui_p.visible = true
+  txt_ui_p.visible = true
 
   // Dynamic content logic
   ?foe
-    txt_UiPersistence.text = string.Format("Fighting: {0}\nHP: {1}/{2}",
+    txt_ui_p.text = string.Format("Fighting: {0}\nHP: {1}/{2}",
     ^                           foe.name, foe.hp, foe.maxhp)
 
   :?harvest
-    txt_UiPersistence.text = "Harvesting: " + harvest
+    txt_ui_p.text = "Harvesting: " + harvest
   :
-    txt_UiPersistence.text = "Exploring: " + loc.name
+    txt_ui_p.text = "Exploring: " + loc.name

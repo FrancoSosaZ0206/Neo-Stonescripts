@@ -111,10 +111,11 @@ var c = color.Random()
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
 
   // import UI/FoeStateTracker
-  import My/Lib/Meters/Ai
-  // var tm = import My/Lib/Meters/Times
-  // var dps = import My/Lib/Meters/DPS
+  var aim = import My/Meters/Ai
+  // var tm = import My/Meters/Times
+  // var dps = import My/Meters/DPS
 
+  aim.main()
   // tm.main(0,-1,#red,"slim ui speedrun")
   // dps.main(-7,-1,#yellow,1,"slim ui")
 
