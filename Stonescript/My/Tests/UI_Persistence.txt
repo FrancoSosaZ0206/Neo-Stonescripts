@@ -36,19 +36,22 @@ func canInit()
 // --- Initializes the persistent UI (panel + text) ---
 func init()
   // recycle old component(s)
-  // txt_ui_p = uimkr.destroy(txt_ui_p)
-  pnl_ui_p = uimkr.destroy(pnl_ui_p)
+  ?pnl_ui_p
+    ?txt_ui_p
+      pnl_ui_p.Remove(txt_ui_p)
+      txt_ui_p = null
+    pnl_ui_p = uimkr.destroy(pnl_ui_p)
 
   // Add text element inside the panel
   txt_ui_p = ui.AddText()
   // txt_ui_p.text = "Waiting..." // placeholder string
-  txt_ui_p.color = "#ffffff"
+  txt_ui_p.color = #ffffff
 
   // Create container panel
   pnl_ui_p = ui.AddPanel()
   pnl_ui_p.w = 20
   pnl_ui_p.h = 5
-  pnl_ui_p.color = "#333333"
+  pnl_ui_p.color = #333333
   pnl_ui_p.anchor = "top_left"
   pnl_ui_p.dock = "top_left"
   pnl_ui_p.x = 1

@@ -4,42 +4,43 @@ Time display utility
 
 **Author:** IronHawk (Tom Crow)
 
-**Version:** 2.2
+**Version:** 3.0.0
 
-## Description
+## Features
 
-This library displays your runs' times!
-Includes a speedrunning version to track frames.
+- Displays `loc.bestTime`, `loc.averageTime`
+and `totaltime` in digital format (second presition).
+- Optional, frame-presition mode.
+- Printing and UI modes.
+- Coloring.
+- UI: self managed - just call the function and
+forget about it!
 
 ## Importing
 
 ### Desktop
 
-Put this file in Stonescript/UI or your
-directory of preference (inside Stonescript),
+Put this file in `Stonescript/UI` or your
+directory of preference (within `Stonescript/`),
 then do this:
 
-`var t = import <YourDirectory>/Times`
+`var t = import <YourDirectory>/Time/public`
 
 ### Mobile
 
-Copy-Paste this script and any dependencies
+Copy-Paste `./public.txt` and any dependencies
 into your Mindstone.
 
 ## Usage
 
 __Example__ - initialize the meter in `0,3` (x,y),
-in red, in the `slim`, non-speedrun version, and
+in red, in the `slim`, default version, and
 in the `ui` mode:
 
-`t.main(0, 1, "#red", "normal ui")`
+`t.main(0, 1, "#red", "ui")`
 
-> *Keep in mind that speedrunning functions need to*
-> *update constantly to show the frames, which may cause*
-> *some lag.*
-> 
-> *Also, remember to use `.Recycle()` and assign*
-> *to `null` after using UI functions!*
+> *Keep in mind that the speedrunning mode needs to*
+> *update constantly, which may cause some lag.*
 
 ***
 
@@ -142,6 +143,11 @@ border of the screen).
 	- Main_Times >> main
 	- Fixed flickering/vanishing bugs for the UI
 	mode; now it's persistent and updates properly.
+
+- **v3.0.0:**
+  - Modularized and encapsuled private modules
+  - Rearranged project files and layout.
+  - Fixed ui persistence bugs.
 
 ***
 

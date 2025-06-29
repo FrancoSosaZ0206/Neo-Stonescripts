@@ -1,0 +1,17 @@
+// ///////////////// IMPORTS ///////////////// //
+
+var u = import My/Lib/Utilities
+import My/Meters/Time/private
+
+// ................ Functions ................ //
+
+func main(x, y, colorHex, mode)
+  // sanitize mode entries
+  mode = string.ToLower(mode)
+
+  updateData(mode)
+
+  ?mode = "ui"
+    uiMngr(x,y,colorHex,mode)
+  :
+    print(x,y,colorHex)

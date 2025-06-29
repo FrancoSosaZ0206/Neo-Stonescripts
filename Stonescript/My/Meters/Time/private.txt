@@ -1,0 +1,120 @@
+// ................ Variables ................ //
+
+var tt  = null
+var bt  = null
+var at = null
+
+var pnl = null
+var txt = null
+var pnl_old = pnl
+var txt_old = txt
+
+var dataArr = [ascii
+####SPEED-O-METER####
+#·##·##·##·##·##·##·#
+#BES#{0}
+#AVG#{1}
+#CUR#{2}
+asciiend,
+
+^ascii
+☆#{0}#|#≈#{1}#|#▶#{2}
+asciiend]
+
+// ................ Functions ................ //
+
+// DATA HANDLING
+
+func updateData(mode)
+  ?mode = "speedrun" // update every frame
+    tt    = u.formatSpeedrun(totaltime)
+
+    ?loc.begin | loc.loop
+      bt  = u.formatSpeedrun(loc.bestTime)
+      at = u.formatSpeedrun(loc.averageTime)
+
+  : // update every second (30 frames)
+    ?loc.begin | totaltime % u.sec = 0
+      tt  = time.formatDigital(totaltime)
+
+    ?loc.begin | loc.loop
+      bt  = time.formatDigital(loc.bestTime)
+      at = time.formatDigital(loc.averageTime)
+
+func dataToString(mode)
+  ?mode = "slim" | mode = "small"
+    return string.Format(dataArr[1], bt,at,tt)
+  :
+    return string.Format(dataArr[0], bt,at,tt)
+
+// PRINT
+
+func print(x, y, colorHex)
+  >`@x@,@y@,@colorHex@,@dataToString(mode)@
+
+func uiMngr(x, y, colorHex, mode)
+  ?canInitUi(x,y,colorHex,mode)
+    mkUi(x,y,colorHex,mode)
+  :?canRegenUi()
+    dlUi()
+    mkUi(x,y,colorHex,mode)
+  :
+    updateUi()
+
+// UI
+
+func canInitUi()
+  return !(pnl & txt)
+func canRegenUi()
+  return pnl ! pnl_old | txt ! pnl_old
+
+func dlUi()
+  pnl.Remove(txt)
+  txt = null
+  pnl.Recycle()
+  pnl = null
+  
+  pnl_old = pnl
+  txt_old = txt
+
+func mkUi(x, y, colorHex, mode)
+  // Panel presets
+  var panelStyle  = -2
+
+  // Textbox presets
+  var dataStr = dataToString(mode)
+  var txtW = string.Size(
+  ^           u.getLargestStr(
+  ^             string.Split(dataStr, "\n")))
+  var txtH = string.Split(dataStr,"\n").Count()
+
+  // default mode: "normal"/"default"
+  ?mode = "slim" | mode = "small"
+    panelStyle = -1
+    txtW = string.Size(dataStr)
+    txtH = 1
+
+  txt = ui.AddText()
+  txt.text = dataStr
+  txt.x = 1
+  txt.y = 1
+  txt.w = txtW
+  txt.h = txtH
+  txt.anchor = "top_left"
+  txt.dock = "top_left"
+  txt.color = colorHex
+
+  pnl = ui.AddPanel()
+  pnl.x = x
+  pnl.y = y
+  pnl.w = txt.w + 2
+  pnl.h = txt.h + 2
+  pnl.anchor  = "bottom_left"
+  pnl.dock    = "bottom_left"
+  pnl.color   = colorHex
+  pnl.style   = panelStyle
+
+  pnl.Add(txt)
+
+func updateUi()
+  txt.text = dataToString(mode)
