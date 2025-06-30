@@ -119,8 +119,11 @@ func fight(mode)
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ........... //
-    :?hp ! maxhp & canDash &
-    ^foe.GetCount(foe.distance + margin) = 1
+    :?hp ! maxhp &
+    ^((canDash &
+    ^  foe.GetCount(foe.distance + margin) = 1) |
+    ^ foe = "monarch")
+
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ........... //

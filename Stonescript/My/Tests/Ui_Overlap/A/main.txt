@@ -6,17 +6,20 @@ var txt = null
 func main()
   ?init()
     mk()
+    >c0,0,#green,A: init
   :?regen()
     dl()
     mk()
+    >c0,0,#yellow,A: regen
   :
     update()
+    >c0,0,#red,A: update
 
 func init()
   return !(pnl & txt)
 
 func regen()
-  return (pnl | txt) & (totaltime % 30 = 0)
+  return pnl.parent ! ui.root | pnl.parent = null
 
 func dl()
   pnl.Remove(txt)
@@ -45,4 +48,6 @@ func mk()
   pnl.Add(txt)
   
 func update()
+  txt.w = string.Size("t="+totaltime)
+  pnl.w = txt.w + 2
   txt.text = "t="+totaltime

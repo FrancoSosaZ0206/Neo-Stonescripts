@@ -206,7 +206,7 @@ var adisabled = [
 // Function Calls
 //*******************************
 
-var button 
+var button
 ?totaltime=1
   button = DrawMindstoneButton()
   Display(level,scene,quest,unknown)
@@ -226,48 +226,48 @@ var button
 //*******************************
 func DrawMindstoneButton()
 
-    var p = ui.AddPanel()
-    p.anchor = buttonanchor
-    p.dock = buttondock
-    p.visible = false
-    p.color = #888888
-    p.style = 1
-    p.w = 8
-    p.h = 5
-    p.x = buttonx
-    p.y = buttony
+  var p = ui.AddPanel()
+  p.anchor = buttonanchor
+  p.dock = buttondock
+  p.visible = false
+  p.color = #888888
+  p.style = 1
+  p.w = 8
+  p.h = 5
+  p.x = buttonx
+  p.y = buttony
 
-    var b = ui.AddButton()
-    b.anchor = center_center
-    b.dock = center_center
-    b.visible = inherit
-    b.style = 1
-    b.text = “”
-    b.w = 8
-    b.h = 5
-    b.SetPressed(BtnPressed)
-    p.Add(b)
+  var b = ui.AddButton()
+  b.anchor = center_center
+  b.dock = center_center
+  b.visible = inherit
+  b.style = 1
+  b.text = “”
+  b.w = 8
+  b.h = 5
+  b.SetPressed(BtnPressed)
+  p.Add(b)
 
-    var a = ui.AddAnim(mindart)
-    a.anchor = center_center
-    a.dock = center_center
-    a.visible = inherit
-    a.color = #white
-    p.Add(a)
+  var a = ui.AddAnim(mindart)
+  a.anchor = center_center
+  a.dock = center_center
+  a.visible = inherit
+  a.color = #white
+  p.Add(a)
 
-    // Only displays text on PC
-    // to match other buttons
-    ?sys.isPC
-      var t = ui.AddText()
-      t.anchor = bottom_right
-      t.dock = bottom_right
-      t.visible = inherit
-      t.color = #888888
-      t.text = "[M]"
-      t.w = 3
-      t.h = 1
-      t.x = -1
-      p.Add(t)
+  // Only displays text on PC
+  // to match other buttons
+  ?sys.isPC
+    var t = ui.AddText()
+    t.anchor = bottom_right
+    t.dock = bottom_right
+    t.visible = inherit
+    t.color = #888888
+    t.text = "[M]"
+    t.w = 3
+    t.h = 1
+    t.x = -1
+    p.Add(t)
 
   return p
 //
@@ -363,7 +363,7 @@ func SetXY(x,y)
 func Display(levels,scenery,
             ^quests,unknown)
 
-  ?!quests & loc.isquest
+  ?!quests & loc.isQuest
     button.visible = false
     return
 

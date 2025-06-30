@@ -1,0 +1,116 @@
+// =====================================
+// atomic example (A and B)
+
+var pnlA = null
+var txtA = null
+var valA = totaltime
+var strA = "t="+valA
+
+var pnlB = null
+var txtB = null
+var valB = 0
+var strB = "kills="+valB
+
+func mainBoth()
+  mainA()
+  mainB()
+
+func mainA()
+  ?initA()
+    mkA()
+    >c0,0,#green,A: initializing
+  :?regenA()
+    dlA()
+    mkA()
+    >c0,0,#yellow,A: regenerating
+  :
+    upA()
+    >c0,0,#red,A: updating
+func mainB()
+  ?initB()
+    mkB()
+    >c0,2,#green,B: initializing
+  :?regenB()
+    dlB()
+    mkB()
+    >c0,2,#yellow,B: regenerating
+  :
+    upB()
+    >c0,2,#red,B: updating
+
+func initA()
+  return totaltime = 1
+func initB()
+  return totaltime = 2
+
+func regenA()
+  return pnlA.parent ! ui.root | pnlA.parent = null
+func regenB()
+  return pnlB.parent ! ui.root | pnlB.parent = null
+
+func dlA()
+  pnlA.Remove(txtA)
+  txtA = null
+  pnlA.Recycle()
+  pnlA = null
+func dlB()
+  pnlB.Remove(txtB)
+  txtB = null
+  pnlB.Recycle()
+  pnlB = null
+
+func mkA()
+  txtA = ui.AddText(strA)
+  txtA.anchor = "center_center"
+  txtA.dock = "center_center"
+  txtA.w = string.Size(strA)
+  txtA.h = 1
+  txtA.align = "center"
+  txtA.color = color.FromRGB(255,0,0)
+  
+  pnlA = ui.AddPanel()
+  pnlA.x = 1
+  pnlA.y = 1
+  pnlA.w = txtA.w + 2
+  pnlA.h = txtA.h + 2
+  pnlA.anchor = "top_left"
+  pnlA.dock = "top_left"
+  pnlA.color = color.FromRGB(100,0,0)
+
+  pnlA.Add(txtA)
+func mkB()
+  txtB = ui.AddText(strB)
+  txtB.anchor = "center_center"
+  txtB.dock = "center_center"
+  txtB.w = string.Size(strB)
+  txtB.h = 1
+  txtB.align = "center"
+  txtB.color = color.FromRGB(0,255,0)
+  
+  pnlB = ui.AddPanel()
+  pnlB.x = 1
+  pnlB.y = 10
+  pnlB.w = txtB.w + 2
+  pnlB.h = txtB.h + 2
+  pnlB.anchor = "top_left"
+  pnlB.dock = "top_left"
+  pnlB.color = color.FromRGB(0,100,0)
+
+  pnlB.Add(txtB)
+
+func upA()
+  valA = totaltime
+  strA = "t="+valA
+
+  txtA.w = string.Size(strA)
+  pnlA.w = txtA.w + 2
+  txtA.text = strA
+func upB()
+  ?foe.state = 4 & foe.time = 0
+    valB++
+  strB = "kills="+valB
+
+  txtB.text = strB
+
+  txtB.w = string.Size(strB)
+  pnlB.w = txtB.w + 2

@@ -30,80 +30,30 @@ import My/Scripts/main
 Deadwood Waterfall. */
 import UI/BragMeter
 
-var scrl = import UI/ScrollText
 import My/Cosmetics
+import My/Scripts/Watermark
 
 ?sys.isMobile
   sys.cacheRemoteFiles = false // refresh between runs
-  import UI/MindstoneButton
+  var mind
+  ?totaltime = 1
+    mind = import UI/MindstoneButton
 
 // ··············· PROCEDURE ················ //
 
 enable npcDialog
 
-// Watermark & version control
-var author = "Tom Crow"
-
-var scriptVer = "2.1.1"
-var lastUpdated = "2025/06/30 03:15 GMT-6"
-var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
-
-var dcTag = "@metaleagle26"
-var dcUsername = "IronHawk, Imports Maniac"
-var ytChannel = "IronHawk0206"
-
-// Formatted watermark array
-var watermarkArr = [
-^"author: "+author,
-
-^"version: "+scriptVer,
-^"last updated: "+lastUpdated,
-^"source: "+sys.fileUrl,
-^"DISCLAIMER: "+disclaimer,
-
-^string.Format("discord: {0} (SSRPG {1}: {2})",
-^              dcTag,
-^              "server username",
-^              dcUsername),
-^"YouTube: "+ytChannel,
-
-^"############"]
-
-// combine array with transparent char separators
-var watermarkStr = string.Join("############", watermarkArr)
-// replace remaining whitespaces for transparent characters "#"
-watermarkStr = string.Split(watermarkStr)
-watermarkStr = string.Join("#", watermarkStr)
-
-// print params
-var w = 16
-var stepWait = 3
-var c = color.Random()
-// color rotation logic
-?totaltime % (math.Pow(stepWait, 2)) = 0
-  c = color.Random()
-
-// print watermark with ScrollText
->`@screen.w - w@,0,@c@,
-^@scrl.ScrollText(watermarkStr,w,stepWait,stepWait)@
-
-
-// print identifier banner
-?loc.begin
-  ui.ShowBanner("Using IronHawk's Neo-Stonescripts!",
-  ^             "Enjoy! ;)")
-
 // withdrawal logic:
 
 ?!loc.isQuest & (
-^loc = "cross_deadwood_river" |
-^loc = "cross_bridge")
+^loc.id = "cross_deadwood_river" |
+^loc.id = "cross_bridge")
   loc.Leave()
 
 // special locations logic
-:?loc = "uulaa_shop" // Hotspring Shop
+:?loc.id = "uulaa_shop" // Hotspring Shop
   import My/Scripts/Hotspring_Shop
-:?loc = "undead_crypt_intro" // Haunted Gate
+:?loc.id = "undead_crypt_intro" // Haunted Gate
   disable npcDialog
   import My/Scripts/Gate
 
@@ -111,30 +61,37 @@ var c = color.Random()
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
 
   import UI/FoeStateTracker
-  var aim = import My/Meters/Ai/public
-  var tm = import My/Meters/Time/public
-  var dps = import My/Meters/DPS/public
+
+  /*var aim
+  var tm
+  var dpsm
+
+  aim = new My/Meters/Ai/public
+  tm = new My/Meters/Time/public
+  dpsm = new My/Meters/DPS/public
 
   aim.main()
-  tm.main(1,screen.h - 3,#red,"slim speedrun")
-  dps.main(screen.w - 8,screen.h - 2,#yellow,1,"slim")
+  tm.main(0,-1,#red,"slim ui speedrun")
+  dpsm.main(-8,-1,#yellow,1,"slim ui")*/
+  /*tm.main(1,screen.h - 3,#red,"slim speedrun")
+  dpsm.main(screen.w - 8,screen.h - 2,#yellow,1,"slim")*/
 
-  ?loc = "rocky_plateau"
+  ?loc.id = "rocky_plateau"
     disable npcDialog
     import My/Scripts/1-Rocky
-  :?loc = "deadwood_valley"
+  :?loc.id = "deadwood_valley"
     import My/Scripts/2-Deadwood
-  :?loc = "caustic_caves"
+  :?loc.id = "caustic_caves"
     import My/Scripts/3-Caves
-  :?loc = "fungus_forest"
+  :?loc.id = "fungus_forest"
     import My/Scripts/4-Mushroom
-  :?loc = "undead_crypt"
+  :?loc.id = "undead_crypt"
     import My/Scripts/5-Halls
-  :?loc = "bronze_mine"
+  :?loc.id = "bronze_mine"
     import My/Scripts/6-Mine
-  :?loc = "icy_ridge"
+  :?loc.id = "icy_ridge"
     import My/Scripts/7-Ridge
-  :?loc = "temple"
+  :?loc.id = "temple"
     import My/Scripts/8-Temple
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

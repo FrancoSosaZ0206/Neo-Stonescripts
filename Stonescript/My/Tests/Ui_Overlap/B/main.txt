@@ -7,17 +7,20 @@ var bVal = 0
 func main()
   ?init()
     mk()
+    >c0,2,#green,B: init
   :?regen()
     dl()
     mk()
+    >c0,2,#yellow,B: regen
   :
     update()
+    >c0,2,#red,B: update
 
 func init()
   return !(pnl & txt)
 
 func regen()
-  return (pnl | txt) & (totaltime % 50 = 0)
+  return pnl.parent ! ui.root | pnl.parent = null
 
 func dl()
   pnl.Remove(txt)
@@ -50,3 +53,6 @@ func update()
     bVal++
 
   txt.text = "kills="+bVal
+
+  txt.w = string.Size("kills="+bVal)
+  pnl.w = txt.w + 2

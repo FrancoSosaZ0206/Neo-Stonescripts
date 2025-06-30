@@ -1,0 +1,4 @@
+// ============================
+// an even more atomic example
+
+var 

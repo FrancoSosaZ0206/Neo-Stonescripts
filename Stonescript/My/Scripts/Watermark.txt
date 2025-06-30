@@ -1,0 +1,61 @@
+// imports
+var scrl = import UI/ScrollText
+
+
+// Watermark & version control
+var author = "Tom Crow"
+
+var scriptVer = "2.1.1"
+var lastUpdated = "2025/06/30 03:15 GMT-6"
+var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
+
+var dcTag = "@metaleagle26"
+var dcUsername = "IronHawk, Imports Maniac"
+var ytChannel = "IronHawk0206"
+
+var separator = "#"
+?string.Size(separator) ! w
+  separator += "#"
+
+// print params
+var w = 16
+var stepWait = 3
+var c = color.Random()
+
+// Formatted watermark array
+var watermarkArr = [
+^"author: "+author,
+
+^"version: "+scriptVer,
+^"last updated: "+lastUpdated,
+^"source: "+sys.fileUrl,
+^"DISCLAIMER: "+disclaimer,
+
+^string.Format("discord: {0} (SSRPG {1}: {2})",
+^              dcTag,
+^              "server username",
+^              dcUsername),
+^"YouTube: "+ytChannel,
+
+^separator]
+
+
+// combine array with transparent char separators
+var watermarkStr = string.Join(separator, watermarkArr)
+// replace remaining whitespaces for transparent characters "#"
+watermarkStr = string.Split(watermarkStr)
+watermarkStr = string.Join("#", watermarkStr)
+
+// color rotation logic
+?totaltime % (math.Pow(stepWait, 2)) = 0
+  c = color.Random()
+
+// print watermark with ScrollText
+>`@screen.w - w@,0,@c@,
+^@scrl.ScrollText(watermarkStr,w,stepWait,stepWait)@
+
+
+// print identifier banner
+?loc.begin
+  ui.ShowBanner("Using IronHawk's Neo-Stonescripts!",
+  ^             "Enjoy! ;)")
