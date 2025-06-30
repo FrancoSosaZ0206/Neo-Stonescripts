@@ -163,3 +163,7 @@ func mkUi(x, y, colorHex, mode)
 
 func updateUi(mode)
   txt.text = dataToString(mode)
+
+  // force visibility
+  pnl.visible = true
+  txt.visible = true
