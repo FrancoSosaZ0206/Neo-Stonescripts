@@ -602,6 +602,10 @@ unmake with repeating crossbow. */
     margin = 8
     a.ldtF("big sword unmake") */
 
+  :?buffs.string = "ʘ" // berserk potion
+    margin = 8
+    a.ldtF("big sword unmake")
+
   :?!(foe = "monarch" & foe = "soldier")
     equip Kubikiribocho
   :
@@ -651,7 +655,7 @@ unmake with repeating crossbow. */
 // Tanky foe, use bardiche ability to lower its hitpoints
 :?loc.stars > 15 &
 ^(foe = "boss" | foe = "monarch") &
-^foe.distance <= s.getRange("sword") + 1 &
+^s.inRange("shovel") &
 ^(c.canUseAbility("staff_poison") |
 ^c.canUseAbility("bardiche"))
   ?c.canUseAbility("staff_poison")
