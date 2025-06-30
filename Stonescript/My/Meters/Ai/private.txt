@@ -11,34 +11,61 @@ var dataLbls = ["E", "P", "I", "W"]
 var dataCols = ["ffffff","ffffff","ffffff","ffffff"]
 var dataVals = [ai.enabled, ai.paused, ai.idle, ai.walking]
 
+var dataStrPrint = ""
+
 // Functions
 
 // assigns individual color metadata for each value.
-func updateData()
-  for i = 0 .. dataVals.Count() - 1
-    // change color metadata based on value state
-    ?dataVals[i]
-      dataCols[i] = "00ff00" // rGb -> green
-    :
-      dataCols[i] = "ff0000" // Rgb -> red
+func dataToString(mode)
+  dataVals = [ai.enabled, ai.paused, ai.idle, ai.walking]
 
-  return string.Format(dataStr,
-  ^   dataCols[0], dataLbls[0],
-  ^   dataCols[1], dataLbls[1],
-  ^   dataCols[2], dataLbls[2],
-  ^   dataCols[3], dataLbls[3]   )
+  ?mode = "ui"
+    for i = 0 .. dataVals.Count() - 1
+      // change color metadata based on value state
+      ?dataVals[i]
+        dataCols[i] = "00ff00" // rGb -> green
+      :
+        dataCols[i] = "ff0000" // Rgb -> red
+
+    return string.Format(dataStr,
+    ^   dataCols[0], dataLbls[0],
+    ^   dataCols[1], dataLbls[1],
+    ^   dataCols[2], dataLbls[2],
+    ^   dataCols[3], dataLbls[3]   )
+
+  :
+    dataStrPrint = "AI#|#"
+    var n = dataVals.Count() - 1
+    for i = 0 .. n
+      // change color metadata based on value state
+      ?dataVals[i]
+        dataStrPrint += ">"+dataLbls[i]+"<"
+      :
+        dataStrPrint += "#"+dataLbls[i]+"#"
+
+      ?i < n
+        dataStrPrint += "#"
+      :
+        dataStrPrint += "#|"
+
+    return dataStrPrint
+
+func print(x,y)
+  >`@x@,@y@,#cyan,@dataToString("")@
+
+// Main UI function
+func uiMngr()
+  ?canInit()
+    mk()
+  :
+    upUi()
 
 // True on first frame of every run/loop
 func canInit()
-  return !txt
-
-func dl()
-  txt.Recycle()
-  txt = null
-  txt_old = txt
+  return loc.begin | loc.loop
 // UI construction
 func mk()
-  var str = updateData()
+  var str = dataToString("ui")
 
   txt = ui.AddText(str)
 
@@ -50,9 +77,7 @@ func mk()
   txt.dock = "center_left"
   txt.color = "#ffffff"
 // Update display
-func updateUi()
+func upUi()
   // assign and parse output into ui textbox
-  txt.text = updateData()
-
-  // force visibility
-  txt.visible = true
+  txt.text = dataToString("ui")
+  txt.w = string.Size(str)

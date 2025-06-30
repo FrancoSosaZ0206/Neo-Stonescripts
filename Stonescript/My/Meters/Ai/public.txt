@@ -6,8 +6,11 @@ var priv = import My/Meters/Ai/private
 
 // functions
 
-func main()
-  ?priv.canInit()
-    priv.mk()
+func main(x,y,mode)
+  // sanitize entry
+  mode = string.ToLower(mode)
+
+  ?mode = "ui"
+    priv.uiMngr()
   :
-    priv.updateUi()
+    priv.print(x,y)

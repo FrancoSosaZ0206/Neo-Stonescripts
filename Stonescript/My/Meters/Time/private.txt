@@ -57,22 +57,11 @@ func print(x, y, colorHex, mode)
 func uiMngr(x, y, colorHex, mode)
   ?canInitUi()
     mkUi(x,y,colorHex,mode)
-  /*:?canRegenUi()
-    dlUi()
-    mkUi(x,y,colorHex,mode)*/
   :
     updateUi(mode)
 
 func canInitUi()
-  return !(pnl & txt)
-func canRegenUi()
-  return (pnl | txt) & (totaltime % (2 * u.sec) = 0)
-
-func dlUi()
-  pnl.Remove(txt)
-  txt = null
-  pnl.Recycle()
-  pnl = null
+  return loc.begin | loc.loop
 
 func mkUi(x, y, colorHex, mode)
   // Panel presets
@@ -119,6 +108,8 @@ func mkUi(x, y, colorHex, mode)
 func updateUi(mode)
   txt.text = dataToString(mode)
 
-  // force visibility
-  pnl.visible = true
-  txt.visible = true
+  txt.w = txtW
+  txt.h = txtH
+
+  pnl.w = txt.w + 2
+  pnl.h = txt.h + 2

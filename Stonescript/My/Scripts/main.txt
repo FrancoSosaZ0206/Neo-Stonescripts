@@ -34,10 +34,12 @@ import My/Cosmetics
 import My/Scripts/Watermark
 
 ?sys.isMobile
-  sys.cacheRemoteFiles = false // refresh between runs
+  ?sys.cacheRemoteFiles = false
+    sys.cacheRemoteFiles = true // refresh between runs
   var mind
   ?totaltime = 1
     mind = import UI/MindstoneButton
+
 
 // ··············· PROCEDURE ················ //
 
@@ -60,21 +62,15 @@ enable npcDialog
 : // farming locations logic
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
 
-  import UI/FoeStateTracker
+  // import UI/FoeStateTracker
 
-  /*var aim
-  var tm
-  var dpsm
+  var aim = new My/Meters/Ai/public
+  var tm = new My/Meters/Time/public
+  var dpsm = new My/Meters/DPS/public
 
-  aim = new My/Meters/Ai/public
-  tm = new My/Meters/Time/public
-  dpsm = new My/Meters/DPS/public
-
-  aim.main()
-  tm.main(0,-1,#red,"slim ui speedrun")
-  dpsm.main(-8,-1,#yellow,1,"slim ui")*/
-  /*tm.main(1,screen.h - 3,#red,"slim speedrun")
-  dpsm.main(screen.w - 8,screen.h - 2,#yellow,1,"slim")*/
+  aim.main(1,screen.h - 3,"")
+  tm.main(1,screen.h - 2,#red,"slim speedrun")
+  dpsm.main(screen.w - 16,screen.h - 2,#yellow,1,"slim")
 
   ?loc.id = "rocky_plateau"
     disable npcDialog

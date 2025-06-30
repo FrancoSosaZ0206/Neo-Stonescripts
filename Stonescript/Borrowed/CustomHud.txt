@@ -1,0 +1,322 @@
+
+/*
+//Foes-Bottom/bottom right
+foe.name
+foe element
+foe.distance
+foe.state
+foe.time
+foe.count
+foe buffs/debuffs
+elite/mod
+
+//PLayer-Bottom Left
+buffs/debuffs
+name
+
+//Location-Top of screen
+screen.i
+totaltime
+best time
+average time
+name
+stars
+loop
+
+//General-Bottom Left
+screen.w/h
+*/
+
+var linfo //Loc
+var pinfo //Player/general
+var finfo //Foes
+var extinfo //Extended Info
+var kinfo //Ki
+var sinfo //Stone
+var winfo //Wood
+var tinfo //Tar
+var binfo //Bronze
+var einfo //Event Resource
+var infopnl //For the extended info
+var infobtn //To show/hide extended info
+var modifier
+var mod
+/*
+None
+  _--_
+.'   .'.
+|  .'  |
+'.'   .'
+  ¯--¯  
+Plated
+  ____
+ │    │
+ │ __ │
+ │ ││ │
+ '.││.'
+%%
+  _  
+ | │ __
+ | ││_ │
+ ()││║ │
+Regen
+     +
+ +
+   ██ + 
+ ██████ 
+   ██   
+%%
+   +
++    ▄█▄
+ ▄█▄  ▀
+  ▀  +
+Metamorph
+     .-.
+    ( ( 
+   ..`-´
+.:::'
+:::'
+%%
+     .-.
+    ( ( 
+   ..`-´
+.:::'
+Berserker
+
+   _.---
+ .´   
+/   ò,ó╬
+───┼
+*/
+var modasci=ascii
+  _--_
+.'   .'.
+|  .'  |
+'.'   .'
+  ¯--¯  
+%%
+########
+########
+########
+########
+########
+asciiend
+var modbox
+var pauseanim=ascii
+█ █
+▀ ▀
+asciiend
+var pausebox
+
+var loops=0
+var ele
+var elecolor
+var starcolor
+var timecolor
+var f
+f=foe
+var MiniMap = import UI/MiniMap
+MiniMap.Show(0,-23,true)
+//import UI/MusicBox
+
+func ShowExtended()
+  infopnl.visible=!infopnl.visible
+  ?infopnl.visible
+    infobtn.y=-4
+    infobtn.text="vvv"
+  :
+    infobtn.y=1
+    infobtn.text="^^^"
+
+?loc.loop
+  loops++
+
+?loc.stars<=5
+  starcolor=#white
+:?loc.stars<=10
+  starcolor=#cyan
+:?loc.stars<=15
+  starcolor=#yellow
+:?loc.stars<=20
+  starcolor=#green
+:?loc.stars<=25
+  starcolor=#blue
+:?loc.stars<=30
+  starcolor=#red
+:?loc.stars<=35
+  starcolor=#magenta //Rainbow doesnt work :(
+
+?totaltime>loc.averageTime
+  timecolor=#cyan
+:
+  timecolor=#blue
+
+?f=" Vigor "
+  ele="Vigor"
+  elecolor=#E6217B
+:?f=" Aether "
+  ele="Aether"
+  elecolor=#7B7B7B
+:?f=" Fire "
+  ele="Fire"
+  elecolor=#FF5222
+:?f=" Poison "
+  ele="Poison"
+  elecolor=#32DA5A
+:?f=" Ice "
+  ele="Ice"
+  elecolor=#0094FF
+:
+  ele="Stone"
+  elecolor=#white
+
+?totaltime=1
+  //Location
+  linfo=ui.AddText(loc.name+" "+loc.stars+"* Screen:"+screen.i+" Loop:"+loops+
+^"\nCurrent:"+time.FormatCasual(totaltime,true)+" Best:"
+^+time.FormatCasual(loc.bestTime,true)+" Average:"+time.FormatCasual(loc.averageTime,true))
+  linfo.anchor=top_left
+  linfo.dock=top_left
+  linfo.y=1
+  linfo.x=25
+  linfo.w=52
+  linfo.align=center
+  //Player/General
+  pinfo=ui.AddText("[color=#red]"+player.name+"[/color]\nBuffs:"+buffs.string+"\nDebuffs:"+debuffs.string+
+^"\nScreen W:"+screen.w+" Screen H:"+screen.h)
+  pinfo.anchor=bottom_left
+  pinfo.dock=bottom_left
+  pinfo.y=0
+  pinfo.x=0
+  pinfo.w=50
+  //Foes
+  finfo=ui.AddText("Element:"+ele+
+^"\nDistance:"+foe.distance+" Count:"+foe.count+
+^"\nState:"+foe.state+" Time:"+foe.time+
+^"\nBuffs:"+foe.buffs.string+"\nDebuffs:"+foe.debuffs.string)
+  finfo.anchor=bottom_right
+  finfo.dock=bottom_right
+  finfo.y=-1
+  finfo.x=-10
+  finfo.w=50
+  finfo.align=right
+  //Extended Info
+  //-Button and Panel
+  infobtn=ui.AddButton()
+  infobtn.anchor=bottom_center
+  infobtn.dock=bottom_center
+  infobtn.text="^^^"
+  infobtn.h=3
+  infobtn.w=5
+  infobtn.y=1
+  infobtn.x=-3
+  infobtn.SetPressed(ShowExtended)
+  infopnl=ui.AddPanel()
+  infopnl.anchor=bottom_center
+  infopnl.dock=bottom_center
+  infopnl.h=6
+  infopnl.w=31
+  infopnl.y=1
+  infopnl.x=-3
+  infopnl.visible=false
+  //-Info Text
+  extinfo=ui.AddText("Tags: "+f)
+  extinfo.anchor=top_left
+  extinfo.dock=top_left
+  extinfo.x=1
+  extinfo.y=1
+  extinfo.w=29
+  infopnl.Add(extinfo)
+  //Elite Modifiers
+  modbox=ui.AddPanel()
+  modbox.anchor=bottom_right
+  modbox.dock=bottom_right
+  modbox.w=10
+  modbox.h=7
+  modbox.y=-3
+  modbox.x=0
+  modbox.color=#green
+  mod=ui.AddAnim(modasci)
+  mod.anchor=bottom_right
+  mod.dock=bottom_right
+  mod.y=-4
+  mod.x=-1
+  mod.color=#red
+  modifier=ui.AddText("None")
+  modifier.anchor=bottom_right
+  modifier.dock=bottom_right
+  modifier.w=10
+  modifier.y=-5
+  modifier.x=0
+  modifier.align=center
+  //Pause Button
+  pausebox=ui.AddAnim(pauseanim)
+  pausebox.anchor=bottom_right
+  pausebox.dock=bottom_right
+  pausebox.x=-3
+  pausebox.y=-1
+  //Resources Info
+  kinfo=ui.AddText("@"+res.ki)
+  kinfo.anchor=top_left
+  kinfo.dock=top_left
+  kinfo.w=15
+  kinfo.align=center
+  sinfo=ui.AddText("[color=#B7B7B7]o[/color]"+res.stone)
+  sinfo.anchor=top_left
+  sinfo.dock=top_left
+  sinfo.w=15
+  sinfo.x=15
+  sinfo.align=center
+  winfo=ui.AddText("[color=#964B00]_/`[/color]"+res.wood)
+  winfo.anchor=top_left
+  winfo.dock=top_left
+  winfo.w=15
+  winfo.x=29
+  winfo.align=center
+  tinfo=ui.AddText("[color=#636363]≈[/color]"+res.tar)
+  tinfo.anchor=top_left
+  tinfo.dock=top_left
+  tinfo.w=15
+  tinfo.x=44
+  tinfo.align=center
+  binfo=ui.AddText("[color=#CD7F32]:.[/color]"+res.bronze)
+  binfo.anchor=top_left
+  binfo.dock=top_left
+  binfo.w=15
+  binfo.x=59
+  binfo.align=center
+  einfo=ui.AddText("Event")
+  einfo.anchor=top_left
+  einfo.dock=top_left
+  einfo.w=15
+  einfo.x=74
+  einfo.align=center
+
+?time=1
+  disable hud r
+
+linfo.text=loc.name+" [color="+starcolor+"]"+loc.stars+"*[/color] Screen:"+screen.i+" Loop:"+loops+
+^"\nCurrent:[color="+timecolor+"]"+time.FormatCasual(totaltime,true)+"[/color] Best:[color=#red]"+
+^time.FormatCasual(loc.bestTime,true)+"[/color] Average:[color=#green]"+time.FormatCasual(loc.averageTime,true)+"[/color]"
+pinfo.text="[color=#cyan]"+player.name+"[/color]\n[color=#blue]Buffs:"+buffs.string+"[/color]\n[color=#red]Debuffs:"+debuffs.string+
+^"[/color]\nScreen W:"+screen.w+" Screen H:"+screen.h
+finfo.text="Element:[color="+elecolor+"]"+ele+"[/color]\nDistance:"+foe.distance+" Count:"+foe.count+
+^"\nState:"+foe.state+" Time:"+foe.time+
+^"\n[color=#blue]Buffs:"+foe.buffs.string+"[/color]\n[color=#red]Debuffs:"+foe.debuffs.string+"[/color]"
+extinfo.text="Tags: "+f
+?loc.name="Hotspring"
+  kinfo.text="[color=#magenta]♦[/color]"+res.crystals
+:
+  kinfo.text="@"+res.ki
+sinfo.text="[color=#B7B7B7]o[/color]"+res.stone
+winfo.text="[color=#964B00]_/`[/color]"+res.wood
+tinfo.text="[color=#636363]≈[/color]"+res.tar
+binfo.text="[color=#CD7F32]:.[/color]"+res.bronze
+einfo.text="NA"
+
+?encounter.isElite
+  modifier.text=encounter.eliteMod
+  mod.frame=1
+:
+  modifier.text="none"
+  mod.frame=0

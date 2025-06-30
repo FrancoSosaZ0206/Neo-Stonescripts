@@ -1,0 +1,41 @@
+// ============================
+// an even more atomic example
+
+?totaltime = 1
+  var compA = ui.AddButton()
+  compA.tcolor = #00ff00
+  compA.bcolor = #00ff00
+  compA.hcolor = #00ff00
+  compA.text = "Press me"
+
+  var compB = ui.AddButton()
+  compB.tcolor = #ff0000
+  compB.bcolor = #ff0000
+  compB.hcolor = #ff0000
+  compB.y = 5
+  compB.text = "No, press me!!!"
+
+  var compE = ui.AddPanel()
+  compE.color = #00ffff
+  compE.anchor = center_left
+  compE.dock = center_left
+
+:?totaltime = 120
+  var compC = ui.AddText("Hello!")
+  compC.color = #ff8800
+  compC.dock = top_left
+  compC.anchor = top_left
+
+  var compF = ui.AddPanel()
+  compF.color = #883311
+  compF.anchor = center_right
+  compF.dock = center_right
+
+:?totaltime = 150
+  var compD = ui.AddText("Goodbye!")
+  compD.color = #ff88ff
+  compD.dock = top_right
+  compD.anchor = top_right
+
+>`1,7,#magenta,nComponents: 
+^@ui.root.children.Count()@
