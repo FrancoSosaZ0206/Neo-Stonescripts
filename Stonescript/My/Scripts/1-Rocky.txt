@@ -457,8 +457,8 @@ or while setting up permapot. */
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & ai.enabled & !ai.paused &
-// Can dash and in melee range
-^!(canDash & a.canSmartDash() & !c.canStutterStep()) &
+// Cannot dash and in dashing range
+^!(canDash & a.canSmartDash()) &
 ^(c.permapotSetup |
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
@@ -506,6 +506,12 @@ unmake with repeating crossbow. */
 
 // ........... SPECIAL ITEMS LOGIC .......... //
 
+// Voidweaver - use it if possible
+:?c.canUseAbility("voidweaver") &
+^c.canUnmakeVoidweaver() &
+^foe.count > 1 & screen.i > 1
+  c.devour("voidweaver")
+
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
@@ -535,12 +541,6 @@ unmake with repeating crossbow. */
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.midhp
   c.useAbility_OH("wand_ice", a.wIh, hand)
-
-// Voidweaver - use it if possible
-:?c.canUseAbility("voidweaver") &
-^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1
-  c.devour("voidweaver")
 
 // ............... AOE LOGIC ................ //
 
@@ -573,33 +573,17 @@ unmake with repeating crossbow. */
   ^  foe.debuffs.string ! "debuff_frost_stun"))
     a.ldtF("grappling")
 
-  /* :?screen.i = 1 & foe.count = 2
-    a.ldtF("sword unmake") */
-
   // permapot run
   :?nRuns = 1 |
-  // split hydra foes
-  ^(encounter.eliteMod = "hydra" &
-  ^ foe.buffs.string ! "stability")
-    // change margin as needed
-    margin = 8 // big sword left hitbox + splash range
-
-    a.ldtF("big sword unmake")
-  // Debuff and unmake
-  :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
+  ^ (encounter.eliteMod = "blessed" &
+  ^  !c.isCasting("bardiche"))
+    // Debuff and unmake
     ?a.canSmartDebuff("magic")
       a.smartDebuff("magic")
     :
       // change margin as needed
-      margin = 8 // big sword left hitbox + splash range
-
+      margin = 8
       a.ldtF("big sword unmake")
-
-  /* // unmake non-elites if there's more foes outside splash range
-  :?foe ! "elite" &
-  ^foe.count - foe.GetCount(foe.distance + margin) > 0
-    margin = 8
-    a.ldtF("big sword unmake") */
 
   :?buffs.string = "ʘ" // berserk potion
     margin = 8
@@ -645,7 +629,7 @@ unmake with repeating crossbow. */
       a.ldtF("sword heal")
 
     : // wait
-      equipL sword stone *0
+      equipL sword *0
   :
     fight("normal")
 
