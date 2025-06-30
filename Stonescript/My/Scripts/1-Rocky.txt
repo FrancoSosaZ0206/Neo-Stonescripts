@@ -457,8 +457,8 @@ or while setting up permapot. */
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & ai.enabled & !ai.paused &
-// Can dash and in shovel range
-^!(canDash & a.canSmartDash() & !s.inRange("shovel")) &
+// Can dash and in melee range
+^!(canDash & a.canSmartDash() & !c.canStutterStep()) &
 ^(c.permapotSetup |
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
@@ -500,7 +500,7 @@ unmake with repeating crossbow. */
   c.smoothCast(a.bR)
 
 // get in melee range faster
-:?!s.inRange("shovel") & !c.permapotSetup
+:?c.canStutterStep()
   c.stutterStep()
   >h0,-1,#red,STUTTERSTEPPING
 
@@ -544,8 +544,7 @@ unmake with repeating crossbow. */
 
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(foe.distance + margin) > 1 &
-^s.inRange("shovel")
+:?foe.GetCount(foe.distance + margin) > 1
   // Align foes
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
@@ -655,7 +654,6 @@ unmake with repeating crossbow. */
 // Tanky foe, use bardiche ability to lower its hitpoints
 :?loc.stars > 15 &
 ^(foe = "boss" | foe = "monarch") &
-^s.inRange("shovel") &
 ^(c.canUseAbility("staff_poison") |
 ^c.canUseAbility("bardiche"))
   ?c.canUseAbility("staff_poison")
