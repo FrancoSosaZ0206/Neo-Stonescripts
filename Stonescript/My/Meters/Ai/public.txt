@@ -12,4 +12,4 @@ func main()
   ?priv.canInit()
     priv.mk()
   :
-    priv.update()
+    priv.updateUi()
