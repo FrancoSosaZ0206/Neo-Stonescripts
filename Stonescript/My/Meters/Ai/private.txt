@@ -53,3 +53,6 @@ func mk()
 func updateUi()
   // assign and parse output into ui textbox
   txt.text = updateData()
+
+  // force visibility
+  txt.visible = true
