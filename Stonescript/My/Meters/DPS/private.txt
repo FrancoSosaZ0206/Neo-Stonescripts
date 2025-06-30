@@ -23,19 +23,17 @@ var DPS = "N/A"     // damage per second
 var pnl = null
 var txt = null
 
-var dataArr = [ascii
-DPS#|#{0}
-asciiend,
+var dataArr = [
+^"DPS#|#{0}",
 
-^ascii
-###DPS#METER###
-#·##·##·##·##·#
-#No.#Hits#{0}
-#Hits/Sec#{1}
-#Dmg#/Hit#{2}
-#Dmg#/Frm#{3}
-#Dmg#/Sec#{4}
-asciiend]
+^"###DPS#METER###\n"+
+^"#·##·##·##·##·#\n"+
+^"#No.#Hits#{0}\n"+
+^"#Hits/Sec#{1}\n"+
+^"#Dmg#/Hit#{2}\n"+
+^"#Dmg#/Frm#{3}\n"+
+^"#Dmg#/Sec#{4}"
+^]
 
 // ................ Functions ................ //
 

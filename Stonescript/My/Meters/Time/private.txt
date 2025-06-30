@@ -11,17 +11,15 @@ var at = null
 var pnl = null
 var txt = null
 
-var dataArr = [ascii
-☆#{0}#|#≈#{1}#|#▶#{2}
-asciiend,
+var dataArr = [
+^"☆#{0}#|#≈#{1}#|#▶#{2}",
 
-^ascii
-####SPEED-O-METER####
-#·##·##·##·##·##·##·#
-#BES#{0}
-#AVG#{1}
-#CUR#{2}
-asciiend]
+^"####SPEED-O-METER####\n"+
+^"#·##·##·##·##·##·##·#\n"+
+^"#BES#{0}\n"+
+^"#AVG#{1}\n"+
+^"#CUR#{2}"
+^]
 
 // ................ Functions ................ //
 

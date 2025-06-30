@@ -1,0 +1,52 @@
+// atomic example B
+
+var pnl = null
+var txt = null
+var bVal = 0
+
+func main()
+  ?init()
+    mk()
+  :?regen()
+    dl()
+    mk()
+  :
+    update()
+
+func init()
+  return !(pnl & txt)
+
+func regen()
+  return (pnl | txt) & (totaltime % 50 = 0)
+
+func dl()
+  pnl.Remove(txt)
+  txt = null
+  pnl.Recycle()
+  pnl = null
+  
+func mk()
+  txt = ui.AddText("kills="+bVal)
+  txt.anchor = "center_center"
+  txt.dock = "center_center"
+  txt.w = string.Size("kills="+bVal)
+  txt.h = 1
+  txt.align = "center"
+  txt.color = color.FromRGB(0,255,0)
+  
+  pnl = ui.AddPanel()
+  pnl.x = 1
+  pnl.y = 10
+  pnl.w = txt.w + 2
+  pnl.h = txt.h + 2
+  pnl.anchor = "top_left"
+  pnl.dock = "top_left"
+  pnl.color = color.FromRGB(0,100,0)
+
+  pnl.Add(txt)
+
+func update()
+  ?foe.state = 4 & foe.time = 0
+    bVal++
+
+  txt.text = "kills="+bVal

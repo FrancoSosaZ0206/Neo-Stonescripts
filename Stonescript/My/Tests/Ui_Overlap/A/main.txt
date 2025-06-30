@@ -1,0 +1,48 @@
+// atomic example A
+
+var pnl = null
+var txt = null
+
+func main()
+  ?init()
+    mk()
+  :?regen()
+    dl()
+    mk()
+  :
+    update()
+
+func init()
+  return !(pnl & txt)
+
+func regen()
+  return (pnl | txt) & (totaltime % 30 = 0)
+
+func dl()
+  pnl.Remove(txt)
+  txt = null
+  pnl.Recycle()
+  pnl = null
+
+func mk()
+  txt = ui.AddText("t="+totaltime)
+  txt.anchor = "center_center"
+  txt.dock = "center_center"
+  txt.w = string.Size("t="+totaltime)
+  txt.h = 1
+  txt.align = "center"
+  txt.color = color.FromRGB(255,0,0)
+  
+  pnl = ui.AddPanel()
+  pnl.x = 1
+  pnl.y = 1
+  pnl.w = txt.w + 2
+  pnl.h = txt.h + 2
+  pnl.anchor = "top_left"
+  pnl.dock = "top_left"
+  pnl.color = color.FromRGB(100,0,0)
+
+  pnl.Add(txt)
+  
+func update()
+  txt.text = "t="+totaltime
