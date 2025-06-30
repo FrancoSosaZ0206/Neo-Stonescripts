@@ -50,8 +50,9 @@ var hihp
 var slideCount = 0 // counter to give screen.Next() time to slide in _DS functions.
 
 var moondialTimer = 0
-var burstingTimer = 0
-var burstingCdTimer = 0
+var burstTimer = 0
+var burstCdTimer = 0
+var burstState = true
 
 var item_TH_IDs = [ // two-handed item IDs
 ^   "blade",
@@ -654,27 +655,36 @@ Usage example:
               sword poison *max +21,
               sword vigor *max +21,
               sword aether *max +21]) */
+func canBurst()
+  return burstState | (ai.idle & !ai.enabled)
 func burst(weaponsArr)
   var n = weaponsArr.Count()
 
-  ?n >= 2
-    ?burstingTimer >= n - 1 // cooldown frame
-      // cycle trough every weapon:
-      equipL @weaponsArr[burstingCdTimer]@
-      equipR @weaponsArr[burstingCdTimer + 1]@
-      burstingCdTimer+= 2 // increment burstingCdTimer twice each loop
-
-      ?burstingCdTimer >= n - 2
-        burstingTimer = 0 // reset timer
-        burstingCdTimer = 0
-
-    : // bursting frame (different weapon every frame)
-      equipL moon
-      equipR @weaponsArr[burstingTimer]@
-      burstingTimer++
-
+  ?n < 2
+    u.showStrCtr(0,30,#red,"ERROR:\nFILE: Combat\nFUNCTION: doBursting\nCAUSE: <weaponsArr> is too small (has "+n+" weapons", false)
   :
-    u.showStrCtr(0,30,#red,"ERROR:\nFILE: Combat\nFUNCTION: doBursting\nCAUSE: <weaponsArr> was too small (had " + n + " weapons", false)
+    ?burstState // active state
+      ?burstTimer < n - 1 // burst frames
+        equipL moon
+        equipR @weaponsArr[burstTimer]@
+        burstTimer ++
+
+      : // reset timer
+        burstTimer = 0
+        burstState = false
+        >c-10,0,#red,burst active
+
+    : // cooldown state
+      ?burstCdTimer < n - 2
+        equipL @weaponsArr[burstCdTimer]@
+        equipR @weaponsArr[burstCdTimer + 1]@
+        burstCdTimer += 2
+      :
+        burstCdTimer = 0
+        burstState = true
+
+        >c-10,0,#cyan,burst cooldown
+
 
 /* AAC = Attack Animation Cancelling
 Widely used trick to enable a

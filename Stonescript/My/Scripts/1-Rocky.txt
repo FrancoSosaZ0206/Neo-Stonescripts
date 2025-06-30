@@ -138,16 +138,14 @@ func fight(mode)
     :?canDash &
     ^(foe.GetCount(foe.distance + margin) = 1 |
     ^foe = "monarch" | foe = "boss")
-      /* ?!c.permapotSetup & foe ! "phase2" & foe ! "phase3"
-        c.burst(a.burstingSwords)
-      :
-        a.ldtF("sword dmg") */
-
-      ?foe = "phase3" & !s.inRange("dash") &
-      ^c.canUseAbility("staff_poison")
+      ?c.canUseAbility("staff_poison") &
+      ^!s.inRange("dash") & foe = "phase3"
         c.useAbility_TH("staff_poison", a.stPh)
       :?c.canUsePotion() & foe = "phase3"
         activate potion
+      :?c.canBurst() &
+      ^!c.permapotSetup & foe = "phase3"
+        c.burst(a.burstingSwords)
       :
         a.ldtF("sword dmg")
     :
@@ -159,8 +157,7 @@ func fight(mode)
 
 // ............. MONITOR LOGIC .............. //
 
-?foe
-  >f0,5,#magenta,dist#=#@foe.distance@
+
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -505,7 +502,6 @@ unmake with repeating crossbow. */
 // get in melee range faster
 :?c.canStutterStep()
   c.stutterStep()
-  >h0,-1,#red,STUTTERSTEPPING
 
 // ........... SPECIAL ITEMS LOGIC .......... //
 
