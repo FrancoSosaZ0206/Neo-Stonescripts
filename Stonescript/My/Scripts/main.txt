@@ -44,8 +44,8 @@ enable npcDialog
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.1.0"
-var lastUpdated = "2025/06/29 23:00 GMT-6"
+var scriptVer = "2.1.1"
+var lastUpdated = "2025/06/30 03:15 GMT-6"
 var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
 
 var dcTag = "@metaleagle26"
@@ -116,8 +116,8 @@ var c = color.Random()
   var dps = import My/Meters/DPS/public
 
   aim.main()
-  tm.main(0,-1,#red,"slim ui speedrun")
-  dps.main(-8,-1,#yellow,1,"slim ui")
+  tm.main(1,screen.h - 3,#red,"slim speedrun")
+  dps.main(screen.w - 8,screen.h - 2,#yellow,1,"slim")
 
   ?loc = "rocky_plateau"
     disable npcDialog
