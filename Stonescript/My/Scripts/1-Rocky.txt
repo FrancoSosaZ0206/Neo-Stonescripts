@@ -585,7 +585,9 @@ unmake with repeating crossbow. */
       margin = 8
       a.ldtF("big sword unmake")
 
-  :?buffs.string = "ʘ" // berserk potion
+  :?buffs.string = "ʘ" | // berserk potion
+  ^(encounter.eliteMod = "hydra" &
+  ^ foe.buffs.string ! "stability")
     margin = 8
     a.ldtF("big sword unmake")
 
