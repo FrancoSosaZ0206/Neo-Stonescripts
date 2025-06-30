@@ -100,9 +100,9 @@ func print(x, y, colorHex, mode)
 func uiMngr(x, y, colorHex, mode)
   ?canInitUi()
     mkUi(x,y,colorHex,mode)
-  :?canRegenUi()
+  /*:?canRegenUi()
     dlUi()
-    mkUi(x,y,colorHex,mode)
+    mkUi(x,y,colorHex,mode)*/
   :
     updateUi(mode)
 
