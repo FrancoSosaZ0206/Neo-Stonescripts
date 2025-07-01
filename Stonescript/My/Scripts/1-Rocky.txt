@@ -143,8 +143,8 @@ func fight(mode)
         c.useAbility_TH("staff_poison", a.stPh)
       :?c.canUsePotion() & foe = "phase3"
         activate potion
-      :?c.canBurst() & !c.permapotSetup & foe = "phase3"
-        c.burst(a.burstSwords)
+      /*:?c.canBurst() & !c.permapotSetup & foe = "phase3"
+        c.burst(a.burstSwords)*/
       :
         a.ldtF("sword dmg")
     :
@@ -368,34 +368,28 @@ or while setting up permapot. */
     a.ldtF("defense heal")
   // reduce damage amap
   :?foe = "phase3" & phase3dmg > 0 &
-  ^(c.canUseAbility("mask") | c.canUseAbility("wand_poison"))
-    ?c.canUseAbility("mask") & phase3dmg > 0
-      c.useAbility_OH("mask", "mask", "r")
-    :?c.canUseAbility("wand_poison") & phase3dmg > 0
-      c.useAbility_OH("wand_poison", a.wPh, hand)
+  ^c.canUseAbility("mask")
+    c.useAbility_OH("mask", "mask", "r")
 
-  // Apply effects
-  :?!c.permapotSetup
-    // get additional damage
-    ?buffs.string ! "buff_damage"
-      a.ldtF("defense buff empower")
-    // af shields deal more DoT than any other fire debuff weapon.
-    :?c.canApplyBurn()
-      a.ldtF("defense debuff burn")
-    // ai shields' chill duration is longer than any other ice weapon.
-    :?c.canEngage() & c.canApplyChill(1)
-      a.ldtF("defense debuff chill")
-    : // all effects applied
-      a.ldtF("defense")
-
-  : // c.permapotSetup
-    // foe will break through armor
-    ?armor < s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) &
-    ^(foe = "phase" | foe = "monarch")
-      // Heal to reduce damage even more
+  :?c.permapotSetup
+    ?hp ! maxhp |
+    ^s.getFoeDmg(a.berserkerLvl,
+    ^            a.plagueLvl,
+    ^            a.maskLvl      ) > armor
       a.ldtF("defense heal")
     :
       a.ldtF("defense")
+
+  // get additional damage
+  :?buffs.string ! "buff_damage"
+    a.ldtF("defense buff empower")
+  :?c.canUnmake()
+    a.ldtF("defense unmake")
+  // af deals more DoT than dF
+  :?c.canApplyBurn()
+    a.ldtF("defense debuff burn")
+  : // all effects applied
+    a.ldtF("defense")
 
 // ............ CUTSCENES LOGIC ............. //
 
@@ -482,10 +476,10 @@ or while setting up permapot. */
     a.ldtF("defense armor regen")
 
 :?ai.paused | !ai.enabled | player.direction = -1
-  ?!c.canBurst() & !c.permapotSetup
+  /*?!c.canBurst() & !c.permapotSetup
     c.burst(a.burstSwords)
-  :
-    a.ldtF("defense armor regen")
+  :*/
+  a.ldtF("defense armor regen")
 
 // .............. DASHING LOGIC ............. //
 
@@ -593,10 +587,10 @@ unmake with repeating crossbow. */
     margin = 8
     a.ldtF("big sword unmake")
 
-  :?!(foe = "monarch" & foe = "soldier")
+  : // ?!(foe = "monarch" & foe = "soldier")
     equip Kubikiribocho
-  :
-    fight("normal")
+  /*:
+    fight("normal")*/
 
 // ............... BOSS LOGIC ............... //
 
@@ -633,7 +627,7 @@ unmake with repeating crossbow. */
       a.ldtF("sword heal")
 
     : // wait
-      equipL sword *0
+      equipL Unbroken Faith
   :
     fight("normal")
 
