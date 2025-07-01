@@ -143,9 +143,8 @@ func fight(mode)
         c.useAbility_TH("staff_poison", a.stPh)
       :?c.canUsePotion() & foe = "phase3"
         activate potion
-      :?c.canBurst() &
-      ^!c.permapotSetup & foe = "phase3"
-        c.burst(a.burstingSwords)
+      :?c.canBurst() & !c.permapotSetup & foe = "phase3"
+        c.burst(a.burstSwords)
       :
         a.ldtF("sword dmg")
     :
@@ -426,7 +425,8 @@ or while setting up permapot. */
     a.smartDash()
   /* Use Berserk Staff to increment Bardiche ability and sword damage
   (only pre-phase1, in phase3 it's activated under different conditions) */
-  :?item.GetCooldown("staff_poison") <= 0 & foe = "phase1"
+  :?item.GetCooldown("staff_poison") <= 0 &
+  ^foe = "phase1" & loc.stars > 15
     c.useAbility_TH("staff_poison", a.stPh)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
@@ -482,7 +482,10 @@ or while setting up permapot. */
     a.ldtF("defense armor regen")
 
 :?ai.paused | !ai.enabled | player.direction = -1
-  a.ldtF("defense armor regen")
+  ?!c.canBurst() & !c.permapotSetup
+    c.burst(a.burstSwords)
+  :
+    a.ldtF("defense armor regen")
 
 // .............. DASHING LOGIC ............. //
 

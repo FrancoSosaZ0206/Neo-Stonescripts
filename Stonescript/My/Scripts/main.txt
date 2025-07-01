@@ -70,7 +70,7 @@ enable npcDialog
 
   aim.main(1,screen.h - 3,"")
   tm.main(1,screen.h - 2,#red,"slim speedrun")
-  dpsm.main(screen.w - 16,screen.h - 2,#yellow,1,"slim")
+  dpsm.main(screen.w - 18,screen.h - 2,#yellow,1,"slim")
 
   ?loc.id = "rocky_plateau"
     disable npcDialog

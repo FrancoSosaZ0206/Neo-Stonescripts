@@ -656,7 +656,7 @@ Usage example:
               sword vigor *max +21,
               sword aether *max +21]) */
 func canBurst()
-  return burstState | (ai.idle & !ai.enabled)
+  return burstState
 func burst(weaponsArr)
   var n = weaponsArr.Count()
 
@@ -672,7 +672,8 @@ func burst(weaponsArr)
       : // reset timer
         burstTimer = 0
         burstState = false
-        >c-10,0,#red,burst active
+      
+      >c-10,0,#red,burst active
 
     : // cooldown state
       ?burstCdTimer < n - 2
@@ -683,7 +684,7 @@ func burst(weaponsArr)
         burstCdTimer = 0
         burstState = true
 
-        >c-10,0,#cyan,burst cooldown
+      >c-10,0,#cyan,burst cooldown
 
 
 /* AAC = Attack Animation Cancelling

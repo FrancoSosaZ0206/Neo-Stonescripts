@@ -216,8 +216,7 @@ var shT     = "*max shield towering golden"
 
 // ................ GROUPING ................ //
 
-var burstingSwords = [
-^     Soulfetcher     , Almafuerte,
+var burstSwords = [
 ^     Mamba Negra     , sPdmg,
 ^     Dothaneel       , sVDmg,
 ^     Void Slayer     , sADmg,
@@ -457,10 +456,10 @@ func ldtF(mode)
           equipL ouroboros
         : // try to deal extra damage if possible
           equipL fissure
-      :?totaltime % 2 = 0 | buffs.string = "buff_inf_speed"
+      : // ?totaltime % 2 = 0 | buffs.string = "buff_inf_speed"
         equipL triskelion
-      :
-        equipL quest
+      /*:
+        equipL quest*/
 
       // Right hand:
       ?!c.permapotSetup
