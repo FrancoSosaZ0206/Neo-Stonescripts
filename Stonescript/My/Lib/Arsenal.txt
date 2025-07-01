@@ -470,7 +470,7 @@ func ldtF(mode)
 
     :
       // Left hand
-      ?foe.count > 1
+      /*?foe.count > 1 // wands
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
           equipL @wIDmg@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
@@ -483,19 +483,19 @@ func ldtF(mode)
           equipL @wFDmg@
         : // foe = "stone"
           equipL @wSh@
-      :
-        ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equipL Bifrost
-        :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          equipL Mamba Negra
-        :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equipL Dothaneel
-        :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equipL Void Slayer
-        :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equipL Vantum Phoenix
-        : // foe = "stone"
-          equipL Bifrost // Unbroken Faith
+      :*/
+      ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
+        equipL Bifrost
+      :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
+        equipL Mamba Negra
+      :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
+        equipL Dothaneel
+      :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
+        equipL Void Slayer
+      :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
+        equipL Vantum Phoenix
+      : // foe = "stone"
+        equipL Bifrost // Unbroken Faith
 
       ?!c.permapotSetup
         // Right hand
