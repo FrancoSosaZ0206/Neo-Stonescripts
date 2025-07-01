@@ -477,31 +477,6 @@ or while setting up permapot. */
 
 // .............. DASHING LOGIC ............. //
 
-:?a.canSmartDash() & canDash
-  a.smartDash()
-
-// Knockback farming
-:?c.canKbFarm()
-  c.smoothCast(a.bS)
-
-/* if in range, get closer while trying to
-unmake with repeating crossbow. */
-:?canDash & s.betweenRange("dash_min","crossbow") &
-^!c.permapotSetup
-  c.smoothCast(a.bR)
-
-// get in melee range faster
-:?c.canStutterStep()
-  c.stutterStep()
-
-// ........... SPECIAL ITEMS LOGIC .......... //
-
-// Voidweaver - use it if possible
-:?c.canUseAbility("voidweaver") &
-^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1
-  c.devour("voidweaver")
-
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
@@ -531,6 +506,31 @@ unmake with repeating crossbow. */
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.midhp
   c.useAbility_OH("wand_ice", a.wIh, hand)
+
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
+// Knockback farming
+:?c.canKbFarm()
+  c.smoothCast(a.bS)
+
+/* if in range, get closer while trying to
+unmake with repeating crossbow. */
+:?canDash & s.betweenRange("dash_min","crossbow") &
+^!c.permapotSetup
+  c.smoothCast(a.bR)
+
+// get in melee range faster
+:?c.canStutterStep()
+  c.stutterStep()
+
+// ........... SPECIAL ITEMS LOGIC .......... //
+
+// Voidweaver - use it if possible
+:?c.canUseAbility("voidweaver") &
+^c.canUnmakeVoidweaver() &
+^foe.count > 1 & screen.i > 1
+  c.devour("voidweaver")
 
 // ............... AOE LOGIC ................ //
 
