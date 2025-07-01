@@ -6,7 +6,13 @@ Library with my personal weapons, special stats and loadouts.
 
 ## Description
 
-This library has some variables and functions that minimalize the usage of my current arsenal and provide some info on their stats.
+This library defines tools aiming to simplify the usage of a player's items, storing upgraded/enchanted stats, and making them easily available.
+
+> **WARNING:** this library heavily depends on the current state of your items to work properly, if not at all.
+>
+> It is therefore strongly advised to adapt to your save's progress before using it.
+>
+> Make sure you carefully read and understand it first.
 
 ## Features
 
@@ -42,12 +48,6 @@ Copy-paste the script into your Mindstone.
 ?foe.debuffs.string = a.maxIgnitions_Boosted
   activate cinderwisp
 ```
-
-> **WARNING:** this library heavily depends on the current state of your items to work properly, if not at all.
->
-> It is therefore strongly advised to adapt to your save's progress before using it.
->
-> Make sure you carefully read and understand it first.
 
 ---
 
