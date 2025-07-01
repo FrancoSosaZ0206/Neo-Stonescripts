@@ -5,8 +5,8 @@ var scrl = import UI/ScrollText
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.1.1"
-var lastUpdated = "2025/06/30 03:15 GMT-6"
+var scriptVer = "2.1.2"
+var lastUpdated = "2025/06/30 21:45 GMT-6"
 var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
 
 var dcTag = "@metaleagle26"
@@ -14,16 +14,19 @@ var dcUsername = "IronHawk, Imports Maniac"
 var ytChannel = "IronHawk0206"
 
 var separator = "#"
-?string.Size(separator) ! w
-  separator += "#"
+var watermarkArr = null
+var watermarkStr = null
 
 // print params
 var w = 16
 var stepWait = 3
 var c = color.Random()
 
-// Formatted watermark array
-var watermarkArr = [
+?string.Size(separator) < w
+  separator += "#"
+
+// Format watermark array
+watermarkArr = [
 ^"author: "+author,
 
 ^"version: "+scriptVer,
@@ -41,7 +44,7 @@ var watermarkArr = [
 
 
 // combine array with transparent char separators
-var watermarkStr = string.Join(separator, watermarkArr)
+watermarkStr = string.Join(separator, watermarkArr)
 // replace remaining whitespaces for transparent characters "#"
 watermarkStr = string.Split(watermarkStr)
 watermarkStr = string.Join("#", watermarkStr)

@@ -672,8 +672,6 @@ func burst(weaponsArr)
       : // reset timer
         burstTimer = 0
         burstState = false
-      
-      >c-10,0,#red,burst active
 
     : // cooldown state
       ?burstCdTimer < n - 2
@@ -683,9 +681,6 @@ func burst(weaponsArr)
       :
         burstCdTimer = 0
         burstState = true
-
-      >c-10,0,#cyan,burst cooldown
-
 
 /* AAC = Attack Animation Cancelling
 Widely used trick to enable a
