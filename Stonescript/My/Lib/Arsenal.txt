@@ -447,19 +447,19 @@ func ldtF(mode)
     :?mode = "armor regen"
       // Left hand:
       ?!ai.walking | // standing still
-      ^(!ai.enabled | ai.paused) // cutscene walking
-        ?armor <= maxarmor |
-        ^player.direction = -1 |
-        ^(hp = maxhp & armor <= 2)
+      ^!ai.enabled | ai.paused // cutscene walking
+        ?(item.right = "compound" & armor <= compoundMaxArmor_boosted + 2) |
+        ^armor <= 2
           equipL quest
         :?hp ! maxhp // passive regen
           equipL ouroboros
         : // try to deal extra damage if possible
           equipL fissure
-      : // ?totaltime % 2 = 0 | buffs.string = "buff_inf_speed"
+      :?ai.walking &
+      ^totaltime % 2 = 0 | buffs.string = "buff_inf_speed"
         equipL triskelion
-      /*:
-        equipL quest*/
+      :
+        equipL quest
 
       // Right hand:
       ?!c.permapotSetup

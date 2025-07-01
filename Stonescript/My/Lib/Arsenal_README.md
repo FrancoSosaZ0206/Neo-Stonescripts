@@ -147,6 +147,7 @@ Loadout function.
 
 - **`mode`**
 
+TO DO: Add ldtF() modes here.
 
 ---
 

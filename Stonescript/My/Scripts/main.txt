@@ -62,7 +62,7 @@ enable npcDialog
 : // farming locations logic
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
 
-  // import UI/FoeStateTracker
+  import UI/FoeStateTracker
 
   var aim = new My/Meters/Ai/public
   var tm = new My/Meters/Time/public

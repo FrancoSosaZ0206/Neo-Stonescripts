@@ -602,16 +602,13 @@ func canEngage()
 
 // ........... Damage min-maxing ............ //
 
-/* Moonjuggling is a trick that boosts dps
-with 2 swords whose attack speed stat is
-maxed out (+21 enchantment).
+/* Moonjuggling is a trick that boosts dps with 2 swords whose attack speed stat is maxed out (+21 enchantment).
+
+Requires AAC (Attack Animation Cancelling).
 
 It's a cycle that repeats every 3 frames:
-- In the first 2, the Moondial Stone is held
-with each sword, boosting their attack speed
-even further.
-- In the last one, both swords are held to
-spend the cooldown frame. */
+- In the first 2, the Moondial Stone is held with each sword, boosting their attack speed even further.
+- In the last one, both swords are held to spend the cooldown frame in a single frame. */
 func moonjuggle(weapon1, weapon2)
   /* moonjuggling isn't necessary or possible
   under these conditions, do
@@ -698,18 +695,15 @@ func AAC(itemLeft, itemRight)
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
 
-/* Smooth Casting is a trick where you
-hold the triskelion stone every certain
-amount of frames to enable walking while
-dealing damage.
+/* Smooth Casting is a trick where you hold the triskelion stone every certain amount of frames to enable walking while dealing damage.
 
-Requires berserk potion or Infernal
-Staff's ability. */
-func canSmoothCast()
+Requires berserk potion or a 1 frame cast, ranged item, such as the Repeating Crossbow or a Socketed Staff with a +21 attack speed enchantment. */
+func canSmoothCast(is1f)
   return !permapotSetup &
-  ^buffs.string = "ʘ" & // berserk potion
-  ^!(debuffs.string = "stun" |
-  ^  debuffs.string = "chill" )
+  ^!(debuffs.string = "stun"  | // player is stunned, can't attack
+  ^  debuffs.string = "chill" | // player is chilled, which drastically reduces movement and attack speeds
+  ^  buffs.string = "buff_inf_speed") & // Infernal Staff walking speed boost
+  ^(is1f | buffs.string = "ʘ") // berserk potion
 func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL triskelion
@@ -726,13 +720,9 @@ Requires Smooth Casting. */
 func canKbFarm()
   return foe ! "unpushable" & // immune to knockback
   ^!permapotSetup &
-  ^canSmoothCast() & // smooth cast is required
-  ^s.inRange("crossbow")
+  ^canSmoothCast(false) & // smooth cast is required
   // between dashing and crossbow range
-  ^foe.distance =
-  ^   math.Clamp(foe.distance,
-  ^              s.getRange("dash_max"),
-  ^              s.getRange("crossbow"))
+  ^s.betweenRange("dash_min","crossbow")
 
 func canEscape()
   return foe ! "ranged" &

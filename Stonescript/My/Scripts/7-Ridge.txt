@@ -332,26 +332,6 @@ with bardiche */
 
 // .............. DASHING LOGIC ............. //
 
-:?a.canSmartDash() & canDash
-  a.smartDash()
-
-// Knockback farming
-:?c.canKbFarm()
-  c.smoothCast(a.bS)
-
-/* if in range, get closer while trying to
-unmake with repeating crossbow. */
-:?canDash & s.betweenRange("dash_min","crossbow") &
-^!c.permapotSetup
-  c.smoothCast(a.bR)
-
-// get in melee range faster
-:?!s.inRange("shovel") & !c.permapotSetup
-  c.stutterStep()
-  >h0,-1,#red,STUTTERSTEPPING
-
-// ........... SPECIAL ITEMS LOGIC .......... //
-
 // Calamity - reduce hp
 :?c.canUseAbility("wand_aether") &
 ^(encounter.eliteMod = "berserk" |
@@ -379,8 +359,27 @@ unmake with repeating crossbow. */
 :?c.canUseAbility("wand_ice") &
 ^c.canApplyStun() & foe = "elite" &
 ^foe.count > 1 &
-^s.getTotalHP("player") < c.midhp
+^s.getTotalHP("player") < c.hihp
   c.useAbility_OH("wand_ice", a.wIh, hand)
+
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
+// Knockback farming
+:?c.canKbFarm()
+  c.smoothCast(a.bS)
+
+/* if in range, get closer while trying to
+unmake with repeating crossbow. */
+:?canDash & s.betweenRange("dash_min","crossbow") &
+^!c.permapotSetup
+  c.smoothCast(a.bR)
+
+// get in melee range faster
+:?c.canStutterStep()
+  c.stutterStep()
+
+// ........... SPECIAL ITEMS LOGIC .......... //
 
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
@@ -391,7 +390,7 @@ unmake with repeating crossbow. */
 // ............... AOE LOGIC ................ //
 
 :?foe.GetCount(foe.distance + margin) > 1 &
-^s.inRange("shovel") & foe ! "boss"
+^foe ! "boss"
   // Align foes
   ?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
@@ -466,7 +465,6 @@ unmake with repeating crossbow. */
 
 // Tanky foe, use bardiche ability to lower its hitpoints
 :?(foe = "boss" | foe = "monarch") &
-^s.inRange("shovel") &
 ^(c.canUseAbility("staff_poison") |
 ^c.canUseAbility("bardiche"))
   ?c.canUseAbility("staff_poison")
