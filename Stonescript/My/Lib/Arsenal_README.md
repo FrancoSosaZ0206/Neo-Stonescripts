@@ -43,9 +43,11 @@ Copy-paste the script into your Mindstone.
   activate cinderwisp
 ```
 
-> **WARNING:** There are constant variables that are subject to changes depending on the level or state of your arsenal (i.e. bladeRDmg).
+> **WARNING:** this library heavily depends on the current state of your items to work properly, if not at all.
 >
-> It is recommended to check and change these values accordingly for the functions to work as intended.
+> It is therefore strongly advised to adapt to your save's progress before using it.
+>
+> Make sure you carefully read and understand it first.
 
 ---
 
@@ -75,7 +77,7 @@ Copy-paste the script into your Mindstone.
 #### Archetypes
 
 - dmg = damage (D affix)
-- eff = buff/debuff
+- eff = effect (buff/debuff)
 - def = defensive (A affix)
 - h = hidden (staves and wands only)
 
