@@ -34,9 +34,8 @@ watermarkArr = [
 ^"source: "+sys.fileUrl,
 ^"DISCLAIMER: "+disclaimer,
 
-^string.Format("discord: {0} (SSRPG {1}: {2})",
+^string.Format("discord: {0} ({1})",
 ^              dcTag,
-^              "server username",
 ^              dcUsername),
 ^"YouTube: "+ytChannel,
 
