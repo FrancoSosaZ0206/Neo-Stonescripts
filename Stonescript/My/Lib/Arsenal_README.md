@@ -135,11 +135,18 @@ It counts the amount of times a debuffing weapon is cast, instead of counting th
 
 ### `func ldtF(mode)`
 
+#### Description
+
 Loadout function.
 
-- Acts as a custom loadout that works with my arsenal.
+- Acts as a big, custom loadout command that works with item aliases.
 - Handles most (if not all) situations.
 - Works with the Permapot strategy.
+
+#### Parameters
+
+- **`mode`**
+
 
 ---
 
