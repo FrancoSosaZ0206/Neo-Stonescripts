@@ -290,12 +290,6 @@ or while setting up permapot. */
 ^  !c.canUseAbility("staff_fire")))
   activate potion
 
-// grab extra ki (EXPERIMENTAL)
-:?foe.state = 4 & ai.enabled & !ai.paused
-  equipL ki stone
-  equipR mask
-  >h0,0,#yellow,GETTING EXTRA KI!!!
-
 // Summons
 :?c.canSummon("voidweaver") &
 ^loc.stars > 15 &
@@ -581,16 +575,20 @@ unmake with repeating crossbow. */
       margin = 8
       a.ldtF("big sword unmake")
 
-  :?buffs.string = "ʘ" | // berserk potion
+  // berserk potion
+  :?buffs.string = "ʘ" |
+  // split hydras lose the Stable buff
   ^(encounter.eliteMod = "hydra" &
-  ^ foe.buffs.string ! "stability")
+  ^ foe.buffs.string ! "stability") |
+  // more foes outside range
+  ^(foe ! "elite" &
+  ^ (foe.count -
+  ^ foe.GetCount(foe.distance + margin))
+  ^ > 0)
     margin = 8
     a.ldtF("big sword unmake")
-
-  : // ?!(foe = "monarch" & foe = "soldier")
+  :
     equip Kubikiribocho
-  /*:
-    fight("normal")*/
 
 // ............... BOSS LOGIC ............... //
 
@@ -621,6 +619,8 @@ unmake with repeating crossbow. */
       a.ldtF("sword debuff weaken")
     :?c.canApplyChill(6)
       a.ldtF("sword debuff chill")
+    :?c.canApplyBurn()
+      a.ldtF("sword debuff burn")
 
     // Heal
     :?hp ! maxhp
