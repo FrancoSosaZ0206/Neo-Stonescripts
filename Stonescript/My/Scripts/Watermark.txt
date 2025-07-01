@@ -1,6 +1,7 @@
 // imports
 var scrl = import UI/ScrollText
 
+// variables
 
 // Watermark & version control
 var author = "Tom Crow"
@@ -22,6 +23,10 @@ var w = 16
 var stepWait = 3
 var c = color.Random()
 
+
+// procedure
+
+// increase gap size to match display width
 ?string.Size(separator) < w
   separator += "#"
 
@@ -40,7 +45,6 @@ watermarkArr = [
 ^"YouTube: "+ytChannel,
 
 ^separator]
-
 
 // combine array with transparent char separators
 watermarkStr = string.Join(separator, watermarkArr)
