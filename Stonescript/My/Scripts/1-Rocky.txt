@@ -123,7 +123,6 @@ func fight(mode)
     ^((canDash &
     ^  foe.GetCount(foe.distance + margin) = 1) |
     ^ foe = "monarch")
-
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ........... //

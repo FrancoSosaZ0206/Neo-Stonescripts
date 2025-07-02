@@ -2,69 +2,7 @@
 //  ┃ ▄▀▄▀▄▀▄▀ START OF "Arsenal" ▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-/* // //////////// FILE INFO //////////////// //
-
-Library with my personal weapons,
-special stats and loadouts
-Made by IronHawk (Tom Crow)
-
-. ................ Description ............... .
-
-  This library has some variables and functions
-  that minimalize the usage of my current
-  arsenal and provide some info on their damage.
-
-. ................. Importing ................ .
-
-  var a = new MyArsenal
-
-. ................... Usage .................. .
-
-  ?foe.debuffs.count = maxIgnitions // example
-
-* ****************** WARNING ***************** *
-
-  There are constant variables that are subject
-  to changes depending on the level or state of
-  your arsenal (i.e. bladeRDmg).
-  
-  It is recommended to check and change these
-  values accordingly for the functions to work
-  as intended.
-
-* ******************************************** *
-
-Enjoy! ;) */
-
-/* //////////////// GLOSSARY //////////////// //
-
-s = sword
-bs = big sword
-h = hammer
-sh = shield
-w = wand
-st = staff
-b = crossbow
-
-P = poison
-V = vigor
-A = aether
-F = fire
-I = ice
-S = stone
-
-dmg = damage (D affix)
-eff = buff/debuff
-def = defensive (A affix)
-h = hidden (staves and wands only)
-
-D = dashing
-T = towering
-C = compound
-R = repeating
-Q = quarterstaff
-B = bardiche
-HH = heavy hammer */
+// For info, see Arsenal_README.
 
 // //////////////// IMPORTS ///////////////// //
 
@@ -75,32 +13,6 @@ var s = import My/Lib/Stats
 // /////////////// VARIABLES //////////////// //
 
 // ************** ITEM ALIASES ************** //
-
-/* ................ RENAMED ................. //
-
-Unbroken Faith      = *max sword stone (enchanted: speed)
-Broken Faith        = *max sword stone (enchanted: speed)
-Mamba Negra         = *max sword poison D (enchanted: speed)
-Dothaneel           = *max sword vigor D (enchanted: speed)
-Void Slayer         = *max sword aether D (enchanted: speed)
-Vantum Phoenix      = *max sword fire D (enchanted: speed)
-Bifrost             = *max sword ice D (enchanted: speed/crit)
-
-Death's Kiss        = *max sword -big poison dP shiny (enchanted: speed)
-Soulfetcher         = *max sword -big vigor dL +21/ (enchanted: speed/L)
-Existential Crisis  = *max sword -big aether dU +21 (enchanted: speed)
-Almafuerte          = *max sword -big ice dI (enchanted: speed)
-
-theVwand            = *max wand vigor D golden
-Frosty Crust        = *max wand ice dI
-
-Subspace Bubble     = *max shield dashing HoH24
-Speedy Hammer       = *max hammer stone
-Kubikiribocho       = *max bardiche (enchanted: crit/damage)
-Mjölnir             = *max heavy_hammer (enchanted: damage)
-Guardian's Wrath    = *max heavy_hammer shiny (enchanted: armor fatigue)
-
-............................................. */
 
 // Elemental
 
@@ -303,10 +215,6 @@ var canIncrease = true
 
 // /////////////// FUNCTIONS //////////////// //
 
-/* Loadout function.
-- Acts as a custom loadout that works with my arsenal.
-- Handles most (if not all) situations.
-- Accounts for the permapot strategy. */
 func ldtF(mode)
   // sanitize entry
   mode = string.ToLower(mode)
@@ -819,15 +727,6 @@ func smartDash()
   :?c.canUseAbility("dash")
     ldtF("dash")
 
-/* Smart debuffing is a faster,
-more efficient method to debuff
-with ranged weapons.
-
-It counts the amount of times a
-debuffing weapon is cast, instead
-of counting the foe's debuffs,
-eliminating the time it takes for
-the projectiles to land. */
 func canSmartDebuff(itemType)
   // entry sanitization
   itemType = string.ToLower(itemType)

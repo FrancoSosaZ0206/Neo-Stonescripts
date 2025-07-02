@@ -23,8 +23,8 @@ This library defines tools aiming to simplify the usage of a player's items, sto
 
 ## Dependencies
 
-- my combat library
-- my stats library
+- my combat library.
+- my stats library.
 
 ## Importing
 

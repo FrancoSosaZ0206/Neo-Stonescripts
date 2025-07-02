@@ -2,35 +2,6 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "Combat" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-/* // ///////////// FILE INFO //////////////// //
-
-Combat functions library
-Made by IronHawk (Tom Crow)
-
-. ................ Description ................ .
-
-  This library provides some game-related
-  functions to make the task of doing a
-  farming script easier.
-
-. ................. Importing ................. .
-
-  var c = new Combat
-
-. .................... Tip .................... .
-
-  If you want to use the variables here,
-  put c.Init() at the top of your script.
-
-. ................... Usage ................... .
-
-  ?c.canUseAbility("blade")
-    c.useAbility_TH("blade")
-
-. ...................................... .
-
-Enjoy! */
-
 // ///////////////// IMPORTS ///////////////// //
 
 var u = import My/Lib/Utilities
@@ -113,24 +84,6 @@ func Init()
 
 // ................. GLOBAL ................. //
 
-/* Returns true if a given weapon's special ability can be activated.
-
-Valid abilityID values:
-- blade >> Blade of the Fallen God
-- mask >> Cultist Mask
-- arm >> Skeleton Arm (REQUIRES GAINING AT LEAST 1 PICK-POCKET BUFF)
-- bash >> Bashing Shield
-- dash >> Dashing Shield
-- bardiche
-- heavy_hammer
-- quarterstaff
-- mind >> Mindstone
-- hatchet
-- voidweaver >> Aether Talisman's summon
-- cinderwisp >> Fire Talisman's summon
-- staff + <name>, staff + <element> >> Hidden staves
-- wand + <name>, wand + <element> >> Hidden wands
-- <element>_talisman >> Talismans */
 func canUseAbility(abilityID)
   var result = false
 
@@ -195,17 +148,6 @@ func canUseAbility(abilityID)
 
   return result
 
-/* Activates a two-handed item's ability.
-
-itemName = your item to activate.
-
-Valid abilityID values:
-- blade >> Blade of the Fallen God
-- arm >> Skeleton Arm
-- bardiche
-- heavy + hammer >> Heavy Hammer
-- quarterstaff
-- staff + <element> + hidden >> Hidden staves */
 func useAbility_TH(abilityID, itemName)
   ?item_TH_IDs.Contains(abilityID)
     equip @itemName@
@@ -214,15 +156,6 @@ func useAbility_TH(abilityID, itemName)
   : // invalid abilityID
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_TH\nCAUSE: <abilityID> unknown:\n\n" + abilityID, false)
     loc.Pause()
-/* Activates a one-handed item's ability.
-
-itemName = your item to activate.
-
-Valid abilityID values:
-- hatchet
-- mask >> Cultist Mask
-- <element> + talisman >> Talismans
-- wand <element> + hidden >> Hidden wands */
 func useAbility_OH(abilityID, itemName, hand)
   ?item_OH_IDs.Contains(abilityID)
     // special one-handed weapons equipment logic
@@ -259,10 +192,8 @@ func useAbility_OH(abilityID, itemName, hand)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: useAbility_T\nCAUSE: unknown <abilityID>:\n\n" + abilityID, false)
     loc.Pause()
 
-/* Returns true if a given item is equipped. */
 func isEquipped(itemName)
   return item.left = itemName | item.right = itemName
-/* Returns true if an attack is being casted. */ 
 func isCasting(itemName)
   return
   ^(item.left = itemName & item.left.state = 2) |
@@ -314,8 +245,6 @@ func screenMngr_DS(itemName, scrTarget, scrMax)
 
     :?canUseAbility_DS(itemName)
       useAbility_DS(itemName)
-/* Checks if a weapon ability can be used in 2 screens
-of distance, according to a certain screen index. */
 func canUseAbility_DS(itemName)
   ?table_itemDS.Contains(itemName)
     return canUseAbility(itemName) &
@@ -346,7 +275,6 @@ func useAbility_DS(itemName)
 
 func isSummoned(summonName)
   return summon.GetId() = summonName
-/* Checks if a summon can be invoked by its respective talisman. */
 func canSummon(summonName)
   var talisman = s.getTalisman(summonName)
   ?talisman
@@ -355,7 +283,6 @@ func canSummon(summonName)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: canSummon\nCAUSE: unknown <summonName>: " + summonName, false)
     return false
 
-/* Checks if a summon can be hidden by its respective talisman. */
 func canHide(summonName)
   var result = s.getTalisman(summonName)
 
@@ -366,11 +293,6 @@ func canHide(summonName)
 
   return result
 
-/* Activates a summon's "Devour" ability.
-
-Valid summonName values:
-- voidweaver
-- cinderwisp */
 func devour(summonName)
   ?s.talisman_table.Contains(summonName)
     ?isSummoned(summonName)
@@ -391,21 +313,9 @@ func devour(summonName)
   :
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
-/* Checks if the Voidweaver's devour ability
-will successfully unmake a foe. */
 func canUnmakeVoidweaver()
   return canUnmake() & foe ! "elite"
 
-/* Checks if the cinderwisp's "devour" ability damage
-will kill the foe.
-
-cinderwispDmg: damage dealt by cinderwisp for each
-              ignition.
-margin: number representing a health margin to add
-        to the remaining foe's health. This is
-        necessary because the ability has a cast time
-        that will alter the estimations done here.
-        Send 0 if you don't want to use a margin. */
 func canKillCinderwisp(cinderwispDmg, margin)
   var result = false
   var debuffCount = null // amount of debuffs stacked
@@ -415,12 +325,6 @@ func canKillCinderwisp(cinderwispDmg, margin)
     result = s.getTotalHP("foe") <= (debuffCount * cinderwispDmg) + margin
 
   return result
-/* Checks if the maximum amount of ignition debuffs have been
-applied to a certain foe.
-
-ignitions_cap: maximum number of ignition debuffs
-               that can be applied. Varies on upgrade level or
-               boosted stat. */
 func isCinderwispCap(ignitions_cap)
   ?foe.debuffs.string
     return foe.debuffs.string = ignitions_cap
@@ -588,11 +492,6 @@ func canApplyAll()
   :
     return false
 
-/* Returns true if the player is engaging in a fight.
-
-This enables the player to benefit from effects
-that are applied when engaging, like ai or A/a
-affix items. */
 func canEngage()
   return ai.walking & ai.enabled & !ai.paused &
   ^foe.distance =
@@ -602,13 +501,6 @@ func canEngage()
 
 // ........... Damage min-maxing ............ //
 
-/* Moonjuggling is a trick that boosts dps with 2 swords whose attack speed stat is maxed out (+21 enchantment).
-
-Requires AAC (Attack Animation Cancelling).
-
-It's a cycle that repeats every 3 frames:
-- In the first 2, the Moondial Stone is held with each sword, boosting their attack speed even further.
-- In the last one, both swords are held to spend the cooldown frame in a single frame. */
 func moonjuggle(weapon1, weapon2)
   /* moonjuggling isn't necessary or possible
   under these conditions, do
@@ -638,20 +530,6 @@ func moonjuggle(weapon1, weapon2)
     equipL moon
     equipR @weapon1@*/
 
-/* Moonjuggling variant, aka Bursting.
-Requires a minimum of 2 swords to cycle through.
-Works with an unlimited number of swords
-
-weaponsArr: array with all the swords to use.
-            Every sword must have a +21 enchanted
-            boosting its attack speed stat.
-
-Usage example:
-  doBursting([sword fire *max +21,
-              sword ice *max +21,
-              sword poison *max +21,
-              sword vigor *max +21,
-              sword aether *max +21]) */
 func canBurst()
   return burstState
 func burst(weaponsArr)
@@ -679,13 +557,6 @@ func burst(weaponsArr)
         burstCdTimer = 0
         burstState = true
 
-/* AAC = Attack Animation Cancelling
-Widely used trick to enable a
-massive attack speed boost.
-
-It works by skipping the "perf"
-animation/state of an item, interrupting
-it by switching to another item momentarily. */
 func AAC(itemLeft, itemRight)
   ?item.left.state = 3
     equipL @itemLeft@
@@ -695,9 +566,6 @@ func AAC(itemLeft, itemRight)
     equipR @itemRight@
     equip @item.right@ // equip works for two-handed items as well
 
-/* Smooth Casting is a trick where you hold the triskelion stone every certain amount of frames to enable walking while dealing damage.
-
-Requires berserk potion or a 1 frame cast, ranged item, such as the Repeating Crossbow or a Socketed Staff with a +21 attack speed enchantment. */
 func canSmoothCast(is1f)
   return !permapotSetup &
   ^!(debuffs.string = "stun"  | // player is stunned, can't attack
@@ -711,12 +579,6 @@ func smoothCast(itemName)
   :
     equip @itemName@
 
-/* Checks if the player can use "Knockback Farming",
-a strategy where you can walk while damaging and
-pushing back foes, minimizing the time the stonehead
-is still.
-
-Requires Smooth Casting. */
 func canKbFarm()
   return foe ! "unpushable" & // immune to knockback
   ^!permapotSetup &
@@ -730,10 +592,6 @@ func canEscape()
   ^(canUseAbility("staff_stone") |
   ^ canUseAbility("mind"))
 
-/* Stutterstepping is a technique that enables
-walking with the Triskelion Stone while inside its
-attack range (where the player would normally stop
-to attack) to walk faster. */
 func canStutterStep()
   return !s.inRange("hatchet") & !permapotSetup
 func stutterStep()

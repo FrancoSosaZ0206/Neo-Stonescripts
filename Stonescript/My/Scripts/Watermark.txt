@@ -1,13 +1,14 @@
-// imports
+// ///////////////// IMPORTS ///////////////// //
+
 var scrl = import UI/ScrollText
 
-// variables
+// //////////////// VARIABLES //////////////// //
 
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.1.3"
-var lastUpdated = "2025/07/01 17:00 GMT-6"
+var scriptVer = "2.1.4"
+var lastUpdated = "2025/07/01 22:00 GMT-6"
 var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
 
 var dcTag = "@metaleagle26"
@@ -23,8 +24,7 @@ var w = 16
 var stepWait = 3
 var c = color.Random()
 
-
-// procedure
+// //////////////// PROCEDURE //////////////// //
 
 // increase gap size to match display width
 ?string.Size(separator) < w

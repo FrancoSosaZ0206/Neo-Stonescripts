@@ -167,6 +167,8 @@ func fight(mode)
     boss_screen = 4
   :?loc.stars = 18
     boss_screen = 5
+  :?loc.stars = 19
+    boss_screen = 6
   :?loc.stars <= 20
     boss_screen = 7
 
@@ -196,7 +198,7 @@ margin = 16 // bardiche's hitbox + splash range
 // Set canDash default value
 canDash = true
 
-c.potionType = "berserk" // "lucky"
+c.potionType = "lucky" // "berserk"
 c.Init()
 a.smartDebuff_Mgr()
 
@@ -237,12 +239,6 @@ or while setting up permapot. */
 ^ (end_t > 1 & screen.i = boss_screen &
 ^  !c.canUseAbility("staff_fire")))
   activate potion
-
-// grab extra ki (EXPERIMENTAL)
-:?foe.state = 4 & ai.enabled & !ai.paused
-  equipL ki stone
-  equipR mask
-  >h0,0,#yellow,GETTING EXTRA KI!!!
 
 // Summons
 :?c.canSummon("voidweaver") &
@@ -372,7 +368,7 @@ with bardiche */
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
 :?canDash & s.betweenRange("dash_min","crossbow") &
-^!c.permapotSetup
+^!c.canSmoothCast(true)
   c.smoothCast(a.bR)
 
 // get in melee range faster
