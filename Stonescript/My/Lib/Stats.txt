@@ -62,7 +62,7 @@ rounds up.
 ...ccCcc////...... basic crossbow right
 ....ccCcc////..... heavy crossbows, heavy hammer
 ..ssSss///........ sword left, staff melee, hammer left (even)
-...ssSss///....... sword right, big sword left, hammer right  (even)
+...ssSss///....... sword right, big sword left, hammer right (even)
 ....ssSss///...... big sword right (even)
 ..wWw////......... wand left, torch left, harmonic
 ...rRr////........ runestone left, runestone right

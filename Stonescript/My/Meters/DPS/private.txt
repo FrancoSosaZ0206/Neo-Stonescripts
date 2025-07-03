@@ -35,6 +35,11 @@ var dataArr = [
 ^"#Dmg#/Sec#{4}"
 ^]
 
+var dataW = string.Size(
+^             u.getLargestStr(
+^                 string.Split(dataToString(""), "\n")))
+var dataH = string.Split(dataToString(""),"\n").Count()
+
 // ................ Functions ................ //
 
 // DATA HANDLING
@@ -98,44 +103,56 @@ func print(x, y, colorHex, mode)
 // UI
 
 func uiMngr(x, y, colorHex, mode)
+  ?pnl & pnl.children
+    >`1,10,#6666ff,DPS/pnl children: @pnl.children.Count()@, 
+    ^visible: @pnl.visible@, 
+    ^parent is root: @pnl.parent = ui.root@
+
+  ?canRegenUi()
+    dlUi()
+    >c10,1,#ff0000,dl DPS
+
   ?canInitUi()
     mkUi(x,y,colorHex,mode)
+    >c10,0,#00ff00,mk DPS
   :
     updateUi(mode)
+    >c10,0,#cyan,up DPS
+
+func canRegenUi()
+  return pnl & (pnl.parent ! ui.root | pnl.children.Count() > 1)
 
 func canInitUi()
-  return loc.begin | loc.loop
+  return !(pnl & txt)
 
-// Regenerates ui components every 3 seconds.
-func canRegenUi()
-  return (pnl | txt) & (totaltime % (3 * u.sec) = 0)
+func dlUi()
+  ?pnl.children.Count() > 0 & txt
+    pnl.Clear()
+    txt = null
+  :
+    pnl.Recycle()
+    pnl = null
 
 func mkUi(x, y, colorHex, mode)
   // Panel presets
   var panelStyle = -3
 
   // Textbox presets
-  var dataStr = dataToString(mode)
-  var txtW = null
-  var txtH = null
+  var dataStr = dataToString("")
 
   ?mode = "slim" | mode = "small"
     panelStyle = -1
-    txtW = string.Size(dataStr)
-    txtH = 1
-  :
-    txtW = string.Size(
-    ^         u.getLargestStr(
-    ^             string.Split(dataStr, "\n")))
 
-    txtH = string.Split(dataStr,"\n").Count()
+    dataStr = dataToString(mode)
+    dataW = string.Size(dataStr)
+    dataH = 1
 
   txt = ui.AddText()
   txt.text = dataStr
   txt.x = 1
   txt.y = 1
-  txt.w = txtW
-  txt.h = txtH
+  txt.w = dataW
+  txt.h = dataH
   txt.anchor = "top_left"
   txt.dock = "top_left"
   txt.color = colorHex
@@ -143,8 +160,8 @@ func mkUi(x, y, colorHex, mode)
   pnl = ui.AddPanel()
   pnl.x = x
   pnl.y = y
-  pnl.w = txt.w + 2
-  pnl.h = txt.h + 2
+  pnl.w = dataW + 2
+  pnl.h = dataH + 2
   pnl.anchor  = "bottom_right"
   pnl.dock    = "bottom_right"
   pnl.color   = colorHex
@@ -152,11 +169,24 @@ func mkUi(x, y, colorHex, mode)
 
   pnl.Add(txt)
 
+  pnl.visible = true
+
 func updateUi(mode)
-  txt.text = dataToString(mode)
+  var dataStr = dataToString("")
 
-  txt.w = txtW
-  txt.h = txtH
+  ?mode = "slim" | mode = "small"
+    dataStr = dataToString(mode)
 
-  pnl.w = txt.w + 2
-  pnl.h = txt.h + 2
+    dataW = string.Size(dataStr)
+    dataH = 1
+
+  ?txt
+    txt.text = dataStr
+    txt.w = dataW
+    txt.h = dataH
+
+  ?pnl
+    pnl.w = dataW + 2
+    pnl.h = dataH + 2
+
+    pnl.visible = true

@@ -1,0 +1,26 @@
+var btn = null
+var pnl = null
+var txt = null
+
+?totaltime = 1
+  btn = ui.AddButton()
+  btn.tcolor = #00ff00
+  btn.bcolor = #00ff00
+  btn.hcolor = #00ff00
+  btn.text = "Press me"
+
+:?totaltime = 120
+  pnl = ui.AddPanel()
+  pnl.color = #00ffff
+  pnl.anchor = center_left
+  pnl.dock = center_left
+
+  txt = ui.AddText("Hello!")
+  txt.color = #ff8800
+  txt.dock = top_left
+  txt.anchor = top_left
+
+  pnl.Add(txt)
+
+>`1,7,#magenta,nComponents: 
+^@ui.root.children.Count()@

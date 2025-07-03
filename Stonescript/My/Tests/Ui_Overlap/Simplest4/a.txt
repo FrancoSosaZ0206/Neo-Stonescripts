@@ -1,0 +1,24 @@
+var btn = null
+var pnl = null
+var txt = null
+
+?totaltime = 1
+  btn = ui.AddButton()
+  btn.tcolor = #ff0000
+  btn.bcolor = #ff0000
+  btn.hcolor = #ff0000
+  btn.y = 5
+  btn.text = "No, press me!!!"
+
+:?totaltime = 150
+  pnl = ui.AddPanel()
+  pnl.color = #883311
+  pnl.anchor = center_right
+  pnl.dock = center_right
+
+  txt = ui.AddText("Goodbye!")
+  txt.color = #ff88ff
+  txt.dock = top_right
+  txt.anchor = top_right
+
+  pnl.Add(txt)

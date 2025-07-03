@@ -1,0 +1,53 @@
+// ============================
+// an even more atomic example
+
+?totaltime = 1
+  var btn = mkBtn( #00ff00, 0, "Press me")
+
+:?totaltime = 120
+  var btn = mkBtn( #ff0000, 5, "No, press me!!!")
+
+  var pnl = mkPnl( #00ffff, "center_left", "center_left")
+
+  var txt = mkTxtbx("Hello!", #ff8800, "center_left", "center_left")
+
+  pnl.Add(txt)
+
+:?totaltime = 150
+  var pnl = mkPnl( #883311, "center_right", "center_right")
+
+  var txt = mkTxtbx("Goodbye!", #ff88ff, "center_right", "center_right")
+
+  pnl.Add(txt)
+
+func mkBtn(col,y,text)
+  var btn = ui.AddButton()
+  btn.tcolor = col
+  btn.bcolor = col
+  btn.hcolor = col
+
+  btn.y = y
+  btn.text = text
+
+  return btn
+
+func mkPnl(col,dock,anchor)
+  var pnl = ui.AddPanel()
+
+  pnl.color = col
+  pnl.dock = dock
+  pnl.anchor = anchor
+
+  return pnl
+
+func mkTxtbx(text,col,dock,anchor)
+  var txtbx = ui.AddText(text)
+
+  txtbx.color = col
+  txtbx.dock = dock
+  txtbx.anchor = anchor
+
+  return txtbx
+
+>`1,7,#magenta,nComponents: 
+^@ui.root.children.Count()@

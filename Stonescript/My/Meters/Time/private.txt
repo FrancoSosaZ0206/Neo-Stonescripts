@@ -16,10 +16,15 @@ var dataArr = [
 
 ^"####SPEED-O-METER####\n"+
 ^"#·##·##·##·##·##·##·#\n"+
-^"#BES#{0}\n"+
-^"#AVG#{1}\n"+
-^"#CUR#{2}"
+^"#BES#{0} ({1}f)\n"+
+^"#AVG#{2} ({3}f)\n"+
+^"#CUR#{4} ({5}f)"
 ^]
+
+var dataW = string.Size(
+^             u.getLargestStr(
+^                 string.Split(dataToString(""), "\n")))
+var dataH = string.Split(dataToString(""),"\n").Count()
 
 // ................ Functions ................ //
 
@@ -45,7 +50,9 @@ func dataToString(mode)
   ?mode = "slim" | mode = "small"
     return string.Format(dataArr[0], bt,at,tt)
   :
-    return string.Format(dataArr[1], bt,at,tt)
+    return string.Format(dataArr[1], bt, loc.bestTime,
+    ^                                at, loc.averageTime,
+    ^                                tt, totaltime)
 
 // PRINT
 
@@ -55,40 +62,56 @@ func print(x, y, colorHex, mode)
 // UI
 
 func uiMngr(x, y, colorHex, mode)
+  ?pnl & pnl.children
+    >`1,9,#ff6666,Time/pnl children: @pnl.children.Count()@, 
+    ^visible: @pnl.visible@, 
+    ^parent is root: @pnl.parent = ui.root@
+
+  ?canRegenUi()
+    dlUi()
+    >c-10,1,#ff0000,dl Time
+
   ?canInitUi()
     mkUi(x,y,colorHex,mode)
+    >c-10,0,#00ff00,mk Time
   :
     updateUi(mode)
+    >c-10,0,#cyan,up Time
+
+func canRegenUi()
+  return pnl & (pnl.parent ! ui.root | pnl.children.Count() > 1)
 
 func canInitUi()
-  return loc.begin | loc.loop
+  return !(pnl & txt)
+
+func dlUi()
+  ?pnl.children.Count() > 0 & txt
+    pnl.Clear()
+    txt = null
+  :
+    pnl.Recycle()
+    pnl = null
 
 func mkUi(x, y, colorHex, mode)
   // Panel presets
   var panelStyle  = -2
 
   // Textbox presets
-  var dataStr = dataToString(mode)
-  var txtW = null
-  var txtH = null
+  var dataStr = dataToString("")
 
   ?mode = "slim" | mode = "small"
     panelStyle = -1
-    txtW = string.Size(dataStr)
-    txtH = 1
-  :
-    txtW = string.Size(
-    ^         u.getLargestStr(
-    ^             string.Split(dataStr, "\n")))
 
-    txtH = string.Split(dataStr,"\n").Count()
+    dataStr = dataToString(mode)
+    dataW = string.Size(dataStr)
+    dataH = 1
 
   txt = ui.AddText()
   txt.text = dataStr
   txt.x = 1
   txt.y = 1
-  txt.w = txtW
-  txt.h = txtH
+  txt.w = dataW
+  txt.h = dataH
   txt.anchor = "top_left"
   txt.dock = "top_left"
   txt.color = colorHex
@@ -96,8 +119,8 @@ func mkUi(x, y, colorHex, mode)
   pnl = ui.AddPanel()
   pnl.x = x
   pnl.y = y
-  pnl.w = txt.w + 2
-  pnl.h = txt.h + 2
+  pnl.w = dataW + 2
+  pnl.h = dataH + 2
   pnl.anchor  = "bottom_left"
   pnl.dock    = "bottom_left"
   pnl.color   = colorHex
@@ -105,11 +128,11 @@ func mkUi(x, y, colorHex, mode)
 
   pnl.Add(txt)
 
+  pnl.visible = true
+
 func updateUi(mode)
-  txt.text = dataToString(mode)
+  ?txt
+    txt.text = dataToString(mode)
 
-  txt.w = txtW
-  txt.h = txtH
-
-  pnl.w = txt.w + 2
-  pnl.h = txt.h + 2
+  ?pnl
+    pnl.visible = true

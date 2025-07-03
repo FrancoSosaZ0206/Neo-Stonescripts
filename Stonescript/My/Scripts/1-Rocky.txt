@@ -25,7 +25,8 @@ var canDash  = true
 // values
 var stunTime = null
 var hand     = null
-var margin   = null
+
+var itemSplash = 17 // bardiche hitbox + splash area
 
 var boss_screen = null
 var boss_cutscenes = [
@@ -95,13 +96,14 @@ func fight(mode)
     ?a.canSmartDebuff("magic") &
     ^(!canDash |
     ^(foe = "elite" &
-    ^foe.GetCount(foe.distance + margin) > 1))
+    ^foe.GetCount(itemSplash) > 1))
+      itemSplash = foe.distance + 7
       a.smartDebuff("magic")
 
     // Permapot 1v1 debuffing
     :?c.canApplyAny() & canDash &
     ^c.permapotSetup & foe = "elite" &
-    ^foe.GetCount(foe.distance + margin) = 1
+    ^foe.GetCount(itemSplash) = 1
       a.ldtF("sword debuff auto")
 
     // 1v1 strong foe weakening
@@ -121,21 +123,22 @@ func fight(mode)
     // ............ HEALING LOGIC ........... //
     :?hp ! maxhp &
     ^((canDash &
-    ^  foe.GetCount(foe.distance + margin) = 1) |
+    ^  foe.GetCount(itemSplash) = 1) |
     ^ foe = "monarch")
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ........... //
     :?c.canUnmake()
       ?canDash &
-      ^foe.GetCount(foe.distance + margin) = 1
+      ^foe.GetCount(itemSplash) = 1
         a.ldtF("sword unmake")
-      : // foe.GetCount(foe.distance + margin) > 1
+      : // foe.GetCount(itemSplash) > 1
+        itemSplash = 10
         a.ldtF("big sword unmake")
 
     // ........... DAMAGE LOGIC ........... //
     :?canDash &
-    ^(foe.GetCount(foe.distance + margin) = 1 |
+    ^(foe.GetCount(itemSplash) = 1 |
     ^foe = "monarch" | foe = "boss")
       ?c.canUseAbility("staff_poison") &
       ^!s.inRange("dash") & foe = "phase3"
@@ -147,6 +150,7 @@ func fight(mode)
       :
         a.ldtF("sword dmg")
     :
+      itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
   : // invalid mode
     u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
@@ -155,7 +159,29 @@ func fight(mode)
 
 // ............. MONITOR LOGIC .............. //
 
+/* itemSplash display test
 
+var playerX = screen.FromWorldX(pos.x)
+playerX = screen.FromWorldX(pos.x)
+
+var playerY = screen.FromWorldZ(pos.z - pos.y)
+playerY = screen.FromWorldZ(pos.z - pos.y)
+
+>`@playerX@,@playerY + 2@,itemSplash
+draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
+
+?foe.distance ! 9999
+  >`@playerX@,@playerY + 3@,dist\n
+  ^dist + itemSplash
+  draw.Bg(playerX, playerY + 3, #0000ff, foe.distance, 1)
+  draw.Bg(playerX, playerY + 4, #aa00aa, foe.distance + itemSplash, 1)
+
+?foe.count
+  >`@playerX@,@playerY + 5@,count range
+  draw.Bg(playerX, playerY + 5, #00aaaa, 46, 1)
+
+  >`@playerX + itemSplash@,@playerY + 2@,out of range
+  draw.Bg(playerX + itemSplash, playerY + 2, #008800, 46 - itemSplash, 1) */
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -169,7 +195,7 @@ func fight(mode)
 
 // .............. SETUP LOGIC ............... //
 
-// Auto-harvesting logic
+/* // Auto-harvesting logic
 ?!buttonPressed
   u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
 
@@ -208,6 +234,7 @@ func fight(mode)
     :
       ?!dontShowAgain
         dontShowAgain = true
+*/
 
 ?loc.loop
   nRuns++
@@ -233,14 +260,16 @@ func fight(mode)
 
 /* // BFG logic
 ?nRuns > 1 & loc.stars > 15
-  c.screenMngr_DS("blade", 2, boss_screen - 3) */
+  c.screenMngr_DS("blade", 2, boss_screen - 3)
+*/
 
 /* // DS Mask logic (early scout wake up)
 ?loc.stars = math.Clamp(loc.stars, 11, 15) & !c.permapotSetup
-  c.screenMngr_DS("mask", 1, 1) */
+  c.screenMngr_DS("mask", 1, 1)
+*/
 
-// set up margin default value
-margin = 16 // bardiche's hitbox + splash range
+// set up itemSplash default value
+itemSplash = 17 // bardiche's hitbox + itemSplash area
 // Set canDash default value
 canDash = true
 // Set phase3dmg
@@ -477,7 +506,7 @@ or while setting up permapot. */
 // .............. DASHING LOGIC ............. //
 
 // Calamity - reduce hp
-:?c.canUseAbility("wand_aether") &
+:?c.canUseAbility("wand_aether") & s.inRange("wand") &
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch" | encounter.eliteMod = "monarch" |
 ^ encounter.eliteMod = "blessed" |
@@ -485,12 +514,12 @@ or while setting up permapot. */
   c.useAbility_OH("wand_aether", a.wAh, hand)
 
 // Reset buff
-:?c.canUseAbility("wand_vigor") &
+:?c.canUseAbility("wand_vigor") & s.inRange("wand") &
 ^foe.buffs.string = "stoic"
   c.useAbility_OH("wand_vigor", a.wVh, hand)
 
 // Reduce damage
-:?c.canUseAbility("wand_poison") &
+:?c.canUseAbility("wand_poison") & s.inRange("wand") &
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch" | encounter.eliteMod = "monarch" |
 ^ encounter.eliteMod = "blessed" |
@@ -500,7 +529,7 @@ or while setting up permapot. */
   c.useAbility_OH("wand_poison", a.wPh, hand)
 
 // Stun enemies
-:?c.canUseAbility("wand_ice") &
+:?c.canUseAbility("wand_ice") & s.inRange("wand") &
 ^c.canApplyStun() & foe = "elite" &
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.hihp
@@ -533,9 +562,9 @@ unmake with repeating crossbow. */
 
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(foe.distance + margin) > 1
+:?foe.GetCount(itemSplash) > 1
   // Align foes
-  ?c.canUseAbility("wand_stone")
+  ?c.canUseAbility("wand_stone") & s.inRange("wand")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   /* Activate Berserk Staff early (in case there's
@@ -560,6 +589,7 @@ unmake with repeating crossbow. */
      // not stunned with heavy hammer or Frost Wand
   ^  foe.debuffs.string ! "debuff_armor_fatigue" &
   ^  foe.debuffs.string ! "debuff_frost_stun"))
+    itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
   // permapot run
@@ -568,10 +598,10 @@ unmake with repeating crossbow. */
   ^  !c.isCasting("bardiche"))
     // Debuff and unmake
     ?a.canSmartDebuff("magic")
+      itemSplash = foe.distance + 7
       a.smartDebuff("magic")
     :
-      // change margin as needed
-      margin = 8
+      itemSplash = 10
       a.ldtF("big sword unmake")
 
   // berserk potion
@@ -582,9 +612,9 @@ unmake with repeating crossbow. */
   // more foes outside range
   ^(foe ! "elite" &
   ^ (foe.count -
-  ^ foe.GetCount(foe.distance + margin))
+  ^ foe.GetCount(itemSplash))
   ^ > 0)
-    margin = 8
+    itemSplash = 10
     a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
