@@ -160,10 +160,10 @@ func fight(mode)
 
 // ............. MONITOR LOGIC .............. //
 
-?permapotActTime ! -1
+?permapotActTime ! -1 & nRuns = 1
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
-    >o-10,6,#magenta,bide until @time.FormatDigital(permapotTbw)@
+    >o-7,6,#magenta,bide until @time.FormatDigital(permapotTbw)@
 
 
 /* itemSplash display test
@@ -630,11 +630,11 @@ unmake with repeating crossbow. */
   ^(encounter.eliteMod = "hydra" &
   ^ foe.buffs.string ! "stability") |
   // more foes outside range
-  ^(foe ! "elite" &
+  ^(foe ! "elite" & screen.i > 1 &
   ^ (foe.count -
   ^ foe.GetCount(itemSplash))
   ^ > 0)
-    itemSplash = 10
+    // itemSplash = 10
     a.ldtF("big sword unmake")
   :
     equip Kubikiribocho

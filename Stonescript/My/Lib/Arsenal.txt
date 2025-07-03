@@ -155,7 +155,7 @@ var berserkerLvl = 21
 // ............ COMPOUND SHIELD ............. //
 
 var compoundMaxArmor_default = 14
-var compoundMaxArmor_boosted = 30
+var compoundMaxArmor_boosted = 31
 
 // .............. CULTIST MASK .............. //
 
