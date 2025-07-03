@@ -163,7 +163,7 @@ func fight(mode)
 ?permapotActTime ! -1
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
-    >o-10,6,#magenta,bide until time.FormatDigital()
+    >o-10,6,#magenta,bide until @time.FormatDigital(permapotTbw)@
 
 
 /* itemSplash display test
