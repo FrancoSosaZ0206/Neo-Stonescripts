@@ -486,7 +486,12 @@ or while setting up permapot. */
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
 
-:?pickup.distance < 15
+:?pickup.distance < 15 &
+// foe is farther than pickup
+^(foe.distance > 15 |
+^ foe.distance = 9999 |
+// pickup is a treasure
+^ pickup = "treasure")
   a.ldtF("magnet")
 
 :?end_t > 1 &
