@@ -195,7 +195,7 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
 
 // .............. SETUP LOGIC ............... //
 
-/* // Auto-harvesting logic
+// Auto-harvesting logic
 ?!buttonPressed
   u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
 
@@ -234,7 +234,6 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
     :
       ?!dontShowAgain
         dontShowAgain = true
-*/
 
 ?loc.loop
   nRuns++

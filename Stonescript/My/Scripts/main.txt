@@ -64,10 +64,9 @@ enable npcDialog
 
   // import UI/FoeStateTracker
 
-  /* // AI meter print mode
+  // AI meter print mode
   var aim = new My/Meters/Ai/public
   aim.main(1,screen.h - 3,"")
-  */
   
   /* // Time and DPS meters in UI mode
   var tm = import My/Meters/Time/public
