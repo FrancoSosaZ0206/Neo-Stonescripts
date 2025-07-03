@@ -324,7 +324,7 @@ c.AAC("sword *0", "hatchet")
 or while setting up permapot. */
 :?c.canUsePotion() &
 ^(c.permapotSetup |
-^ (end_t > 1 & screen.i = boss_screen &
+^ (end_t > 15 & screen.i = boss_screen &
 ^  !c.canUseAbility("staff_fire")))
   activate potion
 
@@ -389,7 +389,7 @@ or while setting up permapot. */
 ^ (foe = "phase3" & foe.damage > 1 &
 ^   ((foe.debuffs.string = "chill:6" & foe.time > 85) |
 ^    (foe.debuffs.string ! "chill" & foe.time > 45  )))) |
-^(foe ! "boss" &
+^(foe = "soldier" &
 ^ foe.debuffs.string ! "stun" &
 ^ s.inRange("dash_min") &
 ^   ((foe.debuffs.string = "chill:6" & foe.time > 50) |
@@ -460,7 +460,7 @@ or while setting up permapot. */
 // ......... ENGAGING/WALKING LOGIC ......... //
 
 // speed up (post-treasure)
-:?end_t > 1 & screen.i = boss_screen &
+:?end_t > 15 & screen.i = boss_screen &
 ^ c.canUseAbility("staff_fire")
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -505,12 +505,13 @@ or while setting up permapot. */
 ^ pickup = "treasure")
   a.ldtF("magnet")
 
+// regen armor (after picking chest up)
 :?end_t > 1 &
 ^!(c.canUsePotion() | c.canUseAbility("staff_fire"))
   a.ldtF("defense armor regen")
 
 :?ai.walking & player.direction = 1 &
-^!s.inRange("crossbow")
+^!s.inRange("crossbow") & foe ! "phase"
   ?armor > a.compoundMaxArmor_boosted |
   ^c.canEngage()
     a.ldtF("engage")
@@ -593,11 +594,11 @@ unmake with repeating crossbow. */
   :?screen.i = 1 & c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
 
-  :?c.canUseAbility("heavy_hammer") & foe = "elite"
-    ?encounter.eliteMod = "plated"
-      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-    :
-      c.useAbility_TH("heavy_hammer", Mjölnir)
+  :?c.canUseAbility("heavy_hammer") &
+  ^encounter.eliteMod = "plated" // foe = "elite"
+    c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+    /*:
+      c.useAbility_TH("heavy_hammer", Mjölnir)*/
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
@@ -628,13 +629,13 @@ unmake with repeating crossbow. */
   :?buffs.string = "ʘ" |
   // split hydras lose the Stable buff
   ^(encounter.eliteMod = "hydra" &
-  ^ foe.buffs.string ! "stability") |
+  ^ foe.buffs.string ! "stability") /* |
   // more foes outside range
   ^(foe ! "elite" & screen.i > 1 &
   ^ (foe.count -
   ^ foe.GetCount(itemSplash))
-  ^ > 0)
-    // itemSplash = 10
+  ^ > 0)*/
+    itemSplash = 10
     a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
