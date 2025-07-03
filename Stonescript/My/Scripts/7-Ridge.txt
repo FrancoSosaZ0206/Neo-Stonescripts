@@ -134,8 +134,7 @@ func fight(mode)
 
 // ............. MONITOR LOGIC .............. //
 
->`1,7,#magenta,screen = @screen.i@\n
-^boss_screen = @boss_screen@
+
 
 // ............. WITHDRAWAL LOGIC ............ //
 
@@ -157,20 +156,18 @@ func fight(mode)
 
 // Set up boss_screen
 ?!boss_screen
-  ?loc.stars <= 10 // cyan and white
-    boss_screen = 2
+  ?loc.stars <= 5 // white
+    boss_screen = 6
+  :?loc.stars = 6 // cyan 1 star
+    boss_screen = 5
+  :?loc.stars <= 10 // cyan
+    boss_screen = 4
+  :?loc.stars = 11 // yellow 1 star
+    boss_screen = 8
   :?loc.stars <= 15 // yellow
     boss_screen = 7
-  :?loc.stars = 16 // green
-    boss_screen = 3
-  :?loc.stars = 17
-    boss_screen = 4
-  :?loc.stars = 18
-    boss_screen = 5
-  :?loc.stars = 19
-    boss_screen = 6
-  :?loc.stars <= 20
-    boss_screen = 7
+  :?loc.stars <= 20 // green
+    boss_screen = 3 + (loc.stars - 16)
 
 // Set up blowing flag
 :?screen.i = boss_screen

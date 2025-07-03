@@ -248,7 +248,7 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
   :?loc.stars <= 15 // yellow
     boss_screen = 4
   :?loc.stars <= 20 // green
-    boss_screen = 7
+    boss_screen = 3 + (loc.stars - 16)
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
   c.permapotSetup = (screen.i >= boss_screen - 1)
