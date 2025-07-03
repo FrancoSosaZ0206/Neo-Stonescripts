@@ -469,6 +469,14 @@ or while setting up permapot. */
 ^   (nRuns > 1 & screen.i = 1)))
   c.useAbility_TH("staff_fire", a.stFh)
 
+// Harvest/Pick up things
+:?harvest.distance < 15 &
+^choice & nRuns > 1
+  ?c.canUseAbility("shovel")
+    c.useAbility_TH("shovel", "shovel")
+  :
+    a.ldtF("harvest")
+
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ai.walking & ai.enabled & !ai.paused &
@@ -478,9 +486,6 @@ or while setting up permapot. */
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
 
-// Harvest/Pick up things
-:?choice & harvest.distance < 5
-  a.ldtF("harvest")
 :?pickup.distance < 15
   a.ldtF("magnet")
 
@@ -621,6 +626,10 @@ unmake with repeating crossbow. */
 // ............... BOSS LOGIC ............... //
 
 :?foe = "phase" // Dysangelos fight logic
+  var permapotTt = loc.averageTime - (loc.averageTime / 10)
+  ?choice
+    permapotTt = loc.averageTime * 2
+
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Default) // reached ignition cap
     c.devour("cinderwisp")
@@ -639,9 +648,7 @@ unmake with repeating crossbow. */
 
   // Buy time
   :?c.permapotSetup &
-  ^(totaltime - permapotActTime
-  ^<
-  ^loc.averageTime - (loc.averageTime / 10))
+  ^(totaltime - permapotActTime < permapotTt)
     // Debuff
     ?c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
@@ -668,7 +675,7 @@ unmake with repeating crossbow. */
 ^c.canUseAbility("bardiche"))
   ?c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
-  : // c.canuseAbility("bardiche")
+  : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
 :
   fight("normal")

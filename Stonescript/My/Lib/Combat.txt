@@ -29,6 +29,8 @@ var item_TH_IDs = [ // two-handed item IDs
 ^   "blade",
 ^   "arm",
 
+^   "shovel",
+
 ^   "bardiche",
 ^   "heavy_hammer",
 ^   "quarterstaff",
@@ -101,7 +103,11 @@ func canUseAbility(abilityID)
       ^buffs.string = "pick_pocket"
 
     :?abilityID = "hatchet"
-      result = (result & loc = "deadwood_valley" &
+      result = (result & loc.id = "deadwood_valley" &
+      ^         s.inRange(abilityID)) |
+      ^isCasting(abilityID) // won't get interrupted
+    :?abilityID = "shovel"
+      result = (result & loc.id = "rocky_plateau" &
       ^         s.inRange(abilityID)) |
       ^isCasting(abilityID) // won't get interrupted
 

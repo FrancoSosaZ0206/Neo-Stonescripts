@@ -150,6 +150,9 @@ var ability_table = [ // ability cooldown IDs only
 ^   "bash",
 ^   "dash",
 
+^   "hatchet",
+^   "shovel",
+
 ^   "bardiche",
 ^   "heavy_hammer",
 ^   "quarterstaff",
