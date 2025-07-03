@@ -41,6 +41,7 @@ var phase3dmg = foe.damage
 // counters
 var nRuns = 1 // number of runs in this session
 var permapotActTime = -1 // time when permapot was activated, -1 means not activated
+var permapotTbw = loc.averageTime - (loc.averageTime / 10) // permapot time bandwidth
 
 var old_t = item.GetTreasureCount()
 var end_t = 0
@@ -159,6 +160,12 @@ func fight(mode)
 
 // ............. MONITOR LOGIC .............. //
 
+?permapotActTime ! -1
+  var delay = totaltime + (5 * 30)
+  ?totaltime <= delay
+    >o-10,6,#magenta,bide until time.FormatDigital()
+
+
 /* itemSplash display test
 
 var playerX = screen.FromWorldX(pos.x)
@@ -197,7 +204,7 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
 
 // Auto-harvesting logic
 ?!buttonPressed
-  u.showStrCtr(6,30,#yellow,"Harvest boulders?",false)
+  u.showStrCtr(6,30,#yellow,"Dig boulders?",false)
 
   ?!yesButton
     yesButton = uimkr.mkButton(
@@ -227,10 +234,10 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
     ?totaltime < aux
       ?choice
         u.showStrCtr(6, 30,#green,
-        ^"Harvest boulders is enabled",false)
+        ^"Dig boulders: enabled",false)
       :
         u.showStrCtr(6, 30,#red,
-        ^"Harvest boulders is disabled",false)
+        ^"Dig boulders: disabled",false)
     :
       ?!dontShowAgain
         dontShowAgain = true
@@ -256,6 +263,10 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
+
+// increase permapot bandwidth if player chooses to dig boulders
+?choice
+  permapotTbw = loc.averageTime + (30 * 75)
 
 /* // BFG logic
 ?nRuns > 1 & loc.stars > 15
@@ -631,10 +642,6 @@ unmake with repeating crossbow. */
 // ............... BOSS LOGIC ............... //
 
 :?foe = "phase" // Dysangelos fight logic
-  var permapotTt = loc.averageTime - (loc.averageTime / 10)
-  ?choice // give an extra minute to dig all the boulders
-    permapotTt = loc.averageTime + (30 * 75)
-
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Default) // reached ignition cap
     c.devour("cinderwisp")
@@ -653,7 +660,7 @@ unmake with repeating crossbow. */
 
   // Buy time
   :?c.permapotSetup &
-  ^(totaltime - permapotActTime < permapotTt)
+  ^(totaltime - permapotActTime < permapotTbw)
     // Debuff
     ?c.canApplyWeaken()
       a.ldtF("sword debuff weaken")
