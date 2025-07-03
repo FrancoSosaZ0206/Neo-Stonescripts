@@ -632,8 +632,8 @@ unmake with repeating crossbow. */
 
 :?foe = "phase" // Dysangelos fight logic
   var permapotTt = loc.averageTime - (loc.averageTime / 10)
-  ?choice
-    permapotTt = loc.averageTime * 2
+  ?choice // give an extra minute to dig all the boulders
+    permapotTt = loc.averageTime + (30 * 75)
 
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Default) // reached ignition cap
