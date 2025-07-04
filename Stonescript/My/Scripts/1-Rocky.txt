@@ -321,7 +321,7 @@ c.AAC("sword *0", "hatchet")
 
 /* activate potion after picking up treasure
 or while setting up permapot. */
-:?c.canUsePotion() &
+:?c.canUsePotion() & loc.stars > 10 &
 ^(c.permapotSetup |
 ^ (end_t > 10 & screen.i = boss_screen &
 ^  !c.canUseAbility("staff_fire")))
@@ -467,8 +467,9 @@ or while setting up permapot. */
 // ......... ENGAGING/WALKING LOGIC ......... //
 
 // speed up (post-treasure)
-:?end_t > 10 & screen.i = boss_screen &
-^ c.canUseAbility("staff_fire")
+:?c.canUseAbility("staff_fire") &
+^ end_t > 10 & screen.i = boss_screen &
+^ loc.stars > 10
   c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
@@ -513,8 +514,9 @@ or while setting up permapot. */
   a.ldtF("magnet")
 
 // regen armor (after picking chest up)
-:?end_t > 1 &
-^!(c.canUsePotion() | c.canUseAbility("staff_fire"))
+:?(loc.stars <= 10 & old_t ! item.GetTreasureCount()) |
+^(end_t > 1 &
+^!(c.canUsePotion() | c.canUseAbility("staff_fire")))
   a.ldtF("defense armor regen")
 
 :?ai.walking & player.direction = 1 &

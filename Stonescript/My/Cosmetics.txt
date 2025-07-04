@@ -6,10 +6,9 @@
   // Default player cosmetics
   import Hats/StarCloak
   import Hats/MushroomHat
-  import Pets/Skully
+  import Pets/Crab
   import Weapons/LanternTalisman
   import Weapons/AR
-
 
   // Foe cosmetics
   ?loc = "undead_crypt"
