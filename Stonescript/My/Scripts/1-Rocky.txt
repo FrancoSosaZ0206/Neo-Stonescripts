@@ -324,7 +324,7 @@ c.AAC("sword *0", "hatchet")
 or while setting up permapot. */
 :?c.canUsePotion() &
 ^(c.permapotSetup |
-^ (end_t > 15 & screen.i = boss_screen &
+^ (end_t > 10 & screen.i = boss_screen &
 ^  !c.canUseAbility("staff_fire")))
   activate potion
 
@@ -460,7 +460,7 @@ or while setting up permapot. */
 // ......... ENGAGING/WALKING LOGIC ......... //
 
 // speed up (post-treasure)
-:?end_t > 15 & screen.i = boss_screen &
+:?end_t > 10 & screen.i = boss_screen &
 ^ c.canUseAbility("staff_fire")
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -511,9 +511,9 @@ or while setting up permapot. */
   a.ldtF("defense armor regen")
 
 :?ai.walking & player.direction = 1 &
-^!s.inRange("crossbow") & foe ! "phase"
+^!s.inRange("crossbow")
   ?armor > a.compoundMaxArmor_boosted |
-  ^c.canEngage()
+  ^c.canEngage() & foe ! "phase"
     a.ldtF("engage")
   :
     a.ldtF("defense armor regen")
@@ -566,7 +566,7 @@ or while setting up permapot. */
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
 :?canDash & s.betweenRange("dash_min","crossbow") &
-^!c.canSmoothCast(true)
+^c.canSmoothCast(true)
   c.smoothCast(a.bR)
 
 // get in melee range faster
@@ -578,7 +578,8 @@ unmake with repeating crossbow. */
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
 ^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1
+^foe.count > 1 & screen.i > 1 &
+^s.inRange("dash_min")
   c.devour("voidweaver")
 
 // ............... AOE LOGIC ................ //
@@ -604,6 +605,7 @@ unmake with repeating crossbow. */
   :?s.inRange("grappling_hook") &
   // don't interrupt bardiche
   ^!c.isCasting("bardiche") &
+  ^foe ! "warcaster" &
   ^(c.canApplyStun() |
     // stun time (frames) running out
   ^ (stunTime = math.Clamp(stunTime, 1, 11) &

@@ -534,8 +534,8 @@ func betweenRange(source1, source2)
   :
     return foe.distance =
     ^math.Clamp(foe.distance,
-    ^           getRange(source1),
-    ^           getRange(source2) )
+    ^           getRange(source1) + 1,
+    ^           getRange(source2) + 1 )
 
 // TO DO: COMPLETE THIS FUNCTION
 /* Calculates the damage the player will deal

@@ -577,7 +577,7 @@ func canSmoothCast(is1f)
   ^!(debuffs.string = "stun"  | // player is stunned, can't attack
   ^  debuffs.string = "chill" | // player is chilled, which drastically reduces movement and attack speeds
   ^  buffs.string = "buff_inf_speed") & // Infernal Staff walking speed boost
-  ^(is1f | buffs.string = "ʘ") // berserk potion
+  ^(is1f | buffs.string = "ʘ") // 1-frame cast item or berserk potion
 func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL triskelion
@@ -599,7 +599,8 @@ func canEscape()
   ^ canUseAbility("mind"))
 
 func canStutterStep()
-  return !s.inRange("hatchet") & !permapotSetup
+  return s.betweenRange("hatchet", "triskelion") &
+  ^!(permapotSetup /*| buffs.string = "buff_inf_speed"*/) 
 func stutterStep()
   equipL sword 0* +0
 
