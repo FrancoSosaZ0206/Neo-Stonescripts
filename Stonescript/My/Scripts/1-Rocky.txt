@@ -165,7 +165,6 @@ func fight(mode)
   ?totaltime <= delay
     >o-7,6,#magenta,wait until @time.FormatDigital(permapotTbw)@
 
-
 /* itemSplash display test
 
 var playerX = screen.FromWorldX(pos.x)
@@ -339,6 +338,14 @@ or while setting up permapot. */
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // ............. DEFENSIVE LOGIC ............ //
+
+// interrupt attacks with shovel
+:?foe = "boss" & foe.state = 32 &
+^c.canUseAbility("shovel")
+  equip shovel
+  ?s.inRange("shovel")
+    c.useAbility_TH("shovel", "shovel")
+  >h0,0,#red,SHOVEL ABILITY
 
 // phase2 about to attack
 :?foe = "phase2" & foe.state = 32 &
@@ -584,7 +591,8 @@ unmake with repeating crossbow. */
 
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(itemSplash) > 1
+:?foe.GetCount(itemSplash) > 1 &
+^!(foe = "boss" | foe = "monarch")
   // Align foes
   ?c.canUseAbility("wand_stone") & s.inRange("wand")
     c.useAbility_OH("wand_stone", a.wSh, hand)
