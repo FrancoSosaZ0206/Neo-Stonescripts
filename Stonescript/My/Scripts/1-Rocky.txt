@@ -339,13 +339,13 @@ or while setting up permapot. */
 
 // ............. DEFENSIVE LOGIC ............ //
 
-// interrupt attacks with shovel
+/* // interrupt attacks with shovel
 :?foe = "boss" & foe.state = 32 &
 ^c.canUseAbility("shovel")
   equip shovel
   ?s.inRange("shovel")
     c.useAbility_TH("shovel", "shovel")
-  >h0,0,#red,SHOVEL ABILITY
+  >h0,0,#red,SHOVEL ABILITY*/
 
 // phase2 about to attack
 :?foe = "phase2" & foe.state = 32 &
