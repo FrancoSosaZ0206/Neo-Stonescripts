@@ -518,7 +518,7 @@ func getRange(source)
 
   return result
 func inRange(source)
-  ?source = "dash" | source = "bash"
+  ?["dash","bash"].Contains(source)
     return foe.distance =
     ^math.Clamp(foe.distance,
     ^           getRange("dash_min"),
