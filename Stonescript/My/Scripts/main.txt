@@ -61,17 +61,17 @@ enable npcDialog
 
 : // farming locations logic
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
+  
+  >`1,9,loc.id=@loc.id@
+  ?foe
+    >`1,10,s=@foe.state@|t=@foe.time@
 
   var aim = import My/Meters/Ai/public
   var tm = import My/Meters/Time/public
   var dpsm = import My/Meters/DPS/public
 
   // Display Meters in print mode
-  // ?loc.stars > 15
-  
-  ?foe
-    >`1,10,s=@foe.state@|t=@foe.time@
-
+  //?loc.stars > 15
   aim.main(1,screen.h - 3,"")
   tm.main(1,screen.h - 2,#red,"slim speedrun")
   dpsm.main(screen.w - 18,screen.h - 2,#yellow,1,"slim")
@@ -93,7 +93,7 @@ enable npcDialog
     import My/Scripts/4-Mushroom
   :?loc.id = "undead_crypt"
     import My/Scripts/5-Halls
-  :?loc.id = "bronze_mine"
+  :?["bronze_mine","bronze_guardian_harder"].Contains(loc.id)
     import My/Scripts/6-Mine
   :?loc.id = "icy_ridge"
     import My/Scripts/7-Ridge

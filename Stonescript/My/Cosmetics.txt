@@ -13,7 +13,7 @@
   // Foe cosmetics
   ?loc = "undead_crypt"
     import Foes/PallasCrown
-  :?loc = "bronze_mine"
-    import Foes/SurferGuardian
+  /*:?loc = "bronze_mine"
+    import Foes/SurferGuardian*/
   :
     import Foes/FlowerFoes

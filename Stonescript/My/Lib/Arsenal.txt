@@ -26,28 +26,28 @@ var shPdef  = "*max shield poison -ap"
 var shPeff  = "*max shield poison ap"
 var bPdmg   = "*max crossbow poison -dP"
 var bPeff   = "*max crossbow poison dP"
-var wPDmg   = "*max wand poison -dP -hidden"
+var wPdmg   = "*max wand poison -dP -hidden"
 var wPeff   = "*max wand poison dP -hidden"
 var stPeff  = "*max staff poison dP -hidden"
 
 // ................. VIGOR .................. //
 
-var sVDmg   = "*max sword -big vigor -dL Spring24" // 2nd
+var sVdmg   = "*max sword -big vigor -dL Spring24" // 2nd
 var sVeff   = "*max sword -big vigor dL -gold" // 2nd (enchanted: speed)
-var bsVDmg  = "*max sword vigor -dL"
+var bsVdmg  = "*max sword vigor -dL"
 var bsVeff  = "*max sword vigor dL"
 var hVeff   = "*max hammer vigor ah"
 var shVdef  = "*max shield vigor -ah"
 var shVeff  = "*max shield vigor ah"
 var bVeff   = "*max crossbow vigor dL"
-var bVDmg   = "*max crossbow vigor -dL"
+var bVdmg   = "*max crossbow vigor -dL"
 var wVeff   = "*max wand vigor dL -hidden"
-var wVDmg   = "*max wand vigor -dL -hidden" // 2nd
+var wVdmg   = "*max wand vigor -dL -hidden" // 2nd
 var stVeff  = "*max staff vigor dL -hidden"
 
 // ................. AETHER ................. //
 
-var sADmg   = "*max sword -big aether -dU" // 2nd
+var sAdmg   = "*max sword -big aether -dU" // 2nd
 var sAeff2  = "*max sword -big aether dU -golden" // 2nd
 var bsAdmg  = "*max sword big aether -dU -golden"
 var bsAeff  = "*max sword big aether dU shiny" // enchanted: speed
@@ -55,39 +55,40 @@ var bsAeff2 = "*max sword big aether dU -shiny" // enchanted: speed
 var hAeff   = "*max hammer aether aU"
 var shAdef  = "*max shield aether -au"
 var shAeff  = "*max shield aether au"
-var bADmg   = "*max crossbow aether -dU"
+var bAdmg   = "*max crossbow aether -dU"
 var bAeff   = "*max crossbow aether dU"
 var wAeff   = "*max wand aether dU -hidden"
+var wAdmg   = "*max wand aether -dU -hidden"
 var stAeff  = "*max staff aether dU -hidden"
 
 // .................. FIRE .................. //
 
-var sFDmg   = "*max sword -big fire -dF"
+var sFdmg   = "*max sword -big fire -dF"
 var sFeff   = "*max sword -big fire dF"
-var bsFDmg  = "*max sword big fire -dF"
+var bsFdmg  = "*max sword big fire -dF"
 var bsFeff  = "*max sword big fire dF"
 var hFeff   = "*max hammer fire aF"
 var shFdef  = "*max shield fire -af"
 var shFeff  = "*max shield fire af"
-var bFDmg   = "*max crossbow fire -dF"
+var bFdmg   = "*max crossbow fire -dF"
 var bFeff   = "*max crossbow fire dF"
-var wFDmg   = "*max wand fire -dF -hidden" // enchanted: speed
 var wFeff   = "*max wand fire dF -hidden"
+var wFdmg   = "*max wand fire -dF -hidden"
 var stFeff  = "*max staff fire dF -hidden"
 
 // .................. ICE ................... //
 
 var sIeff   = "*max sword -big ice dI -prismatic"
-var sIDmg   = "*max sword -big ice -dI"
+var sIdmg   = "*max sword -big ice -dI"
 var bsIeff  = "*max sword big ice dI"
-var bsIDmg  = "*max sword big ice -dI"
+var bsIdmg  = "*max sword big ice -dI"
 var hIeff   = "*max hammer ice aI"
 var shIdef  = "*max shield ice -ai"
 var shIeff  = "*max shield ice ai"
-var bIDmg   = "*max crossbow ice -dI"
+var bIdmg   = "*max crossbow ice -dI"
 var bIeff   = "*max crossbow ice dI"
-var wIDmg   = "*max wand ice -dI -hidden"
-var wIeff   = "*max wand ice dI +15 -hidden"
+var wIeff   = "*max wand ice dI -hidden -golden" // 2nd
+var wIdmg   = "*max wand ice -dI -hidden"
 var stIeff  = "*max staff ice dI -hidden"
 
 // .................. STONE ................. //
@@ -130,10 +131,10 @@ var shT     = "*max shield towering golden"
 
 var burstSwords = [
 ^     Mamba Negra     , sPdmg,
-^     Dothaneel       , sVDmg,
-^     Void Slayer     , sADmg,
-^     Vantum Phoenix  , sFDmg,
-^     Bifrost         , sIDmg
+^     Dothaneel       , sVdmg,
+^     Void Slayer     , sAdmg,
+^     Vantum Phoenix  , sFdmg,
+^     Bifrost         , sIdmg
 ^]
 
 // ************* SPECIAL STATS ************** //
@@ -221,7 +222,8 @@ func ldtF(mode)
 
   ?mode = "start" | mode = "begin" | mode = "default"
     equipL triskelion
-    equipR @shC1@
+    ?loc.begin | loc.loop | !c.permapotSetup
+      equipR @shC1@
 
   :?mode = "engage"
     // Left hand:
@@ -380,15 +382,15 @@ func ldtF(mode)
       // Left hand
       /*?foe.count > 1 // wands
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equipL @wIDmg@
+          equipL @wIdmg@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          equipL @wPDmg@
+          equipL @wPdmg@
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equipL @wVDmg@
+          equipL @wVdmg@
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equipL @wADmg@
+          equipL @wAdmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equipL @wFDmg@
+          equipL @wFdmg@
         : // foe = "stone"
           equipL @wSh@
       :*/
@@ -529,17 +531,17 @@ func ldtF(mode)
 
       : // !c.permapotSetup
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          c.moonjuggle(Bifrost, sIDmg)
+          c.moonjuggle(Bifrost, sIdmg)
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
           c.moonjuggle(Mamba Negra, sPdmg)
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          c.moonjuggle(Dothaneel, sVDmg)
+          c.moonjuggle(Dothaneel, sVdmg)
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          c.moonjuggle(Void Slayer, sADmg)
+          c.moonjuggle(Void Slayer, sAdmg)
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          c.moonjuggle(Vantum Phoenix, sFDmg)
+          c.moonjuggle(Vantum Phoenix, sFdmg)
         : // foe = "stone"
-          c.moonjuggle(Bifrost /*Unbroken Faith*/, sIDmg /*Broken Faith*/)
+          c.moonjuggle(Bifrost /*Unbroken Faith*/, sIdmg /*Broken Faith*/)
   :?mode = "big sword" // TO DO: big swords
     // Special cases:
     ?mode = "heal"
@@ -632,6 +634,8 @@ func ldtF(mode)
           equipL Frosty Crust
         :?mode = "weaken"
           equipL @wPeff@
+        :?mode = "burn"
+          equipL @wFeff@
       :
         ?mode = "chill"
           equipL moon
@@ -639,36 +643,39 @@ func ldtF(mode)
         :?mode = "weaken"
           equipL moon
           equipR @wPeff@
+        :?mode = "burn"
+          equipL moon
+          equip @wFeff@
 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equipL @wIDmg@
+          equipL @wIdmg@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          equipL @wPDmg@
+          equipL @wPdmg@
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equipL @wVDmg@
+          equipL @wVdmg@
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equipL @wADmg@
+          equipL @wAdmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equipL @wFDmg@
+          equipL @wFdmg@
         : // foe = "stone"
-          equipL Frosty Crust // @wSDmg@
+          equipL Frosty Crust // @wSdmg@
       : // !c.permapotSetup
         equipL moon
 
         ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equipR @wIDmg@
+          equipR @wIdmg@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
-          equipR @wPDmg@
+          equipR @wPdmg@
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equipR @wVDmg@
+          equipR @wVdmg@
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equipR @wADmg@
+          equipR @wAdmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equipR @wFDmg@
+          equipR @wFdmg@
         : // foe = "stone"
-          equipR @wIeff@ // @stSDmg@
+          equipR Frosty Crust // @stSdmg@
   :?mode = "ranged" // crossbows
     ?c.permapotSetup
       equipL @bAlt@
@@ -679,7 +686,7 @@ func ldtF(mode)
         equipR Frosty Crust
         // @bVeff@
       :?mode = "unmake"
-        ?c.canSmoothCast()
+        ?c.canSmoothCast(false)
           c.smoothCast(bAeff)
         :
           equip @bAeff@
@@ -696,21 +703,21 @@ func ldtF(mode)
         equip bS
 
       :?mode = "dmg" // TO DO: Uncomment when we have all D crossbows maxed out
-        ?c.canSmoothCast()
-          c.smoothCast(bAeff)
+        ?c.canSmoothCast(false)
+          c.smoothCast(bAdmg)
         :
-          equip @bAeff@
+          equip @bAdmg@
 
         /*?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
-          equip @bIDmg@
+          equip @bIdmg@
         :?(foe = "vigor" & foe.buffs.string ! "adaptive_defense_poison") | mode = "poison"
           equip @bPdmg@
         :?(foe = "aether" & foe.buffs.string ! "adaptive_defense_vigor") | mode = "vigor"
-          equip @bVDmg@
+          equip @bVdmg@
         :?(foe = "fire" & foe.buffs.string ! "adaptive_defense_aether") | mode = "aether"
-          equip @bFDmg@
+          equip @bFdmg@
         :?(foe = "ice" & foe.buffs.string ! "adaptive_defense_fire") | mode = "fire"
-          equip @bIDmg@
+          equip @bIdmg@
         : // foe = "stone"
           equip @bS@ */
 
@@ -786,7 +793,7 @@ func smartDebuff(itemType)
       ldtF("magic debuff weaken")
     : // itemType = "ranged"
       ldtF("ranged debuff weaken")
-      
+
   // incrementing logic
   ?(item.left.state = 3 |
   ^ item.right.state = 3) & // perf state

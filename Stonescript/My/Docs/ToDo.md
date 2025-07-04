@@ -24,10 +24,10 @@
   - x Mushroom
   - x Halls
   - ... Mine:
-    - ... finish updating boss logic:
-      - x add ranged fight section to fight() or at the boss logic section itself.
+    - ✔ finish updating boss logic:
+      - ✔ add ranged fight section to fight() or at the boss logic section itself.
     - ✔ recopilate boss screens and add them to the boss_screen assignment section.
-    - x Test!
+    - ... Test!
       - x does the Explosive Wand's ability work against Enfused elites?
   - x Ridge:
     - ... update again with Rocky's latest adjustments.

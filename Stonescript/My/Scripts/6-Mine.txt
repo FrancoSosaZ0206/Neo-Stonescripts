@@ -74,11 +74,24 @@ func fight(mode)
       a.ldtF("defense")
   :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
+    var canWeakenRanged = c.canApplyWeaken()
+    var canBurnRanged = c.canApplyBurn()
 
     // Bronze Guardian ranged debuffing
-    ?foe = "phase" & !canDash &
-    ^a.canSmartDebuff("magic")
-      a.smartDebuff("magic")
+    ?foe = "phase" & !canDash & canWeakenRanged
+      a.ldtF("magic debuff weaken")
+      ?(item.left = a.wPeff & item.left.state = 3) |
+      ^(item.right = a.wPeff & item.right.state = 3)
+        canWeakenRanged = false
+
+      >h0,7,#red,weakening phase
+    :?foe = "phase" & !canDash & canBurnRanged
+      a.ldtF("magic debuff burn")
+      ?(item.left = a.wFeff & item.left.state = 3) |
+      ^(item.right = a.wFeff & item.right.state = 3)
+        canBurnRanged = false
+      
+      >h0,7,#red,burning phase
 
     // AOE debuffing
     :?a.canSmartDebuff("magic") &
@@ -133,11 +146,14 @@ func fight(mode)
         activate potion
       :
         a.ldtF("sword dmg")
+
+      >h0,7,#red,dmg melee
     : // !(canDash | (...))
       ?!c.permapotSetup
         a.ldtF("ranged dmg")
       :
         a.ldtF("magic dmg")
+      >h0,7,#red,dmg ranged
   : // invalid mode
     u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
@@ -153,13 +169,16 @@ func fight(mode)
 >`1,7,#magenta,screen = @screen.i@\n
 ^boss_screen = @boss_screen@
 
+?foe.distance ! 9999
+  >f0,10,#magenta,dist=@foe.distance@
+
 // ............. WITHDRAWAL LOGIC ............ //
 
-?s.getTotalHP("player")
+?(foe ! "boss" & s.getTotalHP("player")
 ^ <=
 ^s.getFoeDmg(a.berserkerLvl,
 ^            a.plagueLvl,
-^            a.maskLvl      ) |
+^            a.maskLvl      )) |
 ^nRuns >= 25
   loc.Leave()
 
@@ -196,7 +215,7 @@ itemSplash = 17 // bardiche's hitbox + itemSplash area
 // Set canDash default value
 canDash = true
 
-c.potionType = "strength" // "berserk", "lucky"
+c.potionType = "lucky"
 c.Init()
 a.smartDebuff_Mgr()
 
@@ -234,16 +253,17 @@ c.AAC("sword *0", "hatchet")
 or while setting up permapot. */
 :?c.canUsePotion() & loc.stars > 10 &
 ^(c.permapotSetup |
-^ (end_t > 1 & screen.i = boss_screen &
+^ (end_t > 1 &
+^  loc.id = "bronze_guardian_harder" &
 ^  !c.canUseAbility("staff_fire")))
   activate potion
 
 // Summons
 :?c.canSummon("voidweaver") &
-^screen.i < boss_screen - 1 // not a cutscene
+^ loc.id = "bronze_mine"
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
-^screen.i >= boss_screen - 1
+^ loc.id = "bronze_guardian_harder"
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // .............. DEFENSIVE LOGIC ............ //
@@ -253,15 +273,25 @@ or while setting up permapot. */
 :?foe = "explode" & armor < bombCartDmg[loc.stars - 11]
   ?c.canUseAbility("dash")
     a.ldtF("dash")
+    >h0,6,#red,dashing
   :?c.canUseAbility("bash")
     a.ldtF("bash")
+    >h0,6,#red,bashing
   :?s.inRange("dash_min")
     fight("escape")
+    >h0,6,#red,escaping
+  :?c.canStutterStep() // stutter step to it
+    c.stutterStep()
+    >h0,6,#red,stutterstepping to it
   : // walk to it
-    a.ldtF("defense armor regen")
+    ?!s.inRange("triskelion")
+      a.ldtF("default")
+    :
+      equipL sword
+    >h0,6,#red,walking to it
 
 // boss's hammer attack
-:?foe.state = 32 & foe.time >= 30
+:?foe = "phase" & foe.state = 32 & foe.time >= 30
   canDash = false
   fight("escape")
 
@@ -273,7 +303,8 @@ or while setting up permapot. */
 
 // speed up (post-treasure)
 :?c.canUseAbility("staff_fire") &
-^ end_t > 1 & screen.i = boss_screen &
+^ end_t > 1 &
+^ loc.id = "bronze_guardian_harder" &
 ^ loc.stars > 10
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -310,7 +341,7 @@ or while setting up permapot. */
 
 // regen armor (after picking chest up)
 :?(loc.stars <= 10 & old_t ! item.GetTreasureCount()) |
-^(end_t > 1 &
+^(end_t > 1 & loc.id = "bronze_guardian_harder" &
 ^!(c.canUsePotion() | c.canUseAbility("staff_fire")))
   a.ldtF("defense armor regen")
 
@@ -326,6 +357,10 @@ or while setting up permapot. */
 // armor regen logic
 :?ai.paused | !ai.enabled | player.direction = -1
   a.ldtF("defense armor regen")
+
+// .............. RANGED LOGIC .............. //
+
+
 
 // .............. DASHING LOGIC ............. //
 
@@ -366,6 +401,7 @@ or while setting up permapot. */
 
 :?a.canSmartDash() & canDash
   a.smartDash()
+  >h0,6,#red,DASHING
 
 // Knockback farming
 :?c.canKbFarm()
@@ -374,7 +410,7 @@ or while setting up permapot. */
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
 :?canDash & s.betweenRange("triskelion","crossbow") &
-^!c.canSmoothCast(true)
+^c.canSmoothCast(true) & foe ! "phase"
   c.smoothCast(a.bR)
 
 // get in melee range faster
@@ -461,8 +497,6 @@ unmake with repeating crossbow. */
 
 // Boss fight (Bronze Guardian)
 :?foe = "phase"
-  canDash = false
-
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
@@ -476,14 +510,14 @@ unmake with repeating crossbow. */
 
   // boss's hammer's stuck
   :?foe.state = 33 & foe.time < 180
-    canDash = true
-
     ?c.canUseAbility("bardiche")
       c.useAbility_TH("bardiche", Kubikiribocho)
     :
       fight("normal")
   :
+    canDash = false
     fight("normal")
+    >h0,6,#red,ranged fight
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "6-Mine" ▄▀▄▀▄▀▄▀▄▀ ┃  //
