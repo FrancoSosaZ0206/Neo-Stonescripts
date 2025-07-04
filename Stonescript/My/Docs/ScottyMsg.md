@@ -72,30 +72,25 @@ Reactions:
 Message embedded in the ascii-art
 
 ```
-╭╮_/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\_╭╮
-╰╯¯\__________________________/¯╰╯
-   |                          |
-   | Trades are open!         |
-   | ---                      |
-   | Code: TXDR               |
-   | Reply or DM with         |
-   | screenshot to trade.     |
-   |                          |
-   | Fist reply gets the      |
-   | trade, the rest can be   |
-   | waitlisted.              |
-   |                          |
-   | The sooner you reply,    |
-   | the sooner I'll use      |
-   | yours!                   |
-   | ---                      |
-   | Reactions:               |
-   | - Trade completed:       |
-   |     :white_check_mark:   |
-   | - Code recieved:         |
-   |     :thumbsup:           |
-   | - Can waitlist: :pencil: |
-   |                          |
-╭╮_/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\_╭╮
-╰╯¯\__________________________/¯╰╯
+╭╮_/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\_╭╮
+╰╯¯\______________________/¯╰╯
+   |                      |
+   | Trades are open!     |
+   | ---                  |
+   | Code: TXDR           |
+   | Reply or DM with     |
+   | screenshot to trade. |
+   |                      |
+   | Fist reply gets the  |
+   | trade, the rest can  |
+   | be waitlisted.       |
+   |                      |
+   | The sooner you reply,|
+   | the sooner I'll use  |
+   | yours!               |
+   | ---                  |
+   | State:               |
+   |                      |
+╭╮_/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\_╭╮
+╰╯¯\______________________/¯╰╯
 ```
