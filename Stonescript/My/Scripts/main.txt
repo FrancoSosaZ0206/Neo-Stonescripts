@@ -62,34 +62,25 @@ enable npcDialog
 : // farming locations logic
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
 
-  // import UI/FoeStateTracker
-
-  // AI meter print mode
-  var aim = new My/Meters/Ai/public
-  aim.main(1,screen.h - 3,"")
-  
+  var aim = import My/Meters/Ai/public
   var tm = import My/Meters/Time/public
   var dpsm = import My/Meters/DPS/public
+
+  // Display Meters in print mode
+  // ?loc.stars > 15
   
-  /* // Time and DPS meters in UI mode
-  tm.main(1,-1,#ff0000,"slim ui speedrun")
-  dpsm.main(-9,-1,#ffff00,1,"slim ui")
-  */
+  ?foe
+    >`1,10,s=@foe.state@|t=@foe.time@
 
-  /* // manual UI garbage collector
-  var nUiComps = ui.root.children.Count()
-  nUiComps = ui.root.children.Count()
-  ?totaltime > (5*30) &
-  ^nUiComps = 1
-    ?totaltime % (2*30) = 0
-      ui.Clear()
-  */
-
-  // =====================================================
-
-  // Time and DPS meters in print mode
+  aim.main(1,screen.h - 3,"")
   tm.main(1,screen.h - 2,#red,"slim speedrun")
   dpsm.main(screen.w - 18,screen.h - 2,#yellow,1,"slim")
+  /*: // Display meters in UI mode
+    import UI/FoeStateTracker
+
+    aim.main(null,null,"ui")
+    tm.main(1,-1,#ff0000,"slim ui speedrun")
+    dpsm.main(-9,-1,#ffff00,1,"slim ui")*/
 
   ?loc.id = "rocky_plateau"
     disable npcDialog

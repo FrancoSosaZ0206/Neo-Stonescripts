@@ -6,9 +6,11 @@ var priv = import My/Meters/Ai/private
 
 // functions
 
-func main(x,y,mode)
+func main(x, y, mode)
   // sanitize entry
   mode = string.ToLower(mode)
+
+  priv.upData(mode)
 
   ?mode = "ui"
     priv.uiMngr()

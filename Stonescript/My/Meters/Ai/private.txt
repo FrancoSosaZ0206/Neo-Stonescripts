@@ -5,9 +5,9 @@
 var txt = null
 
 // To format:
-var dataStr = "AI#||#[color=#{0}]{1}[/color]#|#[color=#{2}]{3}[/color]#|#[color=#{4}]{5}[/color]#|#[color=#{6}]{7}[/color]#||"
+var dataStr = "AI#|[color={0}]{1}[/color]|[color={2}]{3}[/color]|[color={4}]{5}[/color]|[color={6}]{7}[/color]"
 
-var dataLbls = ["E", "P", "I", "W"]
+var dataLbls = ["enabled", "paused", "idle", "walking"]
 var dataCols = ["ffffff","ffffff","ffffff","ffffff"]
 var dataVals = [ai.enabled, ai.paused, ai.idle, ai.walking]
 
@@ -15,37 +15,39 @@ var dataStrPrint = ""
 
 // Functions
 
-// assigns individual color metadata for each value.
-func dataToString(mode)
+func upData(mode)
   dataVals = [ai.enabled, ai.paused, ai.idle, ai.walking]
 
+  // assigns individual color metadata for each value.
   ?mode = "ui"
     for i = 0 .. dataVals.Count() - 1
       // change color metadata based on value state
       ?dataVals[i]
-        dataCols[i] = "00ff00" // rGb -> green
+        dataCols[i] = #666666 // grey
       :
-        dataCols[i] = "ff0000" // Rgb -> red
+        dataCols[i] = #ff00ff // magenta
 
+  : // compose string
+    dataStrPrint = "AI#|"
+    var n = dataVals.Count() - 1
+    for i = 0 .. n
+      // change color metadata based on value state
+      ?dataVals[i]
+        dataStrPrint += string.ToUpper(dataLbls[i])
+      :
+        dataStrPrint += dataLbls[i]
+      
+      ?i < n
+        dataStrPrint += "|"
+
+func dataToString(mode)
+  ?mode = "ui"
     return string.Format(dataStr,
     ^   dataCols[0], dataLbls[0],
     ^   dataCols[1], dataLbls[1],
     ^   dataCols[2], dataLbls[2],
     ^   dataCols[3], dataLbls[3]   )
-
   :
-    dataStrPrint = "AI#|#"
-    var n = dataVals.Count() - 1
-    for i = 0 .. n
-      // change color metadata based on value state
-      ?dataVals[i]
-        dataStrPrint += ">"+dataLbls[i]+"<"
-      :
-        dataStrPrint += "#"+dataLbls[i]+"#"
-
-      ?i < n
-        dataStrPrint += "#"
-
     return dataStrPrint
 
 func print(x,y)
@@ -53,29 +55,38 @@ func print(x,y)
 
 // Main UI function
 func uiMngr()
-  ?canInit()
-    mk()
+  ?canRegenUi()
+    dlUi()
+
+  ?canInitUi()
+    mkUi()
   :
     upUi()
 
-// True on first frame of every run/loop
-func canInit()
-  return loc.begin | loc.loop
-// UI construction
-func mk()
+func canRegenUi()
+  return txt & txt.parent ! ui.root
+
+func canInitUi()
+  return !txt
+
+func dlUi()
+  ?txt
+    txt.Recycle()
+    txt = null
+
+func mkUi()
   var str = dataToString("ui")
 
   txt = ui.AddText(str)
 
   // define properties
   txt.x = 1
-  txt.y = 0
+  // txt.y = 0
   txt.w = string.Size(str)
+  // txt.h = 1
   txt.anchor = "center_left"
   txt.dock = "center_left"
-  txt.color = "#ffffff"
-// Update display
+
 func upUi()
-  // assign and parse output into ui textbox
-  txt.text = dataToString("ui")
-  txt.w = string.Size(str)
+  ?txt
+    txt.text = dataToString("ui")

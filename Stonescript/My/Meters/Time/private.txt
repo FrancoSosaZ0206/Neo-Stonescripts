@@ -62,21 +62,21 @@ func print(x, y, colorHex, mode)
 // UI
 
 func uiMngr(x, y, colorHex, mode)
-  ?pnl & pnl.children
+  /*?pnl & pnl.children
     >`1,9,#ff6666,Time/pnl children: @pnl.children.Count()@, 
     ^visible: @pnl.visible@, 
-    ^parent is root: @pnl.parent = ui.root@
+    ^parent is root: @pnl.parent = ui.root@*/
 
   ?canRegenUi()
     dlUi()
-    >c-10,1,#ff0000,dl Time
+    // >c-10,1,#ff0000,dl Time
 
   ?canInitUi()
     mkUi(x,y,colorHex,mode)
-    >c-10,0,#00ff00,mk Time
+    // >c-10,0,#00ff00,mk Time
   :
     updateUi(mode)
-    >c-10,0,#cyan,up Time
+    // >c-10,0,#cyan,up Time
 
 func canRegenUi()
   return pnl & (pnl.parent ! ui.root | pnl.children.Count() > 1)
