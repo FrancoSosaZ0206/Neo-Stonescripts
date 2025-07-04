@@ -257,7 +257,7 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
     boss_screen = 3 + (loc.stars - 16)
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
-  c.permapotSetup = (screen.i >= boss_screen - 1)
+  c.permapotSetup = c.permapotSetup & (screen.i >= boss_screen - 1)
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -488,7 +488,7 @@ or while setting up permapot. */
 ^   (nRuns > 1 & screen.i = 1)))
   c.useAbility_TH("staff_fire", a.stFh)
 
-// Harvest/Pick up things
+// Harvesting logic
 :?harvest.distance < 15 &
 ^choice & nRuns > 1
   ?c.canUseAbility("shovel")
@@ -505,6 +505,7 @@ or while setting up permapot. */
 ^ (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
 
+// Pickup logic
 :?pickup.distance < 15 &
 // foe is farther than pickup
 ^(foe.distance > 15 |
@@ -519,6 +520,7 @@ or while setting up permapot. */
 ^!(c.canUsePotion() | c.canUseAbility("staff_fire")))
   a.ldtF("defense armor regen")
 
+// engaging logic
 :?ai.walking & player.direction = 1 &
 ^!s.inRange("crossbow")
   ?armor > a.compoundMaxArmor_boosted |
@@ -527,6 +529,7 @@ or while setting up permapot. */
   :
     a.ldtF("defense armor regen")
 
+// armor regen logic
 :?ai.paused | !ai.enabled | player.direction = -1
   /*?!c.canBurst() & !c.permapotSetup
     c.burst(a.burstSwords)
@@ -574,7 +577,7 @@ or while setting up permapot. */
 
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
-:?canDash & s.betweenRange("dash_min","crossbow") &
+:?canDash & s.betweenRange("triskelion","crossbow") &
 ^c.canSmoothCast(true)
   c.smoothCast(a.bR)
 
@@ -601,15 +604,16 @@ unmake with repeating crossbow. */
 
   /* Activate Berserk Staff early (in case there's
   barely enough armor, to not lose it to the
-  Infernal Staff's Burn debuff). */
+  Infernal Staff's Burn debuff) for the Scout. */
   :?screen.i = 1 & c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
 
+  // Heavy hammer logic
   :?c.canUseAbility("heavy_hammer") &
-  ^encounter.eliteMod = "plated" // foe = "elite"
+  ^encounter.eliteMod = "plated"
     c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-    /*:
-      c.useAbility_TH("heavy_hammer", Mjölnir)*/
+  /* :?c.canUseAbility("heavy_hammer") & foe = "elite"
+    c.useAbility_TH("heavy_hammer", Mjölnir) */
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
@@ -646,7 +650,7 @@ unmake with repeating crossbow. */
   ^(foe ! "elite" & screen.i > 1 &
   ^ (foe.count -
   ^ foe.GetCount(itemSplash))
-  ^ > 0)*/
+  ^ > 0) */
     itemSplash = 10
     a.ldtF("big sword unmake")
   :

@@ -26,8 +26,9 @@
   - ... Mine:
     - ... finish updating boss logic:
       - x add ranged fight section to fight() or at the boss logic section itself.
-    - x recopilate boss screens and add them to the boss_screen assignment section.
+    - ✔ recopilate boss screens and add them to the boss_screen assignment section.
     - x Test!
       - x does the Explosive Wand's ability work against Enfused elites?
-  - ✔ Ridge
+  - x Ridge:
+    - ... update again with Rocky's latest adjustments.
   - x Temple

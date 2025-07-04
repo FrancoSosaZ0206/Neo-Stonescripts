@@ -17,7 +17,8 @@ var canDash  = true
 // values
 var stunTime = null
 var hand     = null
-var margin   = null
+
+var itemSplash = 17 // bardiche hitbox + splash area
 
 var boss_screen = null
 var boss_cutscenes = [] // TO DO
@@ -29,6 +30,7 @@ var bombCartDmg = [
 // counters
 var nRuns = 1 // number of runs in this session
 var permapotActTime = -1 // time when permapot was activated, -1 means not activated
+var permapotTbw = loc.averageTime - (loc.averageTime / 10) // permapot time bandwidth
 
 var old_t = item.GetTreasureCount()
 var end_t = 0
@@ -73,17 +75,22 @@ func fight(mode)
   :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
 
+    // Bronze Guardian ranged debuffing
+    ?foe = "phase" & !canDash &
+    ^a.canSmartDebuff("magic")
+      a.smartDebuff("magic")
+
     // AOE debuffing
-    ?a.canSmartDebuff("magic") &
+    :?a.canSmartDebuff("magic") &
     ^(!canDash |
     ^(foe = "elite" &
-    ^ foe.GetCount(foe.distance + margin) > 1))
+    ^ foe.GetCount(itemSplash) > 1))
       a.smartDebuff("magic")
 
     // Permapot 1v1 debuffing
     :?c.canApplyAny() & canDash &
     ^c.permapotSetup & foe = "elite" &
-    ^foe.GetCount(foe.distance + margin) = 1
+    ^foe.GetCount(itemSplash) = 1
       a.ldtF("sword debuff auto")
 
     // 1v1 strong foe weakening
@@ -103,21 +110,21 @@ func fight(mode)
     // ............ HEALING LOGIC ........... //
     :?hp ! maxhp &
     ^((canDash &
-    ^  foe.GetCount(foe.distance + margin) = 1) |
+    ^  foe.GetCount(itemSplash) = 1) |
     ^ foe = "monarch")
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ........... //
     :?c.canUnmake()
       ?canDash &
-      ^foe.GetCount(foe.distance + margin) = 1
+      ^foe.GetCount(itemSplash) = 1
         a.ldtF("sword unmake")
-      : // foe.GetCount(foe.distance + margin) > 1
+      : // foe.GetCount(itemSplash) > 1
         a.ldtF("big sword unmake")
 
     // ........... DAMAGE LOGIC ........... //
     :?canDash &
-    ^(foe.GetCount(foe.distance + margin) = 1 |
+    ^(foe.GetCount(itemSplash) = 1 |
     ^foe = "monarch" | foe = "phase")
       ?c.canUseAbility("staff_poison") &
       ^!s.inRange("dash")
@@ -126,14 +133,22 @@ func fight(mode)
         activate potion
       :
         a.ldtF("sword dmg")
-    :
-      a.ldtF("magic dmg")
+    : // !(canDash | (...))
+      ?!c.permapotSetup
+        a.ldtF("ranged dmg")
+      :
+        a.ldtF("magic dmg")
   : // invalid mode
     u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
 // //////////////// PROCEDURE //////////////// //
 
 // ............. MONITOR LOGIC .............. //
+
+?permapotActTime ! -1 & nRuns = 1
+  var delay = totaltime + (5 * 30)
+  ?totaltime <= delay
+    >o-7,6,#magenta,wait until @time.FormatDigital(permapotTbw)@
 
 >`1,7,#magenta,screen = @screen.i@\n
 ^boss_screen = @boss_screen@
@@ -166,7 +181,7 @@ func fight(mode)
     boss_screen = 4 + (loc.stars - 16)
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
-  c.permapotSetup = (screen.i >= boss_screen - 1)
+  c.permapotSetup = c.permapotSetup & (screen.i >= boss_screen - 1)
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -176,12 +191,8 @@ func fight(mode)
 ?nRuns > 1
   c.screenMngr_DS("blade", 1, boss_screen - 3)
 
-/* // DS Mask logic (early scout wake up)
-?loc.stars = math.Clamp(loc.stars, 11, 15) & !c.permapotSetup
-  c.screenMngr_DS("mask", 1, 1) */
-
-// set up margin default value
-margin = 16 // bardiche's hitbox + splash range
+// set up itemSplash default value
+itemSplash = 17 // bardiche's hitbox + itemSplash area
 // Set canDash default value
 canDash = true
 
@@ -221,7 +232,7 @@ c.AAC("sword *0", "hatchet")
 
 /* activate potion after picking up treasure
 or while setting up permapot. */
-:?c.canUsePotion() &
+:?c.canUsePotion() & loc.stars > 10 &
 ^(c.permapotSetup |
 ^ (end_t > 1 & screen.i = boss_screen &
 ^  !c.canUseAbility("staff_fire")))
@@ -251,6 +262,7 @@ or while setting up permapot. */
 
 // boss's hammer attack
 :?foe.state = 32 & foe.time >= 30
+  canDash = false
   fight("escape")
 
 // ............ CUTSCENES LOGIC ............. //
@@ -260,8 +272,9 @@ or while setting up permapot. */
 // ........... ENGAGE/WALKING LOGIC .......... //
 
 // speed up (post-treasure)
-:?end_t > 1 & screen.i = boss_screen &
-^ c.canUseAbility("staff_fire")
+:?c.canUseAbility("staff_fire") &
+^ end_t > 1 & screen.i = boss_screen &
+^ loc.stars > 10
   c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
@@ -286,34 +299,43 @@ or while setting up permapot. */
 ^ai.enabled & !ai.paused & !blowing
   c.useAbility_TH("quarterstaff", a.myQ)
 
-// Pick up things
-:?pickup.distance < 15
+// Pickup logic
+:?pickup.distance < 15 &
+// foe is farther than pickup
+^(foe.distance > 15 |
+^ foe.distance = 9999 |
+// pickup is a treasure
+^ pickup = "treasure")
   a.ldtF("magnet")
 
-:?end_t > 1 &
-^!(c.canUsePotion() | c.canUseAbility("staff_fire"))
+// regen armor (after picking chest up)
+:?(loc.stars <= 10 & old_t ! item.GetTreasureCount()) |
+^(end_t > 1 &
+^!(c.canUsePotion() | c.canUseAbility("staff_fire")))
   a.ldtF("defense armor regen")
 
+// engaging logic
 :?ai.walking & player.direction = 1 &
 ^!s.inRange("crossbow")
   ?armor > a.compoundMaxArmor_boosted |
-  ^c.canEngage()
+  ^c.canEngage() & foe ! "phase"
     a.ldtF("engage")
   :
     a.ldtF("defense armor regen")
 
+// armor regen logic
 :?ai.paused | !ai.enabled | player.direction = -1
   a.ldtF("defense armor regen")
 
 // .............. DASHING LOGIC ............. //
 
 // Insta-kill Enfused elites
-:?c.canuseAbility("wand_fire") &
+:?c.canuseAbility("wand_fire") & s.inRange("wand") &
 ^encounter.eliteMod = "enfused"
   c.useAbility_OH("wand_fire", a.wFh, hand)
 
 // Calamity - reduce hp
-:?c.canUseAbility("wand_aether") &
+:?c.canUseAbility("wand_aether") & s.inRange("wand") &
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch" | encounter.eliteMod = "monarch" |
 ^ encounter.eliteMod = "blessed" |
@@ -321,12 +343,12 @@ or while setting up permapot. */
   c.useAbility_OH("wand_aether", a.wAh, hand)
 
 // Reset buff
-:?c.canUseAbility("wand_vigor") &
+:?c.canUseAbility("wand_vigor") & s.inRange("wand") &
 ^foe.buffs.string = "stoic"
   c.useAbility_OH("wand_vigor", a.wVh, hand)
 
 // Reduce damage
-:?c.canUseAbility("wand_poison") &
+:?c.canUseAbility("wand_poison") & s.inRange("wand") &
 ^(encounter.eliteMod = "berserk" |
 ^ foe = "monarch" | encounter.eliteMod = "monarch" |
 ^ encounter.eliteMod = "blessed" |
@@ -336,7 +358,7 @@ or while setting up permapot. */
   c.useAbility_OH("wand_poison", a.wPh, hand)
 
 // Stun enemies
-:?c.canUseAbility("wand_ice") &
+:?c.canUseAbility("wand_ice") & s.inRange("wand") &
 ^c.canApplyStun() & foe = "elite" &
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.hihp
@@ -351,7 +373,7 @@ or while setting up permapot. */
 
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
-:?canDash & s.betweenRange("dash_min","crossbow") &
+:?canDash & s.betweenRange("triskelion","crossbow") &
 ^!c.canSmoothCast(true)
   c.smoothCast(a.bR)
 
@@ -364,17 +386,18 @@ unmake with repeating crossbow. */
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
 ^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1
+^foe.count > 1 & screen.i > 1 &
+^s.inRange("dash_min")
   c.devour("voidweaver")
 
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(foe.distance + margin) > 1 &
-^foe ! "boss"
+:?foe.GetCount(itemSplash) > 1 &
+^!(foe = "boss" | foe = "monarch")
   // Insta-kill enfused elites
-  ?encounter.eliteMod = "enfused" // & c.canApplyBurn()
+  ?encounter.eliteMod = "enfused" & s.inRange("wand")
     ?[foe.debuffs.string,
-    ^foe.buffs.string].Contains("enfused")
+    ^ foe.buffs.string].Contains("enfused")
       >c0,0,#red,ENFUSED IS A STATUS EFFECT!
 
     ?c.permapotSetup
@@ -384,20 +407,14 @@ unmake with repeating crossbow. */
       equipR @a.wFeff@
 
   // Align foes
-  :?c.canUseAbility("wand_stone")
+  :?c.canUseAbility("wand_stone") & s.inRange("wand")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
-  /* Activate Berserk Staff early (in case there's
-  barely enough armor, to not lose it to the
-  Infernal Staff's Burn debuff). */
-  :?screen.i = 1 & c.canUseAbility("staff_poison")
-    c.useAbility_TH("staff_poison", a.stPh)
-
-  :?c.canUseAbility("heavy_hammer") & foe = "elite"
-    ?encounter.eliteMod = "plated"
-      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-    :
-      c.useAbility_TH("heavy_hammer", Mjölnir)
+  // Heavy hammer logic
+  :?c.canUseAbility("heavy_hammer") & encounter.eliteMod = "plated"
+    c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+  :?c.canUseAbility("heavy_hammer") & foe = "mechanical"
+    c.useAbility_TH("heavy_hammer", Mjölnir)
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
@@ -413,24 +430,27 @@ unmake with repeating crossbow. */
 
   // permapot run
   :?nRuns = 1 |
-  // split hydra foes
-  ^(encounter.eliteMod = "hydra" &
-  ^ foe.buffs.string ! "stability")
-    // change margin as needed
-    margin = 8 // big sword left hitbox + splash range
-
-    a.ldtF("big sword unmake")
-  // Debuff and unmake
-  :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
+  ^ (encounter.eliteMod = "blessed" &
+  ^  !c.isCasting("bardiche"))
+    // Debuff and unmake
     ?a.canSmartDebuff("magic")
+      itemSplash = foe.distance + 7
       a.smartDebuff("magic")
     :
-      // change margin as needed
-      margin = 8 // big sword left hitbox + splash range
-
+      itemSplash = 10
       a.ldtF("big sword unmake")
 
-  :?buffs.string = "ʘ" // berserk potion
+  // berserk potion
+  :?buffs.string = "ʘ" |
+  // split hydras lose the Stable buff
+  ^(encounter.eliteMod = "hydra" &
+  ^ foe.buffs.string ! "stability") /* |
+  // more foes outside range
+  ^(foe ! "elite" & screen.i > 1 &
+  ^ (foe.count -
+  ^ foe.GetCount(itemSplash))
+  ^ > 0) */
+    itemSplash = 10
     a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
@@ -439,6 +459,8 @@ unmake with repeating crossbow. */
 
 // Boss fight (Bronze Guardian)
 :?foe = "phase"
+  canDash = false
+
   ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
@@ -452,6 +474,8 @@ unmake with repeating crossbow. */
 
   // boss's hammer's stuck
   :?foe.state = 33 & foe.time < 180
+    canDash = true
+
     ?c.canUseAbility("bardiche")
       c.useAbility_TH("bardiche", Kubikiribocho)
     :
