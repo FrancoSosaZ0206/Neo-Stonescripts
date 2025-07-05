@@ -179,6 +179,8 @@ func fight(mode)
 
 >`1,18,#ff0000,burn | count: @burnCount@, limit: @burnLimit@
 
+>`1,19,permapotSetup: @c.permapotSetup@
+
 // ............. WITHDRAWAL LOGIC ............ //
 
 ?(foe ! "boss" & s.getTotalHP("player")
@@ -207,7 +209,7 @@ func fight(mode)
     boss_screen = 4 + (loc.stars - 16)
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
-  c.permapotSetup = c.permapotSetup & (loc.id = "bronze_guardian_harder")
+  c.permapotSetup = (loc.stars > 10 & loc.id = "bronze_guardian_harder")
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
