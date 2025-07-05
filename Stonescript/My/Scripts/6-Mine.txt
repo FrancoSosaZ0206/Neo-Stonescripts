@@ -35,6 +35,13 @@ var permapotTbw = loc.averageTime - (loc.averageTime / 10) // permapot time band
 var old_t = item.GetTreasureCount()
 var end_t = 0
 
+var powerupCount = 0 // guardian's powerup counter
+
+// smart burn (ranged burn) logic
+// TO DO: in My/Lib/Arsenal, put this into a special mode of canSmartDebuff() or in a separate function.
+var burnCount = -2
+var burnLimit = -2
+
 // //////////////// FUNCTIONS //////////////// //
 
 func fight(mode)
@@ -74,24 +81,19 @@ func fight(mode)
       a.ldtF("defense")
   :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
-    var canWeakenRanged = c.canApplyWeaken()
-    var canBurnRanged = c.canApplyBurn()
 
     // Bronze Guardian ranged debuffing
-    ?foe = "phase" & !canDash & canWeakenRanged
-      a.ldtF("magic debuff weaken")
-      ?(item.left = a.wPeff & item.left.state = 3) |
-      ^(item.right = a.wPeff & item.right.state = 3)
-        canWeakenRanged = false
+    ?foe = "phase" & !canDash & a.canSmartDebuff("magic")
+      a.smartDebuff("magic")
 
-      >h0,7,#red,weakening phase
-    :?foe = "phase" & !canDash & canBurnRanged
+      >c0,1,#008800,weakening guardian
+    :?foe = "phase" & !canDash &
+    ^c.canApplyBurn() & burnCount < burnLimit & burnLimit > 0
       a.ldtF("magic debuff burn")
-      ?(item.left = a.wFeff & item.left.state = 3) |
-      ^(item.right = a.wFeff & item.right.state = 3)
-        canBurnRanged = false
+      ?burnCount = 0 & (item.left.state = 3 | item.right.state = 3)
+        burnCount++
       
-      >h0,7,#red,burning phase
+      >c0,1,#red,burning guardian
 
     // AOE debuffing
     :?a.canSmartDebuff("magic") &
@@ -147,19 +149,19 @@ func fight(mode)
       :
         a.ldtF("sword dmg")
 
-      >h0,7,#red,dmg melee
+      >c0,1,#red,dmg melee
     : // !(canDash | (...))
       ?!c.permapotSetup
         a.ldtF("ranged dmg")
       :
         a.ldtF("magic dmg")
-      >h0,7,#red,dmg ranged
+      >c0,1,#red,dmg ranged
   : // invalid mode
     u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
 // //////////////// PROCEDURE //////////////// //
 
-// ............. MONITOR LOGIC .............. //
+// .............. MONITOR LOGIC .............. //
 
 ?permapotActTime ! -1 & nRuns = 1
   var delay = totaltime + (5 * 30)
@@ -171,6 +173,11 @@ func fight(mode)
 
 ?foe.distance ! 9999
   >f0,10,#magenta,dist=@foe.distance@
+
+>`1,11,#ff8800,powerupCount: @powerupCount@\n
+^ils: @item.left.state@ | irs: @item.right.state@
+
+>`1,18,#ff0000,burn | count: @burnCount@, limit: @burnLimit@
 
 // ............. WITHDRAWAL LOGIC ............ //
 
@@ -200,14 +207,14 @@ func fight(mode)
     boss_screen = 4 + (loc.stars - 16)
 
 ?nRuns = 1 & loc.stars > 15 & boss_screen
-  c.permapotSetup = c.permapotSetup & (screen.i >= boss_screen - 1)
+  c.permapotSetup = c.permapotSetup & (loc.id = "bronze_guardian_harder")
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
 // BFG logic
-?nRuns > 1
+?loc.id = "bronze_mine" & (nRuns > 1 | loc.stars <= 15)
   c.screenMngr_DS("blade", 1, boss_screen - 3)
 
 // set up itemSplash default value
@@ -215,7 +222,7 @@ itemSplash = 17 // bardiche's hitbox + itemSplash area
 // Set canDash default value
 canDash = true
 
-c.potionType = "lucky"
+c.potionType = "strength"
 c.Init()
 a.smartDebuff_Mgr()
 
@@ -237,7 +244,25 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?old_t ! item.GetTreasureCount()
   end_t++
 
-// ................................... //
+// reset powerupCount
+?loc.loop & powerupCount > 0
+  powerupCount = 0
+// increase powerupCount
+:?foe = "phase" & foe.state = 32 & foe.time = 0
+  powerupCount ++
+
+// burnCount and burnLimit logic
+burnCount = s.getEffectStat("foe","debuff","dot","count")
+?!burnCount | burnCount = -2 |
+^burnCount >= burnLimit | foe.state = 4 | !c.canApplyBurn()
+  burnCount = 0
+
+?foe = "immune_to_debuff_dot"
+  burnLimit = 0
+:
+  burnLimit = 1 - burnCount
+
+// ........................................... //
 
 // Permapot equipment
 ?c.permapotSetup
@@ -266,40 +291,41 @@ or while setting up permapot. */
 ^ loc.id = "bronze_guardian_harder"
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
-// .............. DEFENSIVE LOGIC ............ //
+// ............. DEFENSIVE LOGIC ............. //
 
 // minecart miniboss "bomb cart"
-// dash back if we don't have enough armor to tank the damage
-:?foe = "explode" & armor < bombCartDmg[loc.stars - 11]
+:?foe = "explode"
   ?c.canUseAbility("dash")
     a.ldtF("dash")
-    >h0,6,#red,dashing
-  :?c.canUseAbility("bash")
-    a.ldtF("bash")
-    >h0,6,#red,bashing
-  :?s.inRange("dash_min")
-    fight("escape")
-    >h0,6,#red,escaping
-  :?c.canStutterStep() // stutter step to it
-    c.stutterStep()
-    >h0,6,#red,stutterstepping to it
-  : // walk to it
-    ?!s.inRange("triskelion")
-      a.ldtF("default")
-    :
-      equipL sword
-    >h0,6,#red,walking to it
+  // use Eternity Staff to avoid damage altogether
+  :?c.canUseAbility("staff_ice") &
+  ^s.inRange("hatchet") & !c.permapotSetup
+    c.useAbility_TH("staff_ice", a.stIh)
+  :?!(buffs.string = "buff_frozen") // & foe.state = 4)
+    ?s.inRange("dash_min")
+      fight("escape")
+    :?c.canStutterStep() // stutter step to it
+      c.stutterStep()
+    : // walk to it
+      ?!s.inRange("triskelion")
+        a.ldtF("default")
+      :
+        equipL sword
 
 // boss's hammer attack
 :?foe = "phase" & foe.state = 32 & foe.time >= 30
-  canDash = false
-  fight("escape")
+  // block bomb attack
+  ?c.canUseAbility("staff_ice") & powerupCount >= 3
+    c.useAbility_TH("staff_ice", a.stIh)
+  :
+    canDash = false
+    fight("escape")
 
-// ............ CUTSCENES LOGIC ............. //
+// ............. CUTSCENES LOGIC ............. //
 
 
 
-// ........... ENGAGE/WALKING LOGIC .......... //
+// .............. WALKING LOGIC .............. //
 
 // speed up (post-treasure)
 :?c.canUseAbility("staff_fire") &
@@ -310,7 +336,8 @@ or while setting up permapot. */
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
-^screen.i < boss_screen &
+^loc.id = "bronze_mine" &
+^!(foe = "explode" & s.inRange("dash_min")) &
 // already has the speed effect
 ^buffs.string ! "buff_inf_speed" &
 // 1 foe just defeated
@@ -333,8 +360,8 @@ or while setting up permapot. */
 // Pickup logic
 :?pickup.distance < 15 &
 // foe is farther than pickup
-^(foe.distance > 15 |
-^ foe.distance = 9999 |
+^(foe.distance = 9999 |
+^ foe.distance > 15 |
 // pickup is a treasure
 ^ pickup = "treasure")
   a.ldtF("magnet")
@@ -345,63 +372,42 @@ or while setting up permapot. */
 ^!(c.canUsePotion() | c.canUseAbility("staff_fire")))
   a.ldtF("defense armor regen")
 
-// engaging logic
+// armor regen logic
+:?(ai.walking & !s.inRange("socketed_shield")) |
+^(ai.paused | !ai.enabled | player.direction = -1)
+  a.ldtF("defense armor regen")
+
+// engaging logic (out of fighting range)
 :?ai.walking & player.direction = 1 &
-^!s.inRange("crossbow")
+^canDash & s.betweenRange("dash_max", "socketed_shield")
   ?armor > a.compoundMaxArmor_boosted |
-  ^c.canEngage() & foe ! "phase"
+  ^(c.canEngage() & foe ! "phase")
     a.ldtF("engage")
   :
     a.ldtF("defense armor regen")
+  >c0,0,#green,engage PASSIVE
 
-// armor regen logic
-:?ai.paused | !ai.enabled | player.direction = -1
-  a.ldtF("defense armor regen")
-
-// .............. RANGED LOGIC .............. //
-
-
-
-// .............. DASHING LOGIC ............. //
+// ............... RANGED LOGIC .............. //
 
 // Insta-kill Enfused elites
-:?c.canUseAbility("wand_fire") & s.inRange("wand") &
-^encounter.eliteMod = "enfused"
-  c.useAbility_OH("wand_fire", a.wFh, hand)
+:?encounter.eliteMod = "enfused" & s.inRange("wand")
+  // use Explosive Wand to apply burn to all foes in the screen
+  ?c.canUseAbility("wand_fire")
+    c.useAbility_OH("wand_fire", a.wFh, hand)
+  :
+    canDash = false
+    a.ldtF("magic debuff burn")
 
-// Calamity - reduce hp
-:?c.canUseAbility("wand_aether") & s.inRange("wand") &
-^(encounter.eliteMod = "berserk" |
-^ foe = "monarch" | encounter.eliteMod = "monarch" |
-^ encounter.eliteMod = "blessed" |
-^ foe.buffs.string = "buff_tenacious")
-  c.useAbility_OH("wand_aether", a.wAh, hand)
+  ?[foe.debuffs.string,
+  ^ foe.buffs.string].Contains("enfused")
+    >c0,0,#red,ENFUSED IS A STATUS EFFECT!
 
-// Reset buff
-:?c.canUseAbility("wand_vigor") & s.inRange("wand") &
-^foe.buffs.string = "stoic"
-  c.useAbility_OH("wand_vigor", a.wVh, hand)
+  >c0,0,#red,enfused fight
 
-// Reduce damage
-:?c.canUseAbility("wand_poison") & s.inRange("wand") &
-^(encounter.eliteMod = "berserk" |
-^ foe = "monarch" | encounter.eliteMod = "monarch" |
-^ encounter.eliteMod = "blessed" |
-^ encounter.eliteMod = "hydra" |
-^ foe.buffs.string = "buff_tenacious") &
-^s.inRange("dash_min")
-  c.useAbility_OH("wand_poison", a.wPh, hand)
-
-// Stun enemies
-:?c.canUseAbility("wand_ice") & s.inRange("wand") &
-^c.canApplyStun() & foe = "elite" &
-^foe.count > 1 &
-^s.getTotalHP("player") < c.hihp
-  c.useAbility_OH("wand_ice", a.wIh, hand)
+// .............. DASHING LOGIC .............. //
 
 :?a.canSmartDash() & canDash
   a.smartDash()
-  >h0,6,#red,DASHING
 
 // Knockback farming
 :?c.canKbFarm()
@@ -413,39 +419,61 @@ unmake with repeating crossbow. */
 ^c.canSmoothCast(true) & foe ! "phase"
   c.smoothCast(a.bR)
 
+// engaging logic (within fighting range)
+:?ai.walking & player.direction = 1 &
+^foe ! "phase" & canDash &
+^s.betweenRange("triskelion", "dash_max")
+  a.ldtF("engage")
+  >c0,0,#yellow,engage ACTIVE
+
 // get in melee range faster
 :?c.canStutterStep()
   c.stutterStep()
 
-// ........... SPECIAL ITEMS LOGIC .......... //
+// ........... SPECIAL ITEMS LOGIC ........... //
 
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
 ^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1 &
-^s.inRange("dash_min")
+^foe.count > 1 & s.inRange("dash_min") &
+^screen.i > 1
   c.devour("voidweaver")
 
-// ............... AOE LOGIC ................ //
+// Calamity - reduce hp
+:?c.canUseAbility("wand_aether") &
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed" |
+^ foe.buffs.string = "buff_tenacious")
+  c.useAbility_OH("wand_aether", a.wAh, hand)
+
+// Reset buff
+:?c.canUseAbility("wand_vigor") &
+^foe.buffs.string = "stoic"
+  c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+// Reduce damage
+:?c.canUseAbility("wand_poison") &
+^(encounter.eliteMod = "berserk" |
+^ foe = "monarch" | encounter.eliteMod = "monarch" |
+^ encounter.eliteMod = "blessed" |
+^ encounter.eliteMod = "hydra" |
+^ foe.buffs.string = "buff_tenacious")
+  c.useAbility_OH("wand_poison", a.wPh, hand)
+
+// Stun enemies
+:?c.canUseAbility("wand_ice") &
+^c.canApplyStun() & foe = "elite" &
+^foe.count > 1 &
+^s.getTotalHP("player") < c.hihp
+  c.useAbility_OH("wand_ice", a.wIh, hand)
+
+// ................ AOE LOGIC ................ //
 
 :?foe.GetCount(itemSplash) > 1 &
 ^!(foe = "boss" | foe = "monarch")
-  // Insta-kill Enfused elites
-  ?encounter.eliteMod = "enfused" & s.inRange("wand")
-    canDash = false
-
-    ?[foe.debuffs.string,
-    ^ foe.buffs.string].Contains("enfused")
-      >c0,0,#red,ENFUSED IS A STATUS EFFECT!
-
-    ?c.permapotSetup
-      equipL @a.wFeff@
-    :
-      equipL moon
-      equipR @a.wFeff@
-
   // Align foes
-  :?c.canUseAbility("wand_stone") & s.inRange("wand")
+  ?c.canUseAbility("wand_stone") & s.inRange("wand")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   // Heavy hammer logic
@@ -493,7 +521,7 @@ unmake with repeating crossbow. */
   :
     equip Kubikiribocho
 
-// ............... BOSS LOGIC ............... //
+// ................ BOSS LOGIC ............... //
 
 // Boss fight (Bronze Guardian)
 :?foe = "phase"
@@ -510,14 +538,30 @@ unmake with repeating crossbow. */
 
   // boss's hammer's stuck
   :?foe.state = 33 & foe.time < 180
-    ?c.canUseAbility("bardiche")
+    ?!s.inRange("triskelion")
+      a.ldtF("default")
+
+    :?c.canUseAbility("bardiche")
       c.useAbility_TH("bardiche", Kubikiribocho)
     :
       fight("normal")
   :
     canDash = false
     fight("normal")
-    >h0,6,#red,ranged fight
+
+// ................ 1V1 LOGIC ................ //
+
+// Tanky foe, use bardiche ability to lower its hitpoints
+:?foe = "monarch" &
+^(c.canUseAbility("staff_poison") |
+^c.canUseAbility("bardiche"))
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  : // c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+:
+  fight("normal")
+  >c0,0,normal fight
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "6-Mine" ▄▀▄▀▄▀▄▀▄▀ ┃  //

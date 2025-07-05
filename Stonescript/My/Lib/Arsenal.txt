@@ -205,10 +205,10 @@ var bardicheMult_Boosted = 13.5
 
 // ............ FUNCTION RELATED ............ //
 
-var chillCount = null
-var weakenCount = null
-var chillLimit = null
-var weakenLimit = null
+var chillCount  = -2
+var weakenCount = -2
+var chillLimit  = -2
+var weakenLimit = -2
 
 var effCount = 0
 var effLimit = 0
@@ -739,16 +739,23 @@ func canSmartDebuff(itemType)
   itemType = string.ToLower(itemType)
 
   return c.canApplyAny() &
-  ^      effCount <= effLimit &
+  ^      effCount < effLimit &
+  ^      effLimit > 0 &
   ^      ["magic","ranged"].Contains(itemType)
 func smartDebuff_Mgr()
+  >`1,15,#4444ff,chill | count: @chillCount@, limit: @chillLimit@
+  >`1,16,#008800,weaken | count: @weakenCount@, limit: @weakenLimit@
+  >`1,17,#cyan,eff | count: @effCount@, limit: @effLimit@
+
+  // =======================================================
+
   // get individual counts
   chillCount = s.getEffectStat("foe","debuff","chill","count")
   weakenCount = s.getEffectStat("foe","debuff","damage","count")
 
-  ?!chillCount
+  ?!chillCount | chillCount = -2
     chillCount = 0
-  ?!weakenCount
+  ?!weakenCount | weakenCount = -2
     weakenCount = 0
 
   // calculate individual limits
@@ -766,17 +773,11 @@ func smartDebuff_Mgr()
   effLimit = chillLimit + weakenLimit
 
   // resetting logic
-  ?effCount > effLimit & // else, no need to reset
-  ^(effCount > effLimit | // reached limit
+  ?effCount > effLimit | // reached limit
   ^foe.state = 4 | // foe died
-  ^!c.canApplyAny()) // can no longer apply debuffs
-    ?chillCount
-      effCount = chillCount
-    :
-      effCount = 0
-
-    ?weakenCount
-      effCount += weakenCount
+  ^!s.inRange("crossbow") | // out of range
+  ^!c.canApplyAny() // can no longer apply debuffs
+    effCount = 0
 
 func smartDebuff(itemType)
   // Apply effects
