@@ -56,12 +56,12 @@ enable npcDialog
 :?loc.id = "uulaa_shop" // Hotspring Shop
   import My/Scripts/Hotspring_Shop
 :?loc.id = "undead_crypt_intro" // Haunted Gate
-  disable npcDialog
+  // disable npcDialog
   import My/Scripts/Gate
 
 : // farming locations logic
-  // disable hud // TO DO: uncomment this once we can print everything ourselves.
-  
+  // disable hud // TODO: uncomment this once we can print everything ourselves.
+
   >`1,7,loc id: @loc.id@
   ?foe
     >`1,8,foe s | t >> @foe.state@ | @foe.time@
