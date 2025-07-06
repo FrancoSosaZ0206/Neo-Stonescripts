@@ -4,7 +4,6 @@
 
 // //////////////// IMPORTS ///////////////// //
 
-var u = import My/Lib/Utilities
 var a = import My/Lib/Arsenal
 var c = import My/Lib/Combat
 
@@ -16,16 +15,26 @@ var colRand = color.Random() // generate a random color for the tracker
 
 // /////////////// PROCEDURE //////////////// //
 
+// ................ SETUP LOGIC ................ //
+
+// Setup random color for the scottyEyeTracker
 ?totaltime % 8 = 0 // rotate to a new color
   colRand = color.Random()
+
+// ..................................................... //
+
+// activate the scottyEyeTracker
 set.main(colRand)
 
+// initial equipment
 ?loc.begin
   a.ldtF("default")
 
+// pickup treasure
 :?pickup.distance < 15
-  a.ldtF("magnet", false)
+  a.ldtF("magnet")
 
+// Walking logic
 :?ai.walking &
 ^(item.GetCooldown("staff_fire") <= 0 |
 ^ item.GetCooldown("quarterstaff") <= 0)
@@ -39,7 +48,7 @@ set.main(colRand)
 ^(buffs.string = "buff_infernal" |
 ^ buffs.string = "buff_inf_speed")
   a.ldtF("defense armor regen")
-:
+: // idle logic
   equip @a.bR@
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
