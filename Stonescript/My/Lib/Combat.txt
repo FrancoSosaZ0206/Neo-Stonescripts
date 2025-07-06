@@ -207,6 +207,21 @@ func isCasting(itemName)
 
 // ........... Double Screen (DS) ........... //
 
+/* returns the target or maximum screen of a double-screen item, null if not set, or -1 if there was an error.
+
+valid <type> values: "TARGET", "MAX". */
+func getScreen_DS(itemName, type)
+  var result = -1
+  ?!table_itemDS.Contains(itemName)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: getScreen_DS\nCAUSE: unknown <itemName>:\n\n" + itemName, false)
+  :?!table_itemDS.Contains(type)
+    u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: getScreen_DS\nCAUSE: unknown <type>:\n\n" + type, false)
+  :
+    result = 
+    ^table_itemDS[table_itemDS.IndexOf(itemName) +
+    ^             table_itemDS.IndexOf(type)]
+
+  return result
 func isScreen_DS(itemName, type)
   var result = false
   ?!table_itemDS.Contains(itemName)

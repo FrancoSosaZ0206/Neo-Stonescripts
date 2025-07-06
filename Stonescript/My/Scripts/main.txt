@@ -62,9 +62,9 @@ enable npcDialog
 : // farming locations logic
   // disable hud // TO DO: uncomment this once we can print everything ourselves.
   
-  >`1,9,loc.id=@loc.id@
+  >`1,7,loc id: @loc.id@
   ?foe
-    >`1,10,s=@foe.state@|t=@foe.time@
+    >`1,8,foe s | t >> @foe.state@ | @foe.time@
 
   var aim = import My/Meters/Ai/public
   var tm = import My/Meters/Time/public

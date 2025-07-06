@@ -20,10 +20,18 @@ var hand     = null
 
 var itemSplash = 17 // bardiche hitbox + splash area
 
-var boss_screen = null
-var boss_cutscenes = [] // TO DO
+// screens
+var isMinibossScr = false
+var lastFoeScr = null
+var isLastFoeScr = false
+// NOTE: this is in a special boss location.
+var isBossScr = false
 
-var bombCartDmg = [
+// TODO: implement
+var boss_cutscenes = []
+
+// stats
+var minibossDmg = [
 ^60, 65, 70, 75, 80, // yellow
 ^85, 90, 95, 100, 105] // green
 
@@ -37,10 +45,12 @@ var end_t = 0
 
 var powerupCount = 0 // guardian's powerup counter
 
+// ************************************************
 // smart burn (ranged burn) logic
-// TO DO: in My/Lib/Arsenal, put this into a special mode of canSmartDebuff() or in a separate function.
+// TODO: in My/Lib/Arsenal, put this into a special mode of canSmartDebuff() or in a separate function.
 var burnCount = -2
 var burnLimit = -2
+// ************************************************
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -87,6 +97,11 @@ func fight(mode)
       a.smartDebuff("magic")
 
       >c0,1,#008800,weakening guardian
+    
+    // ************************************************
+    // TODO: in My/Lib/Arsenal, put this into a special mode of canSmartDebuff() or in a separate function.
+
+    // FIXME: working like normal debuffing the first time the debuff is applied.
     :?foe = "phase" & !canDash &
     ^c.canApplyBurn() & burnCount < burnLimit & burnLimit > 0
       a.ldtF("magic debuff burn")
@@ -94,6 +109,7 @@ func fight(mode)
         burnCount++
       
       >c0,1,#red,burning guardian
+    // ************************************************
 
     // AOE debuffing
     :?a.canSmartDebuff("magic") &
@@ -138,24 +154,29 @@ func fight(mode)
         a.ldtF("big sword unmake")
 
     // ........... DAMAGE LOGIC ........... //
+    
+    :?c.canUsePotion() & foe = "phase"
+      activate potion
+    :?c.canUseAbility("heavy_hammer") & foe = "phase"
+      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+    :?c.canUseAbility("mask") & foe = "phase"
+      c.useAbility_OH("mask", "mask", "r")
+
     :?canDash &
     ^(foe.GetCount(itemSplash) = 1 |
     ^foe = "monarch" | foe = "phase")
       ?c.canUseAbility("staff_poison") &
       ^!s.inRange("dash")
         c.useAbility_TH("staff_poison", a.stPh)
-      :?c.canUsePotion() & foe = "phase"
-        activate potion
       :
         a.ldtF("sword dmg")
 
-      >c0,1,#red,dmg melee
     : // !(canDash | (...))
       ?!c.permapotSetup
         a.ldtF("ranged dmg")
       :
         a.ldtF("magic dmg")
-      >c0,1,#red,dmg ranged
+
   : // invalid mode
     u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
 
@@ -163,23 +184,52 @@ func fight(mode)
 
 // .............. MONITOR LOGIC .............. //
 
+/* // permapot time bandwidth monitor:
 ?permapotActTime ! -1 & nRuns = 1
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
     >o-7,6,#magenta,wait until @time.FormatDigital(permapotTbw)@
+*/
 
->`1,7,#magenta,screen = @screen.i@\n
-^boss_screen = @boss_screen@
-
+// foe distance monitor
 ?foe.distance ! 9999
   >f0,10,#magenta,dist=@foe.distance@
 
->`1,11,#ff8800,powerupCount: @powerupCount@\n
-^ils: @item.left.state@ | irs: @item.right.state@
+// bfg ds screens monitor
+var bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
+?loc.loop
+  bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
 
->`1,18,#ff0000,burn | count: @burnCount@, limit: @burnLimit@
+?bfgDsTargetScr
+  ?screen.i < bfgDsTargetScr
+    >`1,10,#ffff00,bfg: @screen.i@/@bfgDsTargetScr@
+  :?screen.i = bfgDsTargetScr
+    >`1,10,#00ff00,bfg: @screen.i@/@bfgDsTargetScr@
+  : // screen.i > bfgDsTargetScr
+    >`1,10,#888888,bfg: @screen.i@/@bfgDsTargetScr@
 
->`1,19,permapotSetup: @c.permapotSetup@
+// powerupCount monitor:
+?powerupCount = 0
+  >`1,11,#88ff00,powerupCount: @powerupCount@
+:?powerupCount = 1
+  >`1,11,#ffff00,powerupCount: @powerupCount@
+:?powerupCount = 2
+  >`1,11,#ff8800,powerupCount: @powerupCount@
+:?powerupCount >= 3
+  >`1,11,#ff0000,powerupCount: @powerupCount@
+
+// item states monitor:
+>`1,12,#magenta,ils: @item.left.state@ | irs: @item.right.state@
+
+// ************************************************
+// TODO: move this to My/Lib/Arsenal
+>`1,17,#ff0000,φ: @burnCount@/@burnLimit@
+// ************************************************
+
+?c.permapotSetup
+  >`1,13,#00ff00,permapotSetup
+:
+  >`1,13,#ff0000,permapotSetup
 
 // ............. WITHDRAWAL LOGIC ............ //
 
@@ -199,25 +249,42 @@ func fight(mode)
   old_t = item.GetTreasureCount()
   end_t = 0
 
-// Set up boss_screen
-?!boss_screen
-  ?loc.stars <= 5 // white
-    boss_screen = 7
-  :?loc.stars <= 15 // cyan and yellow
-    boss_screen = 8
-  :?loc.stars <= 20 // green
-    boss_screen = 4 + (loc.stars - 16)
+// set up isMinibossScr
+isMinibossScr = (loc.id = "bronze_mine") &
+^ ((loc.stars = math.Clamp(loc.stars, 11, 15) & // yellow
+^   screen.i = 6) |
+^  (loc.stars = math.Clamp(loc.stars, 16, 20) & // green
+^   screen.i = 1))
 
-?nRuns = 1 & loc.stars > 15 & boss_screen
-  c.permapotSetup = (loc.stars > 10 & loc.id = "bronze_guardian_harder")
+// set up lastFoeScr
+?!lastFoeScr
+  ?loc.stars <= 5
+    lastFoeScr = 5 // white
+  :?loc.stars <= 15
+    lastFoeScr = 6 // cyan and yellow
+  :?loc.stars <= 20
+    lastFoeScr = 2 + loc.stars - 16 // green
+: // set up isLastFoeScr
+  isLastFoeScr = (loc.id = "bronze_mine" & screen.i = lastFoeScr)
+
+// set up isBossScr
+isBossScr = (loc.id = "bronze_guardian_harder" & screen.i = 1)
+
+// set up permapotSetup
+c.permapotSetup = // activate...
+// in first run (yellow onwards), and
+^(loc.stars > 10 & nRuns = 1 &
+// once the potion has been consumed.
+^ item.potion = "empty" & buffs.string = "strength")
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
 // BFG logic
-?loc.id = "bronze_mine" & (nRuns > 1 | loc.stars <= 15)
-  c.screenMngr_DS("blade", 1, boss_screen - 3)
+?loc.id = "bronze_mine" & lastFoeScr &
+^(nRuns > 1 | loc.stars <= 10)
+  c.screenMngr_DS("blade", 1, lastFoeScr - 1)
 
 // set up itemSplash default value
 itemSplash = 17 // bardiche's hitbox + itemSplash area
@@ -253,6 +320,9 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 :?foe = "phase" & foe.state = 32 & foe.time = 0
   powerupCount ++
 
+// ***********************************************
+// TODO: move to My/Lib/Arsenal
+
 // burnCount and burnLimit logic
 burnCount = s.getEffectStat("foe","debuff","dot","count")
 ?!burnCount | burnCount = -2 |
@@ -263,6 +333,7 @@ burnCount = s.getEffectStat("foe","debuff","dot","count")
   burnLimit = 0
 :
   burnLimit = 1 - burnCount
+// ***********************************************
 
 // ........................................... //
 
@@ -278,11 +349,9 @@ c.AAC("sword *0", "hatchet")
 
 /* activate potion after picking up treasure
 or while setting up permapot. */
-:?c.canUsePotion() & loc.stars > 10 &
-^(c.permapotSetup |
-^ (end_t > 1 &
-^  loc.id = "bronze_guardian_harder" &
-^  !c.canUseAbility("staff_fire")))
+:?c.canUsePotion() &
+^loc.stars > 10 & end_t > 1 &
+^loc.id = "bronze_guardian_harder"
   activate potion
 
 // Summons
@@ -295,24 +364,36 @@ or while setting up permapot. */
 
 // ............. DEFENSIVE LOGIC ............. //
 
-// minecart miniboss "bomb cart"
-:?foe = "explode"
-  ?c.canUseAbility("dash")
-    a.ldtF("dash")
-  // use Eternity Staff to avoid damage altogether
-  :?c.canUseAbility("staff_ice") &
-  ^s.inRange("hatchet") & !c.permapotSetup
-    c.useAbility_TH("staff_ice", a.stIh)
-  :?!(buffs.string = "buff_frozen") // & foe.state = 4)
-    ?s.inRange("dash_min")
-      fight("escape")
-    :?c.canStutterStep() // stutter step to it
-      c.stutterStep()
-    : // walk to it
-      ?!s.inRange("triskelion")
-        a.ldtF("default")
-      :
-        equipL sword
+// Bomb Cart screen logic
+:?isMinibossScr
+  // Bomb Cart logic
+  ?foe = "explode"
+    // engage
+    ?s.betweenRange("dash_max", "socketed_shield") &
+    ^ (foe.state = 0 | foe.state = 2 & foe.time = 0)
+      a.ldtF("engage")
+    // dash
+    :?c.canUseAbility("dash")
+      a.ldtF("dash")
+    // walk
+    :?!s.inRange("triskelion")
+      a.ldtF("defense armor regen")
+    // combat
+    :?s.inRange("hatchet")
+      ?c.canUseAbility("staff_ice")
+        c.useAbility_TH("staff_ice", a.stIh)
+
+      ?buffs.string ! "buff_frozen" &
+      ^foe.debuffs.string ! "stun"
+        fight("escape")
+
+  // normal foes in Bomb Cart screen logic
+  :?s.betweenRange("crossbow", "socketed_shield")
+    a.ldtF("engage")
+  /*:?c.canUseAbility("bash")
+    a.ldtF("bash")*/
+  :
+    a.ldtF("ranged dmg")
 
 // boss's hammer attack
 :?foe = "phase" & foe.state = 32 & foe.time >= 30
@@ -331,9 +412,10 @@ or while setting up permapot. */
 
 // speed up (post-treasure)
 :?c.canUseAbility("staff_fire") &
-^ end_t > 1 &
+^ end_t > 1 & loc.stars > 10 &
 ^ loc.id = "bronze_guardian_harder" &
-^ loc.stars > 10
+  // after using potion
+^ item.potion = "empty"
   c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
@@ -437,7 +519,7 @@ unmake with repeating crossbow. */
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
 ^c.canUnmakeVoidweaver() &
-^foe.count > 1 & s.inRange("dash_min") &
+^foe.count > 1 & s.inRange("hatchet") &
 ^screen.i > 1
   c.devour("voidweaver")
 
@@ -531,15 +613,8 @@ unmake with repeating crossbow. */
   ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
     c.devour("cinderwisp")
 
-  ?c.canUsePotion()
-    activate potion
-  :?c.canUseAbility("heavy_hammer")
-    c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-  :?c.canUseAbility("mask")
-    c.useAbility_OH("mask", "mask", "r")
-
   // boss's hammer's stuck
-  :?foe.state = 33 & foe.time < 180
+  ?foe.state = 33 & foe.time < 180
     ?!s.inRange("triskelion")
       a.ldtF("default")
 
