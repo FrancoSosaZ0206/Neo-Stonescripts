@@ -2,7 +2,29 @@
 //  ┃ ▄▀▄▀▄ START OF "Hotspring_Shop" ▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
+// //////////////// IMPORTS ///////////////// //
 
+var a = import My/Lib/Arsenal
+
+// /////////////// VARIABLES //////////////// //
+
+// weapon rotation counter (cosmetic only)
+var weaponCount = 0
+
+// /////////////// PROCEDURE //////////////// //
+
+?ai.walking | loc.begin
+  a.ldtF("default")
+
+: // idle logic
+  // reset counter
+  ?weaponCount > a.burstSwords.Count() - 1
+    weaponCount = 0
+  : // increase counter
+    weaponCount += 2
+    
+  equipL @a.burstSwords[weaponCount]@
+  equipL @a.burstSwords[weaponCount + 1]@
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄ END OF "Hotspring_Shop" ▀▄▀▄▀▄ ┃  //
