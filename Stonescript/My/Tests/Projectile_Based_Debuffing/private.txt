@@ -1,0 +1,96 @@
+// Imports:
+var es = import My/Tests/Projectile_Based_Debuffing/Effect_Stats/public
+
+// Variables:
+
+/* *************** TRACKER INFO ****************
+
+Definition:
+
+  Track applied debuffs by debuff name.
+
+  For more info, see in-game item tooltips or consult this article in the Wiki: https://stonestoryrpg.miraheze.org/wiki/Status_Effects).
+
+Structure:
+
+  datatypes: [string    , int        , int       ]
+  dataset:   [debuffName, launchCount, stackCount]
+
+Structure definition:
+
+  launchCount: counts amount of projectiles launched (or attacks completed).
+  stackCount: counts foe debuff stack
+
+* ******************************************* */
+var trackerArr = []
+
+// tracker dataset indexes
+var _AFFIX        = 0
+var _DEBUFF_ID    = 1
+var _LAUNCH_COUNT = 2
+var _STACK_COUNT  = 3
+
+// Track current foe to reset on target switch
+var _fId = null
+
+// Functions:
+
+func add(affix, debuffId)
+  for tracker : trackerArr
+    ?tracker[_AFFIX] = affix & tracker[_DEBUFF_ID] = debuffId
+      return // already tracked
+
+  trackerArr.Add([affix, debuffId, 0, 0])
+
+func track()
+  // Reset all if foe is present or changed
+  ?_fId ! foe.id
+    for tracker : trackerArr
+      tracker[_LAUNCH_COUNT] = 0 // reset launchCount
+      tracker[_STACK_COUNT] = s.getEffectStat("foe", "debuff", tracker[_DEBUFF_ID], "count") // current stackCount
+      ?!tracker[_STACK_COUNT]
+        tracker[_STACK_COUNT] = 0
+
+    _fId = foe.id
+
+  // Process each tracker
+  for tracker : trackerArr
+    var affix = tracker[_AFFIX]
+    var debuff = tracker[_DEBUFF_ID]
+
+    // Track valid launches only from ranged/magic items
+    ?(item.left = affix & item.left = "wand" & item.left.state = 3) | // only wands in left
+    ^(item.right = affix &
+    ^ (item.right = "wand" | item.right = "staff" | item.right = "crossbow") &
+    ^ item.right.state = 3)
+      tracker[_LAUNCH_COUNT] ++ // increase launchCount
+
+    // Get new stack count
+    var curStacks = s.getEffectStat("foe", "debuff", debuff, "count")
+    ?!curStacks
+      curStacks = 0
+
+    // If stacks increased, update
+    ?curStacks > tracker[_STACK_COUNT]
+      tracker[_STACK_COUNT] = curStacks
+
+func canDebuff(affix, debuffId, maxStacks)
+  for tracker : trackerArr
+    ?tracker[_AFFIX] = affix & tracker[_DEBUFF_ID] = debuffId
+      return tracker[_STACK_COUNT] < maxStacks // only launch if not saturated
+
+  /* not yet tracked, return true if can debuff:
+    - target debuff and stack isn't present,
+    - not immune to debuff,
+    - isn't tenacious,
+    - nor has a debuff protection. */
+  return !(foe.debuffs.string = (debuffId+":"+maxStacks) |
+  ^        foe = ("immune_to_"+debuffId) |
+  ^        ds.isDebuffable())
+
+func monitor()
+  var n = trackerArr.Count()
+  >`1,7,#cyan,Tracked Debuffs: @n@
+  for i = 0 .. n - 1
+    var r = trackerArr[i]
+    >`1,@(i+8)@,#ccc,@r[_AFFIX]@ | @r[_DEBUFF_ID]@ | L:@r[_LAUNCH_COUNT]@ | S:@r[_STACK_COUNT]@

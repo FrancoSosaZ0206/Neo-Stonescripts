@@ -1,0 +1,28 @@
+var debTkr = import My/Tests/Projectile_Based_Debuffing/public
+
+// Procedure:
+
+// Add these once per affix-type combo
+debTkr.add("dI", "debuff_chill")     // Chill
+debTkr.add("dP", "debuff_damage")  // Weaken
+// debTkr.add("dF", "debuff_dot")     // Burn (not in use)
+
+// Call every frame
+debTkr.track()
+
+// Check if safe to apply debuff
+?debTkr.canDebuff("dI", "debuff_chill", 6)
+  equip max* wand dI
+
+:?debTkr.canDebuff("dP", "debuff_damage", 1)
+  equip max* crossbow dP
+
+:?foe.distance > 22
+  equipL triskelion
+  equipR shield compound *max +18
+:
+  equipR repeating crossbow *max +15
+  
+
+// Monitor for debug
+debTkr.monitor()

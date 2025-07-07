@@ -1,0 +1,9 @@
+var priv = import My/Tests/Projectile_Based_Debuffing/Effect_Stats/private
+
+var getID         = priv.getID
+var getName       = priv.getName
+var getMaxStacks  = priv.getMaxStacks
+var isDebuffable  = priv.isDebuffable
+var canDebuff     = priv.canDebuff
+var canDebuffAny  = priv.canDebuffAny
+var canUnmake     = priv.canUnmake

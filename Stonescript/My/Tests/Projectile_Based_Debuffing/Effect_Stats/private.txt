@@ -1,0 +1,99 @@
+// variables:
+
+// property indexes/accessors
+var _NAME = 0
+var _ID = 1
+var _MAX_STACKS = 2
+
+// [NAME, ID, MAX_STACKS]
+var table_debuffs = [
+^["Weaken"  , "debuff_damage" , 1],
+^["Chill"   , "debuff_chill"  , 6],
+^["Burn"    , "debuff_dot"    , 1],
+^["Stun"    , "stun"          , 1]
+^]
+
+// functions:
+
+// helpers
+
+func isValidId(_id)
+  for debuff : table_debuffs
+    ?_id = table_debuffs[_ID]
+      return true
+  
+  return false
+
+// -------------------------------- //
+
+func getID(_name)
+  for debuff : table_debuffs
+    ?_name = debuff[_NAME]
+      return debuff[_ID]
+
+  return null
+
+func getName(_id)
+  for debuff : table_debuffs
+    ?_id = debuff[_id]
+      return debuff[_NAME]
+
+  return null
+
+func getMaxStacks(_id)
+  for debuff : table_debuffs
+    ?_id = debuff[_ID]
+      return debuff[_MAX_STACKS]
+
+  return null
+
+func isDebuffable()
+  return !(foe.buffs.string = "buff_tenacious" |
+  ^        foe.buffs.string = "buff_protection" )
+
+func canDebuff(_id)
+  // entry sanitization
+  ?Type(_id) ! "string"
+    >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: invalid <_id> type: expected "string", recieved "@Type(_id)@".
+    return false
+
+  :?!isValidId(_id)
+    >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: unknown <_id>: @_id@
+    return false
+  :
+    return isDebuffable() &
+    ^      !(foe.debuffs.string = _id+":"+getMaxStacks(_id) |
+    ^        foe = "immnue_to_"+_id)
+
+func canDebuffAny(_idArr)
+  // entry sanitization
+  ?Type(_idArr) ! "array"
+    >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: invalid <_id> type: expected "array", recieved "@Type(_idArr)@".
+    return false
+  :
+    // entry validation
+    var validIdArr = true
+    var invalidId = null
+    for _id : _idArr
+      ?!isValidId(_id)
+        validIdArr = false
+        invalidId = _id
+        break
+
+    ?!validIdArr
+      >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: <_idArr> has 1 or more invalid elements: @invalidId@
+      return false
+
+    : // procedure
+      var result = isDebuffable()
+
+      ?result
+        var aux
+        for _id : _idArr
+          aux = (aux | canDebuff(_id))
+        result = (result & aux)
+      
+      return result
+
+func canUnmake()
+  return !(foe = "boss" | foe = "monarch")

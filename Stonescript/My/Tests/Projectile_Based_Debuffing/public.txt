@@ -1,0 +1,10 @@
+// imports:
+
+var priv = import My/Tests/Projectile_Based_Debuffing/private
+
+// variables:
+
+var add       = priv.add
+var track     = priv.track
+var canDebuff = priv.canDebuff
+var monitor   = priv.monitor

@@ -439,87 +439,6 @@ func canUsePotion()
       ^      item.potion ! "empty" &
       ^      item.potion = potionType
 
-// ............. Status effects ............. //
-
-/* Returns true if the current foes the player is
-facing can be unmade. */
-func canDebuff()
-  return
-  ^!(foe.buffs.string = "buff_tenacious" | // tenacious foes can't be debuffed
-  ^  foe.buffs.string = "buff_protection")
-/* Returns true if the current foes the player is
-facing can be unmade. */
-func canUnmake()
-  return 
-  ^!(foe = "boss" |  // bosses are immune to unmake
-  ^  foe = "monarch") // monarch foes can't be unmade
-
-/* Returns true if the foe is
-vulnerable to Chill and if a given
-debuff count hasn't been reached. */
-func canApplyChill(chillCount)
-  ?chillCount < 1 | chillCount > 6
-    u.showStrCtr(0,30,#red,"ERROR:\nFILE: Combat\nFUNCTION: canApplyChill\nCAUSE: invalid <chillCount>: " + chillCount, false)
-    return false
-  :
-    return canDebuff() &
-    ^(foe.debuffs.string ! "chill:" + chillCount) &
-    ^foe ! "immune_to_debuff_chill"
-/* Returns true if the foe is
-vulnerable to Weaken and if the
-debuff isn't applied yet. */
-func canApplyWeaken()
-  return canDebuff() &
-  ^foe.debuffs.string ! "damage" &
-  ^foe ! "immune_to_debuff_damage"
-/* Returns true if the foe is
-vulnerable to Burn and if the
-debuff isn't applied yet. */
-func canApplyBurn()
-  return canDebuff() &
-  ^foe.debuffs.string ! "dot" &
-  ^foe ! "immune_to_debuff_dot"
-
-/* Returns true if the foe is
-vulnerable to Stun and if the
-debuff isn't applied yet. */
-func canApplyStun()
-  return canDebuff() &
-  ^!(foe.debuffs.string = "stun" | // already stunned
-  ^  foe = "immune_to_stun") // can't stun
-
-/* checks if the foe is vulnerable
-to at least one of the following
-typical debuffs:
-- Chill (attack and movement speed reduction)
-- Weaken (damage reduction) */
-func canApplyAny()
-  ?canDebuff()
-    return
-    ^canApplyChill(6) |
-    ^canApplyWeaken()
-  :
-    return false
-/* checks if the foe is vulnerable
-to ALL of the following
-typical debuffs:
-- Chill (attack and movement speed reduction)
-- Weaken (damage reduction) */
-func canApplyAll()
-  ?canDebuff()
-    return
-    ^canApplyChill(6) &
-    ^canApplyWeaken()
-  :
-    return false
-
-func canEngage()
-  return ai.walking & ai.enabled & !ai.paused &
-  ^foe.distance =
-  ^   math.Clamp(foe.distance,
-  ^              s.getRange("dash_max") + 1,
-  ^              s.getRange("socketed_shield")/* - 10*/)
-
 // ........... Damage min-maxing ............ //
 
 func moonjuggle(weapon1, weapon2)
@@ -628,6 +547,12 @@ func stutterStep()
     equip shovel
     >h0,0,#red,SHOVEL STUTTERSTEP
    */
+
+// ................ Various ................. //
+
+func canEngage()
+  return ai.walking & ai.enabled & !ai.paused &
+  ^s.betweenRange("dash_max", "socketed_shield")
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀▄ END OF "Combat" ▀▄▀▄▀▄▀▄▀▄▀▄ ┃  //
