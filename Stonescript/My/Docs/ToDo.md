@@ -23,25 +23,29 @@
     - [ ] Raw frames (as most speedrunners use it)
   - [ ] implement **partial times**/**checkpoints**
 
+- [ ] Arsenal:
+  - [ ] fix smartDebuff not working properly.
+
 - [ ] Update all location scripts:
-  - [x] Rocky
+  - [ ] Rocky
+    - [ ] Fix permapot not activating
+    - [ ] update again with latest adjustments.
   - [ ] Deadwood
   - [ ] Caves
   - [ ] Mushroom
   - [ ] Halls
   - ... Mine:
     - [x] Add miniboss screens to the logic
-    - [ ] Fix exploding miniboss logic:
+    - [x] Fix exploding miniboss logic:
       - [ ] Make the `Eternity Staff` ability activation conditions more consistent (based on states?)
     - [x] Change permapot activation logic so that it only activates only after the potion is consumed
     - [x] BFG DS:
       - [x] Replace boss_screen as max screen with the last screen of `loc.id = "bronze_mine"` (in every difficulty)
-
     - [x] finish updating boss logic:
       - [x] add ranged fight section to `fight()` or at the boss logic section itself.
     - [x] recopilate boss screens and add them to the boss_screen assignment section.
     - [x] Test!
       - [x] does the *Explosive Wand*'s ability work against Enfused elites?
   - [ ] Ridge:
-    - ... update again with Rocky's latest adjustments.
+    - ... update again with latest adjustments.
   - [ ] Temple

@@ -45,13 +45,6 @@ var end_t = 0
 
 var powerupCount = 0 // guardian's powerup counter
 
-// ************************************************
-// smart burn (ranged burn) logic
-// TODO: in My/Lib/Arsenal, put this into a special mode of canSmartDebuff() or in a separate function.
-var burnCount = -2
-var burnLimit = -2
-// ************************************************
-
 // //////////////// FUNCTIONS //////////////// //
 
 func fight(mode)
@@ -93,23 +86,10 @@ func fight(mode)
     // ........... DEBUFFING LOGIC .......... //
 
     // Bronze Guardian ranged debuffing
-    ?foe = "phase" & !canDash & a.canSmartDebuff("magic")
-      a.smartDebuff("magic")
-
-      >c0,1,#008800,weakening guardian
-    
-    // ************************************************
-    // TODO: in My/Lib/Arsenal, put this into a special mode of canSmartDebuff() or in a separate function.
-
-    // FIXME: working like normal debuffing the first time the debuff is applied.
-    :?foe = "phase" & !canDash &
-    ^c.canApplyBurn() & burnCount < burnLimit & burnLimit > 0
-      a.ldtF("magic debuff burn")
-      ?burnCount = 0 & (item.left.state = 3 | item.right.state = 3)
-        burnCount++
-      
-      >c0,1,#red,burning guardian
-    // ************************************************
+    ?a.canSmartDebuff("magic", ["weaken","burn"]) &
+    ^foe = "phase" & !canDash &
+    ^buffs.string = "smite"
+      a.smartDebuff("magic", ["weaken","burn"])
 
     // AOE debuffing
     :?a.canSmartDebuff("magic") &
@@ -221,11 +201,6 @@ var bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
 // item states monitor:
 >`1,12,#magenta,ils: @item.left.state@ | irs: @item.right.state@
 
-// ************************************************
-// TODO: move this to My/Lib/Arsenal
->`1,17,#ff0000,φ: @burnCount@/@burnLimit@
-// ************************************************
-
 ?c.permapotSetup
   >`1,13,#00ff00,permapotSetup
 :
@@ -335,6 +310,9 @@ burnCount = s.getEffectStat("foe","debuff","dot","count")
   burnLimit = 1 - burnCount
 // ***********************************************
 
+?isMinibossScr & foe ! "explode"
+  canDash = false
+
 // ........................................... //
 
 // Permapot equipment
@@ -363,37 +341,6 @@ or while setting up permapot. */
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // ............. DEFENSIVE LOGIC ............. //
-
-// Bomb Cart screen logic
-:?isMinibossScr
-  // Bomb Cart logic
-  ?foe = "explode"
-    // engage
-    ?s.betweenRange("dash_max", "socketed_shield") &
-    ^ (foe.state = 0 | foe.state = 2 & foe.time = 0)
-      a.ldtF("engage")
-    // dash
-    :?c.canUseAbility("dash")
-      a.ldtF("dash")
-    // walk
-    :?!s.inRange("triskelion")
-      a.ldtF("defense armor regen")
-    // combat
-    :?s.inRange("hatchet")
-      ?c.canUseAbility("staff_ice")
-        c.useAbility_TH("staff_ice", a.stIh)
-
-      ?buffs.string ! "buff_frozen" &
-      ^foe.debuffs.string ! "stun"
-        fight("escape")
-
-  // normal foes in Bomb Cart screen logic
-  :?s.betweenRange("crossbow", "socketed_shield")
-    a.ldtF("engage")
-  /*:?c.canUseAbility("bash")
-    a.ldtF("bash")*/
-  :
-    a.ldtF("ranged dmg")
 
 // boss's hammer attack
 :?foe = "phase" & foe.state = 32 & foe.time >= 30
@@ -475,12 +422,8 @@ or while setting up permapot. */
 
 // Insta-kill Enfused elites
 :?encounter.eliteMod = "enfused" & s.inRange("wand")
-  // use Explosive Wand to apply burn to all foes in the screen
-  ?c.canUseAbility("wand_fire")
-    c.useAbility_OH("wand_fire", a.wFh, hand)
-  :
-    canDash = false
-    a.ldtF("magic debuff burn")
+  canDash = false
+  a.ldtF("magic debuff burn")
 
   ?[foe.debuffs.string,
   ^ foe.buffs.string].Contains("enfused")
@@ -520,7 +463,7 @@ unmake with repeating crossbow. */
 :?c.canUseAbility("voidweaver") &
 ^c.canUnmakeVoidweaver() &
 ^foe.count > 1 & s.inRange("hatchet") &
-^screen.i > 1
+^!isMinibossScr
   c.devour("voidweaver")
 
 // Calamity - reduce hp
@@ -551,6 +494,27 @@ unmake with repeating crossbow. */
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.hihp
   c.useAbility_OH("wand_ice", a.wIh, hand)
+
+// .............. MINIBOSS LOGIC ............. //
+
+// Bomb Cart screen logic
+:?isMinibossScr
+  >c0,0,#red,fd = @foe.distance@
+  
+  // Bomb Cart
+  ?foe = "explode"
+    // combat
+    ?s.inRange("hatchet") &
+    ^c.canUseAbility("staff_ice")
+      c.useAbility_TH("staff_ice", a.stIh)
+
+    :/*?buffs.string ! "buff_frozen" &
+    ^foe.debuffs.string ! "stun"*/
+      canDash = false
+      fight("escape")
+  
+  : // normal foes
+    a.ldtF("ranged dmg")
 
 // ................ AOE LOGIC ................ //
 

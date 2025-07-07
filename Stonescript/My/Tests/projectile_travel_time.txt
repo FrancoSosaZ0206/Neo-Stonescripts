@@ -1,0 +1,25 @@
+var wandLaunched = false
+var wandTime = 0
+
+var bowLaunched = false
+var bowTime = 0
+
+>`1,@screen.h-2-4@,wandTime: @wandTime@\n
+^bowTime: @bowTime@\n
+^wand equipped: 
+^@item.right = "wand"@\n
+^bow equipped: @item.right = "crossbow"@
+
+?item.right = "wand" &
+^item.right.state = 3
+  wandLaunched = true
+
+?wandLaunched & foe.debuffs.string ! "dot"
+  wandTime ++
+
+?item.right = "crossbow" &
+^item.right.state = 3
+  bowLaunched = true
+
+?bowLaunched & foe.debuffs.string ! "damage"
+  bowTime ++
