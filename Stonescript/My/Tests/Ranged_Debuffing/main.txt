@@ -1,4 +1,4 @@
-var debTkr = import My/Tests/Projectile_Based_Debuffing/public
+var debTkr = import My/Tests/Ranged_Debuffing/public
 
 // Procedure:
 

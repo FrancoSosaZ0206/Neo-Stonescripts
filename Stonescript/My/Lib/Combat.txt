@@ -335,7 +335,7 @@ func devour(summonName)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Combat\nFUNCTION: devour\nCAUSE: unknown <summonName>:\n\n" + summonName, false)
 
 func canUnmakeVoidweaver()
-  return canUnmake() & foe ! "elite"
+  return !(foe = "boss" | foe.buffs.string = "stability")
 
 func canKillCinderwisp(cinderwispDmg, margin)
   var result = false

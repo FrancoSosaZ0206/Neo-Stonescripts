@@ -1,0 +1,10 @@
+var priv = import My/Lib/Effect_Stats/private
+
+var getID           = priv.getID
+var getName         = priv.getName
+var getAffix        = priv.getAffix
+var getMaxStacks    = priv.getMaxStacks
+var isDebuffable    = priv.isDebuffable
+var canDebuff       = priv.canDebuff
+var canMultiDebuff  = priv.canMultiDebuff
+var canUnmake       = priv.canUnmake

@@ -3,14 +3,15 @@
 // property indexes/accessors
 var _NAME = 0
 var _ID = 1
-var _MAX_STACKS = 2
+var _AFFIX = 2
+var _MAX_STACKS = 3
 
-// [NAME, ID, MAX_STACKS]
+// [NAME    , ID            , AFFIX, MAX_STACKS]
 var table_debuffs = [
-^["Weaken"  , "debuff_damage" , 1],
-^["Chill"   , "debuff_chill"  , 6],
-^["Burn"    , "debuff_dot"    , 1],
-^["Stun"    , "stun"          , 1]
+^["Weaken"  , "debuff_damage", "dP", 1],
+^["Chill"   , "debuff_chill" , "dI", 6],
+^["Burn"    , "debuff_dot"   , "dF", 1],
+^["Stun"    , "stun"         , null, 1]
 ^]
 
 // functions:
@@ -40,6 +41,13 @@ func getName(_id)
 
   return null
 
+func getAffix(_id)
+  for debuff : table_debuffs
+    ?_id = debuff[_id]
+      return debuff[_AFFIX]
+
+  return null
+
 func getMaxStacks(_id)
   for debuff : table_debuffs
     ?_id = debuff[_ID]
@@ -65,7 +73,7 @@ func canDebuff(_id)
     ^      !(foe.debuffs.string = _id+":"+getMaxStacks(_id) |
     ^        foe = "immnue_to_"+_id)
 
-func canDebuffAny(_idArr)
+func canMultiDebuff(_idArr, logicMode)
   // entry sanitization
   ?Type(_idArr) ! "array"
     >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: invalid <_id> type: expected "array", recieved "@Type(_idArr)@".
