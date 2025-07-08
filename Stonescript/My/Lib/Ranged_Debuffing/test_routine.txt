@@ -2,29 +2,27 @@
 
 var debTkr = import My/Lib/Ranged_Debuffing/public
 
-// Procedure:
+// ****************************************** //
 
-// Add these once per affix-type combo
-debTkr.add("dI", "debuff_chill")     // Chill
-debTkr.add("dP", "debuff_damage")  // Weaken
-// debTkr.add("dF", "debuff_dot")     // Burn (not in use)
+// Procedure:
 
 // Call every frame
 debTkr.track()
 
-// Check if safe to apply debuff
-?debTkr.canDebuff("dI", "debuff_chill", 6)
-  equip max* wand dI
-
-:?debTkr.canDebuff("dP", "debuff_damage", 1)
-  equip max* crossbow dP
-
-:?foe.distance > 22
+?foe.distance > 22
   equipL triskelion
   equipR shield compound *max
+
+// Check if safe to apply debuffs
+:?debTkr.canDebuff("debuff_chill")
+  equip max* wand dI
+
+:?debTkr.canDebuff("debuff_damage")
+  equip max* crossbow dP
 :
   equipR repeating crossbow *max
-  
+
+// ****************************************** //
 
 // Monitor for debug
 debTkr.monitor()

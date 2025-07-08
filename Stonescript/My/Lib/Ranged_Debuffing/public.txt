@@ -7,4 +7,3 @@ var priv = import My/Lib/Ranged_Debuffing/private
 var track     = priv.track
 var canDebuff = priv.canDebuff
 var monitor   = priv.monitor
-
