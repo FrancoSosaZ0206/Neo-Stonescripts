@@ -12,6 +12,7 @@
 
 ## To Do List
 
+- [ ] Ranged_Debuffing/private: at `track()`, fix tracker removal conditions so it only removes it when the stack count is equal to the max stack. Otherwise, when the set is removed, `canDebuff()` will look for current stack count only, ignoring travelling projectiles.
 - [ ] Update Times meter:
   - [ ] display in **table format**.
   - [ ] display previous `n` times:
