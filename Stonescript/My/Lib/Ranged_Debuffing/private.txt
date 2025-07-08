@@ -1,0 +1,120 @@
+// Imports:
+var es = import My/Lib/Effect_Stats/public
+
+// Variables:
+
+var trackerArr = []
+
+// tracker dataset indexes
+var _DEBUFF_NAME  = 0
+var _LAUNCH_COUNT = 1
+var _STACK_COUNT  = 2
+
+// Functions:
+
+// helper
+
+/* Finds and returns the debuff name's tracker.
+Returns null if not found. */
+func get(debuffName)
+  ?!es.isValidName(debuffName)
+    >c0,0,#ff0000,ERROR\n
+    ^FILE: Ranged_Debuffing/private\n
+    ^AT: get\n
+    ^CAUSE: invalid <debuffName>: @debuffName@.
+
+    return null
+  :
+    for tracker : trackerArr
+      ?tracker[_DEBUFF_NAME] = debuffName
+        return tracker[_DEBUFF_NAME]
+
+    return null
+
+// ------------------------------------------ //
+
+/* Returns true if the debuff tracker was added,
+false if it already exists. */
+func add(debuffName)
+  ?get(debuffName) // already exists
+    return false
+  : // doesn't exist
+    trackerArr.Add([debuffName, 0, 0])
+    return true
+
+/* Returns true if the debuff tracker exists and was removed,
+false otherwise. */
+func remove(debuffName)
+  ?!es.isValidName(debuffName)
+    >c0,0,#ff0000,ERROR\n
+    ^FILE: Ranged_Debuffing/private\n
+    ^AT: remove\n
+    ^CAUSE: invalid <debuffName>: @debuffName@.
+
+    return false
+  : // valid debuffName, loop through the array and look for tracker to remove
+    var n = trackerArr.Count()
+
+    for i = 0 .. n - 1
+      ?trackerArr[i][_DEBUFF_NAME] = debuffName
+        ?!trackerArr.RemoveAt(i)
+          >c0,0,#ff0000,ERROR\n
+          ^FILE: Ranged_Debuffing/private\n
+          ^AT: remove\n
+          ^CAUSE: failed to remove tracker at index @i@/@n - 1@.
+
+          return false
+        :
+          return true
+
+    return false
+
+func track()
+  // Process each tracker
+  for tracker : trackerArr
+    // update stack count
+    tracker[_STACK_COUNT] = foe.debuffs.GetCount(es.toId(tracker[_DEBUFF_NAME]))
+
+    var debuffName  = tracker[_DEBUFF_NAME]
+    var affix = es.getAffix(debuffName)
+
+    var launchCount = tracker[_LAUNCH_COUNT]
+    var stackCount  = tracker[_STACK_COUNT]
+
+    // invalid debuff handling (by default, system shouldn't allow this. It's just a safeguard)
+    ?!affix
+      >c0,0,#ff0000,ERROR\nFILE: Ranged_Debuffing/private\nAT: track\nCAUSE: target debuff does not have an affix: @debuffName@
+      return
+
+    // Remove any finished trackers
+    :?launchCount + stackCount >=
+    ^es.getMaxStacks(es.toId(debuffName))
+      remove(debuffName)
+
+    // Track valid launches only from ranged/magic items
+    :?(item.left = affix & item.left = "wand" & item.left.state = 3) | // only wands in left
+    ^(item.right = affix &
+    ^ (item.right = "wand" | item.right = "staff" | item.right = "crossbow") &
+    ^ item.right.state = 3)
+      tracker[_LAUNCH_COUNT] ++ // increase launchCount
+
+func canDebuff(debuffName)
+  var tracker = get(debuffName)
+
+  ?tracker
+    // only launch if not saturated
+    return tracker[_LAUNCH_COUNT] + tracker[_STACK_COUNT] <
+    ^es.getMaxStacks(es.toId(tracker[_DEBUFF_NAME]))
+  :
+    /* not yet tracked, return true if:
+      - targeted foe isn't immune to projectiles, and
+      - can apply target debuff. */
+    return foe ! "immune_to_ranged" &
+    ^      es.canDebuff(es.toId(debuffName))
+
+func monitor()
+  var n = trackerArr.Count()
+  >`1,7,#cyan,Tracked Debuffs: @n@
+  for i = 0 .. n - 1
+    var r = trackerArr[i]
+    >`1,@(8 + i)@,#ccc,@r[_DEBUFF_NAME]@ | L:@r[_LAUNCH_COUNT]@ | S:@r[_STACK_COUNT]@

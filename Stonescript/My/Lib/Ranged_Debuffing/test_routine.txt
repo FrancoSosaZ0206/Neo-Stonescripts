@@ -1,4 +1,6 @@
-var debTkr = import My/Tests/Ranged_Debuffing/public
+// Imports
+
+var debTkr = import My/Lib/Ranged_Debuffing/public
 
 // Procedure:
 
@@ -19,9 +21,9 @@ debTkr.track()
 
 :?foe.distance > 22
   equipL triskelion
-  equipR shield compound *max +18
+  equipR shield compound *max
 :
-  equipR repeating crossbow *max +15
+  equipR repeating crossbow *max
   
 
 // Monitor for debug

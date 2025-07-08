@@ -16,49 +16,91 @@ var table_debuffs = [
 
 // functions:
 
-// helpers
+// data validation
 
 func isValidId(_id)
-  for debuff : table_debuffs
-    ?_id = table_debuffs[_ID]
-      return true
+  ?Type() = "string"
+    for debuff : table_debuffs
+      ?_id = table_debuffs[_ID]
+        return true
+  
+  return false
+func isValidName(_name)
+  ?Type() = "string"
+    for debuff : table_debuffs
+      ?_name = table_debuffs[_NAME]
+        return true
+  
+  return false
+func isValidAffix(_affix)
+  ?Type() = "string"
+    for debuff : table_debuffs
+      ?_affix = table_debuffs[_AFFIX]
+        return true
   
   return false
 
-// -------------------------------- //
+// list getters
 
-func getID(_name)
+func getIds()
+  var idArr = []
+
+  for debuff : table_debuffs
+    idArr.Add(debuff[_ID])
+
+  return idArr
+func getNames()
+  var nameArr = []
+
+  for debuff : table_debuffs
+    nameArr.Add(debuff[_NAME])
+
+  return nameArr
+func getAffixes()
+  var affixArr = []
+
+  for debuff : table_debuffs
+    affixArr.Add(debuff[_AFFIX])
+
+  return affixArr
+
+// transformers
+
+func toId(_name)
   for debuff : table_debuffs
     ?_name = debuff[_NAME]
       return debuff[_ID]
 
   return null
-
-func getName(_id)
+func toName(_id)
   for debuff : table_debuffs
     ?_id = debuff[_id]
       return debuff[_NAME]
 
   return null
 
-func getAffix(_id)
+// data getters
+
+/* Returns debuff's affix if it has one, null otherwise.
+Can recieve a debuff name or id. */
+func getAffix(_key)
   for debuff : table_debuffs
-    ?_id = debuff[_id]
+    ?[debuff[_NAME], debuff[_ID]].Contains(_key)
       return debuff[_AFFIX]
 
   return null
-
-func getMaxStacks(_id)
+func getMaxStacks(_key)
   for debuff : table_debuffs
-    ?_id = debuff[_ID]
+    ?[debuff[_NAME], debuff[_ID]].Contains(_key)
       return debuff[_MAX_STACKS]
 
   return null
 
+// miscellaneous
+
 func isDebuffable()
   return !(foe.buffs.string = "buff_tenacious" |
   ^        foe.buffs.string = "buff_protection" )
-
 func canDebuff(_id)
   // entry sanitization
   ?Type(_id) ! "string"
@@ -73,13 +115,30 @@ func canDebuff(_id)
     ^      !(foe.debuffs.string = _id+":"+getMaxStacks(_id) |
     ^        foe = "immnue_to_"+_id)
 
-func canMultiDebuff(_idArr, logicMode)
+// mode (string) values: "any", "all"
+func canMultiDebuff(_idArr, mode)
   // entry sanitization
   ?Type(_idArr) ! "array"
-    >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: invalid <_id> type: expected "array", recieved "@Type(_idArr)@".
+    >c0,0,#ff0000,ERROR\n
+    ^FILE: Debuff_Stats/private\n
+    ^AT: canDebuff\n
+    ^CAUSE: invalid <_id> type: expected "array", recieved "@Type(_idArr)@".
+    return false
+  :?Type(mode) ! "string"
+    >c0,0,#ff0000,ERROR\n
+    ^FILE: Debuff_Stats/private\n
+    ^AT: canDebuff\n
+    ^CAUSE: invalid <mode> type: expected "string", recieved "@Type(mode)@".
+    return false
+  
+  // entry validation
+  :?!["any", "all"].Contains(string.ToLower(mode))
+    >c0,0,#ff0000,ERROR\n
+    ^FILE: Debuff_Stats/private\n
+    ^AT: canDebuff\n
+    ^CAUSE: unknown <mode> value: @mode@.
     return false
   :
-    // entry validation
     var validIdArr = true
     var invalidId = null
     for _id : _idArr
@@ -89,7 +148,10 @@ func canMultiDebuff(_idArr, logicMode)
         break
 
     ?!validIdArr
-      >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: <_idArr> has 1 or more invalid elements: @invalidId@
+      >c0,0,#ff0000,ERROR\n
+      ^FILE: Debuff_Stats/private\n
+      ^AT: canDebuff\n
+      ^CAUSE: <_idArr> has 1 or more invalid elements: @invalidId@
       return false
 
     : // procedure
@@ -98,7 +160,11 @@ func canMultiDebuff(_idArr, logicMode)
       ?result
         var aux
         for _id : _idArr
-          aux = (aux | canDebuff(_id))
+          ?mode = "any"
+            aux = (aux | canDebuff(_id))
+          : // mode = "all"
+            aux = (aux & canDebuff(_id))
+
         result = (result & aux)
       
       return result

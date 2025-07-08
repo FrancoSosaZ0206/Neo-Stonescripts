@@ -1,10 +1,22 @@
 var priv = import My/Lib/Effect_Stats/private
 
-var getID           = priv.getID
-var getName         = priv.getName
+var isValidId       = priv.isValidId
+var isValidName     = priv.isValidName
+var isValidAffix    = priv.isValidAffix
+
+var getIds          = getIds
+var getNames        = getNames
+var getAffixes      = getAffixes
+
+var toId            = priv.toId
+var toName          = priv.toName
+
 var getAffix        = priv.getAffix
 var getMaxStacks    = priv.getMaxStacks
+
 var isDebuffable    = priv.isDebuffable
 var canDebuff       = priv.canDebuff
+
 var canMultiDebuff  = priv.canMultiDebuff
+
 var canUnmake       = priv.canUnmake

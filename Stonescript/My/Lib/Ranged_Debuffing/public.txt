@@ -1,6 +1,6 @@
 // imports:
 
-var priv = import My/Tests/Projectile_Based_Debuffing/private
+var priv = import My/Lib/Ranged_Debuffing/private
 
 // variables:
 
