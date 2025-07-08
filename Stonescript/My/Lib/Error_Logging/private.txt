@@ -1,0 +1,6 @@
+/* TODO:
+ - [ ] implement errorMessage object/array:
+   [string: file, string: function, string: cause]
+ - [ ] implement logError(errorMessage: msg).
+ - [ ] implement assert(bool: condition, errorMessage: msg).
+ - [ ] store logged errors inside an array (NOT errorMessage, but a global error array containing errorMessage instances). */
