@@ -27,7 +27,7 @@ func get(debuffName)
   :
     for tracker : trackerArr
       ?tracker[_DEBUFF_NAME] = debuffName
-        return tracker[_DEBUFF_NAME]
+        return tracker
 
     return null
 
