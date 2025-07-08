@@ -96,10 +96,13 @@ func track()
       trackerArr.Clear()
 
   : // add and track
+    var affixL = getItemAffix("left")
+    var affixR = getItemAffix("right")
+
     // add tracker based on item equipped in left hand
-    ?!addTracker(getItemAffix("left"))
+    ?!addTracker(affixL)
       // if failed, try in right hand
-      addTracker(getItemAffix("right"))
+      addTracker(affixR)
 
     // Process each tracker
     for tracker : trackerArr
@@ -113,15 +116,15 @@ func track()
       var stackCount  = tracker[_STACK_COUNT]
 
       // Remove any finished trackers
-      ?launchCount + stackCount >=
-      ^es.getMaxStacks(es.toId(affix))
+      ?launchCount + stackCount >= es.toMaxStacks(es.toId(affix))
         removeTracker(affix)
+        continue
 
       // Track valid launches only from ranged/magic items
-      :?(item.left = affix & item.left = "wand" & item.left.state = 3) | // only wands in left
-      ^(item.right = affix &
-      ^ (item.right = "wand" | item.right = "staff" | item.right = "crossbow") &
-      ^ item.right.state = 3)
+      ?affix = affixL & item.left.state = 3
+        tracker[_LAUNCH_COUNT] ++ // increase launchCount
+
+      ?affix = affixR & item.right.state = 3
         tracker[_LAUNCH_COUNT] ++ // increase launchCount
 
 func canDebuff(debuffName)
@@ -130,7 +133,7 @@ func canDebuff(debuffName)
   ?tracker
     // only launch if not saturated
     return tracker[_LAUNCH_COUNT] + tracker[_STACK_COUNT] <
-    ^es.getMaxStacks(es.toId(tracker[_AFFIX]))
+    ^es.toMaxStacks(es.toId(tracker[_AFFIX]))
   :
     /* not yet tracked, return true if:
       - targeted foe isn't immune to projectiles, and
@@ -142,7 +145,8 @@ func monitor()
   var n = trackerArr.Count()
   >`1,7,#cyan,Tracked Debuffs: @n@
   for i = 0 .. n - 1
-    var r = trackerArr[i]
-    >`1,@(8 + i)@,#ccc,@es.toName(r[_AFFIX])@ | 
-    ^L:@r[_LAUNCH_COUNT]@ | 
-    ^S:@r[_STACK_COUNT]@
+    var affix = es.toName(trackerArr[i][_AFFIX])
+    var launchCount = trackerArr[i][_LAUNCH_COUNT]
+    var stackCount = trackerArr[i][_STACK_COUNT]
+
+    >`1,@8 + i@,#ccc,@affix@ | L:@launchCount@ | S:@stackCount@
