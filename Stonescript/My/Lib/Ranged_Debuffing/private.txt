@@ -6,61 +6,76 @@ var es = import My/Lib/Effect_Stats/public
 var trackerArr = []
 
 // tracker dataset indexes
-var _DEBUFF_NAME  = 0
+var _AFFIX        = 0
 var _LAUNCH_COUNT = 1
 var _STACK_COUNT  = 2
 
 // Functions:
 
-// helper
+// private
 
-/* Finds and returns the debuff name's tracker.
-Returns null if not found. */
-func get(debuffName)
-  ?!es.isValidName(debuffName)
+/* Returns an item's affix if it's ranged and is equipped in the target hand, null otherwise. */
+func getItemAffix(hand)
+  // validate left hand
+  ?hand = "left" & item.left = "wand"
+    for affix : es.listAffixes() // if match, validate affix
+      ?affix & item.left = affix // if both item and affix match,
+        return affix
+
+  // validate right hand
+  :?hand = "right" &
+  ^ (item.right = "wand"   |
+  ^  item.right = "staff"  |
+  ^  item.right = "crossbow")
+    for affix : es.listAffixes() // if match, validate affix
+      ?affix & item.right = affix // if both item and affix match,
+        return affix
+
+  return null
+
+/* Returns a tracker if found, null otherwise. Uses affix as search key. */
+func getTracker(affix)
+  ?!es.isValidAffix(affix)
     >c0,0,#ff0000,ERROR\n
     ^FILE: Ranged_Debuffing/private\n
-    ^AT: get\n
-    ^CAUSE: invalid <debuffName>: @debuffName@.
+    ^AT: getTracker\n
+    ^CAUSE: invalid <affix>: @affix@.
 
     return null
   :
     for tracker : trackerArr
-      ?tracker[_DEBUFF_NAME] = debuffName
+      ?tracker[_AFFIX] = affix
         return tracker
 
     return null
 
-// ------------------------------------------ //
-
-/* Returns true if the debuff tracker was added,
-false if it already exists. */
-func add(debuffName)
-  ?get(debuffName) // already exists
+/* Returns true if the tracker was added, false if it already exists. */
+func addTracker(affix)
+  ?getTracker(affix) // already exists
     return false
   : // doesn't exist
-    trackerArr.Add([debuffName, 0, 0])
+    trackerArr.Add([affix, 0, 0])
     return true
 
 /* Returns true if the debuff tracker exists and was removed,
 false otherwise. */
-func remove(debuffName)
-  ?!es.isValidName(debuffName)
+func removeTracker(affix)
+  ?!es.isValidAffix(affix)
     >c0,0,#ff0000,ERROR\n
     ^FILE: Ranged_Debuffing/private\n
-    ^AT: remove\n
-    ^CAUSE: invalid <debuffName>: @debuffName@.
+    ^AT: removeTracker\n
+    ^CAUSE: invalid <affix>: @affix@.
 
     return false
-  : // valid debuffName, loop through the array and look for tracker to remove
+  : // valid affix, loop through the array and look for tracker to remove
     var n = trackerArr.Count()
 
     for i = 0 .. n - 1
-      ?trackerArr[i][_DEBUFF_NAME] = debuffName
+      ?trackerArr[i][_AFFIX] = affix
         ?!trackerArr.RemoveAt(i)
           >c0,0,#ff0000,ERROR\n
           ^FILE: Ranged_Debuffing/private\n
-          ^AT: remove\n
+          ^AT: removeTracker\n
           ^CAUSE: failed to remove tracker at index @i@/@n - 1@.
 
           return false
@@ -69,42 +84,53 @@ func remove(debuffName)
 
     return false
 
+// ------------------------------------------ //
+
+// public
+
 func track()
-  // Process each tracker
-  for tracker : trackerArr
-    // update stack count
-    tracker[_STACK_COUNT] = foe.debuffs.GetCount(es.toId(tracker[_DEBUFF_NAME]))
+  // foe can't be debuffed
+  ?!es.isDebuffable()
+    // clear the system if needed
+    ?trackerArr.Count() > 0
+      trackerArr.Clear()
 
-    var debuffName  = tracker[_DEBUFF_NAME]
-    var affix = es.getAffix(debuffName)
+  : // add and track
+    // add tracker based on item equipped in left hand
+    ?!addTracker(getItemAffix("left"))
+      // if failed, try in right hand
+      addTracker(getItemAffix("right"))
 
-    var launchCount = tracker[_LAUNCH_COUNT]
-    var stackCount  = tracker[_STACK_COUNT]
+    // Process each tracker
+    for tracker : trackerArr
+      // update stack count
+      tracker[_STACK_COUNT] = foe.debuffs.GetCount(
+      ^                         es.toId(tracker[_AFFIX]))
 
-    // invalid debuff handling (by default, system shouldn't allow this. It's just a safeguard)
-    ?!affix
-      >c0,0,#ff0000,ERROR\nFILE: Ranged_Debuffing/private\nAT: track\nCAUSE: target debuff does not have an affix: @debuffName@
-      return
+      // define shorter aliases to work with
+      var affix = tracker[_AFFIX]
+      var launchCount = tracker[_LAUNCH_COUNT]
+      var stackCount  = tracker[_STACK_COUNT]
 
-    // Remove any finished trackers
-    :?launchCount + stackCount >=
-    ^es.getMaxStacks(es.toId(debuffName))
-      remove(debuffName)
+      // Remove any finished trackers
+      ?launchCount + stackCount >=
+      ^es.getMaxStacks(es.toId(affix))
+        removeTracker(affix)
 
-    // Track valid launches only from ranged/magic items
-    :?(item.left = affix & item.left = "wand" & item.left.state = 3) | // only wands in left
-    ^(item.right = affix &
-    ^ (item.right = "wand" | item.right = "staff" | item.right = "crossbow") &
-    ^ item.right.state = 3)
-      tracker[_LAUNCH_COUNT] ++ // increase launchCount
+      // Track valid launches only from ranged/magic items
+      :?(item.left = affix & item.left = "wand" & item.left.state = 3) | // only wands in left
+      ^(item.right = affix &
+      ^ (item.right = "wand" | item.right = "staff" | item.right = "crossbow") &
+      ^ item.right.state = 3)
+        tracker[_LAUNCH_COUNT] ++ // increase launchCount
 
 func canDebuff(debuffName)
-  var tracker = get(debuffName)
+  var tracker = getTracker(es.toAffix(debuffName))
 
   ?tracker
     // only launch if not saturated
     return tracker[_LAUNCH_COUNT] + tracker[_STACK_COUNT] <
-    ^es.getMaxStacks(es.toId(tracker[_DEBUFF_NAME]))
+    ^es.getMaxStacks(es.toId(tracker[_AFFIX]))
   :
     /* not yet tracked, return true if:
       - targeted foe isn't immune to projectiles, and
@@ -117,4 +143,6 @@ func monitor()
   >`1,7,#cyan,Tracked Debuffs: @n@
   for i = 0 .. n - 1
     var r = trackerArr[i]
-    >`1,@(8 + i)@,#ccc,@r[_DEBUFF_NAME]@ | L:@r[_LAUNCH_COUNT]@ | S:@r[_STACK_COUNT]@
+    >`1,@(8 + i)@,#ccc,@es.toName(r[_AFFIX])@ | 
+    ^L:@r[_LAUNCH_COUNT]@ | 
+    ^S:@r[_STACK_COUNT]@

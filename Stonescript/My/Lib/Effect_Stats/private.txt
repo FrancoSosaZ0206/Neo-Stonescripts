@@ -40,23 +40,23 @@ func isValidAffix(_affix)
   
   return false
 
-// list getters
+// list generators
 
-func getIds()
+func listIds()
   var idArr = []
 
   for debuff : table_debuffs
     idArr.Add(debuff[_ID])
 
   return idArr
-func getNames()
+func listNames()
   var nameArr = []
 
   for debuff : table_debuffs
     nameArr.Add(debuff[_NAME])
 
   return nameArr
-func getAffixes()
+func listAffixes()
   var affixArr = []
 
   for debuff : table_debuffs
@@ -66,30 +66,31 @@ func getAffixes()
 
 // transformers
 
-func toId(_name)
+// Can recieve a name or an affix (if it has one).
+func toId(_key)
   for debuff : table_debuffs
-    ?_name = debuff[_NAME]
+    ?[debuff[_NAME], debuff[_AFFIX]].Contains(_key)
       return debuff[_ID]
 
   return null
-func toName(_id)
+
+// Can recieve an id or an affix (if it has one).
+func toName(_key)
   for debuff : table_debuffs
-    ?_id = debuff[_id]
+    ?[debuff[_ID], debuff[_AFFIX]].Contains(_key)
       return debuff[_NAME]
 
   return null
 
-// data getters
-
 /* Returns debuff's affix if it has one, null otherwise.
 Can recieve a debuff name or id. */
-func getAffix(_key)
+func toAffix(_key)
   for debuff : table_debuffs
     ?[debuff[_NAME], debuff[_ID]].Contains(_key)
       return debuff[_AFFIX]
 
   return null
-func getMaxStacks(_key)
+func toMaxStacks(_key)
   for debuff : table_debuffs
     ?[debuff[_NAME], debuff[_ID]].Contains(_key)
       return debuff[_MAX_STACKS]
