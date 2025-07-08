@@ -100,9 +100,9 @@ func track()
     var affixR = getItemAffix("right")
 
     // add tracker based on item equipped in left hand
-    ?!addTracker(affixL)
-      // if failed, try in right hand
-      addTracker(affixR)
+    addTracker(affixL)
+    // same in right hand
+    addTracker(affixR)
 
     // Process each tracker
     for tracker : trackerArr
