@@ -1,4 +1,5 @@
 // Imports:
+
 var log = import My/Lib/Error_Logging/public
 var es = import My/Lib/Effect_Stats/public
 
@@ -16,6 +17,23 @@ var _STACK_COUNT  = 2
 // Functions:
 
 // private
+
+/* Returns true only if all of the following conditions are met:
+- affix is valid
+- can attack
+- can apply target debuff
+- foe is vulnerable to projectiles
+- foe is vulnerable to physical projectiles (if equipped weapon launches those).
+
+Returns false otherwise. */
+func canRangedDebuff(affix)
+  ?!es.isValidAffix(affix)
+    log.logError(_FILE,"canRangedDebuff","invalid <affix>: "+affix)
+    return false
+  :
+    return ai.enabled & !ai.paused &
+    ^es.canDebuff(es.toId(affix)) & foe ! "immune_to_ranged" &
+    ^!(item.right = "crossbow" & foe = "immune_to_physical")
 
 /* Returns an item's affix if it's ranged and is equipped in the target hand, null otherwise. */
 func getItemAffix(hand)
@@ -52,11 +70,13 @@ func getTracker(affix)
 
 /* Returns true if the tracker was added, false if it already exists. */
 func addTracker(affix)
-  ?getTracker(affix) // already exists
-    return false
-  : // doesn't exist
+  var result = canRangedDebuff(affix)
+
+  ?result & !getTracker(affix) // does not exist
     trackerArr.Add([affix, 0, 0])
-    return true
+    result = true
+
+  return result
 
 /* Returns true if the debuff tracker exists and was removed,
 false otherwise. */
@@ -87,7 +107,7 @@ func removeTracker(affix)
 
 func track()
   // foe can't be debuffed
-  ?!es.isDebuffable()
+  ?!es.isDebuffable() | !ai.enabled | ai.paused
     // clear the system if needed
     ?trackerArr.Count() > 0
       trackerArr.Clear()
@@ -104,48 +124,54 @@ func track()
     ?affixR & affixL ! affixR
       addTracker(affixR)
 
-    // Process each tracker
-    for tracker : trackerArr
-      // update stack count
-      tracker[_STACK_COUNT] = foe.debuffs.GetCount(
-      ^                         es.toId(tracker[_AFFIX]))
+    ?trackerArr.Count() > 0
+      // Process each tracker
+      for tracker : trackerArr
+        var affix = tracker[_AFFIX]
+        var _id = es.toId(affix)
 
-      // define shorter aliases to work with
-      var affix = tracker[_AFFIX]
-      var launchCount = tracker[_LAUNCH_COUNT]
-      var stackCount  = tracker[_STACK_COUNT]
+        // update stack count
+        tracker[_STACK_COUNT] = foe.debuffs.GetCount(_id)
 
-      // Remove any finished trackers
-      ?launchCount + stackCount >= es.toMaxStacks(es.toId(affix))
-        removeTracker(affix)
-        continue
+        // define shorter aliases to work with
+        var launchCount = tracker[_LAUNCH_COUNT]
+        var stackCount  = tracker[_STACK_COUNT]
 
-      // Track valid launches only from ranged/magic items
-      ?affix = affixL & item.left.state = 3
-        tracker[_LAUNCH_COUNT] += 1 // increase launchCount
+        // Remove any finished trackers
+        ?stackCount = es.toMaxStacks(_id) | es.isImmuneTo(_id)
+          removeTracker(affix)
+          break
 
-      ?affix = affixR & item.right.state = 3
-        tracker[_LAUNCH_COUNT] += 1 // increase launchCount
+        // Track valid launches only from ranged/magic items
+        ?affix = affixL & item.left.state = 3
+          tracker[_LAUNCH_COUNT] += 1 // increase launchCount
+
+        ?affix = affixR & item.right.state = 3
+          tracker[_LAUNCH_COUNT] += 1 // increase launchCount
 
 func canTrack(debuffName)
-  var tracker = getTracker(es.toAffix(debuffName))
+  var result = false
+  var tracker = null
+  var _id = es.toId(debuffName)
 
-  ?tracker
-    // only launch if not saturated
-    return tracker[_LAUNCH_COUNT] + tracker[_STACK_COUNT] <
-    ^es.toMaxStacks(es.toId(tracker[_AFFIX]))
-  :
-    /* not yet tracked, return true if:
-      - targeted foe isn't immune to projectiles, and
-      - can apply target debuff. */
-    return foe ! "immune_to_ranged" &
-    ^      es.canDebuff(es.toId(debuffName))
+  result = canRangedDebuff(es.toAffix(debuffName))
+
+  ?result
+    tracker = getTracker(es.toAffix(debuffName))
+    ?tracker
+      // only launch if not saturated
+      result = (result & (
+      ^tracker[_LAUNCH_COUNT] + tracker[_STACK_COUNT]
+      ^ <
+      ^es.toMaxStacks(_id)))
+
+  return result
 
 func monitor()
-  ?trackerArr.Count() > 0
-    var n = trackerArr.Count()
-    >`1,7,#cyan,Tracked Debuffs: @n@
+  var n = trackerArr.Count()
+  >`1,7,#cyan,Tracked Debuffs: @n@
 
+  ?trackerArr.Count() > 0
     for i = 0 .. n - 1
       var affix = es.toName(trackerArr[i][_AFFIX])
       var launchCount = trackerArr[i][_LAUNCH_COUNT]

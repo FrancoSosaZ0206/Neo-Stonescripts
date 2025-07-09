@@ -10,18 +10,34 @@ var log = import My/Lib/Error_Logging/public
 // Call every frame
 tracker.track()
 
-?foe.distance > 22
+?pickup.distance < 15
+  equipL triskelion
+  equipR star
+
+:?foe.distance > 20 | !ai.enabled | ai.paused
   equipL triskelion
   equipR shield compound *max
 
-// Check if safe to apply debuffs
-:?tracker.canTrack("Chill")
-  equip max* wand dI
+/* // Group debuffing
+:?tracker.canTrack("Weaken") |
+^tracker.canTrack("Burn")
+  equipL *max wand dP -hidden
+  equipR *max wand dF -hidden
+*/
 
+// Individual debuffing
 :?tracker.canTrack("Weaken")
-  equip max* crossbow dP
+  equipL moon
+  equipR *max wand dP -hidden
+:?tracker.canTrack("Chill")
+  equipL *max wand dI hidden // moon
+  equipR *max wand dI -hidden
+:?tracker.canTrack("Burn")
+  equipL moon
+  equipR *max wand dF -hidden
+
 :
-  equipR repeating crossbow *max
+  equip *max crossbow repeating
 
 // ****************************************** //
 

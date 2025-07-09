@@ -27,21 +27,21 @@ var table_debuffs = [
 func isValidId(_id)
   ?Type(_id) = "string"
     for debuff : table_debuffs
-      ?_id = table_debuffs[_ID]
+      ?_id = debuff[_ID]
         return true
   
   return false
 func isValidName(_name)
   ?Type(_name) = "string"
     for debuff : table_debuffs
-      ?_name = table_debuffs[_NAME]
+      ?_name = debuff[_NAME]
         return true
   
   return false
 func isValidAffix(_affix)
   ?Type(_affix) = "string"
     for debuff : table_debuffs
-      ?_affix = table_debuffs[_AFFIX]
+      ?_affix = debuff[_AFFIX]
         return true
   
   return false
@@ -108,47 +108,55 @@ func toMaxStacks(_key)
 func isDebuffable()
   return !(foe.buffs.string = "buff_tenacious" |
   ^        foe.buffs.string = "buff_protection" )
+func isImmuneTo(_id)
+  var result = false
+  ?Type(_id) ! "string"
+    log.logError(_FILE, "isImmuneTo",
+    ^"invalid <_id> type: expected 'string', recieved '"+Type(_id)+"'")
+
+  :?!isValidId(_id)
+    log.logError(_FILE, "isImmuneTo",
+    ^"unknown <_id>: "+_id)
+  :
+    result = (foe = "immune_to_"+_id)
+
+  return result
 func canDebuff(_id)
+  var result = false
+
   // entry sanitization
   ?Type(_id) ! "string"
     log.logError(_FILE, "canDebuff",
     ^"invalid <_id> type: expected 'string', recieved '"+Type(_id)+"'")
-    
-    return false
 
   :?!isValidId(_id)
     log.logError(_FILE, "canDebuff",
     ^"unknown <_id>: "+_id)
-
-    return false
   :
-    return isDebuffable() &
-    ^      !(foe.debuffs.string = _id+":"+getMaxStacks(_id) |
-    ^        foe = "immnue_to_"+_id)
+    result = (isDebuffable() & !(isImmuneTo(_id) |
+    ^         foe.debuffs.string = _id+":"+toMaxStacks(_id)))
+
+  return result
 
 // mode (string) values: "any", "all"
 func canMultiDebuff(_idArr, mode)
+  var result = false
   // entry sanitization
   ?Type(_idArr) ! "array"
     log.logError(_FILE, "canDebuff",
     ^"invalid <_id> type: expected 'array', recieved '"+Type(_idArr)+"'")
-
-    return false
   :?Type(mode) ! "string"
     log.logError(_FILE, "canDebuff",
     ^"invalid <mode> type: expected 'string', recieved '"+Type(mode)+"'")
-
-    return false
   
   // entry validation
   :?!["any", "all"].Contains(string.ToLower(mode))
     log.logError(_FILE, "canDebuff",
     ^"unknown <mode> value: "+mode)
-  
-    return false
   :
     var validIdArr = true
     var invalidId = null
+
     for _id : _idArr
       ?!isValidId(_id)
         validIdArr = false
@@ -159,10 +167,8 @@ func canMultiDebuff(_idArr, mode)
       log.logError(_FILE, "canDebuff",
       ^"<_idArr> has 1 or more invalid elements: "+invalidId)
 
-      return false
-
     : // procedure
-      var result = isDebuffable()
+      result = isDebuffable()
 
       ?result
         var aux
@@ -173,8 +179,8 @@ func canMultiDebuff(_idArr, mode)
             aux = (aux & canDebuff(_id))
 
         result = (result & aux)
-      
-      return result
+
+  return result
 
 func canUnmake()
   return !(foe = "boss" | foe = "monarch")

@@ -15,6 +15,7 @@ var toAffix         = priv.toAffix
 var toMaxStacks     = priv.toMaxStacks
 
 var isDebuffable    = priv.isDebuffable
+var isImmuneTo      = priv.isImmuneTo
 var canDebuff       = priv.canDebuff
 
 var canMultiDebuff  = priv.canMultiDebuff
