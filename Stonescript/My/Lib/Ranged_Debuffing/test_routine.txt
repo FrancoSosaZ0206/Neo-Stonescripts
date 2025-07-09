@@ -1,23 +1,24 @@
 // Imports
 
-var debTkr = import My/Lib/Ranged_Debuffing/public
+var tracker = import My/Lib/Ranged_Debuffing/public
+var log = import My/Lib/Error_Logging/public
 
 // ****************************************** //
 
 // Procedure:
 
 // Call every frame
-debTkr.track()
+tracker.track()
 
 ?foe.distance > 22
   equipL triskelion
   equipR shield compound *max
 
 // Check if safe to apply debuffs
-:?debTkr.canDebuff("debuff_chill")
+:?tracker.canTrack("Chill")
   equip max* wand dI
 
-:?debTkr.canDebuff("debuff_damage")
+:?tracker.canTrack("Weaken")
   equip max* crossbow dP
 :
   equipR repeating crossbow *max
@@ -25,4 +26,9 @@ debTkr.track()
 // ****************************************** //
 
 // Monitor for debug
-debTkr.monitor()
+tracker.monitor()
+
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h/2@,#ff0000,errorCount: @log.getErrorCount()@
+  >`1,@screen.h - 2 - 4@,#ff0000,@log.getError()@

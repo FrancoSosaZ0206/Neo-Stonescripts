@@ -1,7 +1,10 @@
 // Imports:
+var log = import My/Lib/Error_Logging/public
 var es = import My/Lib/Effect_Stats/public
 
 // Variables:
+
+var _FILE = "Ranged_Debuffing/private"
 
 var trackerArr = []
 
@@ -36,10 +39,8 @@ func getItemAffix(hand)
 /* Returns a tracker if found, null otherwise. Uses affix as search key. */
 func getTracker(affix)
   ?!es.isValidAffix(affix)
-    >c0,0,#ff0000,ERROR\n
-    ^FILE: Ranged_Debuffing/private\n
-    ^AT: getTracker\n
-    ^CAUSE: invalid <affix>: @affix@.
+    log.logError(_FILE, "getTracker",
+    ^"invalid <affix>: "+affix)
 
     return null
   :
@@ -61,10 +62,8 @@ func addTracker(affix)
 false otherwise. */
 func removeTracker(affix)
   ?!es.isValidAffix(affix)
-    >c0,0,#ff0000,ERROR\n
-    ^FILE: Ranged_Debuffing/private\n
-    ^AT: removeTracker\n
-    ^CAUSE: invalid <affix>: @affix@.
+    log.logError(_FILE, "removeTracker",
+    ^"invalid <affix>: "+affix)
 
     return false
   : // valid affix, loop through the array and look for tracker to remove
@@ -73,10 +72,8 @@ func removeTracker(affix)
     for i = 0 .. n - 1
       ?trackerArr[i][_AFFIX] = affix
         ?!trackerArr.RemoveAt(i)
-          >c0,0,#ff0000,ERROR\n
-          ^FILE: Ranged_Debuffing/private\n
-          ^AT: removeTracker\n
-          ^CAUSE: failed to remove tracker at index @i@/@n - 1@.
+          log.logError(_FILE, "removeTracker",
+          ^"failed to remove tracker at index "+i+"/"+n - 1)
 
           return false
         :
@@ -125,12 +122,12 @@ func track()
 
       // Track valid launches only from ranged/magic items
       ?affix = affixL & item.left.state = 3
-        tracker[_LAUNCH_COUNT] ++ // increase launchCount
+        tracker[_LAUNCH_COUNT] += 1 // increase launchCount
 
       ?affix = affixR & item.right.state = 3
-        tracker[_LAUNCH_COUNT] ++ // increase launchCount
+        tracker[_LAUNCH_COUNT] += 1 // increase launchCount
 
-func canDebuff(debuffName)
+func canTrack(debuffName)
   var tracker = getTracker(es.toAffix(debuffName))
 
   ?tracker
@@ -145,11 +142,13 @@ func canDebuff(debuffName)
     ^      es.canDebuff(es.toId(debuffName))
 
 func monitor()
-  var n = trackerArr.Count()
-  >`1,7,#cyan,Tracked Debuffs: @n@
-  for i = 0 .. n - 1
-    var affix = es.toName(trackerArr[i][_AFFIX])
-    var launchCount = trackerArr[i][_LAUNCH_COUNT]
-    var stackCount = trackerArr[i][_STACK_COUNT]
+  ?trackerArr.Count() > 0
+    var n = trackerArr.Count()
+    >`1,7,#cyan,Tracked Debuffs: @n@
 
-    >`1,@8 + i@,#ccc,@affix@ | L:@launchCount@ | S:@stackCount@
+    for i = 0 .. n - 1
+      var affix = es.toName(trackerArr[i][_AFFIX])
+      var launchCount = trackerArr[i][_LAUNCH_COUNT]
+      var stackCount = trackerArr[i][_STACK_COUNT]
+
+      >`1,@8 + i@,#magenta,@affix@ | L:@launchCount@ | S:@stackCount@

@@ -1,4 +1,10 @@
+// imports
+
+var log = import My/Lib/Error_Logging/public
+
 // variables:
+
+var _FILE = "Effect_Stats/private"
 
 // property indexes/accessors
 var _NAME = 0
@@ -6,12 +12,12 @@ var _ID = 1
 var _AFFIX = 2
 var _MAX_STACKS = 3
 
-// [NAME    , ID            , AFFIX, MAX_STACKS]
+// [NAME    , ID            , AFFIX, MAX_STACKS ]
 var table_debuffs = [
-^["Weaken"  , "debuff_damage", "dP", 1],
-^["Chill"   , "debuff_chill" , "dI", 6],
-^["Burn"    , "debuff_dot"   , "dF", 1],
-^["Stun"    , "stun"         , null, 1]
+^["Weaken"  , "debuff_damage", "dP",      1     ],
+^["Chill"   , "debuff_chill" , "dI",      6     ],
+^["Burn"    , "debuff_dot"   , "dF",      1     ],
+^["Stun"    , "stun"         , null,      1     ]
 ^]
 
 // functions:
@@ -19,21 +25,21 @@ var table_debuffs = [
 // data validation
 
 func isValidId(_id)
-  ?Type() = "string"
+  ?Type(_id) = "string"
     for debuff : table_debuffs
       ?_id = table_debuffs[_ID]
         return true
   
   return false
 func isValidName(_name)
-  ?Type() = "string"
+  ?Type(_name) = "string"
     for debuff : table_debuffs
       ?_name = table_debuffs[_NAME]
         return true
   
   return false
 func isValidAffix(_affix)
-  ?Type() = "string"
+  ?Type(_affix) = "string"
     for debuff : table_debuffs
       ?_affix = table_debuffs[_AFFIX]
         return true
@@ -105,11 +111,15 @@ func isDebuffable()
 func canDebuff(_id)
   // entry sanitization
   ?Type(_id) ! "string"
-    >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: invalid <_id> type: expected "string", recieved "@Type(_id)@".
+    log.logError(_FILE, "canDebuff",
+    ^"invalid <_id> type: expected 'string', recieved '"+Type(_id)+"'")
+    
     return false
 
   :?!isValidId(_id)
-    >c0,0,#ff0000,ERROR\nFILE: Debuff_Stats/private\nAT: canDebuff\nCAUSE: unknown <_id>: @_id@
+    log.logError(_FILE, "canDebuff",
+    ^"unknown <_id>: "+_id)
+
     return false
   :
     return isDebuffable() &
@@ -120,24 +130,21 @@ func canDebuff(_id)
 func canMultiDebuff(_idArr, mode)
   // entry sanitization
   ?Type(_idArr) ! "array"
-    >c0,0,#ff0000,ERROR\n
-    ^FILE: Debuff_Stats/private\n
-    ^AT: canDebuff\n
-    ^CAUSE: invalid <_id> type: expected "array", recieved "@Type(_idArr)@".
+    log.logError(_FILE, "canDebuff",
+    ^"invalid <_id> type: expected 'array', recieved '"+Type(_idArr)+"'")
+
     return false
   :?Type(mode) ! "string"
-    >c0,0,#ff0000,ERROR\n
-    ^FILE: Debuff_Stats/private\n
-    ^AT: canDebuff\n
-    ^CAUSE: invalid <mode> type: expected "string", recieved "@Type(mode)@".
+    log.logError(_FILE, "canDebuff",
+    ^"invalid <mode> type: expected 'string', recieved '"+Type(mode)+"'")
+
     return false
   
   // entry validation
   :?!["any", "all"].Contains(string.ToLower(mode))
-    >c0,0,#ff0000,ERROR\n
-    ^FILE: Debuff_Stats/private\n
-    ^AT: canDebuff\n
-    ^CAUSE: unknown <mode> value: @mode@.
+    log.logError(_FILE, "canDebuff",
+    ^"unknown <mode> value: "+mode)
+  
     return false
   :
     var validIdArr = true
@@ -149,10 +156,9 @@ func canMultiDebuff(_idArr, mode)
         break
 
     ?!validIdArr
-      >c0,0,#ff0000,ERROR\n
-      ^FILE: Debuff_Stats/private\n
-      ^AT: canDebuff\n
-      ^CAUSE: <_idArr> has 1 or more invalid elements: @invalidId@
+      log.logError(_FILE, "canDebuff",
+      ^"<_idArr> has 1 or more invalid elements: "+invalidId)
+
       return false
 
     : // procedure

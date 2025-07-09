@@ -1,0 +1,7 @@
+var priv = import My/Lib/Error_Logging/private
+
+var hasErrors     = priv.hasErrors
+var getErrorCount = priv.getErrorCount
+var getError      = priv.getError
+var logError      = priv.logError
+var assert        = priv.assert

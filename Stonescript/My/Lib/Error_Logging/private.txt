@@ -4,3 +4,95 @@
  - [ ] implement logError(errorMessage: msg).
  - [ ] implement assert(bool: condition, errorMessage: msg).
  - [ ] store logged errors inside an array (NOT errorMessage, but a global error array containing errorMessage instances). */
+
+// imports
+
+
+
+// variables
+
+/* ERROR INFO
+
+Object definition
+
+Error = ["FILE","AT","CAUSE"]
+
+Member definition
+
+- FILE: error's source file.
+- AT: error's source function or script body.
+- CAUSE: error's cause description.
+*/
+var log = [] // logs multiple errors.
+
+var _FILE   = 0
+var _AT     = 1
+var _CAUSE  = 2
+
+var errorFormat = "ERROR\nFILE: {0}\nAT: {1}\nCAUSE: {2}."
+
+
+// functions
+
+
+
+// private
+
+
+
+// public
+
+func hasErrors()
+  return log.Count() > 0
+
+func getErrorCount()
+  return log.Count()
+
+func getError()
+  ?hasErrors()
+    return string.Format(errorFormat,
+    ^                    log[0][_FILE],
+    ^                    log[0][_AT],
+    ^                    log[0][_CAUSE])
+  :
+    return null
+
+func logError(_file, _at, _cause)
+  var result = false
+
+  ?Type(_file) ! "string"
+    log.Add(["Error_Logging/private",
+    ^        "logError",
+    ^        "incorrect <_file> type. "+
+    ^        "Expected 'string', was '"+Type(_file)+"'"])
+  :?Type(_at) ! "string"
+    log.Add(["Error_Logging/private",
+    ^        "logError",
+    ^        "incorrect <_at> type. "+
+    ^        "Expected 'string', was '"+Type(_at)+"'"])
+  :?Type(_cause) ! "string"
+    log.Add(["Error_Logging/private",
+    ^        "logError",
+    ^        "incorrect <_cause> type. "+
+    ^        "Expected 'string', was '"+Type(_cause)+"'"])
+
+  :?hasErrors()
+    for error : log
+      ?!(error[_FILE] = _file &
+      ^  error[_AT] = _at &
+      ^  error[_CAUSE] = _cause  )
+        log.Add([_file, _at, _cause])
+        result = true
+
+  return result
+
+func assert(_cond, _file, _at, _cause)
+  ?Type(_cond) ! "bool"
+    log.Add(["Error_Logging/private",
+    ^        "assert",
+    ^        "incorrect <_cond> type. "+
+    ^        "Expected 'bool', was '"+Type(_cond)+"'"])
+    return false
+
+  :?!_cond
+    return logError(_file, _at, _cause)
