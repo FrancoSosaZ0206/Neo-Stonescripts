@@ -31,7 +31,7 @@ Deadwood Waterfall. */
 import UI/BragMeter
 
 import My/Cosmetics
-import My/Scripts/Watermark
+import My/Watermark
 
 ?sys.isMobile
   ?sys.cacheRemoteFiles = false
