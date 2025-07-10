@@ -99,6 +99,8 @@ func updateTracker(affix, hand)
         trackerArr[i][_STACK_COUNT] = stackCount
 
         // Track valid launches only from ranged/magic items
+        // FIXME: add item.*.time = 0 for each hand
+        // FIXME: if the above doesn't work, also try splitting each hand into a separate ? statement.
         ?hand = "left" & item.left.state = 3 |
         ^hand = "right" & item.right.state = 3
           trackerArr[i][_LAUNCH_COUNT] += 1 // increase launchCount
