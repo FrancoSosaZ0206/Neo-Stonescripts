@@ -68,9 +68,10 @@ func getTracker(affix)
 
     return null
 
-func updateTracker(affix)
+func updateTracker(affix, hand)
   var result = false
-  var n = trackerArr.Count()
+  var n = null
+  n = trackerArr.Count()
 
   // if there are tracks,
   ?n > 0
@@ -98,7 +99,8 @@ func updateTracker(affix)
         trackerArr[i][_STACK_COUNT] = stackCount
 
         // Track valid launches only from ranged/magic items
-        ?item.left.state = 3
+        ?hand = "left" & item.left.state = 3 |
+        ^hand = "right" & item.right.state = 3
           trackerArr[i][_LAUNCH_COUNT] += 1 // increase launchCount
 
         result = true
@@ -127,11 +129,11 @@ func track()
 
     // Left hand:
     ?affixL
-      updateTracker(affixL)
+      updateTracker(affixL, "left")
 
     // Right hand:
     ?affixR
-      updateTracker(affixR)
+      updateTracker(affixR, "right")
 
 func canTrack(debuffName)
   var result = false
