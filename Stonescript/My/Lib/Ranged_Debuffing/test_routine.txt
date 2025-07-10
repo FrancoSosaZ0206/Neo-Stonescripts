@@ -18,7 +18,7 @@ tracker.track()
   equipL triskelion
   equipR shield compound *max
 
-/**/ // Group debuffing
+/* // Group debuffing
 :?tracker.canTrack("Weaken") |
 ^tracker.canTrack("Burn")
   equipL *max wand dP -hidden
@@ -26,9 +26,10 @@ tracker.track()
 :?tracker.canTrack("Chill")
   equipL *max wand dI hidden
   equipR *max wand dI -hidden
-/**/
+*/
 
-/* // Individual debuffing
+// Individual debuffing
+/* // Wands
 :?tracker.canTrack("Weaken")
   equipL moon
   equipR *max wand dP -hidden
@@ -38,7 +39,22 @@ tracker.track()
 :?tracker.canTrack("Burn")
   equipL moon
   equipR *max wand dF -hidden
+/* // Staves
+:?tracker.canTrack("Weaken")
+  equip *max staff dP -hidden
+:?tracker.canTrack("Chill")
+  equip *max staff dI -hidden
+:?tracker.canTrack("Burn")
+  equip *max staff dF -hidden
 */
+/**/ // Crossbows
+:?tracker.canTrack("Weaken")
+  equip *max crossbow dP -hidden
+:?tracker.canTrack("Chill")
+  equip *max crossbow dI -hidden
+:?tracker.canTrack("Burn")
+  equip *max crossbow dF -hidden
+/**/
 :
   equip *max crossbow repeating
 

@@ -77,32 +77,29 @@ func updateTracker(affix, hand)
   ?n > 0
     // find track
     for i = 0 .. n - 1
+      // define shorter aliases to work with
       var _affix = trackerArr[i][_AFFIX]
+      var _id        = es.toId(_affix)
+      var stackCount = foe.debuffs.GetCount(_id)
+
+      // Remove any finished trackers
+      ?stackCount = es.toMaxStacks(_id) | es.isImmuneTo(_id)
+        ?!trackerArr.RemoveAt(i)
+          log.logError(_FILE, "updateTracker",
+          ^"failed to remove finished tracker at index "+i)
+          return // terminate function
+        :
+          result = true
+          break // terminate loop
+
+      // update stack count
+      trackerArr[i][_STACK_COUNT] = stackCount
 
       // track found, update it
       ?affix = _affix
-        // define shorter aliases to work with
-        var _id        = es.toId(_affix)
-        var stackCount = foe.debuffs.GetCount(_id)
-
-        // Remove any finished trackers
-        ?stackCount = es.toMaxStacks(_id) | es.isImmuneTo(_id)
-          ?!trackerArr.RemoveAt(i)
-            log.logError(_FILE, "updateTracker",
-            ^"failed to remove finished tracker at index "+i)
-            return // terminate function
-          :
-            result = true
-            break // terminate loop
-
-        // update stack count
-        trackerArr[i][_STACK_COUNT] = stackCount
-
         // Track valid launches only from ranged/magic items
-        // FIXME: add item.*.time = 0 for each hand
-        // FIXME: if the above doesn't work, also try splitting each hand into a separate ? statement.
-        ?hand = "left" & item.left.state = 3 |
-        ^hand = "right" & item.right.state = 3
+        ?(hand = "left" & item.left.state = 3 & item.left.time = 0) |
+        ^(hand = "right" & item.right.state = 3 & item.right.time = 0)
           trackerArr[i][_LAUNCH_COUNT] += 1 // increase launchCount
 
         result = true
@@ -149,9 +146,7 @@ func canTrack(debuffName)
     ?tracker
       // only launch if not saturated
       result = (result & (
-      ^tracker[_LAUNCH_COUNT] + tracker[_STACK_COUNT]
-      ^ <
-      ^es.toMaxStacks(_id)))
+      ^tracker[_LAUNCH_COUNT] < es.toMaxStacks(_id)))
 
   return result
 

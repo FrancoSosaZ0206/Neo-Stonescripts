@@ -24,8 +24,8 @@
     - [ ] Raw frames (as most speedrunners use it)
   - [ ] implement **partial times**/**checkpoints**
 
-- [ ] Arsenal:
-  - [ ] fix smartDebuff not working properly.
+- [x] Arsenal:
+  - [x] fix smartDebuff not working properly.
 
 - [ ] Update all location scripts:
   - [ ] Rocky
