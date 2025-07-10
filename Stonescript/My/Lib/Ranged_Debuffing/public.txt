@@ -6,4 +6,4 @@ var priv = import My/Lib/Ranged_Debuffing/private
 
 var track     = priv.track
 var canTrack  = priv.canTrack
-var monitor   = priv.monitor
+var toStr     = priv.toStr

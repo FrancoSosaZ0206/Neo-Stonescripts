@@ -23,6 +23,9 @@ tracker.track()
 ^tracker.canTrack("Burn")
   equipL *max wand dP -hidden
   equipR *max wand dF -hidden
+:?tracker.canTrack("Chill")
+  equipL *max wand dI hidden
+  equipR *max wand dI -hidden
 */
 
 // Individual debuffing
@@ -30,7 +33,7 @@ tracker.track()
   equipL moon
   equipR *max wand dP -hidden
 :?tracker.canTrack("Chill")
-  equipL *max wand dI hidden // moon
+  equipL moon
   equipR *max wand dI -hidden
 :?tracker.canTrack("Burn")
   equipL moon
@@ -42,7 +45,7 @@ tracker.track()
 // ****************************************** //
 
 // Monitor for debug
-tracker.monitor()
+>`1,7,#cyan,@tracker.toStr()@
 
 // show any logged errors
 ?log.hasErrors()

@@ -68,86 +68,70 @@ func getTracker(affix)
 
     return null
 
-/* Returns true if the tracker was added, false if it already exists. */
-func addTracker(affix)
-  var result = canRangedDebuff(affix)
+func updateTracker(affix)
+  var result = false
+  var n = trackerArr.Count()
 
-  ?result & !getTracker(affix) // does not exist
-    trackerArr.Add([affix, 0, 0])
-    result = true
-
-  return result
-
-/* Returns true if the debuff tracker exists and was removed,
-false otherwise. */
-func removeTracker(affix)
-  ?!es.isValidAffix(affix)
-    log.logError(_FILE, "removeTracker",
-    ^"invalid <affix>: "+affix)
-
-    return false
-  : // valid affix, loop through the array and look for tracker to remove
-    var n = trackerArr.Count()
-
+  // if there are tracks,
+  ?n > 0
+    // find track
     for i = 0 .. n - 1
-      ?trackerArr[i][_AFFIX] = affix
-        ?!trackerArr.RemoveAt(i)
-          log.logError(_FILE, "removeTracker",
-          ^"failed to remove tracker at index "+i+"/"+n - 1)
+      var _affix = trackerArr[i][_AFFIX]
 
-          return false
-        :
-          return true
+      // track found, update it
+      ?affix = _affix
+        // define shorter aliases to work with
+        var _id        = es.toId(_affix)
+        var stackCount = foe.debuffs.GetCount(_id)
 
-    return false
+        // Remove any finished trackers
+        ?stackCount = es.toMaxStacks(_id) | es.isImmuneTo(_id)
+          ?!trackerArr.RemoveAt(i)
+            log.logError(_FILE, "updateTracker",
+            ^"failed to remove finished tracker at index "+i)
+            return // terminate function
+          :
+            result = true
+            break // terminate loop
+
+        // update stack count
+        trackerArr[i][_STACK_COUNT] = stackCount
+
+        // Track valid launches only from ranged/magic items
+        ?item.left.state = 3
+          trackerArr[i][_LAUNCH_COUNT] += 1 // increase launchCount
+
+        result = true
+        break // terminate loop
+
+    ?!result
+      trackerArr.Add([affix, 0, 0])
+  :
+    trackerArr.Add([affix, 0, 0])
 
 // ------------------------------------------ //
 
 // public
 
 func track()
-  // foe can't be debuffed
-  ?!es.isDebuffable() | !ai.enabled | ai.paused
+  // can't debuff or attack
+  ?!es.isDebuffable() | !ai.enabled | ai.paused |
+  ^foe.distance = 9999 | foe.distance > 22
     // clear the system if needed
     ?trackerArr.Count() > 0
       trackerArr.Clear()
 
-  : // add and track
+  : // track each hand slot simultaneously:
     var affixL = getItemAffix("left")
     var affixR = getItemAffix("right")
 
-    // add tracker based on item equipped in left hand
+    // Left hand:
     ?affixL
-      addTracker(affixL)
+      updateTracker(affixL)
 
-    // same in right hand, though only if it's different from the left one
-    ?affixR & affixL ! affixR
-      addTracker(affixR)
-
-    ?trackerArr.Count() > 0
-      // Process each tracker
-      for tracker : trackerArr
-        var affix = tracker[_AFFIX]
-        var _id = es.toId(affix)
-
-        // update stack count
-        tracker[_STACK_COUNT] = foe.debuffs.GetCount(_id)
-
-        // define shorter aliases to work with
-        var launchCount = tracker[_LAUNCH_COUNT]
-        var stackCount  = tracker[_STACK_COUNT]
-
-        // Remove any finished trackers
-        ?stackCount = es.toMaxStacks(_id) | es.isImmuneTo(_id)
-          removeTracker(affix)
-          break
-
-        // Track valid launches only from ranged/magic items
-        ?affix = affixL & item.left.state = 3
-          tracker[_LAUNCH_COUNT] += 1 // increase launchCount
-
-        ?affix = affixR & item.right.state = 3
-          tracker[_LAUNCH_COUNT] += 1 // increase launchCount
+    // Right hand:
+    ?affixR
+      updateTracker(affixR)
 
 func canTrack(debuffName)
   var result = false
@@ -167,14 +151,18 @@ func canTrack(debuffName)
 
   return result
 
-func monitor()
+func toStr()
   var n = trackerArr.Count()
-  >`1,7,#cyan,Tracked Debuffs: @n@
+  var trackerStr = "Tracked Debuffs: "+n+"\n"
 
-  ?trackerArr.Count() > 0
-    for i = 0 .. n - 1
-      var affix = es.toName(trackerArr[i][_AFFIX])
-      var launchCount = trackerArr[i][_LAUNCH_COUNT]
-      var stackCount = trackerArr[i][_STACK_COUNT]
+  ?n > 0
+    for tracker : trackerArr
+      var debName = es.toName(tracker[_AFFIX])
+      var launchCount = tracker[_LAUNCH_COUNT]
+      var stackCount = tracker[_STACK_COUNT]
 
-      >`1,@8 + i@,#magenta,@affix@ | L:@launchCount@ | S:@stackCount@
+      ?debName
+        trackerStr += string.Format("{0} | L:{1} | S:{2}\n", 
+        ^                 debName, launchCount, stackCount)
+
+  return trackerStr
