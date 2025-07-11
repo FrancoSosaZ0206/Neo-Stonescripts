@@ -50,8 +50,7 @@ var stVeff  = "*max staff vigor dL -hidden"
 var sAdmg   = "*max sword -big aether -dU" // 2nd
 var sAeff2  = "*max sword -big aether dU -golden" // 2nd
 var bsAdmg  = "*max sword big aether -dU -golden"
-var bsAeff  = "*max sword big aether dU shiny" // enchanted: speed
-var bsAeff2 = "*max sword big aether dU -shiny" // enchanted: speed
+var bsAeff  = "*max sword big aether dU shiny" // 2nd (enchanted: speed, unmake chance)
 var hAeff   = "*max hammer aether aU"
 var shAdef  = "*max shield aether -au"
 var shAeff  = "*max shield aether au"
@@ -555,7 +554,7 @@ func ldtF(mode)
         equipL @bsAeff@
       :
         equipL @bsAeff@
-        equipR @bsAeff2@
+        equipR Existential Dread
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
         ?c.canApplyChill(6)

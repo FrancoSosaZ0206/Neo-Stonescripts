@@ -4,12 +4,17 @@
 
 // ///////////////// IMPORTS ///////////////// //
 
-var u = import My/Lib/Utilities
+var log = import My/Lib/Error_Logging/public
 var c = import My/Lib/Combat
 var s = import My/Lib/Stats
 var a = import My/Lib/Arsenal
+var es = import My/Lib/Effect_Stats
+var tracker = import My/Lib/Ranged_Debuffing
 
 // //////////////// VARIABLES //////////////// //
+
+// file
+var _FILE = "Scripts/6-Mine"
 
 // flags
 var canDash  = true
@@ -85,37 +90,37 @@ func fight(mode)
   :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
 
+    ?(tracker.canTrack("Weaken") |
+    ^ tracker.canTrack("Burn")    ) &
     // Bronze Guardian ranged debuffing
-    ?a.canSmartDebuff("magic", ["weaken","burn"]) &
-    ^foe = "phase" & !canDash &
-    ^buffs.string = "smite"
-      a.smartDebuff("magic", ["weaken","burn"])
-
+    ^((foe = "phase" & !canDash &
+    ^  buffs.string = "smite") |
     // AOE debuffing
-    :?a.canSmartDebuff("magic") &
     ^(!canDash |
-    ^(foe = "elite" &
-    ^ foe.GetCount(itemSplash) > 1))
-      a.smartDebuff("magic")
-
-    // Permapot 1v1 debuffing
-    :?c.canApplyAny() & canDash &
-    ^c.permapotSetup & foe = "elite" &
-    ^foe.GetCount(itemSplash) = 1
-      a.ldtF("sword debuff auto")
+    ^ (foe = "elite" &
+    ^  foe.GetCount(itemSplash) > 1)))
+      ?tracker.canTrack("Weaken")
+        a.ldtF("magic debuff weaken")
+      : // tracker.canTrack("Burn")
+        a.ldtF("magic debuff burn")
 
     // 1v1 strong foe weakening
-    :?c.canApplyWeaken() & canDash &
+    :?es.canDebuff("debuff_weaken") & canDash &
     ^(foe = "monarch" | foe = "phase")
       a.ldtF("sword debuff weaken")
 
+    // Permapot 1v1 debuffing
+    :?es.canMultiDebuff(["debuff_damage",
+    ^                    "debuff_chill" ,
+    ^                    "debuff_dot"]  , "any") &
+    ^((canDash & c.permapotSetup & foe = "elite" &
+    ^  foe.GetCount(itemSplash) = 1) |
     // 1v1 strong foe debuffing
-    :?(c.canApplyChill(6) | c.canApplyBurn()) &
-    ^canDash &
-    ^((loc.stars > 15 &
-    ^(foe = "monarch" | foe = "phase") &
-    ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
-    ^nRuns = 1)
+    ^(canDash &
+    ^ ((loc.stars > 15 &
+    ^   (foe = "monarch" | foe = "phase") &
+    ^   s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
+    ^  nRuns = 1)))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ........... //
@@ -158,7 +163,7 @@ func fight(mode)
         a.ldtF("magic dmg")
 
   : // invalid mode
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
+    log.logError(_FILE,"fight","unknown <mode>: "+mode)
 
 // //////////////// PROCEDURE //////////////// //
 
@@ -294,21 +299,6 @@ stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 // increase powerupCount
 :?foe = "phase" & foe.state = 32 & foe.time = 0
   powerupCount ++
-
-// ***********************************************
-// TODO: move to My/Lib/Arsenal
-
-// burnCount and burnLimit logic
-burnCount = s.getEffectStat("foe","debuff","dot","count")
-?!burnCount | burnCount = -2 |
-^burnCount >= burnLimit | foe.state = 4 | !c.canApplyBurn()
-  burnCount = 0
-
-?foe = "immune_to_debuff_dot"
-  burnLimit = 0
-:
-  burnLimit = 1 - burnCount
-// ***********************************************
 
 ?isMinibossScr & foe ! "explode"
   canDash = false

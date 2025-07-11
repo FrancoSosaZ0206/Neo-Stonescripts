@@ -117,7 +117,8 @@ It counts the amount of times a debuffing weapon is cast, instead of counting th
 
 - **Death's Kiss**        = `*max sword -big poison dP shiny (enchanted: speed)`
 - **Soulfetcher**         = `*max sword -big vigor dL +21/ (enchanted: speed/L)`
-- **Existential Crisis**  = `*max sword -big aether dU +21 (enchanted: speed)`
+- **Existential Crisis**  = `*max sword -big aether dU +21` (enchanted: speed)
+- **Existential Dread**   = `*max sword big aether dU +21/` (enchanted: speed, unmake chance)
 - **Almafuerte**          = `*max sword -big ice dI (enchanted: speed)`
 
 - **theVwand**            = `*max wand vigor D golden`
