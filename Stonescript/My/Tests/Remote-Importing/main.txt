@@ -1,0 +1,12 @@
+/* Mindstone max characters per line: 48.
+
+0000000000111111111122222222223333333333444444444
+0123456789012345678901234567890123456789012345678
+*/
+var mobileUrl =
+^"https://raw.githubusercontent.com/" +
+^"Javascript-pixel/Js/refs/heads/main/"
+
+sys.SetFileUrl(mobileUrl)
+
+// import UI/MindstoneButton

@@ -2,14 +2,26 @@
 //  ┃ ▄▀▄▀▄▀▄▀▄ START OF "6-Mine" ▀▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
+/*
+TODO: crop lines to fit
+mindstone char limit per line.
+
+Mindstone char limit per line: 49.
+
+0000000001111111111222222222233333333334444444444
+1234567890123456789012345678901234567890123456789
+*/
+
 // ///////////////// IMPORTS ///////////////// //
 
 var log = import My/Lib/Error_Logging/public
+
 var c = import My/Lib/Combat
 var s = import My/Lib/Stats
 var a = import My/Lib/Arsenal
-var es = import My/Lib/Effect_Stats
-var tracker = import My/Lib/Ranged_Debuffing
+
+var es = import My/Lib/Effect_Stats/public
+var tracker = import My/Lib/Ranged_Debuffing/public
 
 // //////////////// VARIABLES //////////////// //
 
@@ -65,12 +77,12 @@ func fight(mode)
     canDash = false
 
     ?c.canUseAbility("staff_stone") &
-    ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & foe.distance < s.getRange("dash_min")))
       c.useAbility_TH("staff_stone", a.stSh)
     :?c.canUseAbility("mind") &
-    ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & foe.distance < s.getRange("dash_min")))
       a.ldtF("mind")
 
     :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
@@ -83,7 +95,7 @@ func fight(mode)
         fight("normal")
 
     // Unmake
-    :?c.canUnmake()
+    :?es.canUnmake()
       a.ldtF("defense unmake")
     :
       a.ldtF("defense")
@@ -105,7 +117,7 @@ func fight(mode)
         a.ldtF("magic debuff burn")
 
     // 1v1 strong foe weakening
-    :?es.canDebuff("debuff_weaken") & canDash &
+    :?es.canDebuff("debuff_damage") & canDash &
     ^(foe = "monarch" | foe = "phase")
       a.ldtF("sword debuff weaken")
 
@@ -131,7 +143,7 @@ func fight(mode)
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ........... //
-    :?c.canUnmake()
+    :?es.canUnmake()
       ?canDash &
       ^foe.GetCount(itemSplash) = 1
         a.ldtF("sword unmake")
@@ -211,6 +223,11 @@ var bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
 :
   >`1,13,#ff0000,permapotSetup
 
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: @log.getErrorCount()@
+  >`1,@screen.h - 2 - 4@,#ff0000,@log.getError()@
+
 // ............. WITHDRAWAL LOGIC ............ //
 
 ?(foe ! "boss" & s.getTotalHP("player")
@@ -273,7 +290,7 @@ canDash = true
 
 c.potionType = "strength"
 c.Init()
-a.smartDebuff_Mgr()
+tracker.track()
 
 stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
 ?!stunTime
@@ -480,7 +497,7 @@ unmake with repeating crossbow. */
 
 // Stun enemies
 :?c.canUseAbility("wand_ice") &
-^c.canApplyStun() & foe = "elite" &
+^es.canDebuff("stun") & foe = "elite" &
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.hihp
   c.useAbility_OH("wand_ice", a.wIh, hand)
@@ -524,7 +541,7 @@ unmake with repeating crossbow. */
   :?s.inRange("grappling_hook") &
   // don't interrupt bardiche
   ^!c.isCasting("bardiche") &
-  ^(c.canApplyStun() |
+  ^(es.canDebuff("stun") |
     // stun time (frames) running out
   ^ (stunTime = math.Clamp(stunTime, 1, 11) &
      // not stunned with heavy hammer or Frost Wand
