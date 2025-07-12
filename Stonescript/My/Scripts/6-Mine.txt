@@ -125,14 +125,13 @@ func fight(mode)
         a.ldtF("magic debuff burn")
 
     // 1v1 strong foe weakening
-    :?es.canDebuff("debuff_damage") & canDash &
+    :?es.canDebuff("Weaken") & canDash &
     ^(foe = "monarch" | foe = "phase")
       a.ldtF("sword debuff weaken")
 
     // Permapot 1v1 debuffing
-    :?es.canMultiDebuff(["debuff_damage",
-    ^                    "debuff_chill" ,
-    ^                    "debuff_dot"    ],
+    :?es.canMultiDebuff(["Weaken","Chill",
+    ^                    "Burn"           ],
     ^                   "any") &
     ^canDash &
     ^((c.permapotSetup & foe = "elite" &
