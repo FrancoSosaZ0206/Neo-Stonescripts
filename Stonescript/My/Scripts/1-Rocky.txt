@@ -76,57 +76,63 @@ func fight(mode)
     canDash = false
 
     ?c.canUseAbility("staff_stone") &
-    ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
       c.useAbility_TH("staff_stone", a.stSh)
     :?c.canUseAbility("mind") &
-    ^(foe ! "ranged" |
-    ^(foe = "phase" & foe.distance < s.getRange("dash_min")))
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
       a.ldtF("mind")
 
-    :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
+    :?c.canUseAbility("staff_ice") &
+    ^ s.inRange("dash_min")
       c.useAbility_TH("staff_ice", a.stIh)
 
-    :?foe.distance > s.getRange("sword") + 1
+    :?!s.inRange("sword")
       ?foe.count > 1
         fight("normal")
       :
         fight("normal")
 
     // Unmake
-    :?c.canUnmake()
+    :?es.canUnmake()
       a.ldtF("defense unmake")
     :
       a.ldtF("defense")
+
   :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
 
     // AOE debuffing
-    ?a.canSmartDebuff("magic") &
+    ?(tracker.canTrack("Weaken") |
+    ^ tracker.canTrack("Burn")    ) &
     ^(!canDash |
     ^(foe = "elite" &
     ^foe.GetCount(itemSplash) > 1))
       itemSplash = foe.distance + 7
-      a.smartDebuff("magic")
-
-    // Permapot 1v1 debuffing
-    :?c.canApplyAny() & canDash &
-    ^c.permapotSetup & foe = "elite" &
-    ^foe.GetCount(itemSplash) = 1
-      a.ldtF("sword debuff auto")
+      ?tracker.canTrack("Weaken")
+        a.ldtF("magic debuff weaken")
+      : // tracker.canTrack("Burn")
+        a.ldtF("magic debuff burn")
 
     // 1v1 strong foe weakening
-    :?c.canApplyWeaken() & canDash &
+    :?es.canDebuff("debuff_damage") & canDash &
     ^(foe = "monarch" | foe = "boss")
       a.ldtF("sword debuff weaken")
 
+    :?es.canMultiDebuff(["debuff_damage",
+    ^                    "debuff_chill" ,
+    ^                    "debuff_dot"]  , "any") &
+    ^ canDash &
+    // Permapot 1v1 debuffing
+    ^ ((c.permapotSetup & foe = "elite" &
+    ^   foe.GetCount(itemSplash) = 1) |
     // 1v1 strong foe debuffing
-    :?(c.canApplyChill(6) | c.canApplyBurn()) &
-    ^canDash &
-    ^((loc.stars > 15 &
-    ^(foe = "monarch" | foe = "boss") &
-    ^s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
-    ^nRuns = 1)
+    ^  ((es.canDebuff("debuff_chill") | es.canDebuff("debuff_dot")) &
+    ^  ((loc.stars > 15 &
+    ^    (foe = "monarch" | foe = "boss") &
+    ^    s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
+    ^   nRuns = 1)))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ........... //
@@ -137,7 +143,7 @@ func fight(mode)
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ........... //
-    :?c.canUnmake()
+    :?es.canUnmake()
       ?canDash &
       ^foe.GetCount(itemSplash) = 1
         a.ldtF("sword unmake")
@@ -369,7 +375,7 @@ or while setting up permapot. */
   :?foe = "fire"
     a.ldtF("defense unmake")
   // apply burn with af shield
-  :?foe = "ice" & c.canApplyBurn()
+  :?foe = "ice" & es.canDebuff("debuff_dot")
     a.ldtF("defense debuff burn")
   :
     fight("normal")
@@ -430,10 +436,10 @@ or while setting up permapot. */
   // get additional damage
   :?buffs.string ! "buff_damage"
     a.ldtF("defense buff empower")
-  :?c.canUnmake()
+  :?es.canUnmake()
     a.ldtF("defense unmake")
   // af deals more DoT than dF
-  :?c.canApplyBurn()
+  :?es.canDebuff("debuff_dot")
     a.ldtF("defense debuff burn")
   : // all effects applied
     a.ldtF("defense")
@@ -571,7 +577,7 @@ or while setting up permapot. */
 
 // Stun enemies
 :?c.canUseAbility("wand_ice") & s.inRange("wand") &
-^c.canApplyStun() & foe = "elite" &
+^es.canDebuff("stun") & foe = "elite" &
 ^foe.count > 1 &
 ^s.getTotalHP("player") < c.hihp
   c.useAbility_OH("wand_ice", a.wIh, hand)
@@ -597,7 +603,7 @@ unmake with repeating crossbow. */
 
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
-^c.canUnmakeVoidweaver() &
+^es.canUnmakeVoidweaver() &
 ^foe.count > 1 & screen.i > 1 &
 ^s.inRange("dash_min")
   c.devour("voidweaver")
@@ -628,7 +634,7 @@ unmake with repeating crossbow. */
   // don't interrupt bardiche
   ^!c.isCasting("bardiche") &
   ^foe ! "warcaster" &
-  ^(c.canApplyStun() |
+  ^(es.canDebuff("stun") |
     // stun time (frames) running out
   ^ (stunTime = math.Clamp(stunTime, 1, 11) &
      // not stunned with heavy hammer or Frost Wand
@@ -687,11 +693,11 @@ unmake with repeating crossbow. */
   :?c.permapotSetup &
   ^(totaltime - permapotActTime < permapotTbw)
     // Debuff
-    ?c.canApplyWeaken()
+    ?es.canDebuff("debuff_damage")
       a.ldtF("sword debuff weaken")
-    :?c.canApplyChill(6)
+    :?es.canDebuff("debuff_chill")
       a.ldtF("sword debuff chill")
-    :?c.canApplyBurn()
+    :?es.canDebuff("debuff_dot")
       a.ldtF("sword debuff burn")
 
     // Heal
