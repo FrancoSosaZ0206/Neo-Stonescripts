@@ -555,7 +555,7 @@ unmake with repeating crossbow. */
 // .............. MINIBOSS LOGIC ............. //
 
 // Bomb Cart screen logic
-:?isMinibossScr
+:?isMinibossScr & s.inRange("crossbow")
   // Bomb Cart
   ?foe = "explode"
     // combat
@@ -563,8 +563,8 @@ unmake with repeating crossbow. */
     ^c.canUseAbility("staff_ice")
       c.useAbility_TH("staff_ice", a.stIh)
 
-    :/*?buffs.string ! "buff_frozen" &
-    ^foe.debuffs.string ! "stun"*/
+    :/* ?buffs.string ! "buff_frozen" &
+    ^foe.debuffs.string ! "stun" */
       canDash = false
       fight("escape")
   
