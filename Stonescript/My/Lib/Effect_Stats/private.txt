@@ -20,6 +20,8 @@ var table_debuffs = [
 ^["Stun"    , "stun"         , null,      1     ]
 ^]
 
+var table_keyTypes = ["NAME", "ID"]
+
 // functions:
 
 // data validation
@@ -54,8 +56,8 @@ func getType(_key)
       result = "ID"
     :?isValidName(_key)
       result = "NAME"
-  :
-    return result
+
+  return result
 
 // list generators
 
@@ -123,7 +125,7 @@ func isImmuneTo(_key)
   var result = false
   var keyType = getType(_key)
 
-  ?!["ID", "NAME"].Contains(keyType)
+  ?!table_keyTypes.Contains(keyType)
     log.logError(_FILE, "isImmuneTo",
     ^            "invalid <_key>: "+_key)
 
@@ -138,10 +140,9 @@ func canDebuff(_key)
   var result = false
   var keyType = getType(_key)
 
-  ?!["ID", "NAME"].Contains(keyType)
+  ?!table_keyTypes.Contains(keyType)
     log.logError(_FILE, "canDebuff",
     ^            "invalid <_key>: "+_key)
-
   :
     ?keyType = "NAME"
       _key = toId(_key)
@@ -177,7 +178,7 @@ func canMultiDebuff(_keyArr, mode)
     var invalidKey = null
 
     for _key : _keyArr
-      ?!["ID", "NAME"].Contains(getType(_key))
+      ?!table_keyTypes.Contains(getType(_key))
         validKeyArr = false
         invalidKey = _key
         break
