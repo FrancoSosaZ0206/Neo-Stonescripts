@@ -4,13 +4,21 @@
 
 // //////////////// IMPORTS ///////////////// //
 
+var log = import My/Lib/Error_Logging/public
+
 var uimkr = import My/Lib/UI_Maker
 var u     = import My/Lib/Utilities
 var c     = import My/Lib/Combat
 var s     = import My/Lib/Stats
 var a     = import My/Lib/Arsenal
 
+var es = import My/Lib/Effect_Stats/public
+var tracker = import My/Lib/Ranged_Debuffing/public
+
 // /////////////// VARIABLES //////////////// //
+
+// file
+var _FILE = "Scripts/1-Rocky"
 
 // ui-related logic for harvesting
 var yesButton     = null

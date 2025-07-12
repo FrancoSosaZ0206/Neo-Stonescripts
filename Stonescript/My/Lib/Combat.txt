@@ -4,7 +4,7 @@
 
 // ///////////////// IMPORTS ///////////////// //
 
-var log = import My/Lib/Error_Logging
+var log = import My/Lib/Error_Logging/public
 var s = import My/Lib/Stats
 
 // //////////////// VARIABLES //////////////// //

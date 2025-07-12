@@ -6,9 +6,12 @@
 
 // //////////////// IMPORTS ///////////////// //
 
-var u = import My/Lib/Utilities
+var log = import My/Lib/Error_Logging/public
+
 var c = import My/Lib/Combat
 var s = import My/Lib/Stats
+
+var es = import My/Lib/Effect_Stats/public
 
 // /////////////// VARIABLES //////////////// //
 
@@ -253,7 +256,8 @@ func ldtF(mode)
         equipR @shFdef@
 
       // on-engage debuffs
-      :?c.canApplyChill(1)
+      :?es.isDebuffable() & !es.isImmuneTo("debuff_chill") &
+      ^ foe.debuffs.GetCount("debuff_chill") < 1
         equipR @shIeff@
         >o0,1,#cyan,ai shield
 
@@ -471,12 +475,12 @@ func ldtF(mode)
         c.moonjuggle(Existential Crisis, sword) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?c.canApplyChill(6) & (mode = "auto" | mode = "chill")
+        ?es.canDebuff("debuff_chill") & (mode = "auto" | mode = "chill")
           equipL Almafuerte
-        :?c.canApplyWeaken() & (mode = "auto" | mode = "weaken")
+        :?es.canDebuff("debuff_damage") & (mode = "auto" | mode = "weaken")
           equipL Death's Kiss
           //'
-        :?c.canApplyBurn() & (mode = "auto" | mode = "burn")
+        :?es.canDebuff("debuff_dot") & (mode = "auto" | mode = "burn")
           equipL @sFeff@
 
       : // !c.permapotSetup
@@ -494,14 +498,14 @@ func ldtF(mode)
         : // foe = "stone"
           sDmg = Bifrost // Unbroken Faith
 
-        ?c.canApplyChill(6) & (mode = "auto" | mode = "chill")
+        ?es.canDebuff("debuff_chill") & (mode = "auto" | mode = "chill")
           c.moonjuggle(Almafuerte, sIeff)
         :
           equipL moon
-          ?c.canApplyWeaken() & (mode = "auto" | mode = "weaken")
+          ?es.canDebuff("debuff_damage") & (mode = "auto" | mode = "weaken")
             equipR Death's Kiss
             //'
-          :?c.canApplyBurn() & (mode = "auto" | mode = "burn")
+          :?es.canDebuff("debuff_dot") & (mode = "auto" | mode = "burn")
             equipR @sFeff@
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
@@ -557,21 +561,21 @@ func ldtF(mode)
         equipR Existential Dread
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?c.canApplyChill(6)
+        ?es.canDebuff("debuff_chill")
           // equipL 
-        :?c.canApplyWeaken()
+        :?es.canDebuff("debuff_damage")
           // equipL 
 
       : // !c.permapotSetup
 
         // Left hand:
-        ?c.canApplyWeaken()
+        ?es.canDebuff("debuff_damage")
           // equipL 
-        :?c.canApplyChill(6)
+        :?es.canDebuff("debuff_chill")
           // equipL 
 
         // Right hand:
-        ?c.canApplyChill(6)
+        ?es.canDebuff("debuff_chill")
           // equipR 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
@@ -711,7 +715,7 @@ func ldtF(mode)
           equip @bS@ */
 
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Arsenal\nFUNCTION: ldtF\nCAUSE: unknown <mode>:\n\n" + mode, false)
+    log.logError(_FILE, "ldtF", "unknown <mode>:\n\n"+mode)
 
   return
 

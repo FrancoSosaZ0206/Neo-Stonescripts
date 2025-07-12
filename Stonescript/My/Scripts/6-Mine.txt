@@ -85,7 +85,8 @@ func fight(mode)
     ^  (foe = "phase" & foe.distance < s.getRange("dash_min")))
       a.ldtF("mind")
 
-    :?c.canUseAbility("staff_ice") & foe.distance < s.getRange("dash_min")
+    :?c.canUseAbility("staff_ice") &
+    ^ foe.distance < s.getRange("dash_min")
       c.useAbility_TH("staff_ice", a.stIh)
 
     :?foe.distance > s.getRange("sword") + 1
@@ -502,6 +503,11 @@ unmake with repeating crossbow. */
 ^s.getTotalHP("player") < c.hihp
   c.useAbility_OH("wand_ice", a.wIh, hand)
 
+// extend range
+/*:?c.canUseAbility("staff_aether") &
+^ s.inRange("dash_min")
+  c.useAbility_TH("staff_aether", a.stAh)*/
+
 // .............. MINIBOSS LOGIC ............. //
 
 // Bomb Cart screen logic
@@ -554,9 +560,15 @@ unmake with repeating crossbow. */
   ^ (encounter.eliteMod = "blessed" &
   ^  !c.isCasting("bardiche"))
     // Debuff and unmake
-    ?a.canSmartDebuff("magic")
+    ?tracker.canTrack("Weaken")
       itemSplash = foe.distance + 7
-      a.smartDebuff("magic")
+      a.ldtF("magic debuff weaken")
+    :?tracker.canTrack("Chill")
+      itemSplash = foe.distance + 7
+      a.ldtF("magic debuff chill")
+    :?tracker.canTrack("Burn")
+      itemSplash = foe.distance + 7
+      a.ldtF("magic debuff burn")
     :
       itemSplash = 10
       a.ldtF("big sword unmake")
@@ -565,7 +577,9 @@ unmake with repeating crossbow. */
   :?buffs.string = "ʘ" |
   // split hydras lose the Stable buff
   ^(encounter.eliteMod = "hydra" &
-  ^ foe.buffs.string ! "stability") /* |
+  ^ foe.buffs.string ! "stability") |
+  // yellow and below
+  ^loc.stars <= 15 /* |
   // more foes outside range
   ^(foe ! "elite" & screen.i > 1 &
   ^ (foe.count -
