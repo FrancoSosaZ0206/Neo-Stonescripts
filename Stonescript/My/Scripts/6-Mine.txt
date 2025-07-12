@@ -156,7 +156,8 @@ func fight(mode)
     
     :?c.canUsePotion() & foe = "phase"
       activate potion
-    :?c.canUseAbility("heavy_hammer") & foe = "phase"
+    :?c.canUseAbility("heavy_hammer") &
+    ^foe = "phase" & foe.armor > 0
       c.useAbility_TH("heavy_hammer", "Guardian's Bane")
     :?c.canUseAbility("mask") & foe = "phase"
       c.useAbility_OH("mask", "mask", "r")
@@ -171,7 +172,10 @@ func fight(mode)
         a.ldtF("sword dmg")
 
     : // !(canDash | (...))
-      ?!c.permapotSetup
+      ?buffs.string = "strength" &
+      ^buffs.GetTime("strength") > 30
+        equip @a.bAdmg@
+      :?!c.permapotSetup
         a.ldtF("ranged dmg")
       :
         a.ldtF("magic dmg")
@@ -224,6 +228,13 @@ var bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
   >`1,13,#00ff00,permapotSetup
 :
   >`1,13,#ff0000,permapotSetup
+
+// show debuff duration
+?buffs.string = "strength"
+  var potTime
+  potTime = buffs.GetTime("strength")
+  >`1,15,#0066ff,strength: @potTime@f 
+  ^(@time.FormatDigital(potTime, true)@)
 
 // show any logged errors
 ?log.hasErrors()
@@ -283,7 +294,7 @@ c.permapotSetup = // activate...
 // BFG logic
 ?loc.id = "bronze_mine" & lastFoeScr &
 ^(nRuns > 1 | loc.stars <= 10)
-  c.screenMngr_DS("blade", 1, lastFoeScr - 1)
+  c.screenMngr_DS("blade", 1, lastFoeScr - 3)
 
 // set up itemSplash default value
 itemSplash = 17 // bardiche's hitbox + itemSplash area
@@ -347,7 +358,7 @@ or while setting up permapot. */
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
 ^ loc.id = "bronze_guardian_harder"
-  c.useAbility_OH("fire_talisman", "fire_talisman", hand)
+  c.useAbility_OH("fire_talisman", "fire_talisman", "left")
 
 // ............. DEFENSIVE LOGIC ............. //
 
@@ -518,7 +529,7 @@ unmake with repeating crossbow. */
   // Bomb Cart
   ?foe = "explode"
     // combat
-    ?s.inRange("hatchet") &
+    ?(s.inRange("hatchet") | foe.state = 4) &
     ^c.canUseAbility("staff_ice")
       c.useAbility_TH("staff_ice", a.stIh)
 
@@ -545,7 +556,7 @@ unmake with repeating crossbow. */
     c.useAbility_TH("heavy_hammer", Mjölnir)
 
   // Stun/Perma-stun logic
-  :?s.inRange("grappling_hook") &
+  :?s.inRange("grappling_hook") & foe = "elite" &
   // don't interrupt bardiche
   ^!c.isCasting("bardiche") &
   ^(es.canDebuff("stun") |
@@ -557,18 +568,16 @@ unmake with repeating crossbow. */
     a.ldtF("grappling")
 
   // permapot run
-  :?nRuns = 1 |
-  ^ (encounter.eliteMod = "blessed" &
-  ^  !c.isCasting("bardiche"))
+  :?encounter.eliteMod = "blessed" &
+  ^ !c.isCasting("bardiche")
+    itemSplash = foe.distance + 7
+
     // Debuff and unmake
     ?tracker.canTrack("Weaken")
-      itemSplash = foe.distance + 7
       a.ldtF("magic debuff weaken")
     :?tracker.canTrack("Chill")
-      itemSplash = foe.distance + 7
       a.ldtF("magic debuff chill")
     :?tracker.canTrack("Burn")
-      itemSplash = foe.distance + 7
       a.ldtF("magic debuff burn")
     :
       itemSplash = 10
@@ -604,7 +613,7 @@ unmake with repeating crossbow. */
     ?!s.inRange("triskelion")
       a.ldtF("default")
 
-    :?c.canUseAbility("bardiche")
+    :?c.canUseAbility("bardiche") & nRuns > 1
       c.useAbility_TH("bardiche", Kubikiribocho)
     :
       fight("normal")
