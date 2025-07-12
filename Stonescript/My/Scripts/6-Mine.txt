@@ -173,7 +173,7 @@ func fight(mode)
 
     : // !(canDash | (...))
       ?buffs.string = "strength" &
-      ^buffs.GetTime("strength") > 30
+      ^buffs.GetTime("strength") > 60
         equip @a.bAdmg@
       :?!c.permapotSetup
         a.ldtF("ranged dmg")
@@ -194,9 +194,10 @@ func fight(mode)
     >o-7,6,#magenta,wait until @time.FormatDigital(permapotTbw)@
 */
 
-// foe distance monitor
+/* // foe distance monitor
 ?foe.distance ! 9999
   >f0,10,#magenta,dist=@foe.distance@
+*/
 
 // bfg ds screens monitor
 var bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
@@ -204,30 +205,35 @@ var bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
   bfgDsTargetScr = c.getScreen_DS("blade", "TARGET")
 
 ?bfgDsTargetScr
-  ?screen.i < bfgDsTargetScr
-    >`1,10,#ffff00,bfg: @screen.i@/@bfgDsTargetScr@
-  :?screen.i = bfgDsTargetScr
-    >`1,10,#00ff00,bfg: @screen.i@/@bfgDsTargetScr@
-  : // screen.i > bfgDsTargetScr
-    >`1,10,#888888,bfg: @screen.i@/@bfgDsTargetScr@
+  var bfgCol
+  ?screen.i > bfgDsTargetScr | loc.id ! "bronze_mine"
+    bfgCol = #888888
+  :?screen.i < bfgDsTargetScr
+    bfgCol = #ffff00
+  : // screen.i = bfgDsTargetScr
+    bfgCol = #00ff00
+  >`1,10,@bfgCol@,bfg: @screen.i@/@bfgDsTargetScr@
 
 // powerupCount monitor:
-?powerupCount = 0
-  >`1,11,#88ff00,powerupCount: @powerupCount@
-:?powerupCount = 1
-  >`1,11,#ffff00,powerupCount: @powerupCount@
+var powerupCol
+powerupCol = #88ff00
+?powerupCount = 1
+  powerupCol = #ffff00
 :?powerupCount = 2
-  >`1,11,#ff8800,powerupCount: @powerupCount@
+  powerupCol = #ff8800
 :?powerupCount >= 3
-  >`1,11,#ff0000,powerupCount: @powerupCount@
+  powerupCol = #ff0000
+>`1,11,@powerupCol@,powerupCount: @powerupCount@
 
 // item states monitor:
 >`1,12,#magenta,ils: @item.left.state@ | irs: @item.right.state@
 
+var permapotCol
 ?c.permapotSetup
-  >`1,13,#00ff00,permapotSetup
+  permapotCol = #00ff00
 :
-  >`1,13,#ff0000,permapotSetup
+  permapotCol = #ff0000
+>`1,13,@permapotCol@,permapotSetup
 
 // show debuff duration
 ?buffs.string = "strength"
@@ -268,12 +274,12 @@ isMinibossScr = (loc.id = "bronze_mine") &
 
 // set up lastFoeScr
 ?!lastFoeScr
-  ?loc.stars <= 5
-    lastFoeScr = 5 // white
-  :?loc.stars <= 15
-    lastFoeScr = 6 // cyan and yellow
+  ?loc.stars <= 5 // white
+    lastFoeScr = 3
+  :?loc.stars <= 15 // cyan and yellow
+    lastFoeScr = 4
   :?loc.stars <= 20
-    lastFoeScr = 2 + loc.stars - 16 // green
+    lastFoeScr = 1 + loc.stars - 16 // green
 : // set up isLastFoeScr
   isLastFoeScr = (loc.id = "bronze_mine" & screen.i = lastFoeScr)
 
@@ -294,7 +300,7 @@ c.permapotSetup = // activate...
 // BFG logic
 ?loc.id = "bronze_mine" & lastFoeScr &
 ^(nRuns > 1 | loc.stars <= 10)
-  c.screenMngr_DS("blade", 1, lastFoeScr - 3)
+  c.screenMngr_DS("blade", 1, lastFoeScr - 1)
 
 // set up itemSplash default value
 itemSplash = 17 // bardiche's hitbox + itemSplash area
@@ -354,11 +360,15 @@ or while setting up permapot. */
 
 // Summons
 :?c.canSummon("voidweaver") &
-^ loc.id = "bronze_mine"
+^ loc.id = "bronze_mine" &
+^ screen.i <= lastFoeScr
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
-^ loc.id = "bronze_guardian_harder"
-  c.useAbility_OH("fire_talisman", "fire_talisman", "left")
+^ ((loc.id = "bronze_mine" &
+^   screen.i > lastFoeScr) |
+^  loc.id = "bronze_guardian_harder")
+// ^ loc.id = "bronze_guardian_harder"
+  c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // ............. DEFENSIVE LOGIC ............. //
 
@@ -387,11 +397,12 @@ or while setting up permapot. */
 
 // speed up (normal)
 :?c.canUseAbility("staff_fire") &
-^loc.id = "bronze_mine" &
-^!(foe = "explode" & s.inRange("dash_min")) &
+^ loc.id = "bronze_mine" &
+^ !(foe = "explode" & s.inRange("dash_min")) &
 // already has the speed effect
-^buffs.string ! "buff_inf_speed" &
-// 1 foe just defeated
+^ buffs.string ! "buff_inf_speed" &
+^ screen.i = lastFoeScr + 1
+/* // 1 foe just defeated
 ^((foe.count = 1 & foe.state = 4) |
 // too far to attack
 ^ (!s.inRange("crossbow"))) &
@@ -400,6 +411,7 @@ or while setting up permapot. */
 ^  (nRuns = 1 |
 // Don't use it when facing the scout
 ^   (nRuns > 1 & screen.i = 1)))
+*/
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
