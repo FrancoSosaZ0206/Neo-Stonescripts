@@ -1,80 +1,64 @@
-﻿// *******************************************************
-//                      3-Caves.txt                       
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-// Script for Caves of Fear
+// ///////////////// IMPORTS ///////////////// //
 
+var log = import My/Lib/Error_Logging/public
 
+var c = import My/Lib/Combat
+var s = import My/Lib/Stats
+var a = import My/Lib/Arsenal
 
-// /////////////////////////////////////////// //
+var es = import My/Lib/Effect_Stats/public
+var tracker = import My/Lib/Ranged_Debuffing/public
 
-// IMPORTS
+// //////////////// VARIABLES //////////////// //
 
-var uimkr = new MyScripts/Lib/UI_Maker
-var u = new MyScripts/Lib/Utilities
-var a = new MyScripts/Lib/MyArsenal
-var i = new MyScripts/Lib/MyBetterInfo
-var c = new MyScripts/Lib/Combat
+// file
+var _FILE = "Scripts/3-Caves"
 
-/***********************************************/
+// flags
+var canDash  = true
 
-import UI/FoeStateTracker
+// values
+var stunTime = null
+var hand     = null
 
-/***********************************************/
+var itemSplash = 17 // bardiche hitbox + splash area
 
-var som = new MyScripts/Lib/Speed_O_Meter
+// screens
+var isMinibossScr = false
+var lastFoeScr = null
+var isLastFoeScr = false
+// NOTE: this is in a special boss location.
+var isBossScr = false
 
-var somPanel = som.mkUI(0, 1,
-^u.colorToHex("red"), true, false)
-?som.Update(false)
-  somPanel.Recycle()
-  somPanel = null
+// TODO: implement
+var boss_cutscenes = []
 
-  somPanel = som.mkUI(0, 1,
-  ^u.colorToHex("red"), true, false)
+// stats
+/* var minibossDmg = [
+^60, 65, 70, 75, 80, // yellow
+^85, 90, 95, 100, 105] // green */
 
-/***********************************************/
+// counters
+// number of runs in this session
+var nRuns = 1
+/* time when permapot was activated,
+   -1 means not activated. */
+var permapotActTime = -1
+// permapot time bandwidth
+var permapotTbw = loc.averageTime -
+^                 (loc.averageTime / 10)
 
-var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
+var old_t = item.GetTreasureCount()
+var end_t = 0
 
-dpsm.ENABLED = true
-dpsm.refreshRate = 30
+// guardian's powerup counter
+var powerupCount = 0
 
-var dpsPanel
-?dpsm.Update()
-  ?dpsPanel
-    dpsPanel.Recycle()
-    dpsPanel = null
-
-  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
-
-/***********************************************/
-
-
-
-// /////////////////////////////////////////// //
-
-// VARIABLES
-
-var keepCultistMask = true
-var smiteScreen = 2
-var moondialMode = -1
-
-?loc.loop
-  keepCultistMask = false
-
-  ?totaltime = 1 & smiteScreen ! 4
-    smiteScreen++
-
-?buffs.string = "berserk"
-  moondialMode = 2
-:
-  moondialMode = 0
-
-
-// /////////////////////////////////////////// //
-
-// FUNCTIONS
+// //////////////// FUNCTIONS //////////////// //
 
 func ldtF(mode)
 
