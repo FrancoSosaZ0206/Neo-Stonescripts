@@ -34,15 +34,15 @@ func updateData(mode)
   ?mode = "speedrun" // update every frame
     tt    = u.formatSpeedrun(totaltime)
 
-    ?loc.begin | loc.loop
+    ?!(bt & at) | loc.begin | loc.loop
       bt  = u.formatSpeedrun(loc.bestTime)
       at = u.formatSpeedrun(loc.averageTime)
 
   : // update every second (30 frames)
-    ?loc.begin | totaltime % u.sec = 0
+    ?!tt | loc.begin | totaltime % u.sec = 0
       tt  = time.formatDigital(totaltime)
 
-    ?loc.begin | loc.loop
+    ?!(bt & at) | loc.begin | loc.loop
       bt  = time.formatDigital(loc.bestTime)
       at = time.formatDigital(loc.averageTime)
 

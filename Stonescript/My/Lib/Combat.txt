@@ -116,7 +116,7 @@ func canUseAbility(abilityID)
 
     :?abilityID = "bardiche" |
     ^abilityID = "heavy_hammer"
-      result = (result & s.inRange(abilityID" ability")) |
+      result = (result & s.inRange(abilityID+" ability")) |
       ^isCasting(abilityID) // won't get interrupted
 
     :?abilityID = "talisman" // interruptible abilities
@@ -195,7 +195,7 @@ func useAbility_OH(abilityID, itemName, hand)
     :
       log.logError(_FILE, "useAbility_OH", "unknown <hand>: "+hand)
   :
-    log.logError(_FILE, "useAbility_T", "unknown <abilityID>: "+abilityID)
+    log.logError(_FILE, "useAbility_TH", "unknown <abilityID>: "+abilityID)
 
 func isEquipped(itemName)
   return item.left = itemName | item.right = itemName
@@ -270,7 +270,7 @@ func canUseAbility_DS(itemName)
     return canUseAbility(itemName) &
     ^isScreen_DS(itemName, "TARGET")
   :
-    log.logError(_FILE, "canUseAbility_DS", "unknown <itemName>: "itemName)
+    log.logError(_FILE, "canUseAbility_DS", "unknown <itemName>: "+itemName)
 
     return false
 func useAbility_DS(itemName)
@@ -289,7 +289,7 @@ func useAbility_DS(itemName)
           useAbility_OH(itemName, itemName, "r")
         screen.ResetOffset()
   :
-    log.logError(_FILE, "useAbility_DS", "unknown <itemName>: "itemName)
+    log.logError(_FILE, "useAbility_DS", "unknown <itemName>: "+itemName)
 
 // ....... Talisman / Summon specific ....... //
 
@@ -300,7 +300,7 @@ func canSummon(summonName)
   ?talisman
     return canUseAbility(talisman) & !isSummoned(summonName)
   :
-    log.logError(_FILE, "canSummon", "unknown <summonName>: "summonName)
+    log.logError(_FILE, "canSummon", "unknown <summonName>: "+summonName)
     return false
 
 func canHide(summonName)
@@ -309,7 +309,7 @@ func canHide(summonName)
   ?result
     return canUseAbility(result) & isSummoned(summonName)
   :
-    log.logError(_FILE, "canHide", "unknown <summonName>: "summonName)
+    log.logError(_FILE, "canHide", "unknown <summonName>: "+summonName)
 
   return result
 
@@ -475,7 +475,7 @@ func burst(weaponsArr)
   var n = weaponsArr.Count()
 
   ?n < 2
-    log.logError(0,30,#red,"ERROR:\nFILE: Combat\ndoBursting", "<weaponsArr> is too small (has "+n+" weapons)")
+    log.logError(_FILE, "doBursting", "<weaponsArr> is too small (has "+n+" weapons)")
   :
     ?burstState // active state
       ?burstTimer < n - 1 // burst frames
