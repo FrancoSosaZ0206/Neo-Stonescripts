@@ -46,6 +46,17 @@ func isValidAffix(_affix)
   
   return false
 
+func getType(_key)
+  var result = null
+
+  ?Type(_key) = "string"
+    ?isValidId(_key)
+      result = "ID"
+    :?isValidName(_key)
+      result = "NAME"
+  :
+    return result
+
 // list generators
 
 func listIds()
@@ -108,75 +119,87 @@ func toMaxStacks(_key)
 func isDebuffable()
   return !(foe.buffs.string = "buff_tenacious" |
   ^        foe.buffs.string = "buff_protection" )
-func isImmuneTo(_id)
+func isImmuneTo(_key)
   var result = false
-  ?Type(_id) ! "string"
-    log.logError(_FILE, "isImmuneTo",
-    ^"invalid <_id> type: expected 'string', recieved '"+Type(_id)+"'")
+  var keyType = getType(_key)
 
-  :?!isValidId(_id)
+  ?!["ID", "NAME"].Contains(keyType)
     log.logError(_FILE, "isImmuneTo",
-    ^"unknown <_id>: "+_id)
+    ^            "invalid <_key>: "+_key)
+
   :
-    result = (foe = "immune_to_"+_id)
+    ?keyType = "NAME"
+      _key = toId(_key)
+    
+    result = (foe = "immune_to_"+_key)
 
   return result
-func canDebuff(_id)
+func canDebuff(_key)
   var result = false
+  var keyType = getType(_key)
 
-  // entry sanitization
-  ?Type(_id) ! "string"
+  ?!["ID", "NAME"].Contains(keyType)
     log.logError(_FILE, "canDebuff",
-    ^"invalid <_id> type: expected 'string', recieved '"+Type(_id)+"'")
+    ^            "invalid <_key>: "+_key)
 
-  :?!isValidId(_id)
-    log.logError(_FILE, "canDebuff",
-    ^"unknown <_id>: "+_id)
   :
-    result = (isDebuffable() & !(isImmuneTo(_id) |
-    ^         foe.debuffs.string = _id+":"+toMaxStacks(_id)))
+    ?keyType = "NAME"
+      _key = toId(_key)
+
+    result =
+    ^   (isDebuffable() &
+    ^    !(isImmuneTo(_key) |
+    ^      foe.debuffs.string =
+    ^        _key+":"+toMaxStacks(_key)))
 
   return result
 
 // mode (string) values: "any", "all"
-func canMultiDebuff(_idArr, mode)
+func canMultiDebuff(_keyArr, mode)
   var result = false
+
   // entry sanitization
-  ?Type(_idArr) ! "array"
+  ?Type(_keyArr) ! "array"
     log.logError(_FILE, "canDebuff",
-    ^"invalid <_id> type: expected 'array', recieved '"+Type(_idArr)+"'")
+    ^  "invalid <_id> type: expected 'array'"+
+    ^  ", recieved '"+Type(_keyArr)+"'")
   :?Type(mode) ! "string"
     log.logError(_FILE, "canDebuff",
-    ^"invalid <mode> type: expected 'string', recieved '"+Type(mode)+"'")
+    ^  "invalid <mode> type: expected 'string'"+
+    ^  ", recieved '"+Type(mode)+"'")
   
   // entry validation
   :?!["any", "all"].Contains(string.ToLower(mode))
     log.logError(_FILE, "canDebuff",
-    ^"unknown <mode> value: "+mode)
+    ^  "unknown <mode> value: "+mode)
   :
-    var validIdArr = true
-    var invalidId = null
+    var validKeyArr = true
+    var invalidKey = null
 
-    for _id : _idArr
-      ?!isValidId(_id)
-        validIdArr = false
-        invalidId = _id
+    for _key : _keyArr
+      ?!["ID", "NAME"].Contains(getType(_key))
+        validKeyArr = false
+        invalidKey = _key
         break
 
-    ?!validIdArr
+    ?!validKeyArr
       log.logError(_FILE, "canDebuff",
-      ^"<_idArr> has 1 or more invalid elements: "+invalidId)
+      ^  "<_keyArr> has 1 or more invalid"+
+      ^  " elements: "+invalidKey)
 
     : // procedure
       result = isDebuffable()
 
       ?result
         var aux
-        for _id : _idArr
+        for _key : _keyArr
+          ?getType(_key) = "NAME"
+            _key = toId(_key)
+
           ?mode = "any"
-            aux = (aux | canDebuff(_id))
+            aux = (aux | canDebuff(_key))
           : // mode = "all"
-            aux = (aux & canDebuff(_id))
+            aux = (aux & canDebuff(_key))
 
         result = (result & aux)
 

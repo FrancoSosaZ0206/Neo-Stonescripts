@@ -4,6 +4,8 @@ var isValidId       = priv.isValidId
 var isValidName     = priv.isValidName
 var isValidAffix    = priv.isValidAffix
 
+var getType         = priv.getType
+
 var listIds         = priv.listIds
 var listNames       = priv.listNames
 var listAffixes     = priv.listAffixes

@@ -53,14 +53,20 @@ var minibossDmg = [
 ^85, 90, 95, 100, 105] // green
 
 // counters
-var nRuns = 1 // number of runs in this session
-var permapotActTime = -1 // time when permapot was activated, -1 means not activated
-var permapotTbw = loc.averageTime - (loc.averageTime / 10) // permapot time bandwidth
+// number of runs in this session
+var nRuns = 1
+/* time when permapot was activated,
+   -1 means not activated. */
+var permapotActTime = -1
+// permapot time bandwidth
+var permapotTbw = loc.averageTime -
+^                 (loc.averageTime / 10)
 
 var old_t = item.GetTreasureCount()
 var end_t = 0
 
-var powerupCount = 0 // guardian's powerup counter
+// guardian's powerup counter
+var powerupCount = 0
 
 // //////////////// FUNCTIONS //////////////// //
 
@@ -126,14 +132,17 @@ func fight(mode)
     // Permapot 1v1 debuffing
     :?es.canMultiDebuff(["debuff_damage",
     ^                    "debuff_chill" ,
-    ^                    "debuff_dot"]  , "any") &
-    ^((canDash & c.permapotSetup & foe = "elite" &
+    ^                    "debuff_dot"    ],
+    ^                   "any") &
+    ^canDash &
+    ^((c.permapotSetup & foe = "elite" &
     ^  foe.GetCount(itemSplash) = 1) |
     // 1v1 strong foe debuffing
-    ^(canDash &
-    ^ ((loc.stars > 15 &
+    ^ (((loc.stars > 15 &
     ^   (foe = "monarch" | foe = "phase") &
-    ^   s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
+    ^   s.getFoeDmg(a.berserkerLvl,
+    ^               a.plagueLvl   ,
+    ^               a.maskLvl      ) > 0) |
     ^  nRuns = 1)))
       a.ldtF("sword debuff auto")
 
@@ -158,7 +167,7 @@ func fight(mode)
       activate potion
     :?c.canUseAbility("heavy_hammer") &
     ^foe = "phase" & foe.armor > 0
-      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
+      c.useAbility_TH("heavy_hammer", Mjölnir) // "Guardian's Bane"
     :?c.canUseAbility("mask") & foe = "phase"
       c.useAbility_OH("mask", "mask", "r")
 
@@ -596,12 +605,12 @@ unmake with repeating crossbow. */
       a.ldtF("big sword unmake")
 
   // berserk potion
-  :?buffs.string = "ʘ" |
+  :/* ?buffs.string = "ʘ" |
   // split hydras lose the Stable buff
   ^(encounter.eliteMod = "hydra" &
   ^ foe.buffs.string ! "stability") |
   // yellow and below
-  ^loc.stars <= 15 /* |
+  ^loc.stars <= 15 */ /* |
   // more foes outside range
   ^(foe ! "elite" & screen.i > 1 &
   ^ (foe.count -
@@ -609,8 +618,8 @@ unmake with repeating crossbow. */
   ^ > 0) */
     itemSplash = 10
     a.ldtF("big sword unmake")
-  :
-    equip Kubikiribocho
+  /*:
+    equip Kubikiribocho*/
 
 // ................ BOSS LOGIC ............... //
 
