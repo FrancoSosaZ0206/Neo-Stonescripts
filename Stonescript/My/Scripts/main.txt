@@ -41,6 +41,14 @@ import My/Watermark
     mind = import UI/MindstoneButton
 
 
+// ................ VARIABLES ............... //
+
+
+
+// ................ FUNCTIONS ............... //
+
+
+
 // ··············· PROCEDURE ················ //
 
 enable npcDialog

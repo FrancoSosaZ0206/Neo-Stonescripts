@@ -1,0 +1,36 @@
+// =============================================
+// this doesn't work
+
+var _PATH = "My/Tests/Dynamic-Importing/"
+var _FILE2 = "2-farewell"
+var _PATH_TO_FILE2 = _PATH + _FILE2
+// import @_PATH_TO_FILE2@
+
+// =============================================
+// this does work
+
+// import My/Tests/Dynamic-Importing/1-greeting
+// import My/Tests/Dynamic-Importing/2-farewell
+
+// .............................................
+
+func impGreeting()
+  import My/Tests/Dynamic-Importing/1-greeting
+func impFarewell()
+  import My/Tests/Dynamic-Importing/2-farewell
+
+// table
+var map_imports = [
+^[30, impGreeting],
+^[90, impFarewell],
+^]
+
+// index accessors
+var _TIME = 0
+var _ACTION = 1
+
+for _import : map_imports
+  ?totaltime > _import[_TIME]
+    _import[_ACTION]()
+
+// =============================================
