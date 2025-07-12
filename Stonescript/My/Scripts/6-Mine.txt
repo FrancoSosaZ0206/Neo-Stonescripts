@@ -555,7 +555,8 @@ unmake with repeating crossbow. */
 // .............. MINIBOSS LOGIC ............. //
 
 // Bomb Cart screen logic
-:?isMinibossScr & s.inRange("crossbow")
+:?isMinibossScr &
+^ foe.GetCount(s.getRange("crossbow")) > 0
   // Bomb Cart
   ?foe = "explode"
     // combat
