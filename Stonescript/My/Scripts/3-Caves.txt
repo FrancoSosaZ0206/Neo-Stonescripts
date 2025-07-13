@@ -426,7 +426,7 @@ we are in the Bolesh's screen. */
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^!s.inRange("dash") & ai.walking &
-^ai.enabled & !ai.paused & !blowing
+^ai.enabled & !ai.paused
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // Pickup logic
@@ -448,8 +448,8 @@ we are in the Bolesh's screen. */
 
 // armor regen logic
 :?(ai.walking & !s.inRange("socketed_shield")) |
-^(ai.paused | !ai.enabled |
-^ player.direction = -1)
+^ (ai.paused | !ai.enabled |
+^  player.direction = -1)
   a.ldtF("defense armor regen")
 
 // engaging logic (out of fighting range)
@@ -479,13 +479,13 @@ we are in the Bolesh's screen. */
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
 :?canDash &
-^s.betweenRange("triskelion","crossbow") &
-^c.canSmoothCast(true) & foe ! "boss"
+^ s.betweenRange("triskelion","crossbow") &
+^ c.canSmoothCast(true) & foe ! "boss"
   c.smoothCast(a.bR)
 
 // engaging logic (within fighting range)
 :?ai.walking & player.direction = 1 &
-^foe ! "phase" & canDash &
+^foe ! "phase" & canDash & !a.canSmartDash() &
 ^s.betweenRange("triskelion", "dash_max")
   a.ldtF("engage")
 
@@ -537,19 +537,15 @@ unmake with repeating crossbow. */
 /* // extend range
 :?c.canUseAbility("staff_aether") &
 ^ s.inRange("dash_min")
-  c.useAbility_TH("staff_aether", a.stAh)
-*/
-
-// .............. MINIBOSS LOGIC ............. //
-
-
+  c.useAbility_TH("staff_aether", a.stAh) */
 
 // ................ AOE LOGIC ................ //
 
 :?foe.GetCount(itemSplash) > 1 &
 ^!(foe = "boss" | foe = "monarch")
   // Align foes
-  ?c.canUseAbility("wand_stone") & s.inRange("wand")
+  ?c.canUseAbility("wand_stone") &
+  ^s.inRange("wand")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   // Heavy hammer logic
@@ -559,7 +555,7 @@ unmake with repeating crossbow. */
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
-  ^foe.buffs.string = "stability" &
+  ^ foe.buffs.string = "stability" &
   // ^ foe = "elite" &
   // don't interrupt bardiche
   ^ !c.isCasting("bardiche") &
@@ -612,7 +608,7 @@ unmake with repeating crossbow. */
   ?c.canKillCinderwisp(
   ^   a.cinderwispDmg_Default, 0) |
   // reached ignition cap
-  ^c.isCinderwispCap(a.maxIgnitions_Boosted)
+  ^c.isCinderwispCap(a.maxIgnitions_Default)
     c.devour("cinderwisp")
 
   ?c.canUseAbility("bardiche") & nRuns > 1

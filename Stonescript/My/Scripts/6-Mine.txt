@@ -435,8 +435,8 @@ or while setting up permapot. */
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
-^!s.inRange("dash") & ai.walking &
-^ai.enabled & !ai.paused & !blowing
+^ !s.inRange("dash") & ai.walking &
+^ ai.enabled & !ai.paused
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // Pickup logic
@@ -647,7 +647,7 @@ unmake with repeating crossbow. */
   ?c.canKillCinderwisp(
   ^   a.cinderwispDmg_Default, 0) |
   // reached ignition cap
-  ^c.isCinderwispCap(a.maxIgnitions_Boosted)
+  ^c.isCinderwispCap(a.maxIgnitions_Default)
     c.devour("cinderwisp")
 
   // boss's hammer's stuck
