@@ -151,9 +151,6 @@ func fight(mode)
     
     :?c.canUsePotion() & foe = "phase"
       activate potion
-    :?c.canUseAbility("mask") & foe = "phase"
-      c.useAbility_OH("mask", "mask", "r")
-
     :?canDash &
     ^(foe.GetCount(itemSplash) = 1 |
     ^foe = "monarch" | foe = "phase")
@@ -291,8 +288,8 @@ isMinibossScr =
 - once the potion has been consumed. */
 c.permapotSetup =
 ^   (loc.stars > 10 & nRuns = 1 &
-^    item.potion = "empty" &
-^    buffs.string = "lucky")
+^    item.potion = "empty"      &
+^    buffs.string = "lucky"      )
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -300,7 +297,7 @@ c.permapotSetup =
 
 // BFG logic
 ?lastFoeScr & (nRuns > 1 | loc.stars <= 10)
-  c.screenMngr_DS("blade", 1, lastFoeScr - 1)
+  c.screenMngr_DS("blade", 2, lastFoeScr - 1)
 
 // set up itemSplash default value
 itemSplash = 17 // bardiche's hitbox + itemSplash area
@@ -351,7 +348,8 @@ c.AAC("sword *0", "hatchet")
 
 /* activate potion after picking up treasure
 or while setting up permapot. */
-:?c.canUsePotion() & loc.stars > 10 & end_t > 1
+:?c.canUsePotion() & loc.stars > 10 &
+^((nRuns = 1 & !c.permapotSetup) | end_t > 1)
   activate potion
 
 // Summons
@@ -370,21 +368,30 @@ or while setting up permapot. */
 we farm knockbacks with it until we kill it or
 we are in the Bolesh's screen. */
 // Ceiling Decorator and Bolesh defensive logic
-:?s.inRange("dash_min") & (
-^  (foe = "cool_bat" &
+:?(foe = "cool_bat" &
 ^   ((foe.state = 33 & foe.time > 12) |
 ^    foe.state = 2)) |
-^  (foe = "spider_boss_harder" &
-^   foe.state = 142 & foe.time > 57))
+^ (foe = "phase" & foe.state = 142 &
+^  (foe.debuffs.string = "chill:6" & foe.time > 55))
   >c0,0,#red,*** ABOUT TO ATTACK! ***
 
   // prevent Weaken
-  ?c.canUseAbility("prevention")
+  ?c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
 
-  // couldn't use protection staff
-  :?buffs.string ! "buff_staff_protection"
-    fight("escape")
+  // reduce damage with Cultist Mask
+  :?c.canUseAbility("mask") & foe = "phase"
+    c.useAbility_OH("mask", "mask", "r")
+
+  // avoid damage with Eternity Staff
+  :?c.canUseAbility("staff_ice") &
+  ^ foe = "phase" & foe.debuffs.string ! "feeble"
+    c.useAbility_TH("staff_ice", a.stIh)
+  
+  // escape damage
+  :?foe.debuffs.string ! "feeble" &
+  ^ foe.debuffs.string ! "debuff_frost_stun"
+    fight("evade")
   :
     fight("normal")
 

@@ -152,7 +152,8 @@ func canUseAbility(abilityID)
         :
           result = false
   :
-    log.logError(_FILE, "canUseAbility", "unknown <abilityID>: "+abilityID)
+    log.logError(_FILE, "canUseAbility",
+    ^"unknown <abilityID>: "+abilityID)
 
   return result
 

@@ -7,8 +7,8 @@ var scrl = import UI/ScrollText
 // Watermark & version control
 var author = "Tom Crow"
 
-var scriptVer = "2.3.11"
-var lastUpdated = "2025/07/13 01:16 GMT-6"
+var scriptVer = "2.3.12"
+var lastUpdated = "2025/07/13 01:46 GMT-6"
 var disclaimer = "STEALING/MARKETING IS FORBIDDEN."
 
 var dcTag = "@metaleagle26"
