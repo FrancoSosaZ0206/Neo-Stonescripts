@@ -5,6 +5,9 @@ var _PATH = "My/Tests/Dynamic-Importing/"
 var _FILE2 = "2-farewell"
 var _PATH_TO_FILE2 = _PATH + _FILE2
 // import @_PATH_TO_FILE2@
+// import _PATH_TO_FILE2
+// import _PATH + _FILE2
+// import @_PATH + _FILE2@
 
 // =============================================
 // this does work
