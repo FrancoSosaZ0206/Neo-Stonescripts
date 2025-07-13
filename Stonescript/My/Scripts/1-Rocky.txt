@@ -223,11 +223,6 @@ draw.Bg(playerX, playerY + 2, #aa4400,
   draw.Bg(playerX + itemSplash, playerY + 2,
   ^ #008800, 46 - itemSplash, 1) */
 
-// monitor minibossScr
-?minibossScr
-  >`1,15,scout scr: @screen.i@/@minibossScr@\n
-  ^is scout scr: @isMinibossScr@
-
 // show any logged errors
 ?log.hasErrors()
   >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
@@ -669,8 +664,8 @@ unmake with repeating crossbow. */
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
 ^ c.canUnmakeVoidweaver() &
-^ foe.count > 1 & s.inRange("hatchet") &
-^ (minibossScr & screen.i > minibossScr)
+^ foe.count > 1 & s.inRange("dash_min") &
+^ !isMinibossScr
   c.devour("voidweaver")
 
 // Calamity - reduce hp
