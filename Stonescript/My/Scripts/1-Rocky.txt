@@ -47,9 +47,14 @@ var boss_cutscenes = [
 var phase3dmg = foe.damage
 
 // counters
-var nRuns = 1 // number of runs in this session
-var permapotActTime = -1 // time when permapot was activated, -1 means not activated
-var permapotTbw = loc.averageTime - (loc.averageTime / 10) // permapot time bandwidth
+// number of runs in this session
+var nRuns = 1
+/* time when permapot was activated,
+   -1 means not activated. */
+var permapotActTime = -1
+// permapot time bandwidth
+var permapotTbw = loc.averageTime -
+^                 (loc.averageTime / 10)
 
 var old_t = item.GetTreasureCount()
 var end_t = 0
@@ -107,8 +112,8 @@ func fight(mode)
     ?(tracker.canTrack("Weaken") |
     ^ tracker.canTrack("Burn")    ) &
     ^(!canDash |
-    ^(foe = "elite" &
-    ^foe.GetCount(itemSplash) > 1))
+    ^ (foe = "elite" &
+    ^  foe.GetCount(itemSplash) > 1))
       itemSplash = foe.distance + 7
       ?tracker.canTrack("Weaken")
         a.ldtF("magic debuff weaken")
@@ -116,30 +121,30 @@ func fight(mode)
         a.ldtF("magic debuff burn")
 
     // 1v1 strong foe weakening
-    :?es.canDebuff("debuff_damage") & canDash &
-    ^(foe = "monarch" | foe = "boss")
+    :?es.canDebuff("Weaken") & canDash &
+    ^ (foe = "monarch" | foe = "boss") &
+    ^ s.inRange("sword")
       a.ldtF("sword debuff weaken")
 
-    :?es.canMultiDebuff(["debuff_damage",
-    ^                    "debuff_chill" ,
-    ^                    "debuff_dot"]  , "any") &
-    ^ canDash &
+    :?es.canMultiDebuff(["Chill","Burn"],"any") &
+    ^ canDash & s.inRange("sword") &
     // Permapot 1v1 debuffing
     ^ ((c.permapotSetup & foe = "elite" &
     ^   foe.GetCount(itemSplash) = 1) |
     // 1v1 strong foe debuffing
-    ^  ((es.canDebuff("debuff_chill") | es.canDebuff("debuff_dot")) &
-    ^  ((loc.stars > 15 &
-    ^    (foe = "monarch" | foe = "boss") &
-    ^    s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl) > 0) |
-    ^   nRuns = 1)))
+    ^  (((loc.stars > 15 &
+    ^     (foe = "monarch" | foe = "boss") &
+    ^     s.getFoeDmg(a.berserkerLvl,
+    ^                 a.plagueLvl   ,
+    ^                 a.maskLvl      ) > 0) |
+    ^    nRuns = 1)))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ........... //
     :?hp ! maxhp &
-    ^((canDash &
-    ^  foe.GetCount(itemSplash) = 1) |
-    ^ foe = "monarch")
+    ^ ((canDash &
+    ^   foe.GetCount(itemSplash) = 1) |
+    ^  foe = "monarch")
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ........... //
@@ -487,18 +492,18 @@ or while setting up permapot. */
   c.useAbility_TH("staff_fire", a.stFh)
 
 // speed up (normal)
+// already has the speed effect
+// 1 foe just defeated
+// too far to attack
+// save armor if it's setup run
+// Don't use it when facing the scout
 :?c.canUseAbility("staff_fire") &
 ^screen.i < boss_screen &
-// already has the speed effect
 ^buffs.string ! "buff_inf_speed" &
-// 1 foe just defeated
 ^((foe.count = 1 & foe.state = 4) |
-// too far to attack
 ^ (!s.inRange("crossbow"))) &
-// save armor if it's setup run
 ^!(loc.stars > 15 &
 ^  (nRuns = 1 |
-// Don't use it when facing the scout
 ^   (nRuns > 1 & screen.i = 1)))
   c.useAbility_TH("staff_fire", a.stFh)
 

@@ -1,11 +1,6 @@
 ﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀ ┃  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "3-Caves" ▄▀▄▀▄▀▄▀ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
-
-/* // TODO: move to RANGED LOGIC and implement
-:?!s.inRange("dash_min") & foe = "phase" &
-^foe.state =  & foe.time = 
-  equip @a.bAdmg@ */
 
 // ///////////////// IMPORTS ///////////////// //
 
@@ -55,6 +50,8 @@ var permapotTbw = loc.averageTime -
 var old_t = item.GetTreasureCount()
 var end_t = 0
 
+var minibossAtkTime = 0
+
 // //////////////// FUNCTIONS //////////////// //
 
 func fight(mode)
@@ -78,9 +75,9 @@ func fight(mode)
     ^  (foe = "phase" & s.inRange("dash_min")))
       a.ldtF("mind")
 
-    :?c.canUseAbility("staff_ice") &
+    /* :?c.canUseAbility("staff_ice") &
     ^ s.inRange("dash_min")
-      c.useAbility_TH("staff_ice", a.stIh)
+      c.useAbility_TH("staff_ice", a.stIh) */
 
     :?!s.inRange("sword")
       ?foe.count > 1
@@ -99,11 +96,8 @@ func fight(mode)
 
     ?(tracker.canTrack("Weaken") |
     ^ tracker.canTrack("Burn")    ) &
-    // Bronze Guardian ranged debuffing
-    ^((foe = "boss" & !canDash &
-    ^  buffs.string = "smite") |
     // AOE debuffing
-    ^ (!canDash |
+    ^((!canDash |
     ^  (foe = "elite" &
     ^   foe.GetCount(itemSplash) > 1)))
       ?tracker.canTrack("Weaken")
@@ -113,30 +107,29 @@ func fight(mode)
 
     // 1v1 strong foe weakening
     :?es.canDebuff("Weaken") & canDash &
-    ^ (foe = "monarch" | foe = "boss")
+    ^ (foe = "monarch" | foe = "boss") &
+    ^ s.inRange("sword")
       a.ldtF("sword debuff weaken")
 
-    :?es.canMultiDebuff(["Weaken","Chill",
-    ^                    "Burn"           ],
-    ^                   "any") &
+    :?es.canMultiDebuff(["Chill","Burn"],"any") &
+    ^ canDash & s.inRange("sword") &
     // Permapot 1v1 debuffing
-    ^ canDash &
     ^ ((c.permapotSetup & foe = "elite" &
     ^   foe.GetCount(itemSplash) = 1) |
     // 1v1 strong foe debuffing
     ^  (((loc.stars > 15 &
-    ^    (foe = "monarch" | foe = "boss") &
-    ^    s.getFoeDmg(a.berserkerLvl,
-    ^                a.plagueLvl   ,
-    ^                a.maskLvl      ) > 0) |
-    ^   nRuns = 1)))
+    ^     (foe = "monarch" | foe = "boss") &
+    ^     s.getFoeDmg(a.berserkerLvl,
+    ^                 a.plagueLvl   ,
+    ^                 a.maskLvl      ) > 0) |
+    ^    nRuns = 1)))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
     :?hp ! maxhp &
-    ^((canDash &
-    ^  foe.GetCount(itemSplash) = 1) |
-    ^ foe = "monarch")
+    ^ ((canDash &
+    ^   foe.GetCount(itemSplash) = 1) |
+    ^  foe = "monarch")
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ............ //
@@ -190,14 +183,13 @@ func fight(mode)
 */
 
 // bfg ds screens monitor
-var bfgDsTargetScr = c.getScreen_DS("blade",
-^                                   "TARGET")
-?loc.loop
-  bfgDsTargetScr = c.getScreen_DS("blade",
-  ^                               "TARGET")
+var bfgDsTargetScr = null
+bfgDsTargetScr = c.getScreen_DS("blade",
+^                               "TARGET")
 
 ?bfgDsTargetScr
-  var bfgCol
+  var bfgCol = #00ff00
+
   ?screen.i > bfgDsTargetScr
     bfgCol = #888888
   :?screen.i < bfgDsTargetScr
@@ -219,7 +211,7 @@ var permapotCol
   permapotCol = #ff0000
 >`1,13,@permapotCol@,permapotSetup
 
-// show debuff duration
+// show effect durations
 ?buffs.string = "ʘ" | buffs.string = "lucky"
   var potTime
   ?buffs.string = "ʘ"
@@ -230,11 +222,21 @@ var permapotCol
   >`1,15,#0066ff,strength: @potTime@f 
   ^(@time.FormatDigital(potTime, true)@)
 
+?debuffs.string = "damage"
+  var weakenTime
+  weakenTime = debuffs.GetTime("damage")
+
+  >`1,16,#008800,∞: @weakenTime@f 
+  ^(@time.FormatDigital(weakenTime, true)@)
+
 // show any logged errors
 ?log.hasErrors()
   >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
   ^@log.getErrorCount()@\n
   >@log.getError()@
+
+?foe = "cool_bat"
+  >f0,6,#magenta,@minibossAtkTime@f
 
 // ............. WITHDRAWAL LOGIC ............ //
 
@@ -333,9 +335,16 @@ c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
-// track time after picking treasure up
+// track post-treasure time
 ?old_t ! item.GetTreasureCount()
   end_t++
+
+// set up minibossAtkTime
+?foe = "cool_bat"
+  ?foe.state = 33 & foe.time = 0
+    minibossAtkTime = 0
+  ?foe.state ! 32
+    minibossAtkTime ++
 
 // ........................................... //
 
@@ -349,10 +358,10 @@ c.AAC("sword *0", "hatchet")
 ?loc.begin
   a.ldtF("default")
 
-/* activate potion after picking up treasure
+/* activate potion post-treasure
 or while setting up permapot. */
 :?c.canUsePotion() & loc.stars > 10 &
-^((nRuns = 1 & !c.permapotSetup) | end_t > 1)
+^((nRuns = 1 & !c.permapotSetup) | end_t > 10)
   activate potion
 
 // Summons
@@ -371,12 +380,10 @@ or while setting up permapot. */
 we farm knockbacks with it until we kill it or
 we are in the Bolesh's screen. */
 // Ceiling Decorator and Bolesh defensive logic
-:?(foe = "cool_bat" &
-^   ((foe.state = 33 & foe.time > 12) |
-^    foe.state = 2)) |
+:?(foe = "cool_bat" & minibossAtkTime > 25) |
 ^ (foe = "phase" & foe.state = 142 &
 ^  (foe.debuffs.string = "chill:6" & foe.time > 55))
-  >c0,0,#red,*** ABOUT TO ATTACK! ***
+  >c0,0,#ff0000,*** ABOUT TO ATTACK! ***
 
   // prevent Weaken
   ?c.canUseAbility("staff_vigor")
@@ -384,14 +391,12 @@ we are in the Bolesh's screen. */
 
   // avoid damage with Eternity Staff
   :?c.canUseAbility("staff_ice") &
-  ^ foe = "phase"
+  ^ foe = "phase" & s.inRange("hatchet")
     c.useAbility_TH("staff_ice", a.stIh)
   
-  // escape damage
-  :?foe.debuffs.string ! "debuff_frost_stun"
+  : // dodge hit
     fight("evade")
-  :
-    fight("normal")
+    >c0,1,#yellow,EVADING ATTACK!
 
 // ............. CUTSCENES LOGIC ............. //
 
@@ -399,29 +404,25 @@ we are in the Bolesh's screen. */
 
 // .............. WALKING LOGIC .............. //
 
-// speed up (post-treasure)
+// speed up (post-treasure, after using potion)
 :?c.canUseAbility("staff_fire") &
-^ end_t > 1 & loc.stars > 10 &
-^ isBossScr &
-// after using potion
-^ item.potion = "empty"
+^ end_t > 10 & loc.stars > 10 &
+^ isBossScr // & item.potion = "empty"
+  >c0,0,#ff0000,SPEED UP (POST-TREASURE)
+
   c.useAbility_TH("staff_fire", a.stFh)
 
-// speed up (normal)
+/* speed up (normal) when:
+  - speed effect not already present
+  - last foe in screen just defeated
+  - too far to attack
+  - save armor if it's setup run
+  - not facing the miniboss */
 :?c.canUseAbility("staff_fire") &
-^ !(foe = "explode" & s.inRange("dash_min")) &
-// already has the speed effect
-^ buffs.string ! "buff_inf_speed" &
-^ screen.i = lastFoeScr + 1
-/* // 1 foe just defeated
-^((foe.count = 1 & foe.state = 4) |
-// too far to attack
-^ (!s.inRange("crossbow"))) &
-// save armor if it's setup run
-^!(loc.stars > 15 &
-^  (nRuns = 1 |
-// Don't use it when facing the scout
-^   (nRuns > 1 & screen.i = 1))) */
+^ (buffs.string ! "buff_inf_speed" |
+^  screen.i = lastFoeScr + 1        )
+  >c0,0,#ff0000,SPEED UP (NORMAL)
+
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -589,17 +590,18 @@ unmake with repeating crossbow. */
       a.ldtF("big sword unmake")
 
   // berserk potion
-  :/* ?buffs.string = "ʘ" |
-  // split hydras lose the Stable buff
-  ^(encounter.eliteMod = "hydra" &
-  ^ foe.buffs.string ! "stability") |
-  // yellow and below
-  ^loc.stars <= 15 */ /* |
-  // more foes outside range
-  ^(foe ! "elite" & screen.i > 1 &
-  ^ (foe.count -
-  ^ foe.GetCount(itemSplash))
-  ^ > 0) */
+  :
+    /* ?buffs.string = "ʘ" |
+    // split hydras lose the Stable buff
+    ^(encounter.eliteMod = "hydra" &
+    ^ foe.buffs.string ! "stability") |
+    // yellow and below
+    ^loc.stars <= 15 |
+    // more foes outside range
+    ^(foe ! "elite" & screen.i > 1 &
+    ^ (foe.count -
+    ^ foe.GetCount(itemSplash))
+    ^ > 0) */
     itemSplash = 10
     a.ldtF("big sword unmake")
   /*:
@@ -615,7 +617,7 @@ unmake with repeating crossbow. */
   ^c.isCinderwispCap(a.maxIgnitions_Boosted)
     c.devour("cinderwisp")
 
-  :?c.canUseAbility("bardiche") & nRuns > 1
+  ?c.canUseAbility("bardiche") & nRuns > 1
     c.useAbility_TH("bardiche", Kubikiribocho)
   :
     fight("normal")
@@ -635,5 +637,5 @@ its hitpoints */
   fight("normal")
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "6-Mine" ▄▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "3-Caves" ▄▀▄▀▄▀▄▀▄ ┃  //
 //  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
