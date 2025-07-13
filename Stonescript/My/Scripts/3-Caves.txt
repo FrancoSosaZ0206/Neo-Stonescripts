@@ -283,10 +283,10 @@ isMinibossScr =
     bossScr = 8
   :?loc.stars <= 20 // green
     lastFoeScr = 2 + loc.stars - 16
-    bossScr = 5 + loc.stars - 16
+    bossScr    = 5 + loc.stars - 16
 : // set up isLastFoeScr and isBossScr
   isLastFoeScr = (screen.i = lastFoeScr)
-  isBossScr = (screen.i = bossScr)
+  isBossScr    = (screen.i = bossScr)
 
 /* set up permapotSetup:
 - in first run (yellow onwards), and
@@ -320,8 +320,6 @@ tracker.track()
 
 // set up stunTime
 stunTime = foe.debuffs.GetTime("stun")
-?!stunTime
-  stunTime = -1
 
 // Decide hand for one-handed items
 ?c.permapotSetup |

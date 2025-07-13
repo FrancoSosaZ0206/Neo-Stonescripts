@@ -36,7 +36,12 @@ var hand     = null
 
 var itemSplash = 17 // bardiche hitbox + splash area
 
-var boss_screen = null
+// screens
+var isMinibossScr = false
+var lastFoeScr = null
+var isLastFoeScr = false
+var bossScr = null
+var isBossScr = false
 var boss_cutscenes = [
 ^ 100, 101, 102, // getting soul stones pre-phase1
 ^ 117, 118, // finishing phase1 cutscene
@@ -140,14 +145,14 @@ func fight(mode)
     ^    nRuns = 1)))
       a.ldtF("sword debuff auto")
 
-    // ............ HEALING LOGIC ........... //
+    // ............ HEALING LOGIC ............ //
     :?hp ! maxhp &
     ^ ((canDash &
     ^   foe.GetCount(itemSplash) = 1) |
     ^  foe = "monarch")
       a.ldtF("sword heal")
 
-    // ........... UNMAKING LOGIC ........... //
+    // ........... UNMAKING LOGIC ............ //
     :?es.canUnmake()
       ?canDash &
       ^foe.GetCount(itemSplash) = 1
@@ -156,7 +161,7 @@ func fight(mode)
         itemSplash = 10
         a.ldtF("big sword unmake")
 
-    // ........... DAMAGE LOGIC ........... //
+    // ............ DAMAGE LOGIC ............. //
     :?canDash &
     ^(foe.GetCount(itemSplash) = 1 |
     ^foe = "monarch" | foe = "boss")
@@ -165,26 +170,30 @@ func fight(mode)
         c.useAbility_TH("staff_poison", a.stPh)
       :?c.canUsePotion() & foe = "phase3"
         activate potion
-      /*:?c.canBurst() & !c.permapotSetup & foe = "phase3"
-        c.burst(a.burstSwords)*/
+      /* :?c.canBurst() & !c.permapotSetup &
+      ^ foe = "phase3"
+        c.burst(a.burstSwords) */
       :
         a.ldtF("sword dmg")
     :
       itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
   : // invalid mode
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: 1-Rocky\nFUNCTION: fight\nCAUSE: unknown <mode>:\n\n" + mode, false)
+    log.logError(_FILE,"fight",
+    ^   "unknown <mode>: "+mode)
 
 // /////////////// PROCEDURE //////////////// //
 
 // ............. MONITOR LOGIC .............. //
 
+// permapot time bandwidth monitor:
 ?permapotActTime ! -1 & nRuns = 1
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
-    >o-7,6,#magenta,wait until @time.FormatDigital(permapotTbw)@
+    >o-7,6,#magenta,wait until 
+    ^@time.FormatDigital(permapotTbw)@
 
-/* itemSplash display test
+/* // itemSplash display test
 
 var playerX = screen.FromWorldX(pos.x)
 playerX = screen.FromWorldX(pos.x)
@@ -193,20 +202,31 @@ var playerY = screen.FromWorldZ(pos.z - pos.y)
 playerY = screen.FromWorldZ(pos.z - pos.y)
 
 >`@playerX@,@playerY + 2@,itemSplash
-draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
+draw.Bg(playerX, playerY + 2, #aa4400,
+^   itemSplash, 1)
 
 ?foe.distance ! 9999
   >`@playerX@,@playerY + 3@,dist\n
   ^dist + itemSplash
-  draw.Bg(playerX, playerY + 3, #0000ff, foe.distance, 1)
-  draw.Bg(playerX, playerY + 4, #aa00aa, foe.distance + itemSplash, 1)
+  draw.Bg(playerX, playerY + 3, #0000ff,
+  ^   foe.distance, 1)
+  draw.Bg(playerX, playerY + 4, #aa00aa,
+  ^   foe.distance + itemSplash, 1)
 
 ?foe.count
   >`@playerX@,@playerY + 5@,count range
   draw.Bg(playerX, playerY + 5, #00aaaa, 46, 1)
 
-  >`@playerX + itemSplash@,@playerY + 2@,out of range
-  draw.Bg(playerX + itemSplash, playerY + 2, #008800, 46 - itemSplash, 1) */
+  >`@playerX + itemSplash@,@playerY + 2@,
+  ^out of range
+  draw.Bg(playerX + itemSplash, playerY + 2,
+  ^ #008800, 46 - itemSplash, 1) */
+
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
+  ^@log.getErrorCount()@\n
+  >@log.getError()@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -257,8 +277,7 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
         u.showStrCtr(6, 30,#red,
         ^"Dig boulders: disabled",false)
     :
-      ?!dontShowAgain
-        dontShowAgain = true
+      dontShowAgain = true
 
 ?loc.loop
   nRuns++
@@ -266,59 +285,76 @@ draw.Bg(playerX, playerY + 2, #aa4400, itemSplash, 1)
   old_t = item.GetTreasureCount()
   end_t = 0
 
-// Set up boss_screen
-?!boss_screen
-  ?loc.stars <= 10 // cyan and white
-    boss_screen = 2
-  :?loc.stars <= 15 // yellow
-    boss_screen = 4
-  :?loc.stars <= 20 // green
-    boss_screen = 3 + (loc.stars - 16)
+// set up isMinibossScr
 
-?nRuns = 1 & loc.stars > 15 & boss_screen
-  c.permapotSetup = c.permapotSetup & (screen.i >= boss_screen - 1)
+// set up lastFoeScr and bossScr
+?!(lastFoeScr | bossScr)
+  ?loc.stars <= 10 // cyan and white
+    bossScr = 2
+  :?loc.stars <= 15 // yellow
+    bossScr = 4
+  :?loc.stars <= 20 // green
+    lastFoeScr = 1 + loc.stars - 16
+    bossScr    = 3 + loc.stars - 16
+: // set up isLastFoeScr and isBossScr
+  isLastFoeScr = (screen.i = lastFoeScr)
+  isBossScr    = (screen.i = bossScr)
+
+/* set up permapotSetup:
+- in first run
+- yellow onwards, or
+- green onwards and
+- upon reaching the boss screen. */
+c.permapotSetup =
+^ (nRuns = 1 & (
+^  (loc.stars = math.Clamp(loc.stars, 11, 15)) |
+^  (loc.stars > 15 &
+^   screen.i >= bossScr - 1)))
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
-// increase permapot bandwidth if player chooses to dig boulders
+/* increase permapotTbw if player chooses to dig
+boulders. */
 ?choice
   permapotTbw = loc.averageTime + (30 * 75)
 
 /* // BFG logic
-?nRuns > 1 & loc.stars > 15
-  c.screenMngr_DS("blade", 2, boss_screen - 3)
-*/
+?nRuns > 1 & loc.stars > 16
+  c.screenMngr_DS("blade", 1, lastFoeScr - 1) */
 
 /* // DS Mask logic (early scout wake up)
-?loc.stars = math.Clamp(loc.stars, 11, 15) & !c.permapotSetup
-  c.screenMngr_DS("mask", 1, 1)
-*/
+?loc.stars = math.Clamp(loc.stars, 11, 15) &
+^!c.permapotSetup
+  c.screenMngr_DS("mask", 1, 1) */
 
 // set up itemSplash default value
 itemSplash = 17 // bardiche's hitbox + itemSplash area
-// Set canDash default value
+// set canDash default value
 canDash = true
-// Set phase3dmg
+// set phase3dmg
 ?foe = "phase3" // only update when needed
-  phase3dmg = s.getFoeDmg(a.berserkerLvl, a.plagueLvl, a.maskLvl)
+  phase3dmg = s.getFoeDmg(
+  ^               a.berserkerLvl,
+  ^               a.plagueLvl, a.maskLvl)
 
-c.potionType = "lucky"
+// init Combat
 c.Init()
-a.smartDebuff_Mgr()
+// start up Ranged_Debuffing tracker
+tracker.track()
 
-stunTime = s.getEffectStat("foe","debuff","stun","time") // frames
-?!stunTime
-  stunTime = -1
+stunTime = foe.debuffs.GetTime("stun")
 
 // Decide hand for one-handed items
-?c.permapotSetup | s.inRange("dash")
+?c.permapotSetup |
+^(s.inRange("dash") & canDash & ai.walking)
   hand = "left"
 :
   hand = "right"
 
 // Auto brewing
+c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
@@ -342,7 +378,7 @@ c.AAC("sword *0", "hatchet")
 or while setting up permapot. */
 :?c.canUsePotion() & loc.stars > 10 &
 ^(c.permapotSetup |
-^ (end_t > 10 & screen.i = boss_screen &
+^ (end_t > 10 & isBossScr &
 ^  !c.canUseAbility("staff_fire")))
   activate potion
 
@@ -350,10 +386,10 @@ or while setting up permapot. */
 :?c.canSummon("voidweaver") &
 ^loc.stars > 15 &
 ^(screen.i = 0 |
-^screen.i = math.Clamp(screen.i, 2, boss_screen - 2)) // not a cutscene
+^screen.i = math.Clamp(screen.i, 2, bossScr - 2)) // not a cutscene
   c.useAbility_OH("aether_talisman", "aether_talisman", hand)
 :?c.canSummon("cinderwisp") &
-^(loc.stars <= 15 | screen.i >= boss_screen - 1)
+^(loc.stars <= 15 | screen.i >= bossScr - 1)
   c.useAbility_OH("fire_talisman", "fire_talisman", hand)
 
 // ............. DEFENSIVE LOGIC ............ //
@@ -452,7 +488,7 @@ or while setting up permapot. */
 // ............ CUTSCENES LOGIC ............. //
 
 // Dysangelos pre-phase1 cutscene damage strat
-:?!c.permapotSetup & screen.i = boss_screen &
+:?!c.permapotSetup & screen.i = bossScr &
 ^(([100, 101, 102].Contains(foe.state) &
 ^  item.GetCooldown("heavy_hammer") <= 0) &
 ^  s.inRange("heavy_hammer ability") |
@@ -464,7 +500,7 @@ or while setting up permapot. */
     c.useAbility_TH("heavy_hammer", Mjölnir)
 
 // Dysangelos post-phase1 cutscene damage strat
-:?!c.permapotSetup & screen.i = boss_screen & 
+:?!c.permapotSetup & screen.i = bossScr & 
 ^(([118, 108].Contains(foe.state) &
 ^  item.GetCooldown("bardiche") <= 0) |
 ^ c.isCasting("bardiche"))
@@ -487,7 +523,7 @@ or while setting up permapot. */
 
 // speed up (post-treasure)
 :?c.canUseAbility("staff_fire") &
-^ end_t > 10 & screen.i = boss_screen &
+^ end_t > 10 & screen.i = bossScr &
 ^ loc.stars > 10
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -498,7 +534,7 @@ or while setting up permapot. */
 // save armor if it's setup run
 // Don't use it when facing the scout
 :?c.canUseAbility("staff_fire") &
-^screen.i < boss_screen &
+^screen.i < bossScr &
 ^buffs.string ! "buff_inf_speed" &
 ^((foe.count = 1 & foe.state = 4) |
 ^ (!s.inRange("crossbow"))) &
