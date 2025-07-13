@@ -106,9 +106,9 @@ func fight(mode)
     ^((foe = "phase" & !canDash &
     ^  buffs.string = "smite") |
     // AOE debuffing
-    ^(!canDash |
-    ^ (foe = "elite" &
-    ^  foe.GetCount(itemSplash) > 1)))
+    ^ (!canDash |
+    ^  (foe = "elite" &
+    ^   foe.GetCount(itemSplash) > 1)))
       ?tracker.canTrack("Weaken")
         a.ldtF("magic debuff weaken")
       : // tracker.canTrack("Burn")
@@ -116,23 +116,23 @@ func fight(mode)
 
     // 1v1 strong foe weakening
     :?es.canDebuff("Weaken") & canDash &
-    ^(foe = "monarch" | foe = "phase")
+    ^ (foe = "monarch" | foe = "phase")
       a.ldtF("sword debuff weaken")
 
-    // Permapot 1v1 debuffing
     :?es.canMultiDebuff(["Weaken","Chill",
     ^                    "Burn"           ],
     ^                   "any") &
-    ^canDash &
-    ^((c.permapotSetup & foe = "elite" &
-    ^  foe.GetCount(itemSplash) = 1) |
+    // Permapot 1v1 debuffing
+    ^ canDash &
+    ^ ((c.permapotSetup & foe = "elite" &
+    ^   foe.GetCount(itemSplash) = 1) |
     // 1v1 strong foe debuffing
-    ^ (((loc.stars > 15 &
-    ^   (foe = "monarch" | foe = "phase") &
-    ^   s.getFoeDmg(a.berserkerLvl,
-    ^               a.plagueLvl   ,
-    ^               a.maskLvl      ) > 0) |
-    ^  nRuns = 1)))
+    ^  (((loc.stars > 15 &
+    ^    (foe = "monarch" | foe = "phase") &
+    ^    s.getFoeDmg(a.berserkerLvl,
+    ^                a.plagueLvl   ,
+    ^                a.maskLvl      ) > 0) |
+    ^   nRuns = 1)))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
@@ -173,10 +173,10 @@ func fight(mode)
       ?buffs.string = "strength" &
       ^buffs.GetTime("strength") > 60
         equip @a.bAdmg@
-      :?!c.permapotSetup
-        a.ldtF("ranged dmg")
-      :
+      :?c.permapotSetup
         a.ldtF("magic dmg")
+      :
+        a.ldtF("ranged dmg")
 
   : // invalid mode
     log.logError(_FILE,"fight",
@@ -185,8 +185,6 @@ func fight(mode)
 // //////////////// PROCEDURE //////////////// //
 
 // .............. MONITOR LOGIC .............. //
-
->c0,0,in wand range: @s.inRange("wand")@
 
 /* // permapot time bandwidth monitor:
 ?permapotActTime ! -1 & nRuns = 1
@@ -322,7 +320,6 @@ itemSplash = 17 // bardiche's hitbox + itemSplash area
 // Set canDash default value
 canDash = true
 
-c.potionType = "strength"
 c.Init()
 tracker.track()
 
@@ -340,6 +337,8 @@ stunTime = s.getEffectStat("foe",
   hand = "right"
 
 // Auto brewing
+c.potionType = "strength"
+
 ?c.canBrewPotion()
   c.brewPotion()
 
@@ -386,7 +385,6 @@ or while setting up permapot. */
 ^ ((loc.id = "bronze_mine" &
 ^   screen.i > lastFoeScr) |
 ^  loc.id = "bronze_guardian_harder")
-// ^ loc.id = "bronze_guardian_harder"
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
 
