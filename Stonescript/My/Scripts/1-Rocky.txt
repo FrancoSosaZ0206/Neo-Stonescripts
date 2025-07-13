@@ -37,6 +37,7 @@ var hand     = null
 var itemSplash = 17 // bardiche hitbox + splash area
 
 // screens
+var minibossScr = null
 var isMinibossScr = false
 var lastFoeScr = null
 var isLastFoeScr = false
@@ -222,6 +223,11 @@ draw.Bg(playerX, playerY + 2, #aa4400,
   draw.Bg(playerX + itemSplash, playerY + 2,
   ^ #008800, 46 - itemSplash, 1) */
 
+// monitor minibossScr
+?minibossScr
+  >`1,15,scout scr: @screen.i@/@minibossScr@\n
+  ^is scout scr: @isMinibossScr@
+
 // show any logged errors
 ?log.hasErrors()
   >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
@@ -287,18 +293,35 @@ draw.Bg(playerX, playerY + 2, #aa4400,
 
 // set up isMinibossScr
 
-// set up lastFoeScr and bossScr
-?!(lastFoeScr | bossScr)
+// set up bossScr
+?!bossScr
   ?loc.stars <= 10 // cyan and white
     bossScr = 2
   :?loc.stars <= 15 // yellow
     bossScr = 4
   :?loc.stars <= 20 // green
+    bossScr = 3 + loc.stars - 16
+: // set up isBossScr
+  isBossScr = (screen.i = bossScr)
+
+// set up lastFoeScr
+?!lastFoeScr
+  // green
+  ?loc.stars = math.Clamp(loc.stars, 16, 20)
     lastFoeScr = 1 + loc.stars - 16
-    bossScr    = 3 + loc.stars - 16
-: // set up isLastFoeScr and isBossScr
+: // set up isLastFoeScr
   isLastFoeScr = (screen.i = lastFoeScr)
-  isBossScr    = (screen.i = bossScr)
+
+// set up minibossScr
+?!minibossScr
+  // yellow
+  ?loc.stars = math.Clamp(loc.stars, 11, 15)
+    minibossScr = 2
+  // green
+  :?loc.stars = math.Clamp(loc.stars, 16, 20)
+    minibossScr = 1
+: // set up isMinibossScr
+  isMinibossScr = (screen.i = minibossScr)
 
 /* set up permapotSetup:
 - in first run
@@ -380,6 +403,8 @@ or while setting up permapot. */
 ^(c.permapotSetup |
 ^ (end_t > 10 & isBossScr &
 ^  !c.canUseAbility("staff_fire")))
+  >c0,0,#red,ACTIVATING POTION (POST-TREASURE)
+
   activate potion
 
 // Summons
@@ -546,16 +571,13 @@ or while setting up permapot. */
 - speed effect not already present
 - last foe just defeated
 - too far to attack
-- not a setup run, or
+- not a setup run, nor
 - when facing the scout */
 :?c.canUseAbility("staff_fire") &
-^screen.i < bossScr &
-^buffs.string ! "buff_inf_speed" &
-^((foe.count = 1 & foe.state = 4) |
-^ (!s.inRange("crossbow"))) &
-^!(loc.stars > 15 &
-^  (nRuns = 1 |
-^   (nRuns > 1 & isMinibossScr)))
+^ screen.i < bossScr &
+^ buffs.string ! "buff_inf_speed" &
+// ^ (!s.inRange("crossbow") &
+^ (minibossScr & screen.i > minibossScr)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // Harvesting logic
@@ -648,7 +670,7 @@ unmake with repeating crossbow. */
 :?c.canUseAbility("voidweaver") &
 ^ c.canUnmakeVoidweaver() &
 ^ foe.count > 1 & s.inRange("hatchet") &
-^ !isMinibossScr
+^ (minibossScr & screen.i > minibossScr)
   c.devour("voidweaver")
 
 // Calamity - reduce hp
