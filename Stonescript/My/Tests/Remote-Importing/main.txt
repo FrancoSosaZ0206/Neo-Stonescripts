@@ -1,11 +1,13 @@
-/* Mindstone max characters per line: 48.
+/* Mindstone max characters per line: 49.
 
-0000000000111111111122222222223333333333444444444
-0123456789012345678901234567890123456789012345678
+0000000001111111111222222222233333333334444444444
+1234567890123456789012345678901234567890123456789
 */
+
+
 var mobileUrl =
 ^"https://raw.githubusercontent.com/" +
-^"Javascript-pixel/Js/refs/heads/main/"
+^"Javascript-pixel/Snoopy/refs/heads/main/"
 
 sys.SetFileUrl(mobileUrl)
 
