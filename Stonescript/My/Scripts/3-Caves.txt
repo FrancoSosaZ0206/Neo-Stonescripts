@@ -151,6 +151,9 @@ func fight(mode)
     
     :?c.canUsePotion() & foe = "phase"
       activate potion
+    // reduce damage with Cultist Mask
+    :?c.canUseAbility("mask") & foe = "phase"
+      c.useAbility_OH("mask", "mask", "r")
     :?canDash &
     ^(foe.GetCount(itemSplash) = 1 |
     ^foe = "monarch" | foe = "phase")
@@ -379,18 +382,13 @@ we are in the Bolesh's screen. */
   ?c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
 
-  // reduce damage with Cultist Mask
-  :?c.canUseAbility("mask") & foe = "phase"
-    c.useAbility_OH("mask", "mask", "r")
-
   // avoid damage with Eternity Staff
   :?c.canUseAbility("staff_ice") &
-  ^ foe = "phase" & foe.debuffs.string ! "feeble"
+  ^ foe = "phase"
     c.useAbility_TH("staff_ice", a.stIh)
   
   // escape damage
-  :?foe.debuffs.string ! "feeble" &
-  ^ foe.debuffs.string ! "debuff_frost_stun"
+  :?foe.debuffs.string ! "debuff_frost_stun"
     fight("evade")
   :
     fight("normal")
