@@ -366,7 +366,15 @@ boulders. */
   c.screenMngr_DS("mask", 1, 1) */
 
 // set up itemSplash default value
-itemSplash = 17 // bardiche's hitbox + itemSplash area
+// bardiche's hitbox + itemSplash area
+itemSplash = 17
+var splashBuffed = false
+?buffs.string = "buff_range" & !splashBuffed
+  itemSplash += 10
+  splashBuffed = true
+:?buffs.string ! "buff_range"
+  splashBuffed = false
+
 // set canDash default value
 canDash = true
 // set phase3dmg
@@ -715,7 +723,7 @@ unmake with repeating crossbow. */
 // ............... AOE LOGIC ................ //
 
 :?foe.GetCount(itemSplash) > 1 &
-^!(foe = "boss" | foe = "monarch")
+^!(foe = "boss" /*| foe = "monarch"*/)
   // Align foes
   ?c.canUseAbility("wand_stone") &
   ^s.inRange("wand")
