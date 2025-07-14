@@ -1,0 +1,9 @@
+# Treasure Sprites
+
+## Golden
+
+```
+·¡:¡·
+┼┴Θ┴┼
+╘═══╛
+```

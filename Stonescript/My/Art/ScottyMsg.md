@@ -35,21 +35,22 @@ MINDSTONE:
 000000000111111111122222222223333333333444444444
 123456789012345678901234567890123456789012345678
 
+  / ` ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯─¯¯¯¯¯ . _ 
+(@)= );  ──¯¯  _ _      ¨·-  .    …        , )@|
+  `¨/,_─¯____________________________…─_____/ ¯ 
+   |                                  _     |    
+   |  Trades are open!   .¡:¡.    /    \   :     
+   :  ---                ┼┴Θ┴┼    )^ ^(/    |    
+   :  Code: TXDR         ╘═══╛    `,^,´     |    
+    >                                      /     
+   |  Reply or DM me                       .     
+   ┊  with screenshot to trade.             :    
+   |  First reply gets the trade,     _     :    
+   |  the rest can be waitlisted.   \((}/   |    
+    :                                ) '   <     
+   |  The sooner you reply, the     ,` )    ┊    
+   |  sooner I'll use your code!     ¯¯     |    
+    \      ________________________________ '.__
+     `.::·´......::..:......................….·´
 
-m_/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\_m
-ω¯\________________________________________/¯ω
-   |                                      |
-   |   Trades are open!         _        :
-   :   ---                     / _  \     |
-   :   Code: TXDR              \)o ò(     |
-    >  Reply or DM me with      `,^,´     /
-   |   screenshot to trade.              .
-   |                                      :
-   |   Fist reply gets the trade, the     :
-   |   rest can be waitlisted.            |
-    :                                     <
-   |   The sooner you reply, the sooner   |
-   |   I'll use your code!                |
-    \      ______________________________ '.___
-     `.::·´......::..:.....................….·´
 ```
