@@ -132,7 +132,7 @@ func fight(mode)
     ^ s.inRange("sword")
       a.ldtF("sword debuff weaken")
 
-    :?es.canMultiDebuff(["Chill","Burn"],"any") &
+    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
     ^ canDash & s.inRange("sword") &
     // Permapot 1v1 debuffing
     ^ ((c.permapotSetup & foe = "elite" &
@@ -164,8 +164,8 @@ func fight(mode)
 
     // ............ DAMAGE LOGIC ............. //
     :?canDash &
-    ^(foe.GetCount(itemSplash) = 1 |
-    ^foe = "monarch" | foe = "boss")
+    ^ (foe.GetCount(itemSplash) = 1 |
+    ^  foe = "monarch" | foe = "boss")
       ?c.canUseAbility("staff_poison") &
       ^!s.inRange("dash") & foe = "phase3"
         c.useAbility_TH("staff_poison", a.stPh)
@@ -222,6 +222,19 @@ draw.Bg(playerX, playerY + 2, #aa4400,
   ^out of range
   draw.Bg(playerX + itemSplash, playerY + 2,
   ^ #008800, 46 - itemSplash, 1) */
+
+// monitor post-treasure metrics
+var treasureCol = #888888
+?end_t > 0 | old_t ! item.GetTreasureCount()
+  treasureCol = #aaff00
+:
+  treasureCol = #888888
+>`1,14,@treasureCol@,
+^treasure:\n
+^  old | @old_t@ (t = @end_t@)
+>`1,16,
+^  cur | @item.GetTreasureCount()@\n
+^  cap | @item.GetTreasureLimit()@\n
 
 // show any logged errors
 ?log.hasErrors()
@@ -283,10 +296,14 @@ draw.Bg(playerX, playerY + 2, #aa4400,
 ?loc.loop
   nRuns++
 
-  old_t = item.GetTreasureCount()
-  end_t = 0
-
-// set up isMinibossScr
+// set up post-treasure metrics
+?old_t ! item.GetTreasureCount()
+  // reset metrics
+  ?loc.loop | !isBossScr
+    old_t = item.GetTreasureCount()
+    end_t = 0
+  : // track time
+    end_t++
 
 // set up bossScr
 ?!bossScr
@@ -376,11 +393,7 @@ c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
-// track time after picking treasure up
-?old_t ! item.GetTreasureCount()
-  end_t++
-
-// ................................... //
+// .......................................... //
 
 // Permapot equipment
 ?c.permapotSetup
@@ -392,15 +405,30 @@ c.AAC("sword *0", "hatchet")
 ?loc.begin
   a.ldtF("default")
 
-/* activate potion after picking up treasure
-or while setting up permapot. */
-:?c.canUsePotion() & loc.stars > 10 &
-^(c.permapotSetup |
-^ (end_t > 10 & isBossScr &
-^  !c.canUseAbility("staff_fire")))
-  >c0,0,#red,ACTIVATING POTION (POST-TREASURE)
-
+// activate potion when in permapot
+:?c.canUsePotion() & c.permapotSetup
   activate potion
+
+// ........... POST-TREASURE LOGIC .......... //
+
+:?loc.stars > 10 & end_t > 1 & isBossScr
+  // pickup treasure
+  ?pickup.distance < 15
+    a.ldtF("magnet")
+
+  // activate potion
+  :?c.canUsePotion() & end_t > 30
+    activate potion
+
+  // speed up
+  :?c.canUseAbility("staff_fire") &
+  ^ end_t > 30 & item.potion = "empty"
+    c.useAbility_TH("staff_fire", a.stFh)
+
+  : // regen armor
+    a.ldtF("defense armor regen")
+
+// .......................................... //
 
 // Summons
 :?c.canSummon("voidweaver") &
@@ -459,8 +487,7 @@ or while setting up permapot. */
 // Acronian Scout's wind and critical attack
 :?foe = "scout" & foe.state = 32 &
 ^ foe.damage >= 8
-  canDash = false
-  fight("normal") // fight ranged to avoid hit
+  fight("evade") // fight ranged to avoid hit
   >f0,0,#red,WIND CRIT, FIGHT RANGED
 
 // Normal attacks
@@ -522,10 +549,10 @@ or while setting up permapot. */
 
 // Dysangelos pre-phase1 cutscene damage strat
 :?!c.permapotSetup & isBossScr &
-^(([100, 101, 102].Contains(foe.state) &
-^  item.GetCooldown("heavy_hammer") <= 0) &
-^  s.inRange("heavy_hammer ability") |
-^ c.isCasting("heavy_hammer"))
+^ (([100, 101, 102].Contains(foe.state) &
+^   item.GetCooldown("heavy_hammer") <= 0) &
+^   s.inRange("heavy_hammer ability") |
+^  c.isCasting("heavy_hammer"))
   ?item.GetCooldown("quarterstaff") <= 0 &
   ^!c.isCasting("heavy_hammer")
     c.useAbility_TH("quarterstaff", a.myQ)
@@ -556,23 +583,12 @@ or while setting up permapot. */
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
-// speed up (post-treasure)
+/* speed up when:
+  - speed effect not already present
+  - not boss nor miniboss screens. */
 :?c.canUseAbility("staff_fire") &
-^ end_t > 10 & isBossScr &
-^ loc.stars > 10
-  c.useAbility_TH("staff_fire", a.stFh)
-
-/* speed up (normal) when:
-- speed effect not already present
-- last foe just defeated
-- too far to attack
-- not a setup run, nor
-- when facing the scout */
-:?c.canUseAbility("staff_fire") &
-^ screen.i < bossScr &
 ^ buffs.string ! "buff_inf_speed" &
-// ^ (!s.inRange("crossbow") &
-^ (minibossScr & screen.i > minibossScr)
+^ !(isBossScr | isMinibossScr)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // Harvesting logic
@@ -592,22 +608,11 @@ or while setting up permapot. */
 ^  (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
 
-// Pickup logic
+// pickup logic
 :?pickup.distance < 15 &
 // foe is farther than pickup
-^(foe.distance > 15 |
-^ foe.distance = 9999 |
-// pickup is a treasure
-^ pickup = "treasure")
+^(foe.distance > 15 | foe.distance = 9999)
   a.ldtF("magnet")
-
-// regen armor (after picking chest up)
-:?(loc.stars <= 10 &
-^  old_t ! item.GetTreasureCount()) |
-^ (end_t > 1 &
-^ !(c.canUsePotion() |
-^   c.canUseAbility("staff_fire")))
-  a.ldtF("defense armor regen")
 
 // armor regen logic
 :?(ai.walking & !s.inRange("socketed_shield")) |
@@ -807,8 +812,8 @@ unmake with repeating crossbow. */
       a.ldtF("sword debuff weaken")
     :?es.canDebuff("Chill")
       a.ldtF("sword debuff chill")
-    :?es.canDebuff("Burn")
-      a.ldtF("sword debuff burn")
+    /*:?es.canDebuff("Burn")
+      a.ldtF("sword debuff burn")*/
 
     // Heal
     :?hp ! maxhp

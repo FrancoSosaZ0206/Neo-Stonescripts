@@ -5,18 +5,41 @@
 var txt = null
 
 // To format:
-var dataStr = "AI#|[color={0}]{1}[/color]|[color={2}]{3}[/color]|[color={4}]{5}[/color]|[color={6}]{7}[/color]"
+var dataStr = "AI#|" +
+^     "[color={0}]{1}[/color]|" +
+^     "[color={2}]{3}[/color]|" +
+^     "[color={4}]{5}[/color]|" +
+^     "[color={6}]{7}[/color]|" +
+^     "[color={8}]{9}[/color]|"
 
-var dataLbls = ["enabled", "paused", "idle", "walking"]
-var dataCols = ["ffffff","ffffff","ffffff","ffffff"]
-var dataVals = [ai.enabled, ai.paused, ai.idle, ai.walking]
+var dataLbls = ["enabl",
+^               "pausd",
+^               "idle" ,
+^               "walkn",
+^               "ablts" ]
+
+var dataCols = ["ffffff",
+^               "ffffff",
+^               "ffffff",
+^               "ffffff",
+^               "ffffff" ]
+
+var dataVals = [ai.enabled,
+^               ai.paused ,
+^               ai.idle   ,
+^               ai.walking,
+^               item.CanActivate()]
 
 var dataStrPrint = ""
 
 // Functions
 
 func upData(mode)
-  dataVals = [ai.enabled, ai.paused, ai.idle, ai.walking]
+  dataVals = [ai.enabled,
+  ^           ai.paused ,
+  ^           ai.idle   ,
+  ^           ai.walking,
+  ^           item.CanActivate()]
 
   // assigns individual color metadata for each value.
   ?mode = "ui"
@@ -46,7 +69,8 @@ func dataToString(mode)
     ^   dataCols[0], dataLbls[0],
     ^   dataCols[1], dataLbls[1],
     ^   dataCols[2], dataLbls[2],
-    ^   dataCols[3], dataLbls[3]   )
+    ^   dataCols[3], dataLbls[3],
+    ^   dataCols[4], dataLbls[4]   )
   :
     return dataStrPrint
 

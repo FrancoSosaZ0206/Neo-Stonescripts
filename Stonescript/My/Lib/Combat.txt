@@ -1,6 +1,8 @@
-﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "Combat" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "Combat" ▄▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+
+// For info, see README.
 
 // ///////////////// IMPORTS ///////////////// //
 
@@ -21,14 +23,17 @@ var hihp
 
 // Function-related
 
-var slideCount = 0 // counter to give screen.Next() time to slide in _DS functions.
+/* counter to give screen.Next()
+time to slide in _DS functions. */
+var slideCount = 0
 
 var moondialTimer = 0
 var burstTimer = 0
 var burstCdTimer = 0
 var burstState = true
 
-var item_TH_IDs = [ // two-handed item IDs
+// two-handed item IDs
+var table_TH = [
 ^   "blade",
 ^   "arm",
 
@@ -46,7 +51,8 @@ var item_TH_IDs = [ // two-handed item IDs
 ^   "staff_stone"
 ^]
 
-var item_OH_IDs = [ // one-handed item IDs
+// one-handed item IDs
+var table_OH = [
 ^   "mask",
 ^   "hatchet",
 
@@ -65,7 +71,9 @@ var item_OH_IDs = [ // one-handed item IDs
 ^   "wand_stone"
 ^]
 
-var table_itemDS = [ // IDs of items' abilities that can be used in 2 screens
+/* IDs of items' abilities that
+can be used in 2 screens. */
+var table_DS = [
 ^   "ID"    , "TARGET", "MAX" ,
 ^   "blade" , null    , null  ,
 ^   "mask"  , null    , null
@@ -74,7 +82,10 @@ var table_itemDS = [ // IDs of items' abilities that can be used in 2 screens
 
 // Others
 
-var permapotSetup = loc.stars > 10 // only true from yellow onwards
+// only true from yellow onwards:
+var permapotSetup = loc.stars > 10
+
+// for automatic brewing:
 var potionType = null
 
 // //////////////// FUNCTIONS //////////////// //
@@ -158,14 +169,15 @@ func canUseAbility(abilityID)
   return result
 
 func useAbility_TH(abilityID, itemName)
-  ?item_TH_IDs.Contains(abilityID)
+  ?table_TH.Contains(abilityID)
     equip @itemName@
     activate R
 
   : // invalid abilityID
-    log.logError(_FILE, "useAbility_TH", "<abilityID> unknown: "+abilityID)
+    log.logError(_FILE, "useAbility_TH",
+    ^"unknown <abilityID>: "+abilityID)
 func useAbility_OH(abilityID, itemName, hand)
-  ?item_OH_IDs.Contains(abilityID)
+  ?table_OH.Contains(abilityID)
     // special one-handed weapons equipment logic
     ?abilityID = "hatchet" | abilityID = "mask"
       equipR @abilityID@
@@ -194,9 +206,11 @@ func useAbility_OH(abilityID, itemName, hand)
         :?ai.walking & !s.inRange("triskelion")
           equipL triskelion
     :
-      log.logError(_FILE, "useAbility_OH", "unknown <hand>: "+hand)
+      log.logError(_FILE, "useAbility_OH",
+      ^"unknown <hand>: "+hand)
   :
-    log.logError(_FILE, "useAbility_TH", "unknown <abilityID>: "+abilityID)
+    log.logError(_FILE, "useAbility_TH",
+    ^"unknown <abilityID>: "+abilityID)
 
 func isEquipped(itemName)
   return item.left = itemName | item.right = itemName
@@ -207,38 +221,51 @@ func isCasting(itemName)
 
 // ........... Double Screen (DS) ........... //
 
-/* returns the target or maximum screen of a double-screen item, null if not set, or -1 if there was an error.
+/* double screen getter function.
+
+Returns:
+- the target or maximum screen of a
+  double-screen item,
+- null if not set, or
+- -1 if there was an error.
 
 valid <type> values: "TARGET", "MAX". */
 func getScreen_DS(itemName, type)
   var result = -1
-  ?!table_itemDS.Contains(itemName)
-    log.logError(_FILE, "getScreen_DS", "unknown <itemName>: "+itemName)
-  :?!table_itemDS.Contains(type)
-    log.logError(_FILE, "getScreen_DS", "unknown <type>: "+type)
+  ?!table_DS.Contains(itemName)
+    log.logError(_FILE, "getScreen_DS",
+    ^"unknown <itemName>: "+itemName)
+  :?!table_DS.Contains(type)
+    log.logError(_FILE, "getScreen_DS",
+    ^"unknown <type>: "+type)
   :
-    result = 
-    ^table_itemDS[table_itemDS.IndexOf(itemName) +
-    ^             table_itemDS.IndexOf(type)]
+    result =
+    ^ table_DS[
+    ^   table_DS.IndexOf(itemName) +
+    ^   table_DS.IndexOf(type)]
 
   return result
 func isScreen_DS(itemName, type)
   var result = false
-  ?!table_itemDS.Contains(itemName)
-    log.logError(_FILE, "isScreen_DS", "unknown <itemName>: "+itemName)
-  :?!table_itemDS.Contains(type)
-    log.logError(_FILE, "isScreen_DS", "unknown <type>: "+type)
+  ?!table_DS.Contains(itemName)
+    log.logError(_FILE, "isScreen_DS",
+    ^"unknown <itemName>: "+itemName)
+  :?!table_DS.Contains(type)
+    log.logError(_FILE, "isScreen_DS",
+    ^"unknown <type>: "+type)
   :
     var scrTarget =
-    ^table_itemDS[table_itemDS.IndexOf(itemName) + 
-    ^             table_itemDS.IndexOf("TARGET")]
+    ^ table_DS[
+    ^   table_DS.IndexOf(itemName) + 
+    ^   table_DS.IndexOf("TARGET")]
 
     ?type = "TARGET"
       result = (screen.i = scrTarget)
     : // type = "MAX"
       result = (scrTarget =
-      ^table_itemDS[table_itemDS.IndexOf(itemName) + 
-      ^            table_itemDS.IndexOf("MAX")])
+      ^ table_DS[
+      ^   table_DS.IndexOf(itemName) + 
+      ^   table_DS.IndexOf("MAX")])
   
   return result
 func screenMngr_DS(itemName, scrTarget, scrMax)
@@ -246,36 +273,41 @@ func screenMngr_DS(itemName, scrTarget, scrMax)
   itemName = string.ToLower(itemName)
 
   // Error handling
-  ?!table_itemDS.Contains(itemName)
-    log.logError(_FILE, "screenMngr_DS", "unknown <itemName>: "+itemName)
+  ?!table_DS.Contains(itemName)
+    log.logError(_FILE, "screenMngr_DS",
+    ^"unknown <itemName>: "+itemName)
   :?scrMax < 0
-    log.logError(_FILE, "screenMngr_DS", "invalid <scrMax>: "+scrMax)
+    log.logError(_FILE, "screenMngr_DS",
+    ^"invalid <scrMax>: "+scrMax)
   :?scrTarget ! math.Clamp(scrTarget, 0, scrMax)
-    log.logError(_FILE, "screenMngr_DS", "invalid <scrTarget>: "+scrTarget)
+    log.logError(_FILE, "screenMngr_DS",
+    ^"invalid <scrTarget>: "+scrTarget)
   // OK, proceed
   :
-    var itemI = table_itemDS.IndexOf(itemName)
-    var targetI = table_itemDS.IndexOf("TARGET")
-    var maxI = table_itemDS.IndexOf("MAX")
+    var itemI = table_DS.IndexOf(itemName)
+    var targetI = table_DS.IndexOf("TARGET")
+    var maxI = table_DS.IndexOf("MAX")
     ?loc.begin | // beginning of the game
-    ^!(table_itemDS[itemI + targetI] & table_itemDS[itemI + maxI]) // or unset
-      table_itemDS[itemI + targetI] = scrTarget
-      table_itemDS[itemI + maxI] = scrMax
+    ^!(table_DS[itemI + targetI] &
+    ^  table_DS[itemI + maxI]     ) // or unset
+      table_DS[itemI + targetI] = scrTarget
+      table_DS[itemI + maxI] = scrMax
     :?loc.loop & !isScreen_DS(itemName, "MAX")
-      table_itemDS[itemI + targetI] += 1
+      table_DS[itemI + targetI] += 1
 
     :?canUseAbility_DS(itemName)
       useAbility_DS(itemName)
 func canUseAbility_DS(itemName)
-  ?table_itemDS.Contains(itemName)
+  ?table_DS.Contains(itemName)
     return canUseAbility(itemName) &
     ^isScreen_DS(itemName, "TARGET")
   :
-    log.logError(_FILE, "canUseAbility_DS", "unknown <itemName>: "+itemName)
+    log.logError(_FILE, "canUseAbility_DS",
+    ^"unknown <itemName>: "+itemName)
 
     return false
 func useAbility_DS(itemName)
-  ?table_itemDS.Contains(itemName)
+  ?table_DS.Contains(itemName)
     ?slideCount = 0
       screen.Next()
       slideCount = 20
@@ -290,7 +322,8 @@ func useAbility_DS(itemName)
           useAbility_OH(itemName, itemName, "r")
         screen.ResetOffset()
   :
-    log.logError(_FILE, "useAbility_DS", "unknown <itemName>: "+itemName)
+    log.logError(_FILE, "useAbility_DS",
+    ^"unknown <itemName>: "+itemName)
 
 // ....... Talisman / Summon specific ....... //
 
@@ -299,18 +332,22 @@ func isSummoned(summonName)
 func canSummon(summonName)
   var talisman = s.getTalisman(summonName)
   ?talisman
-    return canUseAbility(talisman) & !isSummoned(summonName)
+    return canUseAbility(talisman) &
+    ^!isSummoned(summonName)
   :
-    log.logError(_FILE, "canSummon", "unknown <summonName>: "+summonName)
+    log.logError(_FILE, "canSummon",
+    ^"unknown <summonName>: "+summonName)
     return false
 
 func canHide(summonName)
   var result = s.getTalisman(summonName)
 
   ?result
-    return canUseAbility(result) & isSummoned(summonName)
+    return canUseAbility(result) &
+    ^isSummoned(summonName)
   :
-    log.logError(_FILE, "canHide", "unknown <summonName>: "+summonName)
+    log.logError(_FILE, "canHide",
+    ^"unknown <summonName>: "+summonName)
 
   return result
 
@@ -330,9 +367,11 @@ func devour(summonName)
       /*: // summonName = ""
         activate */
     :
-      log.logError(_FILE, "devour", "'"+summonName+"' isn't summoned")
+      log.logError(_FILE, "devour",
+      ^"'"+summonName+"' isn't summoned")
   :
-    log.logError(_FILE, "devour", "unknown <summonName>: "+summonName)
+    log.logError(_FILE, "devour",
+    ^"unknown <summonName>: "+summonName)
 
 func canUnmakeVoidweaver()
   return !(foe = "boss" | foe.buffs.string = "stability")
@@ -357,14 +396,18 @@ func isCinderwispCap(ignitions_cap)
 /* Checks if a certain potion can be brewed. */
 func canBrewPotion()
   ?!potionType
-    log.logError(_FILE, "canBrewPotion", "<potionType> has not been set")
+    log.logError(_FILE, "canBrewPotion",
+    ^"<potionType> has not been set")
+
     return false
   :
     // Entry sanitization
     potionType = string.ToLower(potionType)
 
     ?!s.potion_table.Contains(potionType)
-      log.logError(_FILE, "canBrewPotion", "unknown <potionType>: "+potionType)
+      log.logError(_FILE, "canBrewPotion",
+      ^"unknown <potionType>: "+potionType)
+
       return false
     :
       var result = loc.begin & item.potion ! potionType
@@ -394,13 +437,15 @@ func canBrewPotion()
 /* Brews a certain potion. */
 func brewPotion()
   ?!potionType
-    log.logError(_FILE, "brewPotion", "<potionType> has not been set")
+    log.logError(_FILE, "brewPotion",
+    ^"<potionType> has not been set")
   :
     // Entry sanitization
     potionType = string.ToLower(potionType)
 
     ?!s.potion_table.Contains(potionType)
-      log.logError(_FILE, "brewPotion", "unknown <potionType>: "+potionType)
+      log.logError(_FILE, "brewPotion",
+      ^"unknown <potionType>: "+potionType)
     :
       ?potionType   = "strength"
         brew stone
@@ -425,14 +470,18 @@ func brewPotion()
 
 func canUsePotion()
   ?!potionType
-    log.logError(_FILE, "canBrewPotion", "<potionType> has not been set")
+    log.logError(_FILE, "canBrewPotion",
+    ^"<potionType> has not been set")
+
     return false
   :
     // Entry sanitization
     potionType = string.ToLower(potionType)
 
     ?!s.potion_table.Contains(potionType)
-      log.logError(_FILE, "canBrewPotion", "unknown <potionType>: "+potionType)
+      log.logError(_FILE, "canBrewPotion",
+      ^"unknown <potionType>: "+potionType)
+
       return false
     :
       return item.CanActivate() &
@@ -464,8 +513,9 @@ func moonjuggle(weapon1, weapon2)
       equipL @weapon1@
       equipR @weapon2@
 
-  /* For when you have just 1 +21 sword (weapon2 can be
-  anything, it will not be used) */
+  /* For when you have just 1 +21 sword
+  (weapon2 can be anything, it will not
+   be used) */
   /*:?moondialMode = 3
     equipL moon
     equipR @weapon1@*/
@@ -476,7 +526,9 @@ func burst(weaponsArr)
   var n = weaponsArr.Count()
 
   ?n < 2
-    log.logError(_FILE, "doBursting", "<weaponsArr> is too small (has "+n+" weapons)")
+    log.logError(_FILE, "doBursting",
+    ^"<weaponsArr> is too small "+
+    ^"(has "+n+" weapons)")
   :
     ?burstState // active state
       ?burstTimer < n - 1 // burst frames

@@ -142,17 +142,17 @@ func fight(mode)
 
     // ............ DAMAGE LOGIC ............. //
     
-    :?c.canUsePotion() & foe = "phase"
-      activate potion
-    // reduce damage with Cultist Mask
-    :?c.canUseAbility("mask") & foe = "phase"
-      c.useAbility_OH("mask", "mask", "r")
     :?canDash &
-    ^(foe.GetCount(itemSplash) = 1 |
-    ^foe = "monarch" | foe = "phase")
+    ^ (foe.GetCount(itemSplash) = 1 |
+    ^  foe = "monarch" | foe = "phase")
       ?c.canUseAbility("staff_poison") &
       ^!s.inRange("dash")
         c.useAbility_TH("staff_poison", a.stPh)
+      :?c.canUsePotion() & foe = "phase"
+        activate potion
+      // reduce damage with Cultist Mask
+      :?c.canUseAbility("mask") & foe = "phase"
+        c.useAbility_OH("mask", "mask", "r")
       :
         a.ldtF("sword dmg")
 
@@ -219,7 +219,7 @@ var permapotCol
   : // buffs.string = "lucky"
     potTime = buffs.GetTime("lucky")
 
-  >`1,15,#0066ff,strength: @potTime@f 
+  >`1,15,#0066ff,@c.potionType@: @potTime@f 
   ^(@time.FormatDigital(potTime, true)@)
 
 ?debuffs.string = "damage"
@@ -357,9 +357,12 @@ c.AAC("sword *0", "hatchet")
   a.ldtF("default")
 
 /* activate potion post-treasure
+(after using Infernal Staff)
 or while setting up permapot. */
 :?c.canUsePotion() & loc.stars > 10 &
-^((nRuns = 1 & !c.permapotSetup) | end_t > 10)
+^ (c.permapotSetup |
+^  (end_t > 10 & isBossScr &
+^   !c.canUseAbility("staff_fire")))
   activate potion
 
 // Summons
@@ -404,8 +407,8 @@ we are in the Bolesh's screen. */
 
 // speed up (post-treasure, after using potion)
 :?c.canUseAbility("staff_fire") &
-^ end_t > 10 & loc.stars > 10 &
-^ isBossScr // & item.potion = "empty"
+^ end_t > 10 & isBossScr &
+^ loc.stars > 10
   >c0,0,#ff0000,SPEED UP (POST-TREASURE)
 
   c.useAbility_TH("staff_fire", a.stFh)
@@ -417,16 +420,21 @@ we are in the Bolesh's screen. */
   - save armor if it's setup run
   - not facing the miniboss */
 :?c.canUseAbility("staff_fire") &
-^ (buffs.string ! "buff_inf_speed" |
-^  screen.i = lastFoeScr + 1        )
+^ screen.i < bossScr &
+^ buffs.string ! "buff_inf_speed" &
+^ ((minibossScr & screen.i > minibossScr) |
+^   screen.i = lastFoeScr + 1)
   >c0,0,#ff0000,SPEED UP (NORMAL)
 
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
-^!s.inRange("dash") & ai.walking &
-^ai.enabled & !ai.paused
+^ ai.walking & ai.enabled & !ai.paused &
+// Cannot dash and in dashing range
+^ !(canDash & a.canSmartDash()) &
+^ (c.permapotSetup |
+^  (!c.permapotSetup & screen.i > 0))
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // Pickup logic
@@ -438,7 +446,7 @@ we are in the Bolesh's screen. */
 ^ pickup = "treasure")
   a.ldtF("magnet")
 
-// regen armor (after picking chest up)
+// regen armor (post-treasure)
 :?(loc.stars <= 10 &
 ^  old_t ! item.GetTreasureCount()) |
 ^ (end_t > 1 & isBossScr &
@@ -498,7 +506,7 @@ unmake with repeating crossbow. */
 // Voidweaver - use it if possible
 :?c.canUseAbility("voidweaver") &
 ^ c.canUnmakeVoidweaver() &
-^ foe.count > 1 & s.inRange("hatchet") &
+^ foe.count > 1 & s.inRange("dash_min") &
 ^ !isMinibossScr
   c.devour("voidweaver")
 
