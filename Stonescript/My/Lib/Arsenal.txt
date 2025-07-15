@@ -219,8 +219,9 @@ func ldtF(mode)
 
   :?mode = "engage"
     // Left hand:
-    ?totaltime % 2 = 0 | // every even frame
-    ^buffs.string = "buff_inf_speed" // infernal staff
+    ?!s.inRange("triskelion") &
+    ^(totaltime % 2 = 0 | // every even frame
+    ^ buffs.string = "buff_inf_speed") // infernal staff
       equipL triskelion
     :
       ?(foe = "poison" & foe.buffs.string ! "adaptive_defense_ice") | mode = "ice"
@@ -236,10 +237,8 @@ func ldtF(mode)
       :
         ?hp ! maxhp
           equipL @hVeff@
-        :?armor <= maxarmor
-          equipL quest
         :
-          equipL ki stone
+          equipL *0 sword
 
     // Right hand:
     ?!c.permapotSetup

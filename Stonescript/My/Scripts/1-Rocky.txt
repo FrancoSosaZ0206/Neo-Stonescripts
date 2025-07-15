@@ -659,9 +659,7 @@ c.AAC("sword *0", "hatchet")
 
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
-:?canDash &
-^ s.betweenRange("triskelion","crossbow") &
-^ c.canSmoothCast(true)
+:?canDash & c.canSmoothCast(true)
   c.smoothCast(a.bR)
 
 // engaging logic (within fighting range)

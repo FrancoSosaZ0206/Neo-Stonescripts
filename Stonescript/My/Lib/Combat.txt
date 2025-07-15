@@ -560,6 +560,7 @@ func AAC(itemLeft, itemRight)
 
 func canSmoothCast(is1f)
   return !permapotSetup &
+  ^s.betweenRange("triskelion","crossbow") &
   ^!(debuffs.string = "stun"  | // player is stunned, can't attack
   ^  debuffs.string = "chill" | // player is chilled, which drastically reduces movement and attack speeds
   ^  buffs.string = "buff_inf_speed") & // Infernal Staff walking speed boost
