@@ -1,7 +1,6 @@
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄ START OF "Stats" ▀▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
-
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ START OF "Stats" ▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
 // //////////////// IMPORTS ///////////////// //
 
@@ -9,60 +8,41 @@ var u = import My/Lib/Utilities
 
 // /////////////// VARIABLES //////////////// //
 
+/* FIXME: refactor current map layout from 
+per-property to per-item. */
+
 // .................. IDs ................... //
 
-// TO DO: implement for renamed weapons
-/*var item_table = [ // all items with their names and stonescript IDs
+/* TODO: implement & account for renamed items
+var items = [ // all items with their names and stonescript IDs
 ^   "NAME"          , "STONESCRIPT ID"      , "STAR LEVEL"      , "ENCHANT LEVEL"       , "LOST"    , "COSMETIC"
-^]*/
+^] */
 
-var ability_table = [ // ability cooldown IDs only
-^   "blade",
-^   "mask",
-^   "arm",
-
+var abilities = [ // ability cooldown IDs only
+^   "blade", "mask", "arm",
 ^   "mind",
+^   "bash", "dash",
+^   "hatchet", "shovel",
+^   "bardiche", "heavy_hammer", "quarterstaff",
 
-^   "bash",
-^   "dash",
+// ^   "stone_talisman", "poison_talisman",
+^   /* "vigor_talisman" */, "aether_talisman",
+^   "fire_talisman", // "ice_talisman",
 
-^   "hatchet",
-^   "shovel",
+// ^   "", "",
+^   /* "",*/ "voidweaver",
+^   "cinderwisp", // ^   "",
 
-^   "bardiche",
-^   "heavy_hammer",
-^   "quarterstaff",
+^   "wand_stone", "wand_poison",
+^   "wand_vigor", "wand_aether",
+^   "wand_fire", "wand_ice",
 
-// ^   "stone_talisman",
-// ^   "poison_talisman",
-// ^   "vigor_talisman",
-^   "aether_talisman",
-^   "fire_talisman",
-// ^   "ice_talisman",
-
-// ^   "",
-// ^   "",
-// ^   "",
-^   "voidweaver",
-^   "cinderwisp",
-// ^   "",
-
-^   "wand_stone",
-^   "wand_poison",
-^   "wand_vigor",
-^   "wand_aether",
-^   "wand_fire",
-^   "wand_ice",
-
-^   "staff_stone",
-^   "staff_poison",
-^   "staff_vigor",
-^   "staff_aether",
-^   "staff_fire",
-^   "staff_ice"
+^   "staff_stone","staff_poison",
+^   "staff_vigor","staff_aether",
+^   "staff_fire","staff_ice"
 ^]
 
-var talisman_table = [
+var talismans = [
 ^   "TALISMAN"        , "SUMMON"      ,
 
 // ^   "poison_talisman" , ""  ,
@@ -73,8 +53,8 @@ var talisman_table = [
 // ^   "stone_talisman"  , ""
 ^]
 
-var hidden_table = [
-^   "ID"                  , "NAME"              , "REQUIRED ARMOR",
+var hiddenItems = [
+^   "ID"           , "NAME"              , "REQUIRED ARMOR",
 
 // Hidden wands
 ^   "wand_poison"  , "plague wand"       , 6   ,
@@ -93,7 +73,7 @@ var hidden_table = [
 ^   "staff_stone"  , "acrobatic staff"   , 3
 ^]
 
-var potion_table = [
+var potions = [
 ^   "strength"        ,
 ^   "experience"      ,
 ^   "healing"         ,
@@ -107,18 +87,18 @@ var potion_table = [
 ^]
 
 
-// ............. Weapon Ranges .............. //
+// ................. Ranges ................. //
 
-var range_table = [
+var ranges = [
 ^   "ID"                    , "RANGE",
 
 ^   "blade"                 , 11,
 ^   "arm"                   , 7,
 
 ^   "bardiche"              , 9,
-^   "bardiche ability"      , 7,  // Ability
+^   "bardiche ability"      , 7,
 ^   "heavy_hammer"          , 7,
-^   "heavy_hammer ability"  , 21, // Ability
+^   "heavy_hammer ability"  , 21,
 
 // These count both for dashing and bashing shields:
 ^   "dash_min"              , 11,
@@ -133,6 +113,7 @@ var range_table = [
 ^   "ki"                    , 18,
 ^   "experience"            , 18,
 ^   "triskelion"            , 10,
+^   "fissure"               , 18,
 ^   "moon"                  , 18,
 
 ^   "sword"                 , 5,
@@ -145,7 +126,51 @@ var range_table = [
 ^   "socketed_shield"       , 40  // Engaging range
 ^]
 
-// Special stats
+// ............. Hitbox & Splash ............ //
+
+// index accesors:
+var _HS_IDS     = 0
+var _HS_HITBOX  = 1
+var _HS_SPLASH  = 2
+var _HS_WIELD   = 3
+var _HS_PARITY  = 4
+var _HS_RANGED  = 5
+
+// map (hs = hitbox & splash):
+//      IDS,    HITBOX, SPLASH, WIELD, PARITY, RANGED
+var map_hs = [
+^   "bardiche"      , 13, 4 , false, false, false,
+^   "arm"           , 10, 1 , false, false, false,
+^   "basic crossbow", 7 , 4 , true , false, true ,
+^   "heavy crossbow", 8 , 4 , false, false, true ,
+^   "heavy_hammer"  , 9 , 4 , false, false, false,
+^   "sword"         , 7 , 3 , true , true , false,
+^   "staff melee"   , 7 , 3 , false, true , false,
+^   "hammer"        , 7 , 3 , true , true , false,
+^   "big sword"     , 8 , 3 , true , true , false,
+^   "wand"          , 5 , 4 , true , false, true ,
+^   "torch"         , 5 , 4 , true , false, true ,
+^   "harmonic"      ,
+^   "staff magic"   , 7 , 4 , false, false, true,
+^   "runestone"     ,
+^   "grappling_hook",
+^   "stone throw"   ,
+^   "punch"         ,
+^   "kick"          ,
+^   "hatchet"       ,
+^   "shovel"        ,
+^   "fissure"       ,
+^]
+
+/* NOTE: on _WIELD:
+  false = dual
+  true  = single */
+
+/* NOTE: on _PARITY:
+  false = odd
+  true  = even */
+
+// .............. Special stats ............. //
 
 /* the added range that the
 Grasping Staff's ability adds: */
@@ -156,7 +181,8 @@ var grasping_cap = 22
 var berserker_base = 10
 var reset_base = 29.5
 // Plague Wand's Weaken level table
-var plague_table = [1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6]
+var plague_table =
+^[1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6]
 
 // Mask
 var mask_lvl_table = [
@@ -166,8 +192,7 @@ var mask_lvl_table = [
 // damage reduction per feeble applied
 var maskEffReduction = 2
 
-
-// //////////////// FUNCTIONS //////////////// //
+// //////////////// FUNCTIONS /////////////// //
 
 /* Returns a stat of an effect,
 or null if there was an error.
@@ -326,40 +351,40 @@ func getTotalHP(source)
 /* Returns an armor stat from an item's ID or null if there was an error.
 Works with hidden items only. */
 func getArmor(source)
-  var armorI = hidden_table.IndexOf(source) +
-  ^            hidden_table.IndexOf("REQUIRED ARMOR")
+  var armorI = table_hidden.IndexOf(source) +
+  ^            table_hidden.IndexOf("REQUIRED ARMOR")
 
   ?armorI >= 5 // first armor value's index
-    return hidden_table[armorI]
+    return table_hidden[armorI]
   : // armorI <= 0 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getArmor\nCAUSE: unknown <source>:\n\n" + source, false)
     return null
 /* Returns a talisman's name/ID from a summon's ID or null if there was an error. */
 func getTalisman(source)
-  var talismanI = talisman_table.IndexOf(source) - 1 // index of "TALISMAN"
+  var talismanI = talismans.IndexOf(source) - 1 // index of "TALISMAN"
 
   ?talismanI >= 2 // first talisman value's index
-    return talisman_table[talismanI]
+    return talismans[talismanI]
   : // talismanI <= -1 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getTalisman\nCAUSE: unknown <source>:\n\n" + source, false)
     return null
 /* Returns a summon's name/ID from a talisman's ID or null if there was an error. */
 func getSummon(source)
-  var summonI = talisman_table.IndexOf(source) +
-  ^             talisman_table.IndexOf("SUMMON")
+  var summonI = talismans.IndexOf(source) +
+  ^             talismans.IndexOf("SUMMON")
 
   ?summonI >= 3 // first summon value's index
-    return talisman_table[summonI]
+    return talismans[summonI]
   : // summonI <= 0 -- not found or error
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getSummon\nCAUSE: unknown <source>:\n\n" + source, false)
     return null
-/* Returns each weapon's range, or null
+/* Returns each item's range, or null
 if there was an error.
 
 Accounts for the Grasping Staff's
 buff and Pallas's debuff.
 *************************************
-   REQUIRES WEAPON ID EXCLUSIVELY.
+   REQUIRES ITEM ID EXCLUSIVELY.
 ************************************* */
 func getRange(source)
   var result = null
@@ -367,11 +392,11 @@ func getRange(source)
   var canIncrease = true
   var isReduced = false
 
-  var rangeI = range_table.IndexOf(source) +
-  ^            range_table.IndexOf("RANGE")
+  var rangeI = ranges.IndexOf(source) +
+  ^            ranges.IndexOf("RANGE")
 
   ?rangeI >= 3 // first range value's index
-    result = range_table[rangeI]
+    result = ranges[rangeI]
 
     ?source = "crossbow" |
     ^source = "triskelion"
@@ -403,8 +428,8 @@ func inRange(source)
     return foe.distance <= getRange(source) + 1
 /* Returns true if  */
 func betweenRange(source1, source2)
-  ?!range_table.Contains(source1) |
-  ^!range_table.Contains(source2)
+  ?!ranges.Contains(source1) |
+  ^!ranges.Contains(source2)
     u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: betweenRange\nCAUSE: unknown <source1> or <source2>:\n\n<"+source1+">,<"+source2+">", false)
     return false
   :
@@ -424,7 +449,7 @@ Accounts for these external factors:
   - Weaken debuffs dealt to the player.
   - If the item is a hammer and the foe has armor.
 
-itemDmg = the base damage of your target weapon (> 0).
+itemDmg = the base damage of your target item (> 0).
 itemMult = the item's critical damage multiplier (> 0)
            (only taken into account when using Lucky potion).
 berserkerLvl = your Berserker Staff's enchantment level
@@ -521,7 +546,7 @@ on their enchant level. */
 func getHiddenStat(hiddenName, lvl)
   // Entry sanitization
   hiddenName = string.ToLower(hiddenName)
-  ?hidden_table.Contains(hiddenName) // valid hiddenName
+  ?table_hidden.Contains(hiddenName) // valid hiddenName
     ?math.Clamp(lvl, 1, 21) = lvl // lvl is in range
       ?hiddenName = "berserker staff"
         return berserker_base + lvl - 1
@@ -543,7 +568,6 @@ based on its base damage and crit multiplier. */
 func bardicheDmgR(dmg, mult)
   return (dmg + 17) * mult
 
-
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "Stats" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "Stats" ▄▀▄▀▄▀▄▀▄▀ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //

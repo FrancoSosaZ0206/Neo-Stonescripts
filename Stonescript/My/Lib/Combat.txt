@@ -104,7 +104,7 @@ func canUseAbility(abilityID)
   var result = false
 
   // Valid ID
-  ?s.ability_table.Contains(abilityID)
+  ?s.abilities.Contains(abilityID)
     result = item.CanActivate() &
     ^item.GetCooldown(abilityID) <= 0
 
@@ -152,7 +152,7 @@ func canUseAbility(abilityID)
         ^!(foe = "immune_to_stun" |
         ^  encounter.eliteMod = "tenacious")
 
-    :?s.talisman_table.Contains(abilityID) // it's a summon
+    :?s.talismans.Contains(abilityID) // it's a summon
       result = result & isSummoned(abilityID)
 
       ?abilityID = "voidweaver"
@@ -352,7 +352,7 @@ func canHide(summonName)
   return result
 
 func devour(summonName)
-  ?s.talisman_table.Contains(summonName)
+  ?s.talismans.Contains(summonName)
     ?isSummoned(summonName)
       /*?summonName = ""
         activate */
@@ -404,7 +404,7 @@ func canBrewPotion()
     // Entry sanitization
     potionType = string.ToLower(potionType)
 
-    ?!s.potion_table.Contains(potionType)
+    ?!s.potions.Contains(potionType)
       log.logError(_FILE, "canBrewPotion",
       ^"unknown <potionType>: "+potionType)
 
@@ -443,7 +443,7 @@ func brewPotion()
     // Entry sanitization
     potionType = string.ToLower(potionType)
 
-    ?!s.potion_table.Contains(potionType)
+    ?!s.potions.Contains(potionType)
       log.logError(_FILE, "brewPotion",
       ^"unknown <potionType>: "+potionType)
     :
@@ -478,7 +478,7 @@ func canUsePotion()
     // Entry sanitization
     potionType = string.ToLower(potionType)
 
-    ?!s.potion_table.Contains(potionType)
+    ?!s.potions.Contains(potionType)
       log.logError(_FILE, "canBrewPotion",
       ^"unknown <potionType>: "+potionType)
 
@@ -587,7 +587,7 @@ func canEscape()
 
 func canStutterStep()
   return s.betweenRange("hatchet", "triskelion") &
-  ^!(permapotSetup /*| buffs.string = "buff_inf_speed"*/) 
+  ^!(permapotSetup /* | buffs.string = "buff_inf_speed" */) 
 func stutterStep()
   equipL sword 0* +0
 
