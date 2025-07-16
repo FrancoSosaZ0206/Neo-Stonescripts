@@ -556,15 +556,29 @@ func AAC(itemLeft, itemRight)
 
   ?item.right.state = 3
     equipR @itemRight@
-    equip @item.right@ // equip works for two-handed items as well
 
+    // also works for dual-wielded items:
+    equip @item.right@
+
+/* Returns true if:
+  - is between crosssbow and triskelion ranges.
+  - 1-frame cast item or berserk potion.
+  - NOT:
+    - player is stunned, can't attack.
+    - player is chilled, which drastically
+      reduces movement and attack speeds.
+    - Infernal Staff walking speed boost.
+
+false otherwise. */
 func canSmoothCast(is1f)
-  return !permapotSetup &
+  return
   ^s.betweenRange("triskelion","crossbow") &
-  ^!(debuffs.string = "stun"  | // player is stunned, can't attack
-  ^  debuffs.string = "chill" | // player is chilled, which drastically reduces movement and attack speeds
-  ^  buffs.string = "buff_inf_speed") & // Infernal Staff walking speed boost
-  ^(is1f | buffs.string = "ʘ") // 1-frame cast item or berserk potion
+  ^(is1f | buffs.string = "ʘ") &
+  ^!(permapotSetup |
+  ^  buffs.string = "buff_range" |
+  ^  debuffs.string = "stun"  |
+  ^  debuffs.string = "chill" |
+  ^  buffs.string = "buff_inf_speed")
 func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL triskelion
@@ -587,7 +601,7 @@ func canEscape()
 
 func canStutterStep()
   return s.betweenRange("hatchet", "triskelion") &
-  ^!(permapotSetup /* | buffs.string = "buff_inf_speed" */) 
+  ^!(permapotSetup | buffs.string = "buff_range") 
 func stutterStep()
   equipL sword 0* +0
 

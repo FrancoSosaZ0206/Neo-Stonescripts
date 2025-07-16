@@ -687,7 +687,7 @@ c.AAC("sword *0", "hatchet")
 
     // TODO: extend range
     :?c.canUseAbility("staff_aether") &
-    ^ !isMinibossScr
+    ^ !(isMinibossScr | nRuns = 1)
       c.useAbility_TH("staff_aether", a.stAh)
 
     // Align foes

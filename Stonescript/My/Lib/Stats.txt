@@ -367,11 +367,11 @@ null if there was an error.
 
 Works only with hidden items currently. */
 func getArmor(source)
-  var armorI = table_hidden.IndexOf(source) +
-  ^            table_hidden.IndexOf("REQUIRED ARMOR")
+  var armorI = hiddenItems.IndexOf(source) +
+  ^            hiddenItems.IndexOf("REQUIRED ARMOR")
 
   ?armorI >= 5 // first armor value's index
-    return table_hidden[armorI]
+    return hiddenItems[armorI]
   : // armorI <= 0 -- not found or error
     log.logError(_FILE,"getArmor",
     ^"unknown <source>:\n\n" + source)
@@ -527,9 +527,11 @@ analyzes currently equipped items and returns
 their hitbox + splash ranges, if they're found. */
 func getHbxSplash_Smart()
   // TODO: implement.
+  >c0,0,#red,unimplemented.
 
 func inHbxSplash(isSmart, source)
   // TODO: implement.
+  >c0,0,#red,unimplemented.
 
 /* Returns amount of trailing foes in a group.
 This works by calculating the difference between
@@ -551,6 +553,7 @@ Variables:
              use foe.count (d = 46). */
 func getTailFoes(isSmart, source1, source2)
   // TODO: implement.
+  >c0,0,#red,unimplemented.
 
 // ................. Damage ................. //
 
@@ -673,7 +676,7 @@ based on their enchant level. */
 func getHiddenStat(hiddenName, lvl)
   // Entry sanitization
   hiddenName = string.ToLower(hiddenName)
-  ?table_hidden.Contains(hiddenName) // valid hiddenName
+  ?hiddenItems.Contains(hiddenName) // valid hiddenName
     ?math.Clamp(lvl, 1, 21) = lvl // lvl is in range
       ?hiddenName = "berserker staff"
         return berserker_base + lvl - 1

@@ -195,7 +195,7 @@ func fight(mode)
     ^@time.FormatDigital(
     ^         loc.averageTime + permapotTbw)@
 
-/* // itemSplash display test
+// itemSplash display test
 
 var playerX = screen.FromWorldX(pos.x)
 playerX = screen.FromWorldX(pos.x)
@@ -222,7 +222,7 @@ draw.Bg(playerX, playerY + 2, #aa4400,
   >`@playerX + itemSplash@,@playerY + 2@,
   ^out of range
   draw.Bg(playerX + itemSplash, playerY + 2,
-  ^ #008800, 46 - itemSplash, 1) */
+  ^ #008800, 46 - itemSplash, 1)
 
 // monitor post-treasure metrics
 var treasureCol = #888888
@@ -250,7 +250,7 @@ var treasureCol = #888888
 ^s.getFoeDmg(a.berserkerLvl,
 ^            a.plagueLvl,
 ^            a.maskLvl      ) |
-^nRuns >= 25
+^old_t = item.GetTreasureLimit()
   loc.Leave()
 
 // .............. SETUP LOGIC ............... //
@@ -367,13 +367,7 @@ boulders. */
 
 // set up itemSplash default value
 // bardiche's hitbox + itemSplash area
-itemSplash = 17
-var splashBuffed = false
-?buffs.string = "buff_range" & !splashBuffed
-  itemSplash += 10
-  splashBuffed = true
-:?buffs.string ! "buff_range"
-  splashBuffed = false
+itemSplash = 17 // s.getHbxSplash("bardiche", null)
 
 // set canDash default value
 canDash = true
@@ -712,16 +706,16 @@ unmake with repeating crossbow. */
 ^ s.getTotalHP("player") < c.hihp
   c.useAbility_OH("wand_ice", a.wIh, hand)
 
-// TODO: extend range
+/* // FIXME: extend range
 :?c.canUseAbility("staff_aether") &
-^ foe.count > 1 & !isMinibossScr &
-^ s.inRange("dash_min")
-  c.useAbility_TH("staff_aether", a.stAh)
+^ foe.count > 1 & s.inRange("dash_min") &
+^ !(isMinibossScr | nRuns = 1)
+  c.useAbility_TH("staff_aether", a.stAh) */
 
 // ............... AOE LOGIC ................ //
 
 :?foe.GetCount(itemSplash) > 1 &
-^!(foe = "boss" /*| foe = "monarch"*/)
+^!(foe = "boss")
   // Align foes
   ?c.canUseAbility("wand_stone") &
   ^s.inRange("wand")
@@ -846,6 +840,9 @@ unmake with repeating crossbow. */
     c.useAbility_TH("bardiche", Kubikiribocho)
 :
   fight("normal")
+
+?buffs.string = "buff_range"
+  itemSplash += 10
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀ ┃  //
