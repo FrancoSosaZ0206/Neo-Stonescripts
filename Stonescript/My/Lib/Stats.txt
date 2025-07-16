@@ -4,12 +4,15 @@
 
 // //////////////// IMPORTS ///////////////// //
 
+var log = import My/Lib/Error_Logging/public
 var u = import My/Lib/Utilities
 
 // /////////////// VARIABLES //////////////// //
 
 /* FIXME: refactor current map layout from 
 per-property to per-item. */
+
+var _FILE = "Lib/Stats"
 
 // .................. IDs ................... //
 
@@ -19,14 +22,14 @@ var items = [ // all items with their names and stonescript IDs
 ^] */
 
 var abilities = [ // ability cooldown IDs only
-^   "blade", "mask", "arm",
-^   "mind",
-^   "bash", "dash",
-^   "hatchet", "shovel",
+^   "blade"   , "mask"        , "arm",
+^   "mind"    ,
+^   "bash"    , "dash"        ,
+^   "hatchet" , "shovel"      ,
 ^   "bardiche", "heavy_hammer", "quarterstaff",
 
 // ^   "stone_talisman", "poison_talisman",
-^   /* "vigor_talisman" */, "aether_talisman",
+^   /* "vigor_talisman" ,*/ "aether_talisman",
 ^   "fire_talisman", // "ice_talisman",
 
 // ^   "", "",
@@ -35,11 +38,11 @@ var abilities = [ // ability cooldown IDs only
 
 ^   "wand_stone", "wand_poison",
 ^   "wand_vigor", "wand_aether",
-^   "wand_fire", "wand_ice",
+^   "wand_fire" , "wand_ice",
 
 ^   "staff_stone","staff_poison",
 ^   "staff_vigor","staff_aether",
-^   "staff_fire","staff_ice"
+^   "staff_fire" ,"staff_ice"
 ^]
 
 var talismans = [
@@ -139,27 +142,31 @@ var _HS_RANGED  = 5
 // map (hs = hitbox & splash):
 //      IDS,    HITBOX, SPLASH, WIELD, PARITY, RANGED
 var map_hs = [
-^   "bardiche"      , 13, 4 , false, false, false,
-^   "arm"           , 10, 1 , false, false, false,
-^   "basic crossbow", 7 , 4 , true , false, true ,
-^   "heavy crossbow", 8 , 4 , false, false, true ,
-^   "heavy_hammer"  , 9 , 4 , false, false, false,
-^   "sword"         , 7 , 3 , true , true , false,
-^   "staff melee"   , 7 , 3 , false, true , false,
-^   "hammer"        , 7 , 3 , true , true , false,
-^   "big sword"     , 8 , 3 , true , true , false,
-^   "wand"          , 5 , 4 , true , false, true ,
-^   "torch"         , 5 , 4 , true , false, true ,
-^   "harmonic"      ,
-^   "staff magic"   , 7 , 4 , false, false, true,
-^   "runestone"     ,
-^   "grappling_hook",
-^   "stone throw"   ,
-^   "punch"         ,
-^   "kick"          ,
-^   "hatchet"       ,
-^   "shovel"        ,
-^   "fissure"       ,
+^   ["bardiche"      , 13, 4 , false, false, false],
+^   ["blade"         , 13, 4 , false, false, false],
+^   ["arm"           , 10, 1 , false, false, false],
+^   ["basic crossbow", 7 , 4 , true , false, true ],
+^   ["heavy crossbow", 8 , 4 , false, false, true ],
+^   ["heavy_hammer"  , 9 , 4 , false, false, false],
+^   ["sword"         , 7 , 3 , true , true , false],
+^   ["staff melee"   , 7 , 3 , false, true , false],
+^   ["hammer"        , 7 , 3 , true , true , false],
+^   ["big sword"     , 8 , 3 , true , true , false],
+^   ["wand"          , 5 , 4 , true , false, true ],
+^   ["torch"         , 5 , 4 , true , false, true ],
+// ^   ["harmonic"      , 5 , 4 , false, false, // ???],
+^   ["staff magic"   , 7 , 4 , false, false, true ],
+
+// NOTE: this one doesn't change for right hand
+^   ["runestone"     , 6 , 4 , true , false, true ],
+
+^   ["grappling_hook", 1 , 4 , false, false, true ],
+^   ["stone throw"   , 3 , 4 , true , false, true ],
+^   ["punch"         , 5 , 4 , true , false, false],
+^   ["kick"          , 5 , 4 , true , false, false],
+^   ["hatchet"       , 8 , 4 , false, true , false],
+^   ["shovel"        , 6 , 3 , false, true , false],
+^   ["fissure"       , 63, 0 , true , true , true]
 ^]
 
 /* NOTE: on _WIELD:
@@ -194,6 +201,8 @@ var maskEffReduction = 2
 
 // //////////////// FUNCTIONS /////////////// //
 
+// ............. Status Effects ............. //
+
 /* Returns a stat of an effect,
 or null if there was an error.
 
@@ -227,7 +236,9 @@ func getEffectStat(source, effectType, effectId, statType)
     fxStr = debuffs.string
 
   :
-    showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getEffectStat\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
+    log.logError(_FILE,"getEffectStat",
+    ^"unknown <source> or <effectType>: <"+
+    ^source + ">, <" + effectType + ">")
 
   ?fxStr // there are active effects
     // all effects are separated by a "," char
@@ -293,7 +304,9 @@ func getEffectsTable(source, effectType, isSlim)
     fxTable = "Player debuffs"
 
   :
-    showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: showEffects\nCAUSE: unknown <source> or <effectType>: <" + source + ">, <" + effectType + ">", false)
+    log.logError(_FILE,"showEffects",
+    ^"unknown <source> or <effectType>: <" +
+    ^source + ">, <" + effectType + ">")
 
 
   ?fxStr // there are active effects
@@ -344,12 +357,15 @@ func getTotalHP(source)
   :?source = "player"
     return hp + armor
   :
-    showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getTotalHP\nCAUSE: unknown <source>: " + source, false)
+    log.logError(_FILE,"getTotalHP",
+    ^"unknown <source>: " + source)
 
     return null
 
-/* Returns an armor stat from an item's ID or null if there was an error.
-Works with hidden items only. */
+/* Returns an armor stat from an item's ID,
+null if there was an error.
+
+Works only with hidden items currently. */
 func getArmor(source)
   var armorI = table_hidden.IndexOf(source) +
   ^            table_hidden.IndexOf("REQUIRED ARMOR")
@@ -357,8 +373,12 @@ func getArmor(source)
   ?armorI >= 5 // first armor value's index
     return table_hidden[armorI]
   : // armorI <= 0 -- not found or error
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getArmor\nCAUSE: unknown <source>:\n\n" + source, false)
+    log.logError(_FILE,"getArmor",
+    ^"unknown <source>:\n\n" + source)
     return null
+
+// ................. Summons ................ //
+
 /* Returns a talisman's name/ID from a summon's ID or null if there was an error. */
 func getTalisman(source)
   var talismanI = talismans.IndexOf(source) - 1 // index of "TALISMAN"
@@ -366,7 +386,8 @@ func getTalisman(source)
   ?talismanI >= 2 // first talisman value's index
     return talismans[talismanI]
   : // talismanI <= -1 -- not found or error
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getTalisman\nCAUSE: unknown <source>:\n\n" + source, false)
+    log.logError(_FILE,"getTalisman",
+    ^"unknown <source>:\n\n" + source)
     return null
 /* Returns a summon's name/ID from a talisman's ID or null if there was an error. */
 func getSummon(source)
@@ -376,8 +397,12 @@ func getSummon(source)
   ?summonI >= 3 // first summon value's index
     return talismans[summonI]
   : // summonI <= 0 -- not found or error
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getSummon\nCAUSE: unknown <source>:\n\n" + source, false)
+    log.logError(_FILE,"getSummon",
+    ^"unknown <source>:\n\n" + source)
     return null
+
+// ................. Ranges ................. //
+
 /* Returns each item's range, or null
 if there was an error.
 
@@ -414,8 +439,9 @@ func getRange(source)
     ?result >= grasping_cap & isIncreased
       result = grasping_cap
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getRange\nCAUSE: unknown <source>:\n\n" + source, false)
-    result = false
+    log.logError(_FILE,"getRange",
+    ^"unknown <source>:\n\n" + source)
+    result = null
 
   return result
 func inRange(source)
@@ -426,19 +452,109 @@ func inRange(source)
     ^           getRange("dash_max") )
   :
     return foe.distance <= getRange(source) + 1
-/* Returns true if  */
+/* TODO: interface:
+Returns true if */
 func betweenRange(source1, source2)
   ?!ranges.Contains(source1) |
   ^!ranges.Contains(source2)
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: betweenRange\nCAUSE: unknown <source1> or <source2>:\n\n<"+source1+">,<"+source2+">", false)
+    log.logError(_FILE,"betweenRange",
+    ^"unknown <source1> or <source2>:\n\n<"+
+    ^source1+">, <"+source2+">")
+
     return false
   :
-    return foe.distance =
-    ^math.Clamp(foe.distance,
-    ^           getRange(source1) + 1,
-    ^           getRange(source2) + 1 )
+    var range1 = getRange(source1) + 1
+    var range2 = getRange(source2) + 1
 
-// TO DO: COMPLETE THIS FUNCTION
+    ?range1 < range2
+      return foe.distance =
+      ^math.Clamp(foe.distance,range1,range2)
+    : // range1 >= range2
+      return foe.distance =
+      ^math.Clamp(foe.distance,range2,range1)
+
+// ............. Hitbox + Splash ............ //
+
+/* Returns an item's hitbox + splash range,
+or null if there was an error.
+
+Parameters:
+  - source: item id (see map_hs for reference).
+  - hand: in which the item is equipped
+          (for single-wielded items only).
+
+Value returned can vary based on:
+  - item
+  - attack type (melee/ranged,
+    splash vs single target)
+  - hand equipped (if single-wielded). */
+func getHbxSplash(source, hand)
+  var result = null
+
+  ?Type(hand) ! "string"
+    log.logError(_FILE, "getHbxSplash",
+    ^"invalid <hand> type. Expected 'string'," +
+    ^"received: " + Type(hand))
+  :?!["l", "left", "r", "right"].Contains(hand)
+    log.logError(_FILE, "getHbxSplash",
+    ^"unknown <hand> value: " + hand)
+  :
+    // get source id
+    for hs : map_hs
+      ?hs[_HS_IDS] = source
+        // add hitbox and splash areas
+        result = hs[_HS_HITBOX] + hs[_HS_SPLASH]
+
+        // add distance to foe if it's ranged
+        ?hs[_HS_RANGED] & hs[_HS_IDS] ! "fissure"
+          result += foe.distance
+
+        // add 1 to hitbox if hand is right
+        ?["r", "right"].Contains(hand)
+          result ++
+
+        // add grasping_buff if active
+        ?buffs.string = "buff_range"
+          result = result + grasping_buff
+
+        // exit loop and return from func
+        break
+
+  return result
+
+/* advanced version of getHitboxSplash;
+analyzes currently equipped items and returns
+their hitbox + splash ranges, if they're found. */
+func getHbxSplash_Smart()
+  // TODO: implement.
+
+func inHbxSplash(isSmart, source)
+  // TODO: implement.
+
+/* Returns amount of trailing foes in a group.
+This works by calculating the difference between
+foes in 2 different hitbox + splash ranges.
+
+Pre-Conditions:
+- source2 can be null
+- isSmart = [true, false]
+
+Variables:
+  - isSmart:
+    - false: source1 and source2 will be treated
+             as manual input.
+    - true: automatic input, source1 and source2
+             will be internally managed.
+  - source1: 1st item to get range from.
+  - source2: 2nd item to get range from.
+             If set to null, the function will
+             use foe.count (d = 46). */
+func getTailFoes(isSmart, source1, source2)
+  // TODO: implement.
+
+// ................. Damage ................. //
+
+// TODO: COMPLETE THIS FUNCTION
 /* Calculates the damage the player will deal
 in their next hit.
 
@@ -476,7 +592,8 @@ armorMult = if the target item is a hammer, its bonus
         result *= itemMult
         applied[1] = true
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getPlayerDmg\nCAUSE: invalid entry/entries:\n\n" + source, false)
+    log.logError(_FILE,"getPlayerDmg",
+    ^"invalid entry/entries:\n\n" + source)
 
     result = null
   
@@ -536,13 +653,23 @@ func getFoeDmg(berserkerLvl, plagueLvl, maskLvl)
     return result
   
   : // invalid entries
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getFoeDmg\nCAUSE: invalid entry/entries:\n\n" + "plagueLvl = " + plagueLvl + "\nberserkerLvl = " + berserkerLvl, false)
+    log.logError(_FILE,"getFoeDmg",
+    ^"invalid entry/entries:\n\n" +
+    ^"plagueLvl = " + plagueLvl +
+    ^"\nberserkerLvl = " + berserkerLvl)
 
     return null
 
-// TO DO: COMPLETE MISSING HIDDEN STAVES AND WANDS
-/* Returns stats for hidden wands or staves, based
-on their enchant level. */
+/* Calculates the damage the Bardiche's ability will do,
+based on its base damage and crit multiplier. */
+func bardicheDmgR(dmg, mult)
+  return (dmg + 17) * mult
+
+// ................. Others ................. //
+
+// TODO: COMPLETE MISSING
+/* Returns stats for hidden wands or staves,
+based on their enchant level. */
 func getHiddenStat(hiddenName, lvl)
   // Entry sanitization
   hiddenName = string.ToLower(hiddenName)
@@ -555,18 +682,15 @@ func getHiddenStat(hiddenName, lvl)
       :?hiddenName = "reset wand"
         return reset_base - (0.5 * (lvl - 1))
     :
-      u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getHiddenStat\nCAUSE: invalid <lvl>:\n\n" + lvl, false)
+      log.logError(_FILE,"getHiddenStat",
+      ^"invalid <lvl>:\n\n" + lvl)
 
       return null
   :
-    u.showStrCtr(0,30,#red,"ERROR\nFILE: Stats\nFUNCTION: getHiddenStat\nCAUSE: unknown <hiddenName>:\n\n" + hiddenName, false)
+    log.logError(_FILE,"getHiddenStat",
+    ^"unknown <hiddenName>:\n\n" + hiddenName)
 
     return null
-
-/* Calculates the damage the Bardiche's ability will do,
-based on its base damage and crit multiplier. */
-func bardicheDmgR(dmg, mult)
-  return (dmg + 17) * mult
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "Stats" ▄▀▄▀▄▀▄▀▄▀ ┃  //
