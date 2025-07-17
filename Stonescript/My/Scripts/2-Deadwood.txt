@@ -111,8 +111,8 @@ func fight(mode)
 
     // AOE debuffing
     ?(tracker.canTrack("Weaken") |
-    ^ tracker.canTrack("Burn")    ) &
-    ^(!canDash |
+    ^ tracker.canTrack("Burn")    ) & (
+    ^ !(canDash | foe = "immune_to_ranged") |
     ^ (foe = "elite" &
     ^  foe.GetCount(itemSplash) > 1))
       itemSplash = foe.distance + 7
@@ -142,10 +142,9 @@ func fight(mode)
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
-    :?hp ! maxhp &
-    ^ ((canDash &
-    ^   foe.GetCount(itemSplash) = 1) |
-    ^  foe = "monarch")
+    :?hp ! maxhp & ((canDash &
+    ^ foe.GetCount(itemSplash) = 1) |
+    ^ foe = "monarch")
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ............ //
@@ -162,18 +161,22 @@ func fight(mode)
     ^ (foe.GetCount(itemSplash) = 1 |
     ^  foe = "monarch" | foe = "boss")
       ?c.canUseAbility("staff_poison") &
-      ^!s.inRange("dash") & foe = "phase3"
+      ^!s.inRange("dash") & foe = "poena"
         c.useAbility_TH("staff_poison", a.stPh)
-      :?c.canUsePotion() & foe = "phase3"
+      :?c.canUsePotion() & foe = "poena"
         activate potion
       /* :?c.canBurst() & !c.permapotSetup &
-      ^ foe = "phase3"
+      ^ foe = "poena"
         c.burst(a.burstSwords) */
       :
         a.ldtF("sword dmg")
+
+    :?foe = "immune_to_ranged"
+      a.ldtF("sword dmg")
     :
       itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
+
   : // invalid mode
     log.logError(_FILE,"fight",
     ^   "unknown <mode>: "+mode)
@@ -185,8 +188,7 @@ func fight(mode)
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
     >o-7,6,#magenta,wait until 
-    ^@time.FormatDigital(
-    ^         loc.averageTime + permapotTbw)@
+    ^@time.FormatDigital(permapotTbw)@
 
 /* // itemSplash display test
 
@@ -435,7 +437,8 @@ c.AAC("sword *0", "hatchet")
 
 /* hide cinderwisp to avoid getting ignition
 mirrored. */
-:?c.canHide("cinderwisp") & foe = "poena" &
+:?c.canHide("cinderwisp") &
+^ foe = "poena" & isBossScr &
 ^!c.canUseAbility("bardiche")
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
@@ -497,7 +500,7 @@ mirrored. */
 ^ s.inRange("socketed_shield") &
 ^ ((canDash & !s.inRange("dash_max")) |
 ^  !s.inRange("crossbow"))
-  ?armor > a.compoundMaxArmor_boosted |
+  ?armor > a.CmaE |
   ^(c.canEngage() & foe ! "phase")
     a.ldtF("engage")
   :
@@ -509,7 +512,10 @@ mirrored. */
 
 // .............. DASHING LOGIC ............. //
 
-:?a.canSmartDash() & canDash
+:?canDash & ((
+^  foe.buffs.string = "poena_mirror" |
+^  foe.buffs.string = "buff_mirror"   ) &
+^ c.canUseAbility("dash")) | a.canSmartDash()
   a.smartDash()
 
 // Knockback farming
@@ -528,13 +534,21 @@ unmake with repeating crossbow. */
   a.ldtF("engage")
 
 // get in melee range faster
-:?c.canStutterStep()
+:?c.canStutterStep() // & canDash
   c.stutterStep()
+
+// ............. MINIBOSS LOGIC ............. //
+
+:?isMinibossScr
+  ?foe = "spawner" | foe = "immune_to_ranged"
+    fight("normal")
+  :
+    equip @a.bR@
 
 // ............... AOE LOGIC ................ //
 
 :?foe.GetCount(itemSplash) > 1 &
-^!(foe = "boss")
+^!(foe = "boss" | isMinibossScr)
   // .......... SPECIAL ITEMS LOGIC ......... //
 
   // Voidweaver - use it if possible
@@ -542,6 +556,11 @@ unmake with repeating crossbow. */
   ^c.canUnmakeVoidweaver() &
   ^!isMinibossScr
     c.devour("voidweaver")
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "buff_mirror"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
 
   // Calamity - reduce hp
   :?c.canUseAbility("wand_aether") &
@@ -551,11 +570,6 @@ unmake with repeating crossbow. */
   ^ encounter.eliteMod = "blessed"    |
   ^ foe.buffs.string = "buff_tenacious")
     c.useAbility_OH("wand_aether", a.wAh, hand)
-
-  // Reset buff
-  :?c.canUseAbility("wand_vigor") &
-  ^ foe.buffs.string = "stoic"
-    c.useAbility_OH("wand_vigor", a.wVh, hand)
 
   // Reduce damage
   :?c.canUseAbility("wand_poison") &
@@ -574,7 +588,7 @@ unmake with repeating crossbow. */
 
   // Align foes
   :?c.canUseAbility("wand_stone") &
-  ^s.inRange("wand")
+  ^ s.inRange("wand")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
   // ........................................ //
@@ -591,14 +605,14 @@ unmake with repeating crossbow. */
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
   // don't interrupt bardiche
-  ^ !c.isCasting("bardiche") &
+  ^!c.isCasting("bardiche") &
   ^ foe ! "immune_to_ranged" &
   ^ (es.canDebuff("Stun") |
     // stun time (frames) running out
   ^  (stunTime = math.Clamp(stunTime, 1, 11) &
      // not stunned with heavy hammer // or Frost Wand
   ^   foe.debuffs.string ! "debuff_armor_fatigue"/* &
-  ^   foe.debuffs.string ! "debuff_frost_stun")*/)
+  ^   foe.debuffs.string ! "debuff_frost_stun")*/))
     itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
@@ -642,74 +656,43 @@ unmake with repeating crossbow. */
 
 // Xyloalgia
 :?foe = "tree_boss" & foe.state ! 4
+  // About to die
   ?foe.hp < 200 // a.armDmg * 2
+    // dash back
     canDash = false
-    ?c.canUseAbility("mind")
+    ?c.canUseAbility("staff_stone")
+      c.useAbility_TH("staff_stone", a.stSh)
+    :?c.canUseAbility("mind") &
+    ^!s.inRange("bardiche")
       a.ldtF("mind")
 
+    // queue debuff projectiles
     :?tracker.canTrack("Weaken")
       a.ldtF("magic debuff weaken")
     :?tracker.canTrack("Chill")
       a.ldtF("magic debuff chill")
     :?tracker.canTrack("Burn")
       a.ldtF("magic debuff burn")
+
+    : // dash again and finish up
+      canDash = true
+      fight("normal")
   :
     fight("normal")
 
 : // Poena
-  // remove mirror buff
+  // remove mirror buff with Reset Wand
   ?c.canUseAbility("wand_vigor") &
   ^foe.buffs.string = "poena_mirror"
     c.useAbility_OH("wand_vigor", a.wVh, hand)
 
-  // Stun Poena
+  // Stun Poena with Frost Wand
   :?c.canUseAbility("wand_ice") &
   ^ es.canDebuff("Stun")
     c.useAbility_OH("wand_ice", a.wIh, hand)
 
-  :?foe.distance <= 9
-    ?c.canUseMask()
-      c.useMask()
-    :?c.canUseBard()
-      c.useBard(Kubikiribocho)
-
-    :
-      ?hp ! maxhp
-        ldtF("aidActive")
-
-      :?buffs.string ! "pick_pocket:4" & !keepMask
-        equip arm
-
-      :
-        var totalHammDmg = a.hammDmg
-        ?buffs.string = "smite" // we add the bonus damage to the hammer ability damage
-          totalHammDmg += a.smiteDmg
-
-        ?c.canUseBard() & foe.hp <= a.bardRDmg
-          c.useBard(Kubikiribocho)
-
-        :?c.canUseHamm() &
-        ^foe.hp <= totalHammDmg
-          c.useHamm(a.myHamm)
-
-        :?!keepMask & armor >= 4 & foe.buffs.string = "poena_mirror" &
-        ^item.GetCooldown("wand_vigor") <= 0 & item.CanActivate()
-          equipR @a.hVwand@
-          activate R
-
-        :?foe.buffs.string ! "mirror" & !keepMask
-          >c0,2,DEBUFFING POENA
-          ?item.GetCooldown("staff_fire") <= 0 & armor >= 6
-            equip @a.hFstaff@
-            activate R
-          :?item.GetCooldown("staff_poison") <= 0 & armor >= 8
-            equip @a.hPstaff@
-            activate R
-          :
-            fight1v1()
-
-        :
-          ldtF("poenaStun")
+  :
+    fight("normal")
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄ END OF "2-Deadwood" ▀▄▀▄▀▄▀▄ ┃  //

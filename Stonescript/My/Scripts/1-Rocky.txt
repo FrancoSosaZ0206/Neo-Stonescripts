@@ -193,8 +193,7 @@ func fight(mode)
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
     >o-7,6,#magenta,wait until 
-    ^@time.FormatDigital(
-    ^         loc.averageTime + permapotTbw)@
+    ^@time.FormatDigital(permapotTbw)@
 
 /* // itemSplash display test
 
