@@ -445,7 +445,14 @@ mirrored. */
 
 // ............. DEFENSIVE LOGIC ............ //
 
-
+:?(foe = "tree_boss" &
+^  foe.state = 32 & foe.time >= 70) |
+^ (foe = "poena" &
+^  foe.state = 32 & foe.time >= 80)
+  ?c.canUseAbility("staff_ice")
+    c.useAbility_TH("staff_ice", a.stIh)
+  :
+    fight("evade")
 
 // ............ CUTSCENES LOGIC ............. //
 
@@ -453,15 +460,13 @@ mirrored. */
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
-
-
 /* speed up when:
   - speed effect not already present
   - not boss nor miniboss screens. */
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
-^!(isBossScr | isMinibossScr)
+^!isBossScr
   c.useAbility_TH("staff_fire", a.stFh)
 
 // Harvesting logic
@@ -539,26 +544,26 @@ unmake with repeating crossbow. */
 
 // ............. MINIBOSS LOGIC ............. //
 
-:?isMinibossScr
-  ?foe = "spawner" | foe = "immune_to_ranged"
+// Voidweaver - use it if possible
+:?isMinibossScr &
+^ c.canUseAbility("voidweaver") &
+^ c.canUnmakeVoidweaver()
+  c.devour("voidweaver")
+
+  /*?foe = "spawner" | foe = "immune_to_ranged"
     fight("normal")
   :
-    equip @a.bR@
+    equip @a.bR@*/
 
 // ............... AOE LOGIC ................ //
 
 :?foe.GetCount(itemSplash) > 1 &
-^!(foe = "boss" | isMinibossScr)
+^!(foe = "boss" | foe = "monarch" |
+^  isMinibossScr)
   // .......... SPECIAL ITEMS LOGIC ......... //
 
-  // Voidweaver - use it if possible
-  ?c.canUseAbility("voidweaver") &
-  ^c.canUnmakeVoidweaver() &
-  ^!isMinibossScr
-    c.devour("voidweaver")
-
   // Reset buff
-  :?c.canUseAbility("wand_vigor") &
+  ?c.canUseAbility("wand_vigor") &
   ^ foe.buffs.string = "buff_mirror"
     c.useAbility_OH("wand_vigor", a.wVh, hand)
 
@@ -606,7 +611,6 @@ unmake with repeating crossbow. */
   :?s.inRange("grappling_hook") &
   // don't interrupt bardiche
   ^!c.isCasting("bardiche") &
-  ^ foe ! "immune_to_ranged" &
   ^ (es.canDebuff("Stun") |
     // stun time (frames) running out
   ^  (stunTime = math.Clamp(stunTime, 1, 11) &
@@ -654,18 +658,23 @@ unmake with repeating crossbow. */
 
 // ............... BOSS LOGIC ............... //
 
+?foe = "phase1" & foe.hp <= 0 & (
+^item.GetCooldown("bardiche") <= 0 |
+^c.isCasting("bardiche"))
+  c.useAbility_TH("bardiche", Kubikiribocho)
+
 // Xyloalgia
 :?foe = "tree_boss" & foe.state ! 4
   // About to die
-  ?foe.hp < 200 // a.armDmg * 2
+  ?foe.hp < 100
     // dash back
     canDash = false
     ?c.canUseAbility("staff_stone")
       c.useAbility_TH("staff_stone", a.stSh)
     :?c.canUseAbility("mind") &
-    ^!s.inRange("bardiche")
+    ^ s.inRange("bardiche")
       a.ldtF("mind")
-
+    
     // queue debuff projectiles
     :?tracker.canTrack("Weaken")
       a.ldtF("magic debuff weaken")
@@ -680,7 +689,7 @@ unmake with repeating crossbow. */
   :
     fight("normal")
 
-: // Poena
+:?foe = "poena"
   // remove mirror buff with Reset Wand
   ?c.canUseAbility("wand_vigor") &
   ^foe.buffs.string = "poena_mirror"
@@ -693,6 +702,23 @@ unmake with repeating crossbow. */
 
   :
     fight("normal")
+
+// ................ 1V1 LOGIC ............... //
+
+// Tanky foe, use bardiche ability to lower its hitpoints
+:?loc.stars > 15 &
+^(foe = "boss" | foe = "monarch") &
+^(c.canUseAbility("staff_poison") |
+^c.canUseAbility("bardiche"))
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  : // c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+:
+  fight("normal")
+
+?buffs.string = "buff_range"
+  itemSplash += 10
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
 //  ┃ ▄▀▄▀▄▀▄ END OF "2-Deadwood" ▀▄▀▄▀▄▀▄ ┃  //
