@@ -574,11 +574,12 @@ func canSmoothCast(is1f)
   return
   ^s.betweenRange("triskelion","crossbow") &
   ^(is1f | buffs.string = "ʘ") &
-  ^!(permapotSetup |
-  ^  buffs.string = "buff_range" |
-  ^  debuffs.string = "stun"  |
-  ^  debuffs.string = "chill" |
-  ^  buffs.string = "buff_inf_speed")
+  ^!(permapotSetup                        |
+  ^  foe            = "immune_to_ranged"  |
+  ^  debuffs.string = "stun"              |
+  ^  debuffs.string = "chill"             |
+  ^  buffs.string   = "buff_range"        |
+  ^  buffs.string   = "buff_inf_speed"      )
 func smoothCast(itemName)
   ?totaltime % 2 = 0
     equipL triskelion
@@ -586,12 +587,15 @@ func smoothCast(itemName)
   :
     equip @itemName@
 
+/* Returns true if:
+  - not immune to knockback
+    or physical attacks
+  - can smooth cast with a
+    non-1-frame-cast weapon. */
 func canKbFarm()
-  return foe ! "unpushable" & // immune to knockback
-  ^!permapotSetup &
-  ^canSmoothCast(false) & // smooth cast is required
-  // between dashing and crossbow range
-  ^s.betweenRange("dash_min","crossbow")
+  return canSmoothCast(false) &
+  ^!(foe = "unpushable"         |
+  ^  foe = "immune_to_physical"   )
 
 func canEscape()
   return foe ! "ranged" &

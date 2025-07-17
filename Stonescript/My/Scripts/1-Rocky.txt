@@ -36,13 +36,6 @@ var hand     = null
 
 var itemSplash = 17 // bardiche hitbox + splash area
 
-// screens
-var minibossScr = null
-var isMinibossScr = false
-var lastFoeScr = null
-var isLastFoeScr = false
-var bossScr = null
-var isBossScr = false
 var boss_cutscenes = [
 ^ 100, 101, 102, // getting soul stones pre-phase1
 ^ 117, 118, // finishing phase1 cutscene
@@ -51,6 +44,14 @@ var boss_cutscenes = [
 ^ 116] // phase3 death cutscene state
 
 var phase3dmg = foe.damage
+
+// screens
+var minibossScr = null
+var isMinibossScr = false
+var lastFoeScr = null
+var isLastFoeScr = false
+var bossScr = null
+var isBossScr = false
 
 // counters
 // number of runs in this session
@@ -195,7 +196,7 @@ func fight(mode)
     ^@time.FormatDigital(
     ^         loc.averageTime + permapotTbw)@
 
-// itemSplash display test
+/* // itemSplash display test
 
 var playerX = screen.FromWorldX(pos.x)
 playerX = screen.FromWorldX(pos.x)
@@ -222,9 +223,9 @@ draw.Bg(playerX, playerY + 2, #aa4400,
   >`@playerX + itemSplash@,@playerY + 2@,
   ^out of range
   draw.Bg(playerX + itemSplash, playerY + 2,
-  ^ #008800, 46 - itemSplash, 1)
+  ^ #008800, 46 - itemSplash, 1) */
 
-// monitor post-treasure metrics
+/* // monitor post-treasure metrics
 var treasureCol = #888888
 ?end_t > 0 | old_t ! item.GetTreasureCount()
   treasureCol = #aaff00
@@ -235,7 +236,7 @@ var treasureCol = #888888
 ^  old | @old_t@ (t = @end_t@)
 >`1,16,
 ^  cur | @item.GetTreasureCount()@\n
-^  cap | @item.GetTreasureLimit()@\n
+^  cap | @item.GetTreasureLimit()@\n */
 
 // show any logged errors
 ?log.hasErrors()
@@ -286,10 +287,10 @@ var treasureCol = #888888
     var aux = totaltime + 3*u.sec
     ?totaltime < aux
       ?choice
-        u.showStrCtr(6, 30,#green,
+        u.showStrCtr(6,30,#green,
         ^"Dig boulders: enabled",false)
       :
-        u.showStrCtr(6, 30,#red,
+        u.showStrCtr(6,30,#red,
         ^"Dig boulders: disabled",false)
     :
       dontShowAgain = true
@@ -371,6 +372,7 @@ itemSplash = 17 // s.getHbxSplash("bardiche", null)
 
 // set canDash default value
 canDash = true
+
 // set phase3dmg
 ?foe = "phase3" // only update when needed
   phase3dmg = s.getFoeDmg(
@@ -431,11 +433,11 @@ c.AAC("sword *0", "hatchet")
   : // regen armor
     a.ldtF("defense armor regen")
 
-// .......................................... //
+// .............. SUMMON LOGIC .............. //
 
-// Summons
 :?c.canSummon("voidweaver") &
-^ loc.stars > 15 & screen.i < bossScr - 1
+^ loc.stars > 15 &
+^ screen.i < bossScr - 1 & !isMinibossScr
   c.useAbility_OH("aether_talisman",
   ^   "aether_talisman", hand       )
 :?c.canSummon("cinderwisp") &
@@ -462,9 +464,6 @@ c.AAC("sword *0", "hatchet")
   // gain Empower to deal extra damage
   ?foe = "vigor"
     a.ldtF("defense buff empower")
-  // heal if needed
-  :?foe = "aether" & hp ! maxhp
-    a.ldtF("defense heal")
   // unmake Dysangelos's fire arm
   :?foe = "fire"
     a.ldtF("defense unmake")
@@ -511,14 +510,14 @@ c.AAC("sword *0", "hatchet")
 ^    ((foe.debuffs.string = "chill:6" &
 ^      foe.time > 85                   ) |
 ^     (foe.debuffs.string ! "chill" &
-^      foe.time > 45                 )    ))) |
+^      foe.time > 45                 )    )))/* |
 ^ (foe = "soldier" &
 ^  foe.debuffs.string ! "stun" &
 ^  s.inRange("dash_min") &
 ^   ((foe.debuffs.string = "chill:6" &
 ^     foe.time > 50                   ) |
 ^    (foe.debuffs.string ! "chill" &
-^     foe.time > 10                 )    ))
+^     foe.time > 10                 )    ))*/
 ^)
   // heal faster
   ?foe = "phase1" & hp ! maxhp
@@ -607,15 +606,14 @@ c.AAC("sword *0", "hatchet")
 :?c.canUseAbility("quarterstaff") &
 ^ ai.walking & ai.enabled & !ai.paused &
 // Cannot dash and in dashing range
-^ !(canDash & a.canSmartDash()) &
-^ (c.permapotSetup |
-^  (!c.permapotSetup & screen.i > 0))
+^!(canDash & a.canSmartDash()) &
+^ (c.permapotSetup | screen.i > 0)
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // pickup logic
 :?pickup.distance < 15 &
 // foe is farther than pickup
-^(foe.distance > 15 | foe.distance = 9999)
+^ (foe.distance > 15 | foe.distance = 9999)
   a.ldtF("magnet")
 
 // armor regen logic
@@ -666,58 +664,54 @@ unmake with repeating crossbow. */
 :?c.canStutterStep()
   c.stutterStep()
 
-// ........... SPECIAL ITEMS LOGIC .......... //
-
-// Voidweaver - use it if possible
-:?c.canUseAbility("voidweaver") &
-^ c.canUnmakeVoidweaver() &
-^ foe.count > 1 & s.inRange("dash_min") &
-^ !isMinibossScr
-  c.devour("voidweaver")
-
-// Calamity - reduce hp
-:?c.canUseAbility("wand_aether") &
-^(encounter.eliteMod = "berserk"    |
-^ encounter.eliteMod = "monarch"    |
-^ foe = "monarch"                   |
-^ encounter.eliteMod = "blessed"    |
-^ foe.buffs.string = "buff_tenacious")
-  c.useAbility_OH("wand_aether", a.wAh, hand)
-
-// Reset buff
-:?c.canUseAbility("wand_vigor") &
-^ foe.buffs.string = "stoic"
-  c.useAbility_OH("wand_vigor", a.wVh, hand)
-
-// Reduce damage
-:?c.canUseAbility("wand_poison") &
-^(encounter.eliteMod = "berserk"    |
-^ encounter.eliteMod = "monarch"    |
-^ foe = "monarch"                   |
-^ encounter.eliteMod = "blessed"    |
-^ encounter.eliteMod = "hydra"      |
-^ foe.buffs.string = "buff_tenacious")
-  c.useAbility_OH("wand_poison", a.wPh, hand)
-
-// Stun enemies
-:?c.canUseAbility("wand_ice") &
-^ es.canDebuff("Stun") &
-^ foe.count > 1 & foe = "elite" &
-^ s.getTotalHP("player") < c.hihp
-  c.useAbility_OH("wand_ice", a.wIh, hand)
-
-/* // FIXME: extend range
-:?c.canUseAbility("staff_aether") &
-^ foe.count > 1 & s.inRange("dash_min") &
-^ !(isMinibossScr | nRuns = 1)
-  c.useAbility_TH("staff_aether", a.stAh) */
-
 // ............... AOE LOGIC ................ //
 
 :?foe.GetCount(itemSplash) > 1 &
 ^!(foe = "boss")
+  // .......... SPECIAL ITEMS LOGIC ......... //
+
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^c.canUnmakeVoidweaver() &
+  ^!isMinibossScr
+    c.devour("voidweaver")
+
+  // Calamity - reduce hp
+  :?c.canUseAbility("wand_aether") &
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious")
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "stoic"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Reduce damage
+  :?c.canUseAbility("wand_poison") &
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ encounter.eliteMod = "hydra"      |
+  ^ foe.buffs.string = "buff_tenacious")
+    c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  // Stun enemies
+  :?c.canUseAbility("wand_ice") &
+  ^ es.canDebuff("Stun") & foe = "elite"
+    c.useAbility_OH("wand_ice", a.wIh, hand)
+
+  /* // FIXME: extend range
+  :?c.canUseAbility("staff_aether") &
+  ^ !(isMinibossScr | nRuns = 1)
+    c.useAbility_TH("staff_aether", a.stAh) */
+
   // Align foes
-  ?c.canUseAbility("wand_stone") &
+  :?c.canUseAbility("wand_stone") &
   ^s.inRange("wand")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
@@ -728,6 +722,8 @@ unmake with repeating crossbow. */
   :?c.canUseAbility("staff_poison") &
   ^isMinibossScr
     c.useAbility_TH("staff_poison", a.stPh)
+
+  // ........................................ //
 
   // Heavy hammer logic
   :?c.canUseAbility("heavy_hammer") &

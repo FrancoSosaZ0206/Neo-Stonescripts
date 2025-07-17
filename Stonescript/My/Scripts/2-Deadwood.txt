@@ -1,501 +1,716 @@
-﻿// *******************************************************
-//                     2-Deadwood.txt                     
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄ START OF "2-Deadwood" ▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-// Script for Deadwood Canyon
+// //////////////// IMPORTS ///////////////// //
 
+var log = import My/Lib/Error_Logging/public
 
+var uimkr = import My/Lib/UI_Maker
+var u     = import My/Lib/Utilities
+var c     = import My/Lib/Combat
+var s     = import My/Lib/Stats
+var a     = import My/Lib/Arsenal
 
-// IMPORTS
+var es = import My/Lib/Effect_Stats/public
+var tracker = import My/Lib/Ranged_Debuffing/public
 
-var u = new MyScripts/Lib/Utilities
-var uimkr = new MyScripts/Lib/UI_Maker
-var a = new MyScripts/Lib/MyArsenal
-var i = new MyScripts/Lib/MyBetterInfo
-var c = new MyScripts/Lib/Combat
-c.Main()
+// /////////////// VARIABLES //////////////// //
 
-/***************************************************************/
+// file
+var _FILE = "Scripts/1-Rocky"
 
-var som = new MyScripts/Lib/Speed_O_Meter
-var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
-var bosTmr
-bosTmr = import MyScripts/Borrowed/BossfightTimer2
-
-var somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
-?som.Update(false)
-  somPanel.Recycle()
-  somPanel = null
-
-  somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
-
-
-dpsm.ENABLED = true
-dpsm.refreshRate = 30
-
-var dpsPanel
-?dpsm.Update()
-  ?dpsPanel
-    dpsPanel.Recycle()
-    dpsPanel = null
-
-  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
-
-/***************************************************************/
-
-
-
-// VARIABLES
-
-var keepMask = true
-var smiteScr = 1
-
-var dontDash = false
-var debCount = 0
-
-?loc.loop
-  keepMask = false
-  dontDash = false
-  debCount = 0
-
-var canDebI
-var canDebP
-var canDebF
-
-
-
-// FUNCTIONS:
-
-func harvFunc(btn)
-  btnPressed = true
-  ?btn = yesBtn
-    choice = true
-  : // btn = noBtn
-    choice = false
-
-  return
-
-func ldtF(mode)
-
-  ?mode = "default"
-    equipL triskelion
-    ?!keepMask
-      equipR @a.cshield1@
-  :?mode = "armorRegen"
-    equipL triskelion
-    ?!keepMask
-      equipR @a.cshield2@
-  :?mode = "escape"
-    equipL mind
-    ?!keepMask
-      equipR @a.cshield1@
-  :?mode = "magnet"
-    equipL star
-    ?!keepMask
-      equipR triskelion
-
-  :?mode = "extend"
-    equipL triskelion
-    equipR mask
-
-  :?mode = "harv"
-    ?!keepMask
-      equipL moon
-      equipR hatchet
-    :
-      equipL triskelion
-
-  :?mode = "aidPassive"
-    equipL ouroboros
-    ?!keepMask
-      equipR triskelion
-  :?mode = "aidActive"
-    equipL @a.dLsword@
-    ?!keepMask
-      equipR @a.ahHammer@
-
-  :?mode = "unmkDmg"
-    equip @a.dUstaff@
-
-  :?mode = "poenaStun"
-    ?!keepMask
-      equipL Speedy Hammer
-      equipR Bifrost
-    :
-      equipL Speedy Hammer
-
-  :?mode = "magic"
-    ?keepMask
-      ?canDebI
-        equipL @a.dIwand@
-      :?canDebP
-        equipL @a.dPwand@
-      :?canDebF
-        equipL @a.dFwand@
-
-    :
-      ?canDebI
-        equip @a.dIstaff@
-      :?canDebP
-        equip @a.dPstaff@
-      :?canDebF
-        equip @a.dFstaff@
-
-  :?mode = "rangedDmg"
-    equip @a.rbow@
-
-  :
-    >c-10,0,#red,
-    ^ERROR: ldtF() recieved incorrect mode: @mode@
-
-  return
-
-func fight1v1()
-
-  /* How to apply debuffs:
-  - apply all except the ones the foe is immune to.
-  Finish when:
-  - all possible debuffs have been applied. */
-  canDebI = (foe.debuffs.string ! "chill:6" & foe ! "immune_to_debuff_chill")
-  canDebP = (foe.debuffs.string ! "damage" & foe ! "immune_to_debuff_damage")
-  canDebF = (foe.debuffs.string ! "dot" & foe ! "immune_to_debuff_dot")
-
-  ?canDebI | canDebP | canDebF
-    ?keepMask
-      ?canDebI
-        equipL @a.dIsword@
-      :?canDebP
-        equipL @a.dPsword@
-      :?canDebF
-        equipL @a.dFsword@
-    :
-      //Left hand:
-      ?canDebP
-        equipL @a.dPsword@
-      :?canDebF
-        equipL @a.dFsword@
-      :?canDebI
-        equipL @a.dIwand@
-
-      //Right hand:
-      ?canDebI
-        equipR @a.dIsword@
-
-
-  :?hp ! maxhp
-    ?keepMask
-      equipL @a.dLsword@
-    :
-      equipL moon
-      equipR @a.dLsword@
-
-  :
-    ?loc.stars <= 15
-      equip arm
-
-    :?foe = "tree_boss"
-      >c0,-1,#green,FIGHTING GREEN TREE BOSS
-      ?foe.state = 32 & foe.time >= 70
-        >c0,0,#red,ESCAPE
-        ?c.canUseMind()
-          ldtF("escape")
-        :?foe.distance < 9 &
-        ^armor >= 1 & item.GetCooldown("staff_ice") <= 0
-          >c0,1,#cyan,USING ICE STAFF
-          equip @a.hIstaff@
-          activate R
-      :
-        >c0,0,#red,DAMAGE
-        equipL Bifrost
-        ?!keepMask
-          equipR @a.isword@
-        
-
-    :?foe ! "immune_to_stun"
-      ldtF("poenaStun")
-    :
-      dontDash = true
-      ?
-
-
-  return
-
-
-
-// PROCEDURE:
-
-?foe = "elite" | foe = "boss"
-  i.showBigStr(1,15,40,foe,null,false)
-  >`1,12,#yellow,state=@foe.state@\ntime=@foe.time@
-  i.showBigStr(1,7,40,"left=" + item.left + "\n\nright=" + item.right,null,false)
-
-
-
-var choice = false
-var btnPressed = false
-
-var yesBtn
-var noBtn
-
+// ui-related logic for harvesting
+var yesButton     = null
+var noButton      = null
+var choice        = false
+var buttonPressed = false
 var dontShowAgain = false
 
-?!btnPressed
-  ?!yesBtn
-    yesBtn = uimkr.mkBtn(
+// flags
+var canDash  = true
+
+// values
+var stunTime = null
+var hand     = null
+
+var itemSplash = 17 // bardiche hitbox + splash area
+
+// TODO: implement
+var boss_cutscenes = []
+
+// screens
+var minibossScr = null
+var isMinibossScr = false
+var lastFoeScr = null
+var isLastFoeScr = false
+var bossScr = null
+var isBossScr = false
+
+// counters
+// number of runs in this session
+var nRuns = 1
+/* time when permapot was activated,
+   -1 means not activated. */
+var permapotActTime = -1
+// permapot time bandwidth
+var permapotTbw = loc.averageTime -
+^                 (loc.averageTime / 10)
+
+var old_t = item.GetTreasureCount()
+var end_t = 0
+
+// /////////////// FUNCTIONS //////////////// //
+
+func harvestFunc(button)
+  buttonPressed = true
+  ?button = yesButton
+    choice = true
+  : // button = noButton
+    choice = false
+
+func fight(mode)
+  ?mode = "escape"
+    canDash = false
+
+    ?c.canUseAbility("mind")
+      a.ldtF("mind")
+    : // c.canUseAbility("staff_stone")
+      c.useAbility_TH("staff_stone", a.stSh)
+
+  :?mode = "evade"
+    canDash = false
+
+    ?c.canUseAbility("staff_stone") &
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
+      c.useAbility_TH("staff_stone", a.stSh)
+    :?c.canUseAbility("mind") &
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
+      a.ldtF("mind")
+
+    :?c.canUseAbility("staff_ice") &
+    ^ s.inRange("dash_min")
+      c.useAbility_TH("staff_ice", a.stIh)
+
+    :?!s.inRange("sword")
+      ?foe.count > 1
+        fight("normal")
+      :
+        fight("normal")
+
+    // Unmake
+    :?es.canUnmake()
+      a.ldtF("defense unmake")
+    :
+      a.ldtF("defense")
+
+  :?mode = "normal"
+    // ........... DEBUFFING LOGIC .......... //
+
+    // AOE debuffing
+    ?(tracker.canTrack("Weaken") |
+    ^ tracker.canTrack("Burn")    ) &
+    ^(!canDash |
+    ^ (foe = "elite" &
+    ^  foe.GetCount(itemSplash) > 1))
+      itemSplash = foe.distance + 7
+      ?tracker.canTrack("Weaken")
+        a.ldtF("magic debuff weaken")
+      : // tracker.canTrack("Burn")
+        a.ldtF("magic debuff burn")
+
+    // 1v1 strong foe weakening
+    :?es.canDebuff("Weaken") & canDash &
+    ^ (foe = "monarch" | foe = "boss") &
+    ^ s.inRange("sword")
+      a.ldtF("sword debuff weaken")
+
+    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
+    ^ canDash & s.inRange("sword") &
+    // Permapot 1v1 debuffing
+    ^ ((c.permapotSetup & foe = "elite" &
+    ^   foe.GetCount(itemSplash) = 1) |
+    // 1v1 strong foe debuffing
+    ^  (((loc.stars > 15 &
+    ^     (foe = "monarch" | foe = "boss") &
+    ^     s.getFoeDmg(a.berserkerLvl,
+    ^                 a.plagueLvl   ,
+    ^                 a.maskLvl      ) > 0) |
+    ^    nRuns = 1)))
+      a.ldtF("sword debuff auto")
+
+    // ............ HEALING LOGIC ............ //
+    :?hp ! maxhp &
+    ^ ((canDash &
+    ^   foe.GetCount(itemSplash) = 1) |
+    ^  foe = "monarch")
+      a.ldtF("sword heal")
+
+    // ........... UNMAKING LOGIC ............ //
+    :?es.canUnmake()
+      ?canDash &
+      ^foe.GetCount(itemSplash) = 1
+        a.ldtF("sword unmake")
+      : // foe.GetCount(itemSplash) > 1
+        itemSplash = 10
+        a.ldtF("big sword unmake")
+
+    // ............ DAMAGE LOGIC ............. //
+    :?canDash &
+    ^ (foe.GetCount(itemSplash) = 1 |
+    ^  foe = "monarch" | foe = "boss")
+      ?c.canUseAbility("staff_poison") &
+      ^!s.inRange("dash") & foe = "phase3"
+        c.useAbility_TH("staff_poison", a.stPh)
+      :?c.canUsePotion() & foe = "phase3"
+        activate potion
+      /* :?c.canBurst() & !c.permapotSetup &
+      ^ foe = "phase3"
+        c.burst(a.burstSwords) */
+      :
+        a.ldtF("sword dmg")
+    :
+      itemSplash = foe.distance + 7
+      a.ldtF("magic dmg")
+  : // invalid mode
+    log.logError(_FILE,"fight",
+    ^   "unknown <mode>: "+mode)
+
+// ............. MONITOR LOGIC .............. //
+
+// permapot time bandwidth monitor:
+?permapotActTime ! -1 & nRuns = 1
+  var delay = totaltime + (5 * 30)
+  ?totaltime <= delay
+    >o-7,6,#magenta,wait until 
+    ^@time.FormatDigital(
+    ^         loc.averageTime + permapotTbw)@
+
+/* // itemSplash display test
+
+var playerX = screen.FromWorldX(pos.x)
+playerX = screen.FromWorldX(pos.x)
+
+var playerY = screen.FromWorldZ(pos.z - pos.y)
+playerY = screen.FromWorldZ(pos.z - pos.y)
+
+>`@playerX@,@playerY + 2@,itemSplash
+draw.Bg(playerX, playerY + 2, #aa4400,
+^   itemSplash, 1)
+
+?foe.distance ! 9999
+  >`@playerX@,@playerY + 3@,dist\n
+  ^dist + itemSplash
+  draw.Bg(playerX, playerY + 3, #0000ff,
+  ^   foe.distance, 1)
+  draw.Bg(playerX, playerY + 4, #aa00aa,
+  ^   foe.distance + itemSplash, 1)
+
+?foe.count
+  >`@playerX@,@playerY + 5@,count range
+  draw.Bg(playerX, playerY + 5, #00aaaa, 46, 1)
+
+  >`@playerX + itemSplash@,@playerY + 2@,
+  ^out of range
+  draw.Bg(playerX + itemSplash, playerY + 2,
+  ^ #008800, 46 - itemSplash, 1) */
+
+// monitor post-treasure metrics
+var treasureCol = #888888
+?end_t > 0 | old_t ! item.GetTreasureCount()
+  treasureCol = #aaff00
+:
+  treasureCol = #888888
+>`1,14,@treasureCol@,
+^treasure:\n
+^  old | @old_t@ (t = @end_t@)
+>`1,16,
+^  cur | @item.GetTreasureCount()@\n
+^  cap | @item.GetTreasureLimit()@\n
+
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
+  ^@log.getErrorCount()@\n
+  >@log.getError()@
+
+// ............ WITHDRAWAL LOGIC ............ //
+
+?s.getTotalHP("player")
+^ <=
+^s.getFoeDmg(a.berserkerLvl,
+^            a.plagueLvl,
+^            a.maskLvl      ) |
+^old_t = item.GetTreasureLimit()
+  loc.Leave()
+
+// .............. SETUP LOGIC ............... //
+
+// Auto-harvesting logic
+?!buttonPressed
+  u.showStrCtr(6,30,#yellow,"Chop trees?",false)
+
+  ?!yesButton
+    yesButton = uimkr.mkButton(
     ^-5,9,null,2,null,null, // x, y, w, h, anchor, dock,
     ^"Yes","#green", // txt, col,
     ^null,null,null, // tcol, bcol, hcol,
-    ^-5,harvFunc, // style, pressed,
+    ^-5,harvestFunc, // style, pressed,
     ^null,null,null) // down, up, sound
 
-  ?!noBtn
-    noBtn = uimkr.mkBtn(
+  ?!noButton
+    noButton = uimkr.mkButton(
     ^5,9,8,2,null,null, // x, y, w, h, anchor, dock,
     ^"No","red", // txt, col,
     ^null,null,null, // tcol, bcol, hcol,
-    ^-5,harvFunc, // style, pressed,
+    ^-5,harvestFunc, // style, pressed,
     ^null,null,null) // down, up, sound
-
-
-  i.showStrCtr(6,30,
-  ^"Harvest trees?","#yellow",
-  ^false)
-
 :
-  ?yesBtn
-    yesBtn.Recycle()
-    yesBtn = null
-  ?noBtn
-    noBtn.Recycle()
-    noBtn = null
-
+  ?yesButton
+    yesButton.Recycle()
+    yesButton = null
+  ?noButton
+    noButton.Recycle()
+    noButton = null
 
   ?!dontShowAgain
     var aux = totaltime + 3*u.sec
     ?totaltime < aux
       ?choice
-        i.showStrCtr(6, 30,
-        ^"Harvest trees is enabled","#green",
-        ^false)
-        ?keepMask
-          i.showStrCtr(7, 40,
-          ^"(Will start harvesting in the next run!)","#green",
-          ^false)
+        u.showStrCtr(6,30,#green,
+        ^"Chop trees: enabled",false)
       :
-        i.showStrCtr(6, 30,
-        ^"Harvest trees is disabled","#red",
-        ^false)
+        u.showStrCtr(6,30,#red,
+        ^"Chop trees: disabled",false)
     :
-      ?!dontShowAgain
-        dontShowAgain = true
+      dontShowAgain = true
 
+?loc.loop
+  nRuns++
 
+// set up post-treasure metrics
+?old_t ! item.GetTreasureCount()
+  // reset metrics
+  ?loc.loop | !isBossScr
+    old_t = item.GetTreasureCount()
+    end_t = 0
+  : // track time
+    end_t++
 
-c.doAAC("sword 0*", a.cshield1)
+// set up bossScr
+?!bossScr
+  ?loc.stars <= 5 // white
+    bossScr = 5
+  :?loc.stars <= 15 // cyan and yellow
+    bossScr = 6
+  :?loc.stars <= 20 // green
+    bossScr = 3 + loc.stars - 16
+: // set up isBossScr
+  isBossScr = (screen.i = bossScr)
 
+// set up lastFoeScr
+?!lastFoeScr
+  ?loc.stars <= 5 // white
+    lastFoeScr = 3
+  :?loc.stars <= 10 // cyan
+    lastFoeScr = 4
+  :?loc.stars <= 15 // yellow
+    lastFoeScr = 3
+
+  // green
+  :?loc.stars <= 20
+    lastFoeScr = 1 + loc.stars - 16
+: // set up isLastFoeScr
+  isLastFoeScr = (screen.i = lastFoeScr)
+
+// set up minibossScr
+?!minibossScr
+  // yellow
+  ?loc.stars = math.Clamp(loc.stars, 11, 15)
+    minibossScr = 4
+  // green
+  :?loc.stars = math.Clamp(loc.stars, 16, 20)
+    minibossScr = 1
+: // set up isMinibossScr
+  isMinibossScr = (screen.i = minibossScr)
+
+/* set up permapotSetup:
+- in first run
+- yellow onwards, or
+- green onwards and
+- upon reaching the boss screen. */
+c.permapotSetup =
+^ (nRuns = 1 & (
+^  (loc.stars = math.Clamp(loc.stars, 11, 15)) |
+^  (loc.stars > 15 &
+^   screen.i >= bossScr - 1)))
+
+// Record time when permapot was activated
+?c.permapotSetup & permapotActTime = -1
+  permapotActTime = totaltime
+
+/* increase permapotTbw if player chooses to
+chop trees. */
+?choice
+  permapotTbw = loc.averageTime + (30 * 75)
+
+// BFG logic
+?nRuns > 1 & loc.stars > 16
+  c.screenMngr_DS("blade", 1, lastFoeScr - 1)
+
+// set up itemSplash default value
+// bardiche's hitbox + itemSplash area
+itemSplash = 17 // s.getHbxSplash("bardiche", null)
+
+// set canDash default value
+canDash = true
+
+// init Combat
+c.Init()
+// start up Ranged_Debuffing tracker
+tracker.track()
+
+stunTime = foe.debuffs.GetTime("stun")
+
+// Decide hand for one-handed items
+?c.permapotSetup |
+^(s.inRange("dash") & canDash & ai.walking)
+  hand = "left"
+:
+  hand = "right"
+
+// Auto brewing
+c.potionType = "lucky"
+?c.canBrewPotion()
+  c.brewPotion()
+
+// .......................................... //
+
+// Permapot equipment
+?c.permapotSetup
+  a.ldtF("permapot")
+
+c.AAC("sword *0", "hatchet")
+
+// Initial equipments
 ?loc.begin
+  a.ldtF("default")
 
-  ?res.bronze >= 10
-
-    ?res.wood >= 10
-      ?item.potion ! "berserk"
-        brew wood + bronze
-
-    :?res.stone >= 10
-      ?item.potion ! "lucky"
-        brew stone + bronze
-    :
-      loc.Leave()
-  :
-    loc.Leave()
-
-?keepMask
-  ?item.right.state = -1 | item.right.state > 2
-    equipR mask
-
-?loc.begin | loc.loop
-  equipL triskelion
-  equipR @a.cshield1@
-
-:?foe ! "boss" & c.canUseAETali()
-  ?keepMask
-    c.useAETali("l")
-  :
-    equipL triskelion
-    c.useAETali("r")
-
-:?foe = "tree_boss" & c.canUseFTali()
-  ?keepMask
-    c.useFTali("l")
-  :
-    equipL triskelion
-    c.useFTali("r")
-
-/* hide cinderwisp to avoid
-getting ignition debuff reflected */
-:?c.canHideFTali() &
-^foe = "poena" &
-^!c.canUseBard()
-  ?keepMask
-    c.useFTali("l")
-  :
-    equipL triskelion
-    c.useFTali("r")
-
-:?c.canUsePotDmg() & keepMask
+// activate potion when in permapot
+:?c.canUsePotion() & c.permapotSetup
   activate potion
 
-:?choice & harvest.distance < 5
-  ldtF("harv")
-  ?c.canUseHatchet() & !keepMask
-    c.useHatchet()
+// ........... POST-TREASURE LOGIC .......... //
 
-:?pickup.distance < 15
-  ldtF("magnet")
-:
+:?loc.stars > 10 & end_t > 1 & isBossScr
+  // pickup treasure
+  ?pickup.distance < 15
+    a.ldtF("magnet")
 
-  ?c.canUseBladeDS(smiteScr)
-    c.useBladeDS()
+  // activate potion
+  :?c.canUsePotion() & end_t > 27
+    activate potion
 
-  ?c.canUseQstaff()
-  ^& foe ! "tree_boss" & foe ! "poena"
-  ^& ai.enabled & item.right.state ! 2
-  ^& ((!c.canBash() & !c.canDash())
-  ^| (foe.distance < 11 | foe.distance > 15))
-    c.useQstaff(a.myqstaff)
+  // speed up
+  :?c.canUseAbility("staff_fire") &
+  ^ end_t > 27 & item.potion = "empty"
+    c.useAbility_TH("staff_fire", a.stFh)
 
-  :?((foe = "tree_boss" | foe = "poena") & foe.distance > 22)
-  ^|(foe ! "tree_boss" & foe ! "poena" & foe.distance > 15)
-    ?14 <= armor & armor <= 29
-      ldtF("default")
-    :?armor < 14
-      ldtF("armorRegen")
-    :
-      ldtF("extend")
+  : // regen armor
+    a.ldtF("defense armor regen")
 
+// .............. SUMMON LOGIC .............. //
+
+:?c.canSummon("voidweaver") &
+^ loc.stars > 15 &
+^ screen.i < bossScr - 1 & !isMinibossScr
+  c.useAbility_OH("aether_talisman",
+  ^   "aether_talisman", hand       )
+:?c.canSummon("cinderwisp") & foe ! "poena" &
+^(loc.stars <= 15 | screen.i >= bossScr - 1)
+  c.useAbility_OH("fire_talisman",
+  ^   "fire_talisman", hand       )
+
+/* hide cinderwisp to avoid getting ignition
+mirrored. */
+:?c.canHide("cinderwisp") & foe = "poena" &
+^!c.canUseAbility("bardiche")
+  c.useAbility_OH("fire_talisman",
+  ^   "fire_talisman", hand       )
+
+// ............. DEFENSIVE LOGIC ............ //
+
+
+
+// ............ CUTSCENES LOGIC ............. //
+
+
+
+// ......... ENGAGING/WALKING LOGIC ......... //
+
+
+
+/* speed up when:
+  - speed effect not already present
+  - not boss nor miniboss screens. */
+:?c.canUseAbility("staff_fire") &
+^ buffs.string ! "buff_inf_speed" &
+^ (loc.stars <= 15 | nRuns > 1) &
+^!(isBossScr | isMinibossScr)
+  c.useAbility_TH("staff_fire", a.stFh)
+
+// Harvesting logic
+:?harvest.distance < 15 &
+^choice & nRuns > 1
+  ?c.canUseAbility("hatchet")
+    c.useAbility_OH("hatchet", hatchet, "r")
   :
-    ?c.canBash() & !dontDash
-      c.bash(a.dLsword)
-    :?c.canDash() & !dontDash
-      c.dash(a.dLsword, a.dshield)
+    a.ldtF("harvest")
+
+// mini-dash
+:?c.canUseAbility("quarterstaff") &
+^ ai.walking & ai.enabled & !ai.paused &
+// Cannot dash and in dashing range
+^!(canDash & a.canSmartDash()) &
+^ (c.permapotSetup | screen.i > 0)
+  c.useAbility_TH("quarterstaff", a.myQ)
+
+// pickup logic
+:?pickup.distance < 15 &
+// foe is farther than pickup
+^ (foe.distance > 15 | foe.distance = 9999)
+  a.ldtF("magnet")
+
+// armor regen logic
+:?(ai.walking & !s.inRange("socketed_shield")) |
+^ (ai.paused | !ai.enabled |
+^  player.direction = -1)
+  /*?!c.canBurst() & !c.permapotSetup
+    c.burst(a.burstSwords)
+  :*/
+  a.ldtF("defense armor regen")
+
+// engaging logic (out of fighting range)
+:?ai.walking & player.direction = 1 &
+^ s.inRange("socketed_shield") &
+^ ((canDash & !s.inRange("dash_max")) |
+^  !s.inRange("crossbow"))
+  ?armor > a.compoundMaxArmor_boosted |
+  ^(c.canEngage() & foe ! "phase")
+    a.ldtF("engage")
+  :
+    a.ldtF("defense armor regen")
+
+// ............... RANGED LOGIC .............. //
+
+
+
+// .............. DASHING LOGIC ............. //
+
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
+// Knockback farming
+:?c.canKbFarm()
+  c.smoothCast(a.bS)
+
+/* if in range, get closer while trying to
+unmake with repeating crossbow. */
+:?canDash & c.canSmoothCast(true)
+  c.smoothCast(a.bR)
+
+// engaging logic (within fighting range)
+:?ai.walking & player.direction = 1 &
+^foe ! "phase" & canDash & !a.canSmartDash() &
+^s.betweenRange("triskelion", "dash_max")
+  a.ldtF("engage")
+
+// get in melee range faster
+:?c.canStutterStep()
+  c.stutterStep()
+
+// ............... AOE LOGIC ................ //
+
+:?foe.GetCount(itemSplash) > 1 &
+^!(foe = "boss")
+  // .......... SPECIAL ITEMS LOGIC ......... //
+
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^c.canUnmakeVoidweaver() &
+  ^!isMinibossScr
+    c.devour("voidweaver")
+
+  // Calamity - reduce hp
+  :?c.canUseAbility("wand_aether") &
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious")
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "stoic"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Reduce damage
+  :?c.canUseAbility("wand_poison") &
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ encounter.eliteMod = "hydra"      |
+  ^ foe.buffs.string = "buff_tenacious")
+    c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  /* // FIXME: extend range
+  :?c.canUseAbility("staff_aether") &
+  ^ !(isMinibossScr | nRuns = 1)
+    c.useAbility_TH("staff_aether", a.stAh) */
+
+  // Align foes
+  :?c.canUseAbility("wand_stone") &
+  ^s.inRange("wand")
+    c.useAbility_OH("wand_stone", a.wSh, hand)
+
+  // ........................................ //
+
+  // Heavy hammer logic
+  :?c.canUseAbility("heavy_hammer") &
+  ^ encounter.eliteMod = "plated"
+    c.useAbility_TH("heavy_hammer",
+    ^               "Guardian's Bane")
+  /* :?c.canUseAbility("heavy_hammer") &
+  ^ foe = "elite"
+    c.useAbility_TH("heavy_hammer", Mjölnir) */
+
+  // Stun/Perma-stun logic
+  :?s.inRange("grappling_hook") &
+  // don't interrupt bardiche
+  ^ !c.isCasting("bardiche") &
+  ^ foe ! "immune_to_ranged" &
+  ^ (es.canDebuff("Stun") |
+    // stun time (frames) running out
+  ^  (stunTime = math.Clamp(stunTime, 1, 11) &
+     // not stunned with heavy hammer // or Frost Wand
+  ^   foe.debuffs.string ! "debuff_armor_fatigue"/* &
+  ^   foe.debuffs.string ! "debuff_frost_stun")*/)
+    itemSplash = foe.distance + 5
+    a.ldtF("grappling")
+
+  // permapot run
+  :?nRuns = 1 |
+  ^ (encounter.eliteMod = "blessed" &
+  ^  !c.isCasting("bardiche"))
+    ?foe ! "immune_to_ranged"
+      itemSplash = foe.distance + 7
+
+      // Debuff
+      ?tracker.canTrack("Weaken")
+        a.ldtF("magic debuff weaken")
+      :?tracker.canTrack("Chill")
+        a.ldtF("magic debuff chill")
+      :?tracker.canTrack("Burn")
+        a.ldtF("magic debuff burn")
+      : // unmake
+        itemSplash = 10
+        a.ldtF("big sword unmake")
+    : // unmake
+      itemSplash = 10
+      a.ldtF("big sword unmake")
+
+  // berserk potion
+  :?buffs.string = "ʘ" | foe ! "elite" |
+  // split hydras lose the Stable buff
+  ^ (encounter.eliteMod = "hydra" &
+  ^  foe.buffs.string ! "stability") /* |
+  // more foes outside range
+  ^ (foe ! "elite" & screen.i > 1 &
+  ^  (foe.count -
+  ^   foe.GetCount(itemSplash))
+  ^  > 0) */
+    itemSplash = 10
+    a.ldtF("big sword unmake")
+  :
+    equip Kubikiribocho
+
+// ............... BOSS LOGIC ............... //
+
+// Xyloalgia
+:?foe = "tree_boss" & foe.state ! 4
+  ?foe.hp < 200 // a.armDmg * 2
+    canDash = false
+    ?c.canUseAbility("mind")
+      a.ldtF("mind")
+
+    :?tracker.canTrack("Weaken")
+      a.ldtF("magic debuff weaken")
+    :?tracker.canTrack("Chill")
+      a.ldtF("magic debuff chill")
+    :?tracker.canTrack("Burn")
+      a.ldtF("magic debuff burn")
+  :
+    fight("normal")
+
+: // Poena
+  // remove mirror buff
+  ?c.canUseAbility("wand_vigor") &
+  ^foe.buffs.string = "poena_mirror"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Stun Poena
+  :?c.canUseAbility("wand_ice") &
+  ^ es.canDebuff("Stun")
+    c.useAbility_OH("wand_ice", a.wIh, hand)
+
+  :?foe.distance <= 9
+    ?c.canUseMask()
+      c.useMask()
+    :?c.canUseBard()
+      c.useBard(Kubikiribocho)
 
     :
-      ?foe ! "tree_boss" & foe ! "poena"
-        ?!keepMask &
-        ^(foe = "wasp" | foe = "wasp_nest") &
-        ^item.GetCooldown("wand_fire") <= 0 &
-        ^item.GetCooldown("wand_aether") <= 0 &
-        ^armor >= 18
-          equipL @a.HaeWand@
-          activate L
-          equipR @a.hFwand@
-          activate R
-        :?c.canUseHamm() & keepMask &
-        ^foe.GetCount(15) >= 5 & !c.canUseBlade()
-          c.useHamm(a.myHamm)
-        :?(foe.GetCount(15) = 1 | (foe = "immune_to_ranged" & keepMask)) & !ai.walking
-          fight1v1()
-        :
-          canDebI = (foe.debuffs.string ! "chill:6" & foe ! "immune_to_debuff_chill")
-          canDebP = (foe.debuffs.string ! "damage" & foe ! "immune_to_debuff_damage")
-          canDebF = (foe.debuffs.string ! "dot" & foe ! "immune_to_debuff_dot")
+      ?hp ! maxhp
+        ldtF("aidActive")
 
-          ?canDebI | canDebP | canDebF
-            ldtF("magic")
-          :
-            ldtF("unmkDmg")
+      :?buffs.string ! "pick_pocket:4" & !keepMask
+        equip arm
 
       :
-        ?loc.stars > 5 & c.canUsePotDmg()
-          activate potion
+        var totalHammDmg = a.hammDmg
+        ?buffs.string = "smite" // we add the bonus damage to the hammer ability damage
+          totalHammDmg += a.smiteDmg
 
-        :?foe = "phase1" // Xyloalgia
-        ^& foe.state ! 4
+        ?c.canUseBard() & foe.hp <= a.bardRDmg
+          c.useBard(Kubikiribocho)
 
-          ?foe.hp > a.armDmg * 2
-            fight1v1()
+        :?c.canUseHamm() &
+        ^foe.hp <= totalHammDmg
+          c.useHamm(a.myHamm)
+
+        :?!keepMask & armor >= 4 & foe.buffs.string = "poena_mirror" &
+        ^item.GetCooldown("wand_vigor") <= 0 & item.CanActivate()
+          equipR @a.hVwand@
+          activate R
+
+        :?foe.buffs.string ! "mirror" & !keepMask
+          >c0,2,DEBUFFING POENA
+          ?item.GetCooldown("staff_fire") <= 0 & armor >= 6
+            equip @a.hFstaff@
+            activate R
+          :?item.GetCooldown("staff_poison") <= 0 & armor >= 8
+            equip @a.hPstaff@
+            activate R
           :
-            dontDash = true
-            ?c.canUseMind()
-              ldtF("escape")
-            :
-              ?item.right.state = 3
-                debCount++
+            fight1v1()
 
-              ?debCount < 1
-                equipL @a.dPwand@
-                equipR @a.dFwand@
-              :?debCount < 7
-                equip @a.dIstaff@
+        :
+          ldtF("poenaStun")
 
-              :
-                dontDash = false
-                ?foe.distance > 15 & c.canUseQstaff()
-                  c.useQstaff(a.myqstaff)
-                :?c.canBash()
-                  c.bash(a.dLsword)
-                :?c.canDash()
-                  c.dash(a.dLsword, a.dshield)
-                :
-                  fight1v1()
-
-
-        : // Poena
-          dontDash = false
-
-          ?foe.distance > 15 & c.canUseQstaff()
-            c.useQstaff(a.myqstaff)
-          :?c.canBash()
-            c.bash(a.dLsword)
-          :?c.canDash()
-            c.dash(a.dLsword, a.dshield)
-
-          :?foe.distance <= 9
-            ?c.canUseMask()
-              c.useMask()
-            :?c.canUseBard()
-              c.useBard(Kubikiribocho)
-
-            :
-              ?hp ! maxhp
-                ldtF("aidActive")
-
-              :?buffs.string ! "pick_pocket:4" & !keepMask
-                equip arm
-
-              :
-                var totalHammDmg = a.hammDmg
-                ?buffs.string = "smite" // we add the bonus damage to the hammer ability damage
-                  totalHammDmg += a.smiteDmg
-
-                ?c.canUseBard() & foe.hp <= a.bardRDmg
-                  c.useBard(Kubikiribocho)
-
-                :?c.canUseHamm() &
-                ^foe.hp <= totalHammDmg
-                  c.useHamm(a.myHamm)
-
-                :?!keepMask & armor >= 4 & foe.buffs.string = "poena_mirror" &
-                ^item.GetCooldown("wand_vigor") <= 0 & item.CanActivate()
-                  equipR @a.hVwand@
-                  activate R
-
-                :?foe.buffs.string ! "mirror" & !keepMask
-                  >c0,2,DEBUFFING POENA
-                  ?item.GetCooldown("staff_fire") <= 0 & armor >= 6
-                    equip @a.hFstaff@
-                    activate R
-                  :?item.GetCooldown("staff_poison") <= 0 & armor >= 8
-                    equip @a.hPstaff@
-                    activate R
-                  :
-                    fight1v1()
-
-                :
-                  ldtF("poenaStun")
-
-
-
-// *******************************************************
-//                 END OF "2-Deadwood.txt"                
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄ END OF "2-Deadwood" ▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
