@@ -590,7 +590,8 @@ c.AAC("sword *0", "hatchet")
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
-^ !(isBossScr | isMinibossScr)
+^ !(isBossScr | isMinibossScr |
+^   encounter.isElite)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // Harvesting logic
@@ -629,7 +630,7 @@ c.AAC("sword *0", "hatchet")
 ^ s.inRange("socketed_shield") &
 ^ ((canDash & !s.inRange("dash_max")) |
 ^  !s.inRange("crossbow"))
-  ?armor > a.compoundMaxArmor_boosted |
+  ?armor > a.CmaE |
   ^(c.canEngage() & foe ! "phase")
     a.ldtF("engage")
   :
@@ -783,10 +784,9 @@ unmake with repeating crossbow. */
 // ............... BOSS LOGIC ............... //
 
 :?foe = "phase" // Dysangelos fight logic
-  ?c.canKillCinderwisp(
-  ^   a.cinderwispDmg_Default, 0) |
+  ?c.canKillCinderwisp(a.cwpMiN, 0) |
   // reached ignition cap
-  ^c.isCinderwispCap(a.maxIgnitions_Default)
+  ^c.isCinderwispCap(a.cwpMiN)
     c.devour("cinderwisp")
 
   ?foe ! "phase3"
