@@ -658,7 +658,7 @@ unmake with repeating crossbow. */
 
 // ............... BOSS LOGIC ............... //
 
-?foe = "phase1" & foe.hp <= 0 & (
+:?foe = "phase1" & foe.hp <= 0 & (
 ^item.GetCooldown("bardiche") <= 0 |
 ^c.isCasting("bardiche"))
   c.useAbility_TH("bardiche", Kubikiribocho)

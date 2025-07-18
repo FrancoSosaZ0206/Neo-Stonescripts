@@ -259,7 +259,8 @@ func ldtF(mode)
         equipR @shFdef@
 
       // on-engage debuffs
-      :?es.isDebuffable() & !es.isImmuneTo("debuff_chill") &
+      :?es.isDebuffable() &
+      ^!es.isImmuneTo("Chill") &
       ^ foe.debuffs.GetCount("debuff_chill") < 1
         equipR @shIeff@
         >o0,1,#cyan,ai shield
