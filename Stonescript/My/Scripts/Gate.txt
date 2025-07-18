@@ -44,7 +44,7 @@ set.main(colRand)
   : // item.GetCooldown("quarterstaff") <= 0
     c.useAbility_TH("quarterstaff", a.myQ)
 
-:?armor < a.compoundMaxArmor_boosted &
+:?armor < a.CmaE &
 ^(buffs.string = "buff_infernal" |
 ^ buffs.string = "buff_inf_speed")
   a.ldtF("defense armor regen")
