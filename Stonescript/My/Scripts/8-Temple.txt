@@ -30,14 +30,15 @@ var itemSplash = 17 // bardiche hitbox + splash area
 
 // TODO: implement cutscenes if needed
 var boss_cutscenes = []
+var boss_locs = ["nagaraja", "nagaraja_harder"]
 
 // screens
 var minibossScr = null
 var isMinibossScr = false
 var lastFoeScr = null
-var isLastFoeScr = false
-var bossScr = null
-var isBossScr = false
+var isLastFoeScr = (loc.id = "temple")
+var bossScr = 1
+var isBossScr = (boss_locs.Contains(loc.id))
 
 // counters
 // number of runs in this session
@@ -123,11 +124,13 @@ func fight(mode)
     ^     s.getFoeDmg(a.berserkerLvl,
     ^                 a.plagueLvl   ,
     ^                 a.maskLvl      ) > 0) |
-    ^    nRuns = 1)))
+    ^    nRuns = 1 | buffs.string = "smite")))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
-    :?hp ! maxhp &
+    :?!(hp = maxhp |
+    ^ foe = "acronian_cultist" |
+    ^ foe.name = "Cult Guard"   ) &
     ^ ((canDash &
     ^   foe.GetCount(itemSplash) = 1) |
     ^  foe = "monarch")
@@ -178,7 +181,7 @@ func fight(mode)
     >o-7,6,#magenta,wait until 
     ^@time.FormatDigital(permapotTbw)@
 
-// monitor post-treasure metrics
+/* // monitor post-treasure metrics
 var treasureCol = #888888
 ?end_t > 0 | old_t ! item.GetTreasureCount()
   treasureCol = #aaff00
@@ -189,7 +192,7 @@ var treasureCol = #888888
 ^  old | @old_t@ (t = @end_t@)
 >`1,16,
 ^  cur | @item.GetTreasureCount()@\n
-^  cap | @item.GetTreasureLimit()@
+^  cap | @item.GetTreasureLimit()@ */
 
 // show any logged errors
 ?log.hasErrors()
@@ -221,35 +224,37 @@ var treasureCol = #888888
   : // track time
     end_t++
 
-// set up bossScr
-?!bossScr
-  ?loc.stars <= 10 // cyan and white
-    bossScr = 2
-  :?loc.stars <= 15 // yellow
-    bossScr = 4
-  :?loc.stars <= 20 // green
-    bossScr = 3 + loc.stars - 16
-: // set up isBossScr
-  isBossScr = (screen.i = bossScr)
+// set up isBossScr
+isBossScr = (boss_locs.Contains(loc.id) &
+^            screen.i = bossScr)
 
 // set up lastFoeScr
 ?!lastFoeScr
-  // green
-  ?loc.stars = math.Clamp(loc.stars, 16, 20)
+  ?loc.stars <= 4
+    lastFoeScr = 4
+  :?loc.stars = 5 // white
+    lastFoeScr = 15
+  :?loc.stars <= 10 // cyan
+    lastFoeScr = 16
+  :?loc.stars <= 15 // yellow
+    lastFoeScr = 14
+  :?loc.stars <= 20 // green
     lastFoeScr = 1 + loc.stars - 16
 : // set up isLastFoeScr
-  isLastFoeScr = (screen.i = lastFoeScr)
+  isLastFoeScr =
+  ^(loc.id = "temple" & screen.i = lastFoeScr)
 
 // set up minibossScr
 ?!minibossScr
   // yellow
   ?loc.stars = math.Clamp(loc.stars, 11, 15)
-    minibossScr = 2
+    minibossScr = 15
   // green
   :?loc.stars = math.Clamp(loc.stars, 16, 20)
     minibossScr = 1
 : // set up isMinibossScr
-  isMinibossScr = (screen.i = minibossScr)
+  isMinibossScr = (loc.stars > 10 &
+  ^loc.id = "temple" & screen.i = minibossScr)
 
 /* set up permapotSetup:
 - in first run
@@ -258,17 +263,25 @@ var treasureCol = #888888
 - upon reaching the boss screen. */
 c.permapotSetup =
 ^ (nRuns = 1 & (
-^  (loc.stars = math.Clamp(loc.stars, 11, 15)) |
-^  (loc.stars > 15 &
-^   screen.i >= bossScr - 1)))
+^  loc.stars = math.Clamp(loc.stars, 10, 14) |
+^  (loc.stars > 15 & isBossScr)))
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
   permapotActTime = totaltime
 
 // BFG logic
-?nRuns > 1 & loc.stars > 16
-  c.screenMngr_DS("blade", 1, lastFoeScr - 1)
+var firstFoeScr = 1
+?loc.stars = math.Clamp(loc.stars, 6, 15)
+  firstFoeScr = 2
+
+?!(loc.stars > 15 & nRuns = 1)
+  ?loc.stars = 16
+    c.screenMngr_DS("blade",
+    ^   firstFoeScr, lastFoeScr)
+  :
+    c.screenMngr_DS("blade",
+    ^   firstFoeScr, lastFoeScr - 1)
 
 // set up itemSplash default value
 // bardiche's hitbox + itemSplash area
@@ -292,7 +305,10 @@ stunTime = foe.debuffs.GetTime("stun")
   hand = "right"
 
 // Auto brewing
-c.potionType = "lucky"
+?loc.stars <= 10
+  c.potionType = "berserk"
+:
+  c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
@@ -333,30 +349,37 @@ c.AAC("sword *0", "hatchet")
 
 // .............. SUMMON LOGIC .............. //
 
-:?c.canSummon("voidweaver") &
-^ loc.stars > 15 &
-^ screen.i <= lastFoeScr & !isMinibossScr
+:?c.canSummon("voidweaver") & loc.id = "temple"
   c.useAbility_OH("aether_talisman",
   ^   "aether_talisman", hand       )
-:?c.canSummon("cinderwisp") &
-^(loc.stars <= 15 | screen.i = lastFoeScr + 1)
+:?c.canSummon("cinderwisp") & isBossScr
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
 
 // ............. DEFENSIVE LOGIC ............ //
 
-/* // TODO: implement SAC (Shovel Attack Cancelling)
+// Nagaraja debuffing spit attack
 :?foe = "phase" &
-^ foe.state = 32 & foe.time >= X &
-^ c.canUseAbility("shovel")
-  c.useAbility_TH("shovel", "shovel")
-  >h0,0,#red,SHOVEL ABILITY */
+^ foe.state = 32 & foe.time >= 45
+  // SAC (Shovel Attack Cancelling)
+  ?c.canUseAbility("shovel")
+    c.useAbility_TH("shovel", "shovel")
+    >h0,0,#red,SHOVEL ABILITY
+  // prevent Weaken
+  :?c.canUseAbility("staff_vigor")
+    c.useAbility_TH("staff_vigor", a.stVh)
+  :
+    fight("evade")
 
-// Nagaraja spitting attack
-:?foe = "phase" &
-^(foe.state = 112 | foe.state = 102) &
-^ foe.time >= 55 & foe.time <= 65
-  fight("evade")
+// Nagaraja brick attack
+:?foe = "phase" & foe.state = 112 &
+^ foe.time = math.Clamp(foe.time, 55, 65)
+  // SAC (Shovel Attack Cancelling)
+  ?c.canUseAbility("shovel")
+    c.useAbility_TH("shovel", "shovel")
+    >h0,0,#red,SHOVEL ABILITY
+  :
+    fight("evade")
 
 // ............ CUTSCENES LOGIC ............. //
 
@@ -498,12 +521,10 @@ unmake with repeating crossbow. */
 
   // Heavy hammer logic
   :?c.canUseAbility("heavy_hammer") &
-  ^ encounter.eliteMod = "plated"
-    c.useAbility_TH("heavy_hammer",
-    ^               "Guardian's Bane")
-  /* :?c.canUseAbility("heavy_hammer") &
-  ^ foe = "elite"
-    c.useAbility_TH("heavy_hammer", Mjölnir) */
+  ^ (encounter.eliteMod = "plated" |
+  ^  loc.stars <= 15)
+    c.useAbility_TH("heavy_hammer",Mjölnir)
+  
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
@@ -520,7 +541,7 @@ unmake with repeating crossbow. */
     a.ldtF("grappling")
 
   // permapot run
-  :?nRuns = 1 |
+  :?(nRuns = 1 & loc.stars > 15) |
   ^ (encounter.eliteMod = "blessed" &
   ^  !c.isCasting("bardiche"))
     // Debuff and unmake
@@ -549,6 +570,12 @@ unmake with repeating crossbow. */
   ^  > 0) */
     itemSplash = 10
     a.ldtF("big sword unmake")
+
+  :?foe = "undamageable"
+    ?nRuns <= 1
+      a.ldtF("grappling")
+    :
+      equip @a.bS@
   :
     equip Kubikiribocho
 

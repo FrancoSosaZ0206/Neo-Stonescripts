@@ -101,11 +101,13 @@ enable npcDialog
     import My/Scripts/4-Mushroom
   :?loc.id = "undead_crypt"
     import My/Scripts/5-Halls
-  :?["bronze_mine","bronze_guardian_harder"].Contains(loc.id)
+  :?["bronze_mine", "bronze_guardian",
+    ^"bronze_guardian_harder"].Contains(loc.id)
     import My/Scripts/6-Mine
   :?loc.id = "icy_ridge"
     import My/Scripts/7-Ridge
-  :?["temple"].Contains(loc.id)
+  :?["temple", "nagaraja",
+    ^"nagaraja_harder"].Contains(loc.id)
     import My/Scripts/8-Temple
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
