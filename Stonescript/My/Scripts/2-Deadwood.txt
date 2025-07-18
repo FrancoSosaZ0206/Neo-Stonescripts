@@ -86,7 +86,7 @@ func fight(mode)
     ^  (foe = "phase" & s.inRange("dash_min")))
       c.useAbility_TH("staff_stone", a.stSh)
     :?c.canUseAbility("mind") &
-    ^ (foe ! "ranged" |
+    ^ (foe ! "ranged" | foe = "poena" |
     ^  (foe = "phase" & s.inRange("dash_min")))
       a.ldtF("mind")
 
@@ -111,7 +111,9 @@ func fight(mode)
 
     // AOE debuffing
     ?(tracker.canTrack("Weaken") |
-    ^ tracker.canTrack("Burn")    ) & (
+    ^ tracker.canTrack("Burn")    ) &
+    ^!(foe.buffs.string = "buff_mirror" |
+    ^  foe.buffs.string = "poena_mirror") & (
     ^ !(canDash | foe = "immune_to_ranged") |
     ^ (foe = "elite" &
     ^  foe.GetCount(itemSplash) > 1))
@@ -124,11 +126,15 @@ func fight(mode)
     // 1v1 strong foe weakening
     :?es.canDebuff("Weaken") & canDash &
     ^ (foe = "monarch" | foe = "boss") &
+    ^!(foe.buffs.string = "buff_mirror" |
+    ^  foe.buffs.string = "poena_mirror") &
     ^ s.inRange("sword")
       a.ldtF("sword debuff weaken")
 
     :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
     ^ canDash & s.inRange("sword") &
+    ^!(foe.buffs.string = "buff_mirror" |
+    ^  foe.buffs.string = "poena_mirror") &
     // Permapot 1v1 debuffing
     ^ ((c.permapotSetup & foe = "elite" &
     ^   foe.GetCount(itemSplash) = 1) |
@@ -466,7 +472,7 @@ mirrored. */
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
-^!isBossScr
+^isLastFoeScr
   c.useAbility_TH("staff_fire", a.stFh)
 
 // Harvesting logic
@@ -658,36 +664,15 @@ unmake with repeating crossbow. */
 
 // ............... BOSS LOGIC ............... //
 
-:?foe = "phase1" & foe.hp <= 0 & (
-^item.GetCooldown("bardiche") <= 0 |
-^c.isCasting("bardiche"))
+:?(foe = "phase1" &
+^  (foe.state = 4 | foe.hp <= 0) &
+^  item.GetCooldown("bardiche") <= 0) |
+^ c.isCasting("bardiche")
   c.useAbility_TH("bardiche", Kubikiribocho)
 
 // Xyloalgia
-:?foe = "tree_boss" & foe.state ! 4
-  // About to die
-  ?foe.hp < 100
-    // dash back
-    canDash = false
-    ?c.canUseAbility("staff_stone")
-      c.useAbility_TH("staff_stone", a.stSh)
-    :?c.canUseAbility("mind") &
-    ^ s.inRange("bardiche")
-      a.ldtF("mind")
-    
-    // queue debuff projectiles
-    :?tracker.canTrack("Weaken")
-      a.ldtF("magic debuff weaken")
-    :?tracker.canTrack("Chill")
-      a.ldtF("magic debuff chill")
-    :?tracker.canTrack("Burn")
-      a.ldtF("magic debuff burn")
-
-    : // dash again and finish up
-      canDash = true
-      fight("normal")
-  :
-    fight("normal")
+:?foe = "tree_boss"
+  fight("normal")
 
 :?foe = "poena"
   // remove mirror buff with Reset Wand
