@@ -1,324 +1,585 @@
-﻿// *******************************************************
-//                      8-Temple.txt                      
-// *******************************************************
+﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀ START OF "8-Temple" ▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
 
-// Script for Temple
+// //////////////// IMPORTS ///////////////// //
 
+var log = import My/Lib/Error_Logging/public
 
+var u     = import My/Lib/Utilities
+var c     = import My/Lib/Combat
+var s     = import My/Lib/Stats
+var a     = import My/Lib/Arsenal
 
-// IMPORTS
+var es = import My/Lib/Effect_Stats/public
+var tracker = import My/Lib/Ranged_Debuffing/public
 
-var u = new MyScripts/Lib/Utilities
-var uimkr = new MyScripts/Lib/UI_Maker
-var a = new MyScripts/Lib/MyArsenal
-var i = new MyScripts/Lib/MyBetterInfo
-var c = new MyScripts/Lib/Combat
-c.Main()
+// /////////////// VARIABLES //////////////// //
 
-/***************************************************************/
+// file
+var _FILE = "Scripts/8-Temple"
 
-var som = new MyScripts/Lib/Speed_O_Meter
-var dpsm = new MyScripts/Lib/DPS_Meter_MODIFIED
-var bosTmr
-bosTmr = import MyScripts/Borrowed/BossfightTimer2
+// flags
+var canDash  = true
 
-var somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
-?som.Update(false)
-  somPanel.Recycle()
-  somPanel = null
+// values
+var stunTime = null
+var hand     = null
 
-  somPanel = som.mkUI(0, 1, i.colToHex("red"), true, false)
+var itemSplash = 17 // bardiche hitbox + splash area
 
+// TODO: implement cutscenes if needed
+var boss_cutscenes = []
 
-dpsm.ENABLED = true
-dpsm.refreshRate = 30
+// screens
+var minibossScr = null
+var isMinibossScr = false
+var lastFoeScr = null
+var isLastFoeScr = false
+var bossScr = null
+var isBossScr = false
 
-var dpsPanel
-?dpsm.Update()
-  ?dpsPanel
-    dpsPanel.Recycle()
-    dpsPanel = null
+// counters
+// number of runs in this session
+var nRuns = 1
+/* time when permapot was activated,
+   -1 means not activated. */
+var permapotActTime = -1
+// permapot time bandwidth
+var permapotTbw = loc.averageTime -
+^                 (loc.averageTime / 10)
 
-  dpsPanel = dpsm.mkUI(0, 3, "#yellow", 2)
+var old_t = item.GetTreasureCount()
+var end_t = 0
 
-/***************************************************************/
+// /////////////// FUNCTIONS //////////////// //
 
+func fight(mode)
+  ?mode = "escape"
+    canDash = false
 
+    ?c.canUseAbility("mind")
+      a.ldtF("mind")
+    : // c.canUseAbility("staff_stone")
+      c.useAbility_TH("staff_stone", a.stSh)
 
-// VARIABLES
+  :?mode = "evade"
+    canDash = false
 
-var smiteScr = 2
-var keepMask = true
-var keepFTali = false
+    ?c.canUseAbility("staff_stone") &
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
+      c.useAbility_TH("staff_stone", a.stSh)
+    :?c.canUseAbility("mind") &
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
+      a.ldtF("mind")
 
-?foe = "boss"
-  keepFTali = true
+    :?c.canUseAbility("staff_ice") &
+    ^ s.inRange("dash_min")
+      c.useAbility_TH("staff_ice", a.stIh)
 
-var canDebI
-var canDebP
-var canDebF
+    :?!s.inRange("sword")
+      ?foe.count > 1
+        fight("normal")
+      :
+        fight("normal")
 
-?loc.loop
-  keepMask = false
-  keepFTali = false
-
-
-// FUNCTIONS:
-
-func ldtF(mode) // loadouts
-
-  ?mode = "default"
-    equipL triskelion
-    ?!keepMask
-      equipR @a.cshield1@
-  :?mode = "armorRegen"
-    equipL triskelion
-    ?!keepMask
-      equipR @a.cshield2@
-  :?mode = "engage"
-    equipL triskelion
-    ?!keepMask
-      equipR @a.ishield@
-  :?mode = "escape"
-    equipL mind
-    ?!keepMask
-      equipR @a.ishield@
-  :?mode = "magnet"
-    equipL star
-    ?!keepMask
-      equipR triskelion
-
-  :?mode = "meleeDmg"
-    equipL Bifrost
-    ?!keepMask
-      equipR @a.isword@
-
-  :?mode = "extend"
-    equipL triskelion
-    equipR mask
-
-  :?mode = "magic"
-    ?keepMask
-      ?canDebI
-        equipL Frosty Crust
-      :?canDebP
-        equipL @a.dPwand@
-      :?canDebF
-        equipL @a.dFwand@
-
+    // Unmake
+    :?es.canUnmake()
+      a.ldtF("defense unmake")
     :
-      /*?totaltime % 2 = 0
-        equipL triskelion
-        equipR hatchet*/
+      a.ldtF("defense")
 
-      ?canDebI
-        equip @a.dIstaff@
-      :?canDebP
-        equip @a.dPstaff@
-      :?canDebF
-        equip @a.dFstaff@
+  :?mode = "normal"
+    // ........... DEBUFFING LOGIC .......... //
 
-  :
-    >o0,0,#red,ERROR: ldtF() recieved incorrect mode: @mode@
+    // AOE debuffing
+    ?(tracker.canTrack("Weaken") |
+    ^ tracker.canTrack("Burn")    ) &
+    ^(!canDash |
+    ^ (foe = "elite" &
+    ^  foe.GetCount(itemSplash) > 1))
+      itemSplash = foe.distance + 7
+      ?tracker.canTrack("Weaken")
+        a.ldtF("magic debuff weaken")
+      : // tracker.canTrack("Burn")
+        a.ldtF("magic debuff burn")
 
-  return
+    // 1v1 strong foe weakening
+    :?es.canDebuff("Weaken") & canDash &
+    ^ (foe = "monarch" | foe = "boss") &
+    ^ s.inRange("sword")
+      a.ldtF("sword debuff weaken")
 
-func fight1v1()
+    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
+    ^ canDash & s.inRange("sword") &
+    // Permapot 1v1 debuffing
+    ^ ((c.permapotSetup & foe = "elite" &
+    ^   foe.GetCount(itemSplash) = 1) |
+    // 1v1 strong foe debuffing
+    ^  (((loc.stars > 15 &
+    ^     (foe = "monarch" | foe = "boss") &
+    ^     s.getFoeDmg(a.berserkerLvl,
+    ^                 a.plagueLvl   ,
+    ^                 a.maskLvl      ) > 0) |
+    ^    nRuns = 1)))
+      a.ldtF("sword debuff auto")
 
-  /* How to apply debuffs:
-  - apply all except the ones the foe is immune to.
-  Finish when:
-  - all possible debuffs have been applied. */
-  canDebI = (foe.debuffs.string ! "chill:6" & foe ! "immune_to_debuff_chill")
-  canDebP = (foe.debuffs.string ! "damage" & foe ! "immune_to_debuff_damage")
-  canDebF = (foe.debuffs.string ! "dot" & foe ! "immune_to_debuff_dot")
+    // ............ HEALING LOGIC ............ //
+    :?hp ! maxhp &
+    ^ ((canDash &
+    ^   foe.GetCount(itemSplash) = 1) |
+    ^  foe = "monarch")
+      a.ldtF("sword heal")
 
-  ?(keepMask | buffs.string = "berserk") & (canDebI | canDebP | canDebF)
-    ?keepMask
-      ?canDebI
-        equipL @a.dIsword@
-      :?canDebP
-        equipL @a.dPsword@
-      :?canDebF
-        equipL @a.dFsword@
+    // ........... UNMAKING LOGIC ............ //
+    :?es.canUnmake()
+      ?canDash &
+      ^foe.GetCount(itemSplash) = 1
+        a.ldtF("sword unmake")
+      : // foe.GetCount(itemSplash) > 1
+        itemSplash = 10
+        a.ldtF("big sword unmake")
+
+    // ............ DAMAGE LOGIC ............. //
+    :?canDash &
+    ^ (foe.GetCount(itemSplash) = 1 |
+    ^  foe = "monarch" | foe = "boss")
+      ?foe = "phase"
+        ?c.canUseAbility("staff_poison") &
+        ^s.inRange("bardiche")
+          c.useAbility_TH("staff_poison", a.stPh)
+        :?c.canUsePotion()
+          activate potion
+        :?c.canUseAbility("bardiche") &
+        ^!c.permapotSetup
+          c.useAbility_TH("bardiche", Kubikiribocho)
+        :
+          a.ldtF("sword dmg")
+      :
+        a.ldtF("sword dmg")
     :
-      //Left hand:
-      ?canDebP
-        equipL @a.dPsword@
-      :?canDebF
-        equipL @a.dFsword@
-      :?canDebI
-        equipL Frosty Crust
+      itemSplash = foe.distance + 7
+      a.ldtF("magic dmg")
 
-      //Right hand:
-      ?canDebI
-        equipR @a.dIsword@
+  : // invalid mode
+    log.logError(_FILE,"fight",
+    ^   "unknown <mode>: "+mode)
 
-  :?keepMask
-    equipL Bifrost
-  :
-    ?buffs.string = "berserk"
-      c.doMoondial(Bifrost, a.isword, 2)
-    :
-      c.doMoondial(Bifrost, a.isword, 0)
+// /////////////// PROCEDURE //////////////// //
 
-  return
+// ............. MONITOR LOGIC .............. //
 
+// permapot time bandwidth monitor:
+?permapotActTime ! -1 & nRuns = 1
+  var delay = totaltime + (5 * 30)
+  ?totaltime <= delay
+    >o-7,6,#magenta,wait until 
+    ^@time.FormatDigital(permapotTbw)@
 
+// monitor post-treasure metrics
+var treasureCol = #888888
+?end_t > 0 | old_t ! item.GetTreasureCount()
+  treasureCol = #aaff00
+:
+  treasureCol = #888888
+>`1,14,@treasureCol@,
+^treasure:\n
+^  old | @old_t@ (t = @end_t@)
+>`1,16,
+^  cur | @item.GetTreasureCount()@\n
+^  cap | @item.GetTreasureLimit()@
 
-// PROCEDURE:
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
+  ^@log.getErrorCount()@\n
+  >@log.getError()@
 
+// ............ WITHDRAWAL LOGIC ............ //
 
-c.doAAC("sword 0*", a.cshield1)
-
->`15,2,#yellow,@foe.debuffs.string@
-
-?hp < maxhp & !keepMask
+?s.getTotalHP("player")
+^ <=
+^s.getFoeDmg(a.berserkerLvl,
+^            a.plagueLvl,
+^            a.maskLvl      ) |
+^old_t = item.GetTreasureLimit()
   loc.Leave()
 
-?loc.begin // AUTO BREWING
+// .............. SETUP LOGIC ............... //
 
-  ?res.bronze >= 10
-    ?res.stone >= 10
-      ?item.potion ! "lucky"
-        brew stone + bronze
+?loc.loop
+  nRuns++
 
-    :?res.wood >= 10
-      ?item.potion ! "berserk"
-        brew wood + bronze
-    :
-      loc.Leave()
-  :
-    loc.Leave()
+// set up post-treasure metrics
+?old_t ! item.GetTreasureCount()
+  // reset metrics
+  ?loc.loop | !isBossScr
+    old_t = item.GetTreasureCount()
+    end_t = 0
+  : // track time
+    end_t++
 
-?keepMask
-  ?item.right ! "bardiche" &
-  ^item.right ! "quarterstaff" &
-  ^item.right ! "heavy hammer"
-    equipR mask
+// set up bossScr
+?!bossScr
+  ?loc.stars <= 10 // cyan and white
+    bossScr = 2
+  :?loc.stars <= 15 // yellow
+    bossScr = 4
+  :?loc.stars <= 20 // green
+    bossScr = 3 + loc.stars - 16
+: // set up isBossScr
+  isBossScr = (screen.i = bossScr)
 
-?loc.begin | loc.loop
-  equipL triskelion
-  equipR @a.cshield1@
+// set up lastFoeScr
+?!lastFoeScr
+  // green
+  ?loc.stars = math.Clamp(loc.stars, 16, 20)
+    lastFoeScr = 1 + loc.stars - 16
+: // set up isLastFoeScr
+  isLastFoeScr = (screen.i = lastFoeScr)
 
-:?c.canUseAETali() & !keepFTali
-  ?keepMask
-    c.useAETali("l")
-  :
-    equipL triskelion
-    c.useAETali("r")
+// set up minibossScr
+?!minibossScr
+  // yellow
+  ?loc.stars = math.Clamp(loc.stars, 11, 15)
+    minibossScr = 2
+  // green
+  :?loc.stars = math.Clamp(loc.stars, 16, 20)
+    minibossScr = 1
+: // set up isMinibossScr
+  isMinibossScr = (screen.i = minibossScr)
 
-:?c.canUseFTali() & keepFTali
-  ?keepMask
-    c.useFTali("l")
-  :
-    equipL triskelion
-    c.useFTali("r")
+/* set up permapotSetup:
+- in first run
+- yellow onwards, or
+- green onwards and
+- upon reaching the boss screen. */
+c.permapotSetup =
+^ (nRuns = 1 & (
+^  (loc.stars = math.Clamp(loc.stars, 11, 15)) |
+^  (loc.stars > 15 &
+^   screen.i >= bossScr - 1)))
 
-:?c.canUsePotDmg() & keepMask
+// Record time when permapot was activated
+?c.permapotSetup & permapotActTime = -1
+  permapotActTime = totaltime
+
+// BFG logic
+?nRuns > 1 & loc.stars > 16
+  c.screenMngr_DS("blade", 1, lastFoeScr - 1)
+
+// set up itemSplash default value
+// bardiche's hitbox + itemSplash area
+itemSplash = 17 // s.getHbxSplash("bardiche", null)
+
+// set canDash default value
+canDash = true
+
+// init Combat
+c.Init()
+// start up Ranged_Debuffing tracker
+tracker.track()
+
+stunTime = foe.debuffs.GetTime("stun")
+
+// Decide hand for one-handed items
+?c.permapotSetup |
+^(s.inRange("dash") & canDash & ai.walking)
+  hand = "left"
+:
+  hand = "right"
+
+// Auto brewing
+c.potionType = "lucky"
+?c.canBrewPotion()
+  c.brewPotion()
+
+// .......................................... //
+
+// Permapot equipment
+?c.permapotSetup
+  a.ldtF("permapot")
+
+c.AAC("sword *0", "hatchet")
+
+// Initial equipments
+?loc.begin
+  a.ldtF("default")
+
+// activate potion when in permapot
+:?c.canUsePotion() & c.permapotSetup
   activate potion
 
-:?pickup.distance ! 9999
-  ?c.canUseQstaff()
-    c.useQstaff(a.myqstaff)
+// ........... POST-TREASURE LOGIC .......... //
+
+:?loc.stars > 10 & end_t > 1 & isBossScr
+  // pickup treasure
+  ?pickup.distance < 15
+    a.ldtF("magnet")
+
+  // activate potion
+  :?c.canUsePotion() & end_t > 27
+    activate potion
+
+  // speed up
+  :?c.canUseAbility("staff_fire") &
+  ^ end_t > 27 & item.potion = "empty"
+    c.useAbility_TH("staff_fire", a.stFh)
+
+  : // regen armor
+    a.ldtF("defense armor regen")
+
+// .............. SUMMON LOGIC .............. //
+
+:?c.canSummon("voidweaver") &
+^ loc.stars > 15 &
+^ screen.i <= lastFoeScr & !isMinibossScr
+  c.useAbility_OH("aether_talisman",
+  ^   "aether_talisman", hand       )
+:?c.canSummon("cinderwisp") &
+^(loc.stars <= 15 | screen.i = lastFoeScr + 1)
+  c.useAbility_OH("fire_talisman",
+  ^   "fire_talisman", hand       )
+
+// ............. DEFENSIVE LOGIC ............ //
+
+/* // TODO: implement SAC (Shovel Attack Cancelling)
+:?foe = "phase" &
+^ foe.state = 32 & foe.time >= X &
+^ c.canUseAbility("shovel")
+  c.useAbility_TH("shovel", "shovel")
+  >h0,0,#red,SHOVEL ABILITY */
+
+// Nagaraja spitting attack
+:?foe = "phase" &
+^(foe.state = 112 | foe.state = 102) &
+^ foe.time >= 55 & foe.time <= 65
+  fight("evade")
+
+// ............ CUTSCENES LOGIC ............. //
+
+
+
+// ......... ENGAGING/WALKING LOGIC ......... //
+
+/* speed up when:
+  - speed effect not already present
+  - not boss, miniboss nor elite screens. */
+:?c.canUseAbility("staff_fire") &
+^ buffs.string ! "buff_inf_speed" &
+^ (loc.stars <= 15 | nRuns > 1) &
+^ loc.id = "temple" & 
+^!(isMinibossScr | encounter.isElite)
+  c.useAbility_TH("staff_fire", a.stFh)
+
+// mini-dash
+:?c.canUseAbility("quarterstaff") &
+^ ai.walking & ai.enabled & !ai.paused &
+// Cannot dash and in dashing range
+^!(canDash & a.canSmartDash())
+  c.useAbility_TH("quarterstaff", a.myQ)
+
+// pickup logic
+:?pickup.distance < 15 &
+// foe is farther than pickup
+^(foe.distance > 15 | foe.distance = 9999)
+  a.ldtF("magnet")
+
+// armor regen logic
+:?(ai.walking & !s.inRange("socketed_shield")) |
+^ (ai.paused | !ai.enabled |
+^  player.direction = -1)
+  /*?!c.canBurst() & !c.permapotSetup
+    c.burst(a.burstSwords)
+  :*/
+  a.ldtF("defense armor regen")
+
+// engaging logic (out of fighting range)
+:?ai.walking & player.direction = 1 &
+^ s.inRange("socketed_shield") &
+^ ((canDash & !s.inRange("dash_max")) |
+^  !s.inRange("crossbow"))
+  ?armor > a.CmaE |
+  ^(c.canEngage() & foe ! "phase")
+    a.ldtF("engage")
   :
-    ldtF("magnet")
-:
+    a.ldtF("defense armor regen")
 
-  ?c.canUseBladeDS(smiteScr)
-    ?foe.distance <= 33
-      c.useBladeDS()
+// ............... RANGED LOGIC .............. //
 
-  ?c.canUseQstaff() & ai.enabled
-    ?item.right ! "bardiche" & item.right ! Kubikiribocho
-    ^& item.right ! "heavy hammer" & (
-    ^(!c.canBash() & !c.canDash())
-    ^| (foe.distance < 11 | foe.distance > 15))
-      c.useQstaff(a.myqstaff)
 
-  :?foe.distance > 35
-    ?14 <= armor & armor <= a.cMaxArmor
-      ldtF("default")
-    :?armor < 14
-      ldtF("armorRegen")
+
+// .............. DASHING LOGIC ............. //
+
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
+// Knockback farming
+:?c.canKbFarm()
+  c.smoothCast(a.bS)
+
+/* if in range, get closer while trying to
+unmake with repeating crossbow. */
+:?canDash & c.canSmoothCast(true)
+  c.smoothCast(a.bR)
+
+// engaging logic (within fighting range)
+:?ai.walking & player.direction = 1 &
+^ loc.id = "temple" &
+^ canDash & !a.canSmartDash() &
+^ s.betweenRange("triskelion", "dash_max")
+  a.ldtF("engage")
+
+// get in melee range faster
+:?c.canStutterStep()
+  c.stutterStep()
+
+// ............... AOE LOGIC ................ //
+
+:?foe.GetCount(itemSplash) > 1 & foe ! "boss"
+  // .......... SPECIAL ITEMS LOGIC ......... //
+
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^c.canUnmakeVoidweaver() &
+  ^!isMinibossScr
+    c.devour("voidweaver")
+
+  // Calamity - reduce hp
+  :?c.canUseAbility("wand_aether") &
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious")
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "stoic"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Reduce damage
+  :?c.canUseAbility("wand_poison") &
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ encounter.eliteMod = "hydra"      |
+  ^ foe.buffs.string = "buff_tenacious")
+    c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  // Stun enemies
+  :?c.canUseAbility("wand_ice") &
+  ^ es.canDebuff("Stun") & foe = "elite"
+    c.useAbility_OH("wand_ice", a.wIh, hand)
+
+  /* // FIXME: extend range
+  :?c.canUseAbility("staff_aether") &
+  ^ !(isMinibossScr | nRuns = 1)
+    c.useAbility_TH("staff_aether", a.stAh) */
+
+  // Align foes
+  :?c.canUseAbility("wand_stone") &
+  ^s.inRange("wand")
+    c.useAbility_OH("wand_stone", a.wSh, hand)
+
+  /* Activate Berserk Staff early
+  (in case there's barely enough armor,
+  to not lose it to the Infernal Staff's
+  Burn debuff) for the Scout. */
+  :?c.canUseAbility("staff_poison") &
+  ^isMinibossScr
+    c.useAbility_TH("staff_poison", a.stPh)
+
+  // ........................................ //
+
+  // Heavy hammer logic
+  :?c.canUseAbility("heavy_hammer") &
+  ^ encounter.eliteMod = "plated"
+    c.useAbility_TH("heavy_hammer",
+    ^               "Guardian's Bane")
+  /* :?c.canUseAbility("heavy_hammer") &
+  ^ foe = "elite"
+    c.useAbility_TH("heavy_hammer", Mjölnir) */
+
+  // Stun/Perma-stun logic
+  :?s.inRange("grappling_hook") &
+  // don't interrupt bardiche
+  ^ !c.isCasting("bardiche") &
+  ^ foe ! "warcaster" &
+  ^ (es.canDebuff("stun") |
+    // stun time (frames) running out
+  ^  (stunTime = math.Clamp(stunTime, 1, 11) &
+     // not stunned with heavy hammer or Frost Wand
+  ^   foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^   foe.debuffs.string ! "debuff_frost_stun"))
+    itemSplash = foe.distance + 5
+    a.ldtF("grappling")
+
+  // permapot run
+  :?nRuns = 1 |
+  ^ (encounter.eliteMod = "blessed" &
+  ^  !c.isCasting("bardiche"))
+    // Debuff and unmake
+    itemSplash = foe.distance + 7
+
+    // Debuff and unmake
+    ?tracker.canTrack("Weaken")
+      a.ldtF("magic debuff weaken")
+    :?tracker.canTrack("Chill")
+      a.ldtF("magic debuff chill")
+    :?tracker.canTrack("Burn")
+      a.ldtF("magic debuff burn")
     :
-      equipL triskelion
-      equipR mask
+      itemSplash = 10
+      a.ldtF("big sword unmake")
 
-  :?foe.distance > 15
-    ldtF("engage")
-
-    var isAbtToDash
-    isAbtToDash = (foe.distance <= 17)
-    ?keepMask & isAbtToDash
-      equipR @a.ishield@
-
-    canDebI = (foe.debuffs.string ! "chill" &
-    ^f ! "immune_to_debuff_chill")
-
-    ?!keepMask & canDebI & isAbtToDash &
-    ^i.getFoeTotalHP() > i.getBuffInfo("smite", false, 2) * a.smiteMult
-      equipR @a.aiShield@
-
+  // berserk potion
+  :?buffs.string = "ʘ" | foe ! "elite" |
+  // split hydras lose the Stable buff
+  ^ (encounter.eliteMod = "hydra" &
+  ^  foe.buffs.string ! "stability") /* |
+  // more foes outside range
+  ^ (foe ! "elite" & screen.i > 1 &
+  ^  (foe.count -
+  ^   foe.GetCount(itemSplash))
+  ^  > 0) */
+    itemSplash = 10
+    a.ldtF("big sword unmake")
   :
-    ?foe ! "nagaraja"
-      ?c.canBash()
-        c.bash(Bifrost)
-      :?c.canDash()
-        c.dash(Bifrost, a.dshield)
-      :
-        ?foe = "acronian_cultist"
-          ?c.canUseMask()
-            c.useMask()
-          :
-            fight1v1()  
-        :
-          ?foe.count >= 7 &
-          ^c.canUseHamm() & !keepMask
-          ^!c.canUseBlade()
-            c.useHamm(a.myHamm)
+    equip Kubikiribocho
 
-          ://?foe.count > 1
-            ldtF("magic")
-          /*:?foe.distance < 7
-            fight1v1()*/
+// ............... BOSS LOGIC ............... //
 
+// Nagaraja fight logic
+:?foe = "phase"
+  ?c.canKillCinderwisp(a.cwpMiN, 0) |
+  // reached ignition cap
+  ^c.isCinderwispCap(a.cwpMiN)
+    c.devour("cinderwisp")
 
-    : // foe = "nagaraja"
+  fight("normal")
 
-      ?c.canUseCind() & dpsm.DPS ! "N/A"
-        ?foe.debuffs.string = a.maxIgnitions_Default |
-        ^c.canKillCind(i.getFoeTotalHP(),
-        ^              i.getDebuffLvl("ignition", true),
-        ^              a.cindDmg_Default, dpsm.DPS)
-          c.useCind()
+// ................ 1V1 LOGIC ............... //
 
-      ?c.canUsePot()
-        activate potion
+// Tanky foe, use bardiche ability to lower its hitpoints
+:?loc.stars > 15 &
+^(foe = "boss" | foe = "monarch") &
+^(c.canUseAbility("staff_poison") |
+^c.canUseAbility("bardiche"))
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  : // c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+:
+  fight("normal")
 
-      ?(foe.state = 112 | foe.state = 102)
-      ^& foe.time >= 55 & foe.time <= 65
-        ?c.canUseMind()
-          ldtF("escape")
+?buffs.string = "buff_range"
+  itemSplash += 10
 
-        :?keepMask
-          equipL @a.altbow@
-        :
-          equip @a.ibow@
-
-      :?foe.state ! 4 // if it's not dying
-        ?c.canBash()
-          c.bash(Bifrost)
-        :?c.canDash()
-          c.dash(Bifrost,a.dshield)
-
-        :?c.canUseBard() & keepMask
-          c.useBard(Kubikiribocho)
-        :
-          fight1v1()
-
-
-
-// *******************************************************
-//                  END OF "8-Temple.txt"                 
-// *******************************************************
+//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
+//  ┃ ▄▀▄▀▄▀▄▀▄ END OF "8-Temple" ▀▄▀▄▀▄▀▄ ┃  //
+//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //

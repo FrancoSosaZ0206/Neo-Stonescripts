@@ -105,7 +105,7 @@ enable npcDialog
     import My/Scripts/6-Mine
   :?loc.id = "icy_ridge"
     import My/Scripts/7-Ridge
-  :?loc.id = "temple"
+  :?["temple"].Contains(loc.id)
     import My/Scripts/8-Temple
 
 //  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //

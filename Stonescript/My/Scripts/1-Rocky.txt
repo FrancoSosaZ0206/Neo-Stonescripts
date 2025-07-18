@@ -180,6 +180,7 @@ func fight(mode)
     :
       itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
+
   : // invalid mode
     log.logError(_FILE,"fight",
     ^   "unknown <mode>: "+mode)
@@ -235,7 +236,7 @@ var treasureCol = #888888
 ^  old | @old_t@ (t = @end_t@)
 >`1,16,
 ^  cur | @item.GetTreasureCount()@\n
-^  cap | @item.GetTreasureLimit()@\n */
+^  cap | @item.GetTreasureLimit()@ */
 
 // show any logged errors
 ?log.hasErrors()
@@ -586,7 +587,7 @@ c.AAC("sword *0", "hatchet")
 
 /* speed up when:
   - speed effect not already present
-  - not boss nor miniboss screens. */
+  - not boss, miniboss nor elite screens. */
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
