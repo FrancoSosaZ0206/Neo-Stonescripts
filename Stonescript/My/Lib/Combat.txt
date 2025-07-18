@@ -121,9 +121,8 @@ func canUseAbility(abilityID)
       ^         s.inRange(abilityID)) |
       ^isCasting(abilityID) // won't get interrupted
     :?abilityID = "shovel"
-      result = (result & loc.id = "rocky_plateau"/* &
-      ^         s.inRange(abilityID)*/) |
-      ^isCasting(abilityID) // won't get interrupted
+      // won't get interrupted
+      result = (result | isCasting(abilityID))
 
     :?abilityID = "bardiche" |
     ^abilityID = "heavy_hammer"

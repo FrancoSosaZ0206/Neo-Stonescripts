@@ -155,9 +155,6 @@ func fight(mode)
           c.useAbility_TH("staff_poison", a.stPh)
         :?c.canUsePotion()
           activate potion
-        :?c.canUseAbility("bardiche") &
-        ^!c.permapotSetup
-          c.useAbility_TH("bardiche", Kubikiribocho)
         :
           a.ldtF("sword dmg")
       :
@@ -178,8 +175,13 @@ func fight(mode)
 ?permapotActTime ! -1 & nRuns = 1
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
-    >o-7,6,#magenta,wait until 
+    >o-7,4,#magenta,wait until 
     ^@time.FormatDigital(permapotTbw)@
+
+// monitor False-God
+?foe = "elite" | encounter.isElite //eliteMod = "False-God"
+  >`1,12,#magenta,mod: @encounter.eliteMod@\n
+  ^buffs: @foe.buffs.string@
 
 /* // monitor post-treasure metrics
 var treasureCol = #888888
@@ -260,11 +262,10 @@ isBossScr = (boss_locs.Contains(loc.id) &
 - in first run
 - yellow onwards, or
 - green onwards and
-- upon reaching the boss screen. */
-c.permapotSetup =
-^ (nRuns = 1 & (
-^  loc.stars = math.Clamp(loc.stars, 10, 14) |
-^  (loc.stars > 15 & isBossScr)))
+- upon reaching lastFoeScr. */
+c.permapotSetup = (
+^nRuns = 1 &
+^loc.stars = math.Clamp(loc.stars,11,15))
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -353,8 +354,8 @@ c.AAC("sword *0", "hatchet")
 ^ loc.id = "temple" & screen.i < lastFoeScr
   c.useAbility_OH("aether_talisman",
   ^   "aether_talisman", hand       )
-:?c.canSummon("cinderwisp") &
-^(isBossScr | (isLastFoeScr & foe.count <= 1))
+:?c.canSummon("cinderwisp") & loc.id = "temple" &
+^ screen.i >= lastFoeScr & foe.count <= 1
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
 
@@ -366,7 +367,7 @@ c.AAC("sword *0", "hatchet")
   // SAC (Shovel Attack Cancelling)
   ?c.canUseAbility("shovel")
     c.useAbility_TH("shovel", "shovel")
-    >h0,0,#red,SHOVEL ABILITY
+
   // prevent Weaken
   :?c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
@@ -377,14 +378,12 @@ c.AAC("sword *0", "hatchet")
     fight("normal")
 
 // Nagaraja brick attack
-:?foe = "phase" & foe.state = 112 &
-^ foe.time = math.Clamp(foe.time, 55, 65)
-  // SAC (Shovel Attack Cancelling)
-  ?c.canUseAbility("shovel")
-    c.useAbility_TH("shovel", "shovel")
-    >h0,0,#red,SHOVEL ABILITY
-  :
+:?foe = "phase" &
+^ [112, 102].Contains(foe.state)
+  ?foe.time = math.Clamp(foe.time,55,65)
     fight("evade")
+  :
+    fight("normal")
 
 // ............ CUTSCENES LOGIC ............. //
 
@@ -546,9 +545,11 @@ unmake with repeating crossbow. */
     a.ldtF("grappling")
 
   // permapot run
-  :?(nRuns = 1 & loc.stars > 15) |
-  ^ (encounter.eliteMod = "blessed" &
-  ^  !c.isCasting("bardiche"))
+  :?((nRuns = 1 & loc.stars > 15 &
+  ^   foe = "elite") |
+  ^  encounter.eliteMod = "blessed") &
+  ^!(c.isCasting("bardiche") |
+  ^  c.isCasting("talisman")  )
     // Debuff and unmake
     itemSplash = foe.distance + 7
 
@@ -576,13 +577,17 @@ unmake with repeating crossbow. */
     itemSplash = 10
     a.ldtF("big sword unmake")
 
-  :?foe = "undamageable"
+  /* // False-God AOE
+  :?foe.buffs.string = "immortal"
     ?nRuns <= 1
       a.ldtF("grappling")
     :
-      equip @a.bS@
-  :
+      equip @a.bS@ */
+
+  :?buffs.string = "!"
     equip Kubikiribocho
+  :
+    a.ldtF("big sword unmake")
 
 // ............... BOSS LOGIC ............... //
 
@@ -606,6 +611,14 @@ unmake with repeating crossbow. */
     c.useAbility_TH("staff_poison", a.stPh)
   : // c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
+
+/* // False-God 1v1
+:?foe.buffs.string = "immortal"
+  ?nRuns <= 1
+    a.ldtF("grappling")
+  :
+    equip @a.bS@ */
+
 :
   fight("normal")
 

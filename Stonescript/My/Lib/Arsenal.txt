@@ -479,12 +479,12 @@ func ldtF(mode)
         c.moonjuggle(Existential Crisis, sword) // sAeff2
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?es.canDebuff("debuff_chill") & (mode = "auto" | mode = "chill")
+        ?(es.canDebuff("Chill") & mode = "auto") | mode = "chill"
           equipL Almafuerte
-        :?es.canDebuff("debuff_damage") & (mode = "auto" | mode = "weaken")
+        :?(es.canDebuff("Weaken") & mode = "auto") | mode = "weaken"
           equipL Death's Kiss
           //'
-        :?es.canDebuff("debuff_dot") & (mode = "auto" | mode = "burn")
+        :?(es.canDebuff("Burn") & mode = "auto") | mode = "burn"
           equipL @sFeff@
 
       : // !c.permapotSetup
@@ -502,14 +502,14 @@ func ldtF(mode)
         : // foe = "stone"
           sDmg = Bifrost // Unbroken Faith
 
-        ?es.canDebuff("debuff_chill") & (mode = "auto" | mode = "chill")
+        ?(es.canDebuff("Chill") & mode = "auto") | mode = "chill"
           c.moonjuggle(Almafuerte, sIeff)
         :
           equipL moon
-          ?es.canDebuff("debuff_damage") & (mode = "auto" | mode = "weaken")
+          ?(es.canDebuff("Weaken") & mode = "auto") | mode = "weaken"
             equipR Death's Kiss
             //'
-          :?es.canDebuff("debuff_dot") & (mode = "auto" | mode = "burn")
+          :?(es.canDebuff("Burn") & mode = "auto") | mode = "burn"
             equipR @sFeff@
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
@@ -565,21 +565,21 @@ func ldtF(mode)
         equipR Existential Dread
     :?mode = "debuff"
       ?c.permapotSetup // all left hand
-        ?es.canDebuff("debuff_chill")
+        ?es.canDebuff("Chill")
           // equipL 
-        :?es.canDebuff("debuff_damage")
+        :?es.canDebuff("Weaken")
           // equipL 
 
       : // !c.permapotSetup
 
         // Left hand:
-        ?es.canDebuff("debuff_damage")
+        ?es.canDebuff("Weaken")
           // equipL 
-        :?es.canDebuff("debuff_chill")
+        :?es.canDebuff("Chill")
           // equipL 
 
         // Right hand:
-        ?es.canDebuff("debuff_chill")
+        ?es.canDebuff("Chill")
           // equipR 
     :?mode = "dmg"
       ?c.permapotSetup // all left hand
