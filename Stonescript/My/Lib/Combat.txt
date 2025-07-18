@@ -131,7 +131,8 @@ func canUseAbility(abilityID)
       ^isCasting(abilityID) // won't get interrupted
 
     :?abilityID = "talisman" // interruptible abilities
-      result = result | isCasting(abilityID) // make sure not to change it while casting the ability
+      // make sure not to change it while casting the ability
+      result = (result | isCasting(abilityID))
 
     // Special case, stone wand doesn't require armor.
     :?abilityID = "wand_stone"

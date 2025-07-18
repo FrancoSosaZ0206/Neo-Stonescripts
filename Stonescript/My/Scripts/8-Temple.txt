@@ -349,10 +349,12 @@ c.AAC("sword *0", "hatchet")
 
 // .............. SUMMON LOGIC .............. //
 
-:?c.canSummon("voidweaver") & loc.id = "temple"
+:?c.canSummon("voidweaver") &
+^ loc.id = "temple" & screen.i < lastFoeScr
   c.useAbility_OH("aether_talisman",
   ^   "aether_talisman", hand       )
-:?c.canSummon("cinderwisp") & isBossScr
+:?c.canSummon("cinderwisp") &
+^(isBossScr | (isLastFoeScr & foe.count <= 1))
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
 
@@ -368,8 +370,11 @@ c.AAC("sword *0", "hatchet")
   // prevent Weaken
   :?c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
-  :
+  
+  :?buffs.string ! "buff_staff_protection"
     fight("evade")
+  :
+    fight("normal")
 
 // Nagaraja brick attack
 :?foe = "phase" & foe.state = 112 &

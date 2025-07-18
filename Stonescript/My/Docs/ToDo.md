@@ -28,11 +28,11 @@
   - [x] fix smartDebuff not working properly.
 
 - [ ] Update all location scripts:
-  - [ ] Rocky
-    - [ ] Fix permapot not activating
-    - [ ] update again with latest adjustments.
-  - [ ] Deadwood
-  - [ ] Caves
+  - [x] Rocky
+    - [x] Fix permapot not activating
+    - [x] update again with latest adjustments.
+  - [x] Deadwood
+  - [x] Caves
   - [ ] Mushroom
   - [ ] Halls
   - ... Mine:
@@ -49,4 +49,4 @@
       - [x] does the *Explosive Wand*'s ability work against Enfused elites?
   - [ ] Ridge:
     - ... update again with latest adjustments.
-  - [ ] Temple
+  - [x] Temple
