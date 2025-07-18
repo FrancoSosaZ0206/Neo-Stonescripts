@@ -167,13 +167,17 @@ func fight(mode)
     ^ (foe.GetCount(itemSplash) = 1 |
     ^  foe = "monarch" | foe = "boss")
       ?c.canUseAbility("staff_poison") &
-      ^!s.inRange("dash") & foe = "poena"
+      ^s.inRange("bardiche") & foe = "poena"
         c.useAbility_TH("staff_poison", a.stPh)
       :?c.canUsePotion() & foe = "poena"
         activate potion
+      :?c.canUseAbility("bardiche")
+        c.useAbility_TH("bardiche", Kubikiribocho)
+
       /* :?c.canBurst() & !c.permapotSetup &
       ^ foe = "poena"
         c.burst(a.burstSwords) */
+
       :
         a.ldtF("sword dmg")
 
@@ -418,12 +422,12 @@ c.AAC("sword *0", "hatchet")
     a.ldtF("magnet")
 
   // activate potion
-  :?c.canUsePotion() & end_t > 27
+  :?c.canUsePotion() & end_t > 37
     activate potion
 
   // speed up
   :?c.canUseAbility("staff_fire") &
-  ^ end_t > 27 & item.potion = "empty"
+  ^ end_t > 37 & item.potion = "empty"
     c.useAbility_TH("staff_fire", a.stFh)
 
   : // regen armor
@@ -451,10 +455,13 @@ mirrored. */
 
 // ............. DEFENSIVE LOGIC ............ //
 
-:?(foe = "tree_boss" &
-^  foe.state = 32 & foe.time >= 70) |
-^ (foe = "poena" &
-^  foe.state = 32 & foe.time >= 80)
+:?foe = "tree_boss" &
+^(foe.state = 32 & foe.time >= 71) |
+^(foe.state = 33 & foe.time <= 3)
+  fight("evade")
+
+:?foe = "poena" &
+^ foe.state = 32 & foe.time >= 80
   ?c.canUseAbility("staff_ice")
     c.useAbility_TH("staff_ice", a.stIh)
   :
@@ -472,7 +479,7 @@ mirrored. */
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
-^isLastFoeScr
+^ screen.i = lastFoeScr + 1
   c.useAbility_TH("staff_fire", a.stFh)
 
 // Harvesting logic
@@ -550,16 +557,16 @@ unmake with repeating crossbow. */
 
 // ............. MINIBOSS LOGIC ............. //
 
-// Voidweaver - use it if possible
-:?isMinibossScr &
-^ c.canUseAbility("voidweaver") &
-^ c.canUnmakeVoidweaver()
-  c.devour("voidweaver")
+:?isMinibossScr
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^c.canUnmakeVoidweaver() & nRuns > 1
+    c.devour("voidweaver")
 
-  /*?foe = "spawner" | foe = "immune_to_ranged"
+  :?foe = "spawner" | foe = "immune_to_ranged"
     fight("normal")
   :
-    equip @a.bR@*/
+    equip @a.bR@
 
 // ............... AOE LOGIC ................ //
 
@@ -663,12 +670,6 @@ unmake with repeating crossbow. */
     equip Kubikiribocho
 
 // ............... BOSS LOGIC ............... //
-
-:?(foe = "phase1" &
-^  (foe.state = 4 | foe.hp <= 0) &
-^  item.GetCooldown("bardiche") <= 0) |
-^ c.isCasting("bardiche")
-  c.useAbility_TH("bardiche", Kubikiribocho)
 
 // Xyloalgia
 :?foe = "tree_boss"
