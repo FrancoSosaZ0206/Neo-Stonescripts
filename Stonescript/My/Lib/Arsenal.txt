@@ -125,8 +125,8 @@ var bAlt    = "*max crossbow golden -socketed"
 var myQ     = "*max quarterstaff"
 var Bfast   = "*max bardiche" // enchanted: speed
 var bR      = "*max crossbow repeating golden" // enchanted: pierce
-var shC1    = "*max shield compound shiny" // enchanted: armor
-var shC2    = "*max shield compound -shiny" // enchanted: armor/s
+var shC1    = "*max shield compound shiny" // enchanted: armor, armor/s
+var shC2    = "*max shield compound -shiny"
 var shT     = "*max shield towering golden"
 
 // ................ GROUPING ................ //
@@ -265,10 +265,7 @@ func ldtF(mode)
         equipR @shIeff@
         >o0,1,#cyan,ai shield
 
-      // Normal armor (mode = "defense armor regen")
-      :?armor < CmaN
-        equipR @shC2@
-      : // armor = math.Clamp(armor, CmaN, CmaE)
+      : // Normal armor (mode = "defense armor regen")
         equipR @shC1@
 
   :?mode = "extend" | mode = "permapot"
@@ -322,10 +319,7 @@ func ldtF(mode)
     :
       ?pickup = "treasure"
         equipL star
-        ?armor < CmaN
-          equipR @shC2@
-        :
-          equipR @shC1@
+        equipR @shC1@
       :
         equipL triskelion
         equipR star
@@ -370,10 +364,7 @@ func ldtF(mode)
 
       // Right hand:
       ?!c.permapotSetup
-        ?armor < CmaN
-          equipR @shC2@
-        : // armor = math.Clamp(armor, CmaN, CmaE)
-          equipR @shC1@
+        equipR @shC1@
 
     :
       // Left hand
