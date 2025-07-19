@@ -1,6 +1,6 @@
-﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+﻿// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▀▄▀▄▀▄▀▄▀ START OF "1-Rocky" ▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
 
 // //////////////// IMPORTS ///////////////// //
 
@@ -47,9 +47,9 @@ var phase3dmg = foe.damage
 
 // screens
 var minibossScr = null
-var isMinibossScr = (loc.stars > 15)
+var isMinibossScr = (loc.stars > 10)
 var lastFoeScr = null
-var isLastFoeScr = (loc.stars > 10)
+var isLastFoeScr = (loc.stars > 15)
 var bossScr = null
 var isBossScr = false
 
@@ -141,9 +141,7 @@ func fight(mode)
     // 1v1 strong foe debuffing
     ^  (((loc.stars > 15 &
     ^     (foe = "monarch" | foe = "boss") &
-    ^     s.getFoeDmg(a.berserkerLvl,
-    ^                 a.plagueLvl   ,
-    ^                 a.maskLvl      ) > 0) |
+    ^     s.getFoeDmg() > 0) |
     ^    nRuns = 1 | buffs.string = "smite")))
       a.ldtF("sword debuff auto")
 
@@ -164,19 +162,21 @@ func fight(mode)
         a.ldtF("big sword unmake")
 
     // ............ DAMAGE LOGIC ............. //
-    :?canDash &
-    ^ (foe.GetCount(itemSplash) = 1 |
-    ^  foe = "monarch" | foe = "boss")
+    :?foe = "phase3" & canDash
       ?c.canUseAbility("staff_poison") &
-      ^!s.inRange("dash") & foe = "phase3"
+      ^!s.inRange("dash")
         c.useAbility_TH("staff_poison", a.stPh)
-      :?c.canUsePotion() & foe = "phase3"
+      :?c.canUsePotion()
         activate potion
-      /* :?c.canBurst() & !c.permapotSetup &
-      ^ foe = "phase3"
+      /* :?c.canBurst() & !c.permapotSetup
         c.burst(a.burstSwords) */
       :
         a.ldtF("sword dmg")
+
+    :?canDash &
+    ^ (foe.GetCount(itemSplash) = 1 |
+    ^  foe = "monarch" | foe = "boss")
+      a.ldtF("sword dmg")
     :
       itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
@@ -186,73 +186,6 @@ func fight(mode)
     ^   "unknown <mode>: "+mode)
 
 // /////////////// PROCEDURE //////////////// //
-
-// ............. MONITOR LOGIC .............. //
-
-// permapot time bandwidth monitor:
-?permapotActTime ! -1 & nRuns = 1
-  var delay = totaltime + (5 * 30)
-  ?totaltime <= delay
-    >o-7,6,#magenta,wait until 
-    ^@time.FormatDigital(permapotTbw)@
-
-/* // itemSplash display test
-
-var playerX = screen.FromWorldX(pos.x)
-playerX = screen.FromWorldX(pos.x)
-
-var playerY = screen.FromWorldZ(pos.z - pos.y)
-playerY = screen.FromWorldZ(pos.z - pos.y)
-
->`@playerX@,@playerY + 2@,itemSplash
-draw.Bg(playerX, playerY + 2, #aa4400,
-^   itemSplash, 1)
-
-?foe.distance ! 9999
-  >`@playerX@,@playerY + 3@,dist\n
-  ^dist + itemSplash
-  draw.Bg(playerX, playerY + 3, #0000ff,
-  ^   foe.distance, 1)
-  draw.Bg(playerX, playerY + 4, #aa00aa,
-  ^   foe.distance + itemSplash, 1)
-
-?foe.count
-  >`@playerX@,@playerY + 5@,count range
-  draw.Bg(playerX, playerY + 5, #00aaaa, 46, 1)
-
-  >`@playerX + itemSplash@,@playerY + 2@,
-  ^out of range
-  draw.Bg(playerX + itemSplash, playerY + 2,
-  ^ #008800, 46 - itemSplash, 1) */
-
-/* // monitor post-treasure metrics
-var treasureCol = #888888
-?end_t > 0 | old_t ! item.GetTreasureCount()
-  treasureCol = #aaff00
-:
-  treasureCol = #888888
->`1,14,@treasureCol@,
-^treasure:\n
-^  old | @old_t@ (t = @end_t@)
->`1,16,
-^  cur | @item.GetTreasureCount()@\n
-^  cap | @item.GetTreasureLimit()@ */
-
-// show any logged errors
-?log.hasErrors()
-  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
-  ^@log.getErrorCount()@\n
-  >@log.getError()@
-
-// ............ WITHDRAWAL LOGIC ............ //
-
-?s.getTotalHP("player")
-^ <=
-^s.getFoeDmg(a.berserkerLvl,
-^            a.plagueLvl,
-^            a.maskLvl      ) |
-^old_t = item.GetTreasureLimit()
-  loc.Leave()
 
 // .............. SETUP LOGIC ............... //
 
@@ -318,37 +251,29 @@ var treasureCol = #888888
 : // set up isBossScr
   isBossScr = (screen.i = bossScr)
 
-// set up lastFoeScr
-?!lastFoeScr
-  // green
-  ?loc.stars = math.Clamp(loc.stars, 16, 20)
-    lastFoeScr = 1 + loc.stars - 16
-: // set up isLastFoeScr
-  isLastFoeScr = (loc.stars > 15 &
-  ^screen.i = lastFoeScr)
-
 // set up minibossScr
-?!minibossScr
-  // yellow
-  ?loc.stars = math.Clamp(loc.stars, 11, 15)
+?!minibossScr & loc.stars > 10
+  ?loc.stars <= 15 // yellow
     minibossScr = 2
-  // green
-  :?loc.stars = math.Clamp(loc.stars, 16, 20)
+  :?loc.stars <= 20 // green
     minibossScr = 1
-: // set up isMinibossScr
-  isMinibossScr = (loc.stars > 10 &
-  ^screen.i = minibossScr)
+:?minibossScr // set up isMinibossScr
+  isMinibossScr = (screen.i = minibossScr)
+
+// set up lastFoeScr
+?!lastFoeScr & loc.stars > 15
+  // green
+  ?loc.stars <= 20
+    lastFoeScr = 1 + loc.stars - 16
+:?lastFoeScr // set up isLastFoeScr
+  isLastFoeScr = (screen.i = lastFoeScr)
 
 /* set up permapotSetup:
-- in first run
-- yellow onwards, or
-- green onwards and
-- upon reaching the boss screen. */
-c.permapotSetup =
-^ (nRuns = 1 & (
-^  (loc.stars = math.Clamp(loc.stars, 11, 15)) |
-^  (loc.stars > 15 &
-^   screen.i >= bossScr - 1)))
+- from yellow onwards,
+- in first run, or
+- in green, when in boss screen. */
+c.permapotSetup = (nRuns = 1 & loc.stars > 10 &
+^(loc.stars <= 15 | screen.i >= bossScr - 1))
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -375,11 +300,14 @@ itemSplash = 17 // s.getHbxSplash("bardiche", null)
 // set canDash default value
 canDash = true
 
+// set variables for getFoeDmg
+s._berserkerLvl = a.berserkerLvl
+s._plagueLvl    = a.plagueLvl
+s._maskLvl      = a.maskLvl
+
 // set phase3dmg
 ?foe = "phase3" // only update when needed
-  phase3dmg = s.getFoeDmg(
-  ^               a.berserkerLvl,
-  ^               a.plagueLvl, a.maskLvl)
+  phase3dmg = s.getFoeDmg()
 
 // init Combat
 c.Init()
@@ -400,7 +328,70 @@ c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
-// .......................................... //
+// ............. MONITOR LOGIC .............. //
+
+// permapot time bandwidth monitor:
+?permapotActTime ! -1 & nRuns = 1
+  var delay = totaltime + (5 * 30)
+  ?totaltime <= delay
+    >o-7,6,#magenta,wait until 
+    ^@time.FormatDigital(permapotTbw)@
+
+/* // itemSplash display test
+
+var playerX = screen.FromWorldX(pos.x)
+playerX = screen.FromWorldX(pos.x)
+
+var playerY = screen.FromWorldZ(pos.z - pos.y)
+playerY = screen.FromWorldZ(pos.z - pos.y)
+
+>`@playerX@,@playerY + 2@,itemSplash
+draw.Bg(playerX, playerY + 2, #aa4400,
+^   itemSplash, 1)
+
+?foe.distance ! 9999
+  >`@playerX@,@playerY + 3@,dist\n
+  ^dist + itemSplash
+  draw.Bg(playerX, playerY + 3, #0000ff,
+  ^   foe.distance, 1)
+  draw.Bg(playerX, playerY + 4, #aa00aa,
+  ^   foe.distance + itemSplash, 1)
+
+?foe.count
+  >`@playerX@,@playerY + 5@,count range
+  draw.Bg(playerX, playerY + 5, #00aaaa, 46, 1)
+
+  >`@playerX + itemSplash@,@playerY + 2@,
+  ^out of range
+  draw.Bg(playerX + itemSplash, playerY + 2,
+  ^ #008800, 46 - itemSplash, 1) */
+
+/* // monitor post-treasure metrics
+var treasureCol = #888888
+?end_t > 0 | old_t ! item.GetTreasureCount()
+  treasureCol = #aaff00
+:
+  treasureCol = #888888
+>`1,14,@treasureCol@,
+^treasure:\n
+^  old | @old_t@ (t = @end_t@)
+>`1,16,
+^  cur | @item.GetTreasureCount()@\n
+^  cap | @item.GetTreasureLimit()@ */
+
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
+  ^@log.getErrorCount()@\n
+  >@log.getError()@
+
+// ............ WITHDRAWAL LOGIC ............ //
+
+?s.getTotalHP("player") <= s.getFoeDmg() |
+^old_t = item.GetTreasureLimit()
+  loc.Leave()
+
+// ............... INIT LOGIC ............... //
 
 // Permapot equipment
 ?c.permapotSetup
@@ -531,9 +522,7 @@ c.AAC("sword *0", "hatchet")
 
   :?c.permapotSetup
     ?hp ! maxhp |
-    ^s.getFoeDmg(a.berserkerLvl,
-    ^            a.plagueLvl,
-    ^            a.maskLvl      ) > armor
+    ^s.getFoeDmg() > armor
       a.ldtF("defense heal")
     :
       a.ldtF("defense")

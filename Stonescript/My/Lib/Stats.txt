@@ -199,6 +199,12 @@ var mask_lvl_table = [
 // damage reduction per feeble applied
 var maskEffReduction = 2
 
+// ............ Function-Related ............ //
+
+var _berserkerLvl  = null
+var _plagueLvl     = null
+var _maskLvl       = null
+
 // //////////////// FUNCTIONS /////////////// //
 
 // ............. Status Effects ............. //
@@ -571,22 +577,22 @@ Accounts for these external factors:
 itemDmg = the base damage of your target item (> 0).
 itemMult = the item's critical damage multiplier (> 0)
            (only taken into account when using Lucky potion).
-berserkerLvl = your Berserker Staff's enchantment level
+_berserkerLvl = your Berserker Staff's enchantment level
              (1 <= x <= 21).
 armorMult = if the target item is a hammer, its bonus
             damage multiplier to foes with armor (> 0). */
-/* func getPlayerDmg(itemDmg, itemMult, berserkerLvl, armorMult)
+/* func getPlayerDmg()
   var result = null
   var applied = [false,false,false,false]
 
   ?itemDmg > 0 & itemMult > 0 &
-  ^1 <= berserkerLvl & berserkerLvl <= 21
+  ^1 <= _berserkerLvl & _berserkerLvl <= 21
     ?!result
       result = itemDmg
 
     ?buffs.string
       ?buffs.string = "buff_staff_berserk" & !applied[0]
-        result += getHiddenStat("berserk staff", berserkerLvl)
+        result += getHiddenStat("berserk staff", _berserkerLvl)
         applied[0] = true
 
       ?buffs.string = "!" & !applied[1] // lucky crit buff
@@ -608,22 +614,22 @@ Accounts for damage-reduction debuffs applied,
 or other external factors.
 Returns null if there was an error.
 
-plagueLvl = if used, your Plague Wand's
+_plagueLvl = if used, your Plague Wand's
             enchantment level (1 <= x <= 21).
-berserkerLvl = your Berserker Staff's enchantment
+_berserkerLvl = your Berserker Staff's enchantment
              level (1 <= x <= 21).
 ***************** WARNING *****************
   Since these are variable, they can't be
   calculated, so they have to be provided
         for this function to work.
 ******************************************* */
-func getFoeDmg(berserkerLvl, plagueLvl, maskLvl)
+func getFoeDmg()
   ?(buffs.string = "buff_frozen") // Eternity Staff will prevent any damage
     return 0
 
-  :?berserkerLvl = math.Clamp(berserkerLvl, 1, 21) &
-  ^plagueLvl = math.Clamp(plagueLvl, 1, 21) &
-  ^maskLvl = math.Clamp(maskLvl, 5, 10)
+  :?_berserkerLvl = math.Clamp(_berserkerLvl, 1, 21) &
+  ^ _plagueLvl    = math.Clamp(_plagueLvl, 1, 21) &
+  ^ _maskLvl      = math.Clamp(_maskLvl, 5, 10)
 
     var result = foe.damage
     // TO DO: get way to identify Plague Wand debuff
@@ -632,7 +638,7 @@ func getFoeDmg(berserkerLvl, plagueLvl, maskLvl)
     ?foe.debuffs.string
       ?buffs.string = "buff_staff_berserk" & !applied[0]
         result += (foe.damage *
-        ^          (getHiddenStat("berserker staff", berserkerLvl)
+        ^          (getHiddenStat("berserker staff", _berserkerLvl)
         ^           / 100))
         applied[0] = true
 
@@ -643,11 +649,11 @@ func getFoeDmg(berserkerLvl, plagueLvl, maskLvl)
       ?foe.debuffs.string = "debuff_damage" &
       ^item.GetCooldown("wand_poison") >= ((30 * u.sec) - (3 * u.sec)) & // (total cd duration) - (effect duration)
       ^!applied[2]
-        result -= getHiddenStat("plague wand", plagueLvl)
+        result -= getHiddenStat("plague wand", _plagueLvl)
         applied[2] = true
 
       ?foe.debuffs.string = "feeble" & !applied[3]
-        result -= (2 * (maskLvl - 4))
+        result -= (2 * (_maskLvl - 4))
         applied[3] = true
 
     ?result < 0
@@ -657,9 +663,9 @@ func getFoeDmg(berserkerLvl, plagueLvl, maskLvl)
   
   : // invalid entries
     log.logError(_FILE,"getFoeDmg",
-    ^"invalid entry/entries:\n\n" +
-    ^"plagueLvl = " + plagueLvl +
-    ^"\nberserkerLvl = " + berserkerLvl)
+    ^"_invalid entry/entries:\n\n" +
+    ^"_plagueLvl = " + _plagueLvl +
+    ^"\n_berserkerLvl = " + _berserkerLvl)
 
     return null
 
