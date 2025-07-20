@@ -135,14 +135,13 @@ func canUseAbility(abilityID)
 
     // Special case, stone wand doesn't require armor.
     :?abilityID = "wand_stone"
-      result = result & foe.count > 1 &
-      ^pos.z ! foe.z /* &
-      ^item.CanActivate("wand_stone") */
+      result = (result & foe.count > 1 &
+      ^pos.z ! foe.z)
 
     :?(abilityID = "staff" & abilityID ! "quarterstaff") |
     ^ abilityID = "wand"
-      result = result &
-      ^((10 * armor) + armor.f > 10 * s.getArmor(abilityID))
+      result = (result &
+      ^(10 * armor) + armor.f > 10 * s.getArmor(abilityID))
 
       ?abilityID = "wand_poison"
         result = result &

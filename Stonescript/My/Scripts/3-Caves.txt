@@ -1,8 +1,8 @@
-﻿// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
-// ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "3-Caves" ▄▀▄▀▄▀▄▀▄ ┃ //
-// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
+﻿// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▀▄▀▄▀▄▀▄▀ START OF "3-Caves" ▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
 
-// ///////////////// IMPORTS ///////////////// //
+// ///////////////// IMPORTS //////////////// //
 
 var log = import My/Lib/Error_Logging/public
 
@@ -13,7 +13,7 @@ var a = import My/Lib/Arsenal
 var es = import My/Lib/Effect_Stats/public
 var tracker = import My/Lib/Ranged_Debuffing/public
 
-// //////////////// VARIABLES //////////////// //
+// //////////////// VARIABLES /////////////// //
 
 // file
 var _FILE = "Scripts/3-Caves"
@@ -56,7 +56,7 @@ var end_t = 0
 
 var minibossAtkTime = 0
 
-// //////////////// FUNCTIONS //////////////// //
+// //////////////// FUNCTIONS /////////////// //
 
 func fight(mode)
   ?mode = "escape"
@@ -237,7 +237,10 @@ c.permapotSetup = (nRuns = 1 & loc.stars > 10 &
 // BFG logic
 ?loc.stars = math.Clamp(loc.stars,4,5)
   bfgInitScr = 1
-c.screenMngr_DS("blade", bfgInitScr, lastFoeScr - 1)
+?loc.stars <= 10 | nRuns > 1
+  c.screenMngr_DS("blade",
+  ^               bfgInitScr,
+  ^               lastFoeScr-1)
 
 // set up itemSplash default value
 itemSplash = 17 // bardiche's hitbox + itemSplash area
@@ -282,9 +285,12 @@ stunTime = foe.debuffs.GetTime("stun")
 
 // set up minibossAtkTime
 ?foe = "cool_bat"
-  ?foe.state = 33 & foe.time = 0
+  // set-reset
+  ?(foe.state = 33 & foe.time = 0) |
+  ^minibossAtkTime > 50
     minibossAtkTime = 0
-  ?foe.state ! 32
+  // increment
+  :?foe.state ! 32
     minibossAtkTime ++
 
 // ............. MONITOR LOGIC .............. //
@@ -301,6 +307,19 @@ stunTime = foe.debuffs.GetTime("stun")
   >f0,10,#magenta,dist=@foe.distance@
 */
 
+// monitor post-treasure metrics
+var treasureCol = #888888
+?end_t > 0 | old_t ! item.GetTreasureCount()
+  treasureCol = #aaff00
+:
+  treasureCol = #888888
+>`1,14,@treasureCol@,
+^treasure:\n
+^  old | @old_t@ (t = @end_t@)
+>`1,16,
+^  cur | @item.GetTreasureCount()@\n
+^  cap | @item.GetTreasureLimit()@
+
 // bfg ds screens monitor
 var bfgDsTargetScr = null
 bfgDsTargetScr = c.getScreen_DS("blade",
@@ -316,11 +335,11 @@ bfgDsTargetScr = c.getScreen_DS("blade",
   : // screen.i = bfgDsTargetScr
     bfgCol = #00ff00
 
-  >`1,10,@bfgCol@,bfg: @screen.i@/
+  >`1,9,@bfgCol@,bfg: @screen.i@/
   ^@bfgDsTargetScr@
 
 // item states monitor:
->`1,12,#magenta,ils: @item.left.state@ | 
+>`1,10,#magenta,ils: @item.left.state@ | 
 ^irs: @item.right.state@
 
 var permapotCol
@@ -328,7 +347,7 @@ var permapotCol
   permapotCol = #00ff00
 :
   permapotCol = #ff0000
->`1,13,@permapotCol@,permapotSetup
+>`1,11,@permapotCol@,permapotSetup
 
 // show effect durations
 ?buffs.string = "ʘ" | buffs.string = "lucky"
@@ -338,14 +357,14 @@ var permapotCol
   : // buffs.string = "lucky"
     potTime = buffs.GetTime("lucky")
 
-  >`1,15,#0066ff,@c.potionType@: @potTime@f 
+  >`1,12,#0066ff,@c.potionType@: @potTime@f 
   ^(@time.FormatDigital(potTime, true)@)
 
 ?debuffs.string = "damage"
   var weakenTime
   weakenTime = debuffs.GetTime("damage")
 
-  >`1,16,#008800,∞: @weakenTime@f 
+  >`1,13,#008800,∞: @weakenTime@f 
   ^(@time.FormatDigital(weakenTime, true)@)
 
 // show any logged errors
@@ -410,7 +429,7 @@ c.AAC("sword *0", "hatchet")
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
 
-// ............. DEFENSIVE LOGIC ............. //
+// ............. DEFENSIVE LOGIC ............ //
 
 /* TODO: change Ceiling Decorator logic so that
 we farm knockbacks with it until we kill it or
@@ -448,8 +467,7 @@ we are in the Bolesh's screen. */
   - not facing the miniboss */
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
-^ (loc.stars <= 15 | nRuns > 1) &
-^ screen.i < bossScr &
+// ^ (loc.stars <= 15 | nRuns > 1) &
 ^ !(isBossScr | isMinibossScr |
 ^   encounter.isElite)
   c.useAbility_TH("staff_fire", a.stFh)
@@ -485,11 +503,11 @@ we are in the Bolesh's screen. */
   :
     a.ldtF("defense armor regen")
 
-// ............... RANGED LOGIC .............. //
+// ............... RANGED LOGIC ............. //
 
 
 
-// .............. DASHING LOGIC .............. //
+// .............. DASHING LOGIC ............. //
 
 :?a.canSmartDash() & canDash
   a.smartDash()
@@ -514,7 +532,7 @@ unmake with repeating crossbow. */
 :?c.canStutterStep()
   c.stutterStep()
 
-// ................ BOSS LOGIC ............... //
+// ............... BOSS LOGIC ............... //
 
 :?foe = "phase" // Bolesh
   ?c.canKillCinderwisp(a.cwpMiN, 0) |
@@ -534,10 +552,10 @@ unmake with repeating crossbow. */
   :
     fight("normal")
 
-// ................ AOE LOGIC ................ //
+// ................ AOE LOGIC ............... //
 
 :?foe.GetCount(itemSplash) > 1
-  // ........... SPECIAL ITEMS LOGIC ........... //
+  // ......... SPECIAL ITEMS LOGIC .......... //
   hardElite = (
   ^(encounter.eliteMod = "berserk"    |
   ^ encounter.eliteMod = "monarch"    |
@@ -589,24 +607,20 @@ unmake with repeating crossbow. */
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
-  ^ foe.buffs.string = "stability" &
-  // don't interrupt bardiche
-  ^ !c.isCasting("bardiche") &
-  ^ (es.canDebuff("Stun") |
+  ^ foe.buffs.string = "stability" & (
+  ^ es.canDebuff("Stun") | (
     // stun time (frames) running out
-  ^  (stunTime = math.Clamp(stunTime, 1, 11) &
-     // not stunned with heavy hammer or Frost Wand
-  ^   foe.debuffs.string ! "debuff_armor_fatigue" &
-  ^   foe.debuffs.string ! "debuff_frost_stun"))
+  ^ stunTime = math.Clamp(stunTime, 1, 11) &
+    // not stunned with heavy hammer or Frost Wand
+  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^ foe.debuffs.string ! "debuff_frost_stun"))
     itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
-  // permapot run
-  :?encounter.eliteMod = "blessed" &
-  ^ !c.isCasting("bardiche")
+  // Debuff and unmake
+  :?encounter.eliteMod = "blessed"
     itemSplash = foe.distance + 7
 
-    // Debuff and unmake
     ?tracker.canTrack("Weaken")
       a.ldtF("magic debuff weaken")
     :?tracker.canTrack("Chill")
@@ -617,12 +631,10 @@ unmake with repeating crossbow. */
       itemSplash = 10
       a.ldtF("big sword unmake")
 
-  // berserk potion
+  // unmake
   :
-    /* ?buffs.string = "ʘ" |
-    // split hydras lose the Stable buff
-    ^(encounter.eliteMod = "hydra" &
-    ^ foe.buffs.string ! "stability") |
+    /* ?buffs.string = "ʘ" | // berserk pot
+    ^ foe.buffs.string ! "stability" |
     // yellow and below
     ^loc.stars <= 15 |
     // more foes outside range
@@ -635,11 +647,16 @@ unmake with repeating crossbow. */
   /*:
     equip Kubikiribocho*/
 
-// ................ 1V1 LOGIC ................ //
+// ................ 1V1 LOGIC ............... //
 
 :
   fight("normal")
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "3-Caves" ▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+// .......................................... //
+
+?buffs.string = "buff_range"
+  itemSplash += 10
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "3-Caves" ▄▀▄▀▄▀▄▀▄▀ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //

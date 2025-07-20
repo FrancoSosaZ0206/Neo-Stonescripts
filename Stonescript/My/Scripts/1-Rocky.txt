@@ -763,8 +763,6 @@ unmake with repeating crossbow. */
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
-  // don't interrupt bardiche
-  ^ !c.isCasting("bardiche") &
   ^ foe ! "warcaster" & (
   ^ es.canDebuff("Stun") | (
     // stun time (frames) running out
@@ -775,14 +773,10 @@ unmake with repeating crossbow. */
     itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
-  // permapot run
-  :?nRuns = 1 |
-  ^ (encounter.eliteMod = "blessed" &
-  ^  !c.isCasting("bardiche"))
-    // Debuff and unmake
+  // Debuff and unmake
+  :?nRuns = 1 | encounter.eliteMod = "blessed"
     itemSplash = foe.distance + 7
 
-    // Debuff and unmake
     ?tracker.canTrack("Weaken")
       a.ldtF("magic debuff weaken")
     :?tracker.canTrack("Chill")
@@ -793,11 +787,9 @@ unmake with repeating crossbow. */
       itemSplash = 10
       a.ldtF("big sword unmake")
 
-  // berserk potion
-  :?buffs.string = "ʘ" | foe ! "elite" |
-  // split hydras lose the Stable buff
-  ^ (encounter.eliteMod = "hydra" &
-  ^  foe.buffs.string ! "stability") /* |
+  // unmake
+  :?buffs.string = "ʘ" | // berserk pot
+  ^ foe.buffs.string ! "stability" /* |
   // more foes outside range
   ^ (foe ! "elite" & screen.i > 1 &
   ^  (foe.count -
