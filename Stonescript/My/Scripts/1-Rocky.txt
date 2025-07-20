@@ -28,7 +28,8 @@ var buttonPressed = false
 var dontShowAgain = false
 
 // flags
-var canDash  = true
+var canDash   = true
+var hardElite = false
 
 // values
 var stunTime = null
@@ -656,11 +657,68 @@ unmake with repeating crossbow. */
 :?c.canStutterStep()
   c.stutterStep()
 
+// ............... BOSS LOGIC ............... //
+
+:?foe = "phase" // Dysangelos
+  ?c.canKillCinderwisp(a.cwpMiN, 0) |
+  // reached ignition cap
+  ^c.isCinderwispCap(a.cwpMiN)
+    c.devour("cinderwisp")
+
+  ?foe ! "phase3"
+    ?c.canUseAbility("wand_vigor") &
+    ^foe.buffs.string = "buff_protection"
+      c.useAbility_OH("wand_vigor", a.wVh, hand)
+    :
+      fight("normal")
+
+  // foe = phase3
+  :?c.canUseAbility("heavy_hammer") &
+  ^ foe.armor > 0 & // reduce armor
+  ^ !c.permapotSetup & s.inRange("dash_min")
+    c.useAbility_TH("heavy_hammer", Mjölnir)
+
+  // Buy time
+  :?c.permapotSetup &
+  ^(totaltime - permapotActTime < permapotTbw)
+    // Debuff
+    ?es.canDebuff("Weaken")
+      a.ldtF("sword debuff weaken")
+    :?es.canDebuff("Chill")
+      a.ldtF("sword debuff chill")
+    /*:?es.canDebuff("Burn")
+      a.ldtF("sword debuff burn")*/
+
+    // Heal
+    :?hp ! maxhp
+      a.ldtF("sword heal")
+
+    : // wait
+      equipL Unbroken Faith
+  :
+    fight("normal")
+
+// ............ SPECIAL FOE LOGIC ........... //
+
+:?loc.stars > 15 &
+^(foe = "boss" | foe = "monarch")
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  :?c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+  :
+    fight("normal")
+
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(itemSplash) > 1 &
-^!(foe = "boss")
+:?foe.GetCount(itemSplash) > 1
   // .......... SPECIAL ITEMS LOGIC ......... //
+  hardElite = (
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious"))
 
   // Voidweaver - use it if possible
   ?c.canUseAbility("voidweaver") &
@@ -669,12 +727,7 @@ unmake with repeating crossbow. */
     c.devour("voidweaver")
 
   // Calamity - reduce hp
-  :?c.canUseAbility("wand_aether") &
-  ^(encounter.eliteMod = "berserk"    |
-  ^ encounter.eliteMod = "monarch"    |
-  ^ foe = "monarch"                   |
-  ^ encounter.eliteMod = "blessed"    |
-  ^ foe.buffs.string = "buff_tenacious")
+  :?c.canUseAbility("wand_aether") & hardElite
     c.useAbility_OH("wand_aether", a.wAh, hand)
 
   // Reset buff
@@ -684,12 +737,7 @@ unmake with repeating crossbow. */
 
   // Reduce damage
   :?c.canUseAbility("wand_poison") &
-  ^(encounter.eliteMod = "berserk"    |
-  ^ encounter.eliteMod = "monarch"    |
-  ^ foe = "monarch"                   |
-  ^ encounter.eliteMod = "blessed"    |
-  ^ encounter.eliteMod = "hydra"      |
-  ^ foe.buffs.string = "buff_tenacious")
+  ^(hardElite | encounter.eliteMod = "hydra")
     c.useAbility_OH("wand_poison", a.wPh, hand)
 
   // Stun enemies
@@ -703,40 +751,27 @@ unmake with repeating crossbow. */
     c.useAbility_TH("staff_aether", a.stAh) */
 
   // Align foes
-  :?c.canUseAbility("wand_stone") &
-  ^s.inRange("wand")
+  :?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
-
-  /* Activate Berserk Staff early
-  (in case there's barely enough armor,
-  to not lose it to the Infernal Staff's
-  Burn debuff) for the Scout. */
-  :?c.canUseAbility("staff_poison") &
-  ^isMinibossScr
-    c.useAbility_TH("staff_poison", a.stPh)
 
   // ........................................ //
 
   // Heavy hammer logic
   :?c.canUseAbility("heavy_hammer") &
   ^ encounter.eliteMod = "plated"
-    c.useAbility_TH("heavy_hammer",
-    ^               "Guardian's Bane")
-  /* :?c.canUseAbility("heavy_hammer") &
-  ^ foe = "elite"
-    c.useAbility_TH("heavy_hammer", Mjölnir) */
+    c.useAbility_TH("heavy_hammer", Mjölnir)
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
   // don't interrupt bardiche
   ^ !c.isCasting("bardiche") &
-  ^ foe ! "warcaster" &
-  ^ (es.canDebuff("stun") |
+  ^ foe ! "warcaster" & (
+  ^ es.canDebuff("Stun") | (
     // stun time (frames) running out
-  ^  (stunTime = math.Clamp(stunTime, 1, 11) &
-     // not stunned with heavy hammer or Frost Wand
-  ^   foe.debuffs.string ! "debuff_armor_fatigue" &
-  ^   foe.debuffs.string ! "debuff_frost_stun"))
+  ^ stunTime = math.Clamp(stunTime, 1, 11) &
+    // not stunned with heavy hammer or Frost Wand
+  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^ foe.debuffs.string ! "debuff_frost_stun"))
     itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
@@ -773,64 +808,16 @@ unmake with repeating crossbow. */
   :
     equip Kubikiribocho
 
-// ............... BOSS LOGIC ............... //
-
-:?foe = "phase" // Dysangelos fight logic
-  ?c.canKillCinderwisp(a.cwpMiN, 0) |
-  // reached ignition cap
-  ^c.isCinderwispCap(a.cwpMiN)
-    c.devour("cinderwisp")
-
-  ?foe ! "phase3"
-    ?c.canUseAbility("wand_vigor") &
-    ^foe.buffs.string = "buff_protection"
-      c.useAbility_OH("wand_vigor", a.wVh, hand)
-    :
-      fight("normal")
-
-  // foe = phase3
-  :?c.canUseAbility("heavy_hammer") &
-  ^ foe.armor > 0 & // reduce armor
-  ^ !c.permapotSetup & s.inRange("dash_min")
-    c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-
-  // Buy time
-  :?c.permapotSetup &
-  ^(totaltime - permapotActTime < permapotTbw)
-    // Debuff
-    ?es.canDebuff("Weaken")
-      a.ldtF("sword debuff weaken")
-    :?es.canDebuff("Chill")
-      a.ldtF("sword debuff chill")
-    /*:?es.canDebuff("Burn")
-      a.ldtF("sword debuff burn")*/
-
-    // Heal
-    :?hp ! maxhp
-      a.ldtF("sword heal")
-
-    : // wait
-      equipL Unbroken Faith
-  :
-    fight("normal")
-
 // ................ 1V1 LOGIC ............... //
 
-// Tanky foe, use bardiche ability to lower its hitpoints
-:?loc.stars > 15 &
-^(foe = "boss" | foe = "monarch") &
-^(c.canUseAbility("staff_poison") |
-^c.canUseAbility("bardiche"))
-  ?c.canUseAbility("staff_poison")
-    c.useAbility_TH("staff_poison", a.stPh)
-  : // c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho)
 :
   fight("normal")
+
+// .......................................... //
 
 ?buffs.string = "buff_range"
   itemSplash += 10
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄ END OF "1-Rocky" ▀▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "1-Rocky" ▄▀▄▀▄▀▄▀▄▀ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //

@@ -20,6 +20,7 @@ var _FILE = "Scripts/3-Caves"
 
 // flags
 var canDash  = true
+var hardElite = false
 
 // values
 var stunTime = null
@@ -433,19 +434,11 @@ we are in the Bolesh's screen. */
     fight("evade")
     >c0,1,#yellow,EVADING ATTACK!
 
-// ............. CUTSCENES LOGIC ............. //
+// ............. CUTSCENES LOGIC ............ //
 
 
 
-// .............. WALKING LOGIC .............. //
-
-// speed up (post-treasure, after using potion)
-:?c.canUseAbility("staff_fire") &
-^ end_t > 10 & isBossScr &
-^ loc.stars > 10
-  >c0,0,#ff0000,SPEED UP (POST-TREASURE)
-
-  c.useAbility_TH("staff_fire", a.stFh)
+// ......... ENGAGING/WALKING LOGIC ......... //
 
 /* speed up (normal) when:
   - speed effect not already present
@@ -454,39 +447,26 @@ we are in the Bolesh's screen. */
   - save armor if it's setup run
   - not facing the miniboss */
 :?c.canUseAbility("staff_fire") &
-^ screen.i < bossScr &
 ^ buffs.string ! "buff_inf_speed" &
-^ ((minibossScr & screen.i > minibossScr) |
-^   screen.i = lastFoeScr + 1)
-  >c0,0,#ff0000,SPEED UP (NORMAL)
-
+^ (loc.stars <= 15 | nRuns > 1) &
+^ screen.i < bossScr &
+^ !(isBossScr | isMinibossScr |
+^   encounter.isElite)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ ai.walking & ai.enabled & !ai.paused &
 // Cannot dash and in dashing range
-^ !(canDash & a.canSmartDash()) &
-^ (c.permapotSetup |
-^  (!c.permapotSetup & screen.i > 0))
+^!(canDash & a.canSmartDash()) &
+^ (c.permapotSetup | screen.i > 0)
   c.useAbility_TH("quarterstaff", a.myQ)
 
-// Pickup logic
+// pickup logic
 :?pickup.distance < 15 &
 // foe is farther than pickup
-^(foe.distance = 9999 |
-^ foe.distance > 15 |
-// pickup is a treasure
-^ pickup = "treasure")
+^ (foe.distance > 15 | foe.distance = 9999)
   a.ldtF("magnet")
-
-// regen armor (post-treasure)
-:?(loc.stars <= 10 &
-^  old_t ! item.GetTreasureCount()) |
-^ (end_t > 1 & isBossScr &
-^ !(c.canUsePotion() |
-^   c.canUseAbility("staff_fire")))
-  a.ldtF("defense armor regen")
 
 // armor regen logic
 :?(ai.walking & !s.inRange("socketed_shield")) |
@@ -499,7 +479,7 @@ we are in the Bolesh's screen. */
 ^ s.inRange("socketed_shield") &
 ^ ((canDash & !s.inRange("dash_max")) |
 ^  !s.inRange("crossbow"))
-  ?armor > a.compoundMaxArmor_boosted |
+  ?armor > a.CmaE |
   ^(c.canEngage() & foe ! "phase")
     a.ldtF("engage")
   :
@@ -520,9 +500,8 @@ we are in the Bolesh's screen. */
 
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
-:?canDash &
-^ s.betweenRange("triskelion","crossbow") &
-^ c.canSmoothCast(true) & foe ! "boss"
+:?c.canSmoothCast(true) &
+^ canDash // & foe ! "boss"
   c.smoothCast(a.bR)
 
 // engaging logic (within fighting range)
@@ -535,60 +514,73 @@ unmake with repeating crossbow. */
 :?c.canStutterStep()
   c.stutterStep()
 
-// ........... SPECIAL ITEMS LOGIC ........... //
+// ................ BOSS LOGIC ............... //
 
-// Voidweaver - use it if possible
-:?c.canUseAbility("voidweaver") &
-^ c.canUnmakeVoidweaver() &
-^ foe.count > 1 & s.inRange("dash_min") &
-^ !isMinibossScr
-  c.devour("voidweaver")
+:?foe = "phase" // Bolesh
+  ?c.canKillCinderwisp(a.cwpMiN, 0) |
+  // reached ignition cap
+  ^c.isCinderwispCap(a.cwpMiN)
+    c.devour("cinderwisp")
 
-// Calamity - reduce hp
-:?c.canUseAbility("wand_aether") &
-^(encounter.eliteMod = "berserk"    |
-^ encounter.eliteMod = "monarch"    |
-^ foe = "monarch"                   |
-^ encounter.eliteMod = "blessed"    |
-^ foe.buffs.string = "buff_tenacious")
-  c.useAbility_OH("wand_aether", a.wAh, hand)
+  fight("normal")
 
-// Reset buff
-:?c.canUseAbility("wand_vigor") &
-^ foe.buffs.string = "stoic"
-  c.useAbility_OH("wand_vigor", a.wVh, hand)
+// ............ SPECIAL FOE LOGIC ........... //
 
-// Reduce damage
-:?c.canUseAbility("wand_poison") &
-^(encounter.eliteMod = "berserk"    |
-^ encounter.eliteMod = "monarch"    |
-^ foe = "monarch"                   |
-^ encounter.eliteMod = "blessed"    |
-^ encounter.eliteMod = "hydra"      |
-^ foe.buffs.string = "buff_tenacious")
-  c.useAbility_OH("wand_poison", a.wPh, hand)
-
-// Stun enemies
-:?c.canUseAbility("wand_ice") &
-^ es.canDebuff("Stun") &
-^ foe.count > 1 &
-^ encounter.eliteMod = "Venom" &
-^ s.getTotalHP("player") < c.hihp
-  c.useAbility_OH("wand_ice", a.wIh, hand)
-
-/* // extend range
-:?c.canUseAbility("staff_aether") &
-^ s.inRange("dash_min")
-  c.useAbility_TH("staff_aether", a.stAh) */
+:?foe = "boss" | foe = "monarch"
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  :?c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+  :
+    fight("normal")
 
 // ................ AOE LOGIC ................ //
 
-:?foe.GetCount(itemSplash) > 1 &
-^!(foe = "boss" | foe = "monarch")
+:?foe.GetCount(itemSplash) > 1
+  // ........... SPECIAL ITEMS LOGIC ........... //
+  hardElite = (
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious"))
+
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^c.canUnmakeVoidweaver() &
+  ^!isMinibossScr
+    c.devour("voidweaver")
+
+  // Calamity - reduce hp
+  :?c.canUseAbility("wand_aether") & hardElite
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "stoic"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Reduce damage
+  :?c.canUseAbility("wand_poison") &
+  ^(hardElite | encounter.eliteMod = "hydra")
+    c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  // Stun enemies
+  :?c.canUseAbility("wand_ice") &
+  ^ es.canDebuff("Stun") &
+  ^ encounter.eliteMod = "venom"
+    c.useAbility_OH("wand_ice", a.wIh, hand)
+
+  /* // FIXME: extend range
+  :?c.canUseAbility("staff_aether") &
+  ^ s.inRange("dash_min")
+    c.useAbility_TH("staff_aether", a.stAh) */
+
   // Align foes
-  ?c.canUseAbility("wand_stone") &
-  ^s.inRange("wand")
+  :?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
+
+  // ........................................ //
 
   // Heavy hammer logic
   :?c.canUseAbility("heavy_hammer") &
@@ -598,7 +590,6 @@ unmake with repeating crossbow. */
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
   ^ foe.buffs.string = "stability" &
-  // ^ foe = "elite" &
   // don't interrupt bardiche
   ^ !c.isCasting("bardiche") &
   ^ (es.canDebuff("Stun") |
@@ -607,6 +598,7 @@ unmake with repeating crossbow. */
      // not stunned with heavy hammer or Frost Wand
   ^   foe.debuffs.string ! "debuff_armor_fatigue" &
   ^   foe.debuffs.string ! "debuff_frost_stun"))
+    itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
   // permapot run
@@ -643,32 +635,8 @@ unmake with repeating crossbow. */
   /*:
     equip Kubikiribocho*/
 
-// ................ BOSS LOGIC ............... //
-
-// Boss fight (Bronze Guardian)
-:?foe = "phase"
-  ?c.canKillCinderwisp(
-  ^   a.cinderwispDmg_Default, 0) |
-  // reached ignition cap
-  ^c.isCinderwispCap(a.maxIgnitions_Default)
-    c.devour("cinderwisp")
-
-  ?c.canUseAbility("bardiche") & nRuns > 1
-    c.useAbility_TH("bardiche", Kubikiribocho)
-  :
-    fight("normal")
-
 // ................ 1V1 LOGIC ................ //
 
-/* Tanky foe, use bardiche ability to lower
-its hitpoints */
-:?(foe = "monarch" | foe = "boss") &
-^ (c.canUseAbility("staff_poison") |
-^  c.canUseAbility("bardiche")      )
-  ?c.canUseAbility("staff_poison")
-    c.useAbility_TH("staff_poison", a.stPh)
-  : // c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho)
 :
   fight("normal")
 
