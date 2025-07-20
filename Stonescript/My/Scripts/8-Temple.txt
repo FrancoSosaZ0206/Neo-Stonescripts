@@ -34,7 +34,7 @@ var boss_locs = ["nagaraja", "nagaraja_harder"]
 
 // screens
 var minibossScr = null
-var isMinibossScr = false
+var isMinibossScr = (loc.stars > 10)
 var lastFoeScr = null
 var isLastFoeScr = (loc.id = "temple")
 var bossScr = 1
@@ -81,10 +81,7 @@ func fight(mode)
       c.useAbility_TH("staff_ice", a.stIh)
 
     :?!s.inRange("sword")
-      ?foe.count > 1
-        fight("normal")
-      :
-        fight("normal")
+      fight("normal")
 
     // Unmake
     :?es.canUnmake()
@@ -121,9 +118,7 @@ func fight(mode)
     // 1v1 strong foe debuffing
     ^  (((loc.stars > 15 &
     ^     (foe = "monarch" | foe = "boss") &
-    ^     s.getFoeDmg(a.berserkerLvl,
-    ^                 a.plagueLvl   ,
-    ^                 a.maskLvl      ) > 0) |
+    ^     s.getFoeDmg() > 0) |
     ^    nRuns = 1 | buffs.string = "smite")))
       a.ldtF("sword debuff auto")
 
@@ -146,19 +141,19 @@ func fight(mode)
         a.ldtF("big sword unmake")
 
     // ............ DAMAGE LOGIC ............. //
+    :?foe = "phase" & canDash
+      ?c.canUseAbility("staff_poison") &
+      ^!s.inRange("dash")
+        c.useAbility_TH("staff_poison", a.stPh)
+      :?c.canUsePotion()
+        activate potion
+      :
+        a.ldtF("sword dmg")
+
     :?canDash &
     ^ (foe.GetCount(itemSplash) = 1 |
     ^  foe = "monarch" | foe = "boss")
-      ?foe = "phase"
-        ?c.canUseAbility("staff_poison") &
-        ^s.inRange("bardiche")
-          c.useAbility_TH("staff_poison", a.stPh)
-        :?c.canUsePotion()
-          activate potion
-        :
-          a.ldtF("sword dmg")
-      :
-        a.ldtF("sword dmg")
+      a.ldtF("sword dmg")
     :
       itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
@@ -168,49 +163,6 @@ func fight(mode)
     ^   "unknown <mode>: "+mode)
 
 // /////////////// PROCEDURE //////////////// //
-
-// ............. MONITOR LOGIC .............. //
-
-// permapot time bandwidth monitor:
-?permapotActTime ! -1 & nRuns = 1
-  var delay = totaltime + (5 * 30)
-  ?totaltime <= delay
-    >o-7,4,#magenta,wait until 
-    ^@time.FormatDigital(permapotTbw)@
-
-// monitor False-God
-?foe = "elite" | encounter.isElite //eliteMod = "False-God"
-  >`1,12,#magenta,mod: @encounter.eliteMod@\n
-  ^buffs: @foe.buffs.string@
-
-/* // monitor post-treasure metrics
-var treasureCol = #888888
-?end_t > 0 | old_t ! item.GetTreasureCount()
-  treasureCol = #aaff00
-:
-  treasureCol = #888888
->`1,14,@treasureCol@,
-^treasure:\n
-^  old | @old_t@ (t = @end_t@)
->`1,16,
-^  cur | @item.GetTreasureCount()@\n
-^  cap | @item.GetTreasureLimit()@ */
-
-// show any logged errors
-?log.hasErrors()
-  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
-  ^@log.getErrorCount()@\n
-  >@log.getError()@
-
-// ............ WITHDRAWAL LOGIC ............ //
-
-?s.getTotalHP("player")
-^ <=
-^s.getFoeDmg(a.berserkerLvl,
-^            a.plagueLvl,
-^            a.maskLvl      ) |
-^old_t = item.GetTreasureLimit()
-  loc.Leave()
 
 // .............. SETUP LOGIC ............... //
 
@@ -247,24 +199,20 @@ isBossScr = (boss_locs.Contains(loc.id) &
   ^(loc.id = "temple" & screen.i = lastFoeScr)
 
 // set up minibossScr
-?!minibossScr
+?!minibossScr & loc.stars > 10
   // yellow
-  ?loc.stars = math.Clamp(loc.stars, 11, 15)
+  ?loc.stars <= 15
     minibossScr = 15
   // green
-  :?loc.stars = math.Clamp(loc.stars, 16, 20)
+  :?loc.stars <= 20
     minibossScr = 1
-: // set up isMinibossScr
-  isMinibossScr = (loc.stars > 10 &
-  ^loc.id = "temple" & screen.i = minibossScr)
+:?minibossScr // set up isMinibossScr
+  isMinibossScr = (loc.id = "temple" &
+  ^                screen.i = minibossScr)
 
 /* set up permapotSetup:
-- in first run
-- yellow onwards, or
-- green onwards and
-- upon reaching lastFoeScr. */
-c.permapotSetup = (
-^nRuns = 1 &
+- in yellow ONLY, first run. */
+c.permapotSetup = (nRuns = 1 &
 ^loc.stars = math.Clamp(loc.stars,11,15))
 
 // Record time when permapot was activated
@@ -288,8 +236,13 @@ var firstFoeScr = 1
 // bardiche's hitbox + itemSplash area
 itemSplash = 17 // s.getHbxSplash("bardiche", null)
 
-// set canDash default value
+// set up canDash
 canDash = true
+
+// set variables for getFoeDmg
+s._berserkerLvl = a.berserkerLvl
+s._plagueLvl    = a.plagueLvl
+s._maskLvl      = a.maskLvl
 
 // init Combat
 c.Init()
@@ -313,7 +266,46 @@ stunTime = foe.debuffs.GetTime("stun")
 ?c.canBrewPotion()
   c.brewPotion()
 
-// .......................................... //
+// ............. MONITOR LOGIC .............. //
+
+// permapot time bandwidth monitor:
+?permapotActTime ! -1 & nRuns = 1
+  var delay = totaltime + (5 * 30)
+  ?totaltime <= delay
+    >o-7,4,#magenta,wait until 
+    ^@time.FormatDigital(permapotTbw)@
+
+// monitor False-God
+?foe = "elite" | encounter.isElite //eliteMod = "False-God"
+  >`1,12,#magenta,mod: @encounter.eliteMod@\n
+  ^buffs: @foe.buffs.string@
+
+/* // monitor post-treasure metrics
+var treasureCol = #888888
+?end_t > 0 | old_t ! item.GetTreasureCount()
+  treasureCol = #aaff00
+:
+  treasureCol = #888888
+>`1,14,@treasureCol@,
+^treasure:\n
+^  old | @old_t@ (t = @end_t@)
+>`1,16,
+^  cur | @item.GetTreasureCount()@\n
+^  cap | @item.GetTreasureLimit()@ */
+
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
+  ^@log.getErrorCount()@\n
+  >@log.getError()@
+
+// ............ WITHDRAWAL LOGIC ............ //
+
+?s.getTotalHP("player") <= s.getFoeDmg() |
+^old_t = item.GetTreasureLimit()
+  loc.Leave()
+
+// ............... INIT LOGIC ............... //
 
 // Permapot equipment
 ?c.permapotSetup
@@ -397,7 +389,7 @@ c.AAC("sword *0", "hatchet")
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
-^ loc.id = "temple" & 
+^ loc.id = "temple" &
 ^!(isMinibossScr | encounter.isElite)
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -594,7 +586,6 @@ unmake with repeating crossbow. */
 // Nagaraja fight logic
 :?foe = "phase"
   ?c.canKillCinderwisp(a.cwpMiN, 0) |
-  // reached ignition cap
   ^c.isCinderwispCap(a.cwpMiN)
     c.devour("cinderwisp")
 

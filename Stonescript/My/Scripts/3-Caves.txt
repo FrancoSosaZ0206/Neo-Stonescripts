@@ -568,7 +568,6 @@ unmake with repeating crossbow. */
 
 :?foe = "phase" // Bolesh
   ?c.canKillCinderwisp(a.cwpMiN, 0) |
-  // reached ignition cap
   ^c.isCinderwispCap(a.cwpMiN)
     c.devour("cinderwisp")
 

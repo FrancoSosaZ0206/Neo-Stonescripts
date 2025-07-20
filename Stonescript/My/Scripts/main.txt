@@ -97,7 +97,8 @@ enable npcDialog
     import My/Scripts/2-Deadwood
   :?loc.id = "caustic_caves"
     import My/Scripts/3-Caves
-  :?loc.id = "fungus_forest"
+  :?["fungus_forest", "fungus_forest_boss",
+  ^  "fungus_forest_boss_harder"].Contains(loc.id)
     import My/Scripts/4-Mushroom
   :?loc.id = "undead_crypt"
     import My/Scripts/5-Halls

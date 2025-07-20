@@ -418,7 +418,7 @@ c.AAC("sword *0", "hatchet")
 
   // speed up
   :?c.canUseAbility("staff_fire") &
-  ^ end_t > 27 & item.potion = "empty"
+  ^ item.potion = "empty" & end_t > 27
     c.useAbility_TH("staff_fire", a.stFh)
 
   : // regen armor
@@ -658,7 +658,6 @@ unmake with repeating crossbow. */
 
 :?foe = "phase" // Dysangelos
   ?c.canKillCinderwisp(a.cwpMiN, 0) |
-  // reached ignition cap
   ^c.isCinderwispCap(a.cwpMiN)
     c.devour("cinderwisp")
 
