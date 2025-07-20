@@ -54,7 +54,7 @@ var permapotTbw = loc.averageTime -
 var old_t = item.GetTreasureCount()
 var end_t = 0
 
-var minibossAtkTime = 0
+var batAtkT = 0
 
 // //////////////// FUNCTIONS /////////////// //
 
@@ -147,9 +147,6 @@ func fight(mode)
         c.useAbility_TH("staff_poison", a.stPh)
       :?c.canUsePotion()
         activate potion
-      // reduce damage with Cultist Mask
-      :?c.canUseAbility("mask") & foe = "phase"
-        c.useAbility_OH("mask", "mask", "r")
       :
         a.ldtF("sword dmg")
 
@@ -280,19 +277,17 @@ stunTime = foe.debuffs.GetTime("stun")
 ?old_t ! item.GetTreasureCount()
   end_t++
 
-// set up minibossAtkTime
+// set up batAtkT
 ?foe.id = "cool_bat"
-  >c0,0,#ff0000,CEILING DECORATOR
-
   // init
   ?loc.loop
-    minibossAtkTime = null
+    batAtkT = null
   // set
   :?foe.state = 33 & foe.time = 0
-    minibossAtkTime = 0
+    batAtkT = 0
   // increment
-  :?minibossAtkTime
-    minibossAtkTime ++
+  :?batAtkT
+    batAtkT ++
 
 // ............. MONITOR LOGIC .............. //
 
@@ -374,8 +369,9 @@ var permapotCol
   ^@log.getErrorCount()@\n
   >@log.getError()@
 
-?foe.id = "cool_bat"
-  >f0,6,#magenta,@minibossAtkTime@f
+// monitor batAtkT
+?isMinibossScr & batAtkT
+  >c-10,0,#00ffff,atkTime: @batAtkT@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
@@ -408,12 +404,12 @@ c.AAC("sword *0", "hatchet")
     a.ldtF("magnet")
 
   // activate potion
-  :?c.canUsePotion() & end_t > 27
+  :?c.canUsePotion() & end_t > 70
     activate potion
 
   // speed up
   :?c.canUseAbility("staff_fire") &
-  ^ end_t > 27 & item.potion = "empty"
+  ^ item.potion = "empty" & end_t > 70
     c.useAbility_TH("staff_fire", a.stFh)
 
   : // regen armor
@@ -436,7 +432,7 @@ c.AAC("sword *0", "hatchet")
 we farm knockbacks with it until we kill it or
 we are in the Bolesh's screen. */
 // Ceiling Decorator
-:?foe.id = "cool_bat" & minibossAtkTime > 25
+:?foe.id = "cool_bat" & batAtkT > 25
   >c0,0,#ff0000,*** ABOUT TO ATTACK! ***
 
   // prevent Weaken
@@ -465,13 +461,22 @@ we are in the Bolesh's screen. */
     ?c.canUseAbility("staff_vigor")
       c.useAbility_TH("staff_vigor", a.stVh)
 
-    // avoid damage with Eternity Staff
-    :?c.canUseAbility("staff_ice")
-      c.useAbility_TH("staff_ice", a.stIh)
-    
-    : // dodge hit
-      fight("evade")
-      >c0,1,#yellow,EVADING ATTACK!
+    // reduce damage with Cultist Mask
+    :?c.canUseAbility("mask")
+      c.useAbility_OH("mask", "mask", "r")
+
+    :?foe.debuffs.string ! "feeble"
+      // avoid damage with Eternity Staff
+      ?c.canUseAbility("staff_ice")
+        c.useAbility_TH("staff_ice", a.stIh)
+      
+      : // dodge hit
+        fight("evade")
+        >c0,1,#yellow,EVADING ATTACK!
+    :
+      fight("normal")
+  :
+    fight("normal")
 
 // ............. CUTSCENES LOGIC ............ //
 
@@ -481,15 +486,13 @@ we are in the Bolesh's screen. */
 
 /* speed up (normal) when:
   - speed effect not already present
-  - last foe in screen just defeated
-  - too far to attack
-  - save armor if it's setup run
-  - not facing the miniboss */
+  - screen past last one with foes.
+  - not facing the boss, miniboss or
+    an elite encounter. */
 :?c.canUseAbility("staff_fire") &
-^ buffs.string ! "buff_inf_speed" &
-// ^ (loc.stars <= 15 | nRuns > 1) &
-^!(c.permapotSetup | isBossScr |
-^  isMinibossScr | encounter.isElite)
+^ buffs.string ! "buff_inf_speed" & ((
+^!(c.permapotSetup | nRuns = 1) &
+^ screen.i = lastFoeScr + 1) | screen.i = 0)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -573,11 +576,26 @@ unmake with repeating crossbow. */
 
 // ............ SPECIAL FOE LOGIC ........... //
 
-:?foe = "boss" | foe = "monarch"
+:?foe.id = "cool_bat"
+  // Stun/Perma-stun
+  ?s.inRange("grappling_hook") &
+  ^ es.canDebuff("Stun") | (
+    // stun time (frames) running out
+  ^ stunTime = math.Clamp(stunTime, 1, 11) &
+    // not stunned with heavy hammer or Frost Wand
+  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^ foe.debuffs.string ! "debuff_frost_stun")
+    itemSplash = foe.distance + 5
+    a.ldtF("grappling")
+
+  :?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  :
+    fight("normal")
+
+:?foe = "monarch"
   ?c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
-  :?c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho)
   :
     fight("normal")
 
@@ -595,7 +613,7 @@ unmake with repeating crossbow. */
   // Voidweaver - use it if possible
   ?c.canUseAbility("voidweaver") &
   ^c.canUnmakeVoidweaver() &
-  ^!isMinibossScr
+  ^!isMinibossScr & !encounter.isElite
     c.devour("voidweaver")
 
   // Calamity - reduce hp
@@ -678,19 +696,6 @@ unmake with repeating crossbow. */
 
 // ................ 1V1 LOGIC ............... //
 
-:?foe.id = "cool_bat"
-  // Stun/Perma-stun
-  ?s.inRange("grappling_hook") &
-  ^ es.canDebuff("Stun") | (
-    // stun time (frames) running out
-  ^ stunTime = math.Clamp(stunTime, 1, 11) &
-    // not stunned with heavy hammer or Frost Wand
-  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
-  ^ foe.debuffs.string ! "debuff_frost_stun")
-    itemSplash = foe.distance + 5
-    a.ldtF("grappling")
-  :
-    fight("normal")
 :
   fight("normal")
 
