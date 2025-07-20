@@ -72,22 +72,19 @@ func fight(mode)
 
     ?c.canUseAbility("staff_stone") &
     ^ (foe ! "ranged" |
-    ^  (foe = "phase" & s.inRange("dash_min")))
+    ^  (foe = "phase" & s.inRange("bardiche")))
       c.useAbility_TH("staff_stone", a.stSh)
     :?c.canUseAbility("mind") &
     ^ (foe ! "ranged" |
-    ^  (foe = "phase" & s.inRange("dash_min")))
+    ^  (foe = "phase" & s.inRange("bardiche")))
       a.ldtF("mind")
 
     :?c.canUseAbility("staff_ice") &
-    ^ s.inRange("dash_min")
+    ^ s.inRange("bardiche")
       c.useAbility_TH("staff_ice", a.stIh)
 
     :?!s.inRange("sword")
-      ?foe.count > 1
-        fight("normal")
-      :
-        fight("normal")
+      fight("normal")
 
     // Unmake
     :?es.canUnmake()
@@ -228,7 +225,7 @@ func fight(mode)
 - in first run, or
 - in green, when in boss screen. */
 c.permapotSetup = (nRuns = 1 & loc.stars > 10 &
-^(loc.stars <= 15 | screen.i >= bossScr - 1))
+^(loc.stars <= 15 | screen.i > lastFoeScr))
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -284,13 +281,17 @@ stunTime = foe.debuffs.GetTime("stun")
   end_t++
 
 // set up minibossAtkTime
-?foe = "cool_bat"
-  // set-reset
-  ?(foe.state = 33 & foe.time = 0) |
-  ^minibossAtkTime > 50
+?foe.id = "cool_bat"
+  >c0,0,#ff0000,CEILING DECORATOR
+
+  // init
+  ?loc.loop
+    minibossAtkTime = null
+  // set
+  :?foe.state = 33 & foe.time = 0
     minibossAtkTime = 0
   // increment
-  :?foe.state ! 32
+  :?minibossAtkTime
     minibossAtkTime ++
 
 // ............. MONITOR LOGIC .............. //
@@ -373,7 +374,7 @@ var permapotCol
   ^@log.getErrorCount()@\n
   >@log.getError()@
 
-?foe = "cool_bat"
+?foe.id = "cool_bat"
   >f0,6,#magenta,@minibossAtkTime@f
 
 // ............ WITHDRAWAL LOGIC ............ //
@@ -434,16 +435,13 @@ c.AAC("sword *0", "hatchet")
 /* TODO: change Ceiling Decorator logic so that
 we farm knockbacks with it until we kill it or
 we are in the Bolesh's screen. */
-// Ceiling Decorator and Bolesh defensive logic
-:?(foe = "cool_bat" & minibossAtkTime > 25) |
-^ (foe = "phase" & foe.state = 142 &
-^  (foe.debuffs.string = "chill:6" & foe.time > 55))
+// Ceiling Decorator
+:?foe.id = "cool_bat" & minibossAtkTime > 25
   >c0,0,#ff0000,*** ABOUT TO ATTACK! ***
 
   // prevent Weaken
   ?c.canUseAbility("staff_vigor")
     c.useAbility_TH("staff_vigor", a.stVh)
-
   // avoid damage with Eternity Staff
   :?c.canUseAbility("staff_ice") &
   ^ foe = "phase" & s.inRange("hatchet")
@@ -452,6 +450,28 @@ we are in the Bolesh's screen. */
   : // dodge hit
     fight("evade")
     >c0,1,#yellow,EVADING ATTACK!
+
+// Bolesh about to attack
+:?foe = "phase" & foe.state = 142
+  >c0,0,#ff0000,*** ABOUT TO ATTACK! ***
+
+  // parry attack
+  ?c.canUseAbility("shovel") &
+  ^foe.time = math.Clamp(foe.time,23,55)
+    c.useAbility_TH("shovel", shovel)
+
+  :?foe.time > 55
+    // prevent Weaken
+    ?c.canUseAbility("staff_vigor")
+      c.useAbility_TH("staff_vigor", a.stVh)
+
+    // avoid damage with Eternity Staff
+    :?c.canUseAbility("staff_ice")
+      c.useAbility_TH("staff_ice", a.stIh)
+    
+    : // dodge hit
+      fight("evade")
+      >c0,1,#yellow,EVADING ATTACK!
 
 // ............. CUTSCENES LOGIC ............ //
 
@@ -468,8 +488,8 @@ we are in the Bolesh's screen. */
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 // ^ (loc.stars <= 15 | nRuns > 1) &
-^ !(isBossScr | isMinibossScr |
-^   encounter.isElite)
+^!(c.permapotSetup | isBossScr |
+^  isMinibossScr | encounter.isElite)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -505,7 +525,16 @@ we are in the Bolesh's screen. */
 
 // ............... RANGED LOGIC ............. //
 
-
+:?isMinibossScr & foe.id ! "cool_bat" &
+^ s.inRange("wand")
+  ?tracker.canTrack("Weaken")
+    a.ldtF("magic debuff weaken")
+  :?tracker.canTrack("Chill")
+    a.ldtF("magic debuff chill")
+  :?tracker.canTrack("Burn")
+    a.ldtF("magic debuff burn")
+  :
+    equip @a.bS@
 
 // .............. DASHING LOGIC ............. //
 
@@ -649,6 +678,19 @@ unmake with repeating crossbow. */
 
 // ................ 1V1 LOGIC ............... //
 
+:?foe.id = "cool_bat"
+  // Stun/Perma-stun
+  ?s.inRange("grappling_hook") &
+  ^ es.canDebuff("Stun") | (
+    // stun time (frames) running out
+  ^ stunTime = math.Clamp(stunTime, 1, 11) &
+    // not stunned with heavy hammer or Frost Wand
+  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^ foe.debuffs.string ! "debuff_frost_stun")
+    itemSplash = foe.distance + 5
+    a.ldtF("grappling")
+  :
+    fight("normal")
 :
   fight("normal")
 

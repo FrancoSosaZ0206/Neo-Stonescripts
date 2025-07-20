@@ -102,10 +102,7 @@ func fight(mode)
       c.useAbility_TH("staff_ice", a.stIh)
 
     :?!s.inRange("sword")
-      ?foe.count > 1
-        fight("normal")
-      :
-        fight("normal")
+      fight("normal")
 
     // Unmake
     :?es.canUnmake()
