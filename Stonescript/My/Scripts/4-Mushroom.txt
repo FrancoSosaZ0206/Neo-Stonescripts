@@ -289,7 +289,7 @@ stunTime = foe.debuffs.GetTime("stun")
   >f0,10,#magenta,dist=@foe.distance@
 */
 
-// monitor post-treasure metrics
+/* // monitor post-treasure metrics
 var treasureCol = #888888
 ?end_t > 0 | old_t ! item.GetTreasureCount()
   treasureCol = #aaff00
@@ -300,14 +300,14 @@ var treasureCol = #888888
 ^  old | @old_t@ (t = @end_t@)
 >`1,16,
 ^  cur | @item.GetTreasureCount()@\n
-^  cap | @item.GetTreasureLimit()@
+^  cap | @item.GetTreasureLimit()@ */
 
 // bfg ds screens monitor
 var bfgDsTargetScr = null
 bfgDsTargetScr = c.getScreen_DS("blade",
 ^                               "TARGET")
 
-?bfgDsTargetScr
+?bfgDsTargetScr & !boss_locs.Contains(loc.id)
   var bfgCol = #00ff00
 
   ?screen.i > bfgDsTargetScr
@@ -320,9 +320,9 @@ bfgDsTargetScr = c.getScreen_DS("blade",
   >`1,9,@bfgCol@,bfg: @screen.i@/
   ^@bfgDsTargetScr@
 
-// item states monitor:
+/* // item states monitor:
 >`1,10,#magenta,ils: @item.left.state@ | 
-^irs: @item.right.state@
+^irs: @item.right.state@ */
 
 var permapotCol
 ?c.permapotSetup
@@ -388,12 +388,12 @@ c.AAC("sword *0", "hatchet")
 
 :?c.canSummon("voidweaver") &
 ^!boss_locs.Contains(loc.id) &
-^ screen.i < lastFoeScr
+^ screen.i <= lastFoeScr
   c.useAbility_OH("aether_talisman",
   ^   "aether_talisman", hand       )
 :?c.canSummon("cinderwisp") & (isBossScr |
-^(loc.id = "fungus_forest" &
-^ screen.i >= lastFoeScr & foe.count <= 1))
+^(!boss_locs.Contains(loc.id) &
+^ screen.i = lastFoeScr + 1))
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
 
@@ -534,7 +534,13 @@ unmake with repeating crossbow. */
       c.useAbility_TH("staff_vigor", a.stVh)
 
     :?buffs.string = "buff_staff_protection"
-      a.ldtf("defense heal")
+      ?!s.inRange("shovel")
+        equip shovel
+
+      :?s.getFoeDmg() > armor
+        a.ldtF("defense heal")
+      :
+        fight("normal")
     :
       fight("evade")
 
