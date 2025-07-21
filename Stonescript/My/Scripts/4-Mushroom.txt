@@ -38,7 +38,7 @@ var minibossScr = null
 var isMinibossScr = (loc.stars > 10)
 var lastFoeScr = null
 var isLastFoeScr = (loc.id = "fungus_forest")
-var bossScr = 1
+var bossScr = 0
 var isBossScr = (boss_locs.Contains(loc.id))
 
 var bfgInitScr = 1
@@ -148,14 +148,12 @@ func fight(mode)
       ?c.canUseAbility("staff_poison") &
       ^!s.inRange("dash")
         c.useAbility_TH("staff_poison", a.stPh)
-      :?c.canUsePotion()
-        activate potion
       
       // reduce their damage
       :?c.canUseAbility("wand_poison")
         c.useAbility_OH("wand_poison",a.wPh,hand)
       :?c.canUseAbility("mask")
-        c.useAbility_TH("mask", mask, "r")
+        c.useAbility_OH("mask", mask, "r")
       :
         a.ldtF("sword dmg")
 
@@ -222,7 +220,9 @@ isBossScr = (boss_locs.Contains(loc.id) &
 - in first run, or
 - in green, when in boss screen. */
 c.permapotSetup = (nRuns = 1 & loc.stars > 10 &
-^(loc.stars <= 15 | screen.i > lastFoeScr))
+^(loc.stars <= 15 | (nRuns = 1 &
+^(loc.id = "fungus_forest" &
+^screen.i = lastFoeScr + 1) | isBossScr)))
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -387,7 +387,8 @@ c.AAC("sword *0", "hatchet")
 // .............. SUMMON LOGIC .............. //
 
 :?c.canSummon("voidweaver") &
-^ loc.id = "fungus_forest" & screen.i < lastFoeScr
+^!boss_locs.Contains(loc.id) &
+^ screen.i < lastFoeScr
   c.useAbility_OH("aether_talisman",
   ^   "aether_talisman", hand       )
 :?c.canSummon("cinderwisp") & (isBossScr |
@@ -400,14 +401,30 @@ c.AAC("sword *0", "hatchet")
 
 // Angry Shroom's punch attack
 :?foe = "phase1" & foe.state = 32
-  ?c.canUseAbility("shovel")
+  ?c.canUseAbility("shovel") &
+  ^foe.time = math.Clamp(foe.time,40,74)
     c.useAbility_TH("shovel", shovel)
-  :?foe.time >= 75
+  :?foe.time > 74
     fight("escape")
   :
     fight("normal")
 
+:?foe.id = "mushroom_boss_fat" &
+^ foe.state = 32
+  ?c.canUseAbility("shovel") &
+  ^foe.time = math.Clamp(foe.time,30,65)
+    c.useAbility_TH("shovel", shovel)
 
+  :?foe.time > 74
+    ?c.canUseAbility("staff_vigor")
+      c.useAbility_TH("staff_vigor", a.stVh)
+    :?c.canUseAbility("staff_ice") &
+    ^buffs.string ! "buff_staff_protection"
+      c.useAbility_TH("staff_ice", a.stIh)
+    :
+      fight("escape")
+  :
+    fight("normal")
 
 // ............ CUTSCENES LOGIC ............. //
 
@@ -420,11 +437,9 @@ c.AAC("sword *0", "hatchet")
   - not boss, miniboss nor elite screens. */
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
-^(loc.stars <= 15 | nRuns > 1) & ((
-^ loc.stars > 15 & isLastFoeScr &
-^ foe.count = 1                   ) |
-^ loc.id = "fungus_forest" & !(
-^isMinibossScr | encounter.isElite))
+^(loc.stars <= 15 | nRuns > 1) &
+^ !boss_locs.Contains(loc.id) &
+^ screen.i = lastFoeScr + 1
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -462,16 +477,7 @@ c.AAC("sword *0", "hatchet")
 
 // ............... RANGED LOGIC ............. //
 
-:?isMinibossScr & foe ! "explode" &
-^ s.inRange("wand")
-  ?tracker.canTrack("Weaken")
-    a.ldtF("magic debuff weaken")
-  :?tracker.canTrack("Chill")
-    a.ldtF("magic debuff chill")
-  :?tracker.canTrack("Burn")
-    a.ldtF("magic debuff burn")
-  :
-    equip @a.bS@
+
 
 // .............. DASHING LOGIC ............. //
 
@@ -484,13 +490,12 @@ c.AAC("sword *0", "hatchet")
 
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
-:?c.canSmoothCast(true) &
-^ canDash // & foe ! "boss"
+:?c.canSmoothCast(true) & canDash
   c.smoothCast(a.bR)
 
 // engaging logic (within fighting range)
 :?ai.walking & player.direction = 1 &
-^loc.id = "fungus_forest" &
+^!boss_locs.Contains(loc.id) &
 ^canDash & !a.canSmartDash() &
 ^s.betweenRange("triskelion", "dash_max")
   a.ldtF("engage")
@@ -506,26 +511,37 @@ unmake with repeating crossbow. */
   ?c.canKillCinderwisp(a.cwpMiN, 0) |
   ^c.isCinderwispCap(a.cwpMiN)
     c.devour("cinderwisp")
+  
+  ?c.canUsePotion() & foe = "phase1"
+    activate potion
 
   fight("normal")
 
 // ............ SPECIAL FOE LOGIC ........... //
 
-:?foe = "explode" // Mr. Puff
-  ?c.canUseAbility("staff_vigor")
-    c.useAbility_TH("staff_vigor", a.stVh)
-  :?c.canUseAbility("staff_ice")
-    c.useAbility_TH("staff_ice", a.stIh)
-  :
-    fight("escape")
+:?isMinibossScr
+  ?foe = "explode" // Mr. Puff
+    /* FIXME: Eternity Staff ability
+    removes buff_staff_protection,
+    put it back when the bug is fixed.
 
-// The snail that's always with Mr. Puff
-:?foe = "snail" & foe = "boss"
-  ?c.canUseAbility("heavy_hammer")
-    c.useAbility_TH("heavy_hammer",Mjölnir)
-  :?c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche",Kubikiribocho)
-  :
+    ?c.canUseAbility("staff_ice") &
+    ^buffs.string = "buff_staff_protection" &
+    ^s.inRange("sword")
+      c.useAbility_TH("staff_ice", a.stIh) */
+
+    ?c.canUseAbility("staff_vigor")
+      c.useAbility_TH("staff_vigor", a.stVh)
+
+    :?buffs.string = "buff_staff_protection"
+      a.ldtf("defense heal")
+    :
+      fight("evade")
+
+  // The snail that's always with Mr. Puff
+  :?foe = "snail" & foe = "boss" & foe.count > 1
+    equip @a.bS@
+  : // normal foes
     fight("normal")
 
 // ................ AOE LOGIC ............... //
