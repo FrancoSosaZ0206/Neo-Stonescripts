@@ -1,13 +1,14 @@
 > Min character limit per line on mobile: 30 characters
 123456789ABCDEFGHIJKLMNOPQRSTU| <<< U=30th
 
-
+```
    | XXXXXXXXXXXXXXXXXXXXXXXX | <<< chars per line inside scroll
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM <<< limit
-
 ```
+
 #### Message
 
+```
 Trades are open!
 
 ---
@@ -24,6 +25,7 @@ Reactions:
 - Trade completed: :white_check_mark:
 - Code recieved: :thumbsup:
 - Can waitlist: :pencil:
+```
 
 #### Final
 
