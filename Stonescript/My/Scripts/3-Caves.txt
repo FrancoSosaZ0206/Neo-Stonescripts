@@ -206,7 +206,7 @@ func fight(mode)
 ?!lastFoeScr
   ?loc.stars <= 4 // white
     lastFoeScr = 3
-  ?loc.stars = 5
+  :?loc.stars = 5
     lastFoeScr = 2
   :?loc.stars <= 10 // cyan
     lastFoeScr = 6
@@ -234,10 +234,10 @@ c.permapotSetup = (nRuns = 1 & loc.stars > 10 &
 ?loc.stars <= 10 | nRuns > 1
   c.screenMngr_DS("blade",
   ^               bfgInitScr,
-  ^               lastFoeScr-1)
+  ^               lastFoeScr - 1)
 
 // set up itemSplash default value
-itemSplash = 17 // bardiche's hitbox + itemSplash area
+itemSplash = 17 // bardiche's hitbox + splash area
 
 // set up canDash
 ?isMinibossScr & foe ! "boss"
@@ -363,15 +363,15 @@ var permapotCol
   >`1,13,#008800,∞: @weakenTime@f 
   ^(@time.FormatDigital(weakenTime, true)@)
 
+// monitor batAtkT
+?isMinibossScr & batAtkT
+  >c-10,0,#00ffff,atkTime: @batAtkT@
+
 // show any logged errors
 ?log.hasErrors()
   >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
   ^@log.getErrorCount()@\n
   >@log.getError()@
-
-// monitor batAtkT
-?isMinibossScr & batAtkT
-  >c-10,0,#00ffff,atkTime: @batAtkT@
 
 // ............ WITHDRAWAL LOGIC ............ //
 
