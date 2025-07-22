@@ -144,23 +144,19 @@ func canUseAbility(abilityID)
       ^(10 * armor) + armor.f > 10 * s.getArmor(abilityID))
 
       ?abilityID = "wand_poison"
-        result = result &
-        // ^!(foe = "immune_to_debuff_damage" |
-        ^  foe.buffs.string ! "buff_tenacious" // )
+        result = (result &
+        ^foe.buffs.string ! "buff_tenacious")
       :?abilityID = "wand_ice"
         result = (result &
         ^foe.buffs.string ! "buff_tenacious")
 
     :?s.talismans.Contains(abilityID) // it's a summon
-      result = result & isSummoned(abilityID)
+      result = (result & isSummoned(abilityID))
 
       ?abilityID = "voidweaver"
-        result = result & canUnmakeVoidweaver()
+        result = (result & canUnmakeVoidweaver())
       :?abilityID = "cinderwisp"
-        ?foe.debuffs.string
-          result = result & (foe.debuffs.string = "ignition")
-        :
-          result = false
+        result = (result & foe.debuffs.string = "ignition")
   :
     log.logError(_FILE, "canUseAbility",
     ^"unknown <abilityID>: "+abilityID)
