@@ -145,8 +145,8 @@ func canUseAbility(abilityID)
 
       ?abilityID = "wand_poison"
         result = result &
-        ^!(foe = "immune_to_debuff_damage" |
-        ^  foe.buffs.string ! "buff_tenacious")
+        // ^!(foe = "immune_to_debuff_damage" |
+        ^  foe.buffs.string ! "buff_tenacious" // )
       :?abilityID = "wand_ice"
         result = (result &
         ^foe.buffs.string ! "buff_tenacious")
