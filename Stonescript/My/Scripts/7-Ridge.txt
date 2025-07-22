@@ -1,6 +1,6 @@
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀ START OF "7-Ridge" ▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▀▄▀▄▀▄▀▄▀ START OF "7-Ridge" ▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
 
 // ///////////////// IMPORTS //////////////// //
 
@@ -141,8 +141,9 @@ func fight(mode)
         a.ldtF("big sword unmake")
 
     // ........... DAMAGE LOGIC ........... //
-    :?foe = "phase" | isBossScr
-      ?canDash & !blowing
+    :?isBossScr | foe = "phase"
+      ?(canDash & !blowing) |
+      ^buffs.string = "buff_range"
         ?c.canUseAbility("staff_poison") &
         ^!s.inRange("dash")
           c.useAbility_TH("staff_poison", a.stPh)
@@ -229,12 +230,12 @@ blowing = (isBossScr & (
 ^foe.state = 133 | // normal blowing
 ^foe.state = 143)) // blow & summon ice wall
 
-/* set up permapotSetup:
-- from yellow onwards,
-- in first run, or
-- in green, when in boss screen. */
-c.permapotSetup = (nRuns = 1 & loc.stars > 10 &
-^(loc.stars <= 15 | screen.i > lastFoeScr))
+// set up permapotSetup
+c.permapotSetup = (
+^nRuns = 1 & loc.stars > 10 & (
+^loc.stars <= 15 | screen.i > lastFoeScr | (
+^screen.i = lastFoeScr & (
+^foe.count <= 1 | foe = "spawner"))))
 
 // Record time when permapot was activated
 ?c.permapotSetup & permapotActTime = -1
@@ -404,12 +405,12 @@ c.AAC("sword *0", "hatchet")
     a.ldtF("magnet")
 
   // activate potion
-  :?c.canUsePotion() & end_t > 27
+  :?c.canUsePotion() & end_t > 57
     activate potion
 
   // speed up
   :?c.canUseAbility("staff_fire") &
-  ^ item.potion = "empty" & end_t > 27
+  ^ item.potion = "empty" & end_t > 57
     c.useAbility_TH("staff_fire", a.stFh)
 
   : // regen armor
@@ -418,34 +419,22 @@ c.AAC("sword *0", "hatchet")
 // .............. SUMMON LOGIC .............. //
 
 // Summons
-:?c.canSummon("voidweaver") &
-^ screen.i <= lastFoeScr
+:?c.canSummon("voidweaver") & !(
+^ screen.i > lastFoeScr | (
+^ screen.i = lastFoeScr & (
+^ foe.count <= 1 | foe = "spawner")))
   c.useAbility_OH("aether_talisman",
   ^   "aether_talisman", hand       )
-:?c.canSummon("cinderwisp") &
-^ screen.i > lastFoeScr
+:?c.canSummon("cinderwisp") & (
+^ screen.i > lastFoeScr | (
+^ screen.i = lastFoeScr & (
+^ foe.count <= 1 | foe = "spawner")))
   c.useAbility_OH("fire_talisman",
   ^   "fire_talisman", hand       )
 
 // ............. DEFENSIVE LOGIC ............ //
 
-// about to blow air and apply chill
-:?foe = "phase" & foe.state = 132 &
-^((foe.debuffs.string = "chill:6" & foe.time > 65) |
-^ (foe.debuffs.string ! "chill" & foe.time > 27))
-  ?c.canUseAbility("staff_vigor") // try to prevent the debuff
-    c.useAbility_TH("staff_vigor", a.stVh)
-  :?c.canUseAbility("wand_ice")
-    c.useAbility_OH("wand_ice", a.wIh, hand)
-  :
-    fight("normal")
 
-:?(isBossScr & foe = "phase" & blowing) |
-^ foe.name = "Ice Wall"
-  ?canDash
-    canDash = false
-
-  fight("normal")
 
 // ............ CUTSCENES LOGIC ............. //
 
@@ -461,24 +450,22 @@ with bardiche */
 
 // ........... ENGAGE/WALKING LOGIC .......... //
 
-/* speed up (normal) when:
-  - speed effect not already present
-  - screen past last one with foes.
-  - not facing the boss, miniboss or
-    an elite encounter. */
+// speed up (normal)
 :?c.canUseAbility("staff_fire") &
-^ buffs.string ! "buff_inf_speed" & ((
-^!(c.permapotSetup | nRuns = 1) &
-^ screen.i = lastFoeScr + 1) | screen.i = 0)
+^ buffs.string ! "buff_inf_speed" &
+^!(c.permapotSetup |
+^ (loc.stars > 15 & nRuns = 1)) &
+^((loc.stars <= 10 | screen.i = lastFoeScr+1) |
+^ (loc.stars <= 15 & screen.i = 0) |
+^ (loc.stars > 15 & !encounter.isElite &
+^  screen.i = minibossScr+1))
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
 :?c.canUseAbility("quarterstaff") &
 ^ ai.walking & ai.enabled & !ai.paused &
 // Cannot dash and in dashing range
-^!(canDash & a.canSmartDash()) &
-^!blowing &
-^ (c.permapotSetup | screen.i > 0)
+^!(canDash & a.canSmartDash()) & !blowing
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // pickup logic
@@ -506,39 +493,18 @@ with bardiche */
 
 // ............... RANGED LOGIC ............. //
 
-
+// Hrímnir blowing, Ice Wall or extended range
+:?isBossScr & (
+^(foe = "phase" & blowing) |
+^ foe.name = "Ice Wall" |
+^ buffs.string = "buff_range")
+  canDash = false
+  ?c.canUseAbility("staff_aether")
+    c.useAbility_TH("staff_aether", a.stAh)
+  :
+    fight("normal")
 
 // .............. DASHING LOGIC ............. //
-
-// Calamity - reduce hp
-:?c.canUseAbility("wand_aether") &
-^(encounter.eliteMod = "berserk" |
-^ foe = "monarch" | encounter.eliteMod = "monarch" |
-^ encounter.eliteMod = "blessed" |
-^ foe.buffs.string = "buff_tenacious")
-  c.useAbility_OH("wand_aether", a.wAh, hand)
-
-// Reset buff
-:?c.canUseAbility("wand_vigor") &
-^foe.buffs.string = "stoic"
-  c.useAbility_OH("wand_vigor", a.wVh, hand)
-
-// Reduce damage
-:?c.canUseAbility("wand_poison") &
-^(encounter.eliteMod = "berserk" |
-^ foe = "monarch" | encounter.eliteMod = "monarch" |
-^ encounter.eliteMod = "blessed" |
-^ encounter.eliteMod = "hydra" |
-^ foe.buffs.string = "buff_tenacious") &
-^s.inRange("dash_min")
-  c.useAbility_OH("wand_poison", a.wPh, hand)
-
-// Stun enemies
-:?c.canUseAbility("wand_ice") &
-^c.canApplyStun() & foe = "elite" &
-^foe.count > 1 &
-^s.getTotalHP("player") < c.hihp
-  c.useAbility_OH("wand_ice", a.wIh, hand)
 
 :?a.canSmartDash() & canDash
   a.smartDash()
@@ -549,109 +515,204 @@ with bardiche */
 
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
-:?canDash & s.betweenRange("dash_min","crossbow") &
-^!c.canSmoothCast(true)
+:?c.canSmoothCast(true) &
+^ canDash // & foe ! "boss"
   c.smoothCast(a.bR)
+
+// engaging logic (within fighting range)
+:?ai.walking & player.direction = 1 &
+^foe ! "phase" & canDash & !a.canSmartDash() &
+^s.betweenRange("triskelion", "dash_max")
+  a.ldtF("engage")
 
 // get in melee range faster
 :?c.canStutterStep()
   c.stutterStep()
 
-// ........... SPECIAL ITEMS LOGIC .......... //
+// ............... BOSS LOGIC ............... //
 
-// Voidweaver - use it if possible
-:?c.canUseAbility("voidweaver") &
-^c.canUnmakeVoidweaver() &
-^foe.count > 1 & screen.i > 1
-  c.devour("voidweaver")
+:?foe = "phase" // Boss fight (Hrímnir)
+  ?c.canKillCinderwisp(a.cwpMiN, 0) |
+  ^c.isCinderwispCap(a.cwpMiN)
+    c.devour("cinderwisp")
+
+  // states 0, 1: ice shield
+  ?foe.state <= 1 |
+  ^foe.debuffs.string = "debuff_frost_stun"
+    ?c.canUsePotion()
+      activate potion
+    :?c.canUseAbility("staff_poison") &
+    ^!s.inRange("dash")
+      c.useAbility_TH("staff_poison", a.stPh)
+    :
+      fight("normal")
+
+  // about to blow air and apply chill
+  :?[132, 142].Contains(foe.state)
+    ?c.canUseAbility("wand_ice")
+      c.useAbility_OH("wand_ice", a.wIh, hand)
+
+    :?c.canUseAbility("shovel") & (
+    ^(foe.debuffs.string = "chill:6" &
+    ^ foe.time = math.Clamp(foe.time,30,65)) |
+    ^(foe.debuffs.string ! "chill" &
+    ^ foe.time = math.Clamp(foe.time,0,27)))
+      c.useAbility_TH("shovel", shovel)
+
+    :?((foe.debuffs.string = "chill:6" &
+    ^   foe.time > 65) |
+    ^  (foe.debuffs.string ! "chill" &
+    ^   foe.time > 27))
+      // prevent chill (at least 1 of the 2)
+      ?c.canUseAbility("staff_vigor")
+        c.useAbility_TH("staff_vigor", a.stVh)
+      :?c.canUseAbility("wand_ice")
+        c.useAbility_OH("wand_ice", a.wIh, hand)
+      :
+        fight("normal")
+    :
+      fight("normal")
+
+  : // normal melee combat logic
+    fight("normal")
+
+// ............ SPECIAL FOE LOGIC ........... //
+
+:?foe = "boss"
+  // Stun/Perma-stun
+  ?s.inRange("grappling_hook") &
+  ^!c.isCasting("bardiche") & (
+  ^es.canDebuff("Stun") | (
+  // stun time (frames) running out
+  ^stunTime = math.Clamp(stunTime, 1, 11) &
+  // not stunned with heavy hammer or Frost Wand
+  ^foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^foe.debuffs.string ! "debuff_frost_stun"))
+    itemSplash = foe.distance + 5
+    a.ldtF("grappling")
+
+  :?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  :?c.canUseAbility("bardiche") &
+  ^ loc.stars > 15 & nRuns = 1
+    c.useAbility_TH("bardiche", Kubikiribocho)
+  :
+    fight("normal")
+
+:?foe = "monarch"
+  ?c.canUseAbility("staff_poison")
+    c.useAbility_TH("staff_poison", a.stPh)
+  :
+    fight("normal")
 
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(foe.distance + margin) > 1 &
-^foe ! "boss"
+:?foe.GetCount(itemSplash) > 1
+  // ......... SPECIAL ITEMS LOGIC .......... //
+  hardElite = (
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious"))
+
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^c.canUnmakeVoidweaver() & !(
+  ^isMinibossScr | encounter.isElite |
+  ^c.permapotSetup |
+  ^(loc.stars > 15 & nRuns = 1))
+    c.devour("voidweaver")
+
+  // Calamity - reduce hp
+  :?c.canUseAbility("wand_aether") & hardElite
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "stoic"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Reduce damage
+  :?c.canUseAbility("wand_poison") &
+  ^(hardElite | encounter.eliteMod = "hydra")
+    c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  // Stun enemies
+  :?c.canUseAbility("wand_ice") &
+  ^ es.canDebuff("Stun") &
+  ^ encounter.eliteMod = "venom"
+    c.useAbility_OH("wand_ice", a.wIh, hand)
+
+  /* // FIXME: extend range
+  :?c.canUseAbility("staff_aether") &
+  ^ s.inRange("dash_min")
+    c.useAbility_TH("staff_aether", a.stAh) */
+
   // Align foes
-  ?c.canUseAbility("wand_stone")
+  :?c.canUseAbility("wand_stone")
     c.useAbility_OH("wand_stone", a.wSh, hand)
 
-  /* Activate Berserk Staff early (in case there's
-  barely enough armor, to not lose it to the
-  Infernal Staff's Burn debuff). */
-  :?screen.i = 1 & c.canUseAbility("staff_poison")
-    c.useAbility_TH("staff_poison", a.stPh)
+  // ........................................ //
 
-  :?c.canUseAbility("heavy_hammer") & foe = "elite"
-    ?encounter.eliteMod = "plated"
-      c.useAbility_TH("heavy_hammer", "Guardian's Bane")
-    :
-      c.useAbility_TH("heavy_hammer", Mjölnir)
+  // Heavy hammer logic
+  :?c.canUseAbility("heavy_hammer") &
+  ^ encounter.eliteMod = "plated"
+    c.useAbility_TH("heavy_hammer", Mjölnir)
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
-  // don't interrupt bardiche
-  ^!c.isCasting("bardiche") &
-  ^(c.canApplyStun() |
+  ^ foe.buffs.string = "stability" &
+  ^!c.isCasting("bardiche") & (
+  ^ es.canDebuff("Stun") | (
     // stun time (frames) running out
-  ^ (stunTime = math.Clamp(stunTime, 1, 11) &
-     // not stunned with heavy hammer or Frost Wand
-  ^  foe.debuffs.string ! "debuff_armor_fatigue" &
-  ^  foe.debuffs.string ! "debuff_frost_stun"))
+  ^ stunTime = math.Clamp(stunTime, 1, 11) &
+    // not stunned with heavy hammer or Frost Wand
+  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^ foe.debuffs.string ! "debuff_frost_stun"))
+    itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
-  // permapot run
-  :?nRuns = 1 |
-  // split hydra foes
-  ^(encounter.eliteMod = "hydra" &
-  ^ foe.buffs.string ! "stability")
-    // change margin as needed
-    margin = 8 // big sword left hitbox + splash range
-
-    a.ldtF("big sword unmake")
   // Debuff and unmake
-  :?encounter.eliteMod = "blessed" & !c.isCasting("bardiche")
-    ?a.canSmartDebuff("magic")
-      a.smartDebuff("magic")
+  :?encounter.eliteMod = "blessed"
+    itemSplash = foe.distance + 7
+
+    ?tracker.canTrack("Weaken")
+      a.ldtF("magic debuff weaken")
+    :?tracker.canTrack("Chill")
+      a.ldtF("magic debuff chill")
+    :?tracker.canTrack("Burn")
+      a.ldtF("magic debuff burn")
     :
-      // change margin as needed
-      margin = 8 // big sword left hitbox + splash range
-
+      itemSplash = 10
       a.ldtF("big sword unmake")
+    a.ldtF("big sword unmake")
 
-  :?buffs.string = "ʘ" // berserk potion
+  // unmake
+  :?buffs.string = "ʘ" | // berserk pot
+  ^ foe.buffs.string ! "stability" |
+  // yellow and below
+  ^loc.stars <= 15 /* |
+  // more foes outside range
+  ^(foe ! "elite" & screen.i > 1 &
+  ^ (foe.count -
+  ^ foe.GetCount(itemSplash))
+  ^ > 0) */
+    itemSplash = 10
     a.ldtF("big sword unmake")
   :
     equip Kubikiribocho
 
-// ............... BOSS LOGIC ............... //
-
-:?foe = "phase" // Boss fight (Hrímnir)
-  ?c.canKillCinderwisp(a.cinderwispDmg_Default, 0) |
-  ^c.isCinderwispCap(a.maxIgnitions_Boosted) // reached ignition cap
-    c.devour("cinderwisp")
-
-  // states 0 and 1 are when he has the ice shield
-  ?foe.state > 1
-    ?c.canUsePotion()
-      activate potion
-    :?c.canUseAbility("staff_poison") & !s.inRange("dash")
-      c.useAbility_TH("staff_poison", a.stPh)
-    :
-      fight("normal")
-  : // normal melee combat logic
-    fight("normal")
-
 // ................ 1V1 LOGIC ............... //
 
-// Tanky foe, use bardiche ability to lower its hitpoints
-:?(foe = "boss" | foe = "monarch") &
-^(c.canUseAbility("staff_poison") |
-^c.canUseAbility("bardiche"))
-  ?c.canUseAbility("staff_poison")
-    c.useAbility_TH("staff_poison", a.stPh)
-  : // c.canuseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho)
 :
   fight("normal")
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "7-Ridge" ▀▄▀▄▀▄▀▄▀ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+// .......................................... //
+
+?buffs.string = "buff_range"
+  itemSplash += 10
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "7-Ridge" ▀▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //

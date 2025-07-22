@@ -146,11 +146,10 @@ func canUseAbility(abilityID)
       ?abilityID = "wand_poison"
         result = result &
         ^!(foe = "immune_to_debuff_damage" |
-        ^  encounter.eliteMod = "tenacious")
+        ^  foe.buffs.string ! "buff_tenacious")
       :?abilityID = "wand_ice"
-        result = result &
-        ^!(foe = "immune_to_stun" |
-        ^  encounter.eliteMod = "tenacious")
+        result = (result &
+        ^foe.buffs.string ! "buff_tenacious")
 
     :?s.talismans.Contains(abilityID) // it's a summon
       result = result & isSummoned(abilityID)
