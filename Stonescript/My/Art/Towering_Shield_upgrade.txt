@@ -136,9 +136,14 @@ var pnl = ui.AddPanel()
 pnl.Add(tShieldAnim)
 pnl.Add(upAnim)
 
+pnl.x = 2
+pnl.y = -7
+
 pnl.w = 15
 pnl.h = 10
 pnl.style = -1
+
+// TODO: add opaque black background for the animations
 
 // ///////////////////////////////// //
 
