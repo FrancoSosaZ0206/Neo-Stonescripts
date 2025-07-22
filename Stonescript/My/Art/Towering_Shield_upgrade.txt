@@ -86,7 +86,7 @@ var keyFrames = ascii
 ###
 %%
 
-  -†-
+  -┼-
 ###
 ###
 ###
