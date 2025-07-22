@@ -8,46 +8,103 @@ asciiend
 
 var keyFrames = ascii
 
+
 ###
 ###
 ###
 %%
 
+
 ###
 ###
 |##
 %%
+
 
 ###
 )##
 |_#
 %%
 
+
 |##
 )·#
 #_|
 %%
+
 
 |¯#
 #·(
 ##|
 %%
 
+
 #¯|
 ##(
 ###
 %%
+
 
 ##|
 ##+1!
 ###
 %%
 
+
 ##+1!
 ###
 ###
 %%
+
   +1!
+###
+###
+###
+%%
+
+  +1!
+###
+###
+###
+%%
+
+  +1!
+###
+###
+###
+%%
+
+  +1!
+###
+###
+###
+%%
+
+  <=>
+###
+###
+###
+%%
+
+  -†-
+###
+###
+###
+%%
+
+  ·+·
+###
+###
+###
+%%
+
+   '
+###
+###
+###
+%%
+   .
+   
 ###
 ###
 ###
@@ -58,10 +115,10 @@ asciiend
 var tShieldTxt = ui.AddText(tShieldSprite)
 
 tShieldTxt.x = 2
-tShieldTxt.y = 1
+tShieldTxt.y = 2
 
 var upAnim = ui.AddAnim(keyFrames)
-upAnim.duration = 8 * 3
+upAnim.duration = 16 * 4
 upAnim.loop = true
 
 upAnim.color = "#008800"
@@ -74,10 +131,10 @@ pnl.Add(tShieldTxt)
 pnl.Add(upAnim)
 
 pnl.x = 8
-pnl.y = 3
+pnl.y = 4
 
 pnl.w = 7
-pnl.h = 6
+pnl.h = 7
 pnl.style = -1
 
 pnl.dock = "top_left"
