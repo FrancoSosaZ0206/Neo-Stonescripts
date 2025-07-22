@@ -1,6 +1,6 @@
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄ START OF "main" ▀▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄▀ START OF "main" ▄▀▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
 
 // Read main-Readme.
 
@@ -39,7 +39,6 @@ import My/Watermark
   var mind
   ?totaltime = 1
     mind = import UI/MindstoneButton
-
 
 // ................ VARIABLES ............... //
 
@@ -93,24 +92,32 @@ enable npcDialog
   ?loc.id = "rocky_plateau"
     disable npcDialog
     import My/Scripts/1-Rocky
+
   :?loc.id = "deadwood_valley"
     import My/Scripts/2-Deadwood
+
   :?loc.id = "caustic_caves"
     import My/Scripts/3-Caves
+
   :?["fungus_forest", "fungus_forest_boss",
   ^  "fungus_forest_boss_harder"].Contains(loc.id)
     import My/Scripts/4-Mushroom
-  :?loc.id = "undead_crypt"
+
+  :?["undead_crypt", "skeleton_boss",
+  ^  "skeleton_boss_harder"].Contains(loc.id)
     import My/Scripts/5-Halls
+
   :?["bronze_mine", "bronze_guardian",
-    ^"bronze_guardian_harder"].Contains(loc.id)
+  ^  "bronze_guardian_harder"].Contains(loc.id)
     import My/Scripts/6-Mine
+
   :?loc.id = "icy_ridge"
     import My/Scripts/7-Ridge
+
   :?["temple", "nagaraja",
-    ^"nagaraja_harder"].Contains(loc.id)
+  ^  "nagaraja_harder"].Contains(loc.id)
     import My/Scripts/8-Temple
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "main" ▄▀▄▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄▀▄▀ END OF "main" ▄▀▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //

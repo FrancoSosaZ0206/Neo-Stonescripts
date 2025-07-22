@@ -1,6 +1,6 @@
-﻿//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀ START OF "8-Temple" ▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+﻿// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀ START OF "8-Temple" ▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
 
 // //////////////// IMPORTS ///////////////// //
 
@@ -110,16 +110,15 @@ func fight(mode)
     ^ s.inRange("sword")
       a.ldtF("sword debuff weaken")
 
+    // 1v1 debuffing (permapot/strong foes)
     :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
-    ^ canDash & s.inRange("sword") &
-    // Permapot 1v1 debuffing
-    ^ ((c.permapotSetup & foe = "elite" &
-    ^   foe.GetCount(itemSplash) = 1) |
-    // 1v1 strong foe debuffing
-    ^  (((loc.stars > 15 &
-    ^     (foe = "monarch" | foe = "boss") &
-    ^     s.getFoeDmg() > 0) |
-    ^    nRuns = 1 | buffs.string = "smite")))
+    ^ canDash & s.inRange("sword") & ((
+    ^ c.permapotSetup & foe = "elite" &
+    ^ foe.GetCount(itemSplash) = 1) | (((
+    ^ loc.stars > 15 & (
+    ^ foe = "monarch" | foe = "boss") &
+    ^ s.getFoeDmg() > 0) |
+    ^ nRuns = 1 | buffs.string = "smite")))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
@@ -613,9 +612,11 @@ unmake with repeating crossbow. */
 :
   fight("normal")
 
+// .......................................... //
+
 ?buffs.string = "buff_range"
   itemSplash += 10
 
-//  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  //
-//  ┃ ▄▀▄▀▄▀▄▀▄ END OF "8-Temple" ▀▄▀▄▀▄▀▄ ┃  //
-//  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  //
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄ END OF "8-Temple" ▀▄▀▄▀▄▀▄▀▄ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //

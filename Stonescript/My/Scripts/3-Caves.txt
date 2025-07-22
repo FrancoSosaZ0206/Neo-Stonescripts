@@ -376,7 +376,7 @@ var permapotCol
 // ............ WITHDRAWAL LOGIC ............ //
 
 ?(foe ! "boss" &
-^ s.getTotalHP("player") <= s.getFoeDmg()) |
+^s.getTotalHP("player") <= s.getFoeDmg()) |
 ^old_t = item.GetTreasureLimit()
   loc.Leave()
 
@@ -690,8 +690,8 @@ unmake with repeating crossbow. */
     ^ > 0) */
     itemSplash = 10
     a.ldtF("big sword unmake")
-  /*:
-    equip Kubikiribocho*/
+  /* :
+    equip Kubikiribocho */
 
 // ................ 1V1 LOGIC ............... //
 

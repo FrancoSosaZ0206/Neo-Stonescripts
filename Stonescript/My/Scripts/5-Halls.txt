@@ -1,308 +1,662 @@
-﻿// *******************************************************
-//                       5-Halls.txt                      
-// *******************************************************
+﻿// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄ START OF "5-Halls" ▀▄▀▄▀▄▀▄▀ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
 
-// Script for Haunted Halls
+// //////////////// IMPORTS ///////////////// //
 
+var log = import My/Lib/Error_Logging/public
 
+var u     = import My/Lib/Utilities
+var c     = import My/Lib/Combat
+var s     = import My/Lib/Stats
+var a     = import My/Lib/Arsenal
 
-// /////////////////////////////////////////// //
+var es = import My/Lib/Effect_Stats/public
+var tracker = import My/Lib/Ranged_Debuffing/public
 
-// IMPORTS
+// /////////////// VARIABLES //////////////// //
 
-var u = import My/Lib/Utilities
-var c = import My/Lib/Combat
-var a = import My/Lib/Arsenal
-var i = import My/Lib/BetterInfo
+// file
+var _FILE = "Scripts/5-Halls"
 
-c.Init()
+// flags
+var canDash  = true
 
+// values
+var stunTime = null
+var hand     = null
 
+var itemSplash = 17 // bardiche hitbox + splash area
 
-// /////////////////////////////////////////// //
+// TODO: implement cutscenes if needed
+var boss_cutscenes = []
+var boss_locs = ["skeleton_boss",
+^                "skeleton_boss_harder"]
 
-// VARIABLES
+// screens
+var minibossScr = null
+var isMinibossScr = (loc.stars > 10)
+var lastFoeScr = null
+var isLastFoeScr = (loc.id = "undead_crypt")
+var bossScr = 1
+var isBossScr = (boss_locs.Contains(loc.id))
 
-var weakenType = a.weaken_default
+var bfgInitScr = 1
 
+// counters
+// number of runs in this session
+var nRuns = 1
+/* time when permapot was activated,
+   -1 means not activated. */
+var permapotActTime = -1
+// permapot time bandwidth
+var permapotTbw = loc.averageTime -
+^                 (loc.averageTime / 10)
 
+var old_t = item.GetTreasureCount()
+var end_t = 0
 
-// /////////////////////////////////////////// //
-
-// FUNCTIONS
+// /////////////// FUNCTIONS //////////////// //
 
 func fight(mode)
-  ?mode = "evade"
-    ?c.canUseMindstone() & foe ! "ranged"
-      a.ldtF("escape", c.permapotSetup)
-    :?c.canUseStaffHidden("acrobatic") & foe ! "ranged"
-    ^& foe.distance < u.dash_range_min
-      c.useStaffHidden(a.staffStoneHidden, "acrobatic")
-    
-    :?c.canUseStaffHidden("eternity") & foe.distance < u.dash_range_min
-      c.useStaffHidden(a.staffIceHidden, "eternity")
-    
-    :?foe.distance > c.getRange("sword")
-      ?foe.count > 1
-        fight("ranged splash")
+  ?mode = "escape"
+    canDash = false
+
+    ?c.canUseAbility("mind")
+      a.ldtF("mind")
+    : // c.canUseAbility("staff_stone")
+      c.useAbility_TH("staff_stone", a.stSh)
+
+  :?mode = "evade"
+    canDash = false
+
+    ?c.canUseAbility("staff_stone") &
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
+      c.useAbility_TH("staff_stone", a.stSh)
+    :?c.canUseAbility("mind") &
+    ^ (foe ! "ranged" |
+    ^  (foe = "phase" & s.inRange("dash_min")))
+      a.ldtF("mind")
+
+    :?c.canUseAbility("staff_ice") &
+    ^ s.inRange("dash_min")
+      c.useAbility_TH("staff_ice", a.stIh)
+
+    :?!s.inRange("sword")
+      fight("normal")
+
+    // Unmake
+    :?es.canUnmake()
+      a.ldtF("defense unmake")
+    :
+      a.ldtF("defense")
+
+  :?mode = "normal"
+    // ........... DEBUFFING LOGIC .......... //
+
+    // AOE debuffing
+    ?(tracker.canTrack("Weaken") |
+    ^ tracker.canTrack("Burn")    ) &
+    ^(!canDash |
+    ^ (foe = "elite" &
+    ^  foe.GetCount(itemSplash) > 1))
+      itemSplash = foe.distance + 7
+      ?tracker.canTrack("Weaken")
+        a.ldtF("magic debuff weaken")
+      : // tracker.canTrack("Burn")
+        a.ldtF("magic debuff burn")
+
+    // 1v1 weaken (strong foes)
+    :?es.canDebuff("Weaken") & canDash & ((
+    ^ foe = "monarch" &
+    ^ foe ! "immune_to_physical") |
+    ^ foe = "boss") &
+    ^ s.inRange("sword")
+      a.ldtF("sword debuff weaken")
+
+    // 1v1 debuffing (permapot/strong foes)
+    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
+    ^ foe ! "immune_to_physical" &
+    ^ canDash & s.inRange("sword") & ((
+    ^ c.permapotSetup & foe = "elite" &
+    ^ foe.GetCount(itemSplash) = 1) | (((
+    ^ loc.stars > 15 & (
+    ^ foe = "monarch" | foe = "boss") &
+    ^ s.getFoeDmg() > 0) |
+    ^ nRuns = 1 | buffs.string = "smite")))
+      a.ldtF("sword debuff auto")
+
+    // ............ HEALING LOGIC ............ //
+    :?!(hp = maxhp |
+    ^ foe = "immune_to_physical") | ((
+    ^ canDash &
+    ^ foe.GetCount(itemSplash) = 1) |
+    ^ foe = "monarch")
+      a.ldtF("sword heal")
+
+    // ........... UNMAKING LOGIC ............ //
+    // TODO: add magic mode back once we can use it.
+    :?es.canUnmake() & foe ! "immune_to_physical"
+      /* ?foe = "immune_to_physical"
+        a.ldtF("magic unmake") */
+
+      ?canDash &
+      ^foe.GetCount(itemSplash) = 1
+        a.ldtF("sword unmake")
+      : // foe.GetCount(itemSplash) > 1
+        itemSplash = 10
+        a.ldtF("big sword unmake")
+
+    // ............ DAMAGE LOGIC ............. //
+    :?foe = "phase" & canDash
+      ?c.canUseAbility("staff_poison") &
+      ^!s.inRange("dash")
+        c.useAbility_TH("staff_poison", a.stPh)
+      :?c.canUsePotion()
+        activate potion
       :
-        fight("ranged pierce")
+        a.ldtF("sword dmg")
 
-    :?foe ! "boss" &
-    ^encounter.eliteMod ! "tenacious" &
-    ^encounter.eliteMod ! "monarch" // can unmake
-      a.ldtF("defense unmake", c.permapotSetup)
+    :?canDash & foe ! "immune_to_physical" &
+    ^ (foe.GetCount(itemSplash) = 1 |
+    ^  foe = "monarch" | foe = "boss")
+      a.ldtF("sword dmg")
     :
-      a.ldtF("defense", c.permapotSetup)
+      itemSplash = foe.distance + 7
+      a.ldtF("magic dmg")
 
-  : // debuff, if possible
-    ?c.canDebuffAny() & // foe can be debuffed
-    ^encounter.eliteMod ! "tenacious" // foe isn't immune to debuffs
-      ?mode = "melee"
-        a.ldtF("melee 1v1 debuff", c.permapotSetup)
-      :?mode = "ranged splash"
-        a.ldtF("ranged splash debuff", c.permapotSetup)
-      :?mode = "ranged pierce"
-        a.ldtF("ranged pierce debuff", c.permapotSetup)
+  : // invalid mode
+    log.logError(_FILE,"fight",
+    ^   "unknown <mode>: "+mode)
 
-    : // all possible debuffs applied
-      ?hp ! maxhp // heal up
-        ?mode = "melee"
-          a.ldtF("melee 1v1 heal", c.permapotSetup)
-        :?mode = "ranged splash"
-          a.ldtF("ranged splash heal", c.permapotSetup)
-        :?mode = "ranged pierce"
-          a.ldtF("ranged pierce heal", c.permapotSetup)
+// /////////////// PROCEDURE //////////////// //
 
-      : // deal max damage
-        ?mode = "melee"
-          a.ldtF("melee 1v1", c.permapotSetup)
-        :?mode = "ranged splash"
-          a.ldtF("ranged splash", c.permapotSetup)
-        :?mode = "ranged pierce"
-          a.ldtF("ranged pierce", c.permapotSetup)
+// .............. SETUP LOGIC ............... //
 
-  return
+?loc.loop
+  nRuns++
 
+// set up post-treasure metrics
+?old_t ! item.GetTreasureCount()
+  // reset metrics
+  ?loc.loop | !isBossScr
+    old_t = item.GetTreasureCount()
+    end_t = 0
+  : // track time
+    end_t++
 
+// set up isBossScr
+isBossScr = (boss_locs.Contains(loc.id) &
+^            screen.i = bossScr)
 
-// /////////////////////////////////////////// //
+// set up lastFoeScr
+?!lastFoeScr
+  ?loc.stars <= 6 // white and cyan 1*
+    lastFoeScr = 5
+  :?loc.stars <= 10 // cyan
+    lastFoeScr = 4
+  :?loc.stars <= 15 // yellow
+    lastFoeScr = 5
+  :?loc.stars <= 20 // green
+    lastFoeScr = 1 + loc.stars - 16
+: // set up isLastFoeScr
+  isLastFoeScr =
+  ^(loc.id = "undead_crypt" &
+  ^ screen.i = lastFoeScr)
 
-// PROCEDURE
+// set up minibossScr
+?!minibossScr & loc.stars > 10
+  // yellow
+  ?loc.stars <= 15
+    minibossScr = 7
+  // green
+  :?loc.stars <= 20
+    minibossScr = 1
+:?minibossScr // set up isMinibossScr
+  isMinibossScr = (loc.id = "temple" &
+  ^                screen.i = minibossScr)
 
-// Calculate the amount of damage the foe will deal
-?loc.stars > 15
-  weakenType = a.weaken_boosted
+/* set up permapotSetup:
+- from yellow onwards,
+- in first run, or
+- in green, when in boss screen. */
+c.permapotSetup = (nRuns = 1 & loc.stars > 10 &
+^(loc.stars <= 15 | screen.i > lastFoeScr))
 
-c.smiteScreen_Max = 4
-c.screen_DS_Change("bfg")
-c.doAAC(a.hammerVigorBuff, a.shieldVigorDefense)
+// Record time when permapot was activated
+?c.permapotSetup & permapotActTime = -1
+  permapotActTime = totaltime
 
-// Auto Brewing
-?c.canBrewPotion("berserk")
-  c.brewPotion("berserk")
+// BFG logic
+?loc.stars <= 10 | nRuns > 1
+  c.screenMngr_DS("blade",
+  ^               bfgInitScr,
+  ^               lastFoeScr - 1)
 
-?loc.begin // initial equipment
-  a.ldtF("default", c.permapotSetup)
-:?c.permapotSetup
-  ?item.right ! "bardiche" &
-  ^item.right ! "quarterstaff" &
-  ^item.right ! "heavy hammer" &
-  ^item.right ! "quarterstaff"
-    a.ldtF("extend", c.permapotSetup)
+// set up itemSplash default value
+itemSplash = 17 // bardiche's hitbox + splash area
 
+// set up canDash
+canDash = true
 
-?c.canUseBFG_DS() & loc.stars > 15
-  c.useBFG_DS()
+// set variables for getFoeDmg
+s._berserkerLvl = a.berserkerLvl
+s._plagueLvl    = a.plagueLvl
+s._maskLvl      = a.maskLvl
 
+// init Combat
+c.Init()
+// start up Ranged_Debuffing tracker
+tracker.track()
 
-?foe ! "boss" & !c.isDead() &
-^c.canUseAetherTalisman()
-  ?c.permapotSetup
-    c.useAetherTalisman("l")
-  :
-    equipL triskelion
-    c.useAetherTalisman("r")
-:?foe = "boss" &
-^c.canUseFireTalisman()
-  ?c.permapotSetup
-    c.useFireTalisman("l")
-  :
-    equipL triskelion
-    c.useFireTalisman("r")
+// set up stunTime
+stunTime = foe.debuffs.GetTime("stun")
 
-:?c.canUsePotionDmg() & c.permapotSetup
+// Decide hand for one-handed items
+?c.permapotSetup |
+^(s.inRange("dash") & canDash & ai.walking)
+  hand = "left"
+:
+  hand = "right"
+
+// Auto brewing
+?loc.stars <= 10
+  c.potionType = "berserk"
+:
+  c.potionType = "lucky"
+?c.canBrewPotion()
+  c.brewPotion()
+
+// track post-treasure time
+?old_t ! item.GetTreasureCount()
+  end_t++
+
+// ............. MONITOR LOGIC .............. //
+
+// permapot time bandwidth monitor:
+?permapotActTime ! -1 & nRuns = 1
+  var delay = totaltime + (5 * 30)
+  ?totaltime <= delay
+    >o-7,6,#magenta,wait until 
+    ^@time.FormatDigital(permapotTbw)@
+
+/* // foe distance monitor
+?foe.distance ! 9999
+  >f0,10,#magenta,dist=@foe.distance@
+*/
+
+// monitor post-treasure metrics
+var treasureCol = #888888
+?end_t > 0 | old_t ! item.GetTreasureCount()
+  treasureCol = #aaff00
+:
+  treasureCol = #888888
+>`1,14,@treasureCol@,
+^treasure:\n
+^  old | @old_t@ (t = @end_t@)
+>`1,16,
+^  cur | @item.GetTreasureCount()@\n
+^  cap | @item.GetTreasureLimit()@
+
+// bfg ds screens monitor
+var bfgDsTargetScr = null
+bfgDsTargetScr = c.getScreen_DS("blade",
+^                               "TARGET")
+
+?bfgDsTargetScr
+  var bfgCol = #00ff00
+
+  ?screen.i > bfgDsTargetScr
+    bfgCol = #888888
+  :?screen.i < bfgDsTargetScr
+    bfgCol = #ffff00
+  : // screen.i = bfgDsTargetScr
+    bfgCol = #00ff00
+
+  >`1,9,@bfgCol@,bfg: @screen.i@/
+  ^@bfgDsTargetScr@
+
+// item states monitor:
+>`1,10,#magenta,ils: @item.left.state@ | 
+^irs: @item.right.state@
+
+var permapotCol
+?c.permapotSetup
+  permapotCol = #00ff00
+:
+  permapotCol = #ff0000
+>`1,11,@permapotCol@,permapotSetup
+
+// show effect durations
+?buffs.string = "ʘ" | buffs.string = "lucky"
+  var potTime
+  ?buffs.string = "ʘ"
+    potTime = buffs.GetTime("ʘ")
+  : // buffs.string = "lucky"
+    potTime = buffs.GetTime("lucky")
+
+  >`1,12,#0066ff,@c.potionType@: @potTime@f 
+  ^(@time.FormatDigital(potTime, true)@)
+
+?debuffs.string = "pallas_phase2_debuff"
+  var debuffTime
+  debuffTime = debuffs.GetTime("pallas_phase2_debuff")
+
+  >`1,13,#0088ff,*: @debuffTime@f 
+  ^(@time.FormatDigital(debuffTime, true)@)
+
+// show any logged errors
+?log.hasErrors()
+  >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
+  ^@log.getErrorCount()@\n
+  >@log.getError()@
+
+// ............ WITHDRAWAL LOGIC ............ //
+
+?(foe ! "boss" &
+^s.getTotalHP("player") <= s.getFoeDmg()) |
+^old_t = item.GetTreasureLimit()
+  loc.Leave()
+
+// ............... INIT LOGIC ............... //
+
+// Permapot equipment
+?c.permapotSetup
+  a.ldtF("permapot")
+
+c.AAC("sword *0", "hatchet")
+
+// Initial equipments
+?loc.begin
+  a.ldtF("default")
+
+// activate potion when in permapot
+:?c.canUsePotion() & c.permapotSetup
   activate potion
-:?c.canUseStaffHidden("infernal")
-  c.useStaffHidden(a.staffFireHidden, "infernal")
 
-:?pickup.distance < 15
-  a.ldtF("magnet", c.permapotSetup)
+// ........... POST-TREASURE LOGIC .......... //
 
-// ABOUT TO ATTACK
-:?foe = "skeleton_boss" & // & foe = "boss"
-^foe.state = 32 & foe.time > 63
-  ?c.canUseStaffHidden("prevention") &
-  ^foe = "phase2"
-    c.useStaffHidden(a.staffVigorHidden, "prevention")
+:?loc.stars > 10 & end_t > 1 & isBossScr
+  // pickup treasure
+  ?pickup.distance < 15
+    a.ldtF("magnet")
 
-  :?c.canUseStaffHidden("eternity") &
-  ^buffs.string ! "buff_staff_protection"
-    c.useStaffHidden(a.staffIceHidden, "eternity")
-
-  :?foe.distance <= c.getRange("sword") & // couldn't dash, try to unmake to prevent attack
-  ^foe ! "phase2" &
-  ^!(loc.stars > 15 & c.permapotSetup)
-    a.ldtF("defense unmake", c.permapotSetup)
-
-  :?armor < c.getFoeDamage(weakenType, a.mask_feebleCount)
-    fight("evade")
-
-  :?armor >= c.getFoeDamage(weakenType, a.mask_feebleCount)
-    ?buffs.string ! "buff_damage" & foe ! "phase2"
-      a.ldtF("defense buff empower", c.permapotSetup)
-    :
-      fight("melee")
-
-
-:?c.isQuarterstaffRange() &
-^!(encounter.isElite &
-^foe.distance <= c.getRange("wand") &
-^(item.left = "wand" | item.right = "wand")) &
-^c.canUseQuarterstaff()
-  c.useQuarterstaff(a.myQuarterstaff)
-
-:?foe ! "skeleton_boss" &
-^!(encounter.isElite &
-^foe.distance <= c.getRange("wand") &
-^(item.left = "wand" | item.right = "wand")) &
-^(ai.paused |
-^(ai.idle & foe.distance > u.dash_range_min) | // if we're waiting
-^c.isDead() |
-^(encounter.isElite & foe.distance > c.getRange("wand")) |
-^(!encounter.isElite & foe.distance > u.dash_range_max)) // or we can't engage in a fight
-  ?armor > a.compoundMaxArmor_boosted |
-  ^(foe ! "phase" & foe.distance < u.shield_rune_range)
-    ldtF("engage")
-  :?a.compoundMaxArmor_default <= armor &
-  ^armor <= a.compoundMaxArmor_boosted
-    ldtF("default")
-  :
-    ldtF("armorRegen")
-
-
-:?foe = "skeleton_boss" // Pallas (note: sword can be unmade in phase1)
-  ?c.canUseCinderwisp() &
-  ^foe.debuffs.string = a.maxIgnitions_Default
-    c.useCinderwisp()
-  ?c.canUsePotionDmg()
+  // activate potion
+  :?c.canUsePotion() & end_t > 27
     activate potion
 
+  // speed up
+  :?c.canUseAbility("staff_fire") &
+  ^ item.potion = "empty" & end_t > 27
+    c.useAbility_TH("staff_fire", a.stFh)
+
+  : // regen armor
+    a.ldtF("defense armor regen")
+
+// .............. SUMMON LOGIC .............. //
+
+:?c.canSummon("voidweaver") &
+^ loc.id = "undead_crypt" &
+^ screen.i < lastFoeScr
+  c.useAbility_OH("aether_talisman",
+  ^   "aether_talisman", hand       )
+:?c.canSummon("cinderwisp") &
+^ loc.id = "undead_crypt" &
+^ screen.i >= lastFoeScr & foe.count <= 1
+  c.useAbility_OH("fire_talisman",
+  ^   "fire_talisman", hand       )
+
+// ............. DEFENSIVE LOGIC ............ //
+
+// Pallas about to attack
+:?foe = "phase" & foe.state = 32
+  // parry attack
+  ?c.canUseAbility("shovel") &
+  ^foe.time = math.Clamp(foe.time,25,63)
+    c.useAbility_TH("shovel", shovel)
+
+  :?foe.time > 63 &
+  ^foe.debuffs.string ! "debuff_frost_stun"
+    ?c.canUseAbility("wand_ice")
+      c.useAbility_OH("wand_ice", a.wIh, hand)
+
+    // prevent range debuff
+    :?c.canUseAbility("staff_vigor") &
+    ^foe = "phase2"
+      c.useAbility_TH("staff_vigor", a.stVh)
+
+    // unmake arm
+    :?foe = "phase1" & s.inRange("sword") &
+    ^!(loc.stars > 15 & c.permapotSetup)
+      a.ldtF("defense unmake")
+
+    :?c.canUseAbility("staff_ice") &
+    ^buffs.string ! "buff_staff_protection"
+      c.useAbility_TH("staff_ice",a.stIh)
+
+    // reduce damage
+    :?c.canUseAbility("mask")
+      c.useAbility_OH("mask", mask, "r")
+    :?c.canUseAbility("wand_poison") & s.getFoeDmg() > 0
+      c.useAbility_OH("wand_poison", a.wPh, hand)
+
+    :?!(foe.debuffs.string = "feeble" |
+    ^ foe.debuffs.string = "debuff_damage")
+      fight("evade")
+    :
+      fight("normal")
+  :
+    fight("normal")
+
+// ............ CUTSCENES LOGIC ............. //
+
+
+
+// ......... ENGAGING/WALKING LOGIC ......... //
+
+/* speed up when:
+  - speed effect not already present
+  - not boss, miniboss nor elite screens. */
+:?c.canUseAbility("staff_fire") &
+^ buffs.string ! "buff_inf_speed" &
+^ (loc.stars <= 15 | nRuns > 1) &
+^ loc.id = "undead_crypt" &
+^!(isMinibossScr | encounter.isElite)
+  c.useAbility_TH("staff_fire", a.stFh)
+
+// mini-dash
+:?c.canUseAbility("quarterstaff") &
+^ ai.walking & ai.enabled & !ai.paused &
+// Cannot dash and in dashing range
+^!(canDash & a.canSmartDash())
+  c.useAbility_TH("quarterstaff", a.myQ)
+
+// pickup logic
+:?pickup.distance < 15 &
+// foe is farther than pickup
+^(foe.distance > 15 | foe.distance = 9999)
+  a.ldtF("magnet")
+
+// armor regen logic
+:?(ai.walking & !s.inRange("socketed_shield")) |
+^ (ai.paused | !ai.enabled |
+^  player.direction = -1)
+  /*?!c.canBurst() & !c.permapotSetup
+    c.burst(a.burstSwords)
+  :*/
+  a.ldtF("defense armor regen")
+
+// engaging logic (out of fighting range)
+:?ai.walking & player.direction = 1 &
+^ s.inRange("socketed_shield") &
+^ ((canDash & !s.inRange("dash_max")) |
+^  !s.inRange("crossbow"))
+  ?armor > a.CmaE |
+  ^(c.canEngage() & foe ! "phase")
+    a.ldtF("engage")
+  :
+    a.ldtF("defense armor regen")
+
+// ............... RANGED LOGIC .............. //
+
+
+
+// .............. DASHING LOGIC ............. //
+
+:?a.canSmartDash() & canDash
+  a.smartDash()
+
+// Knockback farming
+:?c.canKbFarm()
+  c.smoothCast(a.bS)
+
+/* if in range, get closer while trying to
+unmake with repeating crossbow. */
+:?canDash & c.canSmoothCast(true)
+  c.smoothCast(a.bR)
+
+// engaging logic (within fighting range)
+:?ai.walking & player.direction = 1 &
+^ loc.id = "undead_crypt" &
+^ canDash & !a.canSmartDash() &
+^ s.betweenRange("triskelion", "dash_max")
+  a.ldtF("engage")
+
+// get in melee range faster
+:?c.canStutterStep()
+  c.stutterStep()
+
+// ............... BOSS LOGIC ............... //
+
+:?foe = "phase" // Pallas
+  ?c.canKillCinderwisp(a.cwpMiN, 0) |
+  ^c.isCinderwispCap(a.cwpMiN)
+    c.devour("cinderwisp")
+
+  // defeat other foes first
   ?foe = "phase2" & foe.count > 1
-    ?c.canUseHeavyHammer()
-      c.useHeavyHammer(Mjölnir)
-    :?c.canUseWandHidden("explosive")
-      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+    ?c.canUseAbility("heavy_hammer")
+      c.useAbility_TH("heavy_hammer",Mjölnir)
     :
-      fight("rangedAOE")
-
-  :?c.canUseBashingShield()
-    ldtF("bash")
-  :?c.canUseDashingShield()
-    ldtF("dash")
-
-  :?c.canUseWandHidden("plague") // reduce their damage
-    c.useWandHidden(a.wandPoisonHidden, "plague", "l")
-  :?c.canUseStaffHidden("berserker") // increase our damage
-    c.useStaffHidden(a.staffPoisonHidden, "berserker")
-  :?c.canUseCultistMask()
-    c.useCultistMask()
-  :?c.canUseWandHidden("frost")
-    c.useWandHidden(a.wandIceHidden, "frost", "l")
-
+      a.ldtF("big sword unmake")
   :
-    fight("melee")
+    fight("normal")
 
+// ............ SPECIAL FOE LOGIC ........... //
 
-// normal foes
-:?encounter.eliteMod = "monarch"
-  ?foe.count > 1 // eliminate the other foes
-    ?c.canUseBFG()
-      c.useBFG()
-    :?c.canUseWandHidden("explosive")
-      c.useWandHidden(a.wandFireHidden, "explosive", "l")
+:?foe = "boss" // R.I.Pieces
+  /* // TODO: add this back once we can
+  ?!s.inRange("sword")
+    a.ldtF("ranged dmg")
+  : */
+  fight("normal")
 
-    :?foe.distance < 7 & // if too close, try to escape
-    ^(c.canUseMindstone() |
-    ^c.canUseStaffHidden("acrobatic"))
-      ?c.canUseMindstone()
-        ldtF("escape")
-      :
-        c.useStaffHidden(a.staffStoneHidden, "acrobatic")
+// ................ AOE LOGIC ............... //
 
-    :?c.canUseHeavyHammer() // if close, use hammer
-      c.useHeavyHammer(Mjölnir)
+:?foe.GetCount(itemSplash) > 1
+  // ......... SPECIAL ITEMS LOGIC .......... //
+  hardElite = (
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious"))
+
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^c.canUnmakeVoidweaver() &
+  ^!isMinibossScr & !encounter.isElite
+    c.devour("voidweaver")
+
+  // Calamity - reduce hp
+  :?c.canUseAbility("wand_aether") & hardElite
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "stoic"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Reduce damage
+  :?c.canUseAbility("wand_poison") &
+  ^(hardElite | encounter.eliteMod = "hydra")
+    c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  // Stun enemies
+  :?c.canUseAbility("wand_ice") &
+  ^ es.canDebuff("Stun")
+    c.useAbility_OH("wand_ice", a.wIh, hand)
+
+  /* // FIXME: extend range
+  :?c.canUseAbility("staff_aether") &
+  ^ s.inRange("dash_min")
+    c.useAbility_TH("staff_aether", a.stAh) */
+
+  // Align foes
+  :?c.canUseAbility("wand_stone")
+    c.useAbility_OH("wand_stone", a.wSh, hand)
+
+  // ........................................ //
+
+  // Heavy hammer logic
+  :?c.canUseAbility("heavy_hammer") &
+  ^ encounter.eliteMod = "plated"
+    c.useAbility_TH("heavy_hammer", Mjölnir)
+
+  // Stun/Perma-stun logic
+  :?s.inRange("grappling_hook") &
+  // ^ foe ! "immune_to_physical" &
+  ^ foe.buffs.string = "stability" & (
+  ^ es.canDebuff("Stun") | (
+    // stun time (frames) running out
+  ^ stunTime = math.Clamp(stunTime, 1, 11) &
+    // not stunned with heavy hammer or Frost Wand
+  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
+  ^ foe.debuffs.string ! "debuff_frost_stun"))
+    itemSplash = foe.distance + 5
+    a.ldtF("grappling")
+
+  // Debuff and unmake
+  :?encounter.eliteMod = "blessed"
+    itemSplash = foe.distance + 7
+
+    ?tracker.canTrack("Weaken")
+      a.ldtF("magic debuff weaken")
+    :?tracker.canTrack("Chill")
+      a.ldtF("magic debuff chill")
+    :?tracker.canTrack("Burn")
+      a.ldtF("magic debuff burn")
     :
-      fight("rangedAOE")
+      itemSplash = 10
+      a.ldtF("big sword unmake")
 
-  :?c.canUseBashingShield()
-    ldtF("bash")
-  :?c.canUseDashingShield()
-    ldtF("dash")
-
-  : // 1v1 with the monarch
-    ?foe.hp + foe.armor >= a.bardicheRDmg &
-    ^c.canUseBardiche()
-      c.useBardiche(Kubikiribocho)
-    :?foe ! "immune_to_physical"
-      fight("melee")
-    :
-      fight("rangedAOE")
-
-:?c.canUseBashingShield() & !encounter.isElite
-  ldtF("bash")
-:?c.canUseDashingShield() & !encounter.isElite
-  ldtF("dash")
-
-:?foe.name = "R.I.Pieces"
-  fight("melee")
-
-:?foe.count > 1 // AOE strategy
-  ?!(screen.i = smiteScreen |
-  ^screen.i = smiteScreen + 1)
-    ?c.canUseVoidweaver() & !encounter.isElite
-      c.useVoidweaver()
-
-    :?encounter.eliteMod ! "tenacious" &
-    ^c.canUseWandHidden("gravity")
-      c.useWandHidden(a.wandStoneHidden, "gravity", "l")
-
-
-  // Hinder regen
-  ?encounter.eliteMod = "regen" &
-  ^c.canUseWandHidden("explosive")
-    c.useWandHidden(a.wandFireHidden, "explosive", "l")
-
-  // Remove armor
-  :?encounter.eliteMod = "plated" &
-  ^c.canUseHeavyHammer()
-    c.useHeavyHammer(Mjölnir)
-
+  // unmake
   :
-    fight("rangedAOE")
+    /* ?buffs.string = "ʘ" | // berserk pot
+    ^ foe.buffs.string ! "stability" |
+    // yellow and below
+    ^loc.stars <= 15 |
+    // more foes outside range
+    ^(foe ! "elite" & screen.i > 1 &
+    ^ (foe.count -
+    ^ foe.GetCount(itemSplash))
+    ^ > 0) */
+    itemSplash = 10
+    a.ldtF("big sword unmake")
+  /* :
+    equip Kubikiribocho */
 
-: // 1v1 strategy
-  ?foe ! "immune_to_physical"
-    ?foe.hp + foe.armor >= a.bardicheRDmg &
-    ^c.canUseBardiche()
-      c.useBardiche(Kubikiribocho)
-    :
-      fight("melee")
-  :
-    fight("rangedAOE")
+// ................ 1V1 LOGIC ............... //
 
+:
+  fight("normal")
 
+// .......................................... //
 
-// *******************************************************
-//                  END OF "5-Halls.txt"                  
-// *******************************************************
+?buffs.string = "buff_range"
+  itemSplash += 10
+
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ //
+// ┃ ▄▀▄▀▄▀▄▀▄▀ END OF "5-Halls" ▄▀▄▀▄▀▄▀▄▀ ┃ //
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ //
