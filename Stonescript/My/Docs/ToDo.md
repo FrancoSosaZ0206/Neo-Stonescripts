@@ -12,6 +12,8 @@
 
 ## To Do List
 
+- [ ] Make video guide on how to remote import from mobile.
+
 - [x] Ranged_Debuffing/private: at `track()`, fix tracker removal conditions so it only removes it when the stack count is equal to the max stack. Otherwise, when the set is removed, `canDebuff()` will look for current stack count only, ignoring travelling projectiles.
 - [ ] Update Times meter:
   - [ ] display in **table format**.
@@ -35,7 +37,7 @@
   - [x] Caves
   - [x] Mushroom
   - [ ] Halls
-  - ... Mine:
+  - [ ] Mine:
     - [x] Add miniboss screens to the logic
     - [x] Fix exploding miniboss logic:
       - [ ] Make the `Eternity Staff` ability activation conditions more consistent (based on states?)
@@ -47,6 +49,6 @@
     - [x] recopilate boss screens and add them to the boss_screen assignment section.
     - [x] Test!
       - [x] does the *Explosive Wand*'s ability work against Enfused elites?
-  - [ ] Ridge:
-    - ... update again with latest adjustments.
+  - [x] Ridge:
+    - [x] update again with latest adjustments.
   - [x] Temple

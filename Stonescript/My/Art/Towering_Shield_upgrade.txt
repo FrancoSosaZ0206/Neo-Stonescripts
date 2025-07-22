@@ -112,6 +112,10 @@ asciiend
 
 // ///////////////////////////////// //
 
+draw.Box(7,11,8,4, #000000,1)
+
+// ///////////////////////////////// //
+
 var tShieldTxt = ui.AddText(tShieldSprite)
 
 tShieldTxt.x = 2
@@ -130,12 +134,12 @@ var pnl = ui.AddPanel()
 pnl.Add(tShieldTxt)
 pnl.Add(upAnim)
 
-pnl.x = 8
-pnl.y = 4
+pnl.x = 6
+pnl.y = 0
 
-pnl.w = 7
-pnl.h = 7
-pnl.style = -1
+pnl.w = 10
+pnl.h = 16
+// pnl.style = -1
 
 pnl.dock = "top_left"
 pnl.anchor = "top_left"
