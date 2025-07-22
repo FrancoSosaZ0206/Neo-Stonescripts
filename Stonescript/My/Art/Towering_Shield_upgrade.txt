@@ -1,3 +1,5 @@
+import UI/MindstoneButton
+
 var tShieldSprite = ascii
 |¯|
 )·(
@@ -5,147 +7,84 @@ var tShieldSprite = ascii
 asciiend
 
 var keyFrames = ascii
-#####
-#####
-#####
-#####
-#####
+
+###
+###
+###
 %%
-#####
-#####
-#####
-#####
-░####
+
+###
+###
+|##
 %%
-#####
-#####
-#####
-░░###
-▒░###
+
+###
+)##
+|_#
 %%
-#####
-#####
-░░░##
-▒▒░##
-▓▒░##
+
+|##
+)·#
+#_|
 %%
-#####
-##░░#
-▒▒▒░#
-▓▓▒##
-█▓▒##
+
+|¯#
+#·(
+##|
 %%
-#####
-##▒▒#
-▓▓▓▒#
-██▓##
-██▓##
+
+#¯|
+##(
+###
 %%
-#####
-##▓▓#
-███▓#
-███##
-███##
+
+##|
+##+1!
+###
 %%
-#####
-##██#
-████#
-███##
-███##
+
+##+1!
+###
+###
 %%
-#####
-##██#
-████#
-▓██##
-▒▓█##
-%%
-#####
-##██#
-▓▓▓█#
-▒▒▓##
-░▒▓##
-%%
-#####
-##▓█#
-▒▒▒▓#
-░░▒##
-#░▒##
-%%
-#####
-##▒▓#
-░░░▒#
-##░##
-##░##
-%%
-######
-##░▒##
-###░##
-###+1!
-######
-%%
-######
-###░##
-###+1!
-######
-######
-%%
-######
-###+1!
-######
-######
-######
-%%
-######
-###~❄~
-######
-######
-######
-%%
-###.*.
-######
-######
-######
-######
-%%
-####·
-#####
-#####
-#####
-#####
+  +1!
+###
+###
+###
 asciiend
 
 // ///////////////////////////////// //
 
-var tShieldAnim = ui.AddAnim(tShieldSprite)
+var tShieldTxt = ui.AddText(tShieldSprite)
 
-tShieldAnim.duration = 17 * 3
-tShieldAnim.loop = true
+tShieldTxt.x = 2
+tShieldTxt.y = 1
 
 var upAnim = ui.AddAnim(keyFrames)
-upAnim.duration = 17 * 3
+upAnim.duration = 8 * 3
 upAnim.loop = true
 
 upAnim.color = "#008800"
-upAnim.x = 2
-upAnim.y = -1
 
 // ///////////////////////////////// //
 
 var pnl = ui.AddPanel()
 
-pnl.Add(tShieldAnim)
+pnl.Add(tShieldTxt)
 pnl.Add(upAnim)
 
-pnl.x = 2
-pnl.y = -7
+pnl.x = 8
+pnl.y = 3
 
-pnl.w = 15
-pnl.h = 10
+pnl.w = 7
+pnl.h = 6
 pnl.style = -1
+
+pnl.dock = "top_left"
+pnl.anchor = "top_left"
 
 // TODO: add opaque black background for the animations
 
 // ///////////////////////////////// //
 
-tShieldAnim.Play()
 upAnim.Play()
