@@ -40,18 +40,18 @@ MINDSTONE:
   / ` ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯─¯¯¯¯¯ . _ 
 (@)= );  ──¯¯  _ _      ¨·-  .    …        , )@|
   `¨/,_─¯____________________________…─_____/ ¯ 
-   |                                  _     |    
-   |  Trades are open!   .¡:¡.    /    \   :     
-   :  ---                ┼┴Θ┴┼    )^ ^(/    |    
-   :  Code: TXDR         ╘═══╛    `,^,´     |    
-    >                                      /     
-   |  Reply or DM me                       .     
-   ┊  with screenshot to trade.             :    
-   |  First reply gets the trade,     _     :    
-   |  the rest can be waitlisted.   \((}/   |    
-    :                                ) '   <     
-   |  The sooner you reply, the     ,` )    ┊    
-   |  sooner I'll use your code!     ¯¯     |    
+   |                                  _     |   
+   |  Trades are open!   .¡:¡.    /    \   :    
+   :  ---                ┼┴Θ┴┼    )^ ^(/    |   
+   :  Code: TXDR         ╘═══╛    `,^,´     |   
+    >                                      /    
+   |  Reply or DM me                       .    
+   ┊  with screenshot to trade.             :   
+   |  First reply gets the trade,     _     :   
+   |  the rest can be waitlisted.   \((}/   |   
+    :                                ) '   <    
+   |  The sooner you reply, the     ,` )    ┊   
+   |  sooner I'll use your code!     ¯¯     |   
     \      ________________________________ '.__
      `.::·´......::..:......................….·´
 
