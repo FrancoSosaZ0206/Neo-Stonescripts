@@ -116,32 +116,46 @@ func canUseAbility(abilityID)
       ^s.inRange("arm") &
       ^buffs.string = "pick_pocket"
 
+    /* hatchet:
+    - deadwood only
+    - in range
+    - if casting, don't interrupt */
     :?abilityID = "hatchet"
-      result = (result & loc.id = "deadwood_valley" &
-      ^         s.inRange(abilityID)) |
-      ^isCasting(abilityID) // won't get interrupted
+      result = ((result &
+      ^   loc.id = "deadwood_valley" &
+      ^   s.inRange(abilityID)) |
+      ^   isCasting(abilityID))
+
+    // shovel: if casting, don't interrupt
     :?abilityID = "shovel"
-      // won't get interrupted
       result = (result | isCasting(abilityID))
 
-    :?abilityID = "bardiche" |
-    ^abilityID = "heavy_hammer"
-      result = (result & s.inRange(abilityID+" ability")) |
-      ^isCasting(abilityID) // won't get interrupted
+    /* bardiche, heavy hammer:
+    - in ability range
+    - if casting, don't interrupt */
+    :?["bardiche", "heavy_hammer"]
+    ^.Contains(abilityID)
+      result = ((result &
+      ^s.inRange(abilityID+" ability")) |
+      ^isCasting(abilityID))
 
-    :?abilityID = "talisman" // interruptible abilities
-      // make sure not to change it while casting the ability
-      result = (result | isCasting(abilityID))
-
-    // Special case, stone wand doesn't require armor.
+    /* Stone wand:
+      - armor >= 0.1
+      - multiple foes
+      - foes can be moved
+      - not aligned with foes */
     :?abilityID = "wand_stone"
-      result = (result & foe.count > 1 &
-      ^pos.z ! foe.z)
-
-    :?(abilityID = "staff" & abilityID ! "quarterstaff") |
-    ^ abilityID = "wand"
       result = (result &
-      ^(10 * armor) + armor.f > 10 * s.getArmor(abilityID))
+      ^(10 * armor) + armor.f >= 1 &
+      ^foe.count > 1 & foe ! "unpushable" &
+      ^pos.z ! math.Clamp(pos.z, foe.z - 3, foe.z + 3))
+
+    /* hidden staves and wands:
+    - check for armor
+    - other special conditions */
+    :?s.isValidHI(abilityID)
+      result = (result &
+      ^(10 * armor) + armor.f > 10 * s.getHIArmor(abilityID))
 
       ?abilityID = "wand_poison"
         result = (result &
@@ -150,13 +164,19 @@ func canUseAbility(abilityID)
         result = (result &
         ^foe.buffs.string ! "buff_tenacious")
 
-    :?s.talismans.Contains(abilityID) // it's a summon
+    // talismans: if casting, don't interrupt
+    :?s.isValidTalisman(abilityID)
+      result = (result | isCasting(abilityID))
+
+    // summons: check if not already summoned
+    :?s.isValidSummon(abilityID)
       result = (result & isSummoned(abilityID))
 
       ?abilityID = "voidweaver"
         result = (result & canUnmakeVoidweaver())
       :?abilityID = "cinderwisp"
         result = (result & foe.debuffs.string = "ignition")
+
   :
     log.logError(_FILE, "canUseAbility",
     ^"unknown <abilityID>: "+abilityID)
@@ -347,7 +367,7 @@ func canHide(summonName)
   return result
 
 func devour(summonName)
-  ?s.talismans.Contains(summonName)
+  ?s.isValidSummon(summonName)
     ?isSummoned(summonName)
       /*?summonName = ""
         activate */

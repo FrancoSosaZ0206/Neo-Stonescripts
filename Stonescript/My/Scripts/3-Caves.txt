@@ -295,7 +295,7 @@ stunTime = foe.debuffs.GetTime("stun")
 ?permapotActTime ! -1 & nRuns = 1
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
-    >o-7,6,#magenta,wait until 
+    >o-7,4,#magenta,wait until 
     ^@time.FormatDigital(permapotTbw)@
 
 /* // foe distance monitor

@@ -12,7 +12,7 @@ var u = import My/Lib/Utilities
 /* FIXME: refactor current map layout from 
 per-property to per-item. */
 
-var _FILE = "Lib/Stats"
+var _FILE = "My/Lib/Stats"
 
 // .................. IDs ................... //
 
@@ -38,43 +38,47 @@ var abilities = [ // ability cooldown IDs only
 
 ^   "wand_stone", "wand_poison",
 ^   "wand_vigor", "wand_aether",
-^   "wand_fire" , "wand_ice",
+^   "wand_fire" , "wand_ice"   ,
 
-^   "staff_stone","staff_poison",
-^   "staff_vigor","staff_aether",
-^   "staff_fire" ,"staff_ice"
+^   "staff_stone", "staff_poison",
+^   "staff_vigor", "staff_aether",
+^   "staff_fire" , "staff_ice"
 ^]
 
 var talismans = [
-^   "TALISMAN"        , "SUMMON"      ,
+// ^"poison_talisman" , "vigor_talisman",
+^"aether_talisman", "fire_talisman"
+// ^"ice_talisman", "stone_talisman"]
+^]
 
-// ^   "poison_talisman" , ""  ,
-// ^   "vigor_talisman"  , ""  ,
-^   "aether_talisman" , "voidweaver"  ,
-^   "fire_talisman"   , "cinderwisp" //  ,
-// ^   "ice_talisman"    , ""  ,
-// ^   "stone_talisman"  , ""
+var summons = [
+// ^"", "",
+^"voidweaver", "cinderwisp"
+// ^   "", ""]
 ^]
 
 var hiddenItems = [
-^   "ID"           , "NAME"              , "REQUIRED ARMOR",
-
 // Hidden wands
-^   "wand_poison"  , "plague wand"       , 6   ,
-^   "wand_vigor"   , "reset wand"        , 1   ,
-^   "wand_aether"  , "calamity wand"     , 14  ,
-^   "wand_fire"    , "explosive wand"    , 4   ,
-^   "wand_ice"     , "frost wand"        , 3   ,
-^   "wand_stone"   , "gravity wand"      , 0   ,
+^["wand_poison", "plague wand"   , 6 ],
+^["wand_vigor" , "reset wand"    , 1 ],
+^["wand_aether", "calamity wand" , 14],
+^["wand_fire"  , "explosive wand", 4 ],
+^["wand_ice"   , "frost wand"    , 3 ],
+^["wand_stone" , "gravity wand"  , 0 ],
 
 // Hidden staves
-^   "staff_poison" , "berserker staff"   , 8   ,
-^   "staff_vigor"  , "prevention staff"  , 4   ,
-^   "staff_aether" , "grasping staff"    , 2   ,
-^   "staff_fire"   , "infernal staff"    , 6   ,
-^   "staff_ice"    , "eternity staff"    , 1   ,
-^   "staff_stone"  , "acrobatic staff"   , 3
-^]
+^["staff_poison", "berserker staff" , 8],
+^["staff_vigor" , "prevention staff", 4],
+^["staff_aether", "grasping staff"  , 2],
+^["staff_fire"  , "infernal staff"  , 6],
+^["staff_ice"   , "eternity staff"  , 1],
+^["staff_stone" , "acrobatic staff" , 3]]
+
+var _HI_ID    = 0
+var _HI_NAME  = 1
+var _HI_ARMOR = 2
+
+// .......................................... //
 
 var potions = [
 ^   "strength"        ,
@@ -355,8 +359,8 @@ func getEffectsTable(source, effectType, isSlim)
 
   return fxTable
 
-/* Returns the sum of a given target's current hp and
-armor. */
+/* Returns the sum of a given target's current
+hp and armor. */
 func getTotalHP(source)
   ?source = "foe"
     return foe.hp + foe.armor
@@ -368,44 +372,113 @@ func getTotalHP(source)
 
     return null
 
-/* Returns an armor stat from an item's ID,
-null if there was an error.
+// .............. Hidden items .............. //
 
-Works only with hidden items currently. */
-func getArmor(source)
-  var armorI = hiddenItems.IndexOf(source) +
-  ^            hiddenItems.IndexOf("REQUIRED ARMOR")
+func isValidHI(source)
+  var result = false
 
-  ?armorI >= 5 // first armor value's index
-    return hiddenItems[armorI]
-  : // armorI <= 0 -- not found or error
-    log.logError(_FILE,"getArmor",
-    ^"unknown <source>:\n\n" + source)
-    return null
+  ?!source
+    log.logError(_FILE, "isValidHI",
+    ^"source was null")
+  :?Type(source) ! "string"
+    log.logError(_FILE, "isValidHI",
+    ^"invalid <source> datatype." +
+    ^"Expected 'string', received: '" +
+    ^Type(source) + "'")
+  :
+    for hiddenItem : hiddenItems
+      ?[hiddenItem[_HI_ID],
+      ^hiddenItem[_HI_NAME]].Contains(source)
+        result = true
+        break
+
+  return result
+
+func HItoID(_name)
+  var result = null
+
+  ?isValidHI(_name)
+    for hiddenItem : hiddenItems
+      ?hiddenItem[_HI_NAME] = _name
+        result = hiddenItem[_HI_ID]
+        break
+
+  return result
+func HItoName(_id)
+  var result = null
+
+  ?isValidHI(_id)
+    for hiddenItem : hiddenItems
+      ?hiddenItem[_HI_ID] = _id
+        result = hiddenItem[_HI_NAME]
+        break
+
+  return result
+
+/* Returns a hidden item's required armor stat
+from its ID or name,
+null if there was an error. */
+func getHIArmor(_key)
+  var result = null
+
+  ?isValidHI(_key)
+    for hiddenItem : hiddenItems
+      ?[hiddenItem[_HI_ID],
+      ^hiddenItem[_HI_NAME]].Contains(_key)
+        result = hiddenItem[_HI_ARMOR]
+        break
+
+  return result
 
 // ................. Summons ................ //
 
-/* Returns a talisman's name/ID from a summon's ID or null if there was an error. */
+func isValidTalisman(source)
+  var result = false
+
+  ?!source
+    log.logError(_FILE, "isValidTalisman",
+    ^"source was null")
+  :?Type(source) ! "string"
+    log.logError(_FILE, "isValidTalisman",
+    ^"invalid <source> datatype." +
+    ^"Expected 'string', received: '" +
+    ^Type(source) + "'")
+  :
+    result = talismans.Contains(source)
+
+  return result
+func isValidSummon(source)
+  var result = false
+
+  ?!source
+    log.logError(_FILE, "isValidSummon",
+    ^"source was null")
+  :?Type(source) ! "string"
+    log.logError(_FILE, "isValidSummon",
+    ^"invalid <source> datatype." +
+    ^"Expected 'string', received: '" +
+    ^Type(source) + "'")
+  :
+    result = summons.Contains(source)
+
+  return result
+
+/* Returns a talisman's name/ID from a summon's
+ID or null if there was an error. */
 func getTalisman(source)
-  var talismanI = talismans.IndexOf(source) - 1 // index of "TALISMAN"
-
-  ?talismanI >= 2 // first talisman value's index
-    return talismans[talismanI]
-  : // talismanI <= -1 -- not found or error
-    log.logError(_FILE,"getTalisman",
-    ^"unknown <source>:\n\n" + source)
+  // entry validation
+  ?!isValidSummon(source)
     return null
-/* Returns a summon's name/ID from a talisman's ID or null if there was an error. */
+  :
+    return talismans[summons.IndexOf(source)]
+/* Returns a summon's name/ID from a talisman's
+ID or null if there was an error. */
 func getSummon(source)
-  var summonI = talismans.IndexOf(source) +
-  ^             talismans.IndexOf("SUMMON")
-
-  ?summonI >= 3 // first summon value's index
-    return talismans[summonI]
-  : // summonI <= 0 -- not found or error
-    log.logError(_FILE,"getSummon",
-    ^"unknown <source>:\n\n" + source)
+  // entry validation
+  ?!isValidSummon(source)
     return null
+  :
+    return summons[talismans.IndexOf(source)]
 
 // ................. Ranges ................. //
 
@@ -682,7 +755,7 @@ based on their enchant level. */
 func getHiddenStat(hiddenName, lvl)
   // Entry sanitization
   hiddenName = string.ToLower(hiddenName)
-  ?hiddenItems.Contains(hiddenName) // valid hiddenName
+  ?isValidHI(hiddenName) // valid hiddenName
     ?math.Clamp(lvl, 1, 21) = lvl // lvl is in range
       ?hiddenName = "berserker staff"
         return berserker_base + lvl - 1
