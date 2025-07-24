@@ -160,21 +160,26 @@ func fight(mode)
         a.ldtF("big sword unmake")
 
     // ............ DAMAGE LOGIC ............. //
-    :?foe = "phase3" & canDash
-      ?c.canUseAbility("staff_poison") &
-      ^!s.inRange("dash")
-        c.useAbility_TH("staff_poison", a.stPh)
-      :?c.canUsePotion()
-        activate potion
-      /* :?c.canBurst() & !c.permapotSetup
-        c.burst(a.burstSwords) */
+    :?foe = "phase" & canDash
+      ?foe = "phase1" & !c.permapotSetup
+        equip Kubikiribocho
+      :?foe = "phase3"
+        ?c.canUseAbility("staff_poison") &
+        ^!s.inRange("dash")
+          c.useAbility_TH("staff_poison", a.stPh)
+        :?c.canUsePotion()
+          activate potion
+        /* :?c.canBurst() & !c.permapotSetup
+          c.burst(a.burstSwords) */
+        :
+          a.ldtF("sword dmg")
       :
         a.ldtF("sword dmg")
 
     :?canDash &
     ^ (foe.GetCount(itemSplash) = 1 |
     ^  foe = "monarch" | foe = "boss")
-      a.ldtF("sword dmg")
+      equip Kubikiribocho
     :
       itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
@@ -328,6 +333,20 @@ c.potionType = "lucky"
 
 // ............. MONITOR LOGIC .............. //
 
+
+// gravity wand monitor:
+var canUseGravity = c.canUseAbility("wand_stone")
+canUseGravity = c.canUseAbility("wand_stone")
+
+var gravityCol = "#ff0000"
+gravityCol = "#ff0000"
+?canUseGravity
+  gravityCol = "#00ff00"
+
+>`1,10,#magenta,gravity cd:
+^ @item.GetCooldown("wand_stone")@
+>`1,11,@gravityCol@,canAct: @canUseGravity@
+
 // permapot time bandwidth monitor:
 ?permapotActTime ! -1 & nRuns = 1
   var delay = totaltime + (5 * 30)
@@ -377,6 +396,18 @@ var treasureCol = #888888
 ^  cur | @item.GetTreasureCount()@\n
 ^  cap | @item.GetTreasureLimit()@ */
 
+// show effect durations
+?nRuns = 1 & (
+^buffs.string = "ʘ" | buffs.string = "lucky")
+  var potTime
+  ?buffs.string = "ʘ"
+    potTime = buffs.GetTime("ʘ")
+  : // buffs.string = "lucky"
+    potTime = buffs.GetTime("lucky")
+
+  >`1,12,#0066ff,@c.potionType@: @potTime@f 
+  ^(@time.FormatDigital(potTime, true)@)
+
 // show any logged errors
 ?log.hasErrors()
   >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
@@ -395,7 +426,7 @@ var treasureCol = #888888
 ?c.permapotSetup
   a.ldtF("permapot")
 
-c.AAC("sword *0", "hatchet")
+c.AAC("sword *0 +0", "hatchet")
 
 // Initial equipments
 ?loc.begin
@@ -539,18 +570,27 @@ c.AAC("sword *0", "hatchet")
 // ............ CUTSCENES LOGIC ............. //
 
 // Dysangelos pre-phase1 cutscene damage strat
-:?!c.permapotSetup & isBossScr &
-^ (([100, 101, 102].Contains(foe.state) &
-^   item.GetCooldown("heavy_hammer") <= 0) &
-^   s.inRange("heavy_hammer ability") |
-^  c.isCasting("heavy_hammer"))
-  ?item.GetCooldown("quarterstaff") <= 0 &
-  ^!c.isCasting("heavy_hammer")
-    c.useAbility_TH("quarterstaff", a.myQ)
-  : // ?c.canUseAbility("heavy_hammer")
-    c.useAbility_TH("heavy_hammer", Mjölnir)
+:?!c.permapotSetup & isBossScr & (
+^ [100, 101, 102].Contains(foe.state) |
+^ c.isCasting("heavy_hammer") |
+^ c.isCasting("bardiche"))
 
-// Dysangelos post-phase1 cutscene damage strat
+  ?c.canUseAbility("heavy_hammer")
+    c.useAbility_TH("heavy_hammer", Mjölnir)
+  :?s.betweenRange("bardiche",
+  ^                "heavy_hammer ability")
+    ?c.canUseAbility("staff_aether")
+      c.useAbility_TH("staff_aether", a.stAh)
+    :?c.canUseAbility("quarterstaff")
+      c.useAbility_TH("quarterstaff", a.myQ)
+
+    :?c.canUseAbility("dash")
+      a.ldtF("dash")
+
+  :?c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho)
+
+/* // Dysangelos post-phase1 cutscene damage strat
 :?!c.permapotSetup & isBossScr & 
 ^(([118, 108].Contains(foe.state) &
 ^  item.GetCooldown("bardiche") <= 0) |
@@ -565,12 +605,12 @@ c.AAC("sword *0", "hatchet")
   /* Use Berserk Staff to increment Bardiche
   ability and sword damage (only pre-phase1,
   in phase3 it's activated under different
-  conditions) */
+  conditions)
   :?item.GetCooldown("staff_poison") <= 0 &
   ^foe = "phase1" & loc.stars > 15
     c.useAbility_TH("staff_poison", a.stPh)
   : // c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho)
+    c.useAbility_TH("bardiche", Kubikiribocho) */
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
@@ -592,19 +632,22 @@ c.AAC("sword *0", "hatchet")
   :
     a.ldtF("harvest")
 
-// mini-dash
-:?c.canUseAbility("quarterstaff") &
-^ ai.walking & ai.enabled & !ai.paused &
-// Cannot dash and in dashing range
-^!(canDash & a.canSmartDash()) &
-^ (c.permapotSetup | screen.i > 0)
-  c.useAbility_TH("quarterstaff", a.myQ)
-
 // pickup logic
 :?pickup.distance < 15 &
 // foe is farther than pickup
 ^ (foe.distance > 15 | foe.distance = 9999)
   a.ldtF("magnet")
+
+// mini-dash
+:?c.canUseAbility("quarterstaff") &
+^ ai.walking & ai.enabled & !ai.paused &
+// Cannot dash and in dashing range, or
+^!((canDash & a.canSmartDash()) |
+// in melee range or permapot setup run
+^ s.inRange("sword") | c.permapotSetup | (
+^ foe = "phase1" & foe.hp = foe.maxhp &
+^ screen.i >= bossScr - 1))
+  c.useAbility_TH("quarterstaff", a.myQ)
 
 // armor regen logic
 :?(ai.walking & !s.inRange("socketed_shield")) |
@@ -617,9 +660,10 @@ c.AAC("sword *0", "hatchet")
 
 // engaging logic (out of fighting range)
 :?ai.walking & player.direction = 1 &
-^ s.inRange("socketed_shield") &
-^ ((canDash & !s.inRange("dash_max")) |
-^  !s.inRange("crossbow"))
+^s.inRange("socketed_shield") & ((
+^canDash & !s.inRange("dash_max")) |
+^!s.inRange("crossbow") |
+^pos.z ! math.Clamp(pos.z, foe.z -3, foe.z +3))
   ?armor > a.CmaE |
   ^(c.canEngage() & foe ! "phase")
     a.ldtF("engage")
@@ -628,7 +672,10 @@ c.AAC("sword *0", "hatchet")
 
 // ............... RANGED LOGIC .............. //
 
-
+// Align foes
+:?c.canUseAbility("wand_stone") &
+^ s.betweenRange("dash_max", "wand")
+  c.useAbility_OH("wand_stone", a.wSh, hand)
 
 // .............. DASHING LOGIC ............. //
 
@@ -700,8 +747,8 @@ unmake with repeating crossbow. */
 ^(foe = "boss" | foe = "monarch")
   ?c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
-  :?c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho)
+  /* :?c.canUseAbility("bardiche")
+    c.useAbility_TH("bardiche", Kubikiribocho) */
   :
     fight("normal")
 
@@ -746,10 +793,6 @@ unmake with repeating crossbow. */
   ^ !(isMinibossScr | nRuns = 1)
     c.useAbility_TH("staff_aether", a.stAh) */
 
-  // Align foes
-  :?c.canUseAbility("wand_stone")
-    c.useAbility_OH("wand_stone", a.wSh, hand)
-
   // ........................................ //
 
   // Heavy hammer logic
@@ -759,7 +802,8 @@ unmake with repeating crossbow. */
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
-  ^ foe ! "warcaster" & (
+  ^ foe ! "warcaster" &
+  ^!c.isCasting("bardiche") & (
   ^ es.canDebuff("Stun") | (
     // stun time (frames) running out
   ^ stunTime = math.Clamp(stunTime, 1, 11) &

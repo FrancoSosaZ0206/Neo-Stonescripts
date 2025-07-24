@@ -1,0 +1,58 @@
+/* Nagaraja Cheat Code
+by Yu, the Second Person (A_Lol)
+Instructions:
+- Place this code below all your other code.
+- DO NOT INTERRUPT THE EQUIPS
+- DO NOT PAUSE WHILE THERE'S A SPIT ON-SCREEN */
+
+var incomingSpit = -1 // stores ETA of spit
+var incomingSpit2 = -1 // in case chill fails
+
+enable pause
+
+?foe.id = "nagaraja"
+
+  // Nagaraja just spat
+  ?foe.state = 31 |
+  ^(foe.state = 33 & foe.time = 0)
+    // there is already another spit in the air
+    ?incomingSpit > totaltime
+      incomingSpit2 = totaltime + 25
+    :
+      incomingSpit = totaltime + 25
+
+  // avoid brick and give space for walking
+  ?foe.distance <= 10 &
+  ^item.GetCooldown("mind") <= 0
+    equipL mind
+    equipR mask
+
+  // there is a spit in the air
+  :?incomingSpit > totaltime
+    disable pause
+
+    // impact imminent, walk forward 2 steps
+    ?incomingSpit - totaltime <= 5
+    ?incomingSpit = totaltime + 5
+      equipL quest
+      equipR shield -ash
+    :
+      equipL tri
+      equipR sword
+
+    : // waiting for spit to get closer
+      equipL quest
+      equipR shield -ash
+
+  :?foe.state = 105
+    equipL quest
+    equipR crossbow *0 +0
+  :
+    equipL quest
+    equipR shield -ash
+
+  // a spit just landed,
+  // handle next spit (if any)
+  ?incomingSpit = totaltime &
+  ^incomingSpit2 > incomingSpit
+    incomingSpit = incomingSpit2

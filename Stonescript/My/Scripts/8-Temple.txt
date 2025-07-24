@@ -310,7 +310,7 @@ var treasureCol = #888888
 ?c.permapotSetup
   a.ldtF("permapot")
 
-c.AAC("sword *0", "hatchet")
+c.AAC("sword *0 +0", "hatchet")
 
 // Initial equipments
 ?loc.begin
