@@ -403,6 +403,8 @@ func ldtF(mode)
       ?!c.permapotSetup
         ?mode = "tank" | mode = "dmg reduce"
           equipR @shT@
+          >h-10,0,#red,EQUIPPING TOWERING SHIELD
+          // loc.Pause()
         :?mode = "stun"
           equipR @shC1@
 

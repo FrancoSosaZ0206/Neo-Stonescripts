@@ -175,9 +175,9 @@ func fight(mode)
       :
         a.ldtF("sword dmg")
 
-    :?canDash &
-    ^ (foe.GetCount(itemSplash) = 1 |
-    ^  foe = "monarch" | foe = "boss")
+    :?canDash & (
+    ^ foe.GetCount(itemSplash) = 1 |
+    ^ foe = "monarch" | foe = "boss")
       // equip Kubikiribocho
       a.ldtF("sword dmg")
     :
@@ -537,11 +537,7 @@ c.AAC("sword *0 +0", "hatchet")
   ?foe = "phase1" & hp ! maxhp
     a.ldtF("defense heal")
     >c0,0,#red,DEFENSE HEAL
-  // reduce Dysan damage with Towering shield
-  :?foe = "phase1" &
-  ^ s.getFoeDmg() <= a.thickArmorRed
-    a.ldtF("defense tank")
-    >c0,0,#888888,DEFENSE TANK
+
   // reduce damage amap
   :?foe = "phase3" & phase3dmg > 0 &
   ^c.canUseAbility("mask")
@@ -550,13 +546,22 @@ c.AAC("sword *0 +0", "hatchet")
   :?c.permapotSetup
     ?hp ! maxhp
       a.ldtF("defense heal")
+      >c0,0,#red,DEFENSE HEAL
     :
       a.ldtF("defense")
+      >c0,0,DEFENSE NORMAL
 
   // get additional damage
   :?buffs.string ! "buff_damage"
     a.ldtF("defense buff empower")
     >c0,0,#008800,DEFENSE EMPOWER
+
+  // reduce Dysan damage with Towering shield
+  :?foe = "phase1" &
+  ^ s.getFoeDmg() <= a.thickArmorRed
+    a.ldtF("defense tank")
+    >c0,0,#888888,DEFENSE TANK
+
   // unmake attacking foes
   :?es.canUnmake()
     a.ldtF("defense unmake")
@@ -651,12 +656,7 @@ c.AAC("sword *0 +0", "hatchet")
 
 // ............... RANGED LOGIC .............. //
 
-// Align foes
-:?c.canUseAbility("wand_stone") &
-^ foe = "elite" &
-^ s.inRange("sword")
-  >c-10,0,#red,USING GRAVITY WAND
-  c.useAbility_OH("wand_stone", a.wSh, hand)
+
 
 // .............. DASHING LOGIC ............. //
 
@@ -731,8 +731,7 @@ unmake with repeating crossbow. */
 
 // ............ SPECIAL FOE LOGIC ........... //
 
-:?loc.stars > 15 &
-^(foe = "boss" | foe = "monarch")
+:?loc.stars > 15 & foe = "boss"
   ?c.canUseAbility("staff_poison")
     c.useAbility_TH("staff_poison", a.stPh)
   /* :?c.canUseAbility("bardiche")
@@ -825,6 +824,13 @@ unmake with repeating crossbow. */
   ^  > 0) */
     itemSplash = 10
     a.ldtF("big sword unmake")
+
+  // Align foes
+  :?c.canUseAbility("wand_stone") &
+  ^ foe = "elite" &
+  ^ s.inRange("sword")
+    >c-10,0,#red,USING GRAVITY WAND
+    c.useAbility_OH("wand_stone", a.wSh, hand)
   :
     equip Kubikiribocho
 
