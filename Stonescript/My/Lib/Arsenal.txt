@@ -127,7 +127,7 @@ var Bfast   = "*max bardiche" // enchanted: speed
 var bR      = "*max crossbow repeating golden" // enchanted: pierce
 var shC1    = "*max shield compound shiny" // enchanted: armor, armor/s
 var shC2    = "*max shield compound -shiny"
-var shT     = "*max shield towering golden"
+var shT     = "*max shield towering" // enchanted: thick armor
 
 // ................ GROUPING ................ //
 
@@ -162,6 +162,10 @@ N = normal
 E = enchanted */
 var CmaN = 14
 var CmaE = 35
+
+// ............. TOWERING SHIELD ............ //
+
+var thickArmorRed = 5
 
 // .............. CULTIST MASK .............. //
 
@@ -395,9 +399,9 @@ func ldtF(mode)
       : // foe = "stone"
         equipL Bifrost // Unbroken Faith
 
+      // Right hand
       ?!c.permapotSetup
-        // Right hand
-        ?mode = "tank"
+        ?mode = "tank" | mode = "dmg reduce"
           equipR @shT@
         :?mode = "stun"
           equipR @shC1@

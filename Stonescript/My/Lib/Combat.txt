@@ -145,10 +145,11 @@ func canUseAbility(abilityID)
       - foes can be moved
       - not aligned with foes */
     :?abilityID = "wand_stone"
-      result = (result &
+      result = ((result &
       ^(10 * armor) + armor.f >= 1 &
-      ^foe.count > 1 & foe ! "unpushable" &
-      ^pos.z ! math.Clamp(pos.z, foe.z - 3, foe.z + 3))
+      ^foe.count > 1 /* & foe ! "unpushable" &
+      ^pos.z ! math.Clamp(pos.z, foe.z - 3, foe.z + 3) */)
+      ^| isCasting("wand_stone"))
 
     /* hidden staves and wands:
     - check for armor

@@ -113,7 +113,7 @@ func fight(mode)
   :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
 
-    // AOE debuffing
+    // AOE debuffingk
     ?(tracker.canTrack("Weaken") |
     ^ tracker.canTrack("Burn")    ) &
     ^(!canDash |
@@ -132,22 +132,21 @@ func fight(mode)
       a.ldtF("sword debuff weaken")
 
     :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
-    ^ canDash & s.inRange("sword") &
+    ^ canDash & s.inRange("sword") & (
+    ^ buffs.string = "smite" |
     // Permapot 1v1 debuffing
     ^ ((c.permapotSetup & foe = "elite" &
     ^   foe.GetCount(itemSplash) = 1) |
     // 1v1 strong foe debuffing
     ^  (((loc.stars > 15 &
     ^     (foe = "monarch" | foe = "boss") &
-    ^     s.getFoeDmg() > 0) |
-    ^    nRuns = 1 | buffs.string = "smite")))
+    ^     s.getFoeDmg() > a.thickArmorRed) |
+    ^    nRuns = 1))))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
-    :?hp ! maxhp &
-    ^ ((canDash &
-    ^   foe.GetCount(itemSplash) = 1) |
-    ^  foe = "monarch")
+    :?hp ! maxhp & foe = "phase" &
+    ^ canDash & s.inRange("sword")
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ............ //
@@ -161,9 +160,9 @@ func fight(mode)
 
     // ............ DAMAGE LOGIC ............. //
     :?foe = "phase" & canDash
-      ?foe = "phase1" & !c.permapotSetup
-        equip Kubikiribocho
-      :?foe = "phase3"
+      /* ?foe = "phase1" & !c.permapotSetup
+        equip Kubikiribocho */
+      ?foe = "phase3"
         ?c.canUseAbility("staff_poison") &
         ^!s.inRange("dash")
           c.useAbility_TH("staff_poison", a.stPh)
@@ -179,7 +178,8 @@ func fight(mode)
     :?canDash &
     ^ (foe.GetCount(itemSplash) = 1 |
     ^  foe = "monarch" | foe = "boss")
-      equip Kubikiribocho
+      // equip Kubikiribocho
+      a.ldtF("sword dmg")
     :
       itemSplash = foe.distance + 7
       a.ldtF("magic dmg")
@@ -333,7 +333,6 @@ c.potionType = "lucky"
 
 // ............. MONITOR LOGIC .............. //
 
-
 // gravity wand monitor:
 var canUseGravity = c.canUseAbility("wand_stone")
 canUseGravity = c.canUseAbility("wand_stone")
@@ -346,13 +345,6 @@ gravityCol = "#ff0000"
 >`1,10,#magenta,gravity cd:
 ^ @item.GetCooldown("wand_stone")@
 >`1,11,@gravityCol@,canAct: @canUseGravity@
-
-// permapot time bandwidth monitor:
-?permapotActTime ! -1 & nRuns = 1
-  var delay = totaltime + (5 * 30)
-  ?totaltime <= delay
-    >o-7,4,#magenta,wait until 
-    ^@time.FormatDigital(permapotTbw)@
 
 /* // itemSplash display test
 
@@ -515,43 +507,48 @@ c.AAC("sword *0 +0", "hatchet")
   >f0,0,#red,WIND CRIT, FIGHT RANGED
 
 // Normal attacks
-:?foe.state = 32 & (
-^ (foe = "scout" &
-^  !(foe.debuffs.string = "stun" |
-^    c.isCasting("bardiche")      ) &
-^    ((foe.debuffs.string = "chill:6" &
-^      foe.time > 50                   ) |
-^     (foe.debuffs.string ! "chill" &
-^      foe.time > 10                 ))   ) |
-^ ((foe = "phase1" &
-^   ((foe.debuffs.string = "chill:6" &
-^     foe.time > 60                   ) |
-^    (foe.debuffs.string ! "chill" &
-^     foe.time > 20                 )    )) |
-^  (foe = "phase3" & foe.damage > 1 &
-^    ((foe.debuffs.string = "chill:6" &
-^      foe.time > 85                   ) |
-^     (foe.debuffs.string ! "chill" &
-^      foe.time > 45                 )    )))/* |
-^ (foe = "soldier" &
-^  foe.debuffs.string ! "stun" &
-^  s.inRange("dash_min") &
-^   ((foe.debuffs.string = "chill:6" &
-^     foe.time > 50                   ) |
-^    (foe.debuffs.string ! "chill" &
-^     foe.time > 10                 )    ))*/
+:?foe.state = 32 & ((
+^ foe = "scout" & !(
+^ foe.debuffs.string = "stun" |
+^ c.isCasting("bardiche")) & ((
+^ foe.debuffs.string = "chill:6" &
+^ foe.time > 50) | (
+^ foe.debuffs.string ! "chill" &
+^ foe.time > 10))) | ((
+^ foe = "phase1" & ((
+^ foe.debuffs.string = "chill:6" &
+^ foe.time > 60) | (
+^ foe.debuffs.string ! "chill" &
+^ foe.time > 20))) | (
+^ foe = "phase3" & foe.damage > 1 & ((
+^ foe.debuffs.string = "chill:6" &
+^ foe.time > 85) | (
+^ foe.debuffs.string ! "chill" &
+^ foe.time > 45)))) /* | (
+^ foe = "soldier" &
+^ foe.debuffs.string ! "stun" &
+^ s.inRange("dash_min") & ((
+^ foe.debuffs.string = "chill:6" &
+^ foe.time > 50) | (
+^ foe.debuffs.string ! "chill" &
+^ foe.time > 10))) */
 ^)
   // heal faster
   ?foe = "phase1" & hp ! maxhp
     a.ldtF("defense heal")
+    >c0,0,#red,DEFENSE HEAL
+  // reduce Dysan damage with Towering shield
+  :?foe = "phase1" &
+  ^ s.getFoeDmg() <= a.thickArmorRed
+    a.ldtF("defense tank")
+    >c0,0,#888888,DEFENSE TANK
   // reduce damage amap
   :?foe = "phase3" & phase3dmg > 0 &
   ^c.canUseAbility("mask")
     c.useAbility_OH("mask", "mask", "r")
 
   :?c.permapotSetup
-    ?hp ! maxhp |
-    ^s.getFoeDmg() > armor
+    ?hp ! maxhp
       a.ldtF("defense heal")
     :
       a.ldtF("defense")
@@ -559,6 +556,8 @@ c.AAC("sword *0 +0", "hatchet")
   // get additional damage
   :?buffs.string ! "buff_damage"
     a.ldtF("defense buff empower")
+    >c0,0,#008800,DEFENSE EMPOWER
+  // unmake attacking foes
   :?es.canUnmake()
     a.ldtF("defense unmake")
   // af deals more DoT than dF
@@ -570,47 +569,29 @@ c.AAC("sword *0 +0", "hatchet")
 // ............ CUTSCENES LOGIC ............. //
 
 // Dysangelos pre-phase1 cutscene damage strat
-:?!c.permapotSetup & isBossScr & (
-^ [100, 101, 102].Contains(foe.state) |
+:?[100,101,102].Contains(foe.state) & (
+^ !c.permapotSetup & isBossScr &
+^ s.inRange("heavy_hammer ability") & (
+^ item.GetCooldown("bardiche") <= 0 |
 ^ c.isCasting("heavy_hammer") |
-^ c.isCasting("bardiche"))
+^ c.isCasting("bardiche")))
+
+  >c0,0,#red,CUTSCENE LOGIC
 
   ?c.canUseAbility("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
-  :?s.betweenRange("bardiche",
-  ^                "heavy_hammer ability")
-    ?c.canUseAbility("staff_aether")
-      c.useAbility_TH("staff_aether", a.stAh)
-    :?c.canUseAbility("quarterstaff")
-      c.useAbility_TH("quarterstaff", a.myQ)
 
-    :?c.canUseAbility("dash")
-      a.ldtF("dash")
+  :?c.canUseAbility("staff_aether")
+    c.useAbility_TH("staff_aether", a.stAh)
+
+  :?c.canUseAbility("dash")
+    a.ldtF("dash")
 
   :?c.canUseAbility("bardiche")
     c.useAbility_TH("bardiche", Kubikiribocho)
-
-/* // Dysangelos post-phase1 cutscene damage strat
-:?!c.permapotSetup & isBossScr & 
-^(([118, 108].Contains(foe.state) &
-^  item.GetCooldown("bardiche") <= 0) |
-^ c.isCasting("bardiche"))
-  // mini-dash to get closer
-  ?item.GetCooldown("quarterstaff") <= 0 &
-  ^!c.isCasting("bardiche")
-    c.useAbility_TH("quarterstaff", a.myQ)
-  // dash
-  :?a.canSmartDash() & !c.isCasting("bardiche")
-    a.smartDash()
-  /* Use Berserk Staff to increment Bardiche
-  ability and sword damage (only pre-phase1,
-  in phase3 it's activated under different
-  conditions)
-  :?item.GetCooldown("staff_poison") <= 0 &
-  ^foe = "phase1" & loc.stars > 15
-    c.useAbility_TH("staff_poison", a.stPh)
-  : // c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho) */
+  
+  :
+    a.ldtF("defense armor regen")
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
@@ -644,9 +625,7 @@ c.AAC("sword *0 +0", "hatchet")
 // Cannot dash and in dashing range, or
 ^!((canDash & a.canSmartDash()) |
 // in melee range or permapot setup run
-^ s.inRange("sword") | c.permapotSetup | (
-^ foe = "phase1" & foe.hp = foe.maxhp &
-^ screen.i >= bossScr - 1))
+^ s.inRange("sword") | c.permapotSetup)
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // armor regen logic
@@ -674,7 +653,9 @@ c.AAC("sword *0 +0", "hatchet")
 
 // Align foes
 :?c.canUseAbility("wand_stone") &
-^ s.betweenRange("dash_max", "wand")
+^ foe = "elite" &
+^ s.inRange("sword")
+  >c-10,0,#red,USING GRAVITY WAND
   c.useAbility_OH("wand_stone", a.wSh, hand)
 
 // .............. DASHING LOGIC ............. //
@@ -724,10 +705,17 @@ unmake with repeating crossbow. */
   // Buy time
   :?c.permapotSetup &
   ^(totaltime - permapotActTime < permapotTbw)
+    // monitor permapot time bandwidth:
+    ?permapotActTime ! -1 & nRuns = 1
+      var delay = totaltime + (5 * 30)
+      ?totaltime <= delay
+        >o-7,4,#magenta,wait until 
+        ^@time.FormatDigital(permapotTbw)@
+
     // Debuff
     ?es.canDebuff("Weaken")
       a.ldtF("sword debuff weaken")
-    :?es.canDebuff("Chill")
+    :?es.canDebuff("Chill") & s.getFoeDmg() > a.thickArmorRed
       a.ldtF("sword debuff chill")
     /*:?es.canDebuff("Burn")
       a.ldtF("sword debuff burn")*/
@@ -819,7 +807,7 @@ unmake with repeating crossbow. */
 
     ?tracker.canTrack("Weaken")
       a.ldtF("magic debuff weaken")
-    :?tracker.canTrack("Chill")
+    :?tracker.canTrack("Chill") & s.getFoeDmg() > a.thickArmorRed
       a.ldtF("magic debuff chill")
     :?tracker.canTrack("Burn")
       a.ldtF("magic debuff burn")
