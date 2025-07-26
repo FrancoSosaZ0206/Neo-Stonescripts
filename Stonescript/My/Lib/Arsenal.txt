@@ -404,7 +404,7 @@ func ldtF(mode)
         ?mode = "tank" | mode = "dmg reduce"
           equipR @shT@
           >h-10,0,#red,EQUIPPING TOWERING SHIELD
-          // loc.Pause()
+
         :?mode = "stun"
           equipR @shC1@
 

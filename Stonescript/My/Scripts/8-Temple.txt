@@ -111,7 +111,8 @@ func fight(mode)
       a.ldtF("sword debuff weaken")
 
     // 1v1 debuffing (permapot/strong foes)
-    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
+    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],
+    ^                   "any") &
     ^ canDash & s.inRange("sword") & ((
     ^ c.permapotSetup & foe = "elite" &
     ^ foe.GetCount(itemSplash) = 1) | (((
@@ -149,9 +150,9 @@ func fight(mode)
       :
         a.ldtF("sword dmg")
 
-    :?canDash &
-    ^ (foe.GetCount(itemSplash) = 1 |
-    ^  foe = "monarch" | foe = "boss")
+    :?canDash & (
+    ^ foe.GetCount(itemSplash) = 1 |
+    ^ foe = "monarch" | foe = "boss")
       a.ldtF("sword dmg")
     :
       itemSplash = foe.distance + 7
@@ -194,8 +195,8 @@ isBossScr = (boss_locs.Contains(loc.id) &
   :?loc.stars <= 20 // green
     lastFoeScr = 1 + loc.stars - 16
 : // set up isLastFoeScr
-  isLastFoeScr =
-  ^(loc.id = "temple" & screen.i = lastFoeScr)
+  isLastFoeScr = (loc.id = "temple" &
+  ^ screen.i = lastFoeScr)
 
 // set up minibossScr
 ?!minibossScr & loc.stars > 10
@@ -396,7 +397,9 @@ c.AAC("sword *0 +0", "hatchet")
 :?c.canUseAbility("quarterstaff") &
 ^ ai.walking & ai.enabled & !ai.paused &
 // Cannot dash and in dashing range
-^!(canDash & a.canSmartDash())
+^!((canDash & a.canSmartDash()) |
+// in melee range or permapot setup run
+^ s.inRange("sword") | c.permapotSetup)
   c.useAbility_TH("quarterstaff", a.myQ)
 
 // pickup logic
@@ -416,11 +419,12 @@ c.AAC("sword *0 +0", "hatchet")
 
 // engaging logic (out of fighting range)
 :?ai.walking & player.direction = 1 &
-^ s.inRange("socketed_shield") &
-^ ((canDash & !s.inRange("dash_max")) |
-^  !s.inRange("crossbow"))
-  ?armor > a.CmaE |
-  ^(c.canEngage() & foe ! "phase")
+^ s.inRange("socketed_shield") & ((
+^ canDash & !s.inRange("dash_max")) |
+^!s.inRange("crossbow") |
+^ pos.z ! math.Clamp(pos.z, foe.z -3, foe.z +3))
+  ?armor > a.CmaE | (
+  ^c.canEngage() & foe ! "phase")
     a.ldtF("engage")
   :
     a.ldtF("defense armor regen")
@@ -458,11 +462,17 @@ unmake with repeating crossbow. */
 
 :?foe.GetCount(itemSplash) > 1 & foe ! "boss"
   // .......... SPECIAL ITEMS LOGIC ......... //
+  hardElite = (
+  ^(encounter.eliteMod = "berserk"    |
+  ^ encounter.eliteMod = "monarch"    |
+  ^ foe = "monarch"                   |
+  ^ encounter.eliteMod = "blessed"    |
+  ^ foe.buffs.string = "buff_tenacious"))
 
   // Voidweaver - use it if possible
   ?c.canUseAbility("voidweaver") &
-  ^c.canUnmakeVoidweaver() &
-  ^!isMinibossScr
+  ^c.canUnmakeVoidweaver() & !(
+  ^isMinibossScr | encounter.isElite)
     c.devour("voidweaver")
 
   // Calamity - reduce hp

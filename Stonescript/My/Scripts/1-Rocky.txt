@@ -113,7 +113,7 @@ func fight(mode)
   :?mode = "normal"
     // ........... DEBUFFING LOGIC .......... //
 
-    // AOE debuffingk
+    // AOE debuffing
     ?(tracker.canTrack("Weaken") |
     ^ tracker.canTrack("Burn")    ) &
     ^(!canDash |
@@ -128,7 +128,9 @@ func fight(mode)
     // 1v1 strong foe weakening
     :?es.canDebuff("Weaken") & canDash &
     ^ (foe = "monarch" | foe = "boss") &
-    ^ s.inRange("sword")
+    ^ s.inRange("sword") & !(
+    ^ foe = "phase3" & !c.permapotSetup &
+    ^ foe.hp <= foe.maxhp / 2)
       a.ldtF("sword debuff weaken")
 
     :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
@@ -141,7 +143,9 @@ func fight(mode)
     ^  (((loc.stars > 15 &
     ^     (foe = "monarch" | foe = "boss") &
     ^     s.getFoeDmg() > a.thickArmorRed) |
-    ^    nRuns = 1))))
+    ^    nRuns = 1)))) & !(
+    ^ foe = "phase3" & !c.permapotSetup &
+    ^ foe.hp <= foe.maxhp / 2)
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
@@ -388,7 +392,7 @@ var treasureCol = #888888
 ^  cur | @item.GetTreasureCount()@\n
 ^  cap | @item.GetTreasureLimit()@ */
 
-// show effect durations
+// monitor effect durations
 ?nRuns = 1 & (
 ^buffs.string = "ʘ" | buffs.string = "lucky")
   var potTime
@@ -400,7 +404,7 @@ var treasureCol = #888888
   >`1,12,#0066ff,@c.potionType@: @potTime@f 
   ^(@time.FormatDigital(potTime, true)@)
 
-// show any logged errors
+// monitor any logged errors
 ?log.hasErrors()
   >`1,@screen.h - 2 - 5@,#ff0000,errorCount: 
   ^@log.getErrorCount()@\n
@@ -460,14 +464,6 @@ c.AAC("sword *0 +0", "hatchet")
   ^   "fire_talisman", hand       )
 
 // ............. DEFENSIVE LOGIC ............ //
-
-/* // TODO: implement SAC (Shovel Attack Cancelling)
-:?foe = "boss" & foe.state = 32 &
-^c.canUseAbility("shovel")
-  equip shovel
-  ?s.inRange("shovel")
-    c.useAbility_TH("shovel", "shovel")
-  >h0,0,#red,SHOVEL ABILITY*/
 
 // phase2 about to attack
 :?foe = "phase2" & foe.state = 32 &
@@ -544,7 +540,14 @@ c.AAC("sword *0 +0", "hatchet")
     c.useAbility_OH("mask", "mask", "r")
 
   :?c.permapotSetup
-    ?hp ! maxhp
+    /* // reduce Dysan damage with Towering shield
+    ?foe = "phase1" & hp = maxhp &
+    ^ s.getFoeDmg() <= a.thickArmorRed
+      a.ldtF("defense tank")
+      >c0,0,#888888,DEFENSE TANK */
+
+    ?hp ! maxhp |
+    ^s.getFoeDmg() > armor
       a.ldtF("defense heal")
       >c0,0,#red,DEFENSE HEAL
     :
@@ -556,11 +559,11 @@ c.AAC("sword *0 +0", "hatchet")
     a.ldtF("defense buff empower")
     >c0,0,#008800,DEFENSE EMPOWER
 
-  // reduce Dysan damage with Towering shield
+  /* // reduce Dysan damage with Towering shield
   :?foe = "phase1" &
   ^ s.getFoeDmg() <= a.thickArmorRed
     a.ldtF("defense tank")
-    >c0,0,#888888,DEFENSE TANK
+    >c0,0,#888888,DEFENSE TANK */
 
   // unmake attacking foes
   :?es.canUnmake()
@@ -569,7 +572,7 @@ c.AAC("sword *0 +0", "hatchet")
   :?es.canDebuff("Burn")
     a.ldtF("defense debuff burn")
   : // all effects applied
-    a.ldtF("defense")
+    fight("normal")
 
 // ............ CUTSCENES LOGIC ............. //
 
@@ -644,10 +647,10 @@ c.AAC("sword *0 +0", "hatchet")
 
 // engaging logic (out of fighting range)
 :?ai.walking & player.direction = 1 &
-^s.inRange("socketed_shield") & ((
-^canDash & !s.inRange("dash_max")) |
+^ s.inRange("socketed_shield") & ((
+^ canDash & !s.inRange("dash_max")) |
 ^!s.inRange("crossbow") |
-^pos.z ! math.Clamp(pos.z, foe.z -3, foe.z +3))
+^ pos.z ! math.Clamp(pos.z, foe.z -3, foe.z +3))
   ?armor > a.CmaE |
   ^(c.canEngage() & foe ! "phase")
     a.ldtF("engage")
@@ -752,8 +755,8 @@ unmake with repeating crossbow. */
 
   // Voidweaver - use it if possible
   ?c.canUseAbility("voidweaver") &
-  ^c.canUnmakeVoidweaver() &
-  ^!isMinibossScr
+  ^c.canUnmakeVoidweaver() & !(
+  ^isMinibossScr | encounter.isElite)
     c.devour("voidweaver")
 
   // Calamity - reduce hp
@@ -789,8 +792,9 @@ unmake with repeating crossbow. */
 
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
-  ^ foe ! "warcaster" &
-  ^!c.isCasting("bardiche") & (
+  ^ foe ! "warcaster" & !(
+  ^c.isCasting("bardiche") |
+  ^c.isCasting("wand")) & (
   ^ es.canDebuff("Stun") | (
     // stun time (frames) running out
   ^ stunTime = math.Clamp(stunTime, 1, 11) &
@@ -806,7 +810,8 @@ unmake with repeating crossbow. */
 
     ?tracker.canTrack("Weaken")
       a.ldtF("magic debuff weaken")
-    :?tracker.canTrack("Chill") & s.getFoeDmg() > a.thickArmorRed
+    :?tracker.canTrack("Chill") &
+    ^ s.getFoeDmg() > a.thickArmorRed
       a.ldtF("magic debuff chill")
     :?tracker.canTrack("Burn")
       a.ldtF("magic debuff burn")

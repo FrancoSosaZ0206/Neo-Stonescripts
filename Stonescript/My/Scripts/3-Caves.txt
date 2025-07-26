@@ -343,15 +343,12 @@ var permapotCol
   permapotCol = #00ff00
 :
   permapotCol = #ff0000
->`1,11,@permapotCol@,permapotSetup
+>`1,11,@permapotCol@,permapot setup
 
 // show effect durations
-?buffs.string = "ʘ" | buffs.string = "lucky"
+?buffs.string = c.potionType
   var potTime
-  ?buffs.string = "ʘ"
-    potTime = buffs.GetTime("ʘ")
-  : // buffs.string = "lucky"
-    potTime = buffs.GetTime("lucky")
+  potTime = buffs.GetTime(c.potionType)
 
   >`1,12,#0066ff,@c.potionType@: @potTime@f 
   ^(@time.FormatDigital(potTime, true)@)
@@ -611,8 +608,8 @@ unmake with repeating crossbow. */
 
   // Voidweaver - use it if possible
   ?c.canUseAbility("voidweaver") &
-  ^c.canUnmakeVoidweaver() &
-  ^!isMinibossScr & !encounter.isElite
+  ^c.canUnmakeVoidweaver() & !(
+  ^isMinibossScr | encounter.isElite)
     c.devour("voidweaver")
 
   // Calamity - reduce hp
@@ -625,8 +622,8 @@ unmake with repeating crossbow. */
     c.useAbility_OH("wand_vigor", a.wVh, hand)
 
   // Reduce damage
-  :?c.canUseAbility("wand_poison") &
-  ^(hardElite | encounter.eliteMod = "hydra")
+  :?c.canUseAbility("wand_poison") & (
+  ^ hardElite | encounter.eliteMod = "hydra")
     c.useAbility_OH("wand_poison", a.wPh, hand)
 
   // Stun enemies
