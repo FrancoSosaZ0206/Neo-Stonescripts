@@ -21,6 +21,7 @@ var _FILE = "Scripts/8-Temple"
 
 // flags
 var canDash  = true
+var hardElite = false
 
 // values
 var stunTime = null

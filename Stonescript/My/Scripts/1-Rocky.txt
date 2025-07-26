@@ -133,17 +133,17 @@ func fight(mode)
     ^ foe.hp <= foe.maxhp / 2)
       a.ldtF("sword debuff weaken")
 
-    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],"any") &
+    // 1v1 debuffing (permapot/strong foes)
+    :?es.canMultiDebuff(["Chill"/*,"Burn"*/],
+    ^                   "any") &
     ^ canDash & s.inRange("sword") & (
-    ^ buffs.string = "smite" |
-    // Permapot 1v1 debuffing
-    ^ ((c.permapotSetup & foe = "elite" &
-    ^   foe.GetCount(itemSplash) = 1) |
-    // 1v1 strong foe debuffing
-    ^  (((loc.stars > 15 &
-    ^     (foe = "monarch" | foe = "boss") &
-    ^     s.getFoeDmg() > a.thickArmorRed) |
-    ^    nRuns = 1)))) & !(
+    ^ buffs.string = "smite" | ((
+    ^ c.permapotSetup & foe = "elite" &
+    ^ foe.GetCount(itemSplash) = 1) | (((
+    ^ loc.stars > 15 & (
+    ^ foe = "monarch" | foe = "boss") &
+    ^ s.getFoeDmg() > a.thickArmorRed) |
+    ^ nRuns = 1)))) & !(
     ^ foe = "phase3" & !c.permapotSetup &
     ^ foe.hp <= foe.maxhp / 2)
       a.ldtF("sword debuff auto")

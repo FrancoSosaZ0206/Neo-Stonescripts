@@ -20,6 +20,7 @@ var _FILE = "Scripts/6-Mine"
 
 // flags
 var canDash  = true
+var hardElite = false
 
 // values
 var stunTime = null
@@ -79,16 +80,16 @@ func fight(mode)
 
     ?c.canUseAbility("staff_stone") &
     ^ (foe ! "ranged" |
-    ^  (foe = "phase" & s.inRange("dash_min")))
+    ^  (foe = "phase" & s.inRange("big_sword")))
       c.useAbility_TH("staff_stone", a.stSh)
     :?c.canUseAbility("mind") &
     ^ (foe ! "ranged" |
-    ^  (foe = "phase" & s.inRange("dash_min")))
+    ^  (foe = "phase" & s.inRange("big_sword")))
       a.ldtF("mind")
 
-    :?c.canUseAbility("staff_ice") &
-    ^ s.inRange("dash_min")
-      c.useAbility_TH("staff_ice", a.stIh)
+    /* :?c.canUseAbility("staff_ice") &
+    ^ s.inRange("big_sword")
+      c.useAbility_TH("staff_ice", a.stIh) */
 
     :?!s.inRange("sword")
       fight("normal")
@@ -102,42 +103,42 @@ func fight(mode)
   :?mode = "normal"
     // ........... DEBUFFING LOGIC ........... //
 
+    // AOE debuffing
     ?(tracker.canTrack("Weaken") |
     ^ tracker.canTrack("Burn")    ) &
+    ^!c.isCasting("heavy_hammer") & ((
     // Bronze Guardian ranged debuffing
-    ^((foe = "phase" & !canDash &
-    ^  buffs.string = "smite") |
-    // AOE debuffing
-    ^ (!canDash |
-    ^  (foe = "elite" &
-    ^   foe.GetCount(itemSplash) > 1)))
+    ^!canDash & foe = "phase") | (
+    ^!canDash | (foe = "elite" &
+    ^ foe.GetCount(itemSplash) > 1)) |
+    ^ buffs.string = "smite")
       ?tracker.canTrack("Weaken")
         a.ldtF("magic debuff weaken")
       : // tracker.canTrack("Burn")
         a.ldtF("magic debuff burn")
 
     // 1v1 strong foe weakening
-    :?es.canDebuff("Weaken") & canDash &
-    ^ (foe = "monarch" | foe = "phase")
+    :?es.canDebuff("Weaken") & canDash & (
+    ^ foe = "monarch" | foe = "phase") &
+    ^ s.inRange("sword")
       a.ldtF("sword debuff weaken")
 
     // 1v1 debuffing (permapot/strong foes)
     :?es.canMultiDebuff(["Weaken","Chill",
     ^                    "Burn"           ],
     ^                   "any") &
-    ^ canDash & s.inRange("sword") & ((
-    ^ c.permapotSetup & foe = "elite" &
+    ^ canDash & s.inRange("sword") & (
+    ^ buffs.string = "smite" | (
     ^ foe.GetCount(itemSplash) = 1) | (((
     ^ loc.stars > 15 & (
     ^ foe = "monarch" | foe = "phase") &
-    ^ s.getFoeDmg() > 0) |
-    ^ nRuns = 1 | buffs.string = "smite")))
+    ^ s.getFoeDmg() > a.thickArmorRed) |
+    ^ nRuns = 1)))
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
-    :?hp ! maxhp &
-    ^((canDash &
-    ^  foe.GetCount(itemSplash) = 1) |
+    :?hp ! maxhp & ((canDash &
+    ^ foe.GetCount(itemSplash) = 1) |
     ^ foe = "monarch")
       a.ldtF("sword heal")
 
@@ -162,19 +163,21 @@ func fight(mode)
       :?c.canUseAbility("staff_poison") &
       ^!s.inRange("dash")
         c.useAbility_TH("staff_poison", a.stPh)
+
+      :?!canDash
+        ?buffs.string = "strength" &
+        ^ buffs.GetTime("strength") > 60
+          equip @a.bAdmg@
+        :
+          a.ldtF("magic dmg")
       :
         a.ldtF("sword dmg")
+
 
     :?canDash & (
     ^ foe.GetCount(itemSplash) = 1 |
     ^ foe = "monarch" | foe = "boss")
       a.ldtF("sword dmg")
-
-    :?buffs.string = "strength" &
-    ^ buffs.GetTime("strength") > 60
-      equip @a.bAdmg@
-    :
-      a.ldtF("magic dmg")
 
   : // invalid mode
     log.logError(_FILE,"fight",
@@ -343,15 +346,16 @@ bfgDsTargetScr = c.getScreen_DS("blade",
   ^@bfgDsTargetScr@
 
 // powerupCount monitor:
-var powerupCol
-powerupCol = #88ff00
-?powerupCount = 1
-  powerupCol = #ffff00
-:?powerupCount = 2
-  powerupCol = #ff8800
-:?powerupCount >= 3
-  powerupCol = #ff0000
->`1,11,@powerupCol@,powerupCount: @powerupCount@
+?isBossScr
+  var powerupCol
+  powerupCol = #88ff00
+  ?powerupCount = 1
+    powerupCol = #ffff00
+  :?powerupCount = 2
+    powerupCol = #ff8800
+  :?powerupCount >= 3
+    powerupCol = #ff0000
+  >`1,11,@powerupCol@,powerupCount: @powerupCount@
 
 /* // item states monitor:
 >`1,12,#magenta,ils: @item.left.state@ | 
@@ -552,22 +556,21 @@ unmake with repeating crossbow. */
 // ............ SPECIAL FOE LOGIC ........... //
 
 // Bomb Cart screen logic
-:?isMinibossScr & s.inRange("wand") & ((
-^ foe = "explode" & (
-^ foe.state = 4 |
-^ foe.GetCount(s.getRange("crossbow")) = 1)) |
-^ foe.GetCount(s.getRange("crossbow")) > 1)
+:?isMinibossScr & s.inRange("wand")
   // Bomb Cart
   ?foe = "explode"
     // combat
-    ?c.canUseAbility("staff_ice") & (
-    ^s.inRange("sword") | foe.state = 4)
+    ?c.canUseAbility("staff_ice") &
+    ^s.inRange("sword")
       c.useAbility_TH("staff_ice", a.stIh)
+    :?s.inRange("sword") &
+    ^ buffs.string ! "buff_frozen"
+      fight("evade")
     :
-      canDash = false
-      fight("escape")
+      fight("normal")
   
   : // normal foes
+    canDash = false
     a.ldtF("ranged dmg")
 
 // ................ AOE LOGIC ................ //
@@ -621,8 +624,8 @@ unmake with repeating crossbow. */
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
   ^ foe ! "warcaster" & !(
-  ^c.isCasting("bardiche") |
-  ^c.isCasting("wand")) & (
+  ^c.isCasting("bardiche")/* |
+  ^c.isCasting("wand")*/) & (
   ^ es.canDebuff("Stun") | (
     // stun time (frames) running out
   ^ stunTime = math.Clamp(stunTime, 1, 11) &
