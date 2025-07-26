@@ -498,13 +498,23 @@ c.AAC("sword *0 +0", "hatchet")
   :
     a.ldtF("defense armor regen")
 
-// ............... RANGED LOGIC .............. //
+// .............. RANGED LOGIC .............. //
 
 // Insta-kill Enfused elites
 :?encounter.eliteMod = "enfused" &
-^ s.inRange("wand")
+^ foe ! "spawn" & s.inRange("wand")
   canDash = false
   a.ldtF("magic debuff burn")
+
+:?foe = "elite" &
+^foe.GetCount(s.getRange("crossbow")) > 1 &
+^foe.buffs.string = "stability"
+  ?tracker.canTrack("Weaken")
+    a.ldtF("magic debuff weaken")
+  :?tracker.canTrack("Chill")
+    a.ldtF("magic debuff chill")
+  :
+    a.ldtF("ranged dmg")
 
 // .............. DASHING LOGIC ............. //
 
@@ -532,7 +542,7 @@ unmake with repeating crossbow. */
 :?c.canStutterStep()
   c.stutterStep()
 
-// ................ BOSS LOGIC ............... //
+// ............... BOSS LOGIC ............... //
 
 // Boss fight (Bronze Guardian)
 :?foe = "phase"
@@ -559,24 +569,28 @@ unmake with repeating crossbow. */
 :?isMinibossScr & s.inRange("wand")
   // Bomb Cart
   ?foe = "explode"
-    // combat
+    /* use Eternity Staff to tank damage if
+    hp + armor is more than its damage */
     ?c.canUseAbility("staff_ice") &
-    ^s.inRange("sword")
+    ^s.inRange("sword") &
+    ^s.getTotalHP("player") >= minibossDmg[loc.stars - 11]
       c.useAbility_TH("staff_ice", a.stIh)
+
     :?s.inRange("sword") &
     ^ buffs.string ! "buff_frozen"
       fight("evade")
     :
+      canDash = false
       fight("normal")
   
   : // normal foes
     canDash = false
     a.ldtF("ranged dmg")
 
-// ................ AOE LOGIC ................ //
+// ................ AOE LOGIC ............... //
 
 :?foe.GetCount(itemSplash) > 1
-  // .......... SPECIAL ITEMS LOGIC .......... //
+  // .......... SPECIAL ITEMS LOGIC ......... //
   hardElite = (
   ^(encounter.eliteMod = "berserk"    |
   ^ encounter.eliteMod = "monarch"    |
