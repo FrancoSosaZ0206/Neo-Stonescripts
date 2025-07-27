@@ -427,12 +427,12 @@ c.AAC(a.hAeff, a.shAdef)
     a.ldtF("magnet")
 
   // activate potion
-  :?c.canUsePotion() & end_t > 27
+  :?c.canUsePotion() & end_t > 57
     activate potion
 
   // speed up
   :?c.canUseAbility("staff_fire") &
-  ^ end_t > 27 & item.potion = "empty"
+  ^ end_t > 57 & item.potion = "empty"
     c.useAbility_TH("staff_fire", a.stFh)
 
   : // regen armor
