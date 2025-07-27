@@ -600,8 +600,9 @@ unmake with repeating crossbow. */
     ^s.getTotalHP("player") >= minibossDmg[loc.stars - 11]
       c.useAbility_TH("staff_ice", a.stIh)
 
-    :?s.inRange("sword") &
-    ^ buffs.string ! "buff_frozen"
+    :?!s.inRange("shovel")
+      equip shovel
+    :?buffs.string ! "buff_frozen"
       fight("evade")
     :
       canDash = false
