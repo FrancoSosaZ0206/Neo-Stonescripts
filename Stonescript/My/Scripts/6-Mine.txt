@@ -165,13 +165,21 @@ func fight(mode)
         c.useAbility_TH("staff_poison", a.stPh)
 
       :?!canDash
-        ?buffs.string = "strength" &
-        ^ buffs.GetTime("strength") > 60
+        ?nRuns > 1 & buffs.string = c.potionType &
+        ^buffs.GetTime(c.potionType) > 60
           equip @a.bAdmg@
         :
           a.ldtF("magic dmg")
       :
-        a.ldtF("sword dmg")
+        ?nRuns = 1 & buffs.string = c.potionType &
+        ^buffs.GetTime(c.potionType) > 60
+          c.moonjuggle(Void Slayer, a.sAdmg)
+
+        :?c.canUseAbility("bardiche") &
+        ^ buffs.string = "ʘ"
+          c.useAbility_TH("bardiche", Kubikiribocho)
+        :
+          a.ldtF("sword dmg")
 
 
     :?canDash & (
@@ -280,7 +288,7 @@ stunTime = foe.debuffs.GetTime("stun")
 ?loc.stars <= 10
   c.potionType = "berserk"
 :
-  c.potionType = "strength"
+  c.potionType = "berserk" // "lucky" // "strength"
 ?c.canBrewPotion()
   c.brewPotion()
 
@@ -321,6 +329,9 @@ var treasureCol = #888888
 ^  cur | @item.GetTreasureCount()@\n
 ^  cap | @item.GetTreasureLimit()@
 
+// eliteMod monitor
+?encounter.isElite
+  >`1,18,#ff0066,elite mod: @encounter.eliteMod@
 
 /* // foe distance monitor
 ?foe.distance ! 9999
@@ -375,7 +386,7 @@ bfgDsTargetScr = c.getScreen_DS("blade",
     var potTime
     potTime = buffs.GetTime(c.potionType)
 
-    >`1,15,#0066ff,@c.potionType@: @potTime@f 
+    >`1,12,#0066ff,@c.potionType@: @potTime@f 
     ^(@time.FormatDigital(potTime, true)@)
 
 // show any logged errors
@@ -397,7 +408,8 @@ bfgDsTargetScr = c.getScreen_DS("blade",
 ?c.permapotSetup
   a.ldtF("permapot")
 
-c.AAC("sword *0 +0", "hatchet")
+c.AAC(a.hAeff, a.shAdef)
+// c.AAC("sword *0 +0", "hatchet")
 
 // Initial equipments
 ?loc.begin
@@ -442,6 +454,12 @@ c.AAC("sword *0 +0", "hatchet")
 
 // ............. DEFENSIVE LOGIC ............ //
 
+// parry Bronze Guardian's Bomb attack
+:?foe = "phase" & foe.state = 32 &
+^ foe.time >= 15 & powerupCount >= 3 &
+^ c.canUseAbility("shovel")
+  c.useAbility_TH("shovel", shovel)
+
 // boss's hammer attack
 :?foe = "phase" & foe.state = 32 &
 ^ foe.time >= 30
@@ -462,7 +480,8 @@ c.AAC("sword *0 +0", "hatchet")
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
 ^ loc.id = "bronze_mine" &
-^!(isMinibossScr | encounter.isElite)
+^!(isMinibossScr | encounter.isElite) & (
+^ screen.i = 0 | screen.i = lastFoeScr + 1)
   c.useAbility_TH("staff_fire", a.stFh)
 
 // mini-dash
@@ -506,9 +525,14 @@ c.AAC("sword *0 +0", "hatchet")
   canDash = false
   a.ldtF("magic debuff burn")
 
-:?foe = "elite" &
-^foe.GetCount(s.getRange("crossbow")) > 1 &
-^foe.buffs.string = "stability"
+:?!c.permapotSetup & foe = "elite" &
+^ buffs.string ! "ʘ" &
+^!["regen", "lucky"].
+^   Contains(encounter.eliteMod) &
+^ foe.GetCount(s.getRange("wand")) =
+^ math.Clamp(foe.GetCount(s.getRange("wand")),
+^            2,3) &
+^ foe.buffs.string = "stability"
   ?tracker.canTrack("Weaken")
     a.ldtF("magic debuff weaken")
   :?tracker.canTrack("Chill")
@@ -589,14 +613,25 @@ unmake with repeating crossbow. */
 
 // ................ AOE LOGIC ............... //
 
+// Stun enemies
+:?c.canUseAbility("wand_ice") &
+^ es.canDebuff("Stun") &
+^ encounter.eliteMod = "lucky"
+  c.useAbility_OH("wand_ice", a.wIh, hand)
+
+// extend range
+:?c.canUseAbility("staff_aether") &
+^ s.inRange("dash_min") &
+^ encounter.eliteMod = "lucky"
+  c.useAbility_TH("staff_aether", a.stAh)
+
 :?foe.GetCount(itemSplash) > 1
   // .......... SPECIAL ITEMS LOGIC ......... //
   hardElite = (
-  ^(encounter.eliteMod = "berserk"    |
-  ^ encounter.eliteMod = "monarch"    |
-  ^ foe = "monarch"                   |
-  ^ encounter.eliteMod = "blessed"    |
-  ^ foe.buffs.string = "buff_tenacious"))
+  ^["berserk","monarch","blessed"].
+  ^   Contains(encounter.eliteMod)  |
+  ^ foe = "monarch"                 |
+  ^ foe.buffs.string = "buff_tenacious")
 
   // Voidweaver - use it if possible
   ?c.canUseAbility("voidweaver") &
@@ -618,16 +653,6 @@ unmake with repeating crossbow. */
   ^ hardElite | encounter.eliteMod = "hydra")
     c.useAbility_OH("wand_poison", a.wPh, hand)
 
-  // Stun enemies
-  :?c.canUseAbility("wand_ice") &
-  ^ es.canDebuff("Stun") & foe = "elite"
-    c.useAbility_OH("wand_ice", a.wIh, hand)
-
-  /* // FIXME: extend range
-  :?c.canUseAbility("staff_aether") &
-  ^ s.inRange("dash_min")
-    c.useAbility_TH("staff_aether", a.stAh) */
-  
   // ........................................ //
 
   // Heavy hammer logic
@@ -650,7 +675,7 @@ unmake with repeating crossbow. */
     a.ldtF("grappling")
 
   // Debuff and unmake
-  :?nRuns = 1 | encounter.eliteMod = "blessed"
+  :?encounter.eliteMod = "blessed"
     itemSplash = foe.distance + 7
 
     ?tracker.canTrack("Weaken")
@@ -665,7 +690,8 @@ unmake with repeating crossbow. */
       a.ldtF("big sword unmake")
 
   // unmake
-  :?buffs.string = "ʘ" | // berserk pot
+  :?nRuns = 1 |
+  ^ buffs.string = "ʘ" | // berserk pot
   ^ foe.buffs.string ! "stability" /* |
   // more foes outside range
   ^ (foe ! "elite" & screen.i > 1 &
@@ -677,8 +703,7 @@ unmake with repeating crossbow. */
 
   // Align foes
   :?c.canUseAbility("wand_stone") &
-  ^ foe = "elite" &
-  ^ s.inRange("sword")
+  ^ foe = "elite" & s.inRange("sword")
     >c-10,0,#red,USING GRAVITY WAND
     c.useAbility_OH("wand_stone", a.wSh, hand)
   :
