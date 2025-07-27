@@ -55,6 +55,8 @@ var sAeff2  = "*max sword -big aether dU -golden" // 2nd
 var bsAdmg  = "*max sword big aether -dU -golden"
 var bsAeff  = "*max sword big aether dU shiny" // 2nd (enchanted: speed, unmake chance)
 var hAeff   = "*max hammer aether aU"
+var hAdmg1  = "*max hammer aether D shiny"  // enchanted: armor dmg mult
+var hAdmg1  = "*max hammer aether D -shiny" // enchanted: armor dmg mult
 var shAdef  = "*max shield aether -au"
 var shAeff  = "*max shield aether au"
 var bAdmg   = "*max crossbow aether -dU"
@@ -96,7 +98,7 @@ var stIeff  = "*max staff ice dI -hidden"
 // .................. STONE ................. //
 
 var shS     = "*max shield stone" // enchanted: dodge chance
-var bS      = "0* crossbow stone socketed +21" // enchanted: speed
+var bS      = "*0 crossbow stone socketed shiny" // enchanted: speed
 
 // ................. HIDDEN ................. //
 
@@ -118,7 +120,7 @@ var stSh    = "*max staff_hidden_stone"  // aka Acrobatic Staff
 
 // ............... ALTERNATE ................ //
 
-var bAlt    = "*max crossbow golden -socketed"
+var bAlt    = "*max crossbow -socketed shiny"
 
 // ............ SPECIAL WEAPONS ............. //
 
@@ -353,16 +355,20 @@ func ldtF(mode)
       // Left hand:
       ?!ai.walking | // standing still
       ^!ai.enabled | ai.paused // cutscene walking
-        ?(item.right = "compound" & armor <= CmaE + 2) |
+        ?hp ! maxhp & foe.time % 2 = 0 // passive regen
+          equipL ouroboros
+
+        :?(item.right = "compound" & armor <= CmaE + 2) |
         ^armor <= 2
           equipL quest
-        :?hp ! maxhp // passive regen
-          equipL ouroboros
+
         : // try to deal extra damage if possible
           equipL fissure
       :?ai.walking &
       ^totaltime % 2 = 0 | buffs.string = "buff_inf_speed"
         equipL triskelion
+      :?hp ! maxhp
+        equipL ouroboros
       :
         equipL quest
 

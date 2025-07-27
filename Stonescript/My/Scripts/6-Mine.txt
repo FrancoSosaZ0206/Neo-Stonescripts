@@ -87,10 +87,6 @@ func fight(mode)
     ^  (foe = "phase" & s.inRange("big_sword")))
       a.ldtF("mind")
 
-    /* :?c.canUseAbility("staff_ice") &
-    ^ s.inRange("big_sword")
-      c.useAbility_TH("staff_ice", a.stIh) */
-
     :?!s.inRange("sword")
       fight("normal")
 
@@ -103,14 +99,22 @@ func fight(mode)
   :?mode = "normal"
     // ........... DEBUFFING LOGIC ........... //
 
+    // Bronze Guardian ranged debuffing
+    ?isBossScr & !canDash & (
+    ^tracker.canTrack("Burn") | (
+    ^tracker.canTrack("Weaken") &
+    ^buffs.string = "smite"))
+      ?tracker.canTrack("Burn")
+        a.ldtF("magic debuff burn")
+      : // tracker.canTrack("Weaken")
+        a.ldtF("magic debuff weaken")
+
     // AOE debuffing
     ?(tracker.canTrack("Weaken") |
     ^ tracker.canTrack("Burn")    ) &
-    ^!c.isCasting("heavy_hammer") & ((
-    // Bronze Guardian ranged debuffing
-    ^!canDash & foe = "phase") | (
+    ^!c.isCasting("heavy_hammer") & (
     ^!canDash | (foe = "elite" &
-    ^ foe.GetCount(itemSplash) > 1)) |
+    ^ foe.GetCount(itemSplash) > 1) |
     ^ buffs.string = "smite")
       ?tracker.canTrack("Weaken")
         a.ldtF("magic debuff weaken")
@@ -139,7 +143,8 @@ func fight(mode)
     // ............ HEALING LOGIC ............ //
     :?hp ! maxhp & ((canDash &
     ^ foe.GetCount(itemSplash) = 1) |
-    ^ foe = "monarch")
+    ^ foe = "monarch") & !(
+    ^ foe = "phase" & c.permapotSetup)
       a.ldtF("sword heal")
 
     // ........... UNMAKING LOGIC ............ //
@@ -156,7 +161,8 @@ func fight(mode)
       ?c.canUsePotion()
         activate potion
       :?c.canUseAbility("heavy_hammer") &
-      ^ foe.armor > 0
+      ^ foe.armor > 0 & !(c.permapotSetup &
+      ^ buffs.GetTime(c.potionType) <= 30)
         c.useAbility_TH("heavy_hammer", Mjölnir)
       :?c.canUseAbility("mask")
         c.useAbility_OH("mask", "mask", "r")
@@ -169,7 +175,7 @@ func fight(mode)
         ^buffs.GetTime(c.potionType) > 60
           equip @a.bAdmg@
         :
-          a.ldtF("magic dmg")
+          a.ldtF("ranged dmg")
       :
         ?nRuns = 1 & buffs.string = c.potionType &
         ^buffs.GetTime(c.potionType) > 60
@@ -262,7 +268,10 @@ c.permapotSetup = (
 // set up itemSplash default value
 itemSplash = 17 // bardiche's hitbox + itemSplash area
 
-// Set canDash default value
+// set up canDash
+/* ?isMinibossScr & foe ! "explode"
+  canDash = false
+: */
 canDash = true
 
 // set variables for getFoeDmg
@@ -285,10 +294,10 @@ stunTime = foe.debuffs.GetTime("stun")
   hand = "right"
 
 // Auto brewing
-?loc.stars <= 10
+?loc.stars <= 15
   c.potionType = "berserk"
 :
-  c.potionType = "berserk" // "lucky" // "strength"
+  c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
@@ -296,15 +305,19 @@ stunTime = foe.debuffs.GetTime("stun")
 ?old_t ! item.GetTreasureCount()
   end_t++
 
+// set up hardElite (for AOE logic)
+hardElite = (
+^["berserk","monarch","blessed"].
+^   Contains(encounter.eliteMod)  |
+^ foe = "monarch"                 |
+^ foe.buffs.string = "buff_tenacious")
+
 // reset powerupCount
 ?loc.loop & powerupCount > 0
   powerupCount = 0
 // increase powerupCount
 :?foe = "phase" & foe.state = 32 & foe.time = 0
   powerupCount ++
-
-?isMinibossScr & foe ! "explode"
-  canDash = false
 
 // .............. MONITOR LOGIC .............. //
 
@@ -316,7 +329,7 @@ stunTime = foe.debuffs.GetTime("stun")
     ^@time.FormatDigital(permapotTbw)@
 */
 
-// monitor post-treasure metrics
+/* // monitor post-treasure metrics
 var treasureCol = #888888
 ?end_t > 0 | old_t ! item.GetTreasureCount()
   treasureCol = #aaff00
@@ -327,7 +340,7 @@ var treasureCol = #888888
 ^  old | @old_t@ (t = @end_t@)
 >`1,16,
 ^  cur | @item.GetTreasureCount()@\n
-^  cap | @item.GetTreasureLimit()@
+^  cap | @item.GetTreasureLimit()@ */
 
 // eliteMod monitor
 ?encounter.isElite
@@ -343,7 +356,9 @@ var bfgDsTargetScr = null
 bfgDsTargetScr = c.getScreen_DS("blade",
 ^                               "TARGET")
 
-?bfgDsTargetScr
+?bfgDsTargetScr &
+^loc.id = "bronze_mine" & (
+^loc.stars <= 10 | nRuns > 1)
   var bfgCol = #00ff00
 
   ?screen.i > bfgDsTargetScr
@@ -445,26 +460,35 @@ c.AAC(a.hAeff, a.shAdef)
 ^ screen.i < lastFoeScr
   c.useAbility_OH("aether_talisman",
   ^               "aether_talisman", hand)
-:?c.canSummon("cinderwisp") & ((
-^ loc.id = "bronze_mine" &
-^ screen.i >= lastFoeScr & foe.count = 1) |
-^ boss_locs.Contains(loc.id))
+
+:?c.isCasting("fire_talisman") | (
+^ c.canSummon("cinderwisp") & ((
+^ loc.id = "bronze_mine" & (
+^ screen.i = lastFoeScr + 1 |
+^ screen.i = lastFoeScr & foe.count = 1)) |
+^ boss_locs.Contains(loc.id)))
   c.useAbility_OH("fire_talisman",
   ^               "fire_talisman", hand)
 
 // ............. DEFENSIVE LOGIC ............ //
 
 // parry Bronze Guardian's Bomb attack
-:?foe = "phase" & foe.state = 32 &
+:?c.canUseAbility("shovel") &
+^ foe = "phase" & foe.state = 32 &
 ^ foe.time >= 15 & powerupCount >= 3 &
-^ c.canUseAbility("shovel")
+^!(c.permapotSetup &
+^ buffs.GetTime(c.potionType) <= 30)
   c.useAbility_TH("shovel", shovel)
 
 // boss's hammer attack
-:?foe = "phase" & foe.state = 32 &
+:?isBossScr & foe.state = 32 &
 ^ foe.time >= 30
   // block bomb attack
-  ?c.canUseAbility("staff_ice")
+  ?c.canUseAbility("staff_ice") &
+  ^foe.distance = 20 &
+  ^s.getTotalHP("player") >= s.getFoeDmg() & !(
+  ^c.permapotSetup &
+  ^buffs.GetTime(c.potionType) <= 30)
     c.useAbility_TH("staff_ice", a.stIh)
   :
     fight("escape")
@@ -475,7 +499,7 @@ c.AAC(a.hAeff, a.shAdef)
 
 // ......... ENGAGING/WALKING LOGIC ......... //
 
-// speed up (normal)
+// speed up
 :?c.canUseAbility("staff_fire") &
 ^ buffs.string ! "buff_inf_speed" &
 ^ (loc.stars <= 15 | nRuns > 1) &
@@ -525,14 +549,25 @@ c.AAC(a.hAeff, a.shAdef)
   canDash = false
   a.ldtF("magic debuff burn")
 
-:?!c.permapotSetup & foe = "elite" &
+// Miniboss screen - normal foes
+:?isMinibossScr &
+^ foe.GetCount(s.getRange("crossbow")) > 1 & (
+^ c.permapotSetup | (
+^ loc.stars > 15 & nRuns = 1)) &
+^ foe ! "explode"
+  canDash = false
+  a.ldtF("ranged dmg")
+
+:?(c.permapotSetup | (
+^ loc.stars > 15 & nRuns = 1)) &
+^ foe = "elite" &
 ^ buffs.string ! "ʘ" &
-^!["regen", "lucky"].
+^!["regen", "lucky", "blessed", "tenacious"].
 ^   Contains(encounter.eliteMod) &
-^ foe.GetCount(s.getRange("wand")) =
-^ math.Clamp(foe.GetCount(s.getRange("wand")),
-^            2,3) &
+^ foe.GetCount(s.getRange("wand")) > 1 &
 ^ foe.buffs.string = "stability"
+  canDash = false
+
   ?tracker.canTrack("Weaken")
     a.ldtF("magic debuff weaken")
   :?tracker.canTrack("Chill")
@@ -569,7 +604,7 @@ unmake with repeating crossbow. */
 // ............... BOSS LOGIC ............... //
 
 // Boss fight (Bronze Guardian)
-:?foe = "phase"
+:?isBossScr
   ?c.canKillCinderwisp(a.cwpMiN, 0) |
   ^c.isCinderwispCap(a.cwpMiN)
     c.devour("cinderwisp")
@@ -590,29 +625,29 @@ unmake with repeating crossbow. */
 // ............ SPECIAL FOE LOGIC ........... //
 
 // Bomb Cart screen logic
-:?isMinibossScr & s.inRange("wand")
-  // Bomb Cart
-  ?foe = "explode"
-    /* use Eternity Staff to tank damage if
-    hp + armor is more than its damage */
-    ?c.canUseAbility("staff_ice") &
-    ^s.inRange("sword") &
-    ^s.getTotalHP("player") >= minibossDmg[loc.stars - 11]
-      c.useAbility_TH("staff_ice", a.stIh)
+:?isMinibossScr & foe = "explode"
+  /* use Eternity Staff to tank damage if
+  hp + armor is more than its damage */
+  ?c.canUseAbility("staff_ice") &
+  ^s.getTotalHP("player") >= minibossDmg[loc.stars - 11]
+    c.useAbility_TH("staff_ice", a.stIh)
 
-    :?!s.inRange("shovel")
-      equip shovel
-    :?buffs.string ! "buff_frozen"
-      fight("evade")
-    :
-      canDash = false
-      fight("normal")
-  
-  : // normal foes
-    canDash = false
-    a.ldtF("ranged dmg")
+  ?!s.inRange("shovel")
+    equip shovel
 
-// ................ AOE LOGIC ............... //
+  :?buffs.string ! "buff_frozen"
+    fight("evade")
+  :
+    fight("normal")
+
+// ........... SPECIAL ITEMS LOGIC .......... //
+
+// Voidweaver - use it if possible
+:?c.canUseAbility("voidweaver") &
+^ c.canUnmakeVoidweaver() & !(
+^ isMinibossScr | encounter.isElite) &
+^ s.inRange("sword")
+  c.devour("voidweaver")
 
 // Stun enemies
 :?c.canUseAbility("wand_ice") &
@@ -626,43 +661,33 @@ unmake with repeating crossbow. */
 ^ encounter.eliteMod = "lucky"
   c.useAbility_TH("staff_aether", a.stAh)
 
+// Calamity - reduce hp
+:?c.canUseAbility("wand_aether") &
+^ s.inRange("sword") & hardElite
+  c.useAbility_OH("wand_aether", a.wAh, hand)
+
+// Reset buff
+:?c.canUseAbility("wand_vigor") &
+^ foe.buffs.string = "stoic"
+  c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+// Reduce damage
+:?c.canUseAbility("wand_poison") & (
+^ hardElite | encounter.eliteMod = "hydra")
+  c.useAbility_OH("wand_poison", a.wPh, hand)
+
+// Heavy hammer logic
+:?(c.canUseAbility("heavy_hammer") &
+^ encounter.eliteMod = "plated" &
+^ foe.GetCount(itemSplash) > 1) |
+^ c.isCasting("heavy_hammer")
+  c.useAbility_TH("heavy_hammer", Mjölnir)
+
+// ................ AOE LOGIC ............... //
+
 :?foe.GetCount(itemSplash) > 1
-  // .......... SPECIAL ITEMS LOGIC ......... //
-  hardElite = (
-  ^["berserk","monarch","blessed"].
-  ^   Contains(encounter.eliteMod)  |
-  ^ foe = "monarch"                 |
-  ^ foe.buffs.string = "buff_tenacious")
-
-  // Voidweaver - use it if possible
-  ?c.canUseAbility("voidweaver") &
-  ^c.canUnmakeVoidweaver() & !(
-  ^isMinibossScr | encounter.isElite)
-    c.devour("voidweaver")
-
-  // Calamity - reduce hp
-  :?c.canUseAbility("wand_aether") & hardElite
-    c.useAbility_OH("wand_aether", a.wAh, hand)
-
-  // Reset buff
-  :?c.canUseAbility("wand_vigor") &
-  ^ foe.buffs.string = "stoic"
-    c.useAbility_OH("wand_vigor", a.wVh, hand)
-
-  // Reduce damage
-  :?c.canUseAbility("wand_poison") & (
-  ^ hardElite | encounter.eliteMod = "hydra")
-    c.useAbility_OH("wand_poison", a.wPh, hand)
-
-  // ........................................ //
-
-  // Heavy hammer logic
-  :?c.canUseAbility("heavy_hammer") &
-  ^ encounter.eliteMod = "plated"
-    c.useAbility_TH("heavy_hammer", Mjölnir)
-
   // Stun/Perma-stun logic
-  :?s.inRange("grappling_hook") &
+  ?s.inRange("grappling_hook") &
   ^ foe ! "warcaster" & !(
   ^c.isCasting("bardiche")/* |
   ^c.isCasting("wand")*/) & (
