@@ -625,7 +625,7 @@ c.AAC("sword *0 +0", "hatchet")
 
   // mini-dash
   :?c.canUseAbility("quarterstaff") &
-  ^!s.inRange("bardiche") &
+  ^!s.inRange("bardiche ability") &
   ^![107,108,-1].Contains(foe.state)
     c.useAbility_TH("quarterstaff", a.myQ)
 
@@ -823,8 +823,9 @@ unmake with repeating crossbow. */
       itemSplash = 10
       a.ldtF("big sword unmake")
 
-  :?buffs.string = "buff_inf_speed" &
-  ^ encounter.eliteMod ! "hydra"
+  :?(buffs.string = "buff_inf_speed" |
+  ^ buffs.string = "buff_range") &
+  ^ encounter.eliteMod ! "spawn_hydra"
     equip Kubikiribocho
 
   // unmake
@@ -876,7 +877,7 @@ unmake with repeating crossbow. */
 
   // Reduce damage
   :?c.canUseAbility("wand_poison") &
-  ^(hardElite | encounter.eliteMod = "hydra")
+  ^(hardElite | encounter.eliteMod = "spawn_hydra")
     c.useAbility_OH("wand_poison", a.wPh, hand)
 
   // Stun enemies
