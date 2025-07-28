@@ -823,8 +823,9 @@ unmake with repeating crossbow. */
 
   // unmake
   :?buffs.string = "ʘ" | !( // berserk pot
-  ^ foe.buffs.string = "stability" |
-  ^ buffs.string = "buff_infernal")
+  ^ foe.buffs.string = "stability" | (
+  ^ buffs.string = "buff_infernal" &
+  ^ encounter.eliteMod ! "hydra"))
     itemSplash = 10
     a.ldtF("big sword unmake")
 

@@ -6,7 +6,8 @@
   // Default player cosmetics
   import Hats/StarCloak
   import Hats/MushroomHat
-  import Pets/Crab
+  import Cosmetics/Knight
+  // import Pets/Crab
   import Weapons/LanternTalisman
   import Weapons/AR
 

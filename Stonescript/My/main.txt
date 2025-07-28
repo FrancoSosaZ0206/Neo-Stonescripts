@@ -16,7 +16,7 @@ var mobileUrl =
 sys.SetFileUrl(mobileUrl)
 
 // ↓↓↓ COMMENT OUT HERE ↓↓↓
-import My/Scripts/main
+import My/main
 // ↑↑↑ COMMENT OUT HERE ↑↑↑
 
 // ↑↑↑ COPY UNTIL HERE ↑↑↑
