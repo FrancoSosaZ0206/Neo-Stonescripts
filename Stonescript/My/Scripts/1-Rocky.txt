@@ -143,9 +143,11 @@ func fight(mode)
     ^ loc.stars > 15 & (
     ^ foe = "monarch" | foe = "boss") &
     ^ s.getFoeDmg() > a.thickArmorRed) |
-    ^ nRuns = 1)))) & !(
+    ^ nRuns = 1)))) & !((
     ^ foe = "phase3" & !c.permapotSetup &
-    ^ foe.hp > foe.maxhp / 2)
+    ^ foe.hp > foe.maxhp / 2) |
+    ^ buffs.string = "berserk" |
+    ^ buffs.string = "buff_damage")
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
