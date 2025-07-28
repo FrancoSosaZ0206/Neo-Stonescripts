@@ -127,10 +127,10 @@ func fight(mode)
 
     // 1v1 strong foe weakening
     :?es.canDebuff("Weaken") & canDash &
-    ^ (foe = "monarch" | foe = "boss") &
-    ^ s.inRange("sword") & !(
+    ^(foe = "monarch" | foe = "boss") &
+    ^ s.inRange("sword") /* & !(
     ^ foe = "phase3" & !c.permapotSetup &
-    ^ foe.hp <= foe.maxhp / 2)
+    ^ foe.hp <= foe.maxhp / 2) */
       a.ldtF("sword debuff weaken")
 
     // 1v1 debuffing (permapot/strong foes)
@@ -145,7 +145,7 @@ func fight(mode)
     ^ s.getFoeDmg() > a.thickArmorRed) |
     ^ nRuns = 1)))) & !(
     ^ foe = "phase3" & !c.permapotSetup &
-    ^ foe.hp <= foe.maxhp / 2)
+    ^ foe.hp > foe.maxhp / 2)
       a.ldtF("sword debuff auto")
 
     // ............ HEALING LOGIC ............ //
@@ -335,19 +335,26 @@ c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
+hardElite = (
+^(encounter.eliteMod = "berserk"    |
+^ encounter.eliteMod = "monarch"    |
+^ foe = "monarch"                   |
+^ encounter.eliteMod = "blessed"    |
+^ foe.buffs.string = "buff_tenacious"))
+
 // ............. MONITOR LOGIC .............. //
 
 // gravity wand monitor:
-var canUseGravity = c.canUseAbility("wand_stone")
-canUseGravity = c.canUseAbility("wand_stone")
+var canUseGravity = c.canUseAbility("staff_poison")
+canUseGravity = c.canUseAbility("staff_poison")
 
 var gravityCol = "#ff0000"
 gravityCol = "#ff0000"
 ?canUseGravity
   gravityCol = "#00ff00"
 
->`1,10,#magenta,gravity cd:
-^ @item.GetCooldown("wand_stone")@
+>`1,10,#magenta,staff_poison cd:
+^ @item.GetCooldown("staff_poison")@
 >`1,11,@gravityCol@,canAct: @canUseGravity@
 
 /* // itemSplash display test
@@ -532,7 +539,7 @@ c.AAC("sword *0 +0", "hatchet")
   // heal faster
   ?foe = "phase1" & hp ! maxhp
     a.ldtF("defense heal")
-    >c0,0,#red,DEFENSE HEAL
+    >c0,0,#red,D HEAL
 
   // reduce damage amap
   :?foe = "phase3" & phase3dmg > 0 &
@@ -544,29 +551,31 @@ c.AAC("sword *0 +0", "hatchet")
     ?foe = "phase1" & hp = maxhp &
     ^ s.getFoeDmg() <= a.thickArmorRed
       a.ldtF("defense tank")
-      >c0,0,#888888,DEFENSE TANK */
+      >c0,0,#888888,D TANK */
 
     ?hp ! maxhp |
     ^s.getFoeDmg() > armor
       a.ldtF("defense heal")
-      >c0,0,#red,DEFENSE HEAL
+      >c0,0,#red,D HEAL
     :
       a.ldtF("defense")
-      >c0,0,DEFENSE NORMAL
+      >c0,0,D NORMAL
 
   // get additional damage
   :?buffs.string ! "buff_damage"
     a.ldtF("defense buff empower")
-    >c0,0,#008800,DEFENSE EMPOWER
+    >c0,0,#008800,D EMPOWER
 
-  /* // reduce Dysan damage with Towering shield
+  // reduce Dysan damage with Towering shield
   :?foe = "phase1" &
-  ^ s.getFoeDmg() <= a.thickArmorRed
+  ^ s.getFoeDmg() <= a.thickArmorRed &
+  ^ armor <= a.thickArmorRed
     a.ldtF("defense tank")
-    >c0,0,#888888,DEFENSE TANK */
+    >c0,0,#888888,D TANK
 
   // unmake attacking foes
   :?es.canUnmake()
+    >c0,0,#ffcc00,D UNMAKE
     a.ldtF("defense unmake")
   // af deals more DoT than dF
   :?es.canDebuff("Burn")
@@ -577,25 +586,40 @@ c.AAC("sword *0 +0", "hatchet")
 // ............ CUTSCENES LOGIC ............. //
 
 // Dysangelos pre-phase1 cutscene damage strat
-:?[100,101,102].Contains(foe.state) & (
+:?isBossScr & (
+^(([100,101,102, 108].Contains(foe.state) | (
+^ foe.state = 107 & foe.time > 145) | (
+^ foe = "phase3" & foe.state = -1)) &
 ^ !c.permapotSetup & isBossScr &
-^ s.inRange("heavy_hammer ability") & (
-^ item.GetCooldown("bardiche") <= 0 |
+^ s.inRange("heavy_hammer ability") &
+^ item.GetCooldown("bardiche") <= 0) |
 ^ c.isCasting("heavy_hammer") |
-^ c.isCasting("bardiche")))
+^ c.isCasting("bardiche"))
 
   >c0,0,#red,CUTSCENE LOGIC
 
-  ?c.canUseAbility("heavy_hammer")
+  ?c.canUseAbility("heavy_hammer") &
+  ^![107,108].Contains(foe.state)
     c.useAbility_TH("heavy_hammer", Mjölnir)
 
   :?c.canUseAbility("staff_aether")
     c.useAbility_TH("staff_aether", a.stAh)
 
+  :?c.canUseAbility("staff_poison") &
+  ^![107,108].Contains(foe.state)
+    c.useAbility_TH("staff_poison", a.stPh)
+
   :?c.canUseAbility("dash")
     a.ldtF("dash")
 
-  :?c.canUseAbility("bardiche")
+  // mini-dash
+  :?c.canUseAbility("quarterstaff") &
+  ^!s.inRange("bardiche") &
+  ^![107,108,-1].Contains(foe.state)
+    c.useAbility_TH("quarterstaff", a.myQ)
+
+  :?c.canUseAbility("bardiche") &
+  ^ foe.state ! 107
     c.useAbility_TH("bardiche", Kubikiribocho)
   
   :
@@ -628,8 +652,9 @@ c.AAC("sword *0 +0", "hatchet")
   a.ldtF("magnet")
 
 // mini-dash
-:?c.canUseAbility("quarterstaff") &
-^ ai.walking & ai.enabled & !ai.paused &
+:?c.canUseAbility("quarterstaff") & (
+^ buffs.string = "buff_range" | ai.walking) &
+^ ai.enabled & !ai.paused &
 // Cannot dash and in dashing range, or
 ^!((canDash & a.canSmartDash()) |
 // in melee range or permapot setup run
@@ -734,73 +759,41 @@ unmake with repeating crossbow. */
 
 // ............ SPECIAL FOE LOGIC ........... //
 
+:?isMinibossScr &
+^ c.canUseAbility("staff_poison")
+  c.useAbility_TH("staff_poison", a.stPh)
+
+:?c.canUseAbility("bardiche") &
+^loc.stars > 15 & nRuns = 1 & (
+^foe = "boss" | foe = "monarch")
+  c.useAbility_TH("bardiche", Kubikiribocho)
+
 :?loc.stars > 15 & foe = "boss"
-  ?c.canUseAbility("staff_poison")
-    c.useAbility_TH("staff_poison", a.stPh)
-  /* :?c.canUseAbility("bardiche")
-    c.useAbility_TH("bardiche", Kubikiribocho) */
-  :
-    fight("normal")
+  fight("normal")
 
 // ............... AOE LOGIC ................ //
 
-:?foe.GetCount(itemSplash) > 1
-  // .......... SPECIAL ITEMS LOGIC ......... //
-  hardElite = (
-  ^(encounter.eliteMod = "berserk"    |
-  ^ encounter.eliteMod = "monarch"    |
-  ^ foe = "monarch"                   |
-  ^ encounter.eliteMod = "blessed"    |
-  ^ foe.buffs.string = "buff_tenacious"))
-
-  // Voidweaver - use it if possible
-  ?c.canUseAbility("voidweaver") &
-  ^c.canUnmakeVoidweaver() & !(
-  ^isMinibossScr | encounter.isElite)
-    c.devour("voidweaver")
-
-  // Calamity - reduce hp
-  :?c.canUseAbility("wand_aether") & hardElite
-    c.useAbility_OH("wand_aether", a.wAh, hand)
-
-  // Reset buff
-  :?c.canUseAbility("wand_vigor") &
-  ^ foe.buffs.string = "stoic"
-    c.useAbility_OH("wand_vigor", a.wVh, hand)
-
-  // Reduce damage
-  :?c.canUseAbility("wand_poison") &
-  ^(hardElite | encounter.eliteMod = "hydra")
-    c.useAbility_OH("wand_poison", a.wPh, hand)
-
-  // Stun enemies
-  :?c.canUseAbility("wand_ice") &
-  ^ es.canDebuff("Stun") & foe = "elite"
-    c.useAbility_OH("wand_ice", a.wIh, hand)
-
-  /* // FIXME: extend range
-  :?c.canUseAbility("staff_aether") &
-  ^ !(isMinibossScr | nRuns = 1)
-    c.useAbility_TH("staff_aether", a.stAh) */
-
-  // ........................................ //
-
+:?foe.GetCount(itemSplash) > 1 & !(
+^ c.isCasting("hidden")) |
+^ c.isCasting("heavy_hammer")
   // Heavy hammer logic
-  :?c.canUseAbility("heavy_hammer") &
+  ?c.canUseAbility("heavy_hammer") &
   ^ encounter.eliteMod = "plated"
     c.useAbility_TH("heavy_hammer", Mjölnir)
 
+  // ........................................ //
+
   // Stun/Perma-stun logic
   :?s.inRange("grappling_hook") &
-  ^ foe ! "warcaster" & !(
+  ^foe ! "warcaster" & !(
   ^c.isCasting("bardiche") |
   ^c.isCasting("wand")) & (
-  ^ es.canDebuff("Stun") | (
-    // stun time (frames) running out
-  ^ stunTime = math.Clamp(stunTime, 1, 11) &
-    // not stunned with heavy hammer or Frost Wand
-  ^ foe.debuffs.string ! "debuff_armor_fatigue" &
-  ^ foe.debuffs.string ! "debuff_frost_stun"))
+  ^es.canDebuff("Stun") | (
+   // stun time (frames) running out
+  ^stunTime = math.Clamp(stunTime, 1, 11) &
+   // not stunned with heavy hammer or Frost Wand
+  ^foe.debuffs.string ! "debuff_armor_fatigue"/* &
+  ^foe.debuffs.string ! "debuff_frost_stun"*/))
     itemSplash = foe.distance + 5
     a.ldtF("grappling")
 
@@ -820,13 +813,9 @@ unmake with repeating crossbow. */
       a.ldtF("big sword unmake")
 
   // unmake
-  :?buffs.string = "ʘ" | // berserk pot
-  ^ foe.buffs.string ! "stability" /* |
-  // more foes outside range
-  ^ (foe ! "elite" & screen.i > 1 &
-  ^  (foe.count -
-  ^   foe.GetCount(itemSplash))
-  ^  > 0) */
+  :?buffs.string = "ʘ" | !( // berserk pot
+  ^ foe.buffs.string = "stability" |
+  ^ buffs.string = "buff_infernal")
     itemSplash = 10
     a.ldtF("big sword unmake")
 
@@ -843,6 +832,43 @@ unmake with repeating crossbow. */
 
 :
   fight("normal")
+
+// .......... SPECIAL ITEMS LOGIC ......... //
+
+// extend range
+?c.canUseAbility("staff_aether") & !(
+^ c.permapotSetup | (
+^ loc.stars > 15 & nRuns = 1)) & ((
+^ isLastFoeScr & s.inRange("sword")) |
+^ screen.i = lastFoeScr + 1)
+  c.useAbility_TH("staff_aether", a.stAh)
+
+:?foe.count > 1 & s.inRange("sword")
+  // Voidweaver - use it if possible
+  ?c.canUseAbility("voidweaver") &
+  ^ c.canUnmakeVoidweaver() & !(
+  ^ isMinibossScr | encounter.isElite)
+    c.devour("voidweaver")
+
+  // Calamity - reduce hp
+  :?c.canUseAbility("wand_aether") & hardElite
+    c.useAbility_OH("wand_aether", a.wAh, hand)
+
+  // Reset buff
+  :?c.canUseAbility("wand_vigor") &
+  ^ foe.buffs.string = "stoic"
+    c.useAbility_OH("wand_vigor", a.wVh, hand)
+
+  // Reduce damage
+  :?c.canUseAbility("wand_poison") &
+  ^(hardElite | encounter.eliteMod = "hydra")
+    c.useAbility_OH("wand_poison", a.wPh, hand)
+
+  // Stun enemies
+  :?c.canUseAbility("wand_ice") &
+  ^(foe.buffs.string = "buff_tenacious" |
+  ^ encounter.eliteMod = "blessed")
+    c.useAbility_OH("wand_ice", a.wIh, hand)
 
 // .......................................... //
 

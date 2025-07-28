@@ -89,6 +89,8 @@ enable npcDialog
     tm.main(1,-1,#ff0000,"slim ui speedrun")
     dpsm.main(-9,-1,#ffff00,1,"slim ui")*/
 
+  // import UI/FoeStateTracker
+    
   ?loc.id = "rocky_plateau"
     disable npcDialog
     import My/Scripts/1-Rocky

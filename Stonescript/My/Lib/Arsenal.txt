@@ -167,7 +167,7 @@ var CmaE = 35
 
 // ............. TOWERING SHIELD ............ //
 
-var thickArmorRed = 5
+var thickArmorRed = 4
 
 // .............. CULTIST MASK .............. //
 

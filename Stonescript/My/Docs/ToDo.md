@@ -38,9 +38,10 @@
   - [x] Mushroom
   - [ ] Halls
   - [ ] Mine:
+    - [ ] Try out ranged-only strat for non-boss foes.
     - [x] Add miniboss screens to the logic
     - [x] Fix exploding miniboss logic:
-      - [ ] Make the `Eternity Staff` ability activation conditions more consistent (based on states?)
+      - [x] Make the `Eternity Staff` ability activation conditions more consistent (based on states?)
     - [x] Change permapot activation logic so that it only activates only after the potion is consumed
     - [x] BFG DS:
       - [x] Replace boss_screen as max screen with the last screen of `loc.id = "bronze_mine"` (in every difficulty)
