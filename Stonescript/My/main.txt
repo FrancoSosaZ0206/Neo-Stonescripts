@@ -73,6 +73,11 @@ enable npcDialog
   ?foe
     >`1,7,s, t | @foe.state@, @foe.time@
 
+  // eliteMod monitor
+  ?encounter.isElite
+    >`1,18,#ff0066,
+    ^elite mod: @encounter.eliteMod@
+
   var aim = import My/Meters/Ai/public
   var tm = import My/Meters/Time/public
   var dpsm = import My/Meters/DPS/public

@@ -6,8 +6,10 @@
   // Default player cosmetics
   import Hats/StarCloak
   import Hats/MushroomHat
-  import Cosmetics/Knight
-  // import Pets/Crab
+
+  ?sys.isMobile
+    import Cosmetics/Knight
+
   import Weapons/LanternTalisman
   import Weapons/AR
 

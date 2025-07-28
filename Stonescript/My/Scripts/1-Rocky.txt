@@ -821,11 +821,14 @@ unmake with repeating crossbow. */
       itemSplash = 10
       a.ldtF("big sword unmake")
 
+  :?buffs.string = "buff_inf_speed" &
+  ^ encounter.eliteMod ! "hydra"
+    equip Kubikiribocho
+
   // unmake
   :?buffs.string = "ʘ" | !( // berserk pot
-  ^ foe.buffs.string = "stability" | (
-  ^ buffs.string = "buff_infernal" &
-  ^ encounter.eliteMod ! "hydra"))
+  ^ foe.buffs.string = "stability" |
+  ^ buffs.string = "buff_inf_speed")
     itemSplash = 10
     a.ldtF("big sword unmake")
 

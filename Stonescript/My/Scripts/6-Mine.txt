@@ -342,10 +342,6 @@ var treasureCol = #888888
 ^  cur | @item.GetTreasureCount()@\n
 ^  cap | @item.GetTreasureLimit()@ */
 
-// eliteMod monitor
-?encounter.isElite
-  >`1,18,#ff0066,elite mod: @encounter.eliteMod@
-
 /* // foe distance monitor
 ?foe.distance ! 9999
   >f0,10,#magenta,dist=@foe.distance@
