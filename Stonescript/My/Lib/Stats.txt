@@ -268,6 +268,7 @@ func getEffectStat(source, effectType, effectId, statType)
           stat = int.Parse(fxStats[3]) // convert into an int to be able to operate with in conditionals.
 
   return stat
+
 /* Returns a string formatted like a table with
 a given target's active effects and their stats.
 Has a full and a slim version.
@@ -299,63 +300,99 @@ func getEffectsTable(source, effectType, isSlim)
   var fxStr = null
   var fxTable = null
 
-  ?source = "foe" & string.Equals(effectType, "buff")
-    fxStr = foe.buffs.string
-    fxTable = "Foe buffs"
-  :?source = "foe" & effectType = "debuff"
-    fxStr = foe.debuffs.string
-    fxTable = "Foe debuffs"
+  // entry validation
+  ?!["foe","player"].Contains(source)
+    log.logError(_FILE,"showEffectsTable",
+    ^"unknown <source>: <" + source + ">")
 
-  :?source = "player" & string.Equals(effectType, "buff")
-    fxStr = buffs.string
-    fxTable = "Player buffs"
-  :?source = "player" & effectType = "debuff"
-    fxStr = debuffs.string
-    fxTable = "Player debuffs"
+  :?!["buff","debuff"].Contains(effectType)
+    log.logError(_FILE,"showEffectsTable",
+    ^"unknown <effectType>: <" +
+    ^effectType + ">")
 
   :
-    log.logError(_FILE,"showEffects",
-    ^"unknown <source> or <effectType>: <" +
-    ^source + ">, <" + effectType + ">")
+    ?source = "foe"
+      ?effectType = "debuff"
+        fxStr = foe.debuffs.string
+      :
+        fxStr = foe.buffs.string
 
+    :?source = "player"
+      ?effectType = "debuff"
+        fxStr = debuffs.string
+      :
+        fxStr = buffs.string
 
-  ?fxStr // there are active effects
-    /* Overview:
-    1. split effects
-    2. for each effect, split into an array with all its stats, and
-      a. add it to the matrix, or
-      b. for the slim version, add all except index 2 (the name).
+    ?fxStr // there are active effects
+      /* Overview:
+      1. split effects
+      2. for each effect, split into an array with all its stats, and
+        a. add it to the matrix, or
+        b. for the slim version, add all except index 2 (the name).
 
-    - Effects are separated by a "," char
-    - Stats are separated by a ":" char */
-    
-    var fxArr = []
-    fxTable += "table:\n\n"
-
-    ?!isSlim
-      fxTable += "Symbol | Name | Count | Time\n"
-    :
-      fxTable += "<sym> x<n>, <mm:ss f>"
-
-    var fxArr = string.Split(fxStr, ",")
-    var fxArrFormatted = []
-    for i = 0 .. fxArr.Count() - 1
-      var fxStats = string.Split(fxArr[i], ":")
-      var statsFormatted = null
+      - Effects are separated by a "," char
+      - Stats are separated by a ":" char */
+      
+      var fxArr = []
+      fxTable = string.Format("{0} {1}s table:\n\n",
+      ^           string.Capitalize(source),
+      ^           string.Capitalize(effectType))
 
       ?!isSlim
-        statsFormatted = string.Join(" | ", fxArr)
+        fxTable += "Symbol | Name | Count | Time\n"
       :
-        statsFormatted = fxStats[0] + " x" + // <sym>
-        ^fxStats[2] + ", " + // <n>
-        ^u.myFormatSpeedrun(fxStats[3]) // <t>
+        fxTable += "<sym>x<n> <mm:ss f>\n"
 
-      ?i < fxArr.Count() - 1
-        statsFormatted += "\n"
+      var fxArr = []
+      fxArr = string.Split(fxStr, ",")
+      var fxArrFormatted = []
+      
+      var n
+      n = fxArr.Count() - 1
 
-      fxArrFormatted.Add(statsFormatted)
+      for i = 0 .. n
+        ?fxArr.Count() - 1 ! n
+          break
 
-    fxTable += string.Join("\n", fxArrFormatted)
+        var fxStats = string.Split(fxArr[i], ":")
+        var statsFormatted = null
+
+        ?!isSlim
+          statsFormatted = string.Join(" | ", fxStats)
+        :
+          statsFormatted =
+          ^   string.Format("{0}x{1} {2}",
+          ^   fxStats[0], // <sym>
+          ^   int.Parse(fxStats[2]), // <n>
+          ^   u.myFormatSpeedrun(
+          ^     int.Parse(fxStats[3]))) // <t>
+
+        ?i < n
+          statsFormatted += "\n"
+
+        fxArrFormatted.Add(statsFormatted)
+
+
+        ?fxArr[i]
+          >c-10,0,fxArr[@i@]: @fxArr[i]@
+        /* ?fxStats[0]
+          >c-10,1,fxStats[0]: @fxStats[0]@
+        ?fxStats[1]
+          >c-10,2,fxStats[1]: @fxStats[1]@
+        ?fxStats[2]
+          >c-10,3,fxStats[2]: @fxStats[2]@
+        ?fxStats[3]
+          >c-10,4,fxStats[3]: @fxStats[3]@
+        ?statsFormatted
+          >c-10,5,statsFormatted: @statsFormatted@
+        ?fxArrFormatted[i]
+          >c-10,6,fxArrFormatted[@i@]: @fxArrFormatted[i]@
+        ?fxTable
+          >c-10,7,fxTable: @fxTable@ */
+
+        loc.Pause()
+
+      fxTable += string.Join("\n", fxArrFormatted)
 
   return fxTable
 

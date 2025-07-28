@@ -69,9 +69,9 @@ enable npcDialog
 : // farming locations logic
   // disable hud // TODO: uncomment this once we can print everything ourselves.
 
-  >`1,7,loc id: @loc.id@
+  >`1,6,in @loc.id@
   ?foe
-    >`1,8,foe s | t >> @foe.state@ | @foe.time@
+    >`1,7,s, t | @foe.state@, @foe.time@
 
   var aim = import My/Meters/Ai/public
   var tm = import My/Meters/Time/public
@@ -82,7 +82,8 @@ enable npcDialog
   aim.main(1,screen.h - 3,"")
   tm.main(1,screen.h - 2,#red,"slim speedrun")
   dpsm.main(screen.w - 18,screen.h - 2,#yellow,2,"slim")
-  /*: // Display meters in UI mode
+  
+  /* : // Display meters in UI mode
     import UI/FoeStateTracker
 
     aim.main(null,null,"ui")

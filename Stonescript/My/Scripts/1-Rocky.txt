@@ -128,9 +128,9 @@ func fight(mode)
     // 1v1 strong foe weakening
     :?es.canDebuff("Weaken") & canDash &
     ^(foe = "monarch" | foe = "boss") &
-    ^ s.inRange("sword") /* & !(
+    ^ s.inRange("sword") & !(
     ^ foe = "phase3" & !c.permapotSetup &
-    ^ foe.hp <= foe.maxhp / 2) */
+    ^ foe.hp <= foe.maxhp / 2)
       a.ldtF("sword debuff weaken")
 
     // 1v1 debuffing (permapot/strong foes)
@@ -344,18 +344,18 @@ hardElite = (
 
 // ............. MONITOR LOGIC .............. //
 
-// gravity wand monitor:
-var canUseGravity = c.canUseAbility("staff_poison")
-canUseGravity = c.canUseAbility("staff_poison")
+/* // abilities monitor:
+var canUseAblt = c.canUseAbility("staff_poison")
+canUseAblt = c.canUseAbility("staff_poison")
 
-var gravityCol = "#ff0000"
-gravityCol = "#ff0000"
-?canUseGravity
-  gravityCol = "#00ff00"
+var abltCol = "#ff0000"
+abltCol = "#ff0000"
+?canUseAblt
+  abltCol = "#00ff00"
 
 >`1,10,#magenta,staff_poison cd:
 ^ @item.GetCooldown("staff_poison")@
->`1,11,@gravityCol@,canAct: @canUseGravity@
+>`1,11,@abltCol@,canAct: @canUseAblt@ */
 
 /* // itemSplash display test
 
@@ -410,6 +410,15 @@ var treasureCol = #888888
 
   >`1,12,#0066ff,@c.potionType@: @potTime@f 
   ^(@time.FormatDigital(potTime, true)@)
+
+/* // monitor effects
+?buffs.string
+  u.showBigStr(1,9,30, #0088ff,buffs.string,false)
+
+var fxTable = null
+// fxTable = s.getEffectsTable("player","buff",true)
+?fxTable
+  >`1,9,#0088ff,@fxTable@ */
 
 // monitor any logged errors
 ?log.hasErrors()
@@ -473,11 +482,11 @@ c.AAC("sword *0 +0", "hatchet")
 // ............. DEFENSIVE LOGIC ............ //
 
 // phase2 about to attack
-:?foe = "phase2" & foe.state = 32 &
-^  ((foe.debuffs.string = "chill:6" &
-^    foe.time > 97) |
-^   (foe.debuffs.string ! "chill" &
-^    foe.time > 55))
+:?foe = "phase2" & foe.state = 32 & ((
+^ foe.debuffs.string = "chill:6" &
+^ foe.time > 97) | (
+^ foe.debuffs.string ! "chill" &
+^ foe.time > 55))
   // gain Empower to deal extra damage
   ?foe = "vigor"
     a.ldtF("defense buff empower")
@@ -491,11 +500,11 @@ c.AAC("sword *0 +0", "hatchet")
     fight("normal")
 
 // Dysan's massive beam or putting shield up
-:?foe = "phase3" &
-^((foe.state = 115 & foe.time > 70) |
-^ (foe.damage = 1 &
-^  ((foe.state = 32 & foe.time > 60) |
-^   (foe.state = 33 & foe.time < 5))))
+:?foe = "phase3" & ((
+^ foe.state = 115 & foe.time > 70) | (
+^ foe.damage = 1 & ((
+^ foe.state = 32 & foe.time > 60) | (
+^ foe.state = 33 & foe.time < 5))))
   // prevent the stun
   ?c.canUseAbility("staff_vigor") &
   ^foe.damage = 1
@@ -542,8 +551,8 @@ c.AAC("sword *0 +0", "hatchet")
     >c0,0,#red,D HEAL
 
   // reduce damage amap
-  :?foe = "phase3" & phase3dmg > 0 &
-  ^c.canUseAbility("mask")
+  :?c.canUseAbility("mask") &
+  ^ foe = "phase3" & phase3dmg > 0
     c.useAbility_OH("mask", "mask", "r")
 
   :?c.permapotSetup
@@ -580,18 +589,18 @@ c.AAC("sword *0 +0", "hatchet")
   // af deals more DoT than dF
   :?es.canDebuff("Burn")
     a.ldtF("defense debuff burn")
+
   : // all effects applied
     fight("normal")
 
 // ............ CUTSCENES LOGIC ............. //
 
 // Dysangelos pre-phase1 cutscene damage strat
-:?isBossScr & (
-^(([100,101,102, 108].Contains(foe.state) | (
+:?isBossScr & !c.permapotSetup &
+^ s.inRange("heavy_hammer ability") & (((
+^ [100,101,102, 108].Contains(foe.state) | (
 ^ foe.state = 107 & foe.time > 145) | (
 ^ foe = "phase3" & foe.state = -1)) &
-^ !c.permapotSetup & isBossScr &
-^ s.inRange("heavy_hammer ability") &
 ^ item.GetCooldown("bardiche") <= 0) |
 ^ c.isCasting("heavy_hammer") |
 ^ c.isCasting("bardiche"))
