@@ -7,9 +7,6 @@
   import Hats/StarCloak
   import Hats/MushroomHat
 
-  ?sys.isMobile
-    import Cosmetics/Knight
-
   import Weapons/LanternTalisman
   import Weapons/AR
 
