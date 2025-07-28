@@ -297,7 +297,7 @@ stunTime = foe.debuffs.GetTime("stun")
 ?loc.stars <= 15
   c.potionType = "berserk"
 :
-  c.potionType = "lucky"
+  c.potionType = "strength" // "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
