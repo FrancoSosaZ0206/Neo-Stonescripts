@@ -855,8 +855,8 @@ unmake with repeating crossbow. */
 ?c.canUseAbility("staff_aether") & !(
 ^ c.permapotSetup | (
 ^ loc.stars > 15 & nRuns = 1)) & ((
-^ isLastFoeScr & s.inRange("sword")) |
-^ screen.i = lastFoeScr + 1)
+^ isLastFoeScr & s.inRange("sword")) | (
+^ lastFoeScr & screen.i = lastFoeScr + 1))
   c.useAbility_TH("staff_aether", a.stAh)
 
 :?foe.count > 1 & s.inRange("sword")

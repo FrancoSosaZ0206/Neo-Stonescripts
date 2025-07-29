@@ -1,0 +1,40 @@
+
+?pickup.distance < 15
+  equipL triskelion
+  equipR star
+
+:?foe.distance > 16
+  equipL triskelion
+  equipR *max shield compound +21/1
+
+  ?totaltime > 5 &
+  ^item.GetCooldown("staff_fire") <= 0
+    equip *max staff fire hidden
+    activate R
+
+:?foe.distance > 11
+  equipL triskelion
+  equipR Subspace Bubble
+
+:?foe.distance > 1
+  ?item.GetCooldown("staff_aether") <= 0
+    equip *max staff aether hidden
+    activate R
+
+  ?(foe.debuffs.string = "stun" &
+  ^ item.GetCooldown("quarterstaff") <= 0) /* |
+  ^(item.right = "quarterstaff" &
+  ^ item.right.state = 2) */
+    equip *max quarterstaff
+    activate R
+
+  // equipL triskelion
+  ?item.left
+    equip socketed crossbow
+
+  equip star
+
+:
+  equip Kubikiribocho
+
+>`1,6,#magenta,d: @foe.distance@
