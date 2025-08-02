@@ -13,6 +13,9 @@ var a = import My/Lib/Arsenal
 var es = import My/Lib/Effect_Stats/public
 var tracker = import My/Lib/Ranged_Debuffing/public
 
+import UI/FoeStateTracker
+// import UI/PlayerStateTracker
+
 // /////////////// VARIABLES //////////////// //
 
 // file
@@ -21,6 +24,7 @@ var _FILE = "Scripts/6-Mine"
 // flags
 var canDash  = true
 var hardElite = false
+var canUseVwv = false
 
 // values
 var stunTime = null
@@ -100,17 +104,21 @@ func fight(mode)
     // ........... DEBUFFING LOGIC ........... //
 
     // Bronze Guardian ranged debuffing
-    ?isBossScr & !canDash & (
+    ?isBossScr & !(canDash |
+    ^c.isCasting("heavy_hammer")) & (
     ^tracker.canTrack("Burn") | (
     ^tracker.canTrack("Weaken") &
     ^buffs.string = "smite"))
+      >c0,-1,#cyan,GUARDIAN RANGED DEBUFF
+
       ?tracker.canTrack("Burn")
         a.ldtF("magic debuff burn")
       : // tracker.canTrack("Weaken")
         a.ldtF("magic debuff weaken")
 
     // AOE debuffing
-    ?(tracker.canTrack("Weaken") |
+    :?!isBossScr & (
+    ^ tracker.canTrack("Weaken") |
     ^ tracker.canTrack("Burn")    ) &
     ^!c.isCasting("heavy_hammer") & (
     ^!canDash | (foe = "elite" &
@@ -157,33 +165,20 @@ func fight(mode)
 
     // ............ DAMAGE LOGIC ............. //
     
-    :?foe = "phase"
-      ?c.canUsePotion()
-        activate potion
-      :?c.canUseAbility("heavy_hammer") &
-      ^ foe.armor > 0 & !(c.permapotSetup &
-      ^ buffs.GetTime(c.potionType) <= 30)
-        c.useAbility_TH("heavy_hammer", Mjölnir)
-      :?c.canUseAbility("mask")
-        c.useAbility_OH("mask", "mask", "r")
-      :?c.canUseAbility("staff_poison") &
-      ^!s.inRange("dash")
-        c.useAbility_TH("staff_poison", a.stPh)
-
-      :?!canDash
-        ?nRuns > 1 & buffs.string = c.potionType &
+    :?isBossScr
+      ?!canDash
+        ?nRuns > 1 &
+        ^buffs.string = ":"+c.potionType &
         ^buffs.GetTime(c.potionType) > 60
           equip @a.bAdmg@
         :
           a.ldtF("ranged dmg")
       :
-        ?nRuns = 1 & buffs.string = c.potionType &
+        ?nRuns = 1 &
+        ^buffs.string = ":"+c.potionType &
         ^buffs.GetTime(c.potionType) > 60
           c.moonjuggle(Void Slayer, a.sAdmg)
 
-        :?c.canUseAbility("bardiche") &
-        ^ buffs.string = "ʘ"
-          c.useAbility_TH("bardiche", Kubikiribocho)
         :
           a.ldtF("sword dmg")
 
@@ -294,10 +289,12 @@ stunTime = foe.debuffs.GetTime("stun")
   hand = "right"
 
 // Auto brewing
-?loc.stars <= 15
+?loc.stars <= 10
+  c.potionType = "strength"
+:?loc.stars <= 15
   c.potionType = "berserk"
 :
-  c.potionType = "strength" // "lucky"
+  c.potionType = "lucky"
 ?c.canBrewPotion()
   c.brewPotion()
 
@@ -319,6 +316,9 @@ hardElite = (
 :?foe = "phase" & foe.state = 32 & foe.time = 0
   powerupCount ++
 
+// set up canUseVwv
+// canUseVwv = false
+
 // .............. MONITOR LOGIC .............. //
 
 /* // permapot time bandwidth monitor:
@@ -326,8 +326,29 @@ hardElite = (
   var delay = totaltime + (5 * 30)
   ?totaltime <= delay
     >o-7,6,#magenta,wait until 
-    ^@time.FormatDigital(permapotTbw)@
-*/
+    ^@time.FormatDigital(permapotTbw)@ */
+
+/* // heavy hammer monitor
+>`1,18,buffs: @buffs.string@
+>`1,15,@c.potionType@ active |
+^ @buffs.string = ":"+c.potionType@\n
+^
+^@c.potionType@ time > 30 |
+^ @buffs.GetTime(c.potionType) > 30@ (
+^@buffs.GetTime(c.potionType)@) */
+
+/* // abilities monitor:
+var canUseAblt = c.canUseAbility("heavy_hammer")
+canUseAblt = c.canUseAbility("heavy_hammer")
+
+var abltCol = "#ff0000"
+abltCol = "#ff0000"
+?canUseAblt
+  abltCol = "#00ff00"
+
+>`1,12,#magenta,heavy_hammer cd:
+^ @item.GetCooldown("heavy_hammer")@
+>`1,13,@abltCol@,canAct: @canUseAblt@ */
 
 /* // monitor post-treasure metrics
 var treasureCol = #888888
@@ -342,10 +363,10 @@ var treasureCol = #888888
 ^  cur | @item.GetTreasureCount()@\n
 ^  cap | @item.GetTreasureLimit()@ */
 
-/* // foe distance monitor
-?foe.distance ! 9999
-  >f0,10,#magenta,dist=@foe.distance@
-*/
+// foe distance monitor
+?foe.distance ! 9999 & (
+^isBossScr | isMinibossScr)
+  >f0,10,#magenta,d:#@foe.distance@
 
 // bfg ds screens monitor
 var bfgDsTargetScr = null
@@ -380,7 +401,7 @@ bfgDsTargetScr = c.getScreen_DS("blade",
   >`1,11,@powerupCol@,powerupCount: @powerupCount@
 
 /* // item states monitor:
->`1,12,#magenta,ils: @item.left.state@ | 
+>`1,14,#magenta,ils: @item.left.state@ | 
 ^irs: @item.right.state@ */
 
 ?nRuns < 5
@@ -393,7 +414,7 @@ bfgDsTargetScr = c.getScreen_DS("blade",
   >`1,13,@permapotCol@,permapot setup
 
   // monitor effect durations
-  ?buffs.string = c.potionType
+  ?buffs.string = ":"+c.potionType
     var potTime
     potTime = buffs.GetTime(c.potionType)
 
@@ -470,28 +491,32 @@ c.AAC(a.hAeff, a.shAdef)
 
 // parry Bronze Guardian's Bomb attack
 :?c.canUseAbility("shovel") &
-^ foe = "phase" & foe.state = 32 &
+^ isBossScr & foe.state = 32 &
 ^ foe.time >= 15 & powerupCount >= 3 &
 ^!(c.permapotSetup &
 ^ buffs.GetTime(c.potionType) <= 30)
+  >c0,0,#red,SHOVEL
   c.useAbility_TH("shovel", shovel)
 
 // boss's hammer attack
 :?isBossScr & foe.state = 32 &
 ^ foe.time >= 30
+  >c0,0,#red,BOSS ATTACK
+
+  ?c.canUseAbility("staff_vigor") &
+  ^c.canUseAbility("staff_ice") &
+  ^((10*armor)+armor.f) > 1 + (10* (
+  ^s.getHIArmor("staff_vigor") +
+  ^s.getHIArmor("staff_ice")))
+    c.useAbility_TH("staff_vigor", a.stVh)
+  
   // block bomb attack
-  ?c.canUseAbility("staff_ice") &
+  :?c.canUseAbility("staff_ice") &
   ^foe.distance = 20 &
   ^s.getTotalHP("player") >= s.getFoeDmg() & !(
   ^c.permapotSetup &
   ^buffs.GetTime(c.potionType) <= 30)
-    ?c.canUseAbility("staff_vigor") &
-    ^((10*armor)+armor.f) > 1 + (10* (
-    ^s.getHIArmor("staff_vigor") +
-    ^s.getHIArmor("staff_ice")))
-      c.useAbility_TH("staff_vigor", a.stVh)
-    :
-      c.useAbility_TH("staff_ice", a.stIh)
+    c.useAbility_TH("staff_ice", a.stIh)
   :
     fight("escape")
 
@@ -503,10 +528,10 @@ c.AAC(a.hAeff, a.shAdef)
 
 // speed up
 :?c.canUseAbility("staff_fire") &
-^ buffs.string ! "buff_inf_speed" &
-^ (loc.stars <= 15 | nRuns > 1) &
-^ loc.id = "bronze_mine" &
-^!(isMinibossScr | encounter.isElite) & (
+^ buffs.string ! "buff_inf_speed" & (
+^ loc.stars <= 15 | nRuns > 1) &
+^ loc.id = "bronze_mine" & !(
+^ isMinibossScr | encounter.isElite) & (
 ^ screen.i = 0 | screen.i = lastFoeScr + 1)
   c.useAbility_TH("staff_fire", a.stFh)
 
@@ -529,6 +554,7 @@ c.AAC(a.hAeff, a.shAdef)
 :?(ai.walking & !s.inRange("socketed_shield")) |
 ^(ai.paused | !ai.enabled |
 ^ player.direction = -1)
+  >c0,0,#red,ARMOR REGEN
   a.ldtF("defense armor regen")
 
 // engaging logic (out of fighting range)
@@ -537,6 +563,8 @@ c.AAC(a.hAeff, a.shAdef)
 ^ canDash & !s.inRange("dash_max")) |
 ^!s.inRange("crossbow") |
 ^ pos.z ! math.Clamp(pos.z, foe.z -3, foe.z +3))
+  >c0,0,#red,ENGAGING OFF-FIGHT
+  
   ?armor > a.CmaE | (
   ^c.canEngage() & foe ! "phase")
     a.ldtF("engage")
@@ -552,17 +580,21 @@ c.AAC(a.hAeff, a.shAdef)
   a.ldtF("magic debuff burn")
 
 // Miniboss screen - normal foes
-:?isMinibossScr &
+:?isMinibossScr & foe ! "explode" &
 ^ foe.GetCount(itemSplash) > 1 & (
 ^ c.permapotSetup | (
-^ loc.stars > 15 & nRuns = 1)) &
-^ foe ! "explode"
+^ loc.stars > 15 & nRuns = 1))
+  >c0,0,#red,MINIBOSS NORMAL FOES
+
   canDash = false
   a.ldtF("ranged dmg")
 
-:?foe.count > 3 & !(
-^ c.isCasting("hidden")) |
-^ c.isCasting("heavy_hammer")
+// AOE logic (ranged)
+:?foe.count > 3 & !canUseVwv & !(
+^ c.isCasting("hidden") |
+^ c.isCasting("heavy_hammer"))
+  >c0,0,#red,AOE RANGED
+
   canDash = false
 
   // ranged debuff
@@ -587,12 +619,23 @@ c.AAC(a.hAeff, a.shAdef)
 
 // .............. DASHING LOGIC ............. //
 
+:?c.canUseAbility("dash") &
+^ canDash & foe = "explode"
+  a.ldtF("dash")
+
 :?a.canSmartDash() & canDash
   a.smartDash()
 
-// Knockback farming
+// ****************************************** //
+/* // Knockback farming
+// TODO: add it back when I have it at +21
 :?c.canKbFarm()
-  c.smoothCast(a.bS)
+  c.smoothCast(a.bS) */
+
+// Knockback farming (alt)
+:?c.canKbFarm()
+  c.smoothCast(a.bAdmg)
+// ****************************************** //
 
 /* if in range, get closer while trying to
 unmake with repeating crossbow. */
@@ -615,42 +658,80 @@ unmake with repeating crossbow. */
 
 // Boss fight (Bronze Guardian)
 :?isBossScr
+  >c0,0,#green,BOSS FIGHT
+  
+  canDash = false
+
   ?c.canKillCinderwisp(a.cwpMiN, 0) |
   ^c.isCinderwispCap(a.cwpMiN)
     c.devour("cinderwisp")
 
+  ?c.canUsePotion()
+    activate potion
+
   // boss's hammer's stuck
   ?foe.state = 33 & foe.time < 180
+    canDash = true
+  
     ?!s.inRange("triskelion")
       a.ldtF("default")
 
-    :?c.canUseAbility("bardiche") & nRuns > 1
+    :?(c.canUseAbility("bardiche") & (
+    ^ c.permapotSetup | hp = maxhp) &
+    ^ buffs.string = ":"+c.potionType &
+    ^ buffs.GetTime(c.potionType) > 60) |
+    ^ c.isCasting("bardiche")
       c.useAbility_TH("bardiche", Kubikiribocho)
     :
       fight("normal")
+
+  :?c.canUseAbility("staff_poison") &
+  ^!s.inRange("dash")
+    c.useAbility_TH("staff_poison", a.stPh)
+
+  :?c.canUseAbility("mask")
+    c.useAbility_OH("mask", "mask", "r")
+
+  // heavy hammer
+  :?(c.canUseAbility("heavy_hammer") &
+  ^ buffs.string = ":"+c.potionType &
+  ^ buffs.GetTime(c.potionType) > 30) |
+  ^ c.isCasting("heavy_hammer")
+    >c0,1,#yellow,HH ABILITY!!!
+    c.useAbility_TH("heavy_hammer", Mjölnir)
+
   :
-    canDash = false
     fight("normal")
 
 // ............ SPECIAL FOE LOGIC ........... //
 
 // Bomb Cart screen logic
 :?isMinibossScr & foe = "explode"
+  >c0,0,#red,BOMB CART!!!
+
+  // use Prevention Staff to keep moving while frozen
+  ?c.canUseAbility("staff_vigor") &
+  ^c.canUseAbility("staff_ice") &
+  ^((10*armor)+armor.f) > 1 + (10* (
+  ^s.getHIArmor("staff_vigor") +
+  ^s.getHIArmor("staff_ice")))
+    c.useAbility_TH("staff_vigor", a.stVh)
+
+  /* // get closer with shovel
+  ?!s.inRange("shovel")
+    equip shovel */
+
+  // get closer with Star stone
+  ?foe.distance > 1
+    ?item.left
+      equip shovel
+    equipR star
 
   /* use Eternity Staff to tank damage if
   hp + armor is more than its damage */
-  ?c.canUseAbility("staff_ice") &
+  :?c.canUseAbility("staff_ice") &
   ^ s.getTotalHP("player") >= minibossDmg[loc.stars - 11]
-    ?c.canUseAbility("staff_vigor") &
-    ^((10*armor)+armor.f) > 1 + (10* (
-    ^s.getHIArmor("staff_vigor") +
-    ^s.getHIArmor("staff_ice")))
-      c.useAbility_TH("staff_vigor", a.stVh)
-    :
-      c.useAbility_TH("staff_ice", a.stIh)
-
-  ?!s.inRange("shovel")
-    equip shovel
+    c.useAbility_TH("staff_ice", a.stIh)
 
   :?buffs.string ! "buff_frozen"
     fight("evade")
@@ -659,12 +740,14 @@ unmake with repeating crossbow. */
 
 // ................ AOE LOGIC ............... //
 
-:?foe.GetCount(itemSplash) > 1 & !(
-^ c.isCasting("hidden")) |
-^ c.isCasting("heavy_hammer")
+:?foe.GetCount(itemSplash) > 1 &
+^!c.isCasting("hidden")
+  >c0,0,#red,MELEE AOE
+
   // Heavy hammer logic
-  ?c.canUseAbility("heavy_hammer") &
-  ^ encounter.eliteMod = "plated"
+  ?(c.canUseAbility("heavy_hammer") &
+  ^ encounter.eliteMod = "plated") |
+  ^c.isCasting("heavy_hammer")
     c.useAbility_TH("heavy_hammer", Mjölnir)
 
   // ........................................ //
@@ -717,6 +800,7 @@ unmake with repeating crossbow. */
 // ................ 1V1 LOGIC ............... //
 
 :
+  >c0,0,#red,1V1 FIGHT
   fight("normal")
 
 // .......... SPECIAL ITEMS LOGIC ......... //
@@ -725,10 +809,17 @@ unmake with repeating crossbow. */
 ?c.canUseAbility("voidweaver") &
 ^c.canUnmakeVoidweaver() & !(
 ^isMinibossScr | encounter.isElite) &
-^foe.count > 1 & s.inRange("crossbow")
-  c.devour("voidweaver")
+^foe.count > 1
+  canUseVwv = true
+  canDash = true
 
-:?foe.count > 1 & s.inRange("wand")
+  ?s.inRange("sword")
+    c.devour("voidweaver")
+:
+  canUseVwv = false
+
+?loc.id = "bronze_mine" & !canUseVwv &
+^ foe.count > 1 & s.inRange("wand")
   // Calamity - reduce hp
   ?c.canUseAbility("wand_aether") & hardElite
     c.useAbility_OH("wand_aether", a.wAh, hand)

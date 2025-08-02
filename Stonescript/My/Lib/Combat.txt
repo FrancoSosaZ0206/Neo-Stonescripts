@@ -136,7 +136,7 @@ func canUseAbility(abilityID)
     :?["bardiche", "heavy_hammer"]
     ^.Contains(abilityID)
       result = ((result &
-      ^s.inRange(abilityID+" ability")) |
+      ^s.inRange(abilityID + " ability")) |
       ^isCasting(abilityID))
 
     /* Stone wand:
